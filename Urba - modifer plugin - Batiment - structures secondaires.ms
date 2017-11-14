@@ -1,14 +1,18 @@
 
 ------------- declaration en global car erreurs "plugin no active machin..." -----
-global str_plan
+/* global str_plan
 global str_facade_modele
 global str_createur_de_composant
 -- global str_facadeParam_murPlein, str_facadeParam_baie , str_facadeParam_espacement		, str_facadeParam_balcon, str_facadeParam_balconFin
-global str_facade, str_facade_composant	, str_ssTrace		/* , str_regle_ssTrace */
+global str_facade, str_facade_composant	, str_ssTrace		
 
 global	str_prefs_matID 
 
-struct 	str_prefs_matID (
+ */
+ 
+ 
+ 
+ struct 	str_prefs_matID (
 	mur 				= 	10,
 	menuiserie 		= 	20,
 	vitrage 			= 	30,
@@ -95,1575 +99,1030 @@ struct str_plan (
 
 
 
-struct str_facade_composant (
+struct str_datasToString (
 	
-	------ Membres ------------------------------------------------------------------------------
+		m_prt,
+		
 	private
-		---- Parametres -----------------------------------
-		m_id					=	"#",		
-		m_type				=	undefined,
-		m_nom				=	"",
-		m_params			=	undefined,
+		separateur_params 			="§",
+		separateur_mutation 		= "¨",
+		separateur_mutationTab 	= "£",
+		separateur_items 			= "^",
+	
+	
+	private
+		fn array_to_string		_tab	=(
+			local tabString = ""
+			for item in _tab do (
+				case classof item  of (
+					string:	tabString += item 		as string + separateur_items
+					Integer:	tabString += item 		as string + separateur_items
+					Float:	tabString += item 		as string + separateur_items
+					Point3:	tabString += item 		as string + separateur_items
+					Array:	tabString += item 		as string + separateur_items
+					
+					---- les reste doit etre nos struct a nous ... -------
+					default:	tabString += item.id 	as string + separateur_items
+				)
+			)
+			tabString
+		),
+		fn string_to_array		_string	=(
+			
+			local tabResult = #()
+			local items 	= filterString 	_string 		separateur_items
+			
+			for item in items do (
+				local data_exe 	= execute item
+				--------------- string ---------------
+				if data_exe 		== undefined then 
+					append tabResult ( item )
+				--------------- un objet ---------------
+				else	if classof data_exe == Name then (
+					local elemTmp =  ( m_prt.get_parametre	  item 	)						
+					--- un id (name)------
+					if elemTmp == undefined do	elemTmp = item
+					append tabResult		elemTmp
+				--------------- Nombres ---------------		
+				) else 	append tabResult 	( data_exe)
+				
+			)
+			tabResult
+		),
 		
-		---- Pointeurs -----------------------------------
-		m_plugThis		=	undefined,
-		m_construction	=	undefined,
-		m_geo				=	undefined,
-		m_matID 			= 	str_prefs_matID (),
-		
-		---- Rollout -----------------------------------
-		m_dialog 			= undefined,
-		
-		---- Fonction virtuelle pure pour construire le composant	----
-		fnVirt_construire	= (),
-		
-	------ Fonctions ------------------------------------------------------------------------------
 	public
-		---- Mutations -----------------------
-		fn set_dialog 		_dialog 				= ( m_dialog 				= _dialog ),
-		fn set_construire 	_fnConstruire 	= ( fnVirt_construire 	= _fnConstruire ),
-		fn set_params		_params			= ( m_params				= _params ),
-		
-		---- Accessions -----------------------
-		fn get_dialog			=	m_dialog,
-		fn get_params			=	m_params,
-		
-		--- Initialisations -----------------------
-		fn initialiser_dialog 	_roll_parent 	=(
-			dialog.m_rollPrt	= 	_roll_parent
-			dialog.m_param	=	m_params
-			dialog.actualiser()
-		),
-		fn initialiser 			_plugThis	_type	_nom 	=(
-			---- id unique ----
-			m_id += _type
-			for i= 1 to 10 do m_id += ( random 0 9 ) as string	
-			
-			m_type 				=	_type 			
-			m_nom				=	_nom
-			m_plugThis			=	_plugThis
-			m_construction 	= 	m_plugThis.construction
-			m_geo				=	m_plugThis.geo	
-		),
-		
-		---- Construction du mesh -----------------------
-		fn construire			= fnVirt_construire		()
-		
-) ---- fin composant -------------------------------
-
-struct str_constructeur_composants (
-	
-		m_this,
-		
-		---- Espacement -------------------------------------------
-		fn espacement =(
-			
-			--- les parametres du composant --------------
-			local params = struct param (
-				longueur = 0
+		fn get_datas_string 		_element	=(
+			local txtResult = ""
+			local propNames = getPropNames _element
+			for param in propNames do (
+				local prop = ( getProperty  _element 	param )
+				local type = classof prop
+				case type of (
+					--- les trucs qu'on zappe ------
+					MAXScriptFunction:	()
+					RolloutClass:()
+					--- les trucs qu'on prend en compte	------
+					array: (
+						local tabString = array_to_string		prop
+						txtResult+=  param as string  + separateur_mutation 	+	tabString  + separateur_params
+					)
+					Name:		(
+						txtResult+=  param as string  + separateur_mutation	+	"#" + prop as string  + separateur_params
+					)
+					default:						(
+							txtResult+=  param as string  + separateur_mutation	+	prop as string  + separateur_params
+					)
+				) -- fin scase --
+				
 			)
-			local dialog  = rollout dialog "Espacement" width:180 height:70	(
-									local m_compo, m_rollPrt, m_param
-									fn actualiser =()
-								)
-			fn fnConstruire   pts_accroches		_normDir		=()
-			
-			--- Creation du composant --------------
-			local nvComposant = str_facade_composant 	()
-			nvComposant.initialiser			m_this			#FAC_COMP_ESP		"Espacement"
-			nvComposant.set_dialog		dialog
-			nvComposant.set_params	 	params
-			nvComposant.set_construire 	fnConstruire
-			
-			nvComposant
-		),
-		
-		---- Mur plein -------------------------------------------
-		fn murPlein 	=(
-			
-			local params = struct param (
-				longueur = 100
-			)
-			local dialog  = rollout dialog "Mur plein" width:180 height:70	(
-									local m_compo
-									local m_rollPrt
-									local m_param
-									
-									edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
-									GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
-									label 'lbl19' "Longeur:" pos:[13,37] width:49 height:13 align:#left
-									spinner 'spn_longueur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-									
-									fn actualiser =(
-										spn_longueur.value 	= 	m_compo.longueur
-										edt_nom.text 			=	m_compo.nom
-									)
-
-									on spn_longueur changed val do (
-										m_compo.longueur = val		
-										m_rollPrt.actualiser ()
-									)
-									on edt_nom	 entered txt 	do	(
-										m_compo.nom = txt
-										m_rollPrt.actualiser ()
-									)
-									
-								)
-			fn fnConstruire  pts_accroches		_normDir		 		= (
-									
-									--- Result -------------
-									local pt_result_1, pt_result_2, pt_result_3
-									
-									--- Vecteurs ------------
-									local vec_ep_dalle 	= [0,0,1] 		* 	m_this.ep_dalle		
-									local vec_ht 			= [0,0,1] 		* 	m_this.niveaux_hauteur				
-									local vec_longueur 	= _normDir 	* 	m_compo.longueur
-									
-									--- Points d'accroche ------------
-									local id_ptAccroche_1 	= pts_accroches[1]
-									local id_ptAccroche_2 	= pts_accroches[2]
-									local id_ptAccroche_3 	= pts_accroches[3]
-									
-									local ptAccroche_1		=	polyop.getVert 	m_this.delegate		id_ptAccroche_1	
-									local ptAccroche_2		=	polyop.getVert 	m_this.delegate		id_ptAccroche_2	
-									local ptAccroche_3		=	polyop.getVert 	m_this.delegate		id_ptAccroche_3	
-									
-									
-									
-									---- LA DALLE  -----------------------------------------------------------------------				
-									-------	Creation des points 	--------
-									local pt_2 		= ptAccroche_1		+ 	vec_longueur
-									local pt_3 		= pt_2					+	vec_ep_dalle
-									
-									--- creation des points --------------
-									local pts_pos 	= #( pt_2, pt_3 )
-									local pts_ids 	= m_geo.points 	pts_pos		
-									
-									-------	Creation des faces 	--------
-									local nvlFace = m_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		 	
-									polyop.setFaceMatID	 m_this.delegate		nvlFace	  ( matID.mur + 1 )
-									
-									--- Result -------------
-									pt_result_1 = pts_ids[1]
-									pt_result_2 = pts_ids[2]
-									
-									
-									
-									---- LE MUR -----------------------------------------------------------------------			
-									-------	Creation des points 	--------
-									local pt_3 		= pt_3		+	vec_ht
-									
-									--- creation des points --------------
-									local pts_pos 	= #( pt_3 )
-									local pts_ids 	= m_geo.points 	pts_pos		
-									
-									-------	Creation des faces 	--------
-									local nvlFace = m_geo.face 		#(	 		id_ptAccroche_2, 		pt_result_2, 		pts_ids[1], 		id_ptAccroche_3	)		 	
-									polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.mur
-									
-									--- Result -------------
-									pt_result_3 = pts_ids[1]
-									
-									
-									---- Result final -----------------------------------------------------------------------
-									#( pt_result_1, pt_result_2, pt_result_3 )
-									
-								)
-			
-			local nvComposant = str_facade_composant 	()
-			nvComposant.initialiser			m_this			#FAC_COMP_MUP		"Mur plein"
-			nvComposant.set_dialog		dialog
-			nvComposant.set_params	 	params
-			nvComposant.set_construire 	fnConstruire
-			
-			nvComposant
+			txtResult
 			
 		),
-		
-		---- Balcon -------------------------------------------
-		fn balcon 		=(
-			
-			--- les parametres du composant --------------
-			local params = struct param (
-				longueur = 100,
-				largeur	= 100
+		fn set_datas_string 		_datas_string 		_element 		=(
+			local datasTab 	= filterString 	_datas_string 		separateur_params
+			for datas in datasTab do (
+				local dataTab		= filterString datas 	separateur_mutation
+				local propNom 	= dataTab[1]
+				local typeProp 	= classof ( getProperty _element propNom  )
+				case typeProp of (
+					--- les trucs qu'on zappe ------
+					MAXScriptFunction:	()
+					RolloutClass:()
+					--- les trucs qu'on prend en compte	------
+					string:		(
+							local data =   dataTab[2]
+							if data   == undefined do data =""
+							setProperty _element propNom data
+					)
+					array: (
+						if dataTab.count >1 do (
+							local datas_liste  = filterString	dataTab[2] 	separateur_items
+							local tabResult =#()
+							for data in datas_liste do (
+								local data_exe 	= execute data
+								--------------- string ---------------
+								if data_exe 		== undefined then 	append tabResult ( data)
+								--------------- un objet ---------------
+								else	if classof data_exe == Name then (	
+									local elemTmp =  ( m_prt.get_parametre	  data 	)	
+									--- un id (name)------
+									if elemTmp == undefined do	elemTmp = data
+									append tabResult		elemTmp
+								--------------- Nombres ---------------	
+								) else 	append tabResult 	( data_exe)
+							)
+							setProperty _element 	propNom 	tabResult
+						)
+					)
+					default:						(
+						if dataTab[2] != undefined do  (							
+							local data = execute dataTab[2]							
+							setProperty _element propNom data
+						)						
+					)
+				)
 			)
-			local dialog  = rollout dialog "Balcon" width:180 height:70	(
-											local m_compo
-											local m_rollPrt
-											local m_param
-										
-											edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
-											GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
-											label 'lbl_largeur' "Largeur:" pos:[13,37] width:49 height:13 align:#left
-											spinner 'spn_largeur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-											
-											fn actualiser =(
-												spn_largeur.value 	= 	m_param.largeur
-												edt_nom.text 			=	m_compo.nom
-											)
-
-											on spn_largeur changed val do 
-												m_param.largeur = val		
-											
-											on edt_nom	 entered txt 	do	(
-												m_compo.nom = txt
-												m_rollPrt.actualiser ()
-											)
-											
-									)
-			fn fnConstruire  	pts_accroches		_normDir				 		= (
-				
-				--- Result -------------
-				local pt_result_1, pt_result_2, pt_result_3
-				
-				--- Vecteurs ------------
-				local vec_ep_dalle 	= [0,0,1] 			* 	m_this.ep_dalle			
-				local vec_longueur 	= _normDir 		* 	m_compo.longueur
-				local norm_balcon	= _normDir * rotateZ ( matrix3 1 ) -90
-				local vec_largeur		= norm_balcon 	*	 largeur				
-				
-				--- Points d'accroche ------------
-				local id_ptAccroche_1 	= pts_accroches[1]
-				local id_ptAccroche_2 	= pts_accroches[2]
-				local id_ptAccroche_3 	= pts_accroches[3]
-				
-				local ptAccroche_1		=	polyop.getVert 	m_this.delegate		id_ptAccroche_1	
-				local ptAccroche_2		=	polyop.getVert 	m_this.delegate		id_ptAccroche_2	
-				local ptAccroche_3		=	polyop.getVert 	m_this.delegate		id_ptAccroche_3	
-				
-				
-				-------	Placement des points 	--------
-				local pt_1 		= ptAccroche_1
-				local pt_2 		= pt_1		+  vec_longueur
-				local pt_3 		= pt_2		+ 	vec_ep_dalle				
-				local pt_4		= pt_1		+ 	vec_ep_dalle
-				
-				local pt_5		= pt_1		+	vec_largeur
-				local pt_6		= pt_2		+	vec_largeur		
-				local pt_7		= pt_3		+	vec_largeur
-				local pt_8		= pt_4		+	vec_largeur
-				
-				--- creation des points --------------
-				local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
-				local pts_ids 	= m_geo.points 	pts_pos		
-				
-				-------	Creation des faces 	--------
-				local nvlFace = m_geo.face 		#(	pts_ids[1], 		pts_ids[5], 		pts_ids[8], 		pts_ids[4] )		 			
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = m_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[7] , 	pts_ids[8] )		 				
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )					
-				local nvlFace = m_geo.face 		#(	pts_ids[6], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[7] )		 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = m_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6], 		pts_ids[5] )		 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = m_geo.face 		#(	pts_ids[8], 		pts_ids[7], 		pts_ids[3], 		pts_ids[4] )		 				
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )
-				
-				
-				
-				
-				#()
-			)
-			
-			--- Creation du composant --------------
-			local nvComposant = str_facade_composant 	()
-			nvComposant.initialiser			m_this			#FAC_COMP_BAL		"Balcon"
-			nvComposant.set_dialog		dialog
-			nvComposant.set_params	 	params
-			nvComposant.set_construire 	fnConstruire
-			
-			nvComposant
-			
-		),
-		
-		---- Balcon fin -------------------------------------------
-		fn balconFin 	=(
-			
-			--- les parametres du composant --------------
-			local dialog  = rollout dialog "Balcon fin" (
-								)
-			fn fnConstruire   pts_accroches		_normDir		=()
-			
-			--- Creation du composant --------------
-			local nvComposant = str_facade_composant 	()
-			nvComposant.initialiser			m_this			#FAC_COMP_BAF		"Balcon fin"
-			nvComposant.set_dialog		dialog
-			nvComposant.set_construire 	fnConstruire
-			
-			nvComposant
+			_element
 		)
 
-) -- fin creer composant ---------
-	
-
- 
-
-------------------------------------------------------------------------------------------------------------------------------------
-
-struct str_facade (
-		
-		nom 							=	"Façade",
-		id								=	"#FACADE_",
-		probabilite					=	100,
-		
-		etages_use_min			=	false,
-		etages_nbre_min		= 	0,
-		etages_use_max		=	false,
-		etages_nbre_max		=	0,
-	
-		longueur_use_min		=	false,
-		longueur_nbre_min	= 	0,
-		longueur_use_max		=	false,
-		longueur_nbre_max	=	0,
-		
-		murs							=	1,			---- ( 1:les deux	2:gouttereaux	3:pignons )
-		mode						=	1,			---- ( 1:repeter	2:etrier			3:centrer )
-		
-		sequence					=	#(),
-		sequence_longueur	=0
-		
-		fn initialiser 		 	=(
-			---- id unique ----
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
-		)
-) 
-
-
-
-/* 
-struct	str_ssTrace	(
-	
-	trace		=	#(),
-	etages	=	0,
-	toiture	=	#()
-	
 )
 
 
 
-
-struct str_mgr_composants (
+struct str_mgr_arrayParametres (
 	
-	---- Membres ----------------------------------------------------------------------------------------------------------------
+	---- MEMBRES ----------------------------------------------------------------------------------------------------------------
 	public
-		m_this,
+		m_core,
 		
 	private
-		m_composants	=	#(),
+		---- la class de réference ----------
+		m_class,
 		
-	---- Fonctions ----------------------------------------------------------------------------------------------------------------
+		---- Le tableau des éléments --------
+		m_items	=	#(),
+		
+		---- Manager de presets -------------
+		mgr_datas 				= str_datasToString 	m_prt:this,
+	
+	
+	---- FONCTIONS ----------------------------------------------------------------------------------------------------------------
 	private
 		---- Parametres blocks ----
 		fn lire_parametres 		=(),
 		fn ecrire_parametres 	=(),
 		
-	---- Creations -------------------------------------------
+		
+		fn ecrire_parametre 		_element 	=(
+			
+			local plug = m_core.m_plug
+
+			
+		),
+		
+		
+		
+	---- INTERFACE -------------------------------------------
 	public
+		fn initialiser		class: =(
+			m_class = class
+		),
+		fn actualiser = (
+			
+		),
+		
 		---- Creation/Suppression ----
-		creer				=	str_constructeur_composants 	m_this:m_this,
+		fn creer			=	(
+			local nv_element = m_class ()
+			append m_items nv_element
+			
+			nv_element.ecrire_parametres ()
+			
+			nv_element
+		),	
+		
 		fn supprimer 	=	(),
 		
-		---- Parametres Block ----
-		fn lire			=	lire_parametres(),
-		fn ecrire			=	ecrire_parametres()
-		
+		---- Accessions ---
+		fn get  	_id =(
+			
+			local result
+			for item in m_items do
+				if item.id == _id do result = compo
+			result
+			
+		)--,
+	
+-- 		---- Parametres Block ----
+-- 		fn lire			=	lire_parametres(),
+-- 		fn ecrire			=	ecrire_parametres()
+	
 )	--	fin manager de composants ------
 
 
- */
-
-/* 
------------------------	MODELE	-------------------------------------------------------------------------------------------------------------
-struct str_facade_modele (
-		
-		id				= "#FAC_MOD_",			---- "MOD" : modele -----------
-		nom 			=	"Modèle",
-		
-		verts 		= #(),
-		edges		= #(),
-		faces			= #(),		
-		SMs			= #(),
-		matIDs		= #(),
-		
-		longueur 	=  0.,
-		hauteur		=	0.,
-		
-		----- events ------------------------------------------
-		on create do 
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
-		
-
-)
 
 
------------------------	FACADES PARAMETRIQUES	-------------------------------------------------------------------------------------------------------------
-struct	str_facadeParam_espacement (
+struct str_shape_outils (
+
 	
 	
-	public
-		m_commun	=	str_facadeParam_commun 	m_parent:this		type:#FAC_PES
-		
-		dialog 		= 	rollout dialog "Espacement" width:180 height:70	(
-								local m_compo, m_rollPrt, m_param
-								fn actualiser =()
-							),
-		
-	---- membres  spécifiques	----------
-		
-		
-		
-	------ CONSTRUIRE -------
-		fn construire	 _id_pt_bas		_id_pt_ht		_normDir		 		= (
+	----------------- tableaux -----------------
+	private
+		fn boucler 	_array	_id_item 		=(
+			
+			if _id_item >	_array.count do _id_item = mod _id_item _array.count
+			if _id_item < 1 do _id_item += _array.count
+			_id_item as integer
+		),
+		fn trouver_pt 		_arraydePts  	_pt 	 =(
+			local result = 0
+			local seuil = 1
+			local i = 1
+			while i <= _arraydePts.count and  result == 0 do (
+				local pt  =_arraydePts[i]
+				if distance 	pt  _pt < seuil do
+					result = i
+				i+=1
+			)
+-- 			format "pt_est_dejaPresent :%\n" result
+			result
+		),
+		fn pt_est_dejaPresent 		_arraydePts  	_pt 	 =(
+			local result = ( trouver_pt	_arraydePts	_pt ) != 0
+			result
+		),
+		fn ComparerTableaux 	first 	second =		(
+			result = true
+			if first.count != second.count then
+				result = false
+			else
+				for i = 1 to first.count do
+					if first[i] != second[i] do result = false
+			result
+		),
+		fn virerDoublonsDansTableau  _tab = (
+			for i = 1 to _tab.count do
+			(
+				for j = _tab.count to i+1 by -1 do
+				(
+					test = ( ComparerTableaux  _tab[i] _tab[j] )
+					if test do
+					(
+						deleteItem _tab j
+					)
+				)--end j loop
+			)--end i loop
+		),
+		fn 	ordonner_Points 		_id_pts	 =(
+			--#(2, 3, 4, 1), #(3, 4, 1, 2), #(4, 1, 2, 3)
+			local min 		=	amin _id_pts
+			local id_min 	= finditem _id_pts min
+			local tab_debut = #()
+			local tab_result = #()
+			for i = id_min to  _id_pts.count	 do (
+				append tab_debut _id_pts[i]
+			)
+			for i = id_min to  _id_pts.count	 do 
+				deleteItem _id_pts id_min
+			tab_result = tab_debut + _id_pts
+			tab_result
 		),
 		
-		----- events ------------------------------------------
-		on create do 	
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
 		
+	----------------- generale -----------------
+	public
+		fn surface 							_pts 	 	=(
+			--- on creer une face sur le tracé ---------
+			local faceTemp = m_geo.pointsEtFaces 	_pts
+			
+			--- pour utiliser cette fonction : ------
+			local result = polyop.getFaceArea  m_plug.delegate faceTemp
+			
+			--- on supprime la face, verts et edges créés--------
+			polyop.deleteFaces 	m_plug.delegate faceTemp
+			
+			result
+		),
+		fn edge_lePlusGrand				_pts 		=(
+			local longueurEdgeMax = 0
+			local	resultPts = #()
+			for i = 1 to _pts.count do (
+				local j = i+1
+				if j > _pts.count  do j = 1
+				local pt 			= _pts[	i ]
+				local pt_suivant	= _pts[	j ]
+				local longueurEdge = distance	pt	pt_suivant
+				if longueurEdge > longueurEdgeMax do (
+					longueurEdgeMax = longueurEdge
+					resultPts = #(pt, pt_suivant)
+				)
+			)
+			resultPts
+		),
+		fn pointLePlusHautsurY 		_pts		=(
+			local maxi = _pts[1].y
+			local result_id = 1
+			for i = 1 to _pts.count do (
+				local pt = _pts[	i ]
+				if  pt.y > maxi do ( 
+					maxi = pt.y
+					result_id = i
+				)
+			)
+			
+	-- 			debug "pointLePlusHautsurY"	var:result_id
+			result_id
+		),
+		fn est_sensPositif 				_pts 		=(
+			
+			local result 				= true
+			local id_pointHaut 	=  pointLePlusHautsurY  	_pts
+			
+			local	id_pt_1 		= id_pointHaut - 1 	---- le point d'avant
+			local	id_pt_ori 		= id_pointHaut 		---- le point origine
+			local	id_pt_2 		= id_pointHaut + 1	---- le point d'apres
+			
+			-- Boucler limite nombre des points
+			if id_pt_1 < 1 do id_pt_1 = _pts.count
+			if id_pt_2 > _pts.count  do id_pt_2 = 1
+			
+			local	pt_1 		= _pts [	id_pt_1		]
+			local	pt_ori 		= _pts [	id_pt_ori	]
+			local	pt_2 		= _pts [	id_pt_2		]
 
-)
+			local	vec1 =  normalize ( pt_1 - pt_ori )
+			local	vec2 =  normalize ( pt_2 - pt_ori )
+			
+			if vec2.x > vec1.X do result = not result
+			
+			result
+			
+		),
+		fn changer_sens 					_pts 		=(
+			local result =#()
+			for i= _pts.count to 1 by -1 do 
+				append result _pts[i]
+			result
+		),
+		
+	-----------------  Axe Principale ----------------------
+	private
+		fn get_axePrincipal_mtrx				_pts  					=(
+			
+			local ptsEdgeLePlusLong 	= edge_lePlusGrand	_pts
+			
+			local axeVecteur 		= 	normalize (ptsEdgeLePlusLong[2] - ptsEdgeLePlusLong[1])
+			local axeMtrx				=  ( matrixFromNormal		axeVecteur )
+			
+			if axeMtrx.row1	==	[0,0,-1]  then 				
+				axeMtrx =  (rotateYMatrix 180) *(rotateXMatrix 180) *  (rotateZMatrix -90) * axeMtrx
+			 else if axeMtrx.row1	==	[0,0,1] do
+				axeMtrx =  (rotateYMatrix 180)  *(rotateXMatrix 180)  * (rotateZMatrix 90) * axeMtrx
+			
+			axeMtrx
+		),
+		fn get_axePrincipal_BB					_pts  	_mtrxAxe  	=(
+			
+			local pt1 = _pts[1] * inverse _mtrxAxe
+			local xMin = xMax = pt1.x
+			local yMin = yMax = pt1.y
+			local zMin = zMax = pt1.z
+			
+			for i = 2 to _pts.count do (
+				local pt = _pts[i] * inverse _mtrxAxe
+				if pt.x < xMin 		do xMin 		= pt.x
+				if pt.x > xMax 	do xMax 	= pt.x
+				if pt.y < yMin 		do yMin 	= pt.y
+				if pt.y > yMax 	do YMax 	= pt.y
+				if pt.z < zMin 		do zMin 		= pt.z
+				if pt.z > zMax 	do zMax 	= pt.z
+			)
+			
+			#([xMin, yMin, zMin]*  _mtrxAxe, [xMax, yMax, zMax]*  _mtrxAxe)
+			
+		),
+		fn get_axePrincipal_orientation		_mtrxAxe 	_vec 					=(
+			
+			local mtrx_Direction = _mtrxAxe
+			local vec_direction = [0,0,1] * mtrx_Direction
+			
+			local vec1_dir = normalize 	_vec	
+			
+			local valTest =  abs  (dot  vec_direction	vec1_dir ) 
+			
+			if valTest	 > cos 45 then 
+				#parallele
+			else 
+				#perpendiculaire
+			 
+		),
+		
+		
+		
+		
+	-----------------  Optimisations ----------------------
+	private
+		fn chercher_alignements		_idTest				=(
+			
+			local seuil 			= m_plug.seuil_aligner	
+			local mtrx_AP 	= m_plug.axeP_mtrx
+			local pt_test					= _pts[_idTest]		* inverse  mtrx_AP
+			local result =#()
+		
+			for i = 1  to _pts.count do (
+				
+				local j 				= boucler 	_pts	( i + 1)
+				local pt 			= _pts[i]	* inverse  mtrx_AP
+				local pt_suivant 	= _pts[j]	* inverse  mtrx_AP
+				
+				
+				if estPignon  	_idTest		 and estPignon  i 	 					do 	(
+					if abs ( pt_test.z - pt.z ) < seuil do 
+						appendIfUnique result i
+					if abs ( pt_test.z - pt_suivant.z ) < seuil do 
+						appendIfUnique result i
+				)
+				
+				if not estPignon  	_idTest		 and not estPignon i  	do (
+					if abs ( pt_test.x - pt.x ) < seuil do
+						appendIfUnique result i
+					if abs ( pt_test.x - pt_suivant.x ) < seuil do 
+						appendIfUnique result i
+				)
+				
+			)
+				
+				
 
-struct	str_facadeParam_murPlein (
-		private
-			----- membres communs --------------
-			m_compo,								---- le composant parant	
-			m_this,
-			m_construction,
-			m_geo,
-			matID = str_prefs_matID (),
+			result
+		),
+		fn intersection 	_pt_orig 	_pt_2 		_pt_seg_1 	_pt_seg_2  		 =(
+			local pt_result
+			local seuil = 1
 			
-		public
-			id				= "#FAC_PMP_",		
+			local vec_proj		= _pt_orig - _pt_2
+			local vec_seg		= _pt_seg_1 - _pt_seg_2
 			
-			dialog 		= 		rollout dialog "Mur plein" width:180 height:70	(
-										local m_compo
-										local m_rollPrt
-										local m_param
-										
-										edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
-										GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
-										label 'lbl19' "Longeur:" pos:[13,37] width:49 height:13 align:#left
-										spinner 'spn_longueur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-										
-										fn actualiser =(
-											spn_longueur.value 	= 	m_compo.longueur
-											edt_nom.text 			=	m_compo.nom
-										)
-
-										on spn_longueur changed val do (
-											m_compo.longueur = val		
-											m_rollPrt.actualiser ()
-										)
-										on edt_nom	 entered txt 	do	(
-											m_compo.nom = txt
-											m_rollPrt.actualiser ()
-										)
-										
-									),
-							
-		---- membres  spécifiques	----------
-		
-		------ fonctions -------
-			fn actualiser 			_compo		_construc	= (
-				m_construction 		= _construc
-				m_geo					=	m_construction.m_geo
-				m_compo 				= _compo
-				m_this					=	m_construction.m_this
-			),
-			fn initialiser 			_compo		_construc	= (
-				
-				actualiser 			_compo		_construc	
-				
-				m_compo.nom 		= "Mur plein"
-				m_compo.longueur 	= 100
-				m_compo.hauteur 	= 100
-			),
-			fn initialiser_dialog 	roll_prt 	=(
-				dialog.m_compo 	= m_compo
-				dialog.m_rollPrt	= roll_prt
-				dialog.m_param	=	this
-				dialog.actualiser()
-			),
+			local norm_proj		= normalize vec_proj
+			local norm_seg		= normalize vec_seg
+			local dot_proj_seg 	= dot norm_proj norm_seg
 			
 			
-		------ CONSTRUIRE -------
-			fn construire	 pts_accroches		_normDir		 		= (
-				
-				--- Result -------------
-				local pt_result_1, pt_result_2, pt_result_3
-				
-				--- Vecteurs ------------
-				local vec_ep_dalle 	= [0,0,1] 		* 	m_this.ep_dalle		
-				local vec_ht 			= [0,0,1] 		* 	m_this.niveaux_hauteur				
-				local vec_longueur 	= _normDir 	* 	m_compo.longueur
-				
-				--- Points d'accroche ------------
-				local id_ptAccroche_1 	= pts_accroches[1]
-				local id_ptAccroche_2 	= pts_accroches[2]
-				local id_ptAccroche_3 	= pts_accroches[3]
-				
-				local ptAccroche_1		=	polyop.getVert 	m_this.delegate		id_ptAccroche_1	
-				local ptAccroche_2		=	polyop.getVert 	m_this.delegate		id_ptAccroche_2	
-				local ptAccroche_3		=	polyop.getVert 	m_this.delegate		id_ptAccroche_3	
-				
-				
-				
-				---- LA DALLE  -----------------------------------------------------------------------				
-				-------	Creation des points 	--------
-				local pt_2 		= ptAccroche_1		+ 	vec_longueur
-				local pt_3 		= pt_2					+	vec_ep_dalle
-				
-				--- creation des points --------------
-				local pts_pos 	= #( pt_2, pt_3 )
-				local pts_ids 	= m_geo.points 	pts_pos		
-				
-				-------	Creation des faces 	--------
-				local nvlFace = m_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		 	
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  ( matID.mur + 1 )
-				
-				--- Result -------------
-				pt_result_1 = pts_ids[1]
-				pt_result_2 = pts_ids[2]
-				
-				
-				
-				---- LE MUR -----------------------------------------------------------------------			
-				-------	Creation des points 	--------
-				local pt_3 		= pt_3		+	vec_ht
-				
-				--- creation des points --------------
-				local pts_pos 	= #( pt_3 )
-				local pts_ids 	= m_geo.points 	pts_pos		
-				
-				-------	Creation des faces 	--------
-				local nvlFace = m_geo.face 		#(	 		id_ptAccroche_2, 		pt_result_2, 		pts_ids[1], 		id_ptAccroche_3	)		 	
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.mur
-				
-				--- Result -------------
-				pt_result_3 = pts_ids[1]
-				
-				
-				---- Result final -----------------------------------------------------------------------
-				#( pt_result_1, pt_result_2, pt_result_3 )
-				
-			),
-			
-		----- events ------------------------------------------
-		on create do 	
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
-		
-		
-)
-
-struct	str_facadeParam_baie (
-		
-		private
-			----- membres communs --------------
-			m_compo,								---- le composant parant	
-			m_this,
-			m_construction,
-			m_geo,
-			matID = str_prefs_matID (),
-		public
-	
-			---- membres  spécifiques	----------
-			baie_allege_hauteur 			= 	100,
-			baie_allege_use				=	true,
-			baie_hauteur_use				=	true,
-			mur_profondeur				= 	20,
-			
-			menuis_largeur				=	7.,
-			menuis_epaisseur				=	3.,			
-			menuis_divisions				=	0,
-	
-			menuis_allege_use			=	false,
-			menuis_allege_ht				=	100,
-			menuis_trav_use				=	false,
-			menuis_trav_ht				=	210,			
-			menuis_ouvrant_use			=	true,
-			menuis_double_use			=	true,
-			
-			tablette_use					= true,
-			tablette_hauteur 				= 5,
-			tablette_debord 				= 5,
-			tablette_cote 					= 5,
-			
-			volet								= false,
-			coffre							= false,
-			
-			----- membres communs --------------
-			id				= "#FAC_PBT_",		
-			dialog 		= 		
-						rollout dialog "Baie " width:200 height:532
-						(
-							local m_compo
-							local m_rollPrt
-							local m_param
-							
-							edittext 'edt_nom' "" pos:[7,3] width:186 height:16 align:#left
-							
-							label 'lbl19' "Longeur:" pos:[11,37] width:49 height:13 align:#left
-							spinner 'spn_longueur' "" pos:[116,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-							label 'lbl21' "Hauteur:" pos:[11,53] width:49 height:13 align:#left
-							spinner 'spn_hauteur' "" pos:[116,52] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-							GroupBox 'grp1' "Baie" pos:[6,21] width:187 height:85 align:#left
-							label 'lbl24' "Allège:" pos:[11,68] width:49 height:13 align:#left
-							spinner 'spn_allege' "" pos:[116,67] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-							checkbutton 'ckb_hauteur' "" pos:[96,51] width:17 height:17 toolTip:"Toute hauteur Valeur négative pour descendre depuis plafond" align:#left
-							checkbutton 'ckb_allege' "" pos:[96,67] width:17 height:17 align:#left
-							label 'lbl29' "Profondeur:" pos:[11,84] width:59 height:13 align:#left
-							spinner 'spn_profondeur' "" pos:[116,83] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-							
-							
-							
-							GroupBox 'grp_divers' "Divers" pos:[6,254] width:187 height:114 align:#left
-							checkbox 'chk_tablette' "Tablette" pos:[10,269] width:59 height:16 align:#left
-							label 'lbl_tablette_hauteur' "Hauteur:" pos:[11,284] width:49 height:13 align:#left
-							spinner 'spn_tablette_hauteur' "" pos:[116,283] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-							label 'lbl_tablette_debord' "Débord:" pos:[11,299] width:49 height:13 align:#left
-							spinner 'spn_tablette_debord' "" pos:[116,298] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-							label 'lbl_tablette_cote' "Cotés:" pos:[11,315] width:59 height:13 align:#left
-							spinner 'spn_tablette_cote' "" pos:[116,314] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-							checkbox 'chk_volets' "Volets" pos:[10,330] width:47 height:16 align:#left
-							checkbox 'chk_coffreStore' "Coffre store" pos:[10,344] width:81 height:16 align:#left
-							GroupBox 'grp_menuiseries' "Menuiseries" pos:[6,110] width:187 height:141 align:#left
-							
-							label 'lbl_allege_hauteur' "Hauteur:" pos:[11,199] width:50 height:13 align:#left
-							spinner 'spn_allege_hauteur' "" pos:[116,198] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-							checkbox 'chk_allege' "Allège" pos:[10,184] width:48 height:16 align:#left
-							label 'lbl_traverse_hauteur' "Hauteur:" pos:[11,228] width:50 height:13 align:#left
-							spinner 'spn_traverse_hauteur' "" pos:[116,227] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-							checkbox 'chk_traverse' "Traverse" pos:[10,213] width:64 height:16 align:#left
-							label 'lbl_menuis_epaisseur' "Epaisseur:" pos:[11,139] width:51 height:13 align:#left
-							spinner 'spn_menuis_epaisseur' "" pos:[116,138] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-							label 'lbl_menuis_largeur' "Largeur:" pos:[11,124] width:42 height:13 align:#left
-							spinner 'spn_menuis_Largeur' "" pos:[116,123] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-							checkbox 'chk_double' "Double" pos:[137,154] width:48 height:16 enabled:false align:#left
-							checkbox 'chk_ouvrant' "Ouvrant" pos:[10,154] width:57 height:16 align:#left
-							
-							label 'lb_divisions' "Divisions:" pos:[11,171] width:59 height:13 align:#left
-							spinner 'spn_divisions' "" pos:[116,170] width:70 height:16 range:[0,4,0] type:#integer scale:1 align:#left
-							
-							fn actualiser =(
-										spn_longueur.value 			= 	m_compo.longueur
-										edt_nom.text 					=	m_compo.nom
-										spn_profondeur.value 		=	m_param.mur_profondeur	
-										ckb_hauteur.checked		=	m_param.baie_hauteur_use 
-										ckb_allege.checked			=	m_param.baie_allege_use
-								
-										if not ckb_hauteur.checked then (
-											spn_hauteur.enabled 	= true
-											spn_hauteur.value 		=	m_compo.hauteur 
-										) else (
-											spn_hauteur.enabled 			= false
-											spn_hauteur.indeterminate 	=	true
-										)
-										if not ckb_allege.checked then (
-											spn_allege.enabled 				= true
-											spn_allege.value 					=	m_param.baie_allege_hauteur 
-										) else (
-											spn_allege.enabled 				= false
-											spn_allege.indeterminate 		=	true
-										)
-										
-										chk_tablette.checked 				= m_param.tablette_use
-										lbl_tablette_hauteur.enabled 		= m_param.tablette_use
-										spn_tablette_hauteur.enabled 	= m_param.tablette_use
-										lbl_tablette_cote.enabled 			= m_param.tablette_use
-										spn_tablette_cote.enabled 		= m_param.tablette_use
-										spn_tablette_debord.enabled 	= m_param.tablette_use
-										lbl_tablette_debord.enabled 		= m_param.tablette_use
-										
-										spn_profondeur.value 					=	m_param.mur_profondeur
-										spn_tablette_hauteur.value 			=	m_param.tablette_hauteur
-										spn_tablette_debord.value 			=	m_param.tablette_debord
-										spn_tablette_cote.value 				=	m_param.tablette_cote
-										
-										spn_tablette_hauteur.indeterminate = not m_param.tablette_use
-										spn_tablette_cote.indeterminate 	= not m_param.tablette_use
-										spn_tablette_debord.indeterminate 	= not m_param.tablette_use
-										
-										
-										
-										spn_menuis_epaisseur.value 				=	m_param.menuis_epaisseur
-										spn_menuis_Largeur.value 				=	m_param.menuis_largeur
-										chk_double.checked 						=	m_param.menuis_double_use
-										chk_ouvrant.checked 						=	m_param.menuis_ouvrant_use
-										
-										spn_allege_hauteur.value 					=	m_param.menuis_allege_ht
-										spn_allege_hauteur.enabled 				=	m_param.menuis_allege_use
-										spn_allege_hauteur.indeterminate 		= not m_param.menuis_allege_use
-										lbl_allege_hauteur.enabled 				=	m_param.menuis_allege_use
-										chk_allege.checked 							=	m_param.menuis_allege_use
-										
-										spn_traverse_hauteur.value 				=	m_param.menuis_trav_ht
-										lbl_traverse_hauteur.enabled 				=	m_param.menuis_trav_use
-										spn_traverse_hauteur.indeterminate 	= not m_param.menuis_trav_use
-										chk_traverse.checked 						=	m_param.menuis_trav_use
-										spn_traverse_hauteur.enabled 			=	m_param.menuis_trav_use
-										
-										spn_divisions.value 							=	m_param.menuis_divisions
-										
-										
-									)
-										
-									
-							
-							
-							
-							
-							
-							
-							
-							on edt_nom entered txt 	do
-							(
-																					m_compo.nom = txt
-																					m_rollPrt.actualiser ()
-																				)
-							on spn_longueur changed val 	do
-								m_compo.longueur 					= val
-							on spn_hauteur changed val 	do
-								m_compo.hauteur 					= val
-							on spn_allege changed val 	do
-								m_param.baie_allege_hauteur 	= val
-							on ckb_hauteur changed state do
-							(
-																				m_param.baie_hauteur_use 	= state
-																				actualiser ()
-																			)
-							on ckb_allege changed state do
-							(
-																				m_param.baie_allege_use 	= state											
-																				actualiser ()
-																			)
-							on spn_profondeur changed val 	do
-								m_param.mur_profondeur	= val
-							on chk_tablette changed state do
-							(
-																				m_param.tablette_use 	= state											
-																				actualiser ()
-																			)
-							on spn_tablette_hauteur changed val 	do
-								m_param.tablette_hauteur 					= val
-							on spn_tablette_debord changed val 	do
-								m_param.tablette_debord 	= val
-							on spn_tablette_cote changed val 	do
-								m_param.tablette_cote	= val
-							on spn_allege_hauteur changed val 	do
-								m_param.menuis_allege_ht 		= val
-							on chk_allege changed state do
-							(
-																				m_param.menuis_allege_use 	= state											
-																				actualiser ()
-																			)
-							on spn_traverse_hauteur changed val 	do
-								m_param.menuis_trav_ht 					= val
-							on chk_traverse changed state do
-							(
-																				m_param.menuis_trav_use 	= state											
-																				actualiser ()
-																			)
-							on spn_menuis_epaisseur changed val 	do
-								m_param.menuis_epaisseur 					= val
-							on spn_menuis_Largeur changed val 	do
-								m_param.menuis_largeur 					= val
-							on chk_double changed state do
-							(
-																				m_param.menuis_double_use 	= state											
-																				actualiser ()
-																			)
-							on chk_ouvrant changed state do
-							(
-																				m_param.menuis_ouvrant_use 	= state											
-																				actualiser ()
-																			)
-							on spn_divisions changed val 	do
-								m_param.menuis_divisions	= val
-							
-						) -- fin rollout ----------
-													
-						
-						,
-			
-		------ CONSTRUIRE -------
-			fn construire	 pts_accroches		_normDir		 		est_DansBalcon:false	= (
-				
-				--- Result -------------
-				local pt_result_1, pt_result_2, pt_result_3
-				
-				--- Vecteurs ------------
-				local vec_ep_dalle 	= [0,0,1] 		* 	m_this.ep_dalle		
-				local vec_allege 		= if baie_allege_use 	then 	[0,0,0] 
-																			else		[0,0,1] *	baie_allege_hauteur
-				local vec_rtmb 		= if baie_hauteur_use 	then 	[0,0,0] 
-																			else		[0,0,1] *	( m_this.niveaux_hauteur - (baie_allege_hauteur + m_compo.hauteur ) )				
-				local norm_prof		= _normDir 	* rotateZ ( matrix3 1 ) 90				
-				local vec_ht 			= if baie_hauteur_use 	then 	[0,0,1] *	 m_this.niveaux_hauteur
-																			else		[0,0,1] * 	m_compo.hauteur				
-				local vec_longueur 	= _normDir * m_compo.longueur
-				local norm_prof		= _normDir * rotateZ ( matrix3 1 ) 90
-				local vec_prof			=  norm_prof * mur_profondeur
-				
-				--- Points d'accroche ------------
-				local id_ptAccroche_1 	= pts_accroches[1]
-				local id_ptAccroche_2 	= pts_accroches[2]
-				local id_ptAccroche_3 	= pts_accroches[3]
-				
-				local ptAccroche_1		=	polyop.getVert 	m_this.delegate		id_ptAccroche_1	
-				local ptAccroche_2		=	polyop.getVert 	m_this.delegate		id_ptAccroche_2	
-				local ptAccroche_3		=	polyop.getVert 	m_this.delegate		id_ptAccroche_3	
-				
-				
-				
-				---- LA DALLE  -----------------------------------------------------------------------				
-				-------	Creation des points 	--------
-				local pt_2 		= ptAccroche_1		+ 	vec_longueur
-				local pt_3 		= pt_2					+	vec_ep_dalle
-				
-				--- creation des points --------------
-				local pts_pos 	= #( pt_2, pt_3 )
-				local pts_ids 	= m_geo.points 	pts_pos		
-				
-				-------	Creation des faces 	--------
-				local nvlFace = m_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		 	
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  ( matID.mur + 1 )
-				
-				--- Result -------------
-				pt_result_1 = pts_ids[1]
-				pt_result_2 = pts_ids[2]
-				
-				
-				
-				
-				---- LA BAIE -----------------------------------------------------------------------				
-				-------	Creation des points 	--------
-				--- mur d'allege ----
-				local pt_bas 	= ptAccroche_2
-				local pt_ht 	= ptAccroche_3
-				
-				local pt_1 		= pt_bas	+  vec_longueur
-				local pt_2 		= pt_1		+  vec_allege
-				local pt_3 		= pt_bas	+ 	vec_allege
-				
-				local pt_4 		= pt_bas	+ 	vec_ht
-				local pt_5 		= pt_4		+ 	vec_longueur				
-				local pt_6 		= pt_ht		+ 	vec_longueur
-				local pt_7 		= pt_3		+ 	vec_prof
-				local pt_8 		= pt_2		+ 	vec_prof
-				local pt_9 		= pt_5		+ 	vec_prof
-				local pt_10		= pt_4		+ 	vec_prof
-				
-				--- creation des points --------------
-				local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8, pt_9, pt_10 )
-				local pts_ids 	= m_geo.points 	pts_pos		
-				
-				--- Result -------------
-				pt_result_3 = pts_ids[6]
--- 				local pts_results = #(pts_ids[1] , pts_ids[6])
-				
-				----- pour plus tard, ...  le raccord avec les menuiseries, et return -----
-				local ids_pts_racc_menuis =#(pts_ids[7], pts_ids[8], pts_ids[9], pts_ids[10])
-				
-				-------	Creation des faces 	--------
-				local nvlFace = m_geo.face 		#(	id_ptAccroche_2, 	pts_ids[1], 		pts_ids[2], 		pts_ids[3] )		 	
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.mur
-				
-				local nvlFace = m_geo.face 		#(	pts_ids[3], 		pts_ids[2], 		pts_ids[8] , 	pts_ids[7] )		 	
-				if tablette_use and not est_DansBalcon	then	polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie
-																		else 	polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.mur
-				
-				local nvlFace = m_geo.face 		#(	pts_ids[10], 	pts_ids[9], 		pts_ids[5], 		pts_ids[4] )		 
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.mur
-				
-				local nvlFace = m_geo.face 		#(	pts_ids[4], 		pts_ids[5], 		pts_ids[6], 		id_ptAccroche_3 )			 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.mur
-				
-				local nvlFace = m_geo.face 		#(	pts_ids[3], 		pts_ids[7], 		pts_ids[10],   	pts_ids[4] )		 	
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.mur
-				
-				local nvlFace = m_geo.face 		#(	pts_ids[8], 		pts_ids[2], 		pts_ids[5],   	pts_ids[9] )		 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.mur
-				
-				
-				
-				
-				
-				
-				
-				
-				--- CADRE MENUISERIE ----------------------------------------------------------------------------------------------------------------		
-				
-				local vec_men_ep			= norm_prof	*	menuis_epaisseur
-				local vec_men_lrg			=	_normDir		*	menuis_largeur
-				local vec_men_ht			=	[0,0,1] 		*	menuis_largeur
-				local vec_men_allegeHt	 =	[0,0,1] 		*	menuis_allege_ht
-				local vec_men_travHt		=	[0,0,1] 		*	menuis_trav_ht
-				
-				-------	Placement des points 	--------
-				local pt_A	= polyop.getVert 	m_this.delegate		ids_pts_racc_menuis[1]		
-				local pt_B	= polyop.getVert 	m_this.delegate		ids_pts_racc_menuis[2]		
-				local pt_C	= polyop.getVert 	m_this.delegate		ids_pts_racc_menuis[3]		
-				local pt_D	= polyop.getVert 	m_this.delegate		ids_pts_racc_menuis[4]
-				
-				local pt_1		= pt_A		+ 	vec_men_lrg 	+ 	vec_men_ht
-				local pt_2		= pt_B		- 	vec_men_lrg 	+ 	vec_men_ht
-				local pt_3		= pt_C		- 	vec_men_lrg 	- 	vec_men_ht
-				local pt_4		= pt_D		+ 	vec_men_lrg 	- 	vec_men_ht
-				
-				local pt_5		= pt_1		+ 	vec_men_ep
-				local pt_6		= pt_2		+ 	vec_men_ep
-				local pt_7		= pt_3		+ 	vec_men_ep
-				local pt_8		= pt_4		+ 	vec_men_ep
-				
-				
-				--- creation des points --------------
-				local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
-				local pts_ids 	= m_geo.points 	pts_pos		
-				
-				----- pour plus tard, ... 
-				local pts_pourOuvrant	= #( pt_5, pt_6, pt_7, pt_8  )
-				
-				---- cadre ------
-				local nvlFace = m_geo.face 		#(	ids_pts_racc_menuis[1]	, 			ids_pts_racc_menuis[2]	, 			ids_pts_racc_menuis[3]	, 			ids_pts_racc_menuis[4]	 ,
-													pts_ids[4], 		pts_ids[3], 		pts_ids[2], 		pts_ids[1] , 	
-													pts_ids[4], 		ids_pts_racc_menuis[4]	 )		 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
-				
-				local nvlFace = m_geo.face 		#(	pts_ids[1], 	pts_ids[2], 	pts_ids[6],   	pts_ids[5]  )			 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie	
-				local nvlFace = m_geo.face 		#(	pts_ids[6], 	pts_ids[2], 	pts_ids[3],   	pts_ids[7]  )			 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie	
-				local nvlFace = m_geo.face 		#(	pts_ids[7], 	pts_ids[3], 	pts_ids[4],   	pts_ids[8]  )			 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie	
-				local nvlFace = m_geo.face 		#(	pts_ids[1], 	pts_ids[5], 	pts_ids[8],   	pts_ids[4]  )			 			
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie
-				
-				--- la face du fond -----------
--- 				if not menuis_ouvrant_use do (
-					local nvlFace = m_geo.face 		#(	pts_ids[5], 	pts_ids[6], 	pts_ids[7],   	pts_ids[8]  )			 			
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.vitrage
-				
--- 				)
-				
-				
-													
-													
-													
-				
-				
-				--- TABLETTE  ----------------------------------------------------------------------------------------------------------------		
-				if tablette_use and not est_DansBalcon do (
-					
-					local vec_tab_ht		= 	[0,0,1] 		* tablette_hauteur
-					local vec_tab_deb	= -norm_prof 	* tablette_debord
-					local vec_tab_cote	= _normDir 	* tablette_cote					
-					
-					-------	Placement des points 	--------
-					local pt_1 		= pt_bas	+  vec_allege 	- 	vec_tab_ht		-	vec_tab_cote	+ vec_tab_deb
-					local pt_2 		= pt_1		+  2 * vec_tab_cote 				+	vec_longueur 	
-					local pt_3 		= pt_2		+ 	vec_tab_ht				
-					local pt_4		= pt_1		+ 	vec_tab_ht
-					
-					local pt_5		= pt_1		-	vec_tab_deb
-					local pt_6		= pt_2		-	vec_tab_deb			
-					local pt_7		= pt_3		-	vec_tab_deb
-					local pt_8		= pt_4		-	vec_tab_deb
-					
-					--- creation des points --------------
-					local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8, pt_9, pt_10 )
-					local pts_ids 	= m_geo.points 	pts_pos		
-					
-					-------	Creation des faces 	--------
-					local nvlFace = m_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[2], 		pts_ids[1] )		 			
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
-					local nvlFace = m_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[4] )		 				
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie					
-					local nvlFace = m_geo.face 		#(	pts_ids[4], 		pts_ids[3], 		pts_ids[7] , 	pts_ids[8] )		 		
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
-					local nvlFace = m_geo.face 		#(	pts_ids[5], 		pts_ids[1], 		pts_ids[4], 		pts_ids[8] )		 		
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
-					local nvlFace = m_geo.face 		#(	pts_ids[2], 		pts_ids[6], 		pts_ids[7], 		pts_ids[3] )		 				
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
-					
+			--- si pas parallele -------------------------
+			local a1, b1, a2, b2 
+			local d1_vert = false
+			local d2_vert = false
+			if dot_proj_seg != 1 and dot_proj_seg != -1 do (
+				
+				--- données pour les eaquations de droite y = ax + b ----
+				-- droite projeté----------------------
+				if (( _pt_orig.z *1000) as integer /1000  == ( _pt_2.z *1000) as integer /1000) then (
+					-- horizontale --
+					a1 = 0
+					b1 	= _pt_orig.z 
+				) else if (( _pt_orig.x *1000) as integer /1000  == ( _pt_2.x *1000) as integer /1000) then (
+					-- verticale --s
+					a1 	= 1
+					b1 	= _pt_orig.z - _pt_orig.x
+					d1_vert = true
+				) else (
+					a1 	= (_pt_orig.z - _pt_2.z ) / (_pt_orig.x - _pt_2.x)
+					b1 	= _pt_orig.z - a1*_pt_orig.x
+				)		
+				-- droite reception
+				if _pt_seg_1.z == _pt_seg_2.z then (
+					-- horizontale --
+					a2 = 0
+					b2 	= _pt_seg_1.z 
+				) else if _pt_seg_1.x == _pt_seg_2.x then (
+					-- verticale --
+					a2 	= 1
+					b2 	= _pt_seg_1.z - _pt_seg_1.x
+					d2_vert = true
+				) else (
+					a2 	= (_pt_seg_1.z - _pt_seg_2.z ) / (_pt_seg_1.x - _pt_seg_2.x)
+					b2 	= _pt_seg_1.z - a2*_pt_seg_1.x
 				)
 				
 				
 				
 				
-				---  ALLEGE  ----------------------------------------------------------------------------------------------------------------	
-				if menuis_allege_use do (
-					local vec_allege_ht = vec_men_ht * 1.5
-					-------	Placement des points 	--------
-					local pt_1 		= pt_bas	+ 	[0,0,1] * menuis_allege_ht	- 	 vec_allege_ht	 + vec_men_lrg + vec_prof
-					local pt_2 		= pt_1		+	vec_longueur 			- 2 * vec_men_lrg 
-					local pt_3 		= pt_2		+   vec_allege_ht	
-					local pt_4		= pt_1		+ 	 vec_allege_ht
-					
-					local pt_5		= pt_1		+	vec_men_ep
-					local pt_6		= pt_2		+	vec_men_ep			
-					local pt_7		= pt_3		+	vec_men_ep
-					local pt_8		= pt_4		+	vec_men_ep
-					
-					
-					--- creation des points --------------
-					local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
-					local pts_ids 	= m_geo.points 	pts_pos		
-					
-					
-					-------	Creation des faces 	--------
-					local nvlFace = m_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[2], 		pts_ids[1] )		 			
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie						
-					local nvlFace = m_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[4] )		 				
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie					
-					local nvlFace = m_geo.face 		#(	pts_ids[4], 		pts_ids[3], 		pts_ids[7] , 	pts_ids[8] )		 		
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
-					
--- 					-- la face vitre du bas
--- 					local pts_pos 	= #( 	 pts_pourOuvrant[1], pts_pourOuvrant[2] ,pt_6 , pt_5)
--- 					local pts_ids 	= m_geo.points 	pts_pos		m_this
--- 					local nvlFace = m_geo.face 		#(pts_ids[1], 		pts_ids[2]	, 		pts_ids[3] , 	pts_ids[4] )		 m_this		
--- 					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.vitrage			
-					
-					----- pour plus tard, ... 
--- 					pts_pourOuvrant[1]		= pt_8
--- 					pts_pourOuvrant[2]		= pt_7
-					
+				local x, y
+				if 	d1_vert then (
+					if not d2_vert do (
+						x =   _pt_orig.x
+						y =   a2 * x + b2
+					)
+				) else 	if 	d2_vert then (
+					if not d1_vert do (
+						x =   _pt_seg_1.x
+						y =   a1 * x + b1
+					)
+				) else (
+						x =   ( b2 - b1 ) / (a1  - a2 )
+						y =   a1 * x + b1
 				)
 				
+				-- si on a un point on verifie la suite -----------------------------
+				if x != undefined do (
+					
+					local pt_proj  = [x,0,y]
+					
+						--- si projection est dans le bon sens ----------
+						if   dot  ( normalize ( _pt_orig - _pt_2 ) )  (  normalize (   pt_proj - _pt_orig) )   > 0 do (
+							
+							local precision = 1000
+							local dist_seg 		= ( ( distance _pt_seg_1 	_pt_seg_2 ) * precision as integer ) / precision
+							local dist_ptProj 		= ( ( distance _pt_seg_1 	pt_proj 		+ distance _pt_seg_2 	pt_proj ) * precision as integer ) / precision	
+							
+							if  dist_ptProj  as string == dist_seg as string  do 
+								pt_result 	= pt_proj
+							
+						)
+				)
 				
-				local pos_largeur_temp1 = pts_pourOuvrant[1]
-				local pos_largeur_temp2 = pts_pourOuvrant[4]
-				--- DOUBLE  ----------------------------------------------------------------------------------------------------------------	
-				for i = 1 to  menuis_divisions  do (
--- 				if menuis_double_use do (
+			)
+			pt_result
+		),
+		fn projeter_trace		 		=(
+			
+			local mtrx_AP 	= m_plug.axeP_mtrx
+			local seuil = 5
+			local result
+			local trace 		= _pts
+			local trace_temp =  for item in trace collect item
+			
+			local est_subdivise_total = false
+			while not est_subdivise_total do (
+				
+				local est_subdivise = false
+				local est_trouve = false
+				
+				local i = 1
+				while i <=  trace_temp.count and not est_trouve do (
 					
-					local largeur_vitre = ( distance	pts_pourOuvrant[1] 	pts_pourOuvrant[2] ) / ( menuis_divisions + 1 )
+					local id_direction_suiv		=  boucler trace_temp  (i+1)
+					local id_direction_prec		= 	boucler trace_temp  (i-1)
 					
-					-------	Placement des points 	--------
-					local pt_1		= pts_pourOuvrant[1]   			- 		vec_men_lrg - vec_men_ep 	+ _normDir * largeur_vitre * i 
-					local pt_2		= pt_1 + 2 * vec_men_lrg
-					local pt_3		= pts_pourOuvrant[4]   			+ 		vec_men_lrg - vec_men_ep	+ _normDir * largeur_vitre * i 
-					local pt_4		= pt_3  - 2 * vec_men_lrg
+					local pt_orig		= 	trace_temp[ i ]	* 	inverse  	mtrx_AP  
+					local pt_suiv		=	trace_temp[ id_direction_suiv  ]  * 	inverse  	mtrx_AP
+					local pt_prec		= 	trace_temp[ id_direction_prec  ] * 	inverse  	mtrx_AP
 					
-					local pt_5		= pt_1		+ 	vec_men_ep
-					local pt_6		= pt_2		+ 	vec_men_ep
-					local pt_7		= pt_3		+ 	vec_men_ep
-					local pt_8		= pt_4		+ 	vec_men_ep
+					---- les segments a tester------------
+					local compteur_segment = 0
+					while compteur_segment <  trace_temp.count  - 2 and not est_trouve do (
+						
+						--- le segment -----
+						local id_seg_1 	= boucler trace_temp  ( i + compteur_segment + 1 )
+						local id_seg_2 	= boucler trace_temp  ( i + compteur_segment + 2	)
+						
+						local pt_seg_1	= trace_temp[ id_seg_1 ]	* 	inverse  	mtrx_AP
+						local pt_seg_2	= trace_temp[ id_seg_2 ] 	* 	inverse  	mtrx_AP 
+						
+						--- la projection 1 -------
+						local pt_proj = intersection 	pt_orig		pt_suiv		pt_seg_1	 	pt_seg_2		
+						
+						if pt_proj != undefined  do (	
+							
+							if distance pt_proj 	pt_seg_1 > seuil and  distance pt_proj 	pt_seg_2 > seuil do (
+								if not pt_est_dejaPresent   trace_temp  	( pt_proj	* 	mtrx_AP )	 do ( 
+									local id_place = trouver_pt	 trace_temp  ( pt_seg_1 * 	mtrx_AP )
+									insertItem			( pt_proj	* 	mtrx_AP )	trace_temp 	( id_place + 1 )
+									est_subdivise = est_trouve = true
+								)
+							)
+						)
+						
+						--- la projection 2 -------
+						local pt_proj = intersection 	pt_orig		pt_prec		pt_seg_1	 	pt_seg_2	
+						
+						if pt_proj != undefined  do (	
+							
+							if distance pt_proj 	pt_seg_1 > seuil and  distance pt_proj 	pt_seg_2 > seuil do (
+								if not pt_est_dejaPresent   trace_temp  	( pt_proj	* 	mtrx_AP )	 do ( 
+									local id_place = trouver_pt	 trace_temp  ( pt_seg_1 * 	mtrx_AP )
+									insertItem			( pt_proj	* 	mtrx_AP )	trace_temp 	( id_place + 1 )
+									est_subdivise = est_trouve = true
+								)
+							)
+						)
+						
+						compteur_segment +=  1
+					) -- fin while compteur_segment
 					
-					--- creation des points --------------
-					local pts_pos 	= #( pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
-					local pts_ids 	= m_geo.points 	pts_pos		
+					i += 1
 					
-					---- faces ------
-					local nvlFace = m_geo.face 		#(	pts_ids[2], 		pts_ids[6], 		pts_ids[7],   	pts_ids[3]  )			 					
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
-					local nvlFace = m_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[3],   	pts_ids[4]  )			 					
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
-					local nvlFace = m_geo.face 		#(	pts_ids[5], 		pts_ids[1], 		pts_ids[4],   	pts_ids[8]  )			 					
-					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
+				) -- fin while i  --
+				
+				if not est_subdivise do est_subdivise_total = true
+				
+			) -- fin while not est_subdivise_total
+			
+			_pts = trace_temp
+			
+		),
+		fn chercher_pt_a90degGauche	_id_pt  	vec_pt		 =(
+			
+			local seuil = 1			
+			local vertexSurLigne = #()
+			local mtrx_AP 		= m_plug.axeP_mtrx			
+			local pt 				= _pts[ _id_pt ] 			* 	inverse  	mtrx_AP	
+			local norm_pt 		= normalize vec_pt			
+			local mtrx_rotateZ90	=	rotateY	(matrix3 1)	90
+			local norm_test 			= norm_pt * mtrx_rotateZ90			
+			local pt_virtuel 			= pt + norm_test			
+			local a,b
+			local verticale 		= false
+			
+			if (( pt.z *1000) as integer /1000  == ( pt_virtuel.z *1000) as integer /1000) then (
+				-- horizontale --
+				a = 0
+				b = pt.z 
+			) else if (( pt.x *1000) as integer /1000  == ( pt_virtuel.x *1000) as integer /1000) then (
+				-- verticale --
+				a 	= 1
+				b 	= pt.z - pt.x
+				verticale = true
+			) else (
+				a 	= (pt.z - pt_virtuel.z ) / (pt.x - pt_virtuel.x)
+				b 	= pt.z - a*pt.x
+			)		
+			
+			
+			if not verticale then (
+				for i=1 to _pts.count do (
+					local pt_test = _pts[i] * 	inverse  	mtrx_AP	
 					
-					if menuis_ouvrant_use do (
+					if  abs ( pt_test.z - ( pt_test.x * a + b ) ) < seuil do (
 						
-						local pt_1_men = pt_1
-						local pt_2_men = pt_2
-						local pt_3_men = pt_3
-						local pt_4_men = pt_4
-						
-						local vec_bandeau_ep = vec_men_ep/2
-						
-						-------	Placement des points 	--------
-						local pt_1		= pt_1_men	+ vec_men_lrg * 3/4	-  	vec_bandeau_ep 	-  	vec_men_ht
-						local pt_2		= pt_2_men 	- vec_men_lrg * 3/4	-  	vec_bandeau_ep 	-  	vec_men_ht
-						local pt_3		= pt_3_men	- vec_men_lrg * 3/4	-  	vec_bandeau_ep 	+  vec_men_ht
-						local pt_4		= pt_4_men  	+ vec_men_lrg * 3/4	-  	vec_bandeau_ep 	+  vec_men_ht
-						
-						local pt_5		= pt_1		+ 	vec_bandeau_ep
-						local pt_6		= pt_2		+ 	vec_bandeau_ep
-						local pt_7		= pt_3		+ 	vec_bandeau_ep
-						local pt_8		= pt_4		+ 	vec_bandeau_ep
-						
-						--- creation des points --------------
-						local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
-						local pts_ids 	= m_geo.points 	pts_pos		
-						
-						---- faces ------
-						local nvlFace = 	m_geo.face 		#(	pts_ids[2], 		pts_ids[6], 		pts_ids[7],   	pts_ids[3]  )			 						
-						polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
-						local nvlFace = 	m_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[3],   	pts_ids[4]  )			 						
-						polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
-						local nvlFace = 	m_geo.face 		#(	pts_ids[5], 		pts_ids[1], 		pts_ids[4],   	pts_ids[8]  )			 					
-						polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
+						local dot_test_dir = dot (normalize (pt_test - pt ))  norm_test
+							
+						if pt_test != pt and dot_test_dir > 0 do 
+							append vertexSurLigne i
 						
 					)
 				)
-				
-				
--- 				
--- 				--- OUVRANT  ----------------------------------------------------------------------------------------------------------------	
--- 				if menuis_ouvrant_use do (
--- 					
--- 					-------	Placement des points 	--------
--- 					local pt_1		= pts_pourOuvrant[1]
--- 					local pt_2		= pts_pourOuvrant[2]
--- 					local pt_3		= pts_pourOuvrant[3]
--- 					local pt_4		= pts_pourOuvrant[4]
--- 					
--- 					local pt_5		= pt_1		+ 	vec_men_lrg 	+ 	vec_men_ht
--- 					local pt_6		= pt_2		- 	vec_men_lrg 	+ 	vec_men_ht
--- 					local pt_7		= pt_3		- 	vec_men_lrg 	- 	vec_men_ht
--- 					local pt_8		= pt_4		+ 	vec_men_lrg 	- 	vec_men_ht
--- 					
--- 					local pt_9		= pt_5		+ 	vec_men_ep
--- 					local pt_10		= pt_6		+ 	vec_men_ep
--- 					local pt_11		= pt_7		+ 	vec_men_ep
--- 					local pt_12		= pt_8		+ 	vec_men_ep
--- 					
--- 					local pts_pourOuvrant	= #( pt_9, pt_10, pt_11, pt_12  )
--- 					
--- 					--- creation des points --------------
--- 					local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 , pt_9, pt_10, pt_11, pt_12 )
--- 					local pts_ids 	= m_geo.points 	pts_pos		m_this
--- 					
--- 					---- cadre ------
--- 					
--- 					local nvlFace = m_geo.face 		#(	pts_ids[1]	, pts_ids[2], pts_ids[3], pts_ids[4], pts_ids[8], pts_ids[7], pts_ids[6], pts_ids[5], pts_ids[8], pts_ids[4] )		 m_this				
--- 					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie					
--- 					
--- 					local nvlFace = m_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[10],   	pts_ids[9]  )			 m_this			
--- 					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
--- 					local nvlFace = m_geo.face 		#(	pts_ids[10], 	pts_ids[6], 		pts_ids[7],   	pts_ids[11]  )			 m_this			
--- 					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
--- 					local nvlFace = m_geo.face 		#(	pts_ids[12], 	pts_ids[11], 	pts_ids[7],   	pts_ids[8]  )			 m_this			
--- 					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
--- 					local nvlFace = m_geo.face 		#(	pts_ids[5], 		pts_ids[9], 		pts_ids[12],   	pts_ids[8]  )			 m_this			
--- 					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.menuiserie			
--- 	-- 					
--- 	-- 					----vitrage
--- 					local nvlFace = m_geo.face 		#(	pts_ids[9], 		pts_ids[10], 		pts_ids[11],   	pts_ids[12]  )			 m_this			
--- 					polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.vitrage			
--- 					
--- 				)
-				
-				
-				
-				
-				----------------------------
--- 				format "-------------> 	BAIE -> pt_results :%\n" #( pt_result_1, pt_result_2, pt_result_3 )
-				
-				---- Result final -----------------------------------------------------------------------
-				#( pt_result_1, pt_result_2, pt_result_3 )
-				
-				
-			),
-			
-			
-		------ fonctions -------
-			fn actualiser 			_compo		_construc	= (
-				m_construction 		= _construc
-				m_geo					=	m_construction.m_geo
-				m_compo 				= _compo
-				m_this					=	m_construction.m_this
-			),
-			
-			fn initialiser 			_compo		_construc	= (
-				
-				actualiser 			_compo		_construc	
-				
-				m_compo.nom 		= "Baie"
-				m_compo.longueur 	= 100
-				m_compo.hauteur 	= 210
-			),
-			
-			fn initialiser_dialog 	roll_prt 	=(
-				dialog.m_compo 	= m_compo
-				dialog.m_rollPrt	= roll_prt
-				dialog.m_param	=	this
-				dialog.actualiser()
-			),
-			
-		----- events ------------------------------------------
-		on create do 	
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
-		
-)
-
-struct	str_facadeParam_balcon (
-	private
-		----- membres communs --------------
-		m_compo,								---- le composant parant	
-
-		m_construction,
-		m_geo,
-		m_this,
-		matID = str_prefs_matID (),
-		
-	public
-		id				= "#FAC_PBD_",			--- Parametre Balcon Debut
-		dialog 		= 		
-	rollout dialog "Balcon" width:180 height:70	(
-										local m_compo
-										local m_rollPrt
-										local m_param
-									
-										edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
-										GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
-										label 'lbl_largeur' "Largeur:" pos:[13,37] width:49 height:13 align:#left
-										spinner 'spn_largeur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-										
-										fn actualiser =(
-											spn_largeur.value 	= 	m_param.largeur
-											edt_nom.text 			=	m_compo.nom
-										)
-
-										on spn_largeur changed val do 
-											m_param.largeur = val		
-										
-										on edt_nom	 entered txt 	do	(
-											m_compo.nom = txt
-											m_rollPrt.actualiser ()
-										)
-										
-								),
+			) else (
+				for i=1 to _pts.count do (
+					local pt_test = _pts[i] * 	inverse  	mtrx_AP	
+					
+					if  abs ( pt_test.x - pt.x ) < seuil  do (
 						
-	---- membres  spécifiques	----------
-		largeur				= 100,
-		
-		gardeCorps			=	0,
-		
--- 		balcon_fin			=	#(),
-		
-		
-		
-		
-		
-		
-		
-	------ fonctions -------
-		fn actualiser 			_compo		_construc	= (
-			m_construction 		= _construc
-			m_geo					=	m_construction.m_geo
-			m_compo 				= _compo
-			m_this					=	m_construction.m_this
-		),
-		
-		fn initialiser 			_compo		_construc	= (
-			
-			actualiser 			_compo		_construc	
-			
-			m_compo.nom 		= "Balcon"
-			m_compo.longueur 	= 0
-			m_compo.hauteur 	= 0
-		),
-		fn initialiser_dialog 	roll_prt 	=(
-			dialog.m_compo 	= m_compo
-			dialog.m_rollPrt	= roll_prt
-			dialog.m_param	=	this
-			dialog.actualiser()
-		),
-		
-		
-	------ CONSTRUIRE -------
-		fn construire	 pts_accroches		_normDir				 		= (
-			
-				--- Result -------------
-				local pt_result_1, pt_result_2, pt_result_3
-				
-				--- Vecteurs ------------
-				local vec_ep_dalle 	= [0,0,1] 			* 	m_this.ep_dalle			
-				local vec_longueur 	= _normDir 		* 	m_compo.longueur
-				local norm_balcon	= _normDir * rotateZ ( matrix3 1 ) -90
-				local vec_largeur		= norm_balcon 	*	 largeur				
-				
-				--- Points d'accroche ------------
-				local id_ptAccroche_1 	= pts_accroches[1]
-				local id_ptAccroche_2 	= pts_accroches[2]
-				local id_ptAccroche_3 	= pts_accroches[3]
-				
-				local ptAccroche_1		=	polyop.getVert 	m_this.delegate		id_ptAccroche_1	
-				local ptAccroche_2		=	polyop.getVert 	m_this.delegate		id_ptAccroche_2	
-				local ptAccroche_3		=	polyop.getVert 	m_this.delegate		id_ptAccroche_3	
-				
-				
-				-------	Placement des points 	--------
-				local pt_1 		= ptAccroche_1
-				local pt_2 		= pt_1		+  vec_longueur
-				local pt_3 		= pt_2		+ 	vec_ep_dalle				
-				local pt_4		= pt_1		+ 	vec_ep_dalle
-				
-				local pt_5		= pt_1		+	vec_largeur
-				local pt_6		= pt_2		+	vec_largeur		
-				local pt_7		= pt_3		+	vec_largeur
-				local pt_8		= pt_4		+	vec_largeur
-				
-				--- creation des points --------------
-				local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
-				local pts_ids 	= m_geo.points 	pts_pos		
-				
-				-------	Creation des faces 	--------
-				local nvlFace = m_geo.face 		#(	pts_ids[1], 		pts_ids[5], 		pts_ids[8], 		pts_ids[4] )		 			
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = m_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[7] , 	pts_ids[8] )		 				
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )					
-				local nvlFace = m_geo.face 		#(	pts_ids[6], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[7] )		 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = m_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6], 		pts_ids[5] )		 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = m_geo.face 		#(	pts_ids[8], 		pts_ids[7], 		pts_ids[3], 		pts_ids[4] )		 				
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )
-				
-				
-				
-				
-				#()
-		),
-		
-		----- events ------------------------------------------
-		on create do 	
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
-
-
-)
-
-struct	str_facadeParam_balconFin (
-	private
-		----- membres communs --------------
-		m_compo,								---- le composant parant	
-		m_this,
-		m_construction,
-		m_geo,
-		matID = str_prefs_matID (),
-		
-	public
-	id				= "#FAC_PBF_",			--- Parametre Balcon Fin
-	dialog 		= 		
-	rollout dialog "Balcon - fin" width:180 height:70	(
-									local m_compo
-									local m_rollPrt
-									local m_param
-									
-										fn actualiser =(
-										)
-
-								),
+						local dot_test_dir = dot (normalize (pt_test - pt ))  norm_test
+							
+						if pt_test != pt and dot_test_dir > 0 do 
+							append vertexSurLigne i
 						
-	---- membres  spécifiques	----------
-		
--- 		balcon_debut		=	#(),
-								
-		
-		
-	------ fonctions -------
-		fn actualiser 			_compo		_construc	= (
-			m_construction 		= _construc
-			m_geo					=	m_construction.m_geo
-			m_compo 				= _compo
-			m_this					=	m_construction.m_this
-		),
-		
-		fn initialiser 			_compo		_construc	= (
-			
-			actualiser 			_compo		_construc	
-			
-			m_compo.nom 		= "Balcon - fin"
-			m_compo.longueur 	= 0
-			m_compo.hauteur 	= 0
-		),
-		fn initialiser_dialog 	roll_prt 	=(
-			dialog.m_compo 	= m_compo
-			dialog.m_rollPrt	= roll_prt
-			dialog.m_param	=	this
-			dialog.actualiser()
-		),
-		
-		
-	------ CONSTRUIRE -------
-		fn construire	 _id_pt_bas		_id_pt_ht		_normDir		 		= (
-	-- 		format "CONSTRUIRE : lg = %\n" m_compo.longueur
-			local pt1 =  polyop.getVert 	m_this.delegate		_id_pt_bas	
-			local pt2 = pt1 + _normDir * m_compo.longueur
-			
-			m_construction.creer_mur 	_id_pt_bas		_id_pt_ht	pt2 			matID:matID.mur
-			
-		),
-		
-		----- events ------------------------------------------
-		on create do 	
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
-
-
-)
-
-struct	str_facadeParam_modele (
-	private
-		----- membres communs --------------
-		m_compo,								---- le composant parant	
-
-		m_construction,
-		m_geo,
-		m_this,
-		matID = str_prefs_matID (),
-		
-	public
-		id				= "#FAC_PBF_",			--- Parametre Balcon Fin
-		dialog 		= 		
-		rollout dialog "Balcon - fin" width:180 height:70	(
-										local m_compo
-										local m_rollPrt
-										local m_param
-										
-											fn actualiser =(
-											)
-
-									),
-						
-	---- membres  spécifiques	----------
-		
--- 		balcon_debut		=	#(),
-								
-		
-		
-	------ fonctions -------
-	private	
-		
-		--------------------------------------------------------------------------------------------------------
-		----------------	 Manipulations MODELE	 	----------------------------------------------------
-		--------------------------------------------------------------------------------------------------------		
-		fn positionnerPivot_modele	 _node =(
-			local segmentsOuverts 	= polyop.getOpenEdges _node
-			local pointsSegsOuverts 	=#()
-			local pointsResult 			=[0,0,0]
-			for seg in segmentsOuverts do (
-				local ptsDuSegment = polyop.getVertsUsingEdge   _node	seg
-				for pt in ptsDuSegment do
-					appendIfUnique pointsSegsOuverts	pt
-			)
-			
-			--- on cherche le point  ------
-			format "pointsSegsOuverts : %\n" pointsSegsOuverts
-			
-			for idPt in pointsSegsOuverts do (
-				
-				if idPt == pointsSegsOuverts[1] then pointsResult = _node.verts[ idPt ].pos
-				else (
-					local pt =_node.verts[ idPt ].pos
-					if pt.x < pointsResult.x do pointsResult = pt
-					if pt.y < pointsResult.y do pointsResult = pt
-					if pt.z < pointsResult.z do pointsResult = pt
+					)
 				)
 			)
-			_node.pivot = pointsResult
+			
+			vertexSurLigne
+			local result 
+			local dist_min = 0
+			for id_pt_test in vertexSurLigne do (
+				local pt_test = _pts[ id_pt_test ] 			* 	inverse  	mtrx_AP	
+				local dist_test = distance pt pt_test
+				if  dist_test < dist_min or dist_min == 0 do (
+					result = id_pt_test
+					dist_min = dist_test
+				)
+			)
+			
+			result
 			
 		),
-		fn preparer_modele 	_node	=(
+		fn unir 	_listeTraces 	=(
 			
-				--- preparation du model -------
-				local nvModel_node = copy _node 
-				convertToPoly 	nvModel_node
-				local  BB = nodeGetBoundingBox 	nvModel_node	(matrix3 1)
-				positionnerPivot_modele 	nvModel_node
-				nvModel_node.rotation = quat 0 0 0 1
-				nvModel_node.pos  = [0,0,0]
+			local traces = #() 
+			
+			for trace in _listeTraces do (
+				local traceTmp = for _pt  in trace collect _pt
+					append traces traceTmp
+			)
 				
-				nvModel_node
+			
+			
+			local continu = true
+			local suivant = false
+			local idTrace1 = 1
+			local idTrace2 = 1
+			local trace1, trace2
+			
+			
+			while traces.count > 1 and	continu do (
+				trace1 	= traces[idTrace1]
+				suivant 	= false
+				for idTrace2 = 1 to traces.count where idTrace1 != idTrace2 and  not suivant 	do (
+					
+					trace2 	= traces[ idTrace2 ]
+					
+					local ptsCommuns			= #()
+					local ptsCommuns_trouve = false
+					local idCommun_rect1 		= 0
+					
+					for i = 1 to  trace1.count  where not  ptsCommuns_trouve   do (
+						local id1 = trace1[i]
+						local id2 =	finditem 	trace2	 id1
+						
+						if  id2 != 0 then (
+							
+							append ptsCommuns id1
+							if ptsCommuns.count == 2 do 
+								ptsCommuns_trouve = true
+						)
+					)
+				
+					
+					if ptsCommuns.count > 1 then (
+						local idPt1_communTrace2 = findItem	trace2  ptsCommuns[1]
+						local idPt2_communTrace2 = boucler	trace2  ( idPt1_communTrace2 + 1 )
+						
+						if trace2[ idPt2_communTrace2 ] != ptsCommuns[2] then (
+							local id_Pt1_trace2 = boucler trace2 (idPt1_communTrace2 + 1)
+							local id_Pt2_trace2 = boucler trace2 (idPt1_communTrace2 + 2)
+							
+							local idPt1_communTrace1 = findItem	trace1  ptsCommuns[1]
+							local idPt2_communTrace1 = boucler trace1 ( idPt1_communTrace1 + 1 )
+							if trace1[ idPt2_communTrace1 ] != ptsCommuns[2] then (
+								local idPt2_communTrace1 = boucler trace1		( (finditem trace1  ptsCommuns[2] ) + 1 )
+								insertItem   trace2[  id_Pt2_trace2 ]	trace1	 idPt2_communTrace1
+								insertItem   trace2[  id_Pt1_trace2 ]	trace1	 idPt2_communTrace1
+								
+							) else (
+								local idPt2_communTrace1 = boucler trace1		( (finditem trace1  ptsCommuns[1] ) + 1 )
+								insertItem   trace2[  id_Pt2_trace2 ]	trace1	 idPt2_communTrace1
+								insertItem   trace2[  id_Pt1_trace2 ]	trace1	 idPt2_communTrace1
+							)
+							
+							
+							
+						) else (
+							local id_Pt1_trace2 = boucler trace2 (idPt2_communTrace2 +1)
+							local id_Pt2_trace2 = boucler trace2 (idPt2_communTrace2 +2)
+-- 								format "		-> - B - on insert a partir de %\n" trace2[ id_Pt1_trace2 ]
+							
+							local idPt1_communTrace1 = findItem	trace1  ptsCommuns[1]
+							local idPt2_communTrace1 = boucler trace1 ( idPt1_communTrace1 + 1 )
+							if trace1[ idPt2_communTrace1 ] != ptsCommuns[2] then (
+								local idPt2_communTrace1 = boucler trace1		( (finditem trace1  ptsCommuns[2] ) + 1 )
+								insertItem   trace2[  id_Pt2_trace2 ]	trace1	 idPt2_communTrace1
+								insertItem   trace2[  id_Pt1_trace2 ]	trace1	 idPt2_communTrace1
+								
+							) else (
+								local idPt2_communTrace1 = boucler trace1		( (finditem trace1  ptsCommuns[1] ) + 1 )
+								insertItem   trace2[  id_Pt2_trace2 ]	trace1	 idPt2_communTrace1
+								insertItem   trace2[  id_Pt1_trace2 ]	trace1	 idPt2_communTrace1
+							)
+							
+							
+						)
+						
+						traces[idTrace1] = ordonner_Points 	trace1
+						deleteItem  traces 	idTrace2
+						idTrace1 = 1
+						
+						suivant = true
+					)
+				)
+				if suivant == false do 	
+					idTrace1 += 1
+				if idTrace1 > traces.count - 1 do 	
+					continu = false
+				
+			) -- fin du while --------
+			
+			
+			traces
+			
+			
+			
+		),
+		fn estPignon 	_pts		_id		=(
+			
+			local mtrx_AP	= get_axePrincipal_mtrx 	_pts
+			local j 			= boucler  _pts  (_id+1)
+			local vec 		= (_pts[j]-_pts[_id])
+			local orientation 	= get_axePrincipal_orientation		mtrx_AP		vec
+			
+			if orientation == #perpendiculaire 
+				then true 
+				else false
 		),
 		
-	
 	public
-		fn actualiser 			_compo		_construc	= (
-			m_construction 		= _construc
-			m_geo					=	m_construction.m_geo
-			m_compo 				= _compo
-			m_this					=	m_construction.m_this
-		),
-		
-		fn initialiser 			_compo		_construc	= (
+		fn orthonormer 		&_pts	_seuil_ortho  =(
 			
-			actualiser 			_compo		_construc	
+			local mtrx_AP = get_axePrincipal_mtrx 	_pts
 			
-			m_compo.nom 		= "Balcon - fin"
-			m_compo.longueur 	= 0
-			m_compo.hauteur 	= 0
-		),
-		fn initialiser_dialog 	roll_prt 	=(
-			dialog.m_compo 	= m_compo
-			dialog.m_rollPrt	= roll_prt
-			dialog.m_param	=	this
-			dialog.actualiser()
-		),
-		
-		
-	------ CONSTRUIRE -------
-		fn construire	 _id_pt_bas		_id_pt_ht		_normDir		 		= (
-	-- 		format "CONSTRUIRE : lg = %\n" m_compo.longueur
-			local pt1 =  polyop.getVert 	m_this.delegate		_id_pt_bas	
-			local pt2 = pt1 + _normDir * m_compo.longueur
-			
-			m_construction.creer_mur 	_id_pt_bas		_id_pt_ht	pt2 			matID:matID.mur
+			for i = 1 to _pts.count do (
+				
+				local j = i + 1
+				if j > _pts.count do j = 1
+				local pt = _pts[i]	* inverse  mtrx_AP 
+				local pt_suivant = _pts[j] *  inverse mtrx_AP 
+				local vec_moyenne 
+				
+				local est_pignon = estPignon _pts  i
+				if not est_pignon then (
+					local moyenneX = ( pt_suivant.x - pt.x ) /2					
+					vec_moyenne = [moyenneX,0,0] * _seuil_ortho / 100
+				) else  (
+					local moyenneZ = ( pt_suivant.z - pt.z ) /2					
+					 vec_moyenne = [0,0,moyenneZ] * _seuil_ortho / 100
+				) 
+				
+				pt 			= _pts[i]	* inverse  mtrx_AP  + vec_moyenne 
+				pt_suivant 	= _pts[j]	* inverse  mtrx_AP  - vec_moyenne 
+				
+				_pts[i] = pt *   mtrx_AP 
+				_pts[j] = pt_suivant  *   mtrx_AP 
+			)
 			
 		),
-		
-		----- events ------------------------------------------
-		on create do 	
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
+		fn souder 				_pts	=(
+			
+			local i = 1
+			while i <=_pts.count do (
+				local j= i+1
+				if j > _pts.count  do j =1
+				local pt 			= _pts[i]
+				local ptSuivant 	= _pts[j]
+				if distance pt ptSuivant <= m_plug.seuil_souder do (
+					deleteitem _pts j
+					_pts[i] = ( pt + ptSuivant ) / 2
+					i = 1
+				)
+				i+=i
+			)
+			
+		),
+		fn aplanir 				_pts	=(
+			
+			local i = 1
+			while i <= _pts.count do (
+				
+				local h = i - 1
+				if h < 1  do h = _pts.count
+				local j= i+1
+				if j > _pts.count  do j =1
+				local ptDAvant 	= _pts[h]
+				local pt 			= _pts[i]
+				local ptSuivant 	= _pts[j]
+				
+				local vec1 = normalize (ptDAvant - pt)
+				local vec2 = normalize (ptSuivant - pt)
+				
+				local anglePt = acos(dot vec1 vec2)			
+				if 	anglePt >= 180 - m_plug.seuil_optimiser  then (
+					deleteitem _pts i
+					i = 0
+				)
+				dot
+				i +=1
+			)
 
-
-)
-
-
-
-
------------------------	FACADE	-------------------------------------------------------------------------------------------------------------
-struct str_facade_composant (
-		
-		id							= "#FAC_CMP_",						---- "CMP" : composant -----------
-		nom 						=	"Composant de façade",
-		
-		type						= #Espacement,		--->	#Espacement		#LongueurFixe		#Modele		#Parametrique
-		
-		longueur					=	0.,	
-		hauteur					= 	0.,
-		
-		modeles					=	#(),
-		modeles_probas		=	#(),
-		
-		param					= 	#(),				
-		
-		----- events ------------------------------------------
-		on create do (
-			---- generation de l'id unique -------
-			if type == #Espacement then 
-				id = "#FAC_CMP_ESP"
-			else
-				for i= 1 to 10 do id += ( random 0 9 ) as string	
+			result
+		),
+		fn aligner						=(	
+			
+			local mtrx_AP 	= m_plug.axeP_mtrx
+			
+			for i = 1 to   _pts.count  do (
+				
+				local aligns = 	chercher_alignements		i			
+				
+				local pt_moyenne = [0,0,0]
+				for id_align in aligns do 
+					pt_moyenne += _pts[id_align]	* inverse  mtrx_AP
+				pt_moyenne /=  aligns.count
+				
+				for id_align in aligns  do (
+					
+					local j 						= boucler _pts (  id_align + 1 )
+					local pt 					= _pts[id_align]	* inverse  mtrx_AP  
+					local pt_suivant 			= _pts[j]	* inverse  mtrx_AP  
+					local vec_moyenne1 	= pt_moyenne	 - pt
+					local vec_moyenne2 	= pt_moyenne	 - pt_suivant
+					local vec_align1, vec_align2
+					if estPignon  	id_align		 then (
+						vec_align1 			= [0,0,vec_moyenne1.z] 
+						vec_align2 			= [0,0,vec_moyenne2.z] 						
+					) else (
+						vec_align1 			= [vec_moyenne1.x,0,0] 
+						vec_align2 			= [vec_moyenne2.x,0,0] 
+					)
+					
+					pt 							= _pts[id_align]	* inverse  mtrx_AP  	+ vec_align1 
+					pt_suivant 					= _pts[j]			* inverse  mtrx_AP  	+ vec_align2
+					
+					_pts[id_align] 	= pt *   mtrx_AP 
+					_pts[j] 			= pt_suivant *   mtrx_AP 
+					
+				)
+			)
+		),
+		fn subdiviser		 		=(
+			
+			--- on  les points projetés au tracé --------
+			projeter_trace 		()
+			
+			local result = #()
+			local result_reste =#()
+			
+			m_rectangles_traces 		= #()
+			
+			local seuil 					= 1
+			local mtrx_AP 			= m_plug.axeP_mtrx
+			local trace 				= _pts
+			
+			for i = 1 to  trace.count 	do (
+				
+				local pt_orig			= 	trace[ i ]	* 	inverse  	mtrx_AP 
+				local id_pt_preced 	= boucler 	trace	( i - 1)
+				local pt_preced 		= trace[ id_pt_preced ] * 	inverse  	mtrx_AP	
+				local vec_pt 			= pt_orig - pt_preced		
+				local id_pt_1, id_pt_2, id_pt_3, id_pt_4
+				
+				id_pt_1	= chercher_pt_a90degGauche	i 	vec_pt	 
+				
+				if id_pt_1 != undefined then (
+					local norm 		= vec_pt * (rotateY	(matrix3 1)	90 )
+					id_pt_2				= chercher_pt_a90degGauche	id_pt_1 	norm		 
+				)  				
+				if id_pt_2 != undefined then (
+					local norm	 	= vec_pt * (rotateY	(matrix3 1)	180 )
+					id_pt_3 				= chercher_pt_a90degGauche	id_pt_2 	norm	 
+				)  				
+				if id_pt_3 != undefined then (
+					local norm	 	= vec_pt * (rotateY	(matrix3 1)	270 )
+					id_pt_4 				= chercher_pt_a90degGauche	id_pt_3 	norm	 
+				)  
+				
+				---- si on a les quatre points -------
+				if id_pt_4 == i do (
+					
+					local pt_rect_1 = trace[ id_pt_1 ]	* 	inverse  	mtrx_AP 
+					local pt_rect_2 = trace[ id_pt_2 ]	* 	inverse  	mtrx_AP 
+					local pt_rect_3 = trace[ id_pt_3 ]	* 	inverse  	mtrx_AP 
+					
+					local surf = ( distance pt_orig pt_rect_1 ) * ( distance pt_orig pt_rect_3 )  / 10000
+					
+					local rect =  #( i, id_pt_1, id_pt_2, id_pt_3 )
+					
+					local rect_ordo = ordonner_Points 	rect
+					append m_rectangles_traces 		rect_ordo
+					virerDoublonsDansTableau 	m_rectangles_traces
+					
+				)
+			) -- fin while i  --
+			
+			
+		),
+		fn decouper 		 		=(
+			
+			
+			--  points concaves -----------------
+			
+			
+			local result = #()
+			local result_reste =#()
+			
+			
+			
+			local seuil 					= 1
+			local mtrx_AP 			= m_plug.axeP_mtrx
+			local trace 				= _pts
+			local trace_restant 		= for i = 1 to trace.count collect i
+			
+-- 			--- creer la face tracé pour tester intersection ------------
+			
+			for sstrace in   m_rectangles_traces 	do (
+				
+				local estValide = true
+				
+				local pt_rect_1 = trace[ sstrace[ 1 ] ]	* 	inverse  	mtrx_AP 
+				local pt_rect_2 = trace[ sstrace[ 2 ] ]	* 	inverse  	mtrx_AP 
+				local pt_rect_3 = trace[ sstrace[ 3 ] ]	* 	inverse  	mtrx_AP 
+				local pt_rect_4 = trace[ sstrace[ 4 ] ]	* 	inverse  	mtrx_AP 
+				
+				local surf = ( distance pt_rect_2 	pt_rect_1 ) * ( distance pt_rect_1 pt_rect_4 )  / 10000
+				
+				
+				if m_plug.sousTraces_surf_min_use do
+					if surf < m_plug.sousTraces_surf_min do estValide = false
+				if m_plug.sousTraces_surf_max_use do
+					if surf > m_plug.sousTraces_surf_max do estValide = false
+									
+				if estValide then (
+					local nvTrace = str_ssTrace 		trace:sstrace		etages:m_plug.sousTraces_etages
+					appendIfUnique result  nvTrace
+					
+				) else (
+					
+					append result_reste 		sstrace
+					virerDoublonsDansTableau 		result_reste
+					
+				)
+			
+			) -- fin while i  --
+			
+			result_reste = unir  result_reste
+			
+			if result_reste.count >0 do (
+				for traceResultRest in result_reste do (
+					local nvTrace = str_ssTrace 	trace:traceResultRest	etages:m_plug.niveaux_nbre
+					append  result  nvTrace
+				)
+			)
+			
+			
+			m_sousTraces = result
+			
 		)
 		
 	
+	
 )
-
- 
-struct	str_regle_ssTrace	(
-	private
-		trace_ptr,
-		
-	public
-		nom 					=	"Sous Tracé",
-		id						=	"",
-		
-		nombre_etages	=	0,
-		surface_min		= 15.,
-		surface_min_use	= true,
-		surface_max		= 25.,
-		surface_max_use	= true,
-		toiture				=	#(),
-		
-		fn initialiser 	_trace_ptr =(
-			trace_ptr = _trace_ptr
-		)
-)
-
-
- */
-
 
 

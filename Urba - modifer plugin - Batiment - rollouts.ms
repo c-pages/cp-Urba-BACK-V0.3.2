@@ -29,54 +29,37 @@
 
 
 
-parameters params_global rollout:roll_global			(
-	
-	------- AXE PRINCIPAL	------------------
-	axeP_mtrx				type:#matrix3	
-	axeP_BB					type:#point3Tab		tabSize:2			tabSizeVariable:false
-	axeP_orientation		type:#float				default:0.			ui:spn_rotation_axeP
-	
-	
-	------- sous tracés	------------------
-	sousTraces_use				type:#boolean		default:false		ui:chk_sousTraces
-	sousTraces_surf_min		type:#float			default:15.			ui:spn_sousTraces_surf_min
-	sousTraces_surf_max		type:#float			default:25.			ui:spn_sousTraces_surf_max
-	sousTraces_surf_min_use	type:#boolean		default:true		ui:chk_sousTraces_surf_min
-	sousTraces_surf_max_use	type:#boolean		default:true		ui:chk_sousTraces_surf_max
-	sousTraces_etages			type:#integer		default:1			ui:spn_sousTraces_etages
-	
-	sousTraces						type:#stringTab 	tabSize:0 			tabSizeVariable:true
-	
+parameters params_global 		rollout:roll_global			(
 	
 	niveaux_hauteur		type: #float 			default:250.		ui:spn_hauteur
 	niveaux_nbre			type: #integer			default:1			ui:spn_nbres
 	ep_dalle					type: #float 			default:20.			--ui:spn_ep_dalle
-	
+	axe_principal			type:#matrix3	
+	orientation				type:#float				default:0.			ui:spn_rotation_axeP
 	
 )
 
-parameters params_trace rollout:roll_trace			(
-
-	------- tracés			------------------
-	a_un_trace				type:#boolean			default:false	
-	trace_original			type:#point3Tab 		tabSize:0 			tabSizeVariable:true
-	trace_courant			type:#point3Tab 		tabSize:0 			tabSizeVariable:true
+parameters params_trace 		rollout:roll_trace			(
 	
+	------- Base			------------------
+	surface_node			type:#node 									ui:btn_pick_trace
+	surface_points			type:#point3Tab 		tabSize:0 			tabSizeVariable:true
 	
 	------- Optimisations		------------------
-	trace_optimiser		type:#boolean			default:true		ui:chk_optimiser
-	trace_souder			type:#boolean			default:true		ui:chk_souder
-	trace_ortho			type:#boolean			default:true		ui:chk_ortho
-	trace_aligner			type:#boolean			default:true		ui:chk_aligner
+	aplanir					type:#boolean			default:true		ui:chk_aplanir
+	souder					type:#boolean			default:true		ui:chk_souder
+	orthonormer			type:#boolean			default:true		ui:chk_ortho
+	aligner					type:#boolean			default:true		ui:chk_aligner
+	projeter					type:#boolean			default:true		ui:chk_projeter
 	
-	seuil_optimiser			type:#float				default:20.			ui:spn_optimiser
+	seuil_aplanir			type:#float				default:20.			ui:spn_aplanir
 	seuil_souder			type:#float				default:30.			ui:spn_souder
 	seuil_ortho				type:#float				default:100.		ui:spn_ortho
 	seuil_aligner			type:#float				default:50.			ui:spn_aligner
 	
 )
 
-parameters params_infos rollout:roll_infos			(
+parameters params_infos 		rollout:roll_infos			(
 	
 	surface					type: #float 			default:0.	
 	
@@ -91,15 +74,33 @@ parameters params_infos rollout:roll_infos			(
 )
 parameters params_facades 	rollout:roll_facades			(
 	
-	facades_items					type:#stringTab 		tabSize:0 			tabSizeVariable:true
-	facades_composants		type:#stringTab 		tabSize:0 			tabSizeVariable:true
-	facades_modeles				type:#stringTab 		tabSize:0 			tabSizeVariable:true
-	facades_parametriques		type:#stringTab 		tabSize:0 			tabSizeVariable:true
+	---- générale -----------
+	fac_noms 						type:#stringTab 		tabSize:0  			tabSizeVariable:true		--ui:lbx_facades	
+	fac_ids 							type:#stringTab 		tabSize:0  			tabSizeVariable:true
+	fac_probabilites				type:#floatTab		tabSize:0 			tabSizeVariable:true
 	
-	materiaux						type:#materialTab	tabSize:0 			tabSizeVariable:true
+	--- Limiteurs - Etages	---
+	fac_etagesMin_uses			type:#boolTab		tabSize:0 			tabSizeVariable:true
+	fac_etagesMins				type:#intTab			tabSize:0 			tabSizeVariable:true
+	fac_etagesMax_uses		type:#boolTab		tabSize:0 			tabSizeVariable:true
+	vetagesMaxs					type:#intTab			tabSize:0 			tabSizeVariable:true
+	
+	--- Limiteurs - longueurs	---
+	fac_longueurMin_uses		type:#boolTab		tabSize:0 			tabSizeVariable:true
+	fac_longueurMins				type:#floatTab		tabSize:0 			tabSizeVariable:true
+	fac_longueurMax_uses		type:#boolTab		tabSize:0 			tabSizeVariable:true
+	fac_longueurMaxs			type:#floatTab		tabSize:0 			tabSizeVariable:true
+	
+	--- Limiteurs - Murs	---
+	fac_murs						type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:les deux	2:gouttereaux	3:pignons )	----
+	fac_modes						type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:repeter	2:etrier			3:centrer )	----
+	
+	--- Sequence	---
+	fac_sequences				type:#stringTab 		tabSize:0 			tabSizeVariable:true
+	fac_sequence_longueurs	type:#stringTab 		tabSize:0 			tabSizeVariable:true
 	
 )
-parameters params_toiture rollout:roll_toiture			(
+parameters params_toiture 		rollout:roll_toiture			(
 	
 -- 	toit_nbrePentes	type: #radiobtnIndex 	default:2		ui:rdo_pentes
 	toit_pente			type: #float 				default:20		ui:spn_pente
@@ -113,7 +114,7 @@ parameters params_toiture rollout:roll_toiture			(
 --------------- ROLLOUT  ----------------------------------------------------------------------------------------------------------------------	
 -------------------------------------------------------------------------------------------------------------------------------------------------
 
-rollout roll_presets "Presets" width:235 height:205	rolledUp:true
+rollout roll_presets 		"Presets" 	rolledUp:true
 (
 	
 	fn shape_filt 		obj = superclassof obj == shape
@@ -125,13 +126,14 @@ rollout roll_presets "Presets" width:235 height:205	rolledUp:true
 	button 'btn_coller' "Coller" pos:[88,17] width:85 height:16 align:#left
 	button 'btn_copier' "Copier" pos:[5,17] width:85 height:16 align:#left
 	
-	
+	/* --------------------  CLEANAGE --------------------
 	fn actualiser =(
-		btn_coller.enabled 		= a_un_trace and urba_clipboard_batiment != ""
-		btn_copier.enabled 			= a_un_trace
-		btn_enregistrer.enabled 		= a_un_trace
-		btn_charger.enabled 			= a_un_trace
 		
+		btn_coller.enabled 			= a_un_trace and urba_clipboard_batiment != ""
+		btn_copier.enabled 			= a_un_trace
+		btn_enregistrer.enabled 	= a_un_trace
+		btn_charger.enabled 		= a_un_trace
+		 
 	)
 	
 	
@@ -144,7 +146,7 @@ rollout roll_presets "Presets" width:235 height:205	rolledUp:true
 	on btn_charger pressed do
 	(
 			presets.charger 					this
--- 			facades.params_toStructs 	this
+		
 			facades.actualiser ()
 		
 			trace.actualiser 	()
@@ -167,118 +169,51 @@ rollout roll_presets "Presets" width:235 height:205	rolledUp:true
 			presets.copier 	this 
 			actualiser()
 		)
+		
+	*/ --------------------  CLEANAGE --------------------
 )
-rollout roll_trace "Tracé" width:182 height:301
+rollout roll_trace 		"Tracé" 		
 (
 	
 	
 	fn shape_filt 		obj = superclassof obj == shape
 	
-	pickbutton 'btn_pick_trace' "Pick shape" pos:[10,13] width:156 height:21 filter:shape_filt align:#left
+	pickbutton 'btn_pick_trace' "Pick shape" pos:[10,13] width:156 height:21 filter:shape_filt align:#left	autoDisplay:true
 	GroupBox 'grp9' "Tracé:" pos:[4,0] width:168 height:40 align:#left
 	
-	checkbox 'chk_optimiser' "Optimiser" pos:[6,76] width:62 height:13 align:#left
+	checkbox 'chk_aplanir' "Aplanir" pos:[6,76] width:62 height:13 align:#left
 	checkbox 'chk_ortho' "Orthonorm." pos:[6,46] width:76 height:13 align:#left
-	spinner 'spn_optimiser' "" pos:[87,75] width:85 height:16 range:[0,40,0] align:#left
+	spinner 'spn_aplanir' "" pos:[87,75] width:85 height:16 range:[0,40,0] align:#left
 	checkbox 'chk_souder' "Souder" pos:[6,61] width:55 height:13 align:#left
 	spinner 'spn_souder' "" pos:[87,60] width:85 height:16 range:[0,100,0] type:#worldunits align:#left
 	spinner 'spn_ortho' "" pos:[87,45] width:85 height:16 range:[0,100,0] type:#float align:#left
 	
-	
-	
-	
-	
-	
 	checkbox 'chk_aligner' "Aligner" pos:[6,91] width:50 height:13 align:#left
 	spinner 'spn_aligner' "" pos:[87,90] width:85 height:16 range:[0,100,0] align:#left
--- 	spinner 'spn_decouper' "" pos:[87,93] width:80 height:16 range:[0,40,0] align:#left
 	
--- 	button 'btn_MaJ' "Actualiser" pos:[24,155] width:147 height:21 align:#left
--- 	checkButton 'chk_MaJ_auto' "" pos:[4,155] width:21 height:21 align:#left
-	
-	
+	checkbox 'chk_projeter' "Projeter" pos:[6,106] width:75 height:13 align:#left
+
+
 	
 	
 	fn actualiser =(
 		
--- 		spn_hauteur.enabled 				= a_un_trace
--- 		lbl_hauteur.enabled 				= a_un_trace		
-		chk_optimiser.enabled 			= a_un_trace
-		chk_ortho.enabled 				= a_un_trace
-		chk_souder.enabled 				= a_un_trace		
--- 		btn_rotation.enabled 				= a_un_trace
--- 		btn_rotation_inv.enabled 		= a_un_trace
--- 		spn_rotation_axeP.enabled 	= a_un_trace
--- 		lbl_axeP.enabled 					= a_un_trace
-		
-		spn_optimiser.enabled 			= trace_optimiser
-		spn_souder.enabled 				= trace_souder
-		spn_ortho.enabled 				= trace_ortho
-		
 	)
 	
 
+	
+	on btn_pick_trace 	picked 		_shape 	do	
+		undo "Bâtiment: Assigner shape" on 
+			core.actualiser()
 		
 	
-	
-	
-	
-	
-	on btn_pick_trace picked 		_nvtrace 	do
-	(
-			trace.definir		_nvtrace	$
-		
-			this.actualiser_rollouts ()
-		
-			construire.batiment ()
-	)
-	
-	on chk_optimiser changed state do
-	(
-		trace.actualiser 	()
-		construire.batiment ()
+	on roll_trace open do 
 		actualiser ()
-	)
-	on chk_ortho changed state do
-	(		
-		trace.actualiser ()
-		construire.batiment ()
-		actualiser ()
-	)
-	on spn_optimiser changed val 	do
-	(
-			trace.actualiser ()
-			construire.batiment ()
-		)
-	on chk_souder changed state do
-	(		
-		trace.actualiser ()
-		construire.batiment ()
-		actualiser ()
-	)
-	on spn_souder changed val 	do
-	(
-			trace.actualiser ()
-			construire.batiment ()
-		)
-	on spn_ortho changed val 	do
-	(
-			trace.actualiser ()
-			construire.batiment ()
-		)
-	on chk_aligner changed state do
-	(
-		trace.actualiser 	()
-		construire.batiment ()
-		actualiser ()
-	)
-	on spn_aligner changed val 	do
-	(
-			trace.actualiser ()
-			construire.batiment ()
-		)
+	
 )
-rollout roll_global "Global" width:247 height:375
+
+
+rollout roll_global 		"Global"
 (
 	
 -- 	local regle_ssTrace_courant
@@ -313,6 +248,7 @@ rollout roll_global "Global" width:247 height:375
 	checkbox 'chk_sousTraces' "Diviser" pos:[13,80] width:107 height:15 align:#left
 	
 	
+	/* --------------------  CLEANAGE --------------------
 	fn actualiser =(
 		
 -- 		lbx_divisions.items = for ssTrace in trace.regles_ssTrace collect ssTrace.nom
@@ -362,17 +298,6 @@ rollout roll_global "Global" width:247 height:375
 	)
 	
 
-/* 			.value  			= regle_ssTrace_courant.nombre_etages
-			spn_division_surfaceMin.value  		= regle_ssTrace_courant.surface_min
-			spn_division_surfaceMax.value  		= regle_ssTrace_courant.surface_max
-			chk_division_surfaceMin.checked  	= regle_ssTrace_courant.surface_min_use
-			chk_division_surfaceMax.checked  	= regle_ssTrace_courant.surface_max_use
-		
-		nombre_etages	=	0,
-		surface_min		= 20.,
-		surface_min_use	= true,
-		surface_max		= 50.,
-		surface_max_use	= true, */
 	
 		
 		
@@ -404,10 +329,7 @@ rollout roll_global "Global" width:247 height:375
 	(
 			construire.batiment ()
 	)
-/* 	on spn_nbres buttondown do
-		flagForeground $ 	true
-	on spn_nbres buttonup do
-		flagForeground $ 	false */
+	
 	on spn_hauteur changed arg do
 	(
 					construire.batiment ()
@@ -468,8 +390,10 @@ rollout roll_global "Global" width:247 height:375
 			construire.batiment 	()
 		
 		)
+		
+	 --------------------  CLEANAGE -------------------- */
 )
-rollout roll_facades "Façades" width:510 height:813
+rollout roll_facades 		"Façades"
 (
 		local m_debug = true
 	local m_dbgPrefix ="urba | roll_facades"
@@ -489,6 +413,8 @@ rollout roll_facades "Façades" width:510 height:813
 	button 'btn_supprimerFacade' "-" pos:[156,-1] width:16 height:16 align:#left
 
 	button 'btn_dupliquer' "Dup" pos:[96,0] width:27 height:16 align:#left
+	
+	/* --------------------  CLEANAGE --------------------
 	fn actualiser =(
 -- 			debug "actualiser"
 		
@@ -536,8 +462,10 @@ rollout roll_facades "Façades" width:510 height:813
 		
 	 			actualiser() 
 			)
+			
+	*/ --------------------  CLEANAGE --------------------
 )
-rollout roll_toiture "Toiture" width:236 height:418
+rollout roll_toiture 		"Toiture"
 (
 	dropdownList 'ddl_toiture' "" pos:[88,1] width:85 height:21 items:#("Plate", "Acrotère", "1 pan", "2 pans") align:#left
 	label 'lbl_facade' "Toiture:" pos:[5,7] width:38 height:15 align:#left
@@ -560,6 +488,7 @@ rollout roll_toiture "Toiture" width:236 height:418
 	label 'lbl_composants' "Composants:" pos:[5,52] width:64 height:15 align:#left
 	
 	
+	/* --------------------  CLEANAGE --------------------
 	
 	fn actualiser =(
 		
@@ -599,8 +528,9 @@ rollout roll_toiture "Toiture" width:236 height:418
 		construire.batiment ()
 	on spn_pente changed val 	do
 		construire.batiment ()
+*/ --------------------  CLEANAGE --------------------
 )
-rollout roll_infos "Infos" width:191 height:142
+rollout roll_infos 			"Infos"
 (
 	label 'lbl16' "Surface:" pos:[5,90] width:43 height:14 align:#left
 	label 'lbl_surface' "" pos:[85,90] width:78 height:16 align:#left 
@@ -642,6 +572,7 @@ rollout roll_infos "Infos" width:191 height:142
 -- 		on ckb_longueurSegts 	changed state 		do	VP_toggle ()
 	GroupBox 'grp30' "Viewport:" pos:[5,1] width:158 height:85 align:#left
 	
+	/* --------------------  CLEANAGE --------------------
 	
 	fn actualiser =(
 		
@@ -694,8 +625,9 @@ rollout roll_infos "Infos" width:191 height:142
 		)
 	on ckb_geometrie changed state 		do
 		actualiser_cacherGeo ()
+*/ --------------------  CLEANAGE --------------------
 )
-rollout roll_aPropos "A propos" width:162 height:64 	rolledUp:true
+rollout roll_aPropos 		"A propos" 	rolledUp:true
 (
 	label 'lbl_axeP' "Urba | V0.1  |" pos:[5,2]  align:#left
 	HyperLink 'hpl1' "Christophe Pagès" pos:[76,2] address:"http://c-pages.fr" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left

@@ -31,8 +31,8 @@
 
 
 
-try unregisterRedrawViewsCallback 		$.fn_VP_afficher_axePrincipal 	
-catch ()
+-- try unregisterRedrawViewsCallback 		$.fn_VP_afficher_axePrincipal 	
+-- catch ()
 
 
 
@@ -51,7 +51,7 @@ global urba_clipboard_batiment = ""
 
 
 (
-include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - structures secondaires.ms"
+-- include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - structures secondaires.ms"
 )
 
 	
@@ -71,15 +71,20 @@ extends:Editable_poly replaceUI:true version:0
 	)
 	
 	--------------- IMPORTS  ----------------------------------------------------------------------------------------------------------------------
+	
+	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Core.ms"
+	
+	
+	
+	/* 
 	include "$userScripts\cp - GLOBAL\Enregistreur De Node.ms"	
 
-	
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - presets.ms"
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - structures.ms"
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Facades.ms"
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - tracé.ms"
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Construire.ms"
-	
+	 */
 	
 	--------------- PRé-DéCLARATIONS  ----------------------------------------------------------------------------------------------------------------------
 	----  rollouts ------------------
@@ -89,22 +94,27 @@ extends:Editable_poly replaceUI:true version:0
 -- 	local geo,  trace,  construire
 	
 	--------------- MEMBRES  ----------------------------------------------------------------------------------------------------------------------
-	---- le model dessiné d'un batiment vide ------------------
-	local traceLogo = #([14.1994,37.717,0], [14.1994,-189.586,0], [287.927,-189.586,0], [287.927,139.601,0], [174.501,253.027,0], [174.501,479.879,0], [61.0754,479.879,0], [61.0754,366.453,0], [-52.3504,479.879,0], [-392.628,139.601,0], [-392.628,-189.586,0], [-118.9,-189.586,0], [-118.9,37.717,0])
 
-	local params_aEnregistrer = 	#(		/*----	Global  	----*/		#niveaux_hauteur, 			#niveaux_nbre, 	#axeP_orientation,
-													/*----	Toiture 	----*/		#toit_pente, 					#toit_type, 		#toit_hauteur ,
-													/*----	Tracé  	----*/		#trace_optimiser, 			#trace_souder, 	#trace_ortho, 		#seuil_optimiser, 				#seuil_souder, 	#seuil_ortho , 	#trace_aligner, 	#seuil_aligner ,	-- #trace_decouper, 
-													/*----	 Facades  	----*/		#facades_composants , 	#facades_items, 	#facades_modeles, 	#facades_parametriques
-											)
-
-	
-	
-	
 	local murs_types = #("Gouttereaux", "Pignons", "Gouttereaux + Pignons")
 	
-	--------------- import des STRUCTURES  ----------------------------------------------------------------------------------------------------------------------
 	
+	
+-- 	local params_aEnregistrer = 	#(		/*----	Global  	----*/			#niveaux_hauteur, 			#niveaux_nbre, 	#axeP_orientation,
+-- 													/*----	Toiture 	----*/		#toit_pente, 					#toit_type, 		#toit_hauteur ,
+-- 													/*----	Tracé  	----*/		#trace_optimiser, 			#trace_souder, 	#trace_ortho, 		#seuil_optimiser, 				#seuil_souder, 	#seuil_ortho , 	#trace_aligner, 	#seuil_aligner ,	-- #trace_decouper, 
+-- 													/*----	 Facades  	----*/		#facades_composants , 		#facades_items, 	#facades_modeles, 	#facades_parametriques
+-- 											)
+ 
+	
+	
+	
+
+	
+	---------------STRUCTURES  ----------------------------------------------------------------------------------------------------------------------
+	local core = str_batiment_core  	()
+	
+	
+	/* --------------------  CLEANAGE --------------------
 	
 	local geo 			= 	str_geo 				m_this:this
 	local construire	=	str_construire		m_this:this		m_geo:geo  					
@@ -265,7 +275,7 @@ extends:Editable_poly replaceUI:true version:0
 				)
 				---- les points du trace_courant -----
 				if o.affiche_trace do (
-					gw.text 		(pt + [0,0,10]) 	(i as string /* + ":" + ( o.trace_courant[i] * inverse o.axeP_mtrx ) as string */ )  	color:yellow
+					gw.text 		(pt + [0,0,10]) 	(i as string )  	color:yellow
 -- 					gw.Marker 	pt 	#hollowBox 	color:yellow
 				)
 			
@@ -325,12 +335,23 @@ extends:Editable_poly replaceUI:true version:0
 		)
 	
 	
+	*/ --------------------  CLEANAGE --------------------
+	
+	
+	fn initialiser 	doLogo:false	=(
+		
+		core.initialiser 		this		doLogo:doLogo
+		
+	)
 	
 	
 	--------------- CREATION  ----------------------------------------------------------------------------------------------------------------------	
 	tool create (	
 		on mousePoint click do	(	
 			nodeTM.translation = worldPoint
+			
+			initialiser 	doLogo:true
+			
 			#stop	
 		)
 	)
@@ -344,7 +365,6 @@ extends:Editable_poly replaceUI:true version:0
 	--------------- EVENEMENTS  ----------------------------------------------------------------------------------------------------------------------	
 	on load 						do 	(
 		debug "load du plugin" 
-		VP_toggle ()
 		initialiser ()
 	)
 	on clone 	_original 	do (
@@ -352,26 +372,17 @@ extends:Editable_poly replaceUI:true version:0
 		
 		initialiser ()
 		
--- 		facades.params_toStructs		this
--- 		trace.actualiser 	this	 
-		
 	)
 	on create do (
 		debug "creation du plugin"		
 		
 		initialiser ()
-		
-		--- le dessin du logo --------
-		trace_courant = traceLogo
-		geo.pointsEtFaces 	trace_courant	
 	)
 	
 	on update do	(
 		debug "update du plugin"	
 		
--- 		try 
-			initialiser () 
--- 		catch ()
+		initialiser () 
 		
 	)
 	
@@ -391,8 +402,8 @@ extends:Editable_poly replaceUI:true version:0
 
 -- try delete $ catch ()
 
-debug_mode =false
--- debug_mode =true
+-- debug_mode =false
+debug_mode =true
 
 -- 
 

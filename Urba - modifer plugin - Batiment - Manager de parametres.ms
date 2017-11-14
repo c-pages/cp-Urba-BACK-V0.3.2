@@ -175,15 +175,29 @@ struct str_mgr_arrayParametres (
 
 struct str_batiment_core (
 	
+	-------- MEMBRES	--------------------------------------------------------------------------------------------------------
 	private
-		facades 		= str_mgr_arrayParametres (),
-		composants	= str_mgr_arrayParametres (),
-		toitures			= str_mgr_arrayParametres (),
-	
+		---- les élément du batiments -------------------
+		mgr_facades 			= str_mgr_arrayParametres (),
+		mgr_composants		= str_mgr_arrayParametres (),
+		mgr_toitures			= str_mgr_arrayParametres (),
+		
+		---- les rollouts flottants -------------------
+		roll_facades,
+		roll_toitures,
+		
+		---- sous structures  -------------------
+		mgr_geometrie,
+		
+	-------- INTERFACE	--------------------------------------------------------------------------------------------------------
 	public	
-		fn lire 			=(),
-		fn ecrire		=()
+		--- Parametres du plug -----------------------
+		fn lire_params 	=(),
+		fn ecrire_params	=(),
 	
+		--- Geometrie -----------------------
+		fn actualiser =()
+		
 )
 
 

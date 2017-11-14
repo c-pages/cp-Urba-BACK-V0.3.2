@@ -308,16 +308,16 @@ struct str_datasMgr (
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 struct	str_geo	(
 	
-	m_this, 
-	
-	fn vider 													=(
-		if (polyop.getNumFaces m_this.delegate) >0 do (
-			local listeDesFaces = #{1..(polyop.getNumFaces m_this.delegate)} as array
-			polyop.deleteFaces m_this.delegate	listeDesFaces		delIsoVerts:true
-			polyop.deleteIsoVerts m_this.delegate
-		)
-	),
-	
+		m_plug, 
+		
+		fn vider 													=(
+			if (polyop.getNumFaces m_this.delegate) >0 do (
+				local listeDesFaces = #{1..(polyop.getNumFaces m_this.delegate)} as array
+				polyop.deleteFaces m_this.delegate	listeDesFaces		delIsoVerts:true
+				polyop.deleteIsoVerts m_this.delegate
+			)
+		),
+		
 	
 	
 		
