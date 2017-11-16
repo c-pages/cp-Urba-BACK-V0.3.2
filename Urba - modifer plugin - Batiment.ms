@@ -17,7 +17,7 @@
 ##########################################################################################################################
 	
 	todo:
-	- gerer les unité des parametre (pour le calcul ou  l'affichage des longueurpar ex..)
+	- gerer les unités des parametres (pour le calcul ou  l'affichage des longueurpar ex..)
 	
 ##########################################################################################################################
 	
@@ -55,7 +55,7 @@ global urba_clipboard_batiment = ""
 )
 
 	
-plugin geometry 	urba_batiment
+plugin geometry 	Urba_Batiment
 name:"Batiment"
 classID:#(685325,452281)
 category:"CP | Urba"
@@ -340,7 +340,7 @@ extends:Editable_poly replaceUI:true version:0
 	
 	fn initialiser 	doLogo:false	=(
 		
-		core.initialiser 		this		doLogo:doLogo
+		core.initialiser 		this		
 		
 	)
 	
@@ -350,7 +350,7 @@ extends:Editable_poly replaceUI:true version:0
 		on mousePoint click do	(	
 			nodeTM.translation = worldPoint
 			
-			initialiser 	doLogo:true
+			core.actualiser ()
 			
 			#stop	
 		)

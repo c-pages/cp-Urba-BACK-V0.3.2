@@ -39,10 +39,10 @@ parameters params_global 		rollout:roll_global			(
 	
 )
 
-parameters params_trace 		rollout:roll_trace			(
+parameters params_surface		rollout:roll_surface			(
 	
 	------- Base			------------------
-	surface_node			type:#node 									ui:btn_pick_trace
+	surface_node			type:#node 									ui:btn_pick_surface
 	surface_points			type:#point3Tab 		tabSize:0 			tabSizeVariable:true
 	
 	------- Optimisations		------------------
@@ -65,10 +65,10 @@ parameters params_infos 		rollout:roll_infos			(
 	
 	------- AFFICHAGE 		 ------------------
 	affiche_axe					type:#boolean			default:false	ui:ckb_axe
-	affiche_trace				type:#boolean			default:false	ui:ckb_trace
+	affiche_surface				type:#boolean			default:false	ui:ckb_surface
 	affiche_gouttereaux		type:#boolean			default:false	ui:ckb_gouttereaux
 	affiche_pignons			type:#boolean			default:false	ui:ckb_pignons
-	affiche_ssTraces			type:#boolean			default:false	ui:ckb_ssTraces
+	affiche_sssurfaces			type:#boolean			default:false	ui:ckb_sssurfaces
 	
 	cache_geometrie			type:#boolean			default:false	ui:ckb_geometrie
 )
@@ -122,17 +122,17 @@ rollout roll_presets 		"Presets" 	rolledUp:true
 	button 'btn_enregistrer' "Enregistrer" pos:[88,2] width:85 height:16 align:#left		
 		
 		
-	button 'btn_charger' "Charger" pos:[5,2] width:85 height:16 align:#left
-	button 'btn_coller' "Coller" pos:[88,17] width:85 height:16 align:#left
-	button 'btn_copier' "Copier" pos:[5,17] width:85 height:16 align:#left
+	button 'btn_charger' 	"Charger" 	pos:[5,2] width:85 height:16 align:#left
+	button 'btn_coller' 		"Coller" 		pos:[88,17] width:85 height:16 align:#left
+	button 'btn_copier' 		"Copier" 		pos:[5,17] width:85 height:16 align:#left
 	
 	/* --------------------  CLEANAGE --------------------
 	fn actualiser =(
 		
-		btn_coller.enabled 			= a_un_trace and urba_clipboard_batiment != ""
-		btn_copier.enabled 			= a_un_trace
-		btn_enregistrer.enabled 	= a_un_trace
-		btn_charger.enabled 		= a_un_trace
+		btn_coller.enabled 			= a_un_surface and urba_clipboard_batiment != ""
+		btn_copier.enabled 			= a_un_surface
+		btn_enregistrer.enabled 	= a_un_surface
+		btn_charger.enabled 		= a_un_surface
 		 
 	)
 	
@@ -149,7 +149,7 @@ rollout roll_presets 		"Presets" 	rolledUp:true
 		
 			facades.actualiser ()
 		
-			trace.actualiser 	()
+			surface.actualiser 	()
 			construire.batiment 	()
 			actualiser_rollouts()
 		)
@@ -159,7 +159,7 @@ rollout roll_presets 		"Presets" 	rolledUp:true
 		
 			facades.actualiser ()
 		
-			trace.actualiser ()
+			surface.actualiser ()
 			construire.batiment ()
 			actualiser_rollouts()
 			
@@ -172,13 +172,13 @@ rollout roll_presets 		"Presets" 	rolledUp:true
 		
 	*/ --------------------  CLEANAGE --------------------
 )
-rollout roll_trace 		"Tracé" 		
+rollout roll_surface 		"Surface" 		
 (
 	
 	
 	fn shape_filt 		obj = superclassof obj == shape
 	
-	pickbutton 'btn_pick_trace' "Pick shape" pos:[10,13] width:156 height:21 filter:shape_filt align:#left	autoDisplay:true
+	pickbutton 'btn_pick_surface' "Pick shape" pos:[10,13] width:156 height:21 filter:shape_filt align:#left	autoDisplay:true
 	GroupBox 'grp9' "Tracé:" pos:[4,0] width:168 height:40 align:#left
 	
 	checkbox 'chk_aplanir' "Aplanir" pos:[6,76] width:62 height:13 align:#left
@@ -202,12 +202,12 @@ rollout roll_trace 		"Tracé"
 	
 
 	
-	on btn_pick_trace 	picked 		_shape 	do	
-		undo "Bâtiment: Assigner shape" on 
-			core.actualiser()
-		
+	on btn_pick_surface 	picked 		_shape 	do	
+		undo "Bâtiment: Assigner shape" on (
+			core.choisir_surface		$		_shape
+		)
 	
-	on roll_trace open do 
+	on roll_surface open do 
 		actualiser ()
 	
 )
@@ -216,7 +216,7 @@ rollout roll_trace 		"Tracé"
 rollout roll_global 		"Global"
 (
 	
--- 	local regle_ssTrace_courant
+-- 	local regle_sssurface_courant
 	
 	spinner 'spn_rotation_axeP' "" pos:[87,32] width:85 height:16 range:[-360,360,0] type:#float scale:1 align:#left
 	label 'lbl_axeP' "Orientation:" pos:[5,33] width:59 height:15 align:#left
@@ -229,68 +229,68 @@ rollout roll_global 		"Global"
 	label 'lbl_hauteur' "Htr. des étages:" pos:[5,18] width:76 height:15 align:#left
 	
 	
-	GroupBox 'grp_sousTrace' "Division surfaces:" pos:[4,64] width:168 height:86 align:#left
+	GroupBox 'grp_soussurface' "Division surfaces:" pos:[4,64] width:168 height:86 align:#left
 	label 'lbl_division_etages' "Nbre. d'étages:" pos:[13,128] width:75 height:15 align:#left
-	spinner 'spn_sousTraces_etages' "" pos:[87,127] width:81 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+	spinner 'spn_soussurfaces_etages' "" pos:[87,127] width:81 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
 	label 'lbl_surfMin' "Surf. min (m²):" pos:[13,95] width:76 height:15 align:#left
 	label 'lbl_surfMax' "        max (m²):" pos:[15,110] width:72 height:15 align:#left
 -- 	button 'btn_ajouter_division' "+" pos:[134,76] width:16 height:16 enabled:true toolTip:"surface minimum." highlightColor:(color 255 255 0) align:#left
 -- 	button 'btn_supprimer_division' "-" pos:[149,76] width:16 height:16 enabled:true toolTip:"surface minimum." highlightColor:(color 255 255 0) align:#left
 	
 	
-	spinner 'spn_sousTraces_surf_min' "" pos:[102,95] width:66 height:16 range:[0,1e+13,0] type:#float scale:1 align:#left
-	spinner 'spn_sousTraces_surf_max' "" pos:[102,111] width:66 height:16 range:[0,1e+13,0] type:#float scale:1 align:#left
-	checkbutton 'chk_sousTraces_surf_max' "" pos:[89,111] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Surface maximum." checked:false align:#left
-	checkbutton 'chk_sousTraces_surf_min' "" pos:[89,95] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"surface minimum." align:#left
+	spinner 'spn_soussurfaces_surf_min' "" pos:[102,95] width:66 height:16 range:[0,1e+13,0] type:#float scale:1 align:#left
+	spinner 'spn_soussurfaces_surf_max' "" pos:[102,111] width:66 height:16 range:[0,1e+13,0] type:#float scale:1 align:#left
+	checkbutton 'chk_soussurfaces_surf_max' "" pos:[89,111] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Surface maximum." checked:false align:#left
+	checkbutton 'chk_soussurfaces_surf_min' "" pos:[89,95] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"surface minimum." align:#left
 -- 	listbox 'lbx_divisions' "" pos:[12,92] width:153 height:5 align:#left
 
 		
-	checkbox 'chk_sousTraces' "Diviser" pos:[13,80] width:107 height:15 align:#left
+	checkbox 'chk_soussurfaces' "Diviser" pos:[13,80] width:107 height:15 align:#left
 	
 	
 	/* --------------------  CLEANAGE --------------------
 	fn actualiser =(
 		
--- 		lbx_divisions.items = for ssTrace in trace.regles_ssTrace collect ssTrace.nom
+-- 		lbx_divisions.items = for sssurface in surface.regles_sssurface collect sssurface.nom
 -- 		if lbx_divisions.selection != 0 then
--- 			regle_ssTrace_courant	= trace.regles_ssTrace[lbx_divisions.selection]
--- 		else regle_ssTrace_courant = undefined
+-- 			regle_sssurface_courant	= surface.regles_sssurface[lbx_divisions.selection]
+-- 		else regle_sssurface_courant = undefined
 		
-		spn_hauteur.enabled 			= a_un_trace
-		lbl_hauteur.enabled 				= a_un_trace		
-		btn_rotation.enabled 			= a_un_trace
-		btn_rotation_inv.enabled 		= a_un_trace
-		spn_rotation_axeP.enabled 	= a_un_trace
-		lbl_axeP.enabled 					= a_un_trace
+		spn_hauteur.enabled 			= a_un_surface
+		lbl_hauteur.enabled 				= a_un_surface		
+		btn_rotation.enabled 			= a_un_surface
+		btn_rotation_inv.enabled 		= a_un_surface
+		spn_rotation_axeP.enabled 	= a_un_surface
+		lbl_axeP.enabled 					= a_un_surface
 		
-		local enabled =  sousTraces_use
-		chk_sousTraces.enabled = false
+		local enabled =  soussurfaces_use
+		chk_soussurfaces.enabled = false
 		
-		spn_sousTraces_etages.enabled 	= enabled
-		spn_sousTraces_surf_min.enabled 			= enabled
+		spn_soussurfaces_etages.enabled 	= enabled
+		spn_soussurfaces_surf_min.enabled 			= enabled
 		lbl_surfMin.enabled 						= enabled
 		lbl_surfMax.enabled 						= enabled
-		chk_sousTraces_surf_max.enabled 	= enabled
-		chk_sousTraces_surf_min.enabled 	= enabled
-		spn_sousTraces_surf_max.enabled 	= enabled
+		chk_soussurfaces_surf_max.enabled 	= enabled
+		chk_soussurfaces_surf_min.enabled 	= enabled
+		spn_soussurfaces_surf_max.enabled 	= enabled
 -- 		btn_supprimer_division.enabled 		= enabled
 		
 		if enabled then (
-			spn_sousTraces_etages.indeterminate  		= false
-			spn_sousTraces_surf_min.indeterminate  		= false
-			spn_sousTraces_surf_max.indeterminate  	= false
--- 			spn_sousTraces_etages.value  			= .nombre_etages
--- 			spn_sousTraces_surf_min.value  		= regle_ssTrace_courant.surface_min
--- 			spn_sousTraces_surf_max.value  		= regle_ssTrace_courant.surface_max
--- 			chk_sousTraces_surf_max.checked  	= regle_ssTrace_courant.surface_min_use
--- 			chk_sousTraces_surf_min.checked  	= regle_ssTrace_courant.surface_max_use
+			spn_soussurfaces_etages.indeterminate  		= false
+			spn_soussurfaces_surf_min.indeterminate  		= false
+			spn_soussurfaces_surf_max.indeterminate  	= false
+-- 			spn_soussurfaces_etages.value  			= .nombre_etages
+-- 			spn_soussurfaces_surf_min.value  		= regle_sssurface_courant.surface_min
+-- 			spn_soussurfaces_surf_max.value  		= regle_sssurface_courant.surface_max
+-- 			chk_soussurfaces_surf_max.checked  	= regle_sssurface_courant.surface_min_use
+-- 			chk_soussurfaces_surf_min.checked  	= regle_sssurface_courant.surface_max_use
 			
 		) else (
-			spn_sousTraces_etages.indeterminate  		= true
-			spn_sousTraces_surf_min.indeterminate  		= true
-			spn_sousTraces_surf_max.indeterminate  	= true
-			chk_sousTraces_surf_max.checked  			= false
-			chk_sousTraces_surf_min.checked  			= false
+			spn_soussurfaces_etages.indeterminate  		= true
+			spn_soussurfaces_surf_min.indeterminate  		= true
+			spn_soussurfaces_surf_max.indeterminate  	= true
+			chk_soussurfaces_surf_max.checked  			= false
+			chk_soussurfaces_surf_min.checked  			= false
 			
 		)
 		
@@ -309,19 +309,19 @@ rollout roll_global 		"Global"
 		actualiser ()
 	on spn_rotation_axeP changed arg do
 	(
-			trace.actualiser ()
+			surface.actualiser ()
 			construire.batiment 	()
 		)
 	on btn_rotation pressed do
 	(
 			axeP_orientation += 90
-			trace.actualiser 			()
+			surface.actualiser 			()
 			construire.batiment 	()
 		)
 	on btn_rotation_inv pressed do
 	(
 			axeP_orientation -= 90
-			trace.actualiser ()
+			surface.actualiser ()
 			
 			construire.batiment ()
 		)
@@ -339,54 +339,54 @@ rollout roll_global 		"Global"
 		flagForeground $ 	true
 	on spn_hauteur buttonup do
 		flagForeground $ 	false
-	on spn_sousTraces_etages changed val do
+	on spn_soussurfaces_etages changed val do
 	(
--- 			regle_ssTrace_courant.nombre_etages = val
+-- 			regle_sssurface_courant.nombre_etages = val
 			actualiser ()
--- 			trace.structs_toParam 	this
-			trace.actualiser 	()
+-- 			surface.structs_toParam 	this
+			surface.actualiser 	()
 			construire.batiment 	()
 		)
-	on spn_sousTraces_surf_min changed val do
+	on spn_soussurfaces_surf_min changed val do
 	(
--- 			regle_ssTrace_courant.surface_min = val
+-- 			regle_sssurface_courant.surface_min = val
 			actualiser ()
--- 			trace.structs_toParam 	this
-			trace.actualiser 	()
+-- 			surface.structs_toParam 	this
+			surface.actualiser 	()
 			construire.batiment 	()
 		)
-	on spn_sousTraces_surf_max changed val do
+	on spn_soussurfaces_surf_max changed val do
 	(
--- 			regle_ssTrace_courant.surface_max = val
+-- 			regle_sssurface_courant.surface_max = val
 			actualiser ()
--- 			trace.structs_toParam 	this
-			trace.actualiser 	()
+-- 			surface.structs_toParam 	this
+			surface.actualiser 	()
 			construire.batiment 	()
 		)
-	on chk_sousTraces_surf_max changed state do
+	on chk_soussurfaces_surf_max changed state do
 	(
--- 			regle_ssTrace_courant.surface_max_use = state
+-- 			regle_sssurface_courant.surface_max_use = state
 			actualiser ()
--- 			trace.structs_toParam 	this
-			trace.actualiser 	()
-			construire.batiment 	()
-		
-		)
-	on chk_sousTraces_surf_min changed state do
-	(
--- 			regle_ssTrace_courant.surface_min_use = state
-			actualiser ()
--- 			trace.structs_toParam 	this
-			trace.actualiser 	()
+-- 			surface.structs_toParam 	this
+			surface.actualiser 	()
 			construire.batiment 	()
 		
 		)
-	on chk_sousTraces changed state do
+	on chk_soussurfaces_surf_min changed state do
 	(
--- 			regle_ssTrace_courant.surface_max_use = state
+-- 			regle_sssurface_courant.surface_min_use = state
 			actualiser ()
--- 			trace.structs_toParam 	this
-			trace.actualiser 	()
+-- 			surface.structs_toParam 	this
+			surface.actualiser 	()
+			construire.batiment 	()
+		
+		)
+	on chk_soussurfaces changed state do
+	(
+-- 			regle_sssurface_courant.surface_max_use = state
+			actualiser ()
+-- 			surface.structs_toParam 	this
+			surface.actualiser 	()
 			construire.batiment 	()
 		
 		)
@@ -418,12 +418,12 @@ rollout roll_facades 		"Façades"
 	fn actualiser =(
 -- 			debug "actualiser"
 		
-		enabled = a_un_trace
+		enabled = a_un_surface
 		lbx_facades.enabled 			= enabled
 		btn_ajouterFacade.enabled 	= enabled
 		btn_supprimerFacade.enabled = enabled		
 		
-		if a_un_trace do 
+		if a_un_surface do 
 			lbx_facades.items =  facades.get_facades_noms ()
 		
 		
@@ -492,23 +492,23 @@ rollout roll_toiture 		"Toiture"
 	
 	fn actualiser =(
 		
--- 		lbl12.enabled 			= a_un_trace
-		ddl_toiture.enabled 			= a_un_trace
-		lbl_facade.enabled 			= a_un_trace
--- 		rdo_pentes.enabled 			= a_un_trace
-		spn_toit_hauteur.enabled 	= a_un_trace
-		lbl_hauteur.enabled 			= a_un_trace
-		spn_pente.enabled 			= a_un_trace
-		lbl_pente.enabled 			= a_un_trace
-		lbl_composants.enabled 	= a_un_trace
+-- 		lbl12.enabled 			= a_un_surface
+		ddl_toiture.enabled 			= a_un_surface
+		lbl_facade.enabled 			= a_un_surface
+-- 		rdo_pentes.enabled 			= a_un_surface
+		spn_toit_hauteur.enabled 	= a_un_surface
+		lbl_hauteur.enabled 			= a_un_surface
+		spn_pente.enabled 			= a_un_surface
+		lbl_pente.enabled 			= a_un_surface
+		lbl_composants.enabled 	= a_un_surface
 		
-		btn_ajouterFacade.enabled 	= a_un_trace
-		btn_supprimerFacade.enabled 	= a_un_trace
--- 		grp_prop.enabled 	= a_un_trace
-		lbx_facades.enabled 	= a_un_trace
+		btn_ajouterFacade.enabled 	= a_un_surface
+		btn_supprimerFacade.enabled 	= a_un_surface
+-- 		grp_prop.enabled 	= a_un_surface
+		lbx_facades.enabled 	= a_un_surface
 		
 		
-		if a_un_trace do (
+		if a_un_surface do (
 -- 			rdo_pentes.enabled 					= ddl_toiture.selection == 3
 			spn_pente.enabled 					= ddl_toiture.selection >= 3
 			lbl_pente.enabled 					= ddl_toiture.selection >= 3
@@ -538,21 +538,21 @@ rollout roll_infos 			"Infos"
  
  
 
-	label 'lbl1_tracePts' "Tracé (origin.):" pos:[5,105] width:70 height:14 align:#left
-	label 'lbl_tracePts_val' "" pos:[85,105] width:78 height:16 align:#left 
+	label 'lbl1_surfacePts' "Tracé (origin.):" pos:[5,105] width:70 height:14 align:#left
+	label 'lbl_surfacePts_val' "" pos:[85,105] width:78 height:16 align:#left 
  
  
  
 
-	label 'lbl1_tracePts_opt' "Tracé (optim.):" pos:[5,120] width:69 height:14 align:#left
-	label 'lbl_tracePts_opt_val' "" pos:[85,120] width:78 height:16 align:#left 
+	label 'lbl1_surfacePts_opt' "Tracé (optim.):" pos:[5,120] width:69 height:14 align:#left
+	label 'lbl_surfacePts_opt_val' "" pos:[85,120] width:78 height:16 align:#left 
  
  
  
 	checkbutton 'ckb_axe' "Axe" pos:[10,14] width:75 height:16 align:#left	 --highlightColor:[200,200,100]
 	 --highlightColor:[200,200,100]
 	 --highlightColor:[200,200,100]
-	checkbutton 'ckb_trace' "Points" pos:[84,14] width:75 height:16 align:#left --highlightColor:[170,170,170]
+	checkbutton 'ckb_surface' "Points" pos:[84,14] width:75 height:16 align:#left --highlightColor:[170,170,170]
  --highlightColor:[170,170,170]
  --highlightColor:[170,170,170]
 	checkbutton 'ckb_pignons' "Pignons" pos:[84,29] width:75 height:16 align:#left		 --highlightColor:[130,130,250]
@@ -563,7 +563,7 @@ rollout roll_infos 			"Infos"
  --highlightColor:[250,100,100]
 -- 		checkbutton 'ckb_longueurSegts' "Long. façades" pos:[5,32] width:80 height:16 align:#left --highlightColor:[170,170,170]
 	checkbutton 'ckb_geometrie' "Cacher géom." pos:[10,65] width:75 height:16 highlightColor:(color 255 0 0) align:#left
-	checkbutton 'ckb_ssTraces' "Sous tracés" pos:[10,44] width:75 height:16 align:#left
+	checkbutton 'ckb_sssurfaces' "Sous tracés" pos:[10,44] width:75 height:16 align:#left
 	
 	
 	
@@ -576,23 +576,23 @@ rollout roll_infos 			"Infos"
 	
 	fn actualiser =(
 		
-		ckb_axe.enabled 					= a_un_trace
-		ckb_trace.enabled 				= a_un_trace
-		ckb_pignons.enabled 			= a_un_trace
-		ckb_gouttereaux.enabled 		= a_un_trace
-		ckb_geometrie.enabled 			= a_un_trace
-		grp30.enabled 			= a_un_trace
+		ckb_axe.enabled 					= a_un_surface
+		ckb_surface.enabled 				= a_un_surface
+		ckb_pignons.enabled 			= a_un_surface
+		ckb_gouttereaux.enabled 		= a_un_surface
+		ckb_geometrie.enabled 			= a_un_surface
+		grp30.enabled 			= a_un_surface
 		
-		lbl16.enabled 			= a_un_trace
-		lbl_surface.enabled 			= a_un_trace
-		lbl1_tracePts.enabled 			= a_un_trace
-		lbl_tracePts_val.enabled 			= a_un_trace
-		lbl1_tracePts_opt.enabled 			= a_un_trace
-		lbl_tracePts_opt_val.enabled 			= a_un_trace
-		if a_un_trace do (
+		lbl16.enabled 			= a_un_surface
+		lbl_surface.enabled 			= a_un_surface
+		lbl1_surfacePts.enabled 			= a_un_surface
+		lbl_surfacePts_val.enabled 			= a_un_surface
+		lbl1_surfacePts_opt.enabled 			= a_un_surface
+		lbl_surfacePts_opt_val.enabled 			= a_un_surface
+		if a_un_surface do (
 			lbl_surface.text = ( surface / 10000 ) as string + " m²"
-			lbl_tracePts_val.text = trace_original.count as string + " pts."
-			lbl_tracePts_opt_val.text = trace_courant.count as string + " pts."
+			lbl_surfacePts_val.text = surface_original.count as string + " pts."
+			lbl_surfacePts_opt_val.text = surface_courant.count as string + " pts."
 		)
 	)
 	
@@ -611,7 +611,7 @@ rollout roll_infos 			"Infos"
 		)
 	on ckb_axe changed state 		do
 		VP_toggle ()
-	on ckb_trace changed state 		do
+	on ckb_surface changed state 		do
 		VP_toggle ()
 	on ckb_pignons changed state 		do
 	(

@@ -2,6 +2,7 @@
 
 include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - structures secondaires.ms"
 include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Geometrie.ms"
+include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Construction.ms"
 include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Surfaces.ms"
 include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Elements.ms"
 
@@ -36,43 +37,42 @@ struct str_batiment_core (
 		roll_facades,
 		
 		--- Sous structures  -------------------
-		m_geometrie	= str_geometrie 	(),
+		m_construction	= str_construction 	(),
 		
-		---- tracé initial -------------------
-		logo = #(	[14.1994,37.717,0], 	[14.1994,-189.586,0], 	[287.927,-189.586,0], 	[287.927,139.601,0], 	[174.501,253.027,0], [174.501,479.879,0], [61.0754,479.879,0], [61.0754,366.453,0], \
-						[-52.3504,479.879,0], 	[-392.628,139.601,0], 	[-392.628,-189.586,0],	[-118.9,-189.586,0], 	[-118.9,37.717,0]),
-	
 	-------- FONCTIONS	--------------------------------------------------------------------------------------------------------
 	private
-		fn contruire =(
-			---- on clean le modele ----
-			m_geometrie.vider ()
+	----- Actions sur le node -----------------------
+		fn centrer_pivot 		_node	=(
+		
+			_node.transform = (matrix3 1)
+			ResetPivot 			_node
 			
-		),
-		fn creer_logo =(
-			
-			debug "logo_creer"
-			m_geometrie.face	logo
+			---- centrer le pivot ----
+			local pt_sommeDesPts = 0
+			for pt in _node.surface_points do
+				pt_sommeDesPts += pt
+			local pt_centre = pt_sommeDesPts / _node.surface_points.count
+			_node.pos = pt_centre
 			
 		),
 		
 	-------- INTERFACE	--------------------------------------------------------------------------------------------------------
 	public	
 	----- Initialisation  -----------------------
-		fn initialiser 	_plug		doLogo:false	= (
+		fn initialiser 	_plug		= (
 			
 			debug "initialiser"
 			
 			---- initialisation des structures -----
 			m_plug = 	_plug			
 			mgr_facades.initialiser		class:str_facade
-			m_geometrie.initialiser		_plug
 			mgr_surfaces.initialiser		_plug
-			
-			---- creation du logo si besoin -----
-			if doLogo do creer_logo ()
+			m_construction.initialiser	_plug
 			
 		),
+		
+		
+		
 		
 	----- Parametres du plug -----------------------
 		--- lire/ecrire -------------
@@ -85,16 +85,26 @@ struct str_batiment_core (
 			nv_facade
 		),
 		
-	----- Geometrie -----------------------
+		
+		
+	----- Actualiser  -----------------------
 		fn actualiser =(
 			
-			---- on actualise ----
+			---- on actualise la surface ----
 			mgr_surfaces.actualiser ()
 			
 			---- on consrtuit ----
-			contruire ()
+			m_construction.actualiser ()
+			
+		),
+		fn choisir_surface 	_nodeTHIS		_shape 		=(
+			
+			_nodeTHIS.transform = _shape.transform
+			
+			actualiser ()
 			
 		)
+		
 		
 		
 )  ---- fin batiment core -------------------------

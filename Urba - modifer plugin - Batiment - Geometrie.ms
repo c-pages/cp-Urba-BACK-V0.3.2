@@ -12,15 +12,7 @@ struct	str_geometrie	(
 		m_plug, 
 		
 		
-		
-		
-		
-		fn initialiser _plug =(
-			debug "initialiser"
-			m_plug= _plug
-		),
-		
-		
+	----- vider la geometrie ----------------
 		fn vider 													=(
 			if (polyop.getNumFaces m_plug.delegate) >0 do (
 				local listeDesFaces = #{1..(polyop.getNumFaces m_plug.delegate)} as array
@@ -29,7 +21,7 @@ struct	str_geometrie	(
 			)
 		),
 		
-		
+	----- constructions élémentaires ----------------
 		fn points	_liste_pts_position								=(
 			local result = #()
 			for pos_pts in _liste_pts_position do 			
@@ -63,6 +55,7 @@ struct	str_geometrie	(
 		),
 		
 		
+	----- constructions élémentaires 2 ----------------
 		fn faceVerticale 	pt1 	pt2 		z 					ht:			=(
 		
 			local VERSION_BACK = true
@@ -127,8 +120,14 @@ struct	str_geometrie	(
 				facesDuContour
 				
 			)
-		)
+		),
 		
+		
+	------ Initialisation de la structure ------------
+		fn initialiser _plug =(
+			debug "initialiser"
+			m_plug= _plug
+		)
 		
 ) --- fin GEo
 

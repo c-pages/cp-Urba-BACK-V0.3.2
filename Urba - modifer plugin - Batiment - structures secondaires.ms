@@ -1126,3 +1126,399 @@ struct str_shape_outils (
 )
 
 
+
+
+
+struct str_poly_outils (
+	
+	
+		---- manipulation de tableaux ----
+		fn ComparerTableaux 	first 	second =
+		(
+			result = true
+			if first.count != second.count then
+				result = false
+			else
+				for i = 1 to first.count do
+					if first[i] != second[i] do result = false
+			result
+		),
+		fn virerDoublonsDansTableau  _tab = (
+			for i = 1 to _tab.count do
+			(
+				for j = _tab.count to i+1 by -1 do
+				(
+					test = ( ComparerTableaux  _tab[i] _tab[j] )
+					if test do
+					(
+						deleteItem _tab j
+					)
+				)--end j loop
+			)--end i loop
+		),
+		
+		
+		
+		
+		
+		
+		---- groupes de selection  ----
+		fn grouperFaces 	_node 	_faces 	_nom 	=(
+			if _node.faces[_nom] == undefined  
+							then		_node.faces[_nom] = 	_faces
+							else		(								
+								tabFaces = for face in _node.faces[_nom] collect face.index
+								tabFaces += _faces
+								_node.faces[_nom] = tabFaces
+							)
+		),
+		fn degrouperFaces 	_node 	_facesARetirer 	_nom 	=(
+			if _node.faces[_nom] != undefined  do		(								
+				tabFaces = for face in _node.faces[_nom] collect 	face.index
+					for  _face in _facesARetirer do (
+						idItem = findItem tabFaces   _face
+						if idItem >0 do deleteItem 	tabFaces  idItem
+					)
+				_node.faces[_nom] = tabFaces
+			)
+		),
+		
+		
+		
+		---- manipulation des selection  ----
+		fn etendreSelecFaces		_node 	_faces	= (
+			
+			_faces_a_retirer = _faces 		---- ( polyop.getFaceSelection  _node ) as array
+			_node.EditablePoly.GrowSelection ()
+			_facesExtension	= ( polyop.getFaceSelection  _node ) 
+			for face in _faces_a_retirer 	do _facesExtension	[face] 	= false
+			polyop.setFaceSelection  _node 	_facesExtension	
+			
+		),
+		
+		fn etendreFaces		_node 	_faces	= (
+			local selectBack = polyop.getFaceSelection  _node
+			polyop.setFaceSelection  _node 	_faces
+			_node.EditablePoly.GrowSelection ()
+			local facesEtendus	=  polyop.getFaceSelection  _node 
+			format "facesEtendus : %\n" facesEtendus
+			polyop.setFaceSelection  _node  selectBack
+			facesEtendus
+		),
+		
+		fn facesDuDessous		_node	_faces	=	(
+			
+			local _selectBack 	= 	polyop.getFaceSelection  _node 
+			local	_facesDuBas 	= #()
+			for _face in _faces do (
+				polyop.setFaceSelection  	_node 	#(_face)
+				outils.etendreSelecFaces 	_node 	#(_face)
+				facesCadre = polyop.getFaceSelection  _node
+				local		_faceDuBas
+				for _faceCadre in facesCadre do 
+					if _faceDuBas == undefined 	
+						then _faceDuBas = _faceCadre
+					else	if ( outils.centreDeLaFace	_node	_faceCadre ).z  <  (outils.centreDeLaFace	_node	_faceDuBas ).z 	
+						then _faceDuBas = _faceCadre
+				
+				append _facesDuBas _faceDuBas
+			)
+			
+			format "Faces du bas : %\n" _facesDuBas
+			polyop.setFaceSelection  _node 	_selectBack
+			
+			for _face in _facesDuBas do
+				format "face : %  centre Z : % \n" 	_face	( outils.centreDeLaFace	_node	_face )
+			
+			
+			_facesDuBas
+		),		
+		fn BACKfacesDuDessous		_node	_faces	=	(
+			
+			local	_facesDuBas = #()
+			for _face in _faces do (
+				polyop.setFaceSelection  _node 	#(_face)
+				outils.etendreSelecFaces 		_node 	#(_face)
+				facesCadre = polyop.getFaceSelection  _node
+				local		_faceDuBas
+				for _faceCadre in facesCadre do 
+					if _faceDuBas == undefined 	then _faceDuBas = _faceCadre
+						else	if ( outils.centreDeLaFace		_node		_faceCadre ).z  <  (outils.centreDeLaFace		_node		_faceDuBas ).z 	then _faceDuBas = _faceCadre
+				
+				append _facesDuBas _faceDuBas
+			)
+			
+			format "Faces du bas : %\n" _facesDuBas
+			_facesDuBas
+		),
+		
+		fn faceLaPlusProche		_node		_faces		_ptReference 	= (							
+			local faceLaPlusProche
+			local distMin = 1000000000000.0
+			for faceTmp in _faces do (
+				centreFaceTmp 		= 		outils.centreDeLaFace		_node		faceTmp
+				dist = length 	(  	centreFaceTmp - _ptReference )
+				if dist < distMin do (
+					distMin = dist
+					faceLaPlusProche = faceTmp
+				)
+			)
+			faceLaPlusProche
+		),
+		
+		---- selection par taille ----
+		fn arreteLaPlusPetite		_node		_listeArretes	= (
+			
+			local arretePlusPetite,  longMin
+			
+			for arrete in _listeArretes do (
+				listePoints = polyop.getEdgeVerts  	_node	arrete
+				pt1 = _node.verts[listePoints[1]]
+				pt2 = _node.verts[listePoints[2]]
+				longueurArrete =  length ( pt1.position	- pt2.position  )
+				
+				if longMin == undefined do (
+					longMin = longueurArrete					
+					arretePlusPetite = arrete
+				)
+				
+				if longueurArrete < longMin do (
+					longMin = longueurArrete
+					arretePlusPetite = arrete
+				)
+				
+			) -- fin for do --
+			
+			arretePlusPetite
+			
+		),
+		fn arretesLesPlusPetites		_node		_listeArretes	 nbre: = (
+			
+			local _arretesPlusPetites,  longMin
+			local _nbresArretes = floor ( (_listeArretes as array).count / 2 )
+			local _result = #()
+			
+			if nbre == unsupplied 
+				then		_nbresArretes	= floor ( (_listeArretes as array).count / 2 )
+				else		_nbresArretes	= nbre
+				
+			while _result.count < _nbresArretes do (
+				local _arreteAAJouter = arreteLaPlusPetite		_node		_listeArretes
+				
+				deleteItem	_listeArretes 	_arreteAAJouter
+				append 		_result  		_arreteAAJouter
+			)
+			
+			_result
+			
+		),		
+		fn facesLesPlusPetites	_node	_faces	nbre: =(
+			local _nbresFaces 
+			local _result = #()
+			
+			if nbre == unsupplied 
+				then		_nbresFaces	= floor ( (_faces as array).count / 2 )
+				else		_nbresFaces	= nbre
+			
+			while _result.count != _nbresFaces do (
+				local _min = 1000000000000000000000000000.0
+				local _faceAAJouter
+				for _face in _faces do (
+					if polyop.getFaceArea _node _face <= _min  and (findItem _result _face ) == 0 do (
+						_faceAAJouter 	= _face
+						_min 				= polyop.getFaceArea _node _face 
+					)
+				)
+				append _result 	_faceAAJouter
+			)
+			_result
+		),		
+		fn facesLesPlusGrandes	_node	_faces	nbre:  =(
+			local _nbresFaces 
+			local _result = #()
+			
+			if nbre == unsupplied 
+				then		_nbresFaces	= floor ( (_faces as array).count / 2 )
+				else		_nbresFaces	= nbre
+			
+			while _result.count != _nbresFaces do (
+				local _min = 0.0
+				local _faceAAJouter
+				for _face in _faces do (
+					if polyop.getFaceArea _node _face >= _min  and (findItem _result _face ) == 0 do (
+						_faceAAJouter 	= _face
+						_min 				= polyop.getFaceArea _node _face 
+					)
+				)
+				append _result 	_faceAAJouter
+			)
+			_result
+		),
+		
+		
+		---- selection par position ----
+		fn faceLaPlusHaute 	_node 	_faces = (
+			local  faceHaute 
+			for faceID in _faces do (
+				if faceHaute = undefined do faceHaute = faceID
+				if  ( polyop.getFaceCenter 	_node 	faceID ).z  > ( polyop.getFaceCenter 	_node	faceHaute ).z do
+					 faceHaute = faceID
+			)
+			faceHaute
+		),		
+		fn faceLaPlusBasse 	_node 	_faces = (
+			local  faceHaute 
+			for faceID in _faces do (
+				if faceHaute == undefined do faceHaute = faceID
+				if  ( polyop.getFaceCenter 	_node 	faceID ).z  < ( polyop.getFaceCenter 	_node	faceHaute ).z do
+					 faceHaute = faceID
+			)
+			 faceHaute
+		),
+		
+		
+		fn get_hauteurNodeModele 	_nd	=(
+			local  BB = nodeGetBoundingBox 	_nd	(matrix3 1)
+			local hauteur = BB[2].z -  BB[1].z 
+			hauteur
+		),
+		fn get_largeurNodeModele 	_nd	=(
+			local  BB = nodeGetBoundingBox 	_nd	(matrix3 1)
+			local largeur = BB[2].x -  BB[1].x 
+			largeur
+		),
+		fn get_angle_vecteur 	vec	=(
+			
+			local result = 0
+			local angle_tan = atan ( vec.y / vec.x )
+			
+			if vec.x >=0 then (
+				if vec.y >= 0 then 	result = angle_tan
+				else 	result = 360 + angle_tan
+			) else (		
+				if vec.y >= 0 then 	result = 180 + angle_tan
+				else result = 180 + angle_tan
+			)
+			
+			result
+		),		
+		
+		---- meusures ----
+		fn ZMinFace 	_node  _listeFaces = (
+			
+			local pointLePlusBas
+			
+			for face in _listeFaces do (
+				listePoints = polyop.getFaceVerts  	_node	face
+				for IDpt in listePoints do (
+					pt = _node.verts[IDpt]
+					if pointLePlusBas == undefined do pointLePlusBas = pt.position.z
+					if pointLePlusBas > pt.position.z do pointLePlusBas = pt.position.z
+				)
+			)			
+			 	pointLePlusBas			
+		),
+		fn largeurFace 	_node _face = (
+			local listePoints = polyop.getFaceVerts  	_node	_face
+			local result = 0
+			for  i=1 to listePoints.count-1 do (
+				pt_1 = _node.verts[ listePoints[ i ] ]				
+				for  j=i+1 to listePoints.count do (				
+					pt_2 	= _node.verts[ listePoints[ j ] ]
+					dist 		= length ( pt_2.position - pt_1.position )
+					if pt_1.position.z == pt_2.position.z and dist > result
+						do result = dist
+				)
+			)
+			 result
+		),
+		fn hauteurFace 	_node 	_face = (
+			local _listePoints = polyop.getFaceVerts  	_node	_face
+			local _result = 0, _mini = 10000000000, _maxi = 0
+			for  _pt in _listePoints 	do (
+				_pt = _node.verts[ _pt ]		
+				if _pt.position.z < _mini 	do _mini 	= _pt.position.z
+				if _pt.position.z > _maxi 	do _maxi 	= _pt.position.z
+			)
+			_result = _maxi  - _mini
+			_result
+		),
+		
+		
+		fn centreDeLaFace	_node	_face = (
+			
+			local versionMax = true
+			local centre = [0,0,0]
+			
+			---- la version max fait  une position  moyenne de tout les points , => pb si 5points sur  la face par ex ----
+			if versionMax then
+				centre = polyop.getFaceCenter _node _face
+			
+			---- debut de version centre perso qui deconne ----
+			else (
+				
+				local listePoints 							= polyop.getFaceVerts  	_node	_face
+				local pointsAlignesVerticalement	= #()
+				local ptsResult 								= #()
+				local coinHtG, coinHtD, coinBsG, coinBsD
+				
+				---- regrouper les points alignés verticalement	----
+				for  i=1 to listePoints.count do (
+					
+					local	ID_pt_1 	= listePoints[ i ] 
+					local	pt_1 		= _node.verts[ ID_pt_1 ]				
+					local resultTmp = #( ID_pt_1 )
+					
+					for  j=1 to listePoints.count do (
+						ID_pt_2 = listePoints[ j ] 					
+						pt_2 = _node.verts[ ID_pt_2 ]
+						
+						if floor (  pt_1.position.x * 10 )	== floor ( pt_2.position.x * 10 ) do 
+							if floor ( pt_1.position.y * 10 ) == floor ( pt_2.position.y * 10 ) do 
+								appendIfUnique resultTmp 		ID_pt_2
+						
+					)
+					sort resultTmp
+					
+					if resultTmp.count > 1 do 	append 	 	pointsAlignesVerticalement 		resultTmp
+					
+				)
+				
+				virerDoublonsDansTableau  pointsAlignesVerticalement 
+				
+				---- selection dans chaque groupe de points du plus haut et du plus bas	----
+				for listPts in pointsAlignesVerticalement do (
+					---- min ----
+					local minZ, maxZ
+					for ptID in listPts do (
+						if minZ == undefined do minZ = ptID
+						if maxZ == undefined do maxZ = ptID
+						
+						if _node.verts[ ptID ].position.z > _node.verts[ minZ ].position.z   do minZ =ptID
+						if _node.verts[ ptID ].position.z < _node.verts[ maxZ ].position.z  do maxZ =ptID
+						
+					)
+					append ptsResult minZ
+					append ptsResult maxZ
+				)
+				
+				sort ptsResult
+				
+				---- moyenne des points hauts et bas	----
+				if ptsResult.count != 0 do (
+					for IDpt in ptsResult do  (
+						centre += _node.verts[ IDpt ].position
+						format "_node.verts[ IDpt ].position : %\n" _node.verts[ IDpt ].position
+					)
+					centre = centre / ptsResult.count
+	-- 				format "	=>	centre : %\n" centre
+				)
+						format "face : %\n" 	_face
+				format "	=>	centre : %\n" centre
+				
+				centre
+			)
+		) -- fin else
+		
+)	-- fin struct outils
+

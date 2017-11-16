@@ -34,9 +34,13 @@ struct str_surfaces (
 			
 			local ptsSurface				=#()
 			
-			---- mise a jour de trace_courant -----------
-			for id_pt = 1 to ( numKnots 	_shape 	1 ) do	
-				append ptsSurface 	 ( getKnotPoint 	_shape 	1 	id_pt ) 
+			---- On chope lmes point de la surface a scanner -----------
+			for id_pt = 1 to ( numKnots 	_shape 	1 ) do	(
+				local pt_shape 	= getKnotPoint 	_shape 	1 	id_pt
+				local pt_surface 	= pt_shape * inverse  _shape.transform
+				append ptsSurface 	 pt_surface
+			)
+			
 			
 			--- on fait tourner les spline dans le meme sens ----
 			if not m_outils.est_sensPositif 	ptsSurface 	 do
@@ -73,6 +77,7 @@ struct str_surfaces (
 	public
 	--- Initialisation ---------------------
 		fn initialiser _plug =(
+			debug "initialiser"
 			m_plug 				= _plug
 		),
 		
