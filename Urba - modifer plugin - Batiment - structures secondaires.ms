@@ -1,16 +1,5 @@
 
-------------- declaration en global car erreurs "plugin no active machin..." -----
-/* global str_plan
-global str_facade_modele
-global str_createur_de_composant
--- global str_facadeParam_murPlein, str_facadeParam_baie , str_facadeParam_espacement		, str_facadeParam_balcon, str_facadeParam_balconFin
-global str_facade, str_facade_composant	, str_ssTrace		
 
-global	str_prefs_matID 
-
- */
- 
- 
  
  struct 	str_prefs_matID (
 	mur 				= 	10,
@@ -231,9 +220,17 @@ struct str_datasToString (
 
 struct str_mgr_arrayParametres (
 	
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+		m_debug = true,
+		m_dbgPrefix ="urba | str_mgr_arrayParametres",
+		fn debug 	_txt  var:	 param:    =(
+			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
+			catch ()
+		),
+	
 	---- MEMBRES ----------------------------------------------------------------------------------------------------------------
 	public
-		m_core,
+		m_plug,
 		
 	private
 		---- la class de réference ----------
@@ -247,51 +244,62 @@ struct str_mgr_arrayParametres (
 	
 	
 	---- FONCTIONS ----------------------------------------------------------------------------------------------------------------
-	private
-		---- Parametres blocks ----
+--	private
+/* 		---- Parametres blocks ----
 		fn lire_parametres 		=(),
 		fn ecrire_parametres 	=(),
 		
 		
 		fn ecrire_parametre 		_element 	=(
 			
-			local plug = m_core.m_plug
 
 			
-		),
+		), */
 		
 		
 		
 	---- INTERFACE -------------------------------------------
 	public
-		fn initialiser		class: =(
-			m_class = class
+		fn initialiser		class:  plug: =(
+			if class== unsupplied or plug == unsupplied do
+				messagebox "str_mgr_arrayParametres : Probleme d'initialisation"
+			m_class 	= 	class
+			m_plug	=	plug
 		),
 		fn actualiser = (
 			
 		),
 		
-		---- Creation/Suppression ----
-		fn creer			=	(
-			local nv_element = m_class ()
-			append m_items nv_element
-			
-			nv_element.ecrire_parametres ()
-			
-			nv_element
-		),	
-		
-		fn supprimer 	=	(),
-		
 		---- Accessions ---
-		fn get  	_id =(
+		fn get_parID  	_id =(
 			
 			local result
 			for item in m_items do
 				if item.id == _id do result = compo
 			result
 			
-		)--,
+		),
+		fn get_parIndex  	_index =(
+			m_items[_index]			
+		),
+		
+		fn get_noms =	for item in m_items collect item.nom,
+		
+		
+		
+		---- Creation/Suppression ----
+		fn creer			=	(
+			debug "creer"
+			local nv_element = m_class ()
+			append m_items nv_element
+			
+			nv_element.enregistrer	 	m_plug
+			
+			nv_element
+		),	
+		
+		fn supprimer 	=	()
+		
 	
 -- 		---- Parametres Block ----
 -- 		fn lire			=	lire_parametres(),

@@ -323,6 +323,15 @@ struct 	str_constructeur_composants (
 ------------------------------------------------------------------------------------------------------------------------------------
 struct 	str_facade (
 	
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+		m_debug = true,
+		m_dbgPrefix ="urba | str_facade",
+		fn debug 	_txt  var:	 param:    =(
+			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
+			catch ()
+		),
+		
+		
 	---------- MEMBRES	--------------------------------------------------------------------------------------
 	public
 		---- Base	-----------
@@ -353,8 +362,6 @@ struct 	str_facade (
 		sequence_longueur		=	0,
 		
 		
--- 		mgr_composants			= str_mgr_arrayParametres (),
-		
 	---------- INTERFACE	--------------------------------------------------------------------------------------
 	public
 		fn initialiser 		 		=	(
@@ -378,6 +385,7 @@ struct 	str_facade (
 			
 		),
 		
+
 		---- Destructeur/Copies	-----------------
 		fn supprimer =(
 			
@@ -391,7 +399,47 @@ struct 	str_facade (
 		
 		
 		---- Parametres	-----------------
-		fn ecrire_parametres 	=(
+		fn enregistrer 	_plug 	=(
+			
+			debug "ecrire"
+			
+			--- on cherche s'il existe deja comme parametre -----
+			local index_facade = 0
+			for i = 1 to _plug.fac_ids.count do
+				if _plug.fac_ids[i] == id do index_facade = i
+			
+			
+			if index_facade == 0 then (
+			--- s'il n'existe pas encore, on l'ajoute -----
+				append 	_plug.fac_ids 				id
+				append 	_plug.fac_noms  			nom
+				append 	_plug.fac_probabilites  	probabilite
+				
+			) else (
+			--- s'il existe, on l'actualise -----
+				_plug.fac_noms[index_facade] 			=	nom
+				_plug.fac_probabilites[index_facade] 	=	probabilite
+				
+			)
+			
+			
+		),
+		
+		fn charger	 	_plug		_id  =(
+			
+			--- on cherche s'il existe deja comme parametre -----
+			local index_facade = 0
+			for i = 1 to _plug.fac_ids.count do
+				if _plug.fac_ids[i] == id do index_facade = i
+					
+			
+			if index_facade != 0 then (
+				
+				id 					= _plug.fac_noms[index_facade] 
+				nom 				= _plug.fac_noms[index_facade] 
+				probabilite 		= _plug.fac_probabilites[index_facade]
+				
+			) else messagebox ("Erreur de chargement de facade : " + _id as string )
 			
 		),
 		

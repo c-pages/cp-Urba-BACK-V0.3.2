@@ -89,7 +89,7 @@ struct str_surfaces (
 			if m_plug.surface_node != undefined do (
 				
 				-- on travaille sur une copie --------
-				local shapeCopie 				=  copy m_plug.surface_node
+				local shapeCopie 				= m_plug.surface_node
 				convertToSplineShape shapeCopie
 				
 				---- si pas valide on clean -------
@@ -113,7 +113,7 @@ struct str_surfaces (
 				)
 				
 				--- suppression de la copie -------------
-				delete shapeCopie
+-- 				delete shapeCopie
 				
 			)
 			
