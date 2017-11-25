@@ -114,235 +114,20 @@ extends:Editable_poly replaceUI:true version:0
 	local core = str_batiment_core  	()
 	
 	
-	/* --------------------  CLEANAGE --------------------
-	
-	local geo 			= 	str_geo 				m_this:this
-	local construire	=	str_construire		m_this:this		m_geo:geo  					
-	local facades		=	str_facades		m_this:this		m_construire:construire
-	local trace			=	str_trace 			m_this:this		m_geo:geo
-	
-	local presets 	= str_presets_batiment 	fichier_dossier:			( getDir #userScripts	 + "\\cp-Urba\\lib\\batiments\\"		)	\
-															fichier_categorie:			"Urba - Bâtiment"	\
-															fichier_extension:			"btm"	\
-															params_aEnregistrer:	params_aEnregistrer
-
-	local nodeScanner = str_enregistreurDeNode ()
-	
-	--------------- FONCTIONS  ----------------------------------------------------------------------------------------------------------------------	
-	------------ Affichage - ViewPort ------------------------------------------------
-	fn	fn_VP_afficher_axePrincipal		 =(
-		
-		gw.setTransform (matrix3 1)
-		
-		
-		for o in selection where classof o == urba_batiment  do (
-			
-			local largeurFleche = 100
-			local BB_axeP 	= o.axeP_BB
-			local mtrx_axeP	= o.axeP_mtrx 
-			local mtrx_axeP2	= o.axeP_mtrx 
-				
-			translate mtrx_axeP 	BB_axeP[1]
-			
-			local diag_axeP	=	(BB_axeP[2] * inverse mtrx_axeP ) - (BB_axeP[1]  * inverse mtrx_axeP  )
-			local largeur 		=	diag_axeP.x
-			local longeur 		= 	diag_axeP.z
--- 				
-			------ l'AXE----------------
-			if o.affiche_axe do (
-				---- dessin de l'Axe-----------------
-				local ptAxe_1 =  [largeur/2,0,0]  *   mtrx_axeP   * o.transform
-				local ptAxe_2 =  [largeur/2,0,longeur - largeurFleche ]  *     mtrx_axeP    * o.transform
-
-				gw.setColor	#line	yellow
-				gw.Polyline #( ptAxe_1, ptAxe_2 )	false
-				
-				---- dessin de la fleche de l'axe -----------------
-				local ptFleche_1 = (  [largeur/2,0,longeur + 0 ]  ) *  mtrx_axeP    * o.transform
-				local ptFleche_2 = (  [largeur/2,0,longeur + 0 ]   + [largeurFleche/ 3,0,-largeurFleche ]) *  mtrx_axeP    * o.transform
-				local ptFleche_3 = (  [largeur/2,0,longeur + 0 ]   + [-largeurFleche/ 3,0,-largeurFleche ]) *  mtrx_axeP    * o.transform
-				
-				gw.Polyline #( ptFleche_1, ptFleche_2, ptFleche_3 )	true
-			)
-			
-			
-			
-			--- sous tracés -------------
-			if o.affiche_ssTraces do (
-				
-				
-				local rectangles = o.trace.rectangles_traces
-				
-				for i = 1 to rectangles.count do (
--- 					format "o.sousTraces.count :%\n"	o.sousTraces.count
-					local rect = rectangles[i]
-					
-					local barycentre = [0,0,0]
-					for id_pt = 1 to rect.count do (
-						local id_ptSuiv = id_pt + 1
-						if id_ptSuiv > rect.count do id_ptSuiv = 1
-						local id_rect 				= rect[ id_pt ]
-						local id_rect_suivant 	= rect[ id_ptSuiv ]
-						
-						local pt 			= o.trace_courant[ id_rect  ] 				*  o.transform 
-						local pt_suivant 	= o.trace_courant[ id_rect_suivant  ]  	*  o.transform 
-						gw.setColor	#line	gray
-						gw.polyline #( pt, pt_suivant )	false
-						barycentre += pt
-					)
-						
-					local pt_0 = o.trace_courant[ rect[ 1 ] ]
-					local pt_1 = o.trace_courant[ rect[ 2 ] ]
-					local pt_2 = o.trace_courant[ rect[ 4 ] ]
-					
-					barycentre /= rect.count
-					
-					local surf = ( distance pt_1 pt_0 ) * ( distance pt_2 pt_0 ) / 10000
-					gw.text 		barycentre	( surf as string + " m²" )  	color:gray
-				)
-				
-				
-				local sousTraces = o.sousTraces
--- 				local barycentre = [0,0,0]
-				for i = 1 to sousTraces.count do (
--- 					format "o.sousTraces.count :%\n"	o.sousTraces.count
-					
-					local nvSsTrace = str_ssTrace ()
-					local sousTrace = o.trace.datasMgr.set_datas_string 		sousTraces[i] 		nvSsTrace 	_this
-					
-					for id_pt = 1 to sousTrace.trace.count do (
-						local id_ptSuiv = id_pt + 1
-						if id_ptSuiv > sousTrace.trace.count do id_ptSuiv = 1
-						local id_ssTrace 				= sousTrace.trace[ id_pt ]
-						local id_ssTrace_suivant 	= sousTrace.trace[ id_ptSuiv ]
-						
-						local pt 			= o.trace_courant[ id_ssTrace  ] 		*  o.transform 
-						local pt_suivant 	= o.trace_courant[ id_ssTrace_suivant  ]  	*  o.transform 
-						gw.setColor	#line	yellow
-						gw.polyline #( pt, pt_suivant )	false
--- 						barycentre += pt
-					)
-						
--- 					local pt_0 = o.trace_courant[ sousTrace[ 1 ] ]
--- 					local pt_1 = o.trace_courant[ sousTrace[ 2 ] ]
--- 					local pt_2 = o.trace_courant[ sousTrace[ 4 ] ]
-					
--- 					barycentre /= sousTraces.count
-					
--- 					local surf = ( distance pt_1 pt_0 ) * ( distance pt_2 pt_0 ) / 10000
--- 					gw.text 		barycentre	( surf as string + " m²" )  	color:gray
-				)
-				
-				
-				
-				
-			)
-				
-				
-	-- 			gw.text 		( (pt + pt_suivant) /2 )	longueurFacade  	color:white
-			
-			
-			
-			for i = 1 to o.trace_courant.count do (
-				
-					
-				local j = i + 1
-				if j > o.trace_courant.count do j = 1
-				local pt = o.trace_courant[i] *  o.transform 
-				local pt_suivant = o.trace_courant[j] *  o.transform 
-				
-				---- les pignons et gouttereaux -----
-				local col = red
-				local estPignon = o.trace.est_pignon i 
-				if estPignon then (
-					if o.affiche_pignons do (
-						gw.setColor	#line	blue
-						gw.polyline #( pt, pt_suivant )	false
-						
-						local longueurFacade = ( distance pt pt_suivant ) as string
-							gw.text 		( (pt + pt_suivant) /2 )	longueurFacade  	color:white
-						
-					)
-				)else (
-					if o.affiche_gouttereaux do (
-						gw.setColor	#line	red
-						gw.polyline #( pt,pt_suivant )	false
-						
-						local longueurFacade = ( distance pt pt_suivant ) as string
-							gw.text 		( (pt + pt_suivant) /2 )	longueurFacade  	color:white
-						
-					)
-				)
-				---- les points du trace_courant -----
-				if o.affiche_trace do (
-					gw.text 		(pt + [0,0,10]) 	(i as string )  	color:yellow
--- 					gw.Marker 	pt 	#hollowBox 	color:yellow
-				)
-			
-			)
-			
-		)
-		gw.enlargeUpdateRect #whole  
-
-
-	)
-	fn VP_toggle	=(
-		unregisterRedrawViewsCallback 	fn_VP_afficher_axePrincipal
-		if 	 this.affiche_axe or  this.affiche_trace or  this.affiche_pignons or  this.affiche_gouttereaux   or  this.affiche_ssTraces do
-			registerRedrawViewsCallback 		fn_VP_afficher_axePrincipal 	
-	)
-	fn actualiser_cacherGeo =(
-		if this.cache_geometrie then (
-			local faces = #{1..(polyop.getNumFaces delegate)} as array
-			polyop.setHiddenFaces 	this.delegate 	faces
-		) else
-			polyop.unHideAllFaces 	this.delegate
-	)
-	---- Rollouts------------
-	fn actualiser_rollouts =(
-		
-		roll_presets.actualiser 	()	
-		roll_trace.actualiser 	()		
-		roll_global.actualiser 	()				
-		roll_facades.actualiser 	()
-		roll_toiture.actualiser	()
-		roll_infos.actualiser 		()
-		
-	)
-	---- Reconstruit le batiment ---
-	fn actualiser_geometrie =(
--- 		facades.params_toStructs 	this		
-		construire.batiment 	()
-	)
-	
-	fn initialiser =(
-		geo.m_this 				= this
-		construire.m_this 	= this
-		facades.m_this 		= this
-		trace.m_this 			= this
-	)
+	--------------- import des PARAMETRES  et rollouts ----------------------------------------------------------------------------------------------------------------------	
+	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - rollouts.ms"
 	
 	
-	
-	------------  Interface ------------------------------------------------
-	---- assigner un tracé -----
-	fn assigner_trace 	_nvtrace	_node	=
-		if _nvtrace != undefined do (
-			trace.definir		_nvtrace	_node
-			trace.actualiser		()
-			construire.batiment 	()
-			
-		)
-	
-	
-	*/ --------------------  CLEANAGE --------------------
+	--------------- INTERFACE  ----------------------------------------------------------------------------------------------------------------------	
 	
 	fn actualiser 		=(		
 		core.actualiser ()		
 	)
 	
 	fn actualiser_rollouts =(
-		
+		roll_global.actualiser ()
+		roll_facades.actualiser ()
+		roll_toiture.actualiser ()
 	)
 	
 	
@@ -364,9 +149,6 @@ extends:Editable_poly replaceUI:true version:0
 		)
 	)
 	
-	
-	--------------- import des PARAMETRES  et rollouts ----------------------------------------------------------------------------------------------------------------------	
-	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - rollouts.ms"
 	
 	
 	

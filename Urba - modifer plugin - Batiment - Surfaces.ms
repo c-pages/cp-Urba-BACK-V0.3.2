@@ -86,29 +86,48 @@ struct str_surfaces (
 			
 			debug "actualiser"
 			
+			--- on scanne les points ---- 
+			local pts_surface = 	for pt in m_plug.surface_points_base	 collect pt
+			
 			if m_plug.surface_node != undefined do (
 				
-				-- on travaille sur une copie --------
-				local shapeCopie 				= m_plug.surface_node
-				convertToSplineShape shapeCopie
+				--- on gere les optimisations  ----
+				if m_plug.orthonormer	do	m_outils.orthonormer	&pts_surface		m_plug.seuil_ortho
+				
+				
+			)
+			
+			
+			--- on assigne les points optimisés dans les parametres du plug ---- 
+			m_plug.surface_points = pts_surface
+
+		),
+		
+	--- Actualisation ---------------------
+		fn assigner 	_shape  =(
+			
+			debug "assigner"
+			
+			if _shape != undefined do (
+				
+				
+				---- on travaille sur une copie --------
+				local shapeCopie 		= _shape
+				convertToSplineShape 	shapeCopie
 				
 				---- si pas valide on clean -------
 				if not valider_shape 		shapeCopie then (
 					
-					m_plug.surface_node = undefined
-					m_plug.surface_points = #()
+					m_plug.surface_node 			= undefined
+					m_plug.surface_points_base 	= #()
+					m_plug.surface_points 			= #()
 					
 				--- si validé ----
 				) else (
 					
-					--- on scanne les points ---- 
-					local nvPts = 	scanner_shape		shapeCopie
-					
-					--- on gere les optimisations  ----
-					if m_plug.orthonormer	do	m_outils.orthonormer	&nvPts		m_plug.seuil_ortho
-					
-					--- on stock les points dans les parametres du plug ---- 
-					m_plug.surface_points = nvPts
+					--- on assigne les points de base ---- 
+					m_plug.surface_node				= _shape
+					m_plug.surface_points_base	 	= 	scanner_shape		shapeCopie
 					
 				)
 				
@@ -116,6 +135,8 @@ struct str_surfaces (
 -- 				delete shapeCopie
 				
 			)
+			
+			actualiser ()
 			
 			debug "surface_node" var:m_plug.surface_node
 			debug "surface_points" var:m_plug.surface_points

@@ -244,17 +244,7 @@ struct str_mgr_arrayParametres (
 	
 	
 	---- FONCTIONS ----------------------------------------------------------------------------------------------------------------
---	private
-/* 		---- Parametres blocks ----
-		fn lire_parametres 		=(),
-		fn ecrire_parametres 	=(),
-		
-		
-		fn ecrire_parametre 		_element 	=(
-			
 
-			
-		), */
 		
 		
 		
@@ -284,7 +274,7 @@ struct str_mgr_arrayParametres (
 		),
 		
 		fn get_noms =	for item in m_items collect item.nom,
-		
+		fn get_items = 	m_items,
 		
 		
 		---- Creation/Suppression ----
@@ -312,6 +302,13 @@ struct str_mgr_arrayParametres (
 
 struct str_shape_outils (
 
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+	m_debug = true,
+	m_dbgPrefix ="urba | str_shape_outils",
+	fn debug 	_txt  var:	 param:    =(
+		try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
+		catch ()
+	),
 	
 	
 	----------------- tableaux -----------------
@@ -900,7 +897,7 @@ struct str_shape_outils (
 		
 	public
 		fn orthonormer 		&_pts	_seuil_ortho  =(
-			
+			debug "orthonormer"
 			local mtrx_AP = get_axePrincipal_mtrx 	_pts
 			
 			for i = 1 to _pts.count do (
@@ -929,6 +926,7 @@ struct str_shape_outils (
 			
 		),
 		fn souder 				_pts	=(
+			debug "souder"
 			
 			local i = 1
 			while i <=_pts.count do (
@@ -946,6 +944,7 @@ struct str_shape_outils (
 			
 		),
 		fn aplanir 				_pts	=(
+			debug "aplanir"
 			
 			local i = 1
 			while i <= _pts.count do (
@@ -973,6 +972,7 @@ struct str_shape_outils (
 			result
 		),
 		fn aligner						=(	
+			debug "aligner"
 			
 			local mtrx_AP 	= m_plug.axeP_mtrx
 			
@@ -1011,6 +1011,7 @@ struct str_shape_outils (
 			)
 		),
 		fn subdiviser		 		=(
+			debug "subdiviser"
 			
 			--- on  les points projetés au tracé --------
 			projeter_trace 		()
@@ -1068,6 +1069,7 @@ struct str_shape_outils (
 			
 		),
 		fn decouper 		 		=(
+			debug "decouper"
 			
 			
 			--  points concaves -----------------

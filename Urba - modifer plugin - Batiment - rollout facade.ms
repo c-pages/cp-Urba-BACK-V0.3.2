@@ -9,45 +9,35 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		
 		include "$userScripts\cp - GLOBAL\UI.ms"
 		include "$userScripts\cp - GLOBAL\DragDialog.ms"
--- 		include "$userScripts\cp - GLOBAL\Mgr - ListView.ms"
 		
 		------------  Membres	----------------------------------------------------------------------------------
 		---- Pointeurs ----
 		local m_plug				---- pointeur vers le plug ----
-	
+		
+		--- les parametres courants ------------
 		local m_facade
-		local m_composant_courant
+		local m_composant
 		
-		---- Structures ----
-		local m_drag			---- la structure gerant le drag de la fenetre ----
-		
-		--- ui  virtuel perso ---
-		local m_titre		
-		
-		-- les fenetre secondaires ---
-		local dialog_modele, dialog_longueurFixe
 		local largeur_params 		= 235
-		
+	
 		--- images bouton fermer ---
 		local murs_types 	= #("Gouttereaux + Pignons", "Gouttereaux", "Pignons")
 		local icos_fermer 	= #(	openBitMap "$userScripts\cp - GLOBAL\ico\ico_fermer_R.jpg" ,		-- Repos ----
 											openBitMap "$userScripts\cp - GLOBAL\ico\ico_fermer_S.jpg" ,		-- Survol ----
-											openBitMap "$userScripts\cp - GLOBAL\ico\ico_fermer_P.jpg" 			-- Pressé ----
-										)
+											openBitMap "$userScripts\cp - GLOBAL\ico\ico_fermer_P.jpg" )		-- Pressé ----
+										
 		
 		
-		local note_etagesMinMax = "\n0 : RdC\nValeurs négative pour compter les étages en descendant, à partir du dernier (-1: dernier étage)"
--- 		local note_etagesMinMax = ""
-		
-		local lv_mgr
 		
 		------------  UI	----------------------------------------------------------------------------------		
+		---- Structures perso pour rollout ----
+		local m_drag			---- Gere le drag de la fenetre ----
+		local m_titre			---- Gere le titre de la fenetre ----
+		
 		---- le bouton pour fermer la fenetre ----
 		ImgTag 'ui_btnFermer' "X" pos:[0,0] width:20 height:20 toolTip:"Fermer" style:#bmp_center align:#left
 
 		ImgTag 'ui_titre' "" pos:[8,4] width:66 height:18 align:#left
-	 
-			
 		edittext 'edt_nom_facade' "" pos:[7,25] width:200 height:16 align:#left
 			
 		spinner 'spn_etages' "" pos:[103,53] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
@@ -168,8 +158,8 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			redimensionnerFenetre  (getDialogSize	roll_urba_editeurFacades)
 			
 		)
-		fn set_facade	_facade = (
-			m_facade = _facade
+		fn set_facade		_facade = (
+			m_facade 	= _facade
 			actualiser ()
 		)
 		
@@ -185,8 +175,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		
 		
 		--------------- EVENEMENTS ------------------
-		----- Fanetre ---------------------------------
--- 		on roll_urba_editeurFacades open 	do initialiser ()
+		----- Fenetre ---------------------------------
 		on roll_urba_editeurFacades resized _taille 	do
 			redimensionnerFenetre 	_taille
 		on roll_urba_editeurFacades lbuttondown _pos 		do
@@ -205,16 +194,16 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		on ui_btnFermer mouseUp do
 			etatBtnFermer #Repos
 		on ui_btnFermer click do
-			m_plug.core.fermer_facadeEditeur 	()
+			m_plug.core.facadeEditeur_fermer 	()
 		
 		
 		
 		
 		--- parametres ---------------------
 		on edt_nom_facade entered txt 	do (
-			m_facade.nom 					=	txt
+			m_facade.nom 	=	txt
+			m_facade.enregistrer 	m_plug
 			m_plug.actualiser_rollouts ()
-			actualiser ()
 		)
 		
 		

@@ -4,10 +4,10 @@
 
 ----------- Construction des batiments----------------------------------------------------------------------
 struct str_construction (
-	
-		------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+		
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 		m_debug = true,
-		m_dbgPrefix ="urba | str_construire",
+		m_dbgPrefix ="urba | str_construction",
 		fn debug 	_txt  var:	 param:    =(
 			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 			catch ()
@@ -21,15 +21,21 @@ struct str_construction (
 		---- Membres ---------------------------------------------
 	public	
 		m_plug,
-		m_geo		= str_geometrie 	(),
+		m_geo		= 	str_geometrie 	(),
+		m_matID	= 	str_prefs_matID (),
 		
+		
+		
+		---- Outils -------------
 	private
-		m_outils					=	str_poly_outils (),
-		m_matID				= 	str_prefs_matID (),
-		modeles_import 		=	#(),		
+		m_outils_poly			=	str_poly_outils (),
+		m_outils_shape		=	str_shape_outils (),
 		
+		---- Constructeur -------------
+	private
+		cstr_composants 	= str_constructeur_composants (),
 		
-		---- tracé initial -------------------
+		---- tracé Logo  -------------------
 	private
 		logo = #(	[14.1994,37.717,0], 	[14.1994,-189.586,0], 	[287.927,-189.586,0], 	[287.927,139.601,0], 	[174.501,253.027,0], 	[174.501,479.879,0], 	[61.0754,479.879,0], 	[61.0754,366.453,0], \
 						[-52.3504,479.879,0], 	[-392.628,139.601,0], 	[-392.628,-189.586,0],	[-118.9,-189.586,0], 	[-118.9,37.717,0]),
@@ -43,9 +49,11 @@ struct str_construction (
 		
 		
 		
-		---- Fonctions ---------------------------------------------
+		
+		
+	---- Fonctions --------------------------------------------------------------------------------------------------------------------
 	private
-	
+		
 		------------ FILTRES-------------------------
 		fn filtrer_facades_parEtages   	_facades 		_etageCourant	 =(
 			
@@ -74,7 +82,7 @@ struct str_construction (
 		fn filtrer_facades_parMurs		_facades	_mur_longueur		_id_pt				=(
 			
 			local facades_result 		= #()
-			local est_pignon				= m_plug.trace.est_pignon		_id_pt
+			local est_pignon				= m_outils_shape.est_pignon		_id_pt
 			
 			---- si la sequence peut rentrer sur le segment de facade ------------
 			for fcde in _facades where fcde.sequence_longueur != 0 and fcde.sequence_longueur < _mur_longueur do (
@@ -116,6 +124,14 @@ struct str_construction (
 			)
 			result
 		),
+		
+		
+		---- elements simples-------------------
+		fn creer_murPlein		_longueur	 =(
+			local 	nvComposant 	= 	cstr_composants.murPlein	()
+			nvComposant.params.longueur 	= _longueur
+			nvComposant
+		),	
 		
 		
 		------------ TOITURES-------------------------		
@@ -389,7 +405,7 @@ struct str_construction (
 			polyop.bevelFaces m_plug.delegate 	faceAExtruder		0 	ep_couvertine
 			polyop.extrudeFaces m_plug.delegate 	faceAExtruder		ep_couvertine
 			
-			local faceToitsSurface = m_outils.etendreFaces  	m_plug.delegate 	#(_face)
+			local faceToitsSurface = m_outils_poly.etendreFaces  	m_plug.delegate 	#(_face)
 			
 			format "faceToitsSurface : %\n" faceToitsSurface
 			
@@ -478,7 +494,7 @@ struct str_construction (
 -- 			-------- DEBUG----------------------
 			
 			--- passerelle ----------
-			local creer_murPlein = m_plug.facades.creer_murPlein
+-- 			local creer_murPlein = m_plug.facades.creer_murPlein
 			
 			
 			------------ ANALYSE ------------------------
@@ -486,7 +502,7 @@ struct str_construction (
 			
 			local longueurFacade 		= distance _pt1 _pt2
 			local normDir					=	normalize ( _pt2 - _pt1)
-			local rot 						= m_outils.get_angle_vecteur		normDir
+			local rot 						= m_outils_poly.get_angle_vecteur		normDir
 			local longueur_sequence 	= _facade.sequence_longueur
 			local sequence 				= _facade.sequence 		
 			local b_espacer 				= _facade.mode == 4
@@ -698,14 +714,14 @@ struct str_construction (
 			local z_initial = copy z
 			
 			--- passerelle ----------
-			local creer_murPlein = m_plug.facades.creer_murPlein
+-- 			local creer_murPlein = m_plug.facades.creer_murPlein
 			
-			for ssTrace_string in m_plug.sousTraces do (
+-- 			for ssTrace_string in m_plug.sousTraces do (
 					z  = z_initial
 				
-					local sousTrace = str_ssTrace ()
+-- 					local sousTrace = str_ssTrace ()
 -- 					m_plug.trace.datasMgr.set_datas_string 		ssTrace_string 		sousTrace
-					m_plug.trace.sousTrace_fromString  	ssTrace_string 		sousTrace
+-- 					m_plug.trace.sousTrace_fromString  	ssTrace_string 		sousTrace
 -- 				set_datas_string 		_datas_string 		_element 	
 				
 			
@@ -714,15 +730,15 @@ struct str_construction (
 				for n_etage = 0 to m_plug.niveaux_nbre do (
 					
 					--- filtre par etages ---------------
-					local facades_total					= m_plug.facades.get_facades ()
-					local facades_etages 				= 	filtrer_facades_parEtages		facades_total 	n_etage
-					local on_a_une_facade_etage 	= facades_etages.count > 0
-					local listePts 							= for idPt in sousTrace.trace collect m_plug.surface_points[idPt]
+					local facades_total		= 	m_plug.core.get_facades ()
+					local facades_etages 	= 	filtrer_facades_parEtages		facades_total 		n_etage
+					local onA_uneFacade 	= 	facades_etages.count > 0
+					local listePts 				= 	for pt in m_plug.surface_points	 collect pt
 					
 					---- boucle  murs ---------------------
 					for id_pt = 1 to listePts.count do	 (
 						
-						local on_a_une_facade_mur = false
+						local onA_unMur = false
 						
 						--- les 2 points du mur ----------
 						local pt_mur_1 = listePts[ id_pt ]
@@ -735,7 +751,7 @@ struct str_construction (
 						local	norm_mur 			= normalize ( pt_mur_2 -	pt_mur_1 )
 						
 						---- si on  a des facades ------
-						if 	on_a_une_facade_etage  then (
+						if 	onA_uneFacade  then (
 						
 							---  filtre par  murs  ---------------
 							local facades_mur		=	filtrer_facades_parMurs		facades_etages	mur_longueur	id_pt
@@ -747,7 +763,7 @@ struct str_construction (
 							if facade_choisi != undefined and facade_choisi.sequence.count > 0 then (
 							--- si on a une facade, on construit la sequence --------------
 								creer_sequence		pt_mur_1		pt_mur_2	 facade_choisi			
-								on_a_une_facade_mur = true
+								onA_unMur = true
 							)  
 							
 						) else (
@@ -761,7 +777,7 @@ struct str_construction (
 							local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	)
 							
 							local compoTmp = creer_murPlein		mur_longueur 	
-							ptsIDs_accroche 	= compoTmp.param[1].construire	 ptsIDs_accroche		norm_mur 
+							ptsIDs_accroche 	= compoTmp.construire	m_plug 		 ptsIDs_accroche		norm_mur 
 							
 						)
 						
@@ -779,7 +795,7 @@ struct str_construction (
 				) --- fin boucle etages -------------
 					
 				
-			)
+-- 			)
 			
 			m_geo.facesContour	 	m_plug.surface_points		z 	m_plug.ep_dalle
 			z += ep_dalle
@@ -812,9 +828,12 @@ struct str_construction (
 		fn initialiser _plug =(
 			m_plug = _plug
 			m_geo.initialiser	_plug
+			cstr_composants.m_plug = _plug
 			
 		),
 		fn actualiser 	 =(
+			
+			debug "actualiser"
 			
 			--- on vide la geametrie ------------
 			m_geo.vider ()
@@ -836,7 +855,7 @@ struct str_construction (
 					
 					---- Construction des differents elements -----
 					ssBassement 		&zCourant					
--- 					etages				&zCourant					
+					etages				&zCourant					
 -- 					toit					&zCourant
 					/* 
 					--- Mapping de maniere global, TODO:generer par  composants---

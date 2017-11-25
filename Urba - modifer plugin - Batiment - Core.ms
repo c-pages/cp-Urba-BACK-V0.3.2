@@ -2,9 +2,9 @@
 
 include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - structures secondaires.ms"
 include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Geometrie.ms"
-include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Construction.ms"
 include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Surfaces.ms"
 include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Elements.ms"
+include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Construction.ms"
 
 
 
@@ -69,6 +69,8 @@ struct str_batiment_core (
 	---- Parametres --------------------
 		fn charger =(
 			
+			debug "charger"
+			
 			--- les facades --------
 			for id in m_plug.fac_ids do (
 				nvFacade = mgr_facades.creer()
@@ -124,7 +126,7 @@ struct str_batiment_core (
 		), */
 		
 	----- Editeur de facades -----------------
-		fn ouvrir_facadeEditeur 	_index	=(
+		fn facadeEditeur_ouvrir 	_index	=(
 			debug "ouvrir_facadeEditeur"
 			createDialog 	roll_facades	style:				#(#style_resizing) 	\
 													pos:					roll_facades_pos		\
@@ -135,16 +137,16 @@ struct str_batiment_core (
 			roll_facades.set_facade 	( mgr_facades.get_parIndex	_index )
 			
 		),
-		fn fermer_facadeEditeur 		=(
+		fn facadeEditeur_fermer 		=(
 			destroyDialog 	roll_facades
 		),
 		
 		
 		
 	----- Parametres du plug -----------------------
-		--- lire/ecrire -------------
-		fn lire_params 	=(),
-		fn ecrire_params	=(),
+-- 		--- lire/ecrire -------------
+-- 		fn lire_params 	=(),
+-- 		fn ecrire_params	=(),
 		
 		--- Gestion ---------------
 		fn creer_facade =(
@@ -154,12 +156,18 @@ struct str_batiment_core (
 		
 		
 	----- Accessions -----------------------
-		fn get_facades_noms =mgr_facades.get_noms (),
+		fn get_facades_noms 	=	mgr_facades.get_noms (),
+		fn get_facades			=	mgr_facades.get_items (),
 		
-		fn choisir_surface 	_nodeTHIS		_shape 		=(
+		fn get_construction		= m_construction,
+		fn get_geo					= m_construction.m_geo,
+		fn get_matID				= m_construction.m_matID,
+		
+	----- Surface ---------------------
+		fn assigner_surface 		_nodeTHIS		_shape 		=(
 			
 			_nodeTHIS.transform = _shape.transform
-			
+			mgr_surface.assigner	_shape
 -- 			activer_ecouteurs 	_nodeTHIS	
 			
 			actualiser ()

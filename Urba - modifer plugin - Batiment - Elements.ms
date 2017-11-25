@@ -5,19 +5,22 @@
 struct 	str_composant (
 	
 	------ Membres ------------------------------------------------------------------------------
-	private
+		
+	public
 		---- Parametres -----------------------------------
-		m_id					=	"#",		
-		m_type				=	undefined,
-		m_nom				=	"",
-		m_params			=	undefined,
+		id						=	"#",		
+		type					=	undefined,
+		nom					=	"",
+		params				=	undefined,
 		
 		---- Pointeurs -----------------------------------
-		m_plugThis		=	undefined,
-		m_construction	=	undefined,
-		m_geo				=	undefined,
+	private
+-- 		m_plug				=	undefined,
+-- 		m_construction	=	undefined,
+-- 		m_geo				=	undefined,
 		m_matID 			= 	str_prefs_matID (),
 		
+	private		
 		---- Rollout -----------------------------------
 		m_dialog 			= undefined,
 		
@@ -27,34 +30,34 @@ struct 	str_composant (
 	------ Fonctions ------------------------------------------------------------------------------
 	public
 		---- Mutations -----------------------
-		fn set_dialog 		_dialog 				= ( m_dialog 				= _dialog ),
+		fn set_dialog 			_dialog 			= ( m_dialog 				= _dialog ),
 		fn set_construire 	_fnConstruire 	= ( fnVirt_construire 	= _fnConstruire ),
-		fn set_params		_params				= ( m_params				= _params ),
+		fn set_params			_params			= ( params					= _params ),
 		
 		---- Accessions -----------------------
 		fn get_dialog			=	m_dialog,
-		fn get_params			=	m_params,
 		
 		--- Initialisations -----------------------
 		fn initialiser_dialog 	_roll_parent 	=(
 			dialog.m_rollPrt	= 	_roll_parent
-			dialog.m_param	=	m_params
+			dialog.m_param	=	params
 			dialog.actualiser()
 		),
-		fn initialiser 			_plugThis	_type	_nom 	=(
+		fn initialiser 		/* 	_plug		 */	_type	_nom 	=(
 			---- id unique ----
-			m_id += _type
-			for i= 1 to 10 do m_id += ( random 0 9 ) as string	
+			id += _type
+			for i= 1 to 10 do id += ( random 0 9 ) as string	
 			
-			m_type 				=	_type 			
-			m_nom				=	_nom
-			m_plugThis			=	_plugThis
-			m_construction 	= 	m_plugThis.construction
-			m_geo				=	m_plugThis.geo	
+-- 			m_plug			=	_plug
+-- 			m_geo			=	_plug.core.get_geo ()
+			
+			type 				=	_type 			
+			nom				=	_nom
+			
 		),
 		
 		---- Construction du mesh 	( fonction virtuelle ) -----------------------
-		fn construire			= fnVirt_construire		(),
+		fn construire	_plug	 	pts_accroches		_normDir				= 		fnVirt_construire	 _plug	pts_accroches		_normDir		this	,
 		
 		
 		---- Destructeur/Copies	-----------------
@@ -72,7 +75,7 @@ struct 	str_composant (
 
 struct 	str_constructeur_composants (
 	
-		m_this,
+		m_plug,
 		
 		---- Espacement -------------------------------------------
 		fn espacement =(
@@ -85,11 +88,11 @@ struct 	str_constructeur_composants (
 									local m_compo, m_rollPrt, m_param
 									fn actualiser =()
 								)
-			fn fnConstruire   pts_accroches		_normDir		=()
+			fn fnConstruire  	_plug	 	pts_accroches		_normDir			_composant		=()
 			
 			--- Creation du composant --------------
-			local nvComposant = str_facade_composant 	()
-			nvComposant.initialiser			m_this			#FAC_COMP_ESP		"Espacement"
+			local nvComposant = str_composant 	()
+			nvComposant.initialiser			m_plug			#FAC_COMP_ESP		"Espacement"
 			nvComposant.set_dialog		dialog
 			nvComposant.set_params	 	params
 			nvComposant.set_construire 	fnConstruire
@@ -128,39 +131,53 @@ struct 	str_constructeur_composants (
 									)
 									
 								)
-			fn fnConstruire  pts_accroches		_normDir		 		= (
+			fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 									
+									
+							-------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
+									local ptr_plug				= 	_plug
+									local ptr_composant  	= 	_composant
+									local ptr_geo 				= 	ptr_plug.core.get_geo ()
+									local matID				=	ptr_plug.core.get_matID ()
+									
+							-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
+									local ep_dalle 		= ptr_plug.ep_dalle
+									local ht_niveaux 		= ptr_plug.niveaux_hauteur
+									local longueur 		= ptr_composant.params.longueur
+									
+									
+							-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 									--- Result -------------
 									local pt_result_1, pt_result_2, pt_result_3
 									
 									--- Vecteurs ------------
-									local vec_ep_dalle 	= [0,0,1] 		* 	m_this.ep_dalle		
-									local vec_ht 			= [0,0,1] 		* 	m_this.niveaux_hauteur				
-									local vec_longueur 	= _normDir 	* 	m_compo.longueur
+									local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
+									local vec_ht 			= [0,0,1] 		* 	ht_niveaux
+									local vec_longueur 	= _normDir 	* 	longueur
 									
 									--- Points d'accroche ------------
 									local id_ptAccroche_1 	= pts_accroches[1]
 									local id_ptAccroche_2 	= pts_accroches[2]
 									local id_ptAccroche_3 	= pts_accroches[3]
 									
-									local ptAccroche_1		=	polyop.getVert 	m_this.delegate		id_ptAccroche_1	
-									local ptAccroche_2		=	polyop.getVert 	m_this.delegate		id_ptAccroche_2	
-									local ptAccroche_3		=	polyop.getVert 	m_this.delegate		id_ptAccroche_3	
+									local ptAccroche_1		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	
+									local ptAccroche_2		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	
+									local ptAccroche_3		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	
 									
 									
 									
-									---- LA DALLE  -----------------------------------------------------------------------				
+									---- LA DALLE  -----------------------------------------------------------------------			
 									-------	Creation des points 	--------
 									local pt_2 		= ptAccroche_1		+ 	vec_longueur
 									local pt_3 		= pt_2					+	vec_ep_dalle
 									
 									--- creation des points --------------
 									local pts_pos 	= #( pt_2, pt_3 )
-									local pts_ids 	= m_geo.points 	pts_pos		
+									local pts_ids 	= ptr_geo.points 	pts_pos		
 									
 									-------	Creation des faces 	--------
-									local nvlFace = m_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		 	
-									polyop.setFaceMatID	 m_this.delegate		nvlFace	  ( matID.mur + 1 )
+									local nvlFace = ptr_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		 	
+									polyop.setFaceMatID	 ptr_plug.delegate		nvlFace	  ( matID.mur + 1 )
 									
 									--- Result -------------
 									pt_result_1 = pts_ids[1]
@@ -174,11 +191,11 @@ struct 	str_constructeur_composants (
 									
 									--- creation des points --------------
 									local pts_pos 	= #( pt_3 )
-									local pts_ids 	= m_geo.points 	pts_pos		
+									local pts_ids 	= ptr_geo.points 	pts_pos		
 									
 									-------	Creation des faces 	--------
-									local nvlFace = m_geo.face 		#(	 		id_ptAccroche_2, 		pt_result_2, 		pts_ids[1], 		id_ptAccroche_3	)		 	
-									polyop.setFaceMatID	 m_this.delegate		nvlFace	  matID.mur
+									local nvlFace = ptr_geo.face 		#(	 		id_ptAccroche_2, 		pt_result_2, 		pts_ids[1], 		id_ptAccroche_3	)		 	
+									polyop.setFaceMatID	 ptr_plug.delegate		nvlFace	  matID.mur
 									
 									--- Result -------------
 									pt_result_3 = pts_ids[1]
@@ -189,10 +206,10 @@ struct 	str_constructeur_composants (
 									
 								)
 			
-			local nvComposant = str_facade_composant 	()
-			nvComposant.initialiser			m_this			#FAC_COMP_MUP		"Mur plein"
+			local nvComposant = str_composant 	()
+			nvComposant.initialiser			#FAC_COMP_MUP		"Mur plein"
 			nvComposant.set_dialog		dialog
-			nvComposant.set_params	 	params
+			nvComposant.set_params	 	( params() )
 			nvComposant.set_construire 	fnConstruire
 			
 			nvComposant
@@ -231,13 +248,13 @@ struct 	str_constructeur_composants (
 											)
 											
 									)
-			fn fnConstruire  	pts_accroches		_normDir				 		= (
+			fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 				
 				--- Result -------------
 				local pt_result_1, pt_result_2, pt_result_3
 				
 				--- Vecteurs ------------
-				local vec_ep_dalle 	= [0,0,1] 			* 	m_this.ep_dalle			
+				local vec_ep_dalle 	= [0,0,1] 			* 	m_plug.ep_dalle			
 				local vec_longueur 	= _normDir 		* 	m_compo.longueur
 				local norm_balcon	= _normDir * rotateZ ( matrix3 1 ) -90
 				local vec_largeur		= norm_balcon 	*	 largeur				
@@ -247,9 +264,9 @@ struct 	str_constructeur_composants (
 				local id_ptAccroche_2 	= pts_accroches[2]
 				local id_ptAccroche_3 	= pts_accroches[3]
 				
-				local ptAccroche_1		=	polyop.getVert 	m_this.delegate		id_ptAccroche_1	
-				local ptAccroche_2		=	polyop.getVert 	m_this.delegate		id_ptAccroche_2	
-				local ptAccroche_3		=	polyop.getVert 	m_this.delegate		id_ptAccroche_3	
+				local ptAccroche_1		=	polyop.getVert 	m_plug.delegate		id_ptAccroche_1	
+				local ptAccroche_2		=	polyop.getVert 	m_plug.delegate		id_ptAccroche_2	
+				local ptAccroche_3		=	polyop.getVert 	m_plug.delegate		id_ptAccroche_3	
 				
 				
 				-------	Placement des points 	--------
@@ -265,19 +282,19 @@ struct 	str_constructeur_composants (
 				
 				--- creation des points --------------
 				local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
-				local pts_ids 	= m_geo.points 	pts_pos		
+				local pts_ids 	= ptr_geo.points 	pts_pos		
 				
 				-------	Creation des faces 	--------
-				local nvlFace = m_geo.face 		#(	pts_ids[1], 		pts_ids[5], 		pts_ids[8], 		pts_ids[4] )		 			
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = m_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[7] , 	pts_ids[8] )		 				
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )					
-				local nvlFace = m_geo.face 		#(	pts_ids[6], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[7] )		 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = m_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6], 		pts_ids[5] )		 		
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = m_geo.face 		#(	pts_ids[8], 		pts_ids[7], 		pts_ids[3], 		pts_ids[4] )		 				
-				polyop.setFaceMatID	 m_this.delegate		nvlFace	   ( matID.mur + 1 )
+				local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[5], 		pts_ids[8], 		pts_ids[4] )		 			
+				polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )			
+				local nvlFace = ptr_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[7] , 	pts_ids[8] )		 				
+				polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )					
+				local nvlFace = ptr_geo.face 		#(	pts_ids[6], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[7] )		 		
+				polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )			
+				local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6], 		pts_ids[5] )		 		
+				polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )			
+				local nvlFace = ptr_geo.face 		#(	pts_ids[8], 		pts_ids[7], 		pts_ids[3], 		pts_ids[4] )		 				
+				polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )
 				
 				
 				
@@ -286,8 +303,8 @@ struct 	str_constructeur_composants (
 			)
 			
 			--- Creation du composant --------------
-			local nvComposant = str_facade_composant 	()
-			nvComposant.initialiser			m_this			#FAC_COMP_BAL		"Balcon"
+			local nvComposant = str_composant 	()
+			nvComposant.initialiser			#FAC_COMP_BAL		"Balcon"
 			nvComposant.set_dialog		dialog
 			nvComposant.set_params	 	params
 			nvComposant.set_construire 	fnConstruire
@@ -302,11 +319,11 @@ struct 	str_constructeur_composants (
 			--- les parametres du composant --------------
 			local dialog  = rollout dialog "Balcon fin" (
 								)
-			fn fnConstruire   pts_accroches		_normDir		=()
+			fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= ()
 			
 			--- Creation du composant --------------
-			local nvComposant = str_facade_composant 	()
-			nvComposant.initialiser			m_this			#FAC_COMP_BAF		"Balcon fin"
+			local nvComposant = str_composant 	()
+			nvComposant.initialiser			#FAC_COMP_BAF		"Balcon fin"
 			nvComposant.set_dialog		dialog
 			nvComposant.set_construire 	fnConstruire
 			
@@ -333,6 +350,9 @@ struct 	str_facade (
 		
 		
 	---------- MEMBRES	--------------------------------------------------------------------------------------
+-- 	private
+-- 		cstr_composants			= str_constructeur_composants (),
+		
 	public
 		---- Base	-----------
 		nom 							=	"Façade",
@@ -370,7 +390,7 @@ struct 	str_facade (
 		
 		
 		---- Composants -----------------
-		fn ajouter_composant 	_type 	=(
+		fn ajouter_composant 		_type 	=(
 			case _type of (
 				#espacement: 	()
 			)
@@ -399,9 +419,9 @@ struct 	str_facade (
 		
 		
 		---- Parametres	-----------------
-		fn enregistrer 	_plug 	=(
+		fn enregistrer 		_plug 	=(
 			
-			debug "ecrire"
+			debug "enregistrer"
 			
 			--- on cherche s'il existe deja comme parametre -----
 			local index_facade = 0
@@ -426,6 +446,9 @@ struct 	str_facade (
 		),
 		
 		fn charger	 	_plug		_id  =(
+			
+			debug "charger"
+			debug "_id" var:_id
 			
 			--- on cherche s'il existe deja comme parametre -----
 			local index_facade = 0

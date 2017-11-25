@@ -31,16 +31,17 @@
 
 parameters params_global 		rollout:roll_global		(
 	
-	------- Surface			------------------
-	surface_node			type:#node 									ui:btn_pick_surface
-	surface_points			type:#point3Tab 		tabSize:0 			tabSizeVariable:true
+	------- Surface		------------------
+	surface_node				type:#node 								-- ui:btn_pick_surface
+	surface_points_base		type:#point3Tab 		tabSize:0 		tabSizeVariable:true
+	surface_points				type:#point3Tab 		tabSize:0 		tabSizeVariable:true
 	
 	------- Divers			------------------
 	niveaux_hauteur		type: #float 			default:250.		ui:spn_hauteur
 	niveaux_nbre			type: #integer			default:1			ui:spn_nbres
 	ep_dalle					type: #float 			default:20.			--ui:spn_ep_dalle
 	
-	------- Orientation			------------------
+	------- Orientation	------------------
 	axe_principal			type:#matrix3	
 	orientation				type:#float				default:0.			ui:spn_rotation_axeP
 	
@@ -117,7 +118,7 @@ parameters params_toiture 		rollout:roll_toiture	(
 --------------- ROLLOUT  ----------------------------------------------------------------------------------------------------------------------	
 -------------------------------------------------------------------------------------------------------------------------------------------------
 
-rollout roll_global 		"Global" 		(
+rollout roll_global 		"Global" 		rolledUp:false	(
 	
 -- 	local regle_sssurface_courant
 	
@@ -136,6 +137,7 @@ rollout roll_global 		"Global" 		(
 	label 'lbl_hauteur' "Htr. des étages:" pos:[5,59] width:76 height:15 align:#left
 	
 	
+	fn actualiser =()
 -- 	button 'btn_ajouter_division' "+" pos:[134,76] width:16 height:16 enabled:true toolTip:"surface minimum." highlightColor:(color 255 255 0) align:#left
 -- 	button 'btn_supprimer_division' "-" pos:[149,76] width:16 height:16 enabled:true toolTip:"surface minimum." highlightColor:(color 255 255 0) align:#left
 	
@@ -291,9 +293,17 @@ rollout roll_global 		"Global" 		(
 	 --------------------  CLEANAGE -------------------- */
 
 	on btn_pick_surface picked _shape	 do
-		core.choisir_surface 	$		_shape
+		core.assigner_surface	 	$		_shape
+	
+	on spn_nbres changed arg do
+		core.actualiser ()
+	
+	on spn_hauteur changed arg do
+		core.actualiser ()
+	
+	
 )
-rollout roll_facades 		"Façades"	(
+rollout roll_facades 		"Façades"	rolledUp:false	(
 
 	listbox 'lbx_facades' "" pos:[5,15] width:165 height:9 align:#left 
 	button 'btn_ajouterFacade' "+" pos:[141,-1] width:16 height:16 align:#left
@@ -320,7 +330,7 @@ rollout roll_facades 		"Façades"	(
 		actualiser ()
 	)
 	on lbx_facades doubleClicked arg do
-		core.ouvrir_facadeEditeur	 	lbx_facades.selection 
+		core.facadeEditeur_ouvrir	 	lbx_facades.selection 
 	
 	
 	/* --------------------  CLEANAGE --------------------
@@ -360,7 +370,7 @@ rollout roll_facades 		"Façades"	(
 			
 	*/ --------------------  CLEANAGE --------------------
 )
-rollout roll_toiture 		"Toiture"		(
+rollout roll_toiture 		"Toiture"		rolledUp:false	(
 	dropdownList 'ddl_toiture' "" pos:[88,1] width:85 height:21 items:#("Plate", "Acrotère", "1 pan", "2 pans") align:#left
 	label 'lbl_facade' "Toiture:" pos:[5,7] width:38 height:15 align:#left
 -- 	radiobuttons 'rdo_pentes' "" pos:[89,52] width:29 height:32 labels:#("1", "2") align:#left
@@ -382,6 +392,7 @@ rollout roll_toiture 		"Toiture"		(
 	label 'lbl_composants' "Composants:" pos:[5,52] width:64 height:15 align:#left
 	
 	
+	fn actualiser =()
 	/* --------------------  CLEANAGE --------------------
 	
 	fn actualiser =(
@@ -425,7 +436,7 @@ rollout roll_toiture 		"Toiture"		(
 */ --------------------  CLEANAGE --------------------
 )
 rollout roll_surface 		"Surface" 	rolledUp:true	(
-		
+	
 	checkbox 'chk_aplanir' "Aplanir" pos:[6,34] width:62 height:13 align:#left
 	checkbox 'chk_ortho' "Orthonorm." pos:[6,4] width:76 height:13 align:#left
 	spinner 'spn_aplanir' "" pos:[87,33] width:80 height:16 range:[0,40,0] align:#left
@@ -437,20 +448,24 @@ rollout roll_surface 		"Surface" 	rolledUp:true	(
 	spinner 'spn_aligner' "" pos:[87,48] width:80 height:16 range:[0,100,0] align:#left
 	
 	checkbox 'chk_projeter' "Projeter" pos:[6,64] width:75 height:13 align:#left
-
-
-	
 	
 	fn actualiser =(
 		
 	)
 	
-
+	on roll_surface 	open 					do	actualiser ()
 	
+	on chk_aplanir 	changed state  	do	core.actualiser ()
+	on chk_ortho 		changed state  	do	core.actualiser ()
+	on chk_souder 	changed state  	do	core.actualiser ()
+	on chk_aligner 	changed state  	do	core.actualiser ()
+	on chk_projeter 	changed state  	do	core.actualiser ()
 	
+	on spn_aplanir 	changed state  	do	core.actualiser ()
+	on spn_souder	changed state  	do	core.actualiser ()
+	on spn_ortho	 	changed state  	do	core.actualiser ()
+	on spn_aligner 	changed state  	do	core.actualiser ()
 	
-	on roll_surface open do
-		actualiser ()
 )
 rollout roll_presets 		"Presets" 	rolledUp:true	(
 	
@@ -509,7 +524,7 @@ rollout roll_presets 		"Presets" 	rolledUp:true	(
 		
 	*/ --------------------  CLEANAGE --------------------
 )
-rollout roll_viewport 	"Viewport"	(
+rollout roll_viewport 	"Viewport"	rolledUp:false	(
 	label 'lbl16' "Surface:" pos:[5,90] width:43 height:14 align:#left
 	label 'lbl_surface' "" pos:[85,90] width:78 height:16 align:#left 
 	label 'lbl_surfacePts' "Tracé (origin.):" pos:[5,105] width:70 height:14 align:#left
@@ -589,9 +604,6 @@ rollout roll_aPropos 		"A propos" 	rolledUp:true	(
 	HyperLink 'hpl2' "GitHub" pos:[127,17] address:"https://github.com/c-pages/cp-Urba" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
 	label 'lbl6' "2017" pos:[5,17] align:#left
 )
-
-
-
 
 
 
