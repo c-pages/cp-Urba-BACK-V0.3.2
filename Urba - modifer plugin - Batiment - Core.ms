@@ -34,12 +34,12 @@ struct str_batiment_core (
 		mgr_surface			= str_surfaces (),
 		
 		---  Rollouts flottants -------------------
-		roll_facades 		= 	filein	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - rollout facade.ms",
-		roll_facades_pos		= [500,500],
+		roll_facades 			= 	filein	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - rollout facade.ms",
+		roll_facades_pos	= [500,500],
 		roll_facades_taille	= [500,300],
 		
 		--- Sous structures  -------------------
-		m_construction	= str_construction 	(),
+		m_construction		= str_construction 	(),
 		
 		
 		----- Ecouteurs	----------------------
@@ -50,7 +50,7 @@ struct str_batiment_core (
 	private
 	----- Actions sur le node -----------------------
 		fn centrer_pivot 		_node	=(
-		
+			
 			_node.transform = (matrix3 1)
 			ResetPivot 			_node
 			
@@ -73,7 +73,8 @@ struct str_batiment_core (
 			
 			--- les facades --------
 			for id in m_plug.fac_ids do (
-				nvFacade = mgr_facades.creer()
+				debug "charger" var:id
+				nvFacade = mgr_facades.creer	enregistrer:false
 				nvFacade.charger 	m_plug		id
 			)
 			
@@ -123,10 +124,10 @@ struct str_batiment_core (
 			roll_facades.set_facade 	( mgr_facades.get_parIndex	_index )
 			
 		),
-		fn facadeEditeur_fermer 		=(
+		fn facadeEditeur_fermer 			=(
 			destroyDialog 	roll_facades
 		),
-		fn creer_facade =(
+		fn creer_facade 							=(
 			local nv_facade 	= mgr_facades.creer ()
 			nv_facade
 		),
@@ -134,7 +135,7 @@ struct str_batiment_core (
 		
 	----- Accessions -----------------------
 		fn get_facades_noms 	=	mgr_facades.get_noms (),
-		fn get_facades			=	mgr_facades.get_items (),
+		fn get_facades				=	mgr_facades.get_items (),
 		
 		fn get_construction		= m_construction,
 		fn get_geo					= m_construction.m_geo,

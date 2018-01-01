@@ -78,29 +78,28 @@ parameters params_viewport				rollout:roll_viewport	(
 parameters params_facades 				rollout:roll_facades	(
 	
 	---- générale -----------
-	fac_noms 						type:#stringTab 		tabSize:0  			tabSizeVariable:true		--ui:lbx_facades	
-	fac_ids 							type:#stringTab 		tabSize:0  			tabSizeVariable:true
-	fac_probabilites				type:#floatTab		tabSize:0 			tabSizeVariable:true
+	fac_noms 							type:#stringTab 	tabSize:0  		tabSizeVariable:true		--ui:lbx_facades	
+	fac_ids 								type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	
 	--- Limiteurs - Etages	---
 	fac_etagesMin_uses			type:#boolTab		tabSize:0 			tabSizeVariable:true
-	fac_etagesMins				type:#intTab			tabSize:0 			tabSizeVariable:true
-	fac_etagesMax_uses		type:#boolTab		tabSize:0 			tabSizeVariable:true
-	fac_etagesMaxs				type:#intTab			tabSize:0 			tabSizeVariable:true
+	fac_etagesMins					type:#intTab			tabSize:0 			tabSizeVariable:true
+	fac_etagesMax_uses			type:#boolTab		tabSize:0 			tabSizeVariable:true
+	fac_etagesMaxs					type:#intTab			tabSize:0 			tabSizeVariable:true
 	
 	--- Limiteurs - longueurs	---
 	fac_longueurMin_uses		type:#boolTab		tabSize:0 			tabSizeVariable:true
 	fac_longueurMins				type:#floatTab		tabSize:0 			tabSizeVariable:true
 	fac_longueurMax_uses		type:#boolTab		tabSize:0 			tabSizeVariable:true
-	fac_longueurMaxs			type:#floatTab		tabSize:0 			tabSizeVariable:true
+	fac_longueurMaxs				type:#floatTab		tabSize:0 			tabSizeVariable:true
 	
 	--- Limiteurs - Murs	---
-	fac_murs						type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:les deux	2:gouttereaux	3:pignons )	----
-	fac_modes						type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:repeter	2:etrier			3:centrer )	----
+	fac_murs							type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:les deux	2:gouttereaux	3:pignons )	----
+	fac_modes							type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:repeter	2:etrier			3:centrer )	----
 	
 	--- Sequence	---
-	fac_sequences				type:#stringTab 		tabSize:0 			tabSizeVariable:true
-	fac_sequence_longueurs	type:#stringTab 		tabSize:0 			tabSizeVariable:true
+	fac_sequences					type:#stringTab 	tabSize:0 			tabSizeVariable:true
+	fac_sequence_longueurs		type:#stringTab 	tabSize:0 			tabSizeVariable:true
 	
 )
 parameters params_toiture 				rollout:roll_toiture	(
@@ -173,6 +172,7 @@ rollout roll_optimSurface 		"Optimisation Surface" 		rolledUp:true	(
 	checkbox 'chk_projeter' "Projeter" pos:[6,64] width:75 height:13 align:#left
 	
 	fn actualiser =(
+		
 		spn_souder.enabled 				= chk_souder.checked
 		spn_souder.Indeterminate 	= not chk_souder.checked
 		
@@ -212,7 +212,7 @@ rollout roll_optimSurface 		"Optimisation Surface" 		rolledUp:true	(
 	
 	on spn_aplanir 	changed state  		do	core.actualiser ()
 	on spn_souder	changed state  		do	core.actualiser ()
-	on spn_ortho	 	changed state  	do	core.actualiser ()
+	on spn_ortho	 	changed state  		do	core.actualiser ()
 	on spn_aligner 	changed state  		do	core.actualiser ()
 	
 )
@@ -224,20 +224,21 @@ rollout roll_facades 		"Façades"		rolledUp:false	(
 	button 'btn_dupliquer' "Dup" pos:[96,0] width:27 height:16 align:#left
 	
 	fn actualiser =(
--- 			debug "actualiser"
 		
-		/* enabled = a_un_surface
+		/*
+		enabled = a_un_surface
 		lbx_facades.enabled 			= enabled
 		btn_ajouterFacade.enabled 	= enabled
 		btn_supprimerFacade.enabled = enabled		
-		 */
+		*/
+		
 		lbx_facades.items =  core.get_facades_noms ()
 		
 		
 	)
 	 
 
-	on roll_facades 			open 			do	actualiser()
+	on roll_facades 				open 			do	actualiser()
 	on btn_ajouterFacade 	pressed 		do	(
 		core.creer_facade ()
 		actualiser ()

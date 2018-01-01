@@ -241,20 +241,16 @@ struct str_mgr_arrayParametres (
 		
 		---- Manager de presets -------------
 		mgr_datas 				= str_datasToString 	m_prt:this,
-	
-	
+		
 	---- FONCTIONS ----------------------------------------------------------------------------------------------------------------
 
-		
-		
-		
 	---- INTERFACE -------------------------------------------
 	public
 		fn initialiser		class:  plug: =(
 			if class== unsupplied or plug == unsupplied do
 				messagebox "str_mgr_arrayParametres : Probleme d'initialisation"
 			m_class 	= 	class
-			m_plug	=	plug
+			m_plug		=	plug
 		),
 		fn actualiser = (
 			
@@ -273,19 +269,20 @@ struct str_mgr_arrayParametres (
 			m_items[_index]			
 		),
 		
-		fn get_noms =	for item in m_items collect item.nom,
-		fn get_items = 	m_items,
-		
+		fn get_noms 	=	for item in m_items collect item.nom,
+		fn get_items	= 	m_items,
 		
 		---- Creation/Suppression ----
-		fn creer			=	(
+		fn creer		enregistrer:true		=(
 			debug "creer"
 			local nv_element = m_class ()
-			append m_items nv_element
+			append		m_items	nv_element
 			
-			nv_element.enregistrer	 	m_plug
+			if enregistrer do
+				nv_element.enregistrer	 	m_plug
 			
 			nv_element
+			
 		),	
 		
 		fn supprimer 	=	()
@@ -303,7 +300,7 @@ struct str_mgr_arrayParametres (
 struct str_shape_outils (
 
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-	m_debug = true,
+	m_debug = false,
 	m_dbgPrefix ="urba | str_shape_outils",
 	fn debug 	_txt  var:	 param:    =(
 		try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
@@ -1533,5 +1530,5 @@ struct str_poly_outils (
 			)
 		) -- fin else
 		
-)	-- fin struct outils
+)	-- fin struct outils poly
 

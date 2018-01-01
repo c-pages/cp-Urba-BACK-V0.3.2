@@ -74,7 +74,6 @@ extends:Editable_poly replaceUI:true version:0
 	)
 	
 	--------------- IMPORTS  ----------------------------------------------------------------------------------------------------------------------
-	
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Core.ms"
 	
 	
@@ -87,11 +86,12 @@ extends:Editable_poly replaceUI:true version:0
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Facades.ms"
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - tracé.ms"
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Construire.ms"
-	 */
+	*/
 	
 	--------------- PRé-DéCLARATIONS  ----------------------------------------------------------------------------------------------------------------------
 	----  rollouts ------------------
 	local roll_global, roll_niveaux,  roll_presets,   roll_toiture, roll_infos , roll_facades , roll_trace
+	
 	
 	----  structures ------------------
 -- 	local geo,  trace,  construire
@@ -102,10 +102,10 @@ extends:Editable_poly replaceUI:true version:0
 	
 	
 	
--- 	local params_aEnregistrer = 	#(		/*----	Global  	----*/			#niveaux_hauteur, 			#niveaux_nbre, 	#axeP_orientation,
--- 													/*----	Toiture 	----*/		#toit_pente, 					#toit_type, 		#toit_hauteur ,
--- 													/*----	Tracé  	----*/		#trace_optimiser, 			#trace_souder, 	#trace_ortho, 		#seuil_optimiser, 				#seuil_souder, 	#seuil_ortho , 	#trace_aligner, 	#seuil_aligner ,	-- #trace_decouper, 
--- 													/*----	 Facades  	----*/		#facades_composants , 		#facades_items, 	#facades_modeles, 	#facades_parametriques
+-- 	local params_aEnregistrer = 	#(		/*----	Global  	----*/		#niveaux_hauteur, 			#niveaux_nbre, 	#axeP_orientation,
+-- 												/*----	Toiture 	----*/		#toit_pente, 					#toit_type, 		#toit_hauteur ,
+-- 												/*----	Tracé  	----*/		#trace_optimiser, 			#trace_souder, 	#trace_ortho, 		#seuil_optimiser, 				#seuil_souder, 	#seuil_ortho , 	#trace_aligner, 	#seuil_aligner ,	-- #trace_decouper, 
+-- 												/*----	 Facades  	----*/		#facades_composants , 		#facades_items, 	#facades_modeles, 	#facades_parametriques
 -- 											)
  
 	
@@ -116,13 +116,10 @@ extends:Editable_poly replaceUI:true version:0
 	---------------STRUCTURES  ----------------------------------------------------------------------------------------------------------------------
 	local core = str_batiment_core  	()
 	
-	
 	--------------- import des PARAMETRES  et rollouts ----------------------------------------------------------------------------------------------------------------------	
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - rollouts.ms"
 	
-	
 	--------------- INTERFACE  ----------------------------------------------------------------------------------------------------------------------	
-	
 	fn actualiser 		=(		
 		core.actualiser ()		
 	)
@@ -150,6 +147,7 @@ extends:Editable_poly replaceUI:true version:0
 			
 			#stop	
 		)
+		
 	)
 	
 	

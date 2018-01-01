@@ -7,7 +7,7 @@
 struct str_surfaces (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-	m_debug = true,
+	m_debug = false,
 	m_dbgPrefix ="urba | str_surfaces",
 	fn debug 	_txt  var:	 param:    =(
 		try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix

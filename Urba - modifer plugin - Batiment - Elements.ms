@@ -15,9 +15,6 @@ struct 	str_composant (
 		
 		---- Pointeurs -----------------------------------
 	private
--- 		m_plug				=	undefined,
--- 		m_construction	=	undefined,
--- 		m_geo				=	undefined,
 		m_matID 			= 	str_prefs_matID (),
 		
 	private		
@@ -32,7 +29,7 @@ struct 	str_composant (
 		---- Mutations -----------------------
 		fn set_dialog 			_dialog 			= ( m_dialog 				= _dialog ),
 		fn set_construire 	_fnConstruire 	= ( fnVirt_construire 	= _fnConstruire ),
-		fn set_params			_params			= ( params					= _params ),
+		fn set_params			_params		= ( params					= _params ),
 		
 		---- Accessions -----------------------
 		fn get_dialog			=	m_dialog,
@@ -43,13 +40,10 @@ struct 	str_composant (
 			dialog.m_param	=	params
 			dialog.actualiser()
 		),
-		fn initialiser 		/* 	_plug		 */	_type	_nom 	=(
+		fn initialiser 		_type	_nom 	=(
 			---- id unique ----
 			id += _type
 			for i= 1 to 10 do id += ( random 0 9 ) as string	
-			
--- 			m_plug			=	_plug
--- 			m_geo			=	_plug.core.get_geo ()
 			
 			type 				=	_type 			
 			nom				=	_nom
@@ -98,6 +92,7 @@ struct 	str_constructeur_composants (
 			nvComposant.set_construire 	fnConstruire
 			
 			nvComposant
+			
 		),
 		
 		---- Mur plein -------------------------------------------
@@ -357,25 +352,22 @@ struct 	str_facade (
 		---- Base	-----------
 		nom 							=	"Façade",
 		id								=	"#FACAD_",
-		
-		---- proba générale -----------
-		probabilite					=	100,
-		
-		--- Limiteurs - Etages	---
-		etages_use_min			=	false,
-		etages_nbre_min			= 	0,
-		etages_use_max			=	false,
-		etages_nbre_max			=	0,
-		
-		--- Limiteurs - longueurs	---
-		longueur_use_min			=	false,
-		longueur_nbre_min		= 	0,
-		longueur_use_max		=	false,
-		longueur_nbre_max		=	0,
+		mode							=	1,					---- ( 1:repeter	2:etrier			3:centrer )	----
 		
 		--- Limiteurs - Murs	---
 		murs							=	1,					---- ( 1:les deux	2:gouttereaux	3:pignons )	----
-		mode							=	1,					---- ( 1:repeter	2:etrier			3:centrer )	----
+		
+		--- Limiteurs - Etages	---
+		etages_min_use			=	false,
+		etages_min				= 	0,
+		etages_max_use			=	false,
+		etages_max			=	0,
+		
+		--- Limiteurs - longueurs	---
+		longueur_min_use			=	false,
+		longueur_min		= 	0,
+		longueur_max_use	=	false,
+		longueur_max		=	0,
 		
 		--- Sequence	---
 		sequence					=	#(),
@@ -426,19 +418,37 @@ struct 	str_facade (
 			--- on cherche s'il existe deja comme parametre -----
 			local index_facade = 0
 			for i = 1 to _plug.fac_ids.count do
-				if _plug.fac_ids[i] == id do index_facade = i
+				if _plug.fac_ids[i] == id  do index_facade = i
 			
 			
 			if index_facade == 0 then (
+				debug "enregistrer nouvelle facade"
 			--- s'il n'existe pas encore, on l'ajoute -----
 				append 	_plug.fac_ids 				id
 				append 	_plug.fac_noms  			nom
-				append 	_plug.fac_probabilites  	probabilite
 				
 			) else (
 			--- s'il existe, on l'actualise -----
-				_plug.fac_noms[index_facade] 			=	nom
-				_plug.fac_probabilites[index_facade] 	=	probabilite
+				debug "enregistrer facade existante"
+				debug "id"		var:id
+				_plug.fac_noms[index_facade] 		=	nom
+				
+				_plug.fac_modes[index_facade]		=	mode
+				
+				--- Limiteurs - Murs	---
+				_plug.fac_murs[index_facade]		= murs
+				
+				--- Limiteurs - Etages	---
+				_plug.fac_etagesMin_uses[index_facade] 		= etages_min_use
+				_plug.fac_etagesMins[index_facade]  				=	etages_min
+				_plug.fac_etagesMax_uses[index_facade] 		= etages_max_use
+				_plug.fac_etagesMaxs[index_facade] 				=	etages_max
+				
+				--- Limiteurs - longueurs	---
+				_plug.fac_longueurMin_uses[index_facade] 	= longueur_min_use
+				_plug.fac_longueurMins[index_facade] 			=	longueur_min
+				_plug.fac_longueurMax_uses[index_facade] 	=	longueur_max_use
+				_plug.fac_longueurMaxs[index_facade] 			= longueur_max
 				
 			)
 			
@@ -452,15 +462,39 @@ struct 	str_facade (
 			
 			--- on cherche s'il existe deja comme parametre -----
 			local index_facade = 0
-			for i = 1 to _plug.fac_ids.count do
-				if _plug.fac_ids[i] == id do index_facade = i
-					
+			for i = 1 to _plug.fac_ids.count do (
+				debug "id test" var:_plug.fac_ids[i]
+				
+				if _plug.fac_ids[i] as string == _id as string do (
+					index_facade = i
+				)
+			)
 			
 			if index_facade != 0 then (
 				
-				id 					= _plug.fac_noms[index_facade] 
-				nom 				= _plug.fac_noms[index_facade] 
-				probabilite 		= _plug.fac_probabilites[index_facade]
+				id 								= _plug.fac_noms[index_facade]
+				nom 								= _plug.fac_noms[index_facade]
+				
+				mode							= _plug.fac_modes[index_facade]
+				
+				--- Limiteurs - Murs	---
+				murs								= _plug.fac_murs[index_facade]
+				
+				--- Limiteurs - Etages	---
+				etages_min_use			= _plug.fac_etagesMin_uses[index_facade] 
+				etages_min					= _plug.fac_etagesMins[index_facade] 
+				etages_max_use			= _plug.fac_etagesMax_uses[index_facade] 
+				etages_max					= _plug.fac_etagesMaxs[index_facade] 
+				
+				--- Limiteurs - longueurs	---
+				longueur_min_use			= _plug.fac_longueurMin_uses[index_facade] 
+				longueur_min				= _plug.fac_longueurMins[index_facade] 
+				longueur_max_use			= _plug.fac_longueurMax_uses[index_facade] 
+				longueur_max				= _plug.fac_longueurMaxs[index_facade] 
+				
+				--- Sequence	---
+-- 				fac_sequences					= _plug.
+-- 				fac_sequence_longueurs		= _plug.
 				
 			) else messagebox ("Erreur de chargement de facade : " + _id as string )
 			
