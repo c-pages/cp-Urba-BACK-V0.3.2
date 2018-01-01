@@ -507,40 +507,6 @@ struct str_shape_outils (
 		
 	-----------------  Optimisations ----------------------
 	private
-		fn chercher_alignements		_idTest				=(
-			
-			local seuil 			= m_plug.seuil_aligner	
-			local mtrx_AP 	= m_plug.axeP_mtrx
-			local pt_test					= _pts[_idTest]		* inverse  mtrx_AP
-			local result =#()
-		
-			for i = 1  to _pts.count do (
-				
-				local j 				= boucler 	_pts	( i + 1)
-				local pt 			= _pts[i]	* inverse  mtrx_AP
-				local pt_suivant 	= _pts[j]	* inverse  mtrx_AP
-				
-				
-				if estPignon  	_idTest		 and estPignon  i 	 					do 	(
-					if abs ( pt_test.z - pt.z ) < seuil do 
-						appendIfUnique result i
-					if abs ( pt_test.z - pt_suivant.z ) < seuil do 
-						appendIfUnique result i
-				)
-				
-				if not estPignon  	_idTest		 and not estPignon i  	do (
-					if abs ( pt_test.x - pt.x ) < seuil do
-						appendIfUnique result i
-					if abs ( pt_test.x - pt_suivant.x ) < seuil do 
-						appendIfUnique result i
-				)
-				
-			)
-				
-				
-
-			result
-		),
 		fn intersection 	_pt_orig 	_pt_2 		_pt_seg_1 	_pt_seg_2  		 =(
 			local pt_result
 			local seuil = 1
@@ -628,83 +594,6 @@ struct str_shape_outils (
 				
 			)
 			pt_result
-		),
-		fn projeter_trace		 		=(
-			
-			local mtrx_AP 	= m_plug.axeP_mtrx
-			local seuil = 5
-			local result
-			local trace 		= _pts
-			local trace_temp =  for item in trace collect item
-			
-			local est_subdivise_total = false
-			while not est_subdivise_total do (
-				
-				local est_subdivise = false
-				local est_trouve = false
-				
-				local i = 1
-				while i <=  trace_temp.count and not est_trouve do (
-					
-					local id_direction_suiv		=  boucler trace_temp  (i+1)
-					local id_direction_prec		= 	boucler trace_temp  (i-1)
-					
-					local pt_orig		= 	trace_temp[ i ]	* 	inverse  	mtrx_AP  
-					local pt_suiv		=	trace_temp[ id_direction_suiv  ]  * 	inverse  	mtrx_AP
-					local pt_prec		= 	trace_temp[ id_direction_prec  ] * 	inverse  	mtrx_AP
-					
-					---- les segments a tester------------
-					local compteur_segment = 0
-					while compteur_segment <  trace_temp.count  - 2 and not est_trouve do (
-						
-						--- le segment -----
-						local id_seg_1 	= boucler trace_temp  ( i + compteur_segment + 1 )
-						local id_seg_2 	= boucler trace_temp  ( i + compteur_segment + 2	)
-						
-						local pt_seg_1	= trace_temp[ id_seg_1 ]	* 	inverse  	mtrx_AP
-						local pt_seg_2	= trace_temp[ id_seg_2 ] 	* 	inverse  	mtrx_AP 
-						
-						--- la projection 1 -------
-						local pt_proj = intersection 	pt_orig		pt_suiv		pt_seg_1	 	pt_seg_2		
-						
-						if pt_proj != undefined  do (	
-							
-							if distance pt_proj 	pt_seg_1 > seuil and  distance pt_proj 	pt_seg_2 > seuil do (
-								if not pt_est_dejaPresent   trace_temp  	( pt_proj	* 	mtrx_AP )	 do ( 
-									local id_place = trouver_pt	 trace_temp  ( pt_seg_1 * 	mtrx_AP )
-									insertItem			( pt_proj	* 	mtrx_AP )	trace_temp 	( id_place + 1 )
-									est_subdivise = est_trouve = true
-								)
-							)
-						)
-						
-						--- la projection 2 -------
-						local pt_proj = intersection 	pt_orig		pt_prec		pt_seg_1	 	pt_seg_2	
-						
-						if pt_proj != undefined  do (	
-							
-							if distance pt_proj 	pt_seg_1 > seuil and  distance pt_proj 	pt_seg_2 > seuil do (
-								if not pt_est_dejaPresent   trace_temp  	( pt_proj	* 	mtrx_AP )	 do ( 
-									local id_place = trouver_pt	 trace_temp  ( pt_seg_1 * 	mtrx_AP )
-									insertItem			( pt_proj	* 	mtrx_AP )	trace_temp 	( id_place + 1 )
-									est_subdivise = est_trouve = true
-								)
-							)
-						)
-						
-						compteur_segment +=  1
-					) -- fin while compteur_segment
-					
-					i += 1
-					
-				) -- fin while i  --
-				
-				if not est_subdivise do est_subdivise_total = true
-				
-			) -- fin while not est_subdivise_total
-			
-			_pts = trace_temp
-			
 		),
 		fn chercher_pt_a90degGauche	_id_pt  	vec_pt		 =(
 			
@@ -894,9 +783,42 @@ struct str_shape_outils (
 				then true 
 				else false
 		),
+		fn chercher_alignements	_pts		_idTest		_seuil		=(
+			
+			local mtrx_AP 			= get_axePrincipal_mtrx 	_pts
+			local pt_test				= _pts[_idTest]		* inverse  mtrx_AP
+			local result =#()
+		
+			for i = 1  to _pts.count do (
+				
+				local j 				= boucler 	_pts	( i + 1)
+				local pt 			= _pts[i]	* inverse  mtrx_AP
+				local pt_suivant 	= _pts[j]	* inverse  mtrx_AP
+				
+				
+				if estPignon  _pts	_idTest		 and estPignon  _pts 	i 	 					do 	(
+					if abs ( pt_test.z - pt.z ) < _seuil do 
+						appendIfUnique result i
+					if abs ( pt_test.z - pt_suivant.z ) < _seuil do 
+						appendIfUnique result i
+				)
+				
+				if not estPignon  _pts	_idTest		 and not estPignon _pts i  	do (
+					if abs ( pt_test.x - pt.x ) < _seuil do
+						appendIfUnique result i
+					if abs ( pt_test.x - pt_suivant.x ) < _seuil do 
+						appendIfUnique result i
+				)
+				
+			)
+				
+				
+
+			result
+		),
 		
 	public
-		fn orthonormer 		&_pts	_seuil_ortho  =(
+		fn orthonormer 		&_pts	_seuil  =(
 			debug "orthonormer"
 			local mtrx_AP = get_axePrincipal_mtrx 	_pts
 			
@@ -911,10 +833,10 @@ struct str_shape_outils (
 				local est_pignon = estPignon _pts  i
 				if not est_pignon then (
 					local moyenneX = ( pt_suivant.x - pt.x ) /2					
-					vec_moyenne = [moyenneX,0,0] * _seuil_ortho / 100
+					vec_moyenne = [moyenneX,0,0] * _seuil / 100
 				) else  (
 					local moyenneZ = ( pt_suivant.z - pt.z ) /2					
-					 vec_moyenne = [0,0,moyenneZ] * _seuil_ortho / 100
+					 vec_moyenne = [0,0,moyenneZ] * _seuil / 100
 				) 
 				
 				pt 			= _pts[i]	* inverse  mtrx_AP  + vec_moyenne 
@@ -925,25 +847,29 @@ struct str_shape_outils (
 			)
 			
 		),
-		fn souder 				_pts	=(
+		fn souder 				&_pts	_seuil  =(
 			debug "souder"
 			
 			local i = 1
 			while i <=_pts.count do (
+				
+-- 					debug "i" var:i
 				local j= i+1
 				if j > _pts.count  do j =1
+					
 				local pt 			= _pts[i]
 				local ptSuivant 	= _pts[j]
-				if distance pt ptSuivant <= m_plug.seuil_souder do (
+				if distance pt ptSuivant <= _seuil do (
+					debug "SOUDURE"
 					deleteitem _pts j
 					_pts[i] = ( pt + ptSuivant ) / 2
 					i = 1
 				)
-				i+=i
+				i+=1
 			)
 			
 		),
-		fn aplanir 				_pts	=(
+		fn aplanir 				&_pts	_seuil  	=(
 			debug "aplanir"
 			
 			local i = 1
@@ -961,7 +887,7 @@ struct str_shape_outils (
 				local vec2 = normalize (ptSuivant - pt)
 				
 				local anglePt = acos(dot vec1 vec2)			
-				if 	anglePt >= 180 - m_plug.seuil_optimiser  then (
+				if 	anglePt >= 180 - _seuil  then (
 					deleteitem _pts i
 					i = 0
 				)
@@ -971,14 +897,14 @@ struct str_shape_outils (
 
 			result
 		),
-		fn aligner						=(	
+		fn aligner				&_pts	_seuil  		=(	
 			debug "aligner"
 			
-			local mtrx_AP 	= m_plug.axeP_mtrx
+			local mtrx_AP 	= get_axePrincipal_mtrx 	_pts
 			
 			for i = 1 to   _pts.count  do (
 				
-				local aligns = 	chercher_alignements		i			
+				local aligns = 	chercher_alignements	_pts	i		_seuil	
 				
 				local pt_moyenne = [0,0,0]
 				for id_align in aligns do 
@@ -993,7 +919,7 @@ struct str_shape_outils (
 					local vec_moyenne1 	= pt_moyenne	 - pt
 					local vec_moyenne2 	= pt_moyenne	 - pt_suivant
 					local vec_align1, vec_align2
-					if estPignon  	id_align		 then (
+					if estPignon  _pts	id_align		 then (
 						vec_align1 			= [0,0,vec_moyenne1.z] 
 						vec_align2 			= [0,0,vec_moyenne2.z] 						
 					) else (
@@ -1009,6 +935,83 @@ struct str_shape_outils (
 					
 				)
 			)
+		),
+		fn projeter		 		&_pts =(
+			
+			local mtrx_AP 	= get_axePrincipal_mtrx 	_pts
+			local seuil = 5
+			local result
+			local trace 		= _pts
+			local trace_temp =  for item in trace collect item
+			
+			local est_subdivise_total = false
+			while not est_subdivise_total do (
+				
+				local est_subdivise = false
+				local est_trouve = false
+				
+				local i = 1
+				while i <=  trace_temp.count and not est_trouve do (
+					
+					local id_direction_suiv		=  boucler trace_temp  (i+1)
+					local id_direction_prec		= 	boucler trace_temp  (i-1)
+					
+					local pt_orig		= 	trace_temp[ i ]	* 	inverse  	mtrx_AP  
+					local pt_suiv		=	trace_temp[ id_direction_suiv  ]  * 	inverse  	mtrx_AP
+					local pt_prec		= 	trace_temp[ id_direction_prec  ] * 	inverse  	mtrx_AP
+					
+					---- les segments a tester------------
+					local compteur_segment = 0
+					while compteur_segment <  trace_temp.count  - 2 and not est_trouve do (
+						
+						--- le segment -----
+						local id_seg_1 	= boucler trace_temp  ( i + compteur_segment + 1 )
+						local id_seg_2 	= boucler trace_temp  ( i + compteur_segment + 2	)
+						
+						local pt_seg_1	= trace_temp[ id_seg_1 ]	* 	inverse  	mtrx_AP
+						local pt_seg_2	= trace_temp[ id_seg_2 ] 	* 	inverse  	mtrx_AP 
+						
+						--- la projection 1 -------
+						local pt_proj = intersection 	pt_orig		pt_suiv		pt_seg_1	 	pt_seg_2		
+						
+						if pt_proj != undefined  do (	
+							
+							if distance pt_proj 	pt_seg_1 > seuil and  distance pt_proj 	pt_seg_2 > seuil do (
+								if not pt_est_dejaPresent   trace_temp  	( pt_proj	* 	mtrx_AP )	 do ( 
+									local id_place = trouver_pt	 trace_temp  ( pt_seg_1 * 	mtrx_AP )
+									insertItem			( pt_proj	* 	mtrx_AP )	trace_temp 	( id_place + 1 )
+									est_subdivise = est_trouve = true
+								)
+							)
+						)
+						
+						--- la projection 2 -------
+						local pt_proj = intersection 	pt_orig		pt_prec		pt_seg_1	 	pt_seg_2	
+						
+						if pt_proj != undefined  do (	
+							
+							if distance pt_proj 	pt_seg_1 > seuil and  distance pt_proj 	pt_seg_2 > seuil do (
+								if not pt_est_dejaPresent   trace_temp  	( pt_proj	* 	mtrx_AP )	 do ( 
+									local id_place = trouver_pt	 trace_temp  ( pt_seg_1 * 	mtrx_AP )
+									insertItem			( pt_proj	* 	mtrx_AP )	trace_temp 	( id_place + 1 )
+									est_subdivise = est_trouve = true
+								)
+							)
+						)
+						
+						compteur_segment +=  1
+					) -- fin while compteur_segment
+					
+					i += 1
+					
+				) -- fin while i  --
+				
+				if not est_subdivise do est_subdivise_total = true
+				
+			) -- fin while not est_subdivise_total
+			
+			_pts = trace_temp
+			
 		),
 		fn subdiviser		 		=(
 			debug "subdiviser"

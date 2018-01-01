@@ -111,20 +111,6 @@ struct str_batiment_core (
 			
 		),
 		
-		/* 
-	---- Ecouteurs -----------------
-		fn activer_ecouteurs 	_nodeTHIS	=(			
--- 			m_ecouteur_surface_handler = when geometry m_plug.surface_node	 changes 	 do 
--- 														_nodeTHIS.actualiser () 
-		),
-		fn desactiver_ecouteurs =(
--- 			deleteChangeHandler m_ecouteur_surface_handler			
-		),
-		
-		fn surface_changed =(
-			
-		), */
-		
 	----- Editeur de facades -----------------
 		fn facadeEditeur_ouvrir 	_index	=(
 			debug "ouvrir_facadeEditeur"
@@ -140,15 +126,6 @@ struct str_batiment_core (
 		fn facadeEditeur_fermer 		=(
 			destroyDialog 	roll_facades
 		),
-		
-		
-		
-	----- Parametres du plug -----------------------
--- 		--- lire/ecrire -------------
--- 		fn lire_params 	=(),
--- 		fn ecrire_params	=(),
-		
-		--- Gestion ---------------
 		fn creer_facade =(
 			local nv_facade 	= mgr_facades.creer ()
 			nv_facade
@@ -163,12 +140,12 @@ struct str_batiment_core (
 		fn get_geo					= m_construction.m_geo,
 		fn get_matID				= m_construction.m_matID,
 		
+		
 	----- Surface ---------------------
 		fn assigner_surface 		_nodeTHIS		_shape 		=(
 			
 			_nodeTHIS.transform = _shape.transform
-			mgr_surface.assigner	_shape
--- 			activer_ecouteurs 	_nodeTHIS	
+			mgr_surface.assigner		_shape
 			
 			actualiser ()
 			

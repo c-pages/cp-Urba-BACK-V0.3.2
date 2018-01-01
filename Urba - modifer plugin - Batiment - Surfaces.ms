@@ -62,13 +62,14 @@ struct str_surfaces (
 					b_trouve = true
 				)
 			
-			--- s'il y a plus qu'une spline on previent -----------
+			--- s'il y a plus qu'une spline ou que la spline n'est pas close on previent -----------
 			if numSplines _shape > 1 or id_premiertraceFerme == 0 then (
 				messagebox "Attention ! Le shape piqué doit posséder une seule spline close."
 				b_result = false
 			) 
 			
 			b_result
+			
 		),
 		
 		
@@ -91,9 +92,12 @@ struct str_surfaces (
 			
 			if m_plug.surface_node != undefined do (
 				
-				--- on gere les optimisations  ----
-				if m_plug.orthonormer	do	m_outils.orthonormer	&pts_surface		m_plug.seuil_ortho
-				
+				--- on gere les OPTIMISATIONS  ----
+				if m_plug.optim_souder			do	m_outils.souder				&pts_surface		m_plug.optim_souder_seuil
+				if m_plug.optim_orthonormer	do	m_outils.orthonormer		&pts_surface		m_plug.optim_ortho_seuil
+				if m_plug.optim_aplanir			do	m_outils.aplanir				&pts_surface		m_plug.optim_aplanir_seuil
+				if m_plug.optim_aligner			do	m_outils.aligner				&pts_surface		m_plug.optim_aligner_seuil
+				if m_plug.optim_projeter		do	m_outils.projeter			&pts_surface
 				
 			)
 			
@@ -110,36 +114,31 @@ struct str_surfaces (
 			
 			if _shape != undefined do (
 				
-				
-				---- on travaille sur une copie --------
-				local shapeCopie 		= _shape
-				convertToSplineShape 	shapeCopie
+				---- on transform en shape--------
+				convertToSplineShape 	_shape
 				
 				---- si pas valide on clean -------
-				if not valider_shape 		shapeCopie then (
+				if not valider_shape 		_shape then (
 					
-					m_plug.surface_node 			= undefined
+					m_plug.surface_node 				= undefined
 					m_plug.surface_points_base 	= #()
-					m_plug.surface_points 			= #()
+					m_plug.surface_points 				= #()
 					
 				--- si validé ----
 				) else (
 					
 					--- on assigne les points de base ---- 
-					m_plug.surface_node				= _shape
-					m_plug.surface_points_base	 	= 	scanner_shape		shapeCopie
-					
-				)
+					m_plug.surface_node				= 	_shape
+					m_plug.surface_points_base	 	= 	scanner_shape		_shape
 				
-				--- suppression de la copie -------------
--- 				delete shapeCopie
+				)
 				
 			)
 			
 			actualiser ()
 			
-			debug "surface_node" var:m_plug.surface_node
-			debug "surface_points" var:m_plug.surface_points
+			debug "surface_node" 	var:m_plug.surface_node
+			debug "surface_points" 	var:m_plug.surface_points
 			
 		)
 		
