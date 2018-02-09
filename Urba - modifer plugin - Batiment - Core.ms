@@ -27,13 +27,15 @@ struct str_batiment_core (
 	-------- MEMBRES	--------------------------------------------------------------------------------------------------------
 	public
 		m_plug,
-		
+	
+	
+	
 	private
 		---  Elément du batiments -------------------
 		mgr_facades			= str_mgr_arrayParametres (),
 		mgr_surface			= str_surfaces (),
 		
-		---  Rollouts flottants -------------------
+		---  Rollouts Facade -------------------
 		roll_facades 			= 	filein	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - rollout facade.ms",
 		roll_facades_pos	= [500,500],
 		roll_facades_taille	= [500,300],
@@ -42,27 +44,7 @@ struct str_batiment_core (
 		m_construction		= str_construction 	(),
 		
 		
-		----- Ecouteurs	----------------------
-		m_ecouteur_surface_handler,
-		
-		
 	-------- FONCTIONS	--------------------------------------------------------------------------------------------------------
-	private
-	----- Actions sur le node -----------------------
-		fn centrer_pivot 		_node	=(
-			
-			_node.transform = (matrix3 1)
-			ResetPivot 			_node
-			
-			---- centrer le pivot ----
-			local pt_sommeDesPts = 0
-			for pt in _node.surface_points do
-				pt_sommeDesPts += pt
-			local pt_centre = pt_sommeDesPts / _node.surface_points.count
-			_node.pos = pt_centre
-			
-		),
-		
 		
 		
 	private
@@ -94,6 +76,8 @@ struct str_batiment_core (
 			m_construction.actualiser ()
 			
 		),
+		
+		
 	----- Initialisation  -----------------------
 		fn initialiser 	_plug		= (
 			
@@ -129,6 +113,9 @@ struct str_batiment_core (
 		),
 		fn creer_facade 							=(
 			local nv_facade 	= mgr_facades.creer ()
+			
+			facadeEditeur_ouvrir	 	( mgr_facades.get_items () ).count
+			
 			nv_facade
 		),
 		

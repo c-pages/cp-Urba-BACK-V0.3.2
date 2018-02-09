@@ -242,6 +242,7 @@ rollout roll_facades 		"Façades"		rolledUp:false	(
 	on btn_ajouterFacade 	pressed 		do	(
 		core.creer_facade ()
 		actualiser ()
+		lbx_facades.selection = lbx_facades.items.count
 	)
 	on lbx_facades doubleClicked arg do
 		core.facadeEditeur_ouvrir	 	lbx_facades.selection 

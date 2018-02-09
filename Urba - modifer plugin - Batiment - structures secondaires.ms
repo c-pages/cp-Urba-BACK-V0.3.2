@@ -247,10 +247,18 @@ struct str_mgr_arrayParametres (
 	---- INTERFACE -------------------------------------------
 	public
 		fn initialiser		class:  plug: =(
+			
+			
+			--- on vide les items ------
+			m_items	=	#()
+			
+			-- on assigne les pointeurs -----------
 			if class== unsupplied or plug == unsupplied do
 				messagebox "str_mgr_arrayParametres : Probleme d'initialisation"
 			m_class 	= 	class
 			m_plug		=	plug
+			
+			
 		),
 		fn actualiser = (
 			
@@ -271,6 +279,7 @@ struct str_mgr_arrayParametres (
 		
 		fn get_noms 	=	for item in m_items collect item.nom,
 		fn get_items	= 	m_items,
+		
 		
 		---- Creation/Suppression ----
 		fn creer		enregistrer:true		=(
@@ -371,7 +380,7 @@ struct str_shape_outils (
 		),
 		
 		
-	----------------- generale -----------------
+	----------------- Divers -----------------
 	public
 		fn surface 							_pts 	 	=(
 			--- on creer une face sur le tracé ---------
@@ -503,6 +512,18 @@ struct str_shape_outils (
 		
 		
 	-----------------  Optimisations ----------------------
+	public
+		fn estPignon 	_pts		_id		=(
+			
+			local mtrx_AP	= get_axePrincipal_mtrx 	_pts
+			local j 			= boucler  _pts  (_id+1)
+			local vec 		= (_pts[j]-_pts[_id])
+			local orientation 	= get_axePrincipal_orientation		mtrx_AP		vec
+			
+			if orientation == #perpendiculaire 
+				then true 
+				else false
+		),
 	private
 		fn intersection 	_pt_orig 	_pt_2 		_pt_seg_1 	_pt_seg_2  		 =(
 			local pt_result
@@ -769,17 +790,6 @@ struct str_shape_outils (
 			
 			
 		),
-		fn estPignon 	_pts		_id		=(
-			
-			local mtrx_AP	= get_axePrincipal_mtrx 	_pts
-			local j 			= boucler  _pts  (_id+1)
-			local vec 		= (_pts[j]-_pts[_id])
-			local orientation 	= get_axePrincipal_orientation		mtrx_AP		vec
-			
-			if orientation == #perpendiculaire 
-				then true 
-				else false
-		),
 		fn chercher_alignements	_pts		_idTest		_seuil		=(
 			
 			local mtrx_AP 			= get_axePrincipal_mtrx 	_pts
@@ -813,6 +823,9 @@ struct str_shape_outils (
 
 			result
 		),
+		
+		
+		
 		
 	public
 		fn orthonormer 		&_pts	_seuil  =(

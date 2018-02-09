@@ -33,6 +33,9 @@
 -- try unregisterRedrawViewsCallback 		$.fn_VP_afficher_axePrincipal 	
 -- catch ()
 
+----- DEBUG-------------------------
+global bat
+try delete bat catch ()
 clearlistener ()
 deleteAllChangeHandlers ()
 
@@ -77,53 +80,25 @@ extends:Editable_poly replaceUI:true version:0
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Core.ms"
 	
 	
-	
-	/* 
-	include "$userScripts\cp - GLOBAL\Enregistreur De Node.ms"	
-
-	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - presets.ms"
-	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - structures.ms"
-	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Facades.ms"
-	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - tracé.ms"
-	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Construire.ms"
-	*/
-	
-	--------------- PRé-DéCLARATIONS  ----------------------------------------------------------------------------------------------------------------------
-	----  rollouts ------------------
-	local roll_global, roll_niveaux,  roll_presets,   roll_toiture, roll_infos , roll_facades , roll_trace
-	
-	
-	----  structures ------------------
--- 	local geo,  trace,  construire
-	
-	--------------- MEMBRES  ----------------------------------------------------------------------------------------------------------------------
-
-	local murs_types = #("Gouttereaux", "Pignons", "Gouttereaux + Pignons")
-	
-	
-	
--- 	local params_aEnregistrer = 	#(		/*----	Global  	----*/		#niveaux_hauteur, 			#niveaux_nbre, 	#axeP_orientation,
--- 												/*----	Toiture 	----*/		#toit_pente, 					#toit_type, 		#toit_hauteur ,
--- 												/*----	Tracé  	----*/		#trace_optimiser, 			#trace_souder, 	#trace_ortho, 		#seuil_optimiser, 				#seuil_souder, 	#seuil_ortho , 	#trace_aligner, 	#seuil_aligner ,	-- #trace_decouper, 
--- 												/*----	 Facades  	----*/		#facades_composants , 		#facades_items, 	#facades_modeles, 	#facades_parametriques
--- 											)
- 
-	
-	
-	
-
-	
-	---------------STRUCTURES  ----------------------------------------------------------------------------------------------------------------------
+	--------------- CORE   ----------------------------------------------------------------------------------------------------------------------
 	local core = str_batiment_core  	()
-	
-	--------------- import des PARAMETRES  et rollouts ----------------------------------------------------------------------------------------------------------------------	
+		
+	--------------- PARAMETRES  et ROLLOUTS ----------------------------------------------------------------------------------------------------------------------	
+	local roll_global, roll_toiture, roll_facades 										----, roll_niveaux,  roll_presets,   roll_infos, roll_trace 
 	include "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - rollouts.ms"
 	
+	
+	
+	
+	
 	--------------- INTERFACE  ----------------------------------------------------------------------------------------------------------------------	
+	---Initialisations / Actualisations ------
+	fn initialiser 	doLogo:false	=(		
+		core.initialiser 		this
+	)
 	fn actualiser 		=(		
 		core.actualiser ()		
 	)
-	
 	fn actualiser_rollouts =(
 		roll_global.actualiser ()
 		roll_facades.actualiser ()
@@ -131,11 +106,11 @@ extends:Editable_poly replaceUI:true version:0
 	)
 	
 	
-	fn initialiser 	doLogo:false	=(
-		
-		core.initialiser 		this		
-		
+	---- Divers	---------
+	fn assigner_shape 		_nodeTHIS		_shape 		=(
+		core.assigner_surface 	_nodeTHIS		_shape 		
 	)
+	
 	
 	
 	--------------- CREATION  ----------------------------------------------------------------------------------------------------------------------	
@@ -159,30 +134,32 @@ extends:Editable_poly replaceUI:true version:0
 		initialiser ()
 	)
 	on clone 	_original 	do (
-		debug "clone du plugin" 
-		
-		initialiser ()
-		
+		debug "clone du plugin" 		
+		initialiser ()		
 	)
 	on create do (
-		debug "creation du plugin"		
-		
+		debug "creation du plugin"	
 		initialiser ()
 	)
-	
 	on update do	(
-		debug "update du plugin"	
-		
-		initialiser () 
-		
+		debug "update du plugin"		
+		initialiser ()		
 	)
 	
 ) --- fin du plug ---
 
 
-
-
  
+
+
+----- DEBUG-------------------------
+if creerBat != undefined do (
+	bat = Urba_Batiment ()
+	bat.assigner_shape  bat	$Shape007
+	select bat
+)
+creerBat = true
+
 
 
 

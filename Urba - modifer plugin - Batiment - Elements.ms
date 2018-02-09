@@ -51,7 +51,7 @@ struct 	str_composant (
 		),
 		
 		---- Construction du mesh 	( fonction virtuelle ) -----------------------
-		fn construire	_plug	 	pts_accroches		_normDir				= 		fnVirt_construire	 _plug	pts_accroches		_normDir		this	,
+		fn construire		_plug	 	pts_accroches		_normDir				= 		fnVirt_construire	 _plug	pts_accroches		_normDir		this	,
 		
 		
 		---- Destructeur/Copies	-----------------
