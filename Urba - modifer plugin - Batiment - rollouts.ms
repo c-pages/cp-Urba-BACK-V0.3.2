@@ -36,9 +36,23 @@ parameters params_global 				rollout:roll_global		(
 	------- Etages			------------------
 	etages_hauteur				type: #float 				default:250.		ui:spn_hauteur		animatable:false		invisibleInTV:true
 	etages_nbre					type: #integer			default:1			ui:spn_nbres			animatable:false		invisibleInTV:true
-	etages_epaiss_dalle					type: #float 				default:20.				animatable:false		invisibleInTV:true	--ui:spn_ep_dalle
+	etages_epaiss_dalle		type: #float 				default:20.									animatable:false		invisibleInTV:true
 
 )
+
+parameters params_sousPartie 				 rollout:roll_sousPartie	 	(
+	
+	sousPartie_noms				type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	sousPartie_ids 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	
+	sousPartie_surfaceMin		type:#floatTab		tabSize:0 			tabSizeVariable:true
+	sousPartie_surfaceMax		type:#floatTab		tabSize:0 			tabSizeVariable:true
+	
+	sousPartie_etages				type:#intTab			tabSize:0 			tabSizeVariable:true
+	
+)
+
+
 parameters params_optimSurface		rollout:roll_optimSurface	(
 	
 	------- Optimisations		------------------
@@ -94,14 +108,12 @@ parameters params_facades 				rollout:roll_facades	(
 	
 )
 parameters params_toiture 				rollout:roll_toiture	(
-	
--- 	toit_nbrePentes	type: #radiobtnIndex 	default:2		ui:rdo_pentes
-	
-	toit_type			type: #integer 			default:1		ui:ddl_toiture				animatable:false		invisibleInTV:true
-	toit_pente			type: #float 				default:20		ui:spn_pente				animatable:false		invisibleInTV:true
-	toit_hauteur		type: #float 				default:20.		ui:spn_toit_hauteur				animatable:false		invisibleInTV:true
-	toit_orientation		type:#float				default:0.				animatable:false		invisibleInTV:true	--	ui:spn_rotation
-	
+	/* 
+	toit_type				type: #integer 			default:1		ui:ddl_toiture				animatable:false		invisibleInTV:true
+	toit_pente				type: #float 				default:20		ui:spn_pente					animatable:false		invisibleInTV:true
+	toit_hauteur			type: #float 				default:20.	ui:spn_toit_hauteur		animatable:false		invisibleInTV:true
+	toit_orientation		type:#float				default:0.											animatable:false		invisibleInTV:true
+	 */
 )
 
 
@@ -109,6 +121,63 @@ parameters params_toiture 				rollout:roll_toiture	(
 --------------- ROLLOUT  ----------------------------------------------------------------------------------------------------------------------	
 -------------------------------------------------------------------------------------------------------------------------------------------------
 
+rollout roll_presets 		"Presets" 		rolledUp:true	(
+	
+	fn shape_filt 		obj = superclassof obj == shape
+	
+	button 'btn_enregistrer' "Enregistrer" pos:[88,2] width:85 height:16 align:#left		
+		
+		
+	button 'btn_charger' 	"Charger" 	pos:[5,2] width:85 height:16 align:#left
+	button 'btn_coller' 		"Coller" 		pos:[88,17] width:85 height:16 align:#left
+	button 'btn_copier' 		"Copier" 		pos:[5,17] width:85 height:16 align:#left
+	
+	/* --------------------  CLEANAGE --------------------
+	fn actualiser =(
+		
+		btn_coller.enabled 			= a_un_surface and urba_clipboard_batiment != ""
+		btn_copier.enabled 			= a_un_surface
+		btn_enregistrer.enabled 	= a_un_surface
+		btn_charger.enabled 		= a_un_surface
+		 
+	)
+	
+	
+	
+	
+	on roll_presets open do actualiser ()
+
+	on btn_enregistrer pressed do
+		presets.enregistrer 	this
+	on btn_charger pressed do
+	(
+			presets.charger 					this
+		
+			facades.actualiser ()
+		
+			surface.actualiser 	()
+			construire.batiment 	()
+			actualiser_rollouts()
+		)
+	on btn_coller pressed do
+	(
+			presets.coller 	this 
+		
+			facades.actualiser ()
+		
+			surface.actualiser ()
+			construire.batiment ()
+			actualiser_rollouts()
+			
+		)
+	on btn_copier pressed do
+	(
+			presets.copier 	this 
+			actualiser()
+		)
+		
+	*/ --------------------  CLEANAGE --------------------
+)
 rollout roll_global "Global" width:162 height:93 (
 	
 	
@@ -150,7 +219,28 @@ rollout roll_global "Global" width:162 height:93 (
 	on spn_hauteur changed arg do
 		core.actualiser ()
 )
-rollout roll_optimSurface 		"Optimisation Surface" 		rolledUp:true	(
+
+
+rollout roll_sousPartie 		"Sous parties" 		rolledUp:false	(
+	
+	listbox 'lbx_sousPartie' "" pos:[5,16] width:165 height:9 align:#left 
+	button 'btn_ajouterSousPartie' "+" pos:[141,-1] width:16 height:16 align:#left
+	button 'btn_supprimerSousPartie' "-" pos:[156,-1] width:16 height:16 align:#left
+	
+	
+	fn actualiser =(
+		
+		
+	)
+	
+	
+)
+
+
+
+
+
+rollout roll_optimSurface 		"Surface" 		rolledUp:true	(
 	
 	checkbox 'chk_aplanir' "Aplanir" pos:[6,34] width:62 height:13 align:#left
 	checkbox 'chk_ortho' "Orthonorm." pos:[6,19] width:76 height:13 align:#left
@@ -214,7 +304,7 @@ rollout roll_facades 		"Façades"		rolledUp:false	(
 	listbox 'lbx_facades' "" pos:[5,16] width:165 height:9 align:#left 
 	button 'btn_ajouterFacade' "+" pos:[141,-1] width:16 height:16 align:#left
 	button 'btn_supprimerFacade' "-" pos:[156,-1] width:16 height:16 align:#left
-	button 'btn_dupliquer' "Dup" pos:[96,0] width:27 height:16 align:#left
+-- 	button 'btn_dupliquer' "Dup" pos:[96,0] width:27 height:16 align:#left
 	
 	fn actualiser =(
 		
@@ -279,6 +369,17 @@ rollout roll_facades 		"Façades"		rolledUp:false	(
 	*/ --------------------  CLEANAGE --------------------
 )
 rollout roll_toiture 		"Toiture"		rolledUp:false	(
+	
+	listbox 'lbx_toiture' "" pos:[5,16] width:165 height:9 align:#left 
+	button 'btn_ajouterToiture' "+" pos:[141,-1] width:16 height:16 align:#left
+	button 'btn_supprimerToiture' "-" pos:[156,-1] width:16 height:16 align:#left
+	
+	
+	fn actualiser =(
+		
+		
+	)
+	/* 
 	dropdownList 'ddl_toiture' "" pos:[88,1] width:85 height:21 items:#("Plate", "Acrotère", "1 pan", "2 pans") align:#left
 	label 'lbl_facade' "Toiture:" pos:[5,7] width:38 height:15 align:#left
 -- 	radiobuttons 'rdo_pentes' "" pos:[89,52] width:29 height:32 labels:#("1", "2") align:#left
@@ -298,9 +399,8 @@ rollout roll_toiture 		"Toiture"		rolledUp:false	(
 	
 -- 	GroupBox 'grp_prop' "Propriétés" pos:[5,195] width:165 height:41 align:#left
 	label 'lbl_composants' "Composants:" pos:[5,52] width:64 height:15 align:#left
+	 */
 	
-	
-	fn actualiser =()
 	/* --------------------  CLEANAGE --------------------
 	
 	fn actualiser =(
@@ -342,63 +442,6 @@ rollout roll_toiture 		"Toiture"		rolledUp:false	(
 	on spn_pente changed val 	do
 		construire.batiment ()
 */ --------------------  CLEANAGE --------------------
-)
-rollout roll_presets 		"Presets" 		rolledUp:true	(
-	
-	fn shape_filt 		obj = superclassof obj == shape
-	
-	button 'btn_enregistrer' "Enregistrer" pos:[88,2] width:85 height:16 align:#left		
-		
-		
-	button 'btn_charger' 	"Charger" 	pos:[5,2] width:85 height:16 align:#left
-	button 'btn_coller' 		"Coller" 		pos:[88,17] width:85 height:16 align:#left
-	button 'btn_copier' 		"Copier" 		pos:[5,17] width:85 height:16 align:#left
-	
-	/* --------------------  CLEANAGE --------------------
-	fn actualiser =(
-		
-		btn_coller.enabled 			= a_un_surface and urba_clipboard_batiment != ""
-		btn_copier.enabled 			= a_un_surface
-		btn_enregistrer.enabled 	= a_un_surface
-		btn_charger.enabled 		= a_un_surface
-		 
-	)
-	
-	
-	
-	
-	on roll_presets open do actualiser ()
-
-	on btn_enregistrer pressed do
-		presets.enregistrer 	this
-	on btn_charger pressed do
-	(
-			presets.charger 					this
-		
-			facades.actualiser ()
-		
-			surface.actualiser 	()
-			construire.batiment 	()
-			actualiser_rollouts()
-		)
-	on btn_coller pressed do
-	(
-			presets.coller 	this 
-		
-			facades.actualiser ()
-		
-			surface.actualiser ()
-			construire.batiment ()
-			actualiser_rollouts()
-			
-		)
-	on btn_copier pressed do
-	(
-			presets.copier 	this 
-			actualiser()
-		)
-		
-	*/ --------------------  CLEANAGE --------------------
 )
 rollout roll_viewport 	"Viewport"	rolledUp:false	(
 	label 'lbl16' "Surface:" pos:[5,90] width:43 height:14 align:#left

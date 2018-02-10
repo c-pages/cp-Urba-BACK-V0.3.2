@@ -91,6 +91,7 @@ struct str_surfaces (
 			
 		),
 		
+	--- Accession ---------------------
 		fn get_points =(
 			
 			debug "actualiser"
@@ -115,7 +116,7 @@ struct str_surfaces (
 
 		),	
 		
-	--- Actualisation ---------------------
+	--- Assigner nouveau shape  ---------------------
 		fn assigner 	_shape  =(
 			
 			debug "assigner"
@@ -136,6 +137,12 @@ struct str_surfaces (
 			debug "surface_node" 	var:m_plug.surface_node
 			
 		)
+		
+		/* ,
+		
+		fn subdiviser		 =(
+			m_outils.subdiviser		 	( get_points() )
+		) */
 		
 		
 ) -- fin struct Surface ------------------------

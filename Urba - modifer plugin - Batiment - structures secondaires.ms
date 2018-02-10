@@ -1026,6 +1026,29 @@ struct str_shape_outils (
 			_pts = trace_temp
 			
 		),
+		
+		
+		------Subdivision ----------------------------------------------------------
+		
+		fn scanner_points 	_shape	=(
+			
+			local ptsSurface				=#()
+			
+			---- On chope les points de la surface a scanner -----------
+			for id_pt = 1 to ( numKnots 	_shape 	1 ) do	(
+				local pt_shape 	= getKnotPoint 	_shape 	1 	id_pt
+				local pt_surface 	= pt_shape * inverse  _shape.transform
+				append ptsSurface 	 pt_surface
+			)
+			
+			
+			--- on fait tourner les spline dans le meme sens ----
+			if not m_outils.est_sensPositif 	ptsSurface 	 do
+				trace_absolu = m_outils.changer_sens		ptsSurface
+			
+			ptsSurface
+			
+		),
 		fn subdiviser		 	_pts 		=(
 			debug "subdiviser"
 			
@@ -1151,9 +1174,9 @@ struct str_shape_outils (
 	
 )
 
-
-
-
+test = str_shape_outils ()
+pts = test.scanner_points	$
+test.subdiviser	pts
 
 struct str_poly_outils (
 	
