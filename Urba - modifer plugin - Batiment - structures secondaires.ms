@@ -3,10 +3,10 @@
  
  struct 	str_prefs_matID (
 	mur 				= 	10,
-	menuiserie 		= 	20,
+	menuiserie 	= 	20,
 	vitrage 			= 	30,
 	toiture 			= 	40,
-	metal				=	50
+	metal			=	50
 )
 
 struct str_plan (
@@ -19,12 +19,14 @@ struct str_plan (
 			catch ()
 		),
 		
+		---- Membres --------------
 		a,
 		b,
 		c,
 		d,
 		normal ,
 		
+		---- Fonctions --------------
 		fn creerFrom_2vecs_et_1Point	_vec1 	_vec2  	_point	=(
 			
 -- 			debug "creerFrom_2vecs_et_1Point"
@@ -94,9 +96,9 @@ struct str_datasToString (
 		
 	private
 		separateur_params 			="§",
-		separateur_mutation 		= "¨",
+		separateur_mutation 			= "¨",
 		separateur_mutationTab 	= "£",
-		separateur_items 			= "^",
+		separateur_items 				= "^",
 	
 	
 	private
@@ -319,13 +321,13 @@ struct str_shape_outils (
 	
 	----------------- tableaux -----------------
 	private
-		fn boucler 	_array	_id_item 		=(
+		fn boucler 							_array				_id_item 		=(
 			
 			if _id_item >	_array.count do _id_item = mod _id_item _array.count
 			if _id_item < 1 do _id_item += _array.count
 			_id_item as integer
 		),
-		fn trouver_pt 		_arraydePts  	_pt 	 =(
+		fn trouver_pt 						_arraydePts  		_pt 	 			=(
 			local result = 0
 			local seuil = 1
 			local i = 1
@@ -338,11 +340,11 @@ struct str_shape_outils (
 -- 			format "pt_est_dejaPresent :%\n" result
 			result
 		),
-		fn pt_est_dejaPresent 		_arraydePts  	_pt 	 =(
+		fn pt_est_dejaPresent 			_arraydePts  		_pt 	 			=(
 			local result = ( trouver_pt	_arraydePts	_pt ) != 0
 			result
 		),
-		fn ComparerTableaux 	first 	second =		(
+		fn comparerTableaux 			first 				second 				=(
 			result = true
 			if first.count != second.count then
 				result = false
@@ -351,7 +353,7 @@ struct str_shape_outils (
 					if first[i] != second[i] do result = false
 			result
 		),
-		fn virerDoublonsDansTableau  _tab = (
+		fn virerDoublonsDansTableau  _tab 			= (
 			for i = 1 to _tab.count do
 			(
 				for j = _tab.count to i+1 by -1 do
@@ -364,7 +366,7 @@ struct str_shape_outils (
 				)--end j loop
 			)--end i loop
 		),
-		fn 	ordonner_Points 		_id_pts	 =(
+		fn ordonner_Points 				_id_pts	 		=(
 			--#(2, 3, 4, 1), #(3, 4, 1, 2), #(4, 1, 2, 3)
 			local min 		=	amin _id_pts
 			local id_min 	= finditem _id_pts min
@@ -382,7 +384,7 @@ struct str_shape_outils (
 		
 	----------------- Divers -----------------
 	public
-		fn surface 							_pts 	 	=(
+		fn surface 								_pts 	 	=(
 			--- on creer une face sur le tracé ---------
 			local faceTemp = m_geo.pointsEtFaces 	_pts
 			
@@ -410,7 +412,7 @@ struct str_shape_outils (
 			)
 			resultPts
 		),
-		fn pointLePlusHautsurY 		_pts		=(
+		fn pointLePlusHautsurY 			_pts		=(
 			local maxi = _pts[1].y
 			local result_id = 1
 			for i = 1 to _pts.count do (
@@ -424,7 +426,7 @@ struct str_shape_outils (
 	-- 			debug "pointLePlusHautsurY"	var:result_id
 			result_id
 		),
-		fn est_sensPositif 				_pts 		=(
+		fn est_sensPositif 					_pts 		=(
 			
 			local result 				= true
 			local id_pointHaut 	=  pointLePlusHautsurY  	_pts
@@ -511,7 +513,7 @@ struct str_shape_outils (
 		
 		
 		
-	-----------------  Optimisations ----------------------
+	-----------------  divers ----------------------
 	public
 		fn estPignon 	_pts		_id		=(
 			
@@ -827,6 +829,7 @@ struct str_shape_outils (
 		
 		
 		
+	-----------------  Optimisations ----------------------
 	public
 		fn orthonormer 		&_pts	_seuil  =(
 			debug "orthonormer"
@@ -946,7 +949,7 @@ struct str_shape_outils (
 				)
 			)
 		),
-		fn projeter		 		&_pts =(
+		fn projeter		 		&_pts 	=(
 			
 			local mtrx_AP 	= get_axePrincipal_mtrx 	_pts
 			local seuil = 5
@@ -1023,11 +1026,11 @@ struct str_shape_outils (
 			_pts = trace_temp
 			
 		),
-		fn subdiviser		 		=(
+		fn subdiviser		 	_pts 		=(
 			debug "subdiviser"
 			
 			--- on  les points projetés au tracé --------
-			projeter_trace 		()
+			projeter		_pts
 			
 			local result = #()
 			local result_reste =#()
@@ -1035,7 +1038,7 @@ struct str_shape_outils (
 			m_rectangles_traces 		= #()
 			
 			local seuil 					= 1
-			local mtrx_AP 			= m_plug.axeP_mtrx
+			local mtrx_AP 			= get_axePrincipal_mtrx 	_pts
 			local trace 				= _pts
 			
 			for i = 1 to  trace.count 	do (
@@ -1081,7 +1084,7 @@ struct str_shape_outils (
 			
 			
 		),
-		fn decouper 		 		=(
+		fn decouper 		 	_pts 		=(
 			debug "decouper"
 			
 			
@@ -1093,12 +1096,12 @@ struct str_shape_outils (
 			
 			
 			
-			local seuil 					= 1
-			local mtrx_AP 			= m_plug.axeP_mtrx
+			local seuil 				= 1
+			local mtrx_AP 			= get_axePrincipal_mtrx 	_pts
 			local trace 				= _pts
-			local trace_restant 		= for i = 1 to trace.count collect i
+			local trace_restant 	= for i = 1 to trace.count collect i
 			
--- 			--- creer la face tracé pour tester intersection ------------
+			--- creer la face tracé pour tester intersection 	------------
 			
 			for sstrace in   m_rectangles_traces 	do (
 				

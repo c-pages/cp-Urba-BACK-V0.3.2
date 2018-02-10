@@ -27,9 +27,9 @@ struct 	str_composant (
 	------ Fonctions ------------------------------------------------------------------------------
 	public
 		---- Mutations -----------------------
-		fn set_dialog 			_dialog 			= ( m_dialog 				= _dialog ),
-		fn set_construire 	_fnConstruire 	= ( fnVirt_construire 	= _fnConstruire ),
-		fn set_params			_params		= ( params					= _params ),
+		fn set_dialog 			_dialog 				= ( m_dialog 				= _dialog ),
+		fn set_construire 		_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
+		fn set_params			_params			= ( params					= _params ),
 		
 		---- Accessions -----------------------
 		fn get_dialog			=	m_dialog,
@@ -41,6 +41,7 @@ struct 	str_composant (
 			dialog.actualiser()
 		),
 		fn initialiser 		_type	_nom 	=(
+			
 			---- id unique ----
 			id += _type
 			for i= 1 to 10 do id += ( random 0 9 ) as string	
@@ -136,8 +137,8 @@ struct 	str_constructeur_composants (
 									local matID				=	ptr_plug.core.get_matID ()
 									
 							-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
-									local ep_dalle 		= ptr_plug.ep_dalle
-									local ht_niveaux 		= ptr_plug.niveaux_hauteur
+									local ep_dalle 		= ptr_plug.etages_epaiss_dalle
+									local ht_niveaux 		= ptr_plug.etages_hauteur
 									local longueur 		= ptr_composant.params.longueur
 									
 									
@@ -249,7 +250,7 @@ struct 	str_constructeur_composants (
 				local pt_result_1, pt_result_2, pt_result_3
 				
 				--- Vecteurs ------------
-				local vec_ep_dalle 	= [0,0,1] 			* 	m_plug.ep_dalle			
+				local vec_ep_dalle 	= [0,0,1] 			* 	m_plug.etages_epaiss_dalle			
 				local vec_longueur 	= _normDir 		* 	m_compo.longueur
 				local norm_balcon	= _normDir * rotateZ ( matrix3 1 ) -90
 				local vec_largeur		= norm_balcon 	*	 largeur				
@@ -440,15 +441,15 @@ struct 	str_facade (
 				
 				--- Limiteurs - Etages	---
 				_plug.fac_etagesMin_uses[index_facade] 		= etages_min_use
-				_plug.fac_etagesMins[index_facade]  				=	etages_min
+				_plug.fac_etagesMin[index_facade]  				=	etages_min
 				_plug.fac_etagesMax_uses[index_facade] 		= etages_max_use
-				_plug.fac_etagesMaxs[index_facade] 				=	etages_max
+				_plug.fac_etagesMax[index_facade] 				=	etages_max
 				
 				--- Limiteurs - longueurs	---
 				_plug.fac_longueurMin_uses[index_facade] 	= longueur_min_use
-				_plug.fac_longueurMins[index_facade] 			=	longueur_min
+				_plug.fac_longueurMin[index_facade] 			=	longueur_min
 				_plug.fac_longueurMax_uses[index_facade] 	=	longueur_max_use
-				_plug.fac_longueurMaxs[index_facade] 			= longueur_max
+				_plug.fac_longueurMax[index_facade] 			= longueur_max
 				
 			)
 			
@@ -482,15 +483,15 @@ struct 	str_facade (
 				
 				--- Limiteurs - Etages	---
 				etages_min_use			= _plug.fac_etagesMin_uses[index_facade] 
-				etages_min					= _plug.fac_etagesMins[index_facade] 
+				etages_min					= _plug.fac_etagesMin[index_facade] 
 				etages_max_use			= _plug.fac_etagesMax_uses[index_facade] 
-				etages_max					= _plug.fac_etagesMaxs[index_facade] 
+				etages_max					= _plug.fac_etagesMax[index_facade] 
 				
 				--- Limiteurs - longueurs	---
 				longueur_min_use			= _plug.fac_longueurMin_uses[index_facade] 
-				longueur_min				= _plug.fac_longueurMins[index_facade] 
+				longueur_min				= _plug.fac_longueurMin[index_facade] 
 				longueur_max_use			= _plug.fac_longueurMax_uses[index_facade] 
-				longueur_max				= _plug.fac_longueurMaxs[index_facade] 
+				longueur_max				= _plug.fac_longueurMax[index_facade] 
 				
 				--- Sequence	---
 -- 				fac_sequences					= _plug.

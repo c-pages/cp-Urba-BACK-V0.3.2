@@ -88,38 +88,30 @@ struct	str_geometrie	(
 		),
 		fn facesContour	ptsContours	 altitude 		hauteur 			=(
 			
-			local VERSION_BACK = true
 			
-			if not VERSION_BACK then (
-				------------	NOUVELLE VERSION	----------------
+			local facesDuContour =#()
+			local listePts = #()
+			if hauteur <0 then
+				listePts = for i = ptsContours.count to 1 by -1 collect ptsContours[i]
+			else listePts = ptsContours
+			
+			for i_pt = 1 to listePts.count do	 (
+				local pt_1 = listePts[i_pt]
+				local pt_2 
 				
+				if i_pt == listePts.count then
+					pt_2 = listePts[1]
+				else pt_2 =  listePts[i_pt + 1 ]
 				
-			) else (  
-				------------	VERSION BACK 	----------------
-				
-				local facesDuContour =#()
-				local listePts = #()
-				if hauteur <0 then
-					listePts = for i = ptsContours.count to 1 by -1 collect ptsContours[i]
-				else listePts = ptsContours
-				
-				for i_pt = 1 to listePts.count do	 (
-					local pt_1 = listePts[i_pt]
-					local pt_2 
-					
-					if i_pt == listePts.count then
-						pt_2 = listePts[1]
-					else pt_2 =  listePts[i_pt + 1 ]
-					
-					local nvlFace = faceVerticale 		pt_1		pt_2 	altitude 		ht:hauteur
-					if nvlFace != undefined do
-						appendIfUnique facesDuContour	nvlFace
-					
-				)
-				
-				facesDuContour
+				local nvlFace = faceVerticale 		pt_1		pt_2 	altitude 		ht:hauteur
+				if nvlFace != undefined do
+					appendIfUnique facesDuContour	nvlFace
 				
 			)
+			
+			facesDuContour
+			
+		
 		),
 		
 		

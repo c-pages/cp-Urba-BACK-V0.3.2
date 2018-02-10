@@ -31,48 +31,39 @@
 parameters params_global 				rollout:roll_global		(
 	
 	------- Surface		------------------
-	surface_node				type:#node 								 ui:btn_pick_surface
-	surface_points_base		type:#point3Tab 		tabSize:0 		tabSizeVariable:true
-	surface_points				type:#point3Tab 		tabSize:0 		tabSizeVariable:true
+	surface_node					type:#node 								 	ui:btn_pick_surface		animatable:false		invisibleInTV:true
 	
-	------- Divers			------------------
-	niveaux_hauteur		type: #float 			default:250.		ui:spn_hauteur
-	niveaux_nbre			type: #integer			default:1			ui:spn_nbres
-	ep_dalle					type: #float 			default:20.			--ui:spn_ep_dalle
-	
-	------- Orientation	------------------
-	axe_principal			type:#matrix3	
-	orientation				type:#float				default:0.			ui:spn_rotation_axeP
-	
+	------- Etages			------------------
+	etages_hauteur				type: #float 				default:250.		ui:spn_hauteur		animatable:false		invisibleInTV:true
+	etages_nbre					type: #integer			default:1			ui:spn_nbres			animatable:false		invisibleInTV:true
+	etages_epaiss_dalle					type: #float 				default:20.				animatable:false		invisibleInTV:true	--ui:spn_ep_dalle
+
 )
 parameters params_optimSurface		rollout:roll_optimSurface	(
 	
 	------- Optimisations		------------------
-	optim_aplanir					type:#boolean			default:true		ui:chk_aplanir
-	optim_souder					type:#boolean			default:true		ui:chk_souder
-	optim_orthonormer			type:#boolean			default:true		ui:chk_ortho
-	optim_aligner					type:#boolean			default:true		ui:chk_aligner
-	optim_projeter				type:#boolean			default:true		ui:chk_projeter
+	optim_aplanir					type:#boolean			default:true		ui:chk_aplanir		animatable:false		invisibleInTV:true
+	optim_souder					type:#boolean			default:true		ui:chk_souder		animatable:false		invisibleInTV:true
+	optim_orthonormer			type:#boolean			default:true		ui:chk_ortho			animatable:false		invisibleInTV:true
+	optim_aligner					type:#boolean			default:true		ui:chk_aligner		animatable:false		invisibleInTV:true
+	optim_projeter					type:#boolean			default:true		ui:chk_projeter		animatable:false		invisibleInTV:true
 	
 	------- Seuils		------------------
-	optim_aplanir_seuil			type:#float				default:20.			ui:spn_aplanir
-	optim_souder_seuil			type:#float				default:30.			ui:spn_souder
-	optim_ortho_seuil			type:#float				default:100.		ui:spn_ortho
-	optim_aligner_seuil			type:#float				default:50.			ui:spn_aligner
+	optim_aplanir_seuil			type:#float				default:20.			ui:spn_aplanir		animatable:false		invisibleInTV:true
+	optim_souder_seuil			type:#float				default:30.			ui:spn_souder		animatable:false		invisibleInTV:true
+	optim_ortho_seuil				type:#float				default:100.			ui:spn_ortho			animatable:false		invisibleInTV:true
+	optim_aligner_seuil			type:#float				default:50.			ui:spn_aligner		animatable:false		invisibleInTV:true
 	
 )
 parameters params_viewport				rollout:roll_viewport	(
 	
-	surface					type: #float 			default:0.	
-	
 	------- AFFICHAGE 		 ------------------
-	affiche_axe					type:#boolean			default:false	ui:ckb_axe
-	affiche_surface			type:#boolean			default:false	ui:ckb_surface
-	affiche_gouttereaux		type:#boolean			default:false	ui:ckb_gouttereaux
-	affiche_pignons			type:#boolean			default:false	ui:ckb_pignons
-	affiche_sssurfaces		type:#boolean			default:false	ui:ckb_sssurfaces
-	
-	cache_geometrie			type:#boolean			default:false	ui:ckb_geometrie
+	affiche_axe					type:#boolean			default:false	ui:ckb_axe				animatable:false		invisibleInTV:true
+	affiche_surface				type:#boolean			default:false	ui:ckb_surface			animatable:false		invisibleInTV:true
+	affiche_gouttereaux		type:#boolean			default:false	ui:ckb_gouttereaux	animatable:false		invisibleInTV:true
+	affiche_pignons				type:#boolean			default:false	ui:ckb_pignons			animatable:false		invisibleInTV:true
+	affiche_ssSurfaces			type:#boolean			default:false	ui:ckb_ssSurfaces		animatable:false		invisibleInTV:true	
+	affiche_geometrie			type:#boolean			default:false	ui:ckb_geometrie		animatable:false		invisibleInTV:true
 	
 )
 parameters params_facades 				rollout:roll_facades	(
@@ -83,15 +74,15 @@ parameters params_facades 				rollout:roll_facades	(
 	
 	--- Limiteurs - Etages	---
 	fac_etagesMin_uses			type:#boolTab		tabSize:0 			tabSizeVariable:true
-	fac_etagesMins					type:#intTab			tabSize:0 			tabSizeVariable:true
+	fac_etagesMin					type:#intTab			tabSize:0 			tabSizeVariable:true
 	fac_etagesMax_uses			type:#boolTab		tabSize:0 			tabSizeVariable:true
-	fac_etagesMaxs					type:#intTab			tabSize:0 			tabSizeVariable:true
+	fac_etagesMax					type:#intTab			tabSize:0 			tabSizeVariable:true
 	
 	--- Limiteurs - longueurs	---
 	fac_longueurMin_uses		type:#boolTab		tabSize:0 			tabSizeVariable:true
-	fac_longueurMins				type:#floatTab		tabSize:0 			tabSizeVariable:true
+	fac_longueurMin				type:#floatTab		tabSize:0 			tabSizeVariable:true
 	fac_longueurMax_uses		type:#boolTab		tabSize:0 			tabSizeVariable:true
-	fac_longueurMaxs				type:#floatTab		tabSize:0 			tabSizeVariable:true
+	fac_longueurMax				type:#floatTab		tabSize:0 			tabSizeVariable:true
 	
 	--- Limiteurs - Murs	---
 	fac_murs							type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:les deux	2:gouttereaux	3:pignons )	----
@@ -105,9 +96,11 @@ parameters params_facades 				rollout:roll_facades	(
 parameters params_toiture 				rollout:roll_toiture	(
 	
 -- 	toit_nbrePentes	type: #radiobtnIndex 	default:2		ui:rdo_pentes
-	toit_pente			type: #float 				default:20		ui:spn_pente
-	toit_type			type: #integer 			default:1		ui:ddl_toiture
-	toit_hauteur		type: #float 				default:20.		ui:spn_toit_hauteur
+	
+	toit_type			type: #integer 			default:1		ui:ddl_toiture				animatable:false		invisibleInTV:true
+	toit_pente			type: #float 				default:20		ui:spn_pente				animatable:false		invisibleInTV:true
+	toit_hauteur		type: #float 				default:20.		ui:spn_toit_hauteur				animatable:false		invisibleInTV:true
+	toit_orientation		type:#float				default:0.				animatable:false		invisibleInTV:true	--	ui:spn_rotation
 	
 )
 
@@ -124,16 +117,16 @@ rollout roll_global "Global" width:162 height:93 (
 	pickbutton 'btn_pick_surface' "Pick shape" pos:[12,14] width:116 height:18 filter:shape_filt autoDisplay:true align:#left
 	GroupBox 'grp9' "Surface:" pos:[4,0] width:162 height:38 align:#left
 
-	spinner 'spn_rotation_axeP' "" pos:[87,73] width:54 height:16 range:[-360,360,0] type:#float scale:1 align:#left
-	label 'lbl_axeP' "Orientation:" pos:[5,74] width:59 height:15 align:#left
-	button 'btn_rotation' "+90°" pos:[138,73] width:30 height:16 align:#left
-	
+	-- 	spinner 'spn_rotation_axeP' "" pos:[87,73] width:54 height:16 range:[-360,360,0] type:#float scale:1 align:#left
+	-- 	label 'lbl_axeP' "Orientation:" pos:[5,74] width:59 height:15 align:#left
+	-- 	button 'btn_rotation' "+90°" pos:[138,73] width:30 height:16 align:#left
+
 	label 'lbl_nbre' "Nbre. d'étages:" pos:[5,44] width:79 height:15 align:#left
 	spinner 'spn_nbres' "" pos:[87,43] width:80 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
 	spinner 'spn_hauteur' "" pos:[87,58] width:80 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
 	label 'lbl_hauteur' "Htr. des étages:" pos:[5,59] width:76 height:15 align:#left
 	
-	button 'btn_maj' "MAJ" pos:[127,15] width:30 height:16 align:#left
+	button 'btn_maj' "MAJ" pos:[127,14] width:30 height:18 align:#left
 	
 	fn actualiser =(
 		btn_maj.enabled = surface_node != undefined
@@ -218,7 +211,7 @@ rollout roll_optimSurface 		"Optimisation Surface" 		rolledUp:true	(
 )
 rollout roll_facades 		"Façades"		rolledUp:false	(
 
-	listbox 'lbx_facades' "" pos:[5,15] width:165 height:9 align:#left 
+	listbox 'lbx_facades' "" pos:[5,16] width:165 height:9 align:#left 
 	button 'btn_ajouterFacade' "+" pos:[141,-1] width:16 height:16 align:#left
 	button 'btn_supprimerFacade' "-" pos:[156,-1] width:16 height:16 align:#left
 	button 'btn_dupliquer' "Dup" pos:[96,0] width:27 height:16 align:#left

@@ -43,10 +43,10 @@ struct str_construction (
 		
 		---- constantes------------------
 	private
-		ep_ssBassement 	= 	100,
-		ep_dalle 			= 20,
-		ep_mur	 			= 20,
-		ep_couvertine	 	= 5,
+		const_ep_ssBassement 	= 	100,
+-- 		const_ep_dalle 				= 20,
+		const_ep_mur	 			= 20,
+		const_ep_couvertine	 	= 5,
 		
 		
 		
@@ -140,6 +140,8 @@ struct str_construction (
 	private
 		fn toitPentes 				&z	_nbrePentes	=(
 			
+			local surface_points 	= m_plug.core.get_surface_points ()
+			
 			local	 mtrx_axeP	=	m_plug.axeP_mtrx
 			local	 BB_axeP	=	m_plug.axeP_BB
 			translate mtrx_axeP	BB_axeP[1]
@@ -149,7 +151,8 @@ struct str_construction (
 			local longeur 		= 	diag_axeP.z
 			local hauteur 		= largeur * tan m_plug.toit_pente		--	largeur /2 --* random .3 1.5
 			
-			local nvlsFaces 	= #()
+			local nvlsFaces 				= #()
+			
 			case _nbrePentes of (
 				1: ( ---------- 1 PENTE ----------------------------------------------------------------------------------------------------
 						--- gestion de l'angle de la pente .... ----
@@ -164,20 +167,19 @@ struct str_construction (
 						
 						local pt_Origine = pt_0
 						pt_Origine.z =  z + m_plug.toit_hauteur
-	-- 						point pos:pt_Origine	 isSelected:true
 					
 						local plan_pente = str_plan ()
 						plan_pente.creerFrom_2vecs_et_1Point	vec1	vec2		pt_Origine
 						
 						local pointsPente = #()
 						local pointsMurs   =#()
-						for i = 1 to  m_plug.surface_points.count do (
+						for i = 1 to  surface_points.count do (
 							
 							local j = i+1
-							if j >  m_plug.surface_points.count  do j = 1
+							if j >  surface_points.count  do j = 1
 							
 							--- point Mur ----
-							local pt 			= 	m_plug.surface_points[i]	
+							local pt 			= 	surface_points[i]	
 							pt.z = z
 							append pointsMurs  pt		
 							
@@ -288,14 +290,14 @@ struct str_construction (
 						local pointsPente1 = #()
 						local pointsPente2 = #()
 						local pointsMurs   =#()
-						for i = 1 to  m_plug.surface_points.count do (
+						for i = 1 to  surface_points.count do (
 							
 							local j = i+1
-							if j >  m_plug.surface_points.count  do j = 1
+							if j >  surface_points.count  do j = 1
 							
 							
 							--- point Mur ----
-							local pt 			= 	m_plug.surface_points[i]	
+							local pt 			= 	surface_points[i]	
 							pt.z = z
 							append pointsMurs  pt		
 							
@@ -312,7 +314,7 @@ struct str_construction (
 							)
 							
 							--- point mur - faitage ----
-							local pt_suivant 	= 	m_plug.surface_points[j]	
+							local pt_suivant 	= 	surface_points[j]	
 							pt_suivant.z = z
 							local intersect = plan_verticaleFaitage.coupe_segment	pt 	pt_suivant							
 							if intersect do (
@@ -395,7 +397,7 @@ struct str_construction (
 			-- m_matID --
 			polyop.setFaceMatID m_plug.delegate  #(_face) 	m_matID.mur
 			-- gemoetrie --			
-			polyop.bevelFaces m_plug.delegate 	#(_face) 	0 	-ep_mur
+			polyop.bevelFaces m_plug.delegate 	#(_face) 	0 	-const_ep_mur
 			local faceAExtruder = #{_face+1..(polyop.getNumFaces m_plug.delegate)} as array
 			polyop.extrudeFaces  m_plug.delegate 	faceAExtruder 	m_plug.toit_hauteur
 			
@@ -404,8 +406,8 @@ struct str_construction (
 			-- m_matID --
 			polyop.setFaceMatID m_plug.delegate  faceAExtruder 	m_matID.metal
 			-- gemoetrie --
-			polyop.bevelFaces m_plug.delegate 	faceAExtruder		0 	ep_couvertine
-			polyop.extrudeFaces m_plug.delegate 	faceAExtruder		ep_couvertine
+			polyop.bevelFaces m_plug.delegate 	faceAExtruder		0 	const_ep_couvertine
+			polyop.extrudeFaces m_plug.delegate 	faceAExtruder		const_ep_couvertine
 			
 			local faceToitsSurface = m_outils_poly.etendreFaces  	m_plug.delegate 	#(_face)
 			
@@ -417,16 +419,17 @@ struct str_construction (
 			
 		),		
 		fn toit 						&z =(
+			
+			local surface_points 	= m_plug.core.get_surface_points ()
+			
 			case m_plug.toit_type of (
-				1: (	---- PLAT	----
-					local surface_points = for pt in m_plug.surface_points collect [pt.x,pt.y,z]
+				1: (	---- PLAT	----	-- for pt in m_plug.surface_points collect [pt.x,pt.y,z]
 					m_geo.pointsEtFaces		surface_points		  	m_matID:m_matID.toiture
 				)
 				2: (	---- ACROTERE	----
 					
 					
 					--- creation de la facette globale-----
-					local surface_points 	= for pt in m_plug.surface_points collect [pt.x,pt.y,z]
 					local faceDuToit 			= m_geo.pointsEtFaces		surface_points		
 					
 					acrotere			faceDuToit
@@ -446,8 +449,9 @@ struct str_construction (
 	private
 		fn ssBassement  			&z	=(
 			
-			m_geo.facesContour	 	m_plug.surface_points		z 	ep_ssBassement	
-			z += ep_ssBassement
+			local surface_points 	= m_plug.core.get_surface_points ()
+			m_geo.facesContour	 	surface_points		z 	const_ep_ssBassement	
+			z += const_ep_ssBassement
 			
 		),
 		fn creer_mur 	_pt_bas		_pt_ht	_pt2 		 ht:	m_matID:	= (
@@ -457,7 +461,7 @@ struct str_construction (
 -- 			debug "_pt2" var:_pt2
 -- 			debug "(distance _pt2 _pt_bas )" var:(distance _pt2 	(polyop.getvert m_plug.delegate _pt_bas ) )
 			if ht != unsupplied then	hauteur = ht
-				else hauteur 	=	m_plug.niveaux_hauteur 
+				else hauteur 	=	m_plug.etages_hauteur 
 			
 			local pts_pos_esp = 	#()		
 			append pts_pos_esp 	( _pt2 )
@@ -543,8 +547,8 @@ struct str_construction (
 			
 			--- les 3 premiers points --------				
 			local pt_accroche_1 	= 	_pt1
-			local pt_accroche_2 	= 	pt_accroche_1 + [0,0,m_plug.ep_dalle]
-			local pt_accroche_3 	= 	pt_accroche_2 + [0,0,m_plug.niveaux_hauteur]
+			local pt_accroche_2 	= 	pt_accroche_1 + [0,0,m_plug.etages_epaiss_dalle]
+			local pt_accroche_3 	= 	pt_accroche_2 + [0,0,m_plug.etages_hauteur]
 			
 			local ptsIDs_accroche 		= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	 	)
 			
@@ -617,7 +621,7 @@ struct str_construction (
 									
 									-----	facette du dessus -----
 									pt2 = pt1 + normDir * modele.longueur								
-									local hauteurQuiReste = 	m_plug.niveaux_hauteur 	- modele.hauteur	
+									local hauteurQuiReste = 	m_plug.etages_hauteur 	- modele.hauteur	
 									
 									local pts_accroche = creer_mur 	pt_bas		pt_ht		pt2 		m_plug		ht:hauteurQuiReste	
 									pt_bas 	= pts_accroche[1]
@@ -708,27 +712,27 @@ struct str_construction (
 			local z_initial = copy z
 			local facades_total		= 	m_plug.core.get_facades ()
 			
+			local surface_points 	= m_plug.core.get_surface_points ()
 			
 			---- boucle étages ---------------------
-			for n_etage = 0 to m_plug.niveaux_nbre do (
+			for n_etage = 0 to m_plug.etages_nbre do (
 				
 				debug "etage num" var:n_etage
 				
 				--- filtre par etages ---------------
 				local facades_etages 	= 	filtrer_facades_parEtages		facades_total 		n_etage
 				local onA_uneFacade 	= 	facades_etages.count > 0
-				local listePts 				= 	for pt in m_plug.surface_points	 collect pt
 				
 				---- boucle  murs ---------------------
-				for id_pt = 1 to listePts.count do	 (
+				for id_pt = 1 to surface_points.count do	 (
 					
 					debug "id_pt	-----------------------------------" 
 					
 					--- les 2 points du mur ----------
-					local pt_mur_1 = listePts[ id_pt ]
+					local pt_mur_1 = surface_points[ id_pt ]
 					local pt_mur_2						
-					if id_pt == listePts.count 	then	pt_mur_2 = listePts[ 1 ]
-															else	pt_mur_2 = listePts[ id_pt + 1 ]
+					if id_pt == surface_points.count 	then	pt_mur_2 = surface_points[ 1 ]
+																		else	pt_mur_2 = surface_points[ id_pt + 1 ]
 					pt_mur_1.z = pt_mur_2.z = z
 					
 					local	mur_longueur 		= distance pt_mur_1 	pt_mur_2
@@ -736,7 +740,7 @@ struct str_construction (
 					
 				
 					---  filtre par  murs  ---------------
-					local facade_choisi			=	filtrer_facades_parMurs		facades_etages		mur_longueur	m_plug.surface_points		id_pt
+					local facade_choisi			=	filtrer_facades_parMurs		facades_etages		mur_longueur	surface_points		id_pt
 					
 					
 					
@@ -760,31 +764,31 @@ struct str_construction (
 						
 						--- Composant 'Mur plein' temporaire	------
 						local pt_accroche_1 	= 	pt_mur_1 
-						local pt_accroche_2 	= 	pt_mur_1 + [0,0,m_plug.ep_dalle]
-						local pt_accroche_3 	= 	pt_accroche_2 + [0,0,m_plug.niveaux_hauteur]	
+						local pt_accroche_2 	= 	pt_mur_1 + [0,0,	m_plug.etages_epaiss_dalle]
+						local pt_accroche_3 	= 	pt_accroche_2 + [0,0,m_plug.etages_hauteur]	
 						
 						local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	)
 						
-						local compoTmp = creer_murPlein		mur_longueur 	
+						local compoTmp 	= creer_murPlein		mur_longueur 	
 						ptsIDs_accroche 	= compoTmp.construire	m_plug 		 ptsIDs_accroche		norm_mur 
 						
 					)
 					
 				)
 				
-				z += m_plug.niveaux_hauteur + m_plug.ep_dalle
+				z += m_plug.etages_hauteur + m_plug.etages_epaiss_dalle
 				
 				/* --- dalle plancher ---
-				if ep_dalle  != 0 do (
-					local nvlsFaces = m_geo.facesContour	m_plug.surface_points	z 	ep_dalle	m_plug
+				if const_ep_dalle  != 0 do (
+					local nvlsFaces = m_geo.facesContour	m_plug.surface_points	z 	const_ep_dalle	m_plug
 					facesDunEtage  += nvlsFaces
-					z += ep_dalle
+					z += const_ep_dalle
 				)  */
 				
 			) --- fin boucle etages -------------
 			
-			m_geo.facesContour	 	m_plug.surface_points		z 	m_plug.ep_dalle
-			z += ep_dalle
+			m_geo.facesContour	 (	m_plug.core.get_surface_points ()	)	z 	m_plug.etages_epaiss_dalle
+			z += m_plug.etages_epaiss_dalle
 			
 		),
 		
@@ -842,7 +846,7 @@ struct str_construction (
 					local chrono_debut = timeStamp ()
 					
 					---- On définie le Z initial 	----
-					local zCourant = -( ep_ssBassement + ep_dalle )
+					local zCourant = -( const_ep_ssBassement + m_plug.etages_epaiss_dalle )
 					
 					---- ...  et on construit le batiment -----
 					ssBassement 		&zCourant

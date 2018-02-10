@@ -121,6 +121,8 @@ struct str_batiment_core (
 		
 		
 	----- Accessions -----------------------
+		fn get_surface_points		=	mgr_surface.get_points	(),
+		
 		fn get_facades_noms 	=	mgr_facades.get_noms (),
 		fn get_facades				=	mgr_facades.get_items (),
 		
