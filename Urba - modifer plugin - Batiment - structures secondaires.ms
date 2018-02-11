@@ -1174,9 +1174,6 @@ struct str_shape_outils (
 	
 )
 
-test = str_shape_outils ()
-pts = test.scanner_points	$
-test.subdiviser	pts
 
 struct str_poly_outils (
 	
