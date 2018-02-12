@@ -5,60 +5,63 @@
 ------------------------------------------------------------------------------
 ----------	Fichiers annexes						--------------------------
 ------------------------------------------------------------------------------
-include "$userScripts\cp - GLOBAL\UI.ms"
-include "$userScripts\cp - GLOBAL\DragDialog.ms"
+-- include "$userScripts\cp - GLOBAL\UI.ms"
+-- include "$userScripts\cp - GLOBAL\DragDialog.ms"
 
 
 
 ------------------------------------------------------------------------------
 ----------	Fenetre								 -------------------------
 ------------------------------------------------------------------------------
-rollout roll_OSM_importer "OSM_importer" width:200 height:259
+rollout roll_OSM_importer "Urba | OSM Importer" width:200 height:262
 (
 	------------  Membres	----------------------------------------------------------------------------------
 	---- Pointeurs ----
 	local m_prt				---- pointeur vers la structure de controle ----
 	
 	---- Structures ----
-	local m_drag			---- la structure gerant le drag de la fenetre ----
-	
+-- 	local m_drag			---- la structure gerant le drag de la fenetre ----
+	/* 
 	--- ctro des imgtags ---
 	local m_titre
 	local m_log
-	
+	 */
 	
 	------------  UI	----------------------------------------------------------------------------------		
-	---- le bouton pour fermer la fenetre ----
-	ImgTag 'ui_btnFermer' "X" pos:[180,0] width:20 height:20 toolTip:"Fermer" style:#bmp_center align:#left
-	
-	ImgTag 'ui_titre' "" pos:[8,4] width:66 height:18 align:#left
-	ImgTag 'ui_log' "" pos:[6,233] width:66 height:18 align:#left
+-- 	---- le bouton pour fermer la fenetre ----
+-- 	ImgTag 'ui_btnFermer' "X" pos:[180,0] width:20 height:20 toolTip:"Fermer" style:#bmp_center align:#left
+-- 	
+-- 	ImgTag 'ui_titre' "" pos:[8,4] width:66 height:18 align:#left
+-- 	ImgTag 'ui_log' "" pos:[6,233] width:66 height:18 align:#left
 
-	button 'btn_webOSM' "OSM web site" pos:[8,23] width:90 height:18 toolTip:"Acceder au site Open Street Map pour y télécharger un export '.osm'." align:#left
-	button 'btn_charger' "Charger" pos:[100,23] width:92 height:18 toolTip:"Charger un fichier OSM (*.osm)." align:#left
+	button 'btn_webOSM' "OSM.org" pos:[8,6] width:64 height:18 toolTip:"Acceder au site Open Street Map pour y télécharger un export '.osm'." align:#left
+	button 'btn_charger' "Charger" pos:[73,6] width:119 height:18 toolTip:"Charger un fichier OSM (*.osm)." align:#left
 	
-	button 'btn_importer' "Importer" pos:[6,208] width:184 height:23 enabled:false toolTip:"Importer." align:#left
-	groupBox 'grp_infos' "Infos" pos:[8,40] width:185 height:102 align:#left
-	label 'lbl_infos' "" pos:[18,58] width:164 height:78 align:#left
-	checkbox 'chk_batiments' "Batiments" pos:[10,145] width:84 height:18 align:#left		checked:true
+	button 'btn_importer' "Importer" pos:[6,216] width:184 height:36 enabled:false toolTip:"Importer." align:#left
+	GroupBox 'grp_infos' "Infos" pos:[8,23] width:185 height:102 align:#left
+	label 'lbl_infos' "" pos:[18,41] width:164 height:78 align:#left
+	checkbox 'chk_batiments' "Batiments" pos:[17,145] width:84 height:18 checked:true align:#left
 	
 
-	checkbox 'chk_voiries' "Voiries" pos:[10,164] width:61 height:18  align:#left		checked:true	--	enabled:false
+	checkbox 'chk_voiries' "Voiries" pos:[17,164] width:61 height:18 checked:true align:#left	--	enabled:false
+	--	enabled:false
 	
 	checkbox 'chk_zones' "Zones" pos:[102,146] width:61 height:18 enabled:false align:#left
 	
-	label 'lbl_echelle' "Echelle :" pos:[10,186] width:49 height:13 align:#left
-	spinner 'spn_echelle' "" pos:[71,187] width:118 height:16 range:[0,1e+06,1] align:#left
+	label 'lbl_echelle' "Echelle :" pos:[17,186] width:49 height:13 align:#left
+	spinner 'spn_echelle' "" pos:[71,187] width:107 height:16 range:[0,1e+06,1] align:#left
 	
+	
+	GroupBox 'grp_options' "Options" pos:[9,130] width:177 height:80 align:#left
 		------------  Fonctions	----------------------------------------------------------------------------------
 	---- Gere l'état du bouton  -----
-	fn etatBtnFermer		_etat =(
-		case _etat of (
-			#Repos : 	ui_btnFermer.bitmap = m_prt.m_icos_fermer[1]	
-			#Survol : 	ui_btnFermer.bitmap = m_prt.m_icos_fermer[2]	
-			#Press : 	ui_btnFermer.bitmap = m_prt.m_icos_fermer[3]	
-		)
-	)
+-- 	fn etatBtnFermer		_etat =(
+-- 		case _etat of (
+-- 			#Repos : 	ui_btnFermer.bitmap = m_prt.m_icos_fermer[1]	
+-- 			#Survol : 	ui_btnFermer.bitmap = m_prt.m_icos_fermer[2]	
+-- 			#Press : 	ui_btnFermer.bitmap = m_prt.m_icos_fermer[3]	
+-- 		)
+-- 	)
 	
 	
 	fn actualiser = (
@@ -66,8 +69,10 @@ rollout roll_OSM_importer "OSM_importer" width:200 height:259
 		local parsingOK = m_prt.get_parsingOK ()
 		
 		btn_importer.enabled 	= parsingOK
-		grp_infos.enabled 			= parsingOK 
-		lbl_infos.enabled 			= parsingOK 
+-- 		grp_infos.enabled 			= parsingOK 
+-- 		lbl_infos.enabled 			= parsingOK 
+		
+		grp_options.enabled 		= parsingOK 
 		
 		chk_batiments.enabled 	= parsingOK 
 		chk_voiries.enabled = parsingOK 
@@ -76,7 +81,7 @@ rollout roll_OSM_importer "OSM_importer" width:200 height:259
 		lbl_echelle.enabled 		= parsingOK 
 		spn_echelle.enabled 		= parsingOK 		
 		
-		if parsingOK do (
+		if parsingOK then (
 			local info_txt = ""
 			info_txt		+=  m_prt.get_nomDuFichier () + "\n"
 			info_txt		+= "\n"
@@ -84,20 +89,20 @@ rollout roll_OSM_importer "OSM_importer" width:200 height:259
 			info_txt		+= "Batiments : " + m_prt.get_nbr_batiments () as string + "\n"
 			info_txt		+= "Voiries : " + m_prt.get_nbr_voiries () as string + "\n"
 			lbl_infos.text = info_txt
-		)
+		) else lbl_infos.text = "Aucun fichier chargé."
 		
 	)
 	
-	fn recadrer _taille =(
-		
-		ui_btnFermer.pos.x = _taille.x - 20
-	)
+-- 	fn recadrer _taille =(
+-- 		
+-- 		ui_btnFermer.pos.x = _taille.x - 20
+-- 	)
 	
 	---- Initialisation de la fenetre  -----
 	fn initialiser = (
 		
-		m_drag 		= str_drag 	m_prt:roll_OSM_importer		
-		
+-- 		m_drag 		= str_drag 	m_prt:roll_OSM_importer		
+		/* 
 		m_titre 		= str_label 	m_ui:ui_titre			m_texte:"Urba | OSM Importer"
 		m_titre.setPolice (str_policeGrande())
 		m_titre.setCouleur (color 5	5	5)
@@ -111,25 +116,25 @@ rollout roll_OSM_importer "OSM_importer" width:200 height:259
 		
 		-- le bouton fermer --
 		ui_btnFermer.bitmap = m_prt.m_icos_fermer[1]	
-		
+		 */
 		actualiser()
 
 	)
 	
 	
 	------------  Evenements	----------------------------------------------------------------------------------
-	---- Drag ----
+/* 	---- Drag ----
 	on roll_OSM_importer lbuttondown _pos 	do
 		m_drag.demarrer ()
 	on roll_OSM_importer lbuttonup _pos 	do
 		m_drag.arreter ()
 	on roll_OSM_importer mouseMove _pos 	do
 		m_drag.suivreSouris ()
-	
+	 */
 -- 	--- recadrage ----
 -- 	on roll_OSM_importer resized  taille do
 -- 		recadrer (taille)
-	
+	/* 
 	---- Fermer ----
 	on ui_btnFermer mouseover do
 		etatBtnFermer #Survol
@@ -141,17 +146,21 @@ rollout roll_OSM_importer "OSM_importer" width:200 height:259
 		etatBtnFermer #Repos	
 	on ui_btnFermer click do
 		m_prt.fermer ()
-	
+	 */
 	--- interface	---------
 	on btn_webOSM pressed  do
 	(
 		/* 	command = "ShellLaunch \"Chrome.exe\" @\"https://www.openstreetmap.org\""
 			execute command
-		 */
-		rollout webbrowser_rollout "Open Street Map" width:800 height:600
-			(
-				edittext edt_Lieu "Lieu:" 	text:"Rouen"
-				dotNetControl wb "System.Windows.forms.WebBrowser" pos:[10,22] width:780 height:570
+		*/
+		
+		
+		rollout webbrowser_rollout "Urba | OSM Importer | Open Street Map" width:800 height:600	(
+			
+			local tooltip_osm = "1. Entrez un lieu à rechercher ou déplacez la carte.\n2. Cadrez la zone à importer\n3. Exportez le fichier *.osm (bouton 'exporter' de la page internet).\n4. Enregistrer le fichier de manière à pouvoir le charger dans l'Importer OSM."
+			
+				edittext edt_Lieu "Lieu:" 	text:"Rouen"	tooltip:tooltip_osm
+				dotNetControl wb "System.Windows.forms.WebBrowser" pos:[10,22] width:780 height:570		tooltip:tooltip_osm
 
 
 				fn formaterTexte 	_texte =(
@@ -159,7 +168,6 @@ rollout roll_OSM_importer "OSM_importer" width:200 height:259
 				)
 				
 				fn openOSM_lieu	 _lieu	 = (
--- 					wb.AllowNavigation  = false
 					
 					local urlString		=	"https://www.openstreetmap.org/search?query="	
 					local urlRecherche 	= urlString + formaterTexte  	_lieu	
@@ -175,11 +183,12 @@ rollout roll_OSM_importer "OSM_importer" width:200 height:259
 
 
 			)
+			
 			createdialog webbrowser_rollout		--bgcolor:[68,68,68 ]
 	)
 	on btn_charger pressed  do
 	(
-		m_log.setTexte "Importation du fichier OSM ..."
+-- 		m_log.setTexte "Importation du fichier OSM ..."
 		
 		local fichier = getOpenFileName 	caption:"Fichier OSM à importer"\
 															types:"OSM(*.osm)|*.osm|All|*.*|" \
@@ -188,10 +197,10 @@ rollout roll_OSM_importer "OSM_importer" width:200 height:259
 			
 			m_prt.importer  fichier 
 			
-			m_log.setTexte "Importation reussie."
+-- 			m_log.setTexte "Importation reussie."
 			 
-		) else
-			m_log.setTexte ""
+		) /* else
+			m_log.setTexte "" */
 		
 		
 		actualiser ()
@@ -208,19 +217,19 @@ rollout roll_OSM_importer "OSM_importer" width:200 height:259
 		
 		if chk_batiments.checked do (
 			m_prt.initialiser_creation ()
-			m_log.setTexte "Création des batiments..."
+-- 			m_log.setTexte "Création des batiments..."
 			m_prt.creer_batiments 	echelle:spn_echelle.value
 			m_prt.finaliser_creation ()
 		)
 		if chk_voiries.checked do (
 			m_prt.initialiser_creation ()
-			m_log.setTexte "Création des voiries..."
+-- 			m_log.setTexte "Création des voiries..."
 			m_prt.creer_voiries  	echelle:spn_echelle.value
 			m_prt.finaliser_creation ()
 		)
 		
 		
-		m_log.setTexte ""
+-- 		m_log.setTexte ""
 	
 	)
 )
@@ -438,12 +447,13 @@ struct str_OSM_importer	(
 		---- fenetre -----
 		fn ouvrir =(			
 			---- creation de la fenetre ----
-			createDialog m_dialog 	style:				#(#style_resizing) \
-												lockHeight:			true	\
+			createDialog m_dialog 	lockHeight:			true	\
 												lockWidth:			true		\
-												pos:					m_dialogPos	\
+												pos:					m_dialogPos	/* \
 												bgcolor:			col_fenetreFond 	 \
-												fgcolor:				col_fenetreTxt 
+												fgcolor:				col_fenetreTxt  */
+			--style:				#(#style_resizing) \
+												
 			m_ouvert = true
 			---- initialisation de la fenetre ----
 			m_dialog.m_prt	 	= this
@@ -832,7 +842,7 @@ struct str_OSM_importer	(
 GLOBAL 	OSMImporter = str_OSM_importer ()
 
 
-
+OSMImporter.ouvrir ()
 
 
 
