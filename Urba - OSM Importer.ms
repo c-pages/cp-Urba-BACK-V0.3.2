@@ -204,19 +204,21 @@ rollout roll_OSM_importer "OSM_importer" width:200 height:259
 	
 	on btn_importer pressed  do (
 		
-		m_prt.initialiser_creation ()
+		clearSelection ()
 		
 		if chk_batiments.checked do (
-
+			m_prt.initialiser_creation ()
 			m_log.setTexte "Création des batiments..."
-			m_prt.creer_batiments ()
+			m_prt.creer_batiments 	echelle:spn_echelle.value
+			m_prt.finaliser_creation ()
 		)
 		if chk_voiries.checked do (
+			m_prt.initialiser_creation ()
 			m_log.setTexte "Création des voiries..."
-			m_prt.creer_voiries ()
+			m_prt.creer_voiries  	echelle:spn_echelle.value
+			m_prt.finaliser_creation ()
 		)
 		
-		m_prt.finaliser_creation ()
 		
 		m_log.setTexte ""
 	
@@ -394,6 +396,10 @@ struct str_OSM_importer	(
 		
 	--- helper d'importation	---
 		m_helper,	
+		m_helper_batiments,	
+		m_helper_voiries,	
+		
+		
 		m_helper_minX,
 		m_helper_minY ,
 		m_helper_maxX ,
@@ -519,6 +525,9 @@ struct str_OSM_importer	(
 		
 		fn initialiser_creation =(
 			
+			m_shps_batiments = #()
+			m_shps_voiries = #()
+			
 			--- les min et max pour placer dummy	-------
 			m_helper 		= dummy name:(uniqueName "OSM - Import " )
 			
@@ -533,9 +542,9 @@ struct str_OSM_importer	(
 		fn finaliser_creation =(
 			
 			local dum_echelle 	= [m_helper_maxX - m_helper_minX, m_helper_maxY - m_helper_minY, 10 ]
-			local dum_pos 		= [m_helper_minX + dum_echelle.x / 2 , m_helper_minY + dum_echelle.y / 2, 0 ]
+			local dum_pos 			= [m_helper_minX + dum_echelle.x / 2 , m_helper_minY + dum_echelle.y / 2, 0 ]
 			m_helper.pos 	= dum_pos
-			m_helper.scale	=	dum_echelle / 10
+			m_helper.scale	=	dum_echelle / 10	*	1.1
 			
 			for shapeBat in m_shps_batiments do
 				shapeBat.parent = m_helper
@@ -544,19 +553,18 @@ struct str_OSM_importer	(
 				shapeVoirie.parent = m_helper
 			
 -- 			m_helper.pos = [0,0,0]
-			select m_helper
+			selectMore m_helper
 			
 		),
 		
-		fn creer_batiments	=(
+		fn creer_batiments	echelle:1.	=(
 			
-			format "Analyse des batiments ... "
-			local m_batiments	=#()
+			local chrono_debut	=	timestamp ()
 			
-			
-			progressStart "OSM - Analyse des batiments	..."
+			progressStart "OSM  - Création des batiments ..."
 			
 			local i = 0
+			
 			--- on collect les batiments et leur points -----------------
 			for elemBat in m_elems_batiment do (
 				
@@ -567,58 +575,49 @@ struct str_OSM_importer	(
 				local nvBat 			= str_OSM_object ()
 				
 				--- et on collecte les points du batiment	----------
-				nvBat.points 			= get_element_points	elemBat	
-				append	m_batiments	nvBat
+				nvBat.points 			= get_element_points	elemBat 
 				
-				i+= 1
-			)
-			progressEnd() 
-			
-			
-			
-			local m_shps_batiments =#()
-			format "Tracé des batiments	... "
-			
-			progressStart "OSM  - Tracé des batiments	..."
-			local i = 0
-			for bat in m_batiments	do	(
-				
-				local pourCent = (i as float) / m_batiments.count * 100
-				progressUpdate pourCent
-				
-				local shapeBat = line pos:bat.points[1] name:(uniqueName "OSM - Batiment ")	wirecolor:[230, 230, 150 ]
-				append m_shps_batiments	shapeBat
-			
+				--- on construite le shape ------------------
+				local shapeBat = line pos:nvBat.points[1] name:(uniqueName "OSM - Batiment ")	wirecolor:[200, 200, 255 ]
+				append m_shps_batiments		shapeBat			
 				addNewSpline shapeBat
-				for pt in bat.points do (
-					addKnot shapeBat 1 #corner #line  	pt
-					if m_helper_minX > pt.x 	do 	m_helper_minX 	= pt.x 
-					if m_helper_minY > pt.y 	do 	m_helper_minY 	= pt.y 
-					if m_helper_maxX < pt.x 	do 	m_helper_maxX 	= pt.x 
-					if m_helper_maxY < pt.y 	do 	m_helper_maxY 	= pt.y 
+				for pt in nvBat.points do (
+					local point_echelle = pt * echelle
+					--- creation du point	----
+					addKnot shapeBat 1 #corner #line  	point_echelle
+					
+					-- on check les min et max globaux	----
+					if m_helper_minX 	> point_echelle.x 	do 	m_helper_minX 	= point_echelle.x 
+					if m_helper_minY 	> point_echelle.y 	do 	m_helper_minY 	= point_echelle.y 
+					if m_helper_maxX < point_echelle.x 	do 	m_helper_maxX 	= point_echelle.x 
+					if m_helper_maxY < point_echelle.y 	do 	m_helper_maxY 	= point_echelle.y 
 				)
+				
 				close shapeBat 1
 				updateshape shapeBat
 				
+				
 				i+= 1
 			)
-			
 			progressEnd() 
 			
 			
+			local chrono_result	=	.001 * ( timestamp ()	- chrono_debut )
 			
-			format "... Creation des batiments   reussi. \n"
-			format "	% batiments créés. \n"	m_shps_batiments.count
+			
+			
+			format "CP | OSM Importer |	Creation des batiments   : %s.\n"		chrono_result
+			format "CP | OSM Importer |		% batiments créés. \n"	m_shps_batiments.count
 		),
 	
-		fn creer_voiries	=(
+		fn creer_voiries		echelle:1.	=(
 			
-			format "Analyse des voiries ... "
 			
-			m_shps_voiries=#()
+			local chrono_debut	=	timestamp ()
+			
 			
 			local i=0
-			progressStart "OSM - Analyse des voiries	..."
+			progressStart "OSM - Création des voiries ..."
 			--- on collect les voiries et leurs points -----------------
 			for elemVoirie in m_elems_voiries do (
 				
@@ -629,43 +628,38 @@ struct str_OSM_importer	(
 				local nvVoirie 			= str_OSM_object ()
 				
 				--- et on collecte les points du batiment	----------
-				nvVoirie.points 			= get_element_points	elemVoirie	
+				nvVoirie.points 			= get_element_points		elemVoirie	
 				append	m_voiries		nvVoirie
+								
+				local shapeVoirie = line pos:nvVoirie.points[1] name:(uniqueName "OSM - Voirie ")	wirecolor:[130, 130, 230 ]
+				append m_shps_voiries	shapeVoirie
+			
+				addNewSpline shapeVoirie
+				for pt in nvVoirie.points do (
+					
+					local point_echelle = pt * echelle
+					
+					addKnot shapeVoirie 1 #corner #line  	point_echelle
+					if m_helper_minX 	> point_echelle.x 	do 	m_helper_minX 	= point_echelle.x 
+					if m_helper_minY 	> point_echelle.y 	do 	m_helper_minY 	= point_echelle.y 
+					if m_helper_maxX < point_echelle.x 	do 	m_helper_maxX 	= point_echelle.x 
+					if m_helper_maxY < point_echelle.y 	do 	m_helper_maxY 	= point_echelle.y 
+				)
+				
+				updateshape shapeVoirie
+				
 				
 				i += 1
 				
 			)
-			format "... Analyse des voiries   reussi. \n"
 			
-			
-			format "Tracé des voiries	... "
-			
-			progressStart "OSM  - Tracé des voiries	..."
-			for voirie in m_voiries	do	(
-				
-				local pourCent = (i as float) / m_voiries.count * 100
-				progressUpdate pourCent
-				
-				local shapeVoirie = line pos:voirie.points[1] name:(uniqueName "OSM - Voirie ")	wirecolor:[150, 150, 255 ]
-				append m_shps_voiries	shapeVoirie
-			
-				addNewSpline shapeVoirie
-				for pt in voirie.points do (
-					addKnot shapeVoirie 1 #corner #line  	pt
-					if m_helper_minX > pt.x 	do 	m_helper_minX 	= pt.x 
-					if m_helper_minY > pt.y 	do 	m_helper_minY 	= pt.y 
-					if m_helper_maxX < pt.x 	do 	m_helper_maxX 	= pt.x 
-					if m_helper_maxY < pt.y 	do 	m_helper_maxY 	= pt.y 
-				)
--- 				close shapeBat 1
-				updateshape shapeVoirie
-			)
 			
 			progressEnd() 
+			local chrono_result	=	.001 * ( timestamp ()	- chrono_debut )
+			format "CP | OSM Importer |	Creation des voiries   : %s.\n"		chrono_result		
+			format "CP | OSM Importer |		% voiries créés. \n"	m_shps_voiries.count
 			
 			
-			format "... Creation des voiries   reussi. \n"
-			format "	% voiries créés. \n"	m_shps_voiries.count
 		),
 		
 		
@@ -673,9 +667,10 @@ struct str_OSM_importer	(
 		---- Import	------------------------------------------------
 		fn parser =(
 			
-			format "Parsing: ... \n"
 			
-			progressStart "OSM Importer - Parsing ...."
+			local chrono_debut	=	timestamp ()
+			
+			progressStart "OSM - Analyse XML ...."
 			
 			--- on vide tout -----			
 -- 			m_elems_Nodes 		= 	#()
@@ -783,14 +778,15 @@ struct str_OSM_importer	(
 				
 			)	---- fin collecte les nodes	---------------
 			
--- 			progressUpdate 100
 			progressEnd() 
 			
+			
+			local chrono_result	=	.001 * ( timestamp ()	- chrono_debut )
 			if annuleOp  then (
-				format "...	parsing annulé par l'utilisateur.\n"
+				format "CP | OSM Importer |	Analyse XML : Annulé par l'utilisateur.\n"
 				m_parsingOK = false
 			) else (
-				format "...	parsing reussi.\n"
+				format "CP | OSM Importer |	Analyse XML : %s.\n"		chrono_result
 				m_parsingOK = true
 			)
 			
