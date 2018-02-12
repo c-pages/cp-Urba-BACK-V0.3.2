@@ -150,7 +150,7 @@ extends:Editable_poly replaceUI:true version:0
 
 
  
-
+/* 
 
 ----- DEBUG-------------------------
 if creerBat != undefined do (
@@ -160,7 +160,7 @@ if creerBat != undefined do (
 )
 creerBat = true
 
-
+ */
 
 
 /* 

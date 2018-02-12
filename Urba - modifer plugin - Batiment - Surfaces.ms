@@ -55,14 +55,14 @@ struct str_surfaces (
 			local b_result 						= true
 			
 			--- on ne prend que des splineShape -----
-			if classOf _shape !=splineShape	 do(
-				messagebox "Attention ! Le shape piqué doit posséder une seule spline"
+			if classOf _shape !=	line	 do(
+				messagebox "Attention ! Le shape piqué doit être une Line."
 				b_result = false
 			) 
 			
 			--- on ne prend que la premiere spline fermée -----
 			if b_result and numSplines _shape > 1 do (
-				messagebox "Attention ! Le shape piqué doit posséder une seule spline"
+				messagebox "Attention ! Le shape piqué doit posséder une seule spline."
 				b_result = false
 			) 
 			

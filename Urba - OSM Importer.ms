@@ -215,6 +215,8 @@ rollout roll_OSM_importer "Urba | OSM Importer" width:200 height:262
 		
 		clearSelection ()
 		
+		m_prt.initialiser_creation_global ()
+		
 		if chk_batiments.checked do (
 			m_prt.initialiser_creation ()
 -- 			m_log.setTexte "Création des batiments..."
@@ -393,6 +395,7 @@ struct str_OSM_importer	(
 		m_elems_batiment	= #(),
 		
 	--- les objets divers 		-----	
+		m_points_total	=#(),
 		m_points 			=#(),
 		m_batiments 	= #(),
 		m_voiries	 		= #(),
@@ -414,7 +417,9 @@ struct str_OSM_importer	(
 		m_helper_maxX ,
 		m_helper_maxY,
 	
-	
+		---- constante------
+		m_const_coefEchelle_metre = 55.51729,
+		
 	private
 		m_xmlParser 		= str_xmlParser (),
 		converterGPS = str_conv_GPStoMeter_mercator (),
@@ -440,7 +445,6 @@ struct str_OSM_importer	(
 										openBitMap ico_btnFermer_S ,		-- Survol ----
 										openBitMap ico_btnFermer_P 			-- Pressé ----
 										),
-				
 		------------  Fonctions	----------------------------------------------------------------------------------
 	public
 		
@@ -481,7 +485,7 @@ struct str_OSM_importer	(
 	
 	-- Accession	---------
 		fn get_parsingOK 			= m_parsingOK,
-			
+		
 		fn get_nbr_points 			= m_points.count,
 		fn get_nbr_batiments 	= m_elems_batiment.count,
 		fn get_nbr_voiries 		= m_elems_voiries.count,
@@ -501,12 +505,12 @@ struct str_OSM_importer	(
 			
 			while i < m_points.count and not trouve do (
 				
-				i +=1
+				i +=	1
 				local pt = m_points[i]
 				
 				if pt.ref	 == _id do (
 					result	=	pt.pos
-					
+-- 					deleteItem m_points  i
 					trouve = true
 				)
 			)
@@ -532,6 +536,9 @@ struct str_OSM_importer	(
 		),
 		
 		
+		fn initialiser_creation_global =(
+			m_points = m_points_total
+		),
 		
 		fn initialiser_creation =(
 			
@@ -592,7 +599,8 @@ struct str_OSM_importer	(
 				append m_shps_batiments		shapeBat			
 				addNewSpline shapeBat
 				for pt in nvBat.points do (
-					local point_echelle = pt * echelle
+					
+					local point_echelle = pt * echelle * m_const_coefEchelle_metre
 					--- creation du point	----
 					addKnot shapeBat 1 #corner #line  	point_echelle
 					
@@ -605,7 +613,7 @@ struct str_OSM_importer	(
 				
 				close shapeBat 1
 				updateshape shapeBat
-				
+				convertToSplineshape shapeBat
 				
 				i+= 1
 			)
@@ -647,7 +655,7 @@ struct str_OSM_importer	(
 				addNewSpline shapeVoirie
 				for pt in nvVoirie.points do (
 					
-					local point_echelle = pt * echelle
+					local point_echelle = pt * echelle * m_const_coefEchelle_metre
 					
 					addKnot shapeVoirie 1 #corner #line  	point_echelle
 					if m_helper_minX 	> point_echelle.x 	do 	m_helper_minX 	= point_echelle.x 
@@ -657,6 +665,7 @@ struct str_OSM_importer	(
 				)
 				
 				updateshape shapeVoirie
+				convertToSplineshape shapeVoirie
 				
 				
 				i += 1
@@ -740,7 +749,7 @@ struct str_OSM_importer	(
 					nvPoint.pos.x		=	pos_enMetre.x	- m_boundsMin.x
 					nvPoint.pos.y		=	pos_enMetre.y	- m_boundsMin.y
 					
-					append m_points	nvPoint
+					append m_points_total	nvPoint
 				)
 				
 				
@@ -778,7 +787,7 @@ struct str_OSM_importer	(
 					
 					
 				)
-				
+				m_points = m_points_total
 				
 				--- on gere l'annulation -------
 				if keyboard.escPressed or ( getProgressCancel() )  do
@@ -842,7 +851,7 @@ struct str_OSM_importer	(
 GLOBAL 	OSMImporter = str_OSM_importer ()
 
 
-OSMImporter.ouvrir ()
+-- OSMImporter.ouvrir ()
 
 
 
