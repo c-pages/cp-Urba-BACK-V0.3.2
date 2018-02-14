@@ -15,11 +15,10 @@
 ------------------------------------------------------------------------------
 rollout roll_OSMWeb "Urba | OSM Importer | Open Street Map" width:800 height:600	(
 	
-	local		m_prt
+	local		m_prt	
 	
-	
-	local tooltip_osm = "1. Entrer un lieu à rechercher ou déplacer la carte.\n2. Cadrer la zone désirée.\n3. Exporter le fichier *.osm (bouton 'exporter' de la page internet).\n4. Enregistrer le fichier sur DD (de manière à pouvoir le charger depuis l'Importer OSM.)"
-	
+	local 	tooltip_osm = "1. Entrer un lieu à rechercher ou déplacer la carte.\n2. Cadrer la zone désirée.\n3. Exporter le fichier *.osm (bouton 'exporter' de la page internet).\n4. Enregistrer le fichier sur DD (de manière à pouvoir le charger depuis l'Importer OSM.)"
+		
 		edittext edt_Lieu "Lieu:" 	text:"Rouen"	tooltip:tooltip_osm		pos:[8,5] 
 		dotNetControl wb "System.Windows.forms.WebBrowser" pos:[10,22] width:780 height:570		tooltip:tooltip_osm
 		
@@ -84,7 +83,7 @@ rollout roll_OSM_importer "Urba | OSM Importer" width:200 height:117
 	
 	checkbox 'chk_batiments' "Batiments" pos:[20,40] width:84 height:18 checked:true align:#left
 	checkbox 'chk_voiries' "Voiries" pos:[20,59] width:61 height:18 checked:true align:#left
--- 	checkbox 'chk_divers' "Divers" pos:[105,41] width:61 height:18 checked:true align:#left
+	checkbox 'chk_divers' "Divers" pos:[105,41] width:61 height:18 checked:true align:#left
 	label 'lbl_echelle' "Echelle :" pos:[20,81] width:49 height:13 align:#left
 	spinner 'spn_echelle' "" pos:[74,82] width:107 height:16 range:[0,1e+06,1] align:#left
 	GroupBox 'grp_options' "Options" pos:[8,25] width:185 height:80 align:#left
@@ -147,7 +146,7 @@ rollout roll_OSM_importer "Urba | OSM Importer" width:200 height:117
 															types:"OSM(*.osm)|*.osm|All|*.*|" \
 															historyCategory:"OSM_fichiers"
 		if fichier != undefined do	(
-			m_prt.importer	fichier	batiments:chk_batiments.checked 		voiries:chk_voiries.checked 	/* divers:chk_divers.checked 	 */ echelle:spn_echelle.value
+			m_prt.importer	fichier	batiments:chk_batiments.checked 		voiries:chk_voiries.checked 	divers:chk_divers.checked 	  echelle:spn_echelle.value
 			
 			actualiser ()
 		)
@@ -311,7 +310,7 @@ struct str_OSM_importer	(
 		m_elems_Nodes 		= #(),
 		m_elems_voiries		= #(),
 		m_elems_batiment	= #(),
--- 		m_elems_divers			=#(),
+		m_elems_divers			=#(),
 		
 	--- les objets divers 		-----	
 		m_points	=#(),
@@ -320,11 +319,13 @@ struct str_OSM_importer	(
 		m_shps_batiments 	=#(),
 		m_shps_voiries 			=#(),
 		m_shps_reste			=#(),
+		m_shps_divers			=#(),
 	
 	--- helper d'importation	---
 		m_helper,	
 		m_helper_batiments,	
 		m_helper_voiries,		
+		m_helper_divers,		
 		
 		m_helper_minX,
 		m_helper_minY ,
@@ -509,7 +510,10 @@ struct str_OSM_importer	(
 		
 		fn creer_elements		_elements		echelle:1.		type:"Divers"		wireCol:[200, 200, 255]		fermerShape:false	=(
 			
-			progressStart ( "OSM - Création des " + type	+ "s ..." )
+			local typeAffiche = type
+			if typeAffiche[typeAffiche.count] != "s" do  typeAffiche += "s"
+				
+			progressStart ( "OSM - Création des " + typeAffiche	+ " ..." )
 			
 			local chrono_debut	=	timestamp ()
 			local nvxShapes 		= #()
@@ -551,11 +555,10 @@ struct str_OSM_importer	(
 			
 -- 			
 -- 			progressEnd() 			
-			
 			if not m_annuleOp  then (
 				local chrono_result	=	.001 * ( timestamp ()	- chrono_debut )
-				format "CP | OSM Importer |	Importation %s   : %s.\n"	type	chrono_result		
-				format "CP | OSM Importer |		% %s importés.\n"	nvxShapes.count		type
+				format "CP | OSM Importer |	Importation %   : %s.\n"	typeAffiche	chrono_result		
+				format "CP | OSM Importer |		% % importés.\n"	nvxShapes.count		typeAffiche
 			)
 			nvxShapes
 		),
@@ -609,11 +612,11 @@ struct str_OSM_importer	(
 								type_element = #building
 								trouve = true
 							)
--- 							/* -- on a une "route"	------
--- 							else /* if valeur_de_K == "highway" then */ (
--- 								appendIfUnique m_elems_voiries		elem_way
--- 								trouve = true
--- 							) */
+							 -- on a une "route"	------
+							else  if valeur_de_K == "highway" then (
+								type_element = #route
+								trouve = true
+							) 
 							/* -- le reste	------
 							else  (
 								appendIfUnique 	m_elems_divers		elem_way
@@ -628,9 +631,10 @@ struct str_OSM_importer	(
 					
 					if type_element == #building	then
 							appendIfUnique 	m_elems_batiment		elem_way
-					else
-							appendIfUnique 	m_elems_voiries		elem_way
-						
+					else if type_element == #route then
+							appendIfUnique 	m_elems_voiries			elem_way
+					else 
+							appendIfUnique 	m_elems_divers			elem_way
 					
 				------ les BOUNDS du document---------------
 				) else	if  root.ChildNodes.itemOf[i].name == "bounds" then (
@@ -714,9 +718,9 @@ struct str_OSM_importer	(
 	public
 		
 	---- Importation	dans la scene		------------------------------------------------
-		fn importer	_fichier		batiments:true		voiries:true	/* reste:true	 */	 echelle:1.0	=(
+		fn importer	_fichier		batiments:true		voiries:true	divers:true		 echelle:1.0	=(
 			
-			if _fichier != undefined do  (
+			if _fichier != undefined do with  redraw off (
 				
 				m_annuleOp 	= false
 				
@@ -733,19 +737,24 @@ struct str_OSM_importer	(
 					clearSelection ()
 				
 				initialiser_creation_global ()
-				/* 
+			
 				---- Creation du reste	-------
-				if not m_annuleOp and reste do 
+				if not m_annuleOp and divers do  (
 					creer_elements		m_elems_divers			echelle:echelle			type:"Divers"			wireCol:[155, 155, 50]
-				 */
+					m_helper_divers  = m_helper
+				)
+				
 				---- Creation des voiries	-------
-				if not m_annuleOp and voiries do 
+				if not m_annuleOp and voiries do (
 					m_shps_batiments = creer_elements		m_elems_voiries		echelle:echelle			type:"Voirie"			wireCol:[255, 255, 150]
+					m_helper_voiries  = m_helper
+				)
 				
 				---- Creation des batiments	-------
-				if not m_annuleOp and batiments do 
+				if not m_annuleOp and batiments do (
 					m_shps_voiries = creer_elements		m_elems_batiment		echelle:echelle		type:"Bâtiment"		wireCol:[200, 200, 255]		fermerShape:true
-				
+					m_helper_batiments  = m_helper
+				)
 				
 				
 				local chrono_result	=	.001 * ( timestamp ()	- chrono_debut )
@@ -754,9 +763,11 @@ struct str_OSM_importer	(
 					-- on annule tout ----------------
 					try delete m_shps_batiments		catch ()
 					try delete m_shps_voiries			catch ()
+					try delete m_shps_divers			catch ()
 					try delete m_helper					catch ()
 					try delete m_helper_batiments	catch ()
 					try delete m_helper_voiries		catch ()
+					try delete m_helper_divers			catch ()
 					
 					select	selectBack
 					
