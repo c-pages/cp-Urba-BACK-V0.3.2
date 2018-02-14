@@ -58,9 +58,9 @@ parameters params_optimSurface		rollout:roll_optimSurface	(
 	------- Optimisations		------------------
 	optim_aplanir					type:#boolean			default:true		ui:chk_aplanir		animatable:false		invisibleInTV:true
 	optim_souder					type:#boolean			default:true		ui:chk_souder		animatable:false		invisibleInTV:true
-	optim_orthonormer			type:#boolean			default:true		ui:chk_ortho			animatable:false		invisibleInTV:true
-	optim_aligner					type:#boolean			default:true		ui:chk_aligner		animatable:false		invisibleInTV:true
-	optim_projeter					type:#boolean			default:true		ui:chk_projeter		animatable:false		invisibleInTV:true
+	optim_orthonormer			type:#boolean			default:false		ui:chk_ortho			animatable:false		invisibleInTV:true
+	optim_aligner					type:#boolean			default:false		ui:chk_aligner		animatable:false		invisibleInTV:true
+	optim_projeter					type:#boolean			default:false		ui:chk_projeter		animatable:false		invisibleInTV:true
 	
 	------- Seuils		------------------
 	optim_aplanir_seuil			type:#float				default:20.			ui:spn_aplanir		animatable:false		invisibleInTV:true

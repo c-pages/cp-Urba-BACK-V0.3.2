@@ -11,61 +11,90 @@
 
 
 ------------------------------------------------------------------------------
-----------	Fenetre								 -------------------------
+----------	Fenetre	OSM Web				 -------------------------
 ------------------------------------------------------------------------------
-rollout roll_OSM_importer "Urba | OSM Importer" width:200 height:262
+rollout roll_OSMWeb "Urba | OSM Importer | Open Street Map" width:800 height:600	(
+	
+	local		m_prt
+	
+	
+	local tooltip_osm = "1. Entrer un lieu à rechercher ou déplacer la carte.\n2. Cadrer la zone désirée.\n3. Exporter le fichier *.osm (bouton 'exporter' de la page internet).\n4. Enregistrer le fichier sur DD (de manière à pouvoir le charger depuis l'Importer OSM.)"
+	
+		edittext edt_Lieu "Lieu:" 	text:"Rouen"	tooltip:tooltip_osm		pos:[8,5] 
+		dotNetControl wb "System.Windows.forms.WebBrowser" pos:[10,22] width:780 height:570		tooltip:tooltip_osm
+		
+		fn formaterTexte 	_texte =(
+			substituteString 	_texte " " "%20"
+		)
+			
+		fn openOSM_lieu	 _lieu	 = (
+			
+			local urlString		=	"https://www.openstreetmap.org/search?query="	
+			local urlRecherche 	= urlString + formaterTexte  	_lieu	
+			wb.url 		= dotNetObject "System.Uri" urlRecherche 
+		
+		)
+		fn recadrer =(
+			taille = GetDialogSize 	roll_OSMWeb
+-- 			format "recadrer :%\n" taille
+			
+			--- taille minimum pour afficher l'interface de la page web comme il faut -----------
+			local min_larg = 645
+			local min_hauteur = 380
+			if taille.x <  min_larg do (
+				taille.x = min_larg
+				roll_OSMWeb.width = taille.x
+			)
+			if taille.y < min_hauteur do (
+				taille.y = min_hauteur
+				roll_OSMWeb.height = taille.y
+			)
+				
+			edt_Lieu.width 	= taille.x - 45
+			wb.width 			= taille.x - 20
+			wb.height 			= taille.y - 30
+		)
+		
+		on edt_Lieu	entered txt 	do openOSM_lieu txt
+		on roll_OSMWeb close 	do m_prt.fermer_OSMWeb ()
+		
+		on roll_OSMWeb open 	do (
+			recadrer ()
+			openOSM_lieu edt_Lieu.text
+		)
+		
+		on roll_OSMWeb resized taille do 
+			recadrer	()
+		
+	)
+
+------------------------------------------------------------------------------
+----------	Fenetre	Importer				 -------------------------
+------------------------------------------------------------------------------
+rollout roll_OSM_importer "Urba | OSM Importer" width:200 height:117
 (
+	
 	------------  Membres	----------------------------------------------------------------------------------
 	---- Pointeurs ----
 	local m_prt				---- pointeur vers la structure de controle ----
 	
-	---- Structures ----
--- 	local m_drag			---- la structure gerant le drag de la fenetre ----
-	/* 
-	--- ctro des imgtags ---
-	local m_titre
-	local m_log
-	 */
-	
-	------------  UI	----------------------------------------------------------------------------------		
--- 	---- le bouton pour fermer la fenetre ----
--- 	ImgTag 'ui_btnFermer' "X" pos:[180,0] width:20 height:20 toolTip:"Fermer" style:#bmp_center align:#left
--- 	
--- 	ImgTag 'ui_titre' "" pos:[8,4] width:66 height:18 align:#left
--- 	ImgTag 'ui_log' "" pos:[6,233] width:66 height:18 align:#left
 
-	button 'btn_webOSM' "OSM.org" pos:[8,6] width:64 height:18 toolTip:"Acceder au site Open Street Map pour y télécharger un export '.osm'." align:#left
-	button 'btn_charger' "Charger" pos:[73,6] width:119 height:18 toolTip:"Charger un fichier OSM (*.osm)." align:#left
+	------------  UI	----------------------------------------------------------------------------------
+	checkButton 'chkBtn_webOSM' "OSM.org" pos:[8,6] width:64 height:18 toolTip:"Ouvre un navigateur web sur le site Open Street Map pour y télécharger un fichier OSM (*.osm)." align:#left
 	
-	button 'btn_importer' "Importer" pos:[6,216] width:184 height:36 enabled:false toolTip:"Importer." align:#left
-	GroupBox 'grp_infos' "Infos" pos:[8,23] width:185 height:102 align:#left
-	label 'lbl_infos' "" pos:[18,41] width:164 height:78 align:#left
-	checkbox 'chk_batiments' "Batiments" pos:[17,145] width:84 height:18 checked:true align:#left
-	
-
-	checkbox 'chk_voiries' "Voiries" pos:[17,164] width:61 height:18 checked:true align:#left	--	enabled:false
-	--	enabled:false
-	
-	checkbox 'chk_zones' "Zones" pos:[102,146] width:61 height:18 enabled:false align:#left
-	
-	label 'lbl_echelle' "Echelle :" pos:[17,186] width:49 height:13 align:#left
-	spinner 'spn_echelle' "" pos:[71,187] width:107 height:16 range:[0,1e+06,1] align:#left
+	checkbox 'chk_batiments' "Batiments" pos:[20,40] width:84 height:18 checked:true align:#left
+	checkbox 'chk_voiries' "Voiries" pos:[20,59] width:61 height:18 checked:true align:#left
+-- 	checkbox 'chk_divers' "Divers" pos:[105,41] width:61 height:18 checked:true align:#left
+	label 'lbl_echelle' "Echelle :" pos:[20,81] width:49 height:13 align:#left
+	spinner 'spn_echelle' "" pos:[74,82] width:107 height:16 range:[0,1e+06,1] align:#left
+	GroupBox 'grp_options' "Options" pos:[8,25] width:185 height:80 align:#left
+	button 'btn_importer' "Importer" pos:[73,6] width:119 height:18 toolTip:"Charger un fichier OSM (*.osm)." align:#left
 	
 	
-	GroupBox 'grp_options' "Options" pos:[9,130] width:177 height:80 align:#left
-		------------  Fonctions	----------------------------------------------------------------------------------
-	---- Gere l'état du bouton  -----
--- 	fn etatBtnFermer		_etat =(
--- 		case _etat of (
--- 			#Repos : 	ui_btnFermer.bitmap = m_prt.m_icos_fermer[1]	
--- 			#Survol : 	ui_btnFermer.bitmap = m_prt.m_icos_fermer[2]	
--- 			#Press : 	ui_btnFermer.bitmap = m_prt.m_icos_fermer[3]	
--- 		)
--- 	)
-	
-	
+	------------  Fonctions	----------------------------------------------------------------------------------
 	fn actualiser = (
-		
+		chkBtn_webOSM.checked =  m_prt.m_dialog_OSMWeb_estOuvert 
+		/* 
 		local parsingOK = m_prt.get_parsingOK ()
 		
 		btn_importer.enabled 	= parsingOK
@@ -76,7 +105,7 @@ rollout roll_OSM_importer "Urba | OSM Importer" width:200 height:262
 		
 		chk_batiments.enabled 	= parsingOK 
 		chk_voiries.enabled = parsingOK 
--- 		chk_zones.enabled = parsingOK 
+-- 		chk_divers.enabled = parsingOK 
 		
 		lbl_echelle.enabled 		= parsingOK 
 		spn_echelle.enabled 		= parsingOK 		
@@ -90,150 +119,43 @@ rollout roll_OSM_importer "Urba | OSM Importer" width:200 height:262
 			info_txt		+= "Voiries : " + m_prt.get_nbr_voiries () as string + "\n"
 			lbl_infos.text = info_txt
 		) else lbl_infos.text = "Aucun fichier chargé."
-		
+		 */
 	)
 	
--- 	fn recadrer _taille =(
--- 		
--- 		ui_btnFermer.pos.x = _taille.x - 20
--- 	)
 	
 	---- Initialisation de la fenetre  -----
 	fn initialiser = (
 		
--- 		m_drag 		= str_drag 	m_prt:roll_OSM_importer		
-		/* 
-		m_titre 		= str_label 	m_ui:ui_titre			m_texte:"Urba | OSM Importer"
-		m_titre.setPolice (str_policeGrande())
-		m_titre.setCouleur (color 5	5	5)
-		m_titre.setCouleurFond (color 200 200 200)
-		
-		m_log 		= str_label 	m_ui:ui_log				m_texte:"."
--- 		m_log.setPolice (str_policePetite())
-		m_log.setCouleur (color 55	55	55)
-		m_log.setCouleurFond (color 200 200 200)
-		
-		
-		-- le bouton fermer --
-		ui_btnFermer.bitmap = m_prt.m_icos_fermer[1]	
-		 */
 		actualiser()
 
 	)
 	
 	
 	------------  Evenements	----------------------------------------------------------------------------------
-/* 	---- Drag ----
-	on roll_OSM_importer lbuttondown _pos 	do
-		m_drag.demarrer ()
-	on roll_OSM_importer lbuttonup _pos 	do
-		m_drag.arreter ()
-	on roll_OSM_importer mouseMove _pos 	do
-		m_drag.suivreSouris ()
-	 */
--- 	--- recadrage ----
--- 	on roll_OSM_importer resized  taille do
--- 		recadrer (taille)
-	/* 
-	---- Fermer ----
-	on ui_btnFermer mouseover do
-		etatBtnFermer #Survol
-	on ui_btnFermer mouseout do
-		etatBtnFermer #Repos
-	on ui_btnFermer mouseDown do
-		etatBtnFermer #Press
-	on ui_btnFermer mouseUp do
-		etatBtnFermer #Repos	
-	on ui_btnFermer click do
-		m_prt.fermer ()
-	 */
+
 	--- interface	---------
-	on btn_webOSM pressed  do
-	(
-		/* 	command = "ShellLaunch \"Chrome.exe\" @\"https://www.openstreetmap.org\""
-			execute command
-		*/
-		
-		
-		rollout webbrowser_rollout "Urba | OSM Importer | Open Street Map" width:800 height:600	(
-			
-			local tooltip_osm = "1. Entrez un lieu à rechercher ou déplacez la carte.\n2. Cadrez la zone à importer\n3. Exportez le fichier *.osm (bouton 'exporter' de la page internet).\n4. Enregistrer le fichier de manière à pouvoir le charger dans l'Importer OSM."
-			
-				edittext edt_Lieu "Lieu:" 	text:"Rouen"	tooltip:tooltip_osm
-				dotNetControl wb "System.Windows.forms.WebBrowser" pos:[10,22] width:780 height:570		tooltip:tooltip_osm
-
-
-				fn formaterTexte 	_texte =(
-					substituteString 	_texte " " "%20"
-				)
-				
-				fn openOSM_lieu	 _lieu	 = (
-					
-					local urlString		=	"https://www.openstreetmap.org/search?query="	
-					local urlRecherche 	= urlString + formaterTexte  	_lieu	
-					wb.url 		= dotNetObject "System.Uri" urlRecherche 
-				
-				)
-				
-				
-				on edt_Lieu	entered txt 	do openOSM_lieu txt
-				on webbrowser_rollout open 	do openOSM_lieu edt_Lieu.text
-
-
-
-
-			)
-			
-			createdialog webbrowser_rollout		--bgcolor:[68,68,68 ]
+	on chkBtn_webOSM changed state	  do	(
+		case state of (
+			true:		m_prt.ouvrir_OSMWeb ()
+			false:	m_prt.fermer_OSMWeb ()
+		)
 	)
-	on btn_charger pressed  do
-	(
--- 		m_log.setTexte "Importation du fichier OSM ..."
+	
+	on btn_importer pressed  do	(
 		
 		local fichier = getOpenFileName 	caption:"Fichier OSM à importer"\
 															types:"OSM(*.osm)|*.osm|All|*.*|" \
 															historyCategory:"OSM_fichiers"
-		if fichier != undefined then (
+		if fichier != undefined do	(
+			m_prt.importer	fichier	batiments:chk_batiments.checked 		voiries:chk_voiries.checked 	/* divers:chk_divers.checked 	 */ echelle:spn_echelle.value
 			
-			m_prt.importer  fichier 
-			
--- 			m_log.setTexte "Importation reussie."
-			 
-		) /* else
-			m_log.setTexte "" */
-		
-		
-		actualiser ()
-	)
-	on spn_echelle changed val do
-(
-	
-	)
-	
-	
-	on btn_importer pressed  do (
-		
-		clearSelection ()
-		
-		m_prt.initialiser_creation_global ()
-		
-		if chk_batiments.checked do (
-			m_prt.initialiser_creation ()
--- 			m_log.setTexte "Création des batiments..."
-			m_prt.creer_batiments 	echelle:spn_echelle.value
-			m_prt.finaliser_creation ()
+			actualiser ()
 		)
-		if chk_voiries.checked do (
-			m_prt.initialiser_creation ()
--- 			m_log.setTexte "Création des voiries..."
-			m_prt.creer_voiries  	echelle:spn_echelle.value
-			m_prt.finaliser_creation ()
-		)
-		
-		
--- 		m_log.setTexte ""
-	
 	)
+
+	
+		
+		
 )
 
 
@@ -362,9 +284,6 @@ struct		str_xmlParser (
 				m_xmlDoc.RemoveAll()
 				m_xmlDoc.load 	_fichier
 			)
--- 			showmethods m_xmlDoc
-			
-			OK
 		),
 		
 		
@@ -386,31 +305,26 @@ struct str_OSM_importer	(
 	
 	----	Membres	-------------------------------------------------
 	private
-		m_nomDuFichier ="",
 		m_boundsMin	=	str_posGPS (),		
 	
 	--- les elements XML	----
 		m_elems_Nodes 		= #(),
 		m_elems_voiries		= #(),
 		m_elems_batiment	= #(),
+-- 		m_elems_divers			=#(),
 		
 	--- les objets divers 		-----	
-		m_points_total	=#(),
-		m_points 			=#(),
-		m_batiments 	= #(),
-		m_voiries	 		= #(),
-		
-		m_parsingOK 	= false,
+		m_points	=#(),
 	
 	--- les shapes ---------
-		m_shps_batiments =#(),
-		m_shps_voiries =#(),
-		
+		m_shps_batiments 	=#(),
+		m_shps_voiries 			=#(),
+		m_shps_reste			=#(),
+	
 	--- helper d'importation	---
 		m_helper,	
 		m_helper_batiments,	
-		m_helper_voiries,	
-		
+		m_helper_voiries,		
 		
 		m_helper_minX,
 		m_helper_minY ,
@@ -423,48 +337,35 @@ struct str_OSM_importer	(
 	private
 		m_xmlParser 		= str_xmlParser (),
 		converterGPS = str_conv_GPStoMeter_mercator (),
-	
+		
+	--- pour l'annulation ----
+		m_annuleOp = false,
+		
 		------------  Rollout ---------------
 	public
 		---- pointeurs ----
-		m_dialog				= roll_OSM_importer ,		---- le rollout ----
-		m_dialogPos 			= [100,100],
-		m_ouvert				=false,
+		m_dialog					= roll_OSM_importer ,		---- le rollout ----
+		m_dialogPos 				= [100,100],
+		m_ouvert					=	false,
 		
--- 		col_fenetreFond		= color 68  68 68, 	----  ----
--- 		col_fenetreTxt		= color 230  230 230, 	----  ----
-		col_fenetreFond		= color 200	200	200, 	----  ----
-		col_fenetreTxt		= color 5  5 5, 	----  ----
-	
-		--- images bouton fermer ---
-		ico_btnFermer_R	=	"$userScripts\cp - GLOBAL\ico\ico_fermer_R.jpg",
-		ico_btnFermer_S	=	"$userScripts\cp - GLOBAL\ico\ico_fermer_S.jpg",
-		ico_btnFermer_P	=	"$userScripts\cp - GLOBAL\ico\ico_fermer_P.jpg",
+		m_dialog_OSMWeb	= roll_OSMWeb ,				---- le rollout OSM web ----
+		m_dialog_OSMWeb_estOuvert = false,
 		
-		m_icos_fermer 	= #(	openBitMap ico_btnFermer_R ,		-- Repos ----
-										openBitMap ico_btnFermer_S ,		-- Survol ----
-										openBitMap ico_btnFermer_P 			-- Pressé ----
-										),
 		------------  Fonctions	----------------------------------------------------------------------------------
 	public
 		
 		---- fenetre -----
 		fn ouvrir =(			
 			---- creation de la fenetre ----
-			createDialog m_dialog 	lockHeight:			true	\
-												lockWidth:			true		\
-												pos:					m_dialogPos	/* \
-												bgcolor:			col_fenetreFond 	 \
-												fgcolor:				col_fenetreTxt  */
-			--style:				#(#style_resizing) \
-												
+			createDialog m_dialog 	pos:					m_dialogPos	
+			
 			m_ouvert = true
+			
 			---- initialisation de la fenetre ----
 			m_dialog.m_prt	 	= this
 			m_dialog.initialiser ()
-						
+			
 		),
-		
 		fn fermer  =(	
 			m_ouvert = false
 			--- Actiualiser position pour reouverture prochaine ----
@@ -479,22 +380,22 @@ struct str_OSM_importer	(
 								else ouvrir ()
 		),
 		fn estOuvert	=m_ouvert,
-		
-	----	Fonctions	----------------------------------------
-	public
 	
-	-- Accession	---------
-		fn get_parsingOK 			= m_parsingOK,
-		
-		fn get_nbr_points 			= m_points.count,
-		fn get_nbr_batiments 	= m_elems_batiment.count,
-		fn get_nbr_voiries 		= m_elems_voiries.count,
+		fn fermer_OSMWeb =(
+			try	destroyDialog	m_dialog_OSMWeb	catch ()
 			
-		fn get_nomDuFichier 		= filenameFromPath m_nomDuFichier,
+			m_dialog_OSMWeb_estOuvert = false
+			m_dialog.actualiser ()
+		),
+		fn ouvrir_OSMWeb =(
 		
+			createdialog m_dialog_OSMWeb		style: #( #style_resizing ,#style_titlebar , #style_border , #style_sysmenu)		--	parent:roll_OSM_importer		--		lockHeight:false		lockWidht:false		--bgcolor:[68,68,68 ]
+			m_dialog_OSMWeb.m_prt			=	this 
+			m_dialog_OSMWeb_estOuvert 	= true
+		),
 		
-		
-		
+	----- Accession	---------
+	private
 		fn get_point		_id =(
 			
 			local result 
@@ -510,13 +411,11 @@ struct str_OSM_importer	(
 				
 				if pt.ref	 == _id do (
 					result	=	pt.pos
--- 					deleteItem m_points  i
 					trouve = true
 				)
 			)
 			result
 		),
-		
 		fn get_element_points		_elemBat		=(
 			
 			local result =#()
@@ -527,26 +426,37 @@ struct str_OSM_importer	(
 			--- on collecte les IDs des nodes composant le batiment	------
 			for elementNode in elementsNodes_DuBat do (
 				local attribID =	elementNode.attributes.getNamedItem "ref"
-				append result	( get_point	attribID.value )
+				local pnt = ( get_point	attribID.value )
+				if  pnt  != undefined do
+					append result	( get_point	attribID.value )
 				
 			)
 			
+			-- si le dernier point est le meme que le premier on supprime le dernier ---
+			if result.count > 1 do
+				if result[1] == result[result.count]	do
+					deleteItem result		result.count
+				
 			
 			result
 		),
 		
 		
+	----- Creation des shapes	---------
+	private	
 		fn initialiser_creation_global =(
-			m_points = m_points_total
+			m_points = m_points
+			m_shps_batiments		= #()
+			m_shps_voiries				= #()
+			m_helper						= undefined
+			m_helper_batiments		= undefined
+			m_helper_voiries			= undefined
 		),
 		
-		fn initialiser_creation =(
-			
-			m_shps_batiments = #()
-			m_shps_voiries = #()
+		fn creer_helper nom:"DIVERS"=(
 			
 			--- les min et max pour placer dummy	-------
-			m_helper 		= dummy name:(uniqueName "OSM - Import " )
+			m_helper 		= dummy name:( uniqueName( "OSM - " + nom) )
 			
 			local helper_maxi 	= 100000000000			
 			m_helper_minX 	=	helper_maxi
@@ -554,55 +464,32 @@ struct str_OSM_importer	(
 			m_helper_maxX 	=	-helper_maxi
 			m_helper_maxY 	=	-helper_maxi
 			
+			m_helper
+			
 		),
 			
-		fn finaliser_creation =(
+		fn recadrer_helper 	=(
 			
 			local dum_echelle 	= [m_helper_maxX - m_helper_minX, m_helper_maxY - m_helper_minY, 10 ]
 			local dum_pos 			= [m_helper_minX + dum_echelle.x / 2 , m_helper_minY + dum_echelle.y / 2, 0 ]
 			m_helper.pos 	= dum_pos
 			m_helper.scale	=	dum_echelle / 10	*	1.1
-			
-			for shapeBat in m_shps_batiments do
-				shapeBat.parent = m_helper
-			
-			for shapeVoirie in m_shps_voiries do
-				shapeVoirie.parent = m_helper
-			
--- 			m_helper.pos = [0,0,0]
 			selectMore m_helper
 			
 		),
 		
-		fn creer_batiments	echelle:1.	=(
+		
+		
+		fn construire_shape		_objetAConstruire	echelle:1	type:"Divers"		fermerShape:false		wireCol:[200, 200, 255]		=(
 			
-			local chrono_debut	=	timestamp ()
-			
-			progressStart "OSM  - Création des batiments ..."
-			
-			local i = 0
-			
-			--- on collect les batiments et leur points -----------------
-			for elemBat in m_elems_batiment do (
-				
-				
-				local pourCent = (i as float) / m_elems_batiment.count * 100
-				progressUpdate pourCent
-				
-				local nvBat 			= str_OSM_object ()
-				
-				--- et on collecte les points du batiment	----------
-				nvBat.points 			= get_element_points	elemBat 
-				
 				--- on construite le shape ------------------
-				local shapeBat = line pos:nvBat.points[1] name:(uniqueName "OSM - Batiment ")	wirecolor:[200, 200, 255 ]
-				append m_shps_batiments		shapeBat			
-				addNewSpline shapeBat
-				for pt in nvBat.points do (
+				local nvShape	 = line pos:( _objetAConstruire.points[1] * echelle * m_const_coefEchelle_metre )	name:( uniqueName( "OSM - " + type + " - " ) )	wirecolor:wireCol
+				addNewSpline nvShape
+				for pt in _objetAConstruire.points do (
 					
 					local point_echelle = pt * echelle * m_const_coefEchelle_metre
 					--- creation du point	----
-					addKnot shapeBat 1 #corner #line  	point_echelle
+					addKnot nvShape 1 #corner #line  	point_echelle
 					
 					-- on check les min et max globaux	----
 					if m_helper_minX 	> point_echelle.x 	do 	m_helper_minX 	= point_echelle.x 
@@ -611,100 +498,83 @@ struct str_OSM_importer	(
 					if m_helper_maxY < point_echelle.y 	do 	m_helper_maxY 	= point_echelle.y 
 				)
 				
-				close shapeBat 1
-				updateshape shapeBat
-				convertToSplineshape shapeBat
+				if fermerShape do
+					close nvShape 1
 				
-				i+= 1
-			)
-			progressEnd() 
-			
-			
-			local chrono_result	=	.001 * ( timestamp ()	- chrono_debut )
-			
-			
-			
-			format "CP | OSM Importer |	Creation des batiments   : %s.\n"		chrono_result
-			format "CP | OSM Importer |		% batiments créés. \n"	m_shps_batiments.count
+				updateshape nvShape
+				convertToSplineshape nvShape
+				
+				nvShape
 		),
-	
-		fn creer_voiries		echelle:1.	=(
+		
+		fn creer_elements		_elements		echelle:1.		type:"Divers"		wireCol:[200, 200, 255]		fermerShape:false	=(
 			
+			progressStart ( "OSM - Création des " + type	+ "s ..." )
 			
 			local chrono_debut	=	timestamp ()
+			local nvxShapes 		= #()
 			
+			creer_helper nom:(toUpper  type )
 			
 			local i=0
-			progressStart "OSM - Création des voiries ..."
 			--- on collect les voiries et leurs points -----------------
-			for elemVoirie in m_elems_voiries do (
+			while i < _elements.count and not m_annuleOp do (
 				
+				local elemOSM	= _elements[i+1]
 				
-				local pourCent = (i as float) / m_elems_voiries.count * 100
+				local pourCent = (i as float) / _elements.count * 100
 				progressUpdate pourCent
 				
-				local nvVoirie 			= str_OSM_object ()
+				local nvObjetOSM 			= str_OSM_object ()
 				
 				--- et on collecte les points du batiment	----------
-				nvVoirie.points 			= get_element_points		elemVoirie	
-				append	m_voiries		nvVoirie
-								
-				local shapeVoirie = line pos:nvVoirie.points[1] name:(uniqueName "OSM - Voirie ")	wirecolor:[130, 130, 230 ]
-				append m_shps_voiries	shapeVoirie
-			
-				addNewSpline shapeVoirie
-				for pt in nvVoirie.points do (
+				nvObjetOSM.points 			= get_element_points		elemOSM	
+				if nvObjetOSM.points.count > 0 do (
+					local nvShape = construire_shape		nvObjetOSM	echelle:echelle	type:type		wireCol:wireCol	fermerShape:fermerShape
 					
-					local point_echelle = pt * echelle * m_const_coefEchelle_metre
-					
-					addKnot shapeVoirie 1 #corner #line  	point_echelle
-					if m_helper_minX 	> point_echelle.x 	do 	m_helper_minX 	= point_echelle.x 
-					if m_helper_minY 	> point_echelle.y 	do 	m_helper_minY 	= point_echelle.y 
-					if m_helper_maxX < point_echelle.x 	do 	m_helper_maxX 	= point_echelle.x 
-					if m_helper_maxY < point_echelle.y 	do 	m_helper_maxY 	= point_echelle.y 
+					append nvxShapes		nvShape
 				)
 				
-				updateshape shapeVoirie
-				convertToSplineshape shapeVoirie
-				
+				--- on gere l'annulation -------
+				if keyboard.escPressed or ( getProgressCancel() )  do
+					m_annuleOp = true
 				
 				i += 1
 				
 			)
 			
 			
-			progressEnd() 
-			local chrono_result	=	.001 * ( timestamp ()	- chrono_debut )
-			format "CP | OSM Importer |	Creation des voiries   : %s.\n"		chrono_result		
-			format "CP | OSM Importer |		% voiries créés. \n"	m_shps_voiries.count
+			--- le helper--------
+			recadrer_helper ()
+			for shp in nvxShapes do
+				shp.parent = m_helper
 			
+-- 			
+-- 			progressEnd() 			
 			
+			if not m_annuleOp  then (
+				local chrono_result	=	.001 * ( timestamp ()	- chrono_debut )
+				format "CP | OSM Importer |	Importation %s   : %s.\n"	type	chrono_result		
+				format "CP | OSM Importer |		% %s importés.\n"	nvxShapes.count		type
+			)
+			nvxShapes
 		),
 		
-		
-		
-		---- Import	------------------------------------------------
-		fn parser =(
+	---- Chargement	------------------------------------------------
+		fn parser 	=(
 			
 			
 			local chrono_debut	=	timestamp ()
 			
-			progressStart "OSM - Analyse XML ...."
+			progressStart "OSM - Analyse XML du fichier ...."
 			
 			--- on vide tout -----			
--- 			m_elems_Nodes 		= 	#()
-			m_elems_voiries		= 	#()
-			m_elems_batiment	= 	#()
-			
-			m_points 					=	#()
-			m_batiments 			= 	#()
-			
-			
+			m_points 					=	#()	
+			m_shps_batiments 	=	#()
+			m_shps_voiries 			=	#()
 			
 			---- la limite min du doc OSM --------------
 			m_boundsMin			= [0,0]
-			
-			
 			
 			---	on remlpis nos elements	-------------
 			local result 	=#()
@@ -712,27 +582,64 @@ struct str_OSM_importer	(
 			
 			---- On collecte les nodes	----
 			local i = 0
-			local annuleOp = false			
-			while i < root.childNodes.count and not annuleOp do (
--- 			for i = 0 to root.childNodes.count-1 do	(
-				
--- 			format "	% ... \n"	i
-				
+			
+			while i < root.childNodes.count and not m_annuleOp do (
 				
 				local pourCent = (i as float) / root.childNodes.count * 100
 				progressUpdate pourCent
 				
+				---- les WAY	(batiments et routes) ----
+				if  root.ChildNodes.itemOf[i].name == "way" then (
+					
+					local elem_way = root.ChildNodes.itemOf[i]
+					
+					-- on cycle dans les attributs ---------------
+					local j = 0
+					local trouve = false
+					local type_element = #voirie
+					while j < elem_way.childNodes.count and not trouve do (
+						
+						---- on cherche dans les 'tag' -------------
+						if  elem_way.ChildNodes.itemOf[j].name == "tag" do (
+							local	valeur_de_K =	elem_way.ChildNodes.itemOf[j].attributes.itemOf[0].value
+							
+							-- on a un "building"	------
+							if valeur_de_K == "building" then (
+-- 								appendIfUnique m_elems_batiment	elem_way
+								type_element = #building
+								trouve = true
+							)
+-- 							/* -- on a une "route"	------
+-- 							else /* if valeur_de_K == "highway" then */ (
+-- 								appendIfUnique m_elems_voiries		elem_way
+-- 								trouve = true
+-- 							) */
+							/* -- le reste	------
+							else  (
+								appendIfUnique 	m_elems_divers		elem_way
+								trouve = true
+							) */
+-- 							else format "tag : %\n"		valeur_de_K
+							
+						)
+						j += 1
+					)
 				
+					
+					if type_element == #building	then
+							appendIfUnique 	m_elems_batiment		elem_way
+					else
+							appendIfUnique 	m_elems_voiries		elem_way
+						
+					
 				------ les BOUNDS du document---------------
-				if  root.ChildNodes.itemOf[i].name == "bounds" then (
+				) else	if  root.ChildNodes.itemOf[i].name == "bounds" then (
 					
 					local	elem_bounds = root.ChildNodes.itemOf[i]
 					---- la limite min du doc OSM --------------
 					local longitudeMin 	= elem_bounds.attributes.getNamedItem "minlon"
 					local latitudeMin 		= elem_bounds.attributes.getNamedItem "minlat"
 					m_boundsMin	 		= converterGPS.gpsToMeters   ( longitudeMin.value as double )  ( latitudeMin.value as double )
-					
-
 					
 				------ les NODES (les differents point)---------------
 				) else if  root.ChildNodes.itemOf[i].name == "node" then (
@@ -749,72 +656,36 @@ struct str_OSM_importer	(
 					nvPoint.pos.x		=	pos_enMetre.x	- m_boundsMin.x
 					nvPoint.pos.y		=	pos_enMetre.y	- m_boundsMin.y
 					
-					append m_points_total	nvPoint
+					append m_points	nvPoint
 				)
-				
-				
-				---- les WAY	(batiments et routes) ----
-				else if  root.ChildNodes.itemOf[i].name == "way" do (
-					
-					
-					local elem_way = root.ChildNodes.itemOf[i]
-					
-					-- on cycle dans les attributs ---------------
-					local j = 0
-					local trouve = false
-					while j < elem_way.childNodes.count and not trouve do (
--- 					for j = 0 to elem_way.childNodes.count-1 do	(
-						
-						---- on cherche dans les 'tag' -------------
-						if  elem_way.ChildNodes.itemOf[j].name == "tag" do (
-							local	valeur_de_K =	elem_way.ChildNodes.itemOf[j].attributes.itemOf[0].value
-							
-							-- on a un "building"	------
-							if valeur_de_K == "building" do (
-								appendIfUnique m_elems_batiment	elem_way
-								trouve = true
-							)
-							-- on a une "route"	------
-							if valeur_de_K == "highway" do (
-								appendIfUnique m_elems_voiries		elem_way
-								trouve = true
-							)
-							
-						)
-						j += 1
-					)
-					
-					
-					
-				)
-				m_points = m_points_total
 				
 				--- on gere l'annulation -------
 				if keyboard.escPressed or ( getProgressCancel() )  do
-					annuleOp = true
+					m_annuleOp = true
 				
 				i+=1
 				
 			)	---- fin collecte les nodes	---------------
 			
-			progressEnd() 
+			m_points = m_points
+			
+-- 			progressEnd() 
 			
 			
 			local chrono_result	=	.001 * ( timestamp ()	- chrono_debut )
-			if annuleOp  then (
-				format "CP | OSM Importer |	Analyse XML : Annulé par l'utilisateur.\n"
-				m_parsingOK = false
-			) else (
+			if not m_annuleOp  then (
 				format "CP | OSM Importer |	Analyse XML : %s.\n"		chrono_result
 				m_parsingOK = true
 			)
 			
 		),
-		
-	-- Importation	---------
-		fn importer  _fichier =(
+			
+	-- Chargement du fichier *.osm	---------
+		fn charger  _fichier =(
 			
 			if doesFileExist _fichier then	(
+				
+				format "CP | OSM Importer |	Importation de  : \"%\"\n"		_fichier
 				
 				m_nomDuFichier = _fichier
 				
@@ -829,19 +700,79 @@ struct str_OSM_importer	(
 				--- on charge le XML ------
 				m_xmlParser.charger		fichierXmlTemp
 				
-				parser ()
-				
--- 				creer_batiments ()
-				
 				--- on supprime le fichier xml temporaire -----
 				deleteFile fichierXmlTemp
 				
 				
 			) else 
 				format "--	OsM Importer --	 ERREUR : \"%\" n'existe pas !!\n"	_fichier
+			
+		),
+		
+		
+	---- Interface	-----------------------------------------------------
+	public
+		
+	---- Importation	dans la scene		------------------------------------------------
+		fn importer	_fichier		batiments:true		voiries:true	/* reste:true	 */	 echelle:1.0	=(
+			
+			if _fichier != undefined do  (
+				
+				m_annuleOp 	= false
+				
+				local chrono_debut	=	timestamp ()	
+				
+				charger  _fichier
+				
+				parser ()
+				
+				local selectBack = selection as array
+				
+				
+				if not m_annuleOp do	
+					clearSelection ()
+				
+				initialiser_creation_global ()
+				/* 
+				---- Creation du reste	-------
+				if not m_annuleOp and reste do 
+					creer_elements		m_elems_divers			echelle:echelle			type:"Divers"			wireCol:[155, 155, 50]
+				 */
+				---- Creation des voiries	-------
+				if not m_annuleOp and voiries do 
+					m_shps_batiments = creer_elements		m_elems_voiries		echelle:echelle			type:"Voirie"			wireCol:[255, 255, 150]
+				
+				---- Creation des batiments	-------
+				if not m_annuleOp and batiments do 
+					m_shps_voiries = creer_elements		m_elems_batiment		echelle:echelle		type:"Bâtiment"		wireCol:[200, 200, 255]		fermerShape:true
+				
+				
+				
+				local chrono_result	=	.001 * ( timestamp ()	- chrono_debut )
+				
+				if m_annuleOp  then (
+					-- on annule tout ----------------
+					try delete m_shps_batiments		catch ()
+					try delete m_shps_voiries			catch ()
+					try delete m_helper					catch ()
+					try delete m_helper_batiments	catch ()
+					try delete m_helper_voiries		catch ()
+					
+					select	selectBack
+					
+					format "CP | OSM Importer |	 Opération annulée par l'utilisateur : %s.\n"		chrono_result
+					
+				) else 
+					format "CP | OSM Importer |	Opération réussie : %s.\n"		chrono_result
+				
+			)
+			progressEnd() 
+			redrawviews ()
+			
+			ouvrir ()
 		)
-		
-		
+	
+	
 )	------- FIN OSM Importer	-------------
 
 
