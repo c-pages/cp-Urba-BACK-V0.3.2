@@ -1,4 +1,4 @@
-﻿/*#######################################################################################################################
+﻿/*#########################################################################################################################
 	Christophe Pages (http://www.c-pages.fr) 	
 ##########################################################################################################################
 	
@@ -39,7 +39,7 @@ parameters params_global 				rollout:roll_global		(
 	etages_epaiss_dalle		type: #float 				default:20.									animatable:false		invisibleInTV:true
 
 )
-
+/* 
 parameters params_sousPartie 				 rollout:roll_sousPartie	 	(
 	
 	sousPartie_noms				type:#stringTab 	tabSize:0  		tabSizeVariable:true
@@ -51,6 +51,9 @@ parameters params_sousPartie 				 rollout:roll_sousPartie	 	(
 	sousPartie_etages				type:#intTab			tabSize:0 			tabSizeVariable:true
 	
 )
+
+
+ */
 
 
 parameters params_optimSurface		rollout:roll_optimSurface	(
@@ -104,16 +107,28 @@ parameters params_facades 				rollout:roll_facades	(
 	
 	--- Sequence	---
 	fac_sequences					type:#stringTab 	tabSize:0 			tabSizeVariable:true
-	fac_sequence_longueurs		type:#stringTab 	tabSize:0 			tabSizeVariable:true
+	fac_sequence_longueurs		type:#floatTab	 	tabSize:0 			tabSizeVariable:true
 	
 )
+parameters params_facades_composants 			(
+	
+	---- les composants de facades -----------
+	fac_compos_noms 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	fac_compos_ids 				type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	fac_compos_types 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	fac_compos_params			type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	
+)
+
+
+
 parameters params_toiture 				rollout:roll_toiture	(
 	/* 
 	toit_type				type: #integer 			default:1		ui:ddl_toiture				animatable:false		invisibleInTV:true
 	toit_pente				type: #float 				default:20		ui:spn_pente					animatable:false		invisibleInTV:true
 	toit_hauteur			type: #float 				default:20.	ui:spn_toit_hauteur		animatable:false		invisibleInTV:true
 	toit_orientation		type:#float				default:0.											animatable:false		invisibleInTV:true
-	 */
+	*/
 )
 
 
@@ -220,7 +235,7 @@ rollout roll_global "Global" width:162 height:93 (
 		core.actualiser ()
 )
 
-
+/* 
 rollout roll_sousPartie 		"Sous parties" 		rolledUp:false	(
 	
 	listbox 'lbx_sousPartie' "" pos:[5,16] width:165 height:9 align:#left 
@@ -236,7 +251,7 @@ rollout roll_sousPartie 		"Sous parties" 		rolledUp:false	(
 	
 )
 
-
+ */
 
 
 
@@ -322,10 +337,13 @@ rollout roll_facades 		"Façades"		rolledUp:false	(
 	 
 
 	on roll_facades 				open 			do	actualiser()
+	on roll_facades 				close 			do	core.facadeEditeur_fermer()
 	on btn_ajouterFacade 	pressed 		do	(
 		core.creer_facade ()
 		actualiser ()
 		lbx_facades.selection = lbx_facades.items.count
+		
+		core.facadeEditeur_ouvrir	 	lbx_facades.selection
 	)
 	on lbx_facades doubleClicked arg do
 		core.facadeEditeur_ouvrir	 	lbx_facades.selection 

@@ -2,78 +2,23 @@
 
 
 
-struct 	str_composant (
-	
-	------ Membres ------------------------------------------------------------------------------
+struct 	str_mgr_composants (
 		
-	public
-		---- Parametres -----------------------------------
-		id						=	"#",		
-		type					=	undefined,
-		nom					=	"",
-		params				=	undefined,
-		
-		---- Pointeurs -----------------------------------
-	private
-		m_matID 			= 	str_prefs_matID (),
-		
-	private		
-		---- Rollout -----------------------------------
-		m_dialog 			= undefined,
-		
-		---- Fonction virtuelle pure pour construire le composant	----
-		fnVirt_construire	= (),
-		
-	------ Fonctions ------------------------------------------------------------------------------
-	public
-		---- Mutations -----------------------
-		fn set_dialog 			_dialog 				= ( m_dialog 				= _dialog ),
-		fn set_construire 		_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
-		fn set_params			_params			= ( params					= _params ),
-		
-		---- Accessions -----------------------
-		fn get_dialog			=	m_dialog,
-		
-		--- Initialisations -----------------------
-		fn initialiser_dialog 	_roll_parent 	=(
-			dialog.m_rollPrt	= 	_roll_parent
-			dialog.m_param	=	params
-			dialog.actualiser()
-		),
-		fn initialiser 		_type	_nom 	=(
-			
-			---- id unique ----
-			id += _type
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
-			
-			type 				=	_type 			
-			nom				=	_nom
-			
-		),
-		
-		---- Construction du mesh 	( fonction virtuelle ) -----------------------
-		fn construire		_plug	 	pts_accroches		_normDir				= 		fnVirt_construire	 _plug	pts_accroches		_normDir		this	,
-		
-		
-		---- Destructeur/Copies	-----------------
-		fn supprimer =(
-			
-		),
-		fn dupliquer =(
-			
-		),
-		fn cloner =(
-			
-		)
-		
-) ---- fin composant -------------------------------
-
-struct 	str_constructeur_composants (
-	
 		m_plug,
+	private
 		
-		---- Espacement -------------------------------------------
-		fn espacement =(
+		---- Le tableau des éléments --------
+		m_items	=	#(),
+		
+		fn get_nouveauComposant =(
+			--- on importe le fichier du struct des composants (pour avoir accés meme si le plug est pas actif)---
+			include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Elements - Composant.ms"
+			str_composant ()
+		),
+		
+		---- CONSTRUCTION DES  COMPOSANTS -------------------------------------------
+	private
+		fn espacement 	=(
 			
 			--- les parametres du composant --------------
 			local params = struct param (
@@ -86,10 +31,10 @@ struct 	str_constructeur_composants (
 			fn fnConstruire  	_plug	 	pts_accroches		_normDir			_composant		=()
 			
 			--- Creation du composant --------------
-			local nvComposant = str_composant 	()
-			nvComposant.initialiser			m_plug			#FAC_COMP_ESP		"Espacement"
-			nvComposant.set_dialog		dialog
-			nvComposant.set_params	 	params
+			local nvComposant = get_nouveauComposant 	()
+			nvComposant.initialiser			#FAC_COMP_ESP		"Espacement"
+			nvComposant.set_dialog			dialog
+			nvComposant.set_params	 	( params () )
 			nvComposant.set_construire 	fnConstruire
 			
 			nvComposant
@@ -134,12 +79,12 @@ struct 	str_constructeur_composants (
 									local ptr_plug				= 	_plug
 									local ptr_composant  	= 	_composant
 									local ptr_geo 				= 	ptr_plug.core.get_geo ()
-									local matID				=	ptr_plug.core.get_matID ()
+									local matID					=	ptr_plug.core.get_matID ()
 									
 							-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
-									local ep_dalle 		= ptr_plug.etages_epaiss_dalle
+									local ep_dalle 			= ptr_plug.etages_epaiss_dalle
 									local ht_niveaux 		= ptr_plug.etages_hauteur
-									local longueur 		= ptr_composant.params.longueur
+									local longueur 			= ptr_composant.params.longueur
 									
 									
 							-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
@@ -202,7 +147,7 @@ struct 	str_constructeur_composants (
 									
 								)
 			
-			local nvComposant = str_composant 	()
+			local nvComposant = get_nouveauComposant 	()
 			nvComposant.initialiser			#FAC_COMP_MUP		"Mur plein"
 			nvComposant.set_dialog		dialog
 			nvComposant.set_params	 	( params() )
@@ -299,10 +244,10 @@ struct 	str_constructeur_composants (
 			)
 			
 			--- Creation du composant --------------
-			local nvComposant = str_composant 	()
+			local nvComposant = get_nouveauComposant 	()
 			nvComposant.initialiser			#FAC_COMP_BAL		"Balcon"
 			nvComposant.set_dialog		dialog
-			nvComposant.set_params	 	params
+			nvComposant.set_params	 	( params () )
 			nvComposant.set_construire 	fnConstruire
 			
 			nvComposant
@@ -313,19 +258,52 @@ struct 	str_constructeur_composants (
 		fn balconFin 	=(
 			
 			--- les parametres du composant --------------
+			local params = struct param (
+				longueur = 0
+			)
+			
+			--- les parametres du composant --------------
 			local dialog  = rollout dialog "Balcon fin" (
 								)
 			fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= ()
 			
 			--- Creation du composant --------------
-			local nvComposant = str_composant 	()
+			local nvComposant = get_nouveauComposant 	()
 			nvComposant.initialiser			#FAC_COMP_BAF		"Balcon fin"
-			nvComposant.set_dialog		dialog
+			nvComposant.set_dialog			dialog
+			nvComposant.set_params	 	( params () )
 			nvComposant.set_construire 	fnConstruire
 			
 			nvComposant
+			
+		),
+		
+		
+		
+		---- INTERFACE -------------------------------------------
+	public
+		fn creer		_typeDeComposant	=(
+			local nvComposant
+			case	_typeDeComposant of (
+				#espacement:		nvComposant = espacement()
+				#murPlein:			nvComposant = murPlein()
+				#balcon:				nvComposant = balcon()
+				#balconFin:			nvComposant = balconFin()
+			)
+			append m_items	nvComposant
+			nvComposant
+		),
+		fn get_murPlein = murPlein	(),
+		
+		-----INIT	--------------
+	public
+		fn initialiser	_plug	=(
+			
+			m_plug = _plug
+			
 		)
-
+		
+		
 ) -- fin creer composant ---------
 	
 
@@ -346,20 +324,17 @@ struct 	str_facade (
 		
 		
 	---------- MEMBRES	--------------------------------------------------------------------------------------
--- 	private
--- 		cstr_composants			= str_constructeur_composants (),
-		
 	public
 		---- Base	-----------
 		nom 							=	"Façade",
 		id								=	"#FACAD_",
-		mode							=	1,					---- ( 1:repeter	2:etrier			3:centrer )	----
+		mode						=	1,					---- ( 1:repeter	2:etrier			3:centrer )	----
 		
 		--- Limiteurs - Murs	---
 		murs							=	1,					---- ( 1:les deux	2:gouttereaux	3:pignons )	----
 		
 		--- Limiteurs - Etages	---
-		etages_min_use			=	false,
+		etages_min_use		=	false,
 		etages_min				= 	0,
 		etages_max_use			=	false,
 		etages_max			=	0,
@@ -383,10 +358,19 @@ struct 	str_facade (
 		
 		
 		---- Composants -----------------
-		fn ajouter_composant 		_type 	=(
-			case _type of (
-				#espacement: 	()
-			)
+		fn get_composants_noms =(
+			for compo in sequence collect compo.nom
+		),
+		fn get_sequence_longueur	=(
+			sequence_longueur		=	0
+			for compo in sequence do
+				sequence_longueur	+=	compo.get_longueur ()
+			
+			sequence_longueur
+		),
+		
+		fn ajouter_composant 		_composant 	=(
+			append sequence 		_composant
 		),
 		fn supprimer_composant 	_composant 	=(
 			
@@ -397,24 +381,12 @@ struct 	str_facade (
 		fn cloner_composant 		_composant 	=(
 			
 		),
-		
-
-		---- Destructeur/Copies	-----------------
-		fn supprimer =(
-			
-		),
-		fn dupliquer =(
-			
-		),
-		fn cloner =(
-			
-		),
-		
-		
-		---- Parametres	-----------------
+				
+		---- Enregistrement / chargement	-----------------
 		fn enregistrer 		_plug 	=(
 			
 			debug "enregistrer"
+			local mgr_datas = _plug.core.get_mgrDatas ()
 			
 			--- on cherche s'il existe deja comme parametre -----
 			local index_facade = 0
@@ -422,18 +394,38 @@ struct 	str_facade (
 				if _plug.fac_ids[i] == id  do index_facade = i
 			
 			
+			--- s'il n'existe pas encore, on l'ajoute -----
 			if index_facade == 0 then (
 				debug "enregistrer nouvelle facade"
-			--- s'il n'existe pas encore, on l'ajoute -----
 				append 	_plug.fac_ids 				id
 				append 	_plug.fac_noms  			nom
 				
-			) else (
+				--- Limiteurs - Murs	---
+				append 	_plug.fac_murs		 murs
+				
+				--- Limiteurs - Etages	---
+				append 	_plug.fac_etagesMin_uses 		 etages_min_use
+				append 	_plug.fac_etagesMin  					etages_min
+				append 	_plug.fac_etagesMax_uses 		 etages_max_use
+				append 	_plug.fac_etagesMax 					etages_max
+				
+				--- Limiteurs - longueurs	---
+				append 	_plug.fac_longueurMin_uses 	 longueur_min_use
+				append 	_plug.fac_longueurMin 				longueur_min
+				append 	_plug.fac_longueurMax_uses 		longueur_max_use
+				append 	_plug.fac_longueurMax 			 longueur_max
+				
+				--- la sequence de composants	-------
+				append 	_plug.fac_sequences 						( mgr_datas.array_to_string		#() )
+				append 	_plug.fac_sequence_longueurs 			sequence_longueur
+				
 			--- s'il existe, on l'actualise -----
+			) else (
+				
 				debug "enregistrer facade existante"
 				debug "id"		var:id
-				_plug.fac_noms[index_facade] 		=	nom
 				
+				_plug.fac_noms[index_facade] 		=	nom				
 				_plug.fac_modes[index_facade]		=	mode
 				
 				--- Limiteurs - Murs	---
@@ -450,6 +442,15 @@ struct 	str_facade (
 				_plug.fac_longueurMin[index_facade] 			=	longueur_min
 				_plug.fac_longueurMax_uses[index_facade] 	=	longueur_max_use
 				_plug.fac_longueurMax[index_facade] 			= longueur_max
+				
+				-- la sequence	-----
+				local sequenceIDs = for compo in sequence collect	compo.id
+				_plug.fac_sequences[index_facade] 						= mgr_datas.array_to_string		sequenceIDs		
+				_plug.fac_sequence_longueurs[index_facade] 			= sequence_longueur		
+				
+				--- les composants -----
+				for compo in sequence do
+					compo.enregistrer _plug			
 				
 			)
 			

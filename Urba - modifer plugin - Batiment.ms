@@ -143,7 +143,7 @@ extends:Editable_poly replaceUI:true version:0
 	)
 	on update do	(
 		debug "update du plugin"		
-		initialiser ()		
+-- 		initialiser ()		
 	)
 	
 ) --- fin du plug ---

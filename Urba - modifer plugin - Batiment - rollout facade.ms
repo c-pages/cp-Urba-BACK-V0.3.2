@@ -6,7 +6,15 @@
 
 rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 (
+	
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+		fn debug 	_txt  var:	 param:    =(
+			local m_debug = true
+			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:"urba | roll_urba_editeurFacades"
+			catch ()
+		)
 		
+		------- includes ------------------
 		include "$userScripts\cp - GLOBAL\UI.ms"
 		include "$userScripts\cp - GLOBAL\DragDialog.ms"
 		
@@ -15,7 +23,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		local m_plug				---- pointeur vers le plug ----
 		
 		--- les parametres courants ------------
-		local m_facade
+		local m_facade_courante
 		local m_composant
 		
 		--- rollout	---------
@@ -88,37 +96,37 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		------------  Fonctions	----------------------------------------------------------------------------------
 		fn actualiser 							=(
 			
-			edt_nom_facade.text 			= m_facade.nom
+			edt_nom_facade.text 			= m_facade_courante.nom
 			
-			chk_etages.checked				= m_facade.etages_min_use
-			spn_etages.indeterminate 		= not m_facade.etages_min_use	
-			spn_etages.enabled 				= m_facade.etages_min_use	
+			chk_etages.checked				= m_facade_courante.etages_min_use
+			spn_etages.indeterminate 		= not m_facade_courante.etages_min_use	
+			spn_etages.enabled 				= m_facade_courante.etages_min_use	
 			if not spn_etages.indeterminate do
-				spn_etages.value				= m_facade.etages_min
+				spn_etages.value				= m_facade_courante.etages_min
 			
-			chk_etagesMax.checked		= m_facade.etages_max_use
-			spn_etagesMax.indeterminate = not m_facade.etages_max_use	
-			spn_etagesMax.enabled		= m_facade.etages_max_use			
+			chk_etagesMax.checked		= m_facade_courante.etages_max_use
+			spn_etagesMax.indeterminate = not m_facade_courante.etages_max_use	
+			spn_etagesMax.enabled		= m_facade_courante.etages_max_use			
 			if not spn_etagesMax.indeterminate do
-				spn_etagesMax.value		= m_facade.etages_max	
+				spn_etagesMax.value		= m_facade_courante.etages_max	
 			
-			
-			
-			chk_longueur_min.checked				= m_facade.longueur_min_use
-			spn_longueur_min.indeterminate 		= not m_facade.longueur_min_use	
-			spn_longueur_min.enabled 			= m_facade.longueur_min_use	
+			chk_longueur_min.checked				= m_facade_courante.longueur_min_use
+			spn_longueur_min.indeterminate 		= not m_facade_courante.longueur_min_use	
+			spn_longueur_min.enabled 			= m_facade_courante.longueur_min_use	
 			if not spn_longueur_min.indeterminate do
-				spn_longueur_min.value				= m_facade.longueur_min
+				spn_longueur_min.value				= m_facade_courante.longueur_min
 			
-			chk_longueur_max.checked				= m_facade.longueur_max_use
-			spn_longueur_max.indeterminate 		= not m_facade.longueur_max_use	
-			spn_longueur_max.enabled 				= m_facade.longueur_max_use	
+			chk_longueur_max.checked				= m_facade_courante.longueur_max_use
+			spn_longueur_max.indeterminate 		= not m_facade_courante.longueur_max_use	
+			spn_longueur_max.enabled 				= m_facade_courante.longueur_max_use	
 			if not spn_longueur_max.indeterminate do
-				spn_longueur_max.value				= m_facade.longueur_max
+				spn_longueur_max.value				= m_facade_courante.longueur_max
 			
 			
-			ddl_murs.selection 				= m_facade.murs
-			ddl_mode.selection 				= m_facade.mode
+			ddl_murs.selection 				= m_facade_courante.murs
+			ddl_mode.selection 				= m_facade_courante.mode
+			
+			lbx_sequence.items				=	m_facade_courante.get_composants_noms ()
 			
 		)
 		fn redimensionnerFenetre 		_taille 	=(
@@ -138,18 +146,20 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			roll_urba_editeurFacades.width 	= _taille.x
 			roll_urba_editeurFacades.height 	= _taille.y
 			
-			local largeur_fenetre = 	_taille.x - largeur_params
+			m_plug.core.set_roll_editeurDeFacade_taille	_taille
+			
+			local largeur_fenetre 	= 	_taille.x - largeur_params
 			
 			ui_btnFermer.pos.x		= 	_taille.x - 20
 			
 			edt_nom_facade.width 	= 	largeur_fenetre - ( 2* largeur_bord	+ 2 * largeur_btn   )
 			btn_enregistrer.pos.x 	= 	edt_nom_facade.width 	+  edt_nom_facade.pos.x
-			btn_charger.pos.x 		= 	largeur_btn 	+  btn_enregistrer.pos.x
+			btn_charger.pos.x 			= 	largeur_btn 	+  btn_enregistrer.pos.x
 			
 			ddl_murs.width 			= 	ddl_mode.width  = 	largeur_fenetre  - ( ddl_murs.pos.x + largeur_bord )
 			lbx_sequence.width 		= ddl_murs.width 	 - largeur_btn
 			
-			lbx_sequence.height 	= _taille.y - ( lbx_sequence.pos.y + largeur_btn + 2 * largeur_bord )
+			lbx_sequence.height 		= _taille.y - ( lbx_sequence.pos.y + largeur_btn + 2 * largeur_bord )
 			
 			
 -- 			btn_annuler.pos.x		= largeur_fenetre - (  118 + largeur_bord )
@@ -182,9 +192,15 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			
 		)
 		fn set_facade		_facade 	= (
-			m_facade 	= _facade
+			m_facade_courante 	= _facade
 			actualiser ()
 		)
+		fn ajouter_composant	_type =(
+			debug "ajouter composant"
+			m_plug.core.creer_composant	m_facade_courante		_type		position:lbx_sequence.selection
+			actualiser ()
+		)
+		
 		
 		---- Gere l'état du bouton  -----
 		fn etatBtnFermer		_etat 	=(
@@ -208,6 +224,13 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		on roll_urba_editeurFacades mouseMove 	_pos 	do
 			m_drag.suivreSouris ()
 		
+		on roll_urba_editeurFacades close do
+			m_plug.core.actualiser ()
+		
+		on roll_urba_editeurFacades moved 	dest do
+			m_plug.core.set_roll_editeurDeFacade_position	dest
+		
+		
 		on ui_btnFermer mouseover do
 			etatBtnFermer #Survol
 		on ui_btnFermer mouseout do
@@ -224,61 +247,66 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		
 		--- parametres ---------------------
 		on edt_nom_facade entered txt 	do (
-			m_facade.nom 	=	txt
-			m_facade.enregistrer 	m_plug
+			m_facade_courante.nom 	=	txt
+			m_facade_courante.enregistrer 	m_plug
 			m_plug.actualiser_rollouts ()
 		)
 		on ddl_mode selected sel	 do		(
-			m_facade.mode 	= 	sel
-			m_facade.enregistrer 	m_plug
+			m_facade_courante.mode 	= 	sel
+			m_facade_courante.enregistrer 	m_plug
 		)
 		
 		on ddl_murs selected sel	 do		(
-			m_facade.murs 	= 	sel
-			m_facade.enregistrer 	m_plug
+			m_facade_courante.murs 	= 	sel
+			m_facade_courante.enregistrer 	m_plug
 		)
 		
 		
 		on chk_etages changed state do		(
-			m_facade.etages_min_use 	= 	state		
-			m_facade.enregistrer 	m_plug
+			m_facade_courante.etages_min_use 	= 	state		
+			m_facade_courante.enregistrer 	m_plug
 			actualiser ()
 		)
 		on spn_etages	 changed val 	do		(
-			m_facade.etages_min 	= 	val
-			m_facade.enregistrer 	m_plug
+			m_facade_courante.etages_min 	= 	val
+			m_facade_courante.enregistrer 	m_plug
 		)
 		on chk_etagesMax changed state do		(
-			m_facade.etages_max_use 	= 	state		
-			m_facade.enregistrer 	m_plug
+			m_facade_courante.etages_max_use 	= 	state		
+			m_facade_courante.enregistrer 	m_plug
 			actualiser ()
 		)
 		on spn_etagesMax	 changed val 	do		(
-			m_facade.etages_max 	= 	val
-			m_facade.enregistrer 	m_plug
+			m_facade_courante.etages_max 	= 	val
+			m_facade_courante.enregistrer 	m_plug
 		)
 		
 		
 		on spn_longueur_min changed val 	do		(
-			m_facade.longueur_min 	= 	val
-			m_facade.enregistrer 	m_plug
+			m_facade_courante.longueur_min 	= 	val
+			m_facade_courante.enregistrer 	m_plug
 		)
 		on spn_longueur_max changed val 	do		(
-			m_facade.longueur_max 	= 	val
-			m_facade.enregistrer 	m_plug
+			m_facade_courante.longueur_max 	= 	val
+			m_facade_courante.enregistrer 	m_plug
 		)
 		on chk_longueur_max changed state do		(
-			m_facade.longueur_max_use 	= 	state		
-			m_facade.enregistrer 	m_plug
+			m_facade_courante.longueur_max_use 	= 	state		
+			m_facade_courante.enregistrer 	m_plug
 			actualiser ()
 		)
 		on chk_longueur_min changed state do		(
-			m_facade.longueur_min_use 	= 	state		
-			m_facade.enregistrer 	m_plug
+			m_facade_courante.longueur_min_use 	= 	state		
+			m_facade_courante.enregistrer 	m_plug
 			actualiser ()
 		)
 		
 		
+		on btn_ajouter_espacement pressed do
+			ajouter_composant	#Espacement
+		
+		on btn_ajouter_murPlein pressed do
+			ajouter_composant	#MurPlein
 		/* 
 		--- Sequence	---
 		sequence					=	#(),
@@ -288,7 +316,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		/* 
 		on lbx_sequence selected _sel 	do
 		(
-							m_composant_courant = m_facade.sequence[_sel]
+							m_composant_courant = m_facade_courante.sequence[_sel]
 							afficher_proprietes ()
 							--actualiser ()
 						)
@@ -305,9 +333,9 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		(
 							local id_orig = lbx_sequence.selection
 							if id_orig >1 do (
-								local itemTmp = m_facade.sequence[id_orig]
-								deleteItem	m_facade.sequence	id_orig
-								insertItem	itemTmp		m_facade.sequence	(id_orig-1)
+								local itemTmp = m_facade_courante.sequence[id_orig]
+								deleteItem	m_facade_courante.sequence	id_orig
+								insertItem	itemTmp		m_facade_courante.sequence	(id_orig-1)
 								lbx_sequence.selection	-= 1
 							)
 							actualiser ()
@@ -315,10 +343,10 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		on btn_descendre pressed do
 		(
 							local id_orig = lbx_sequence.selection
-							if id_orig < m_facade.sequence.count do (
-								local itemTmp = m_facade.sequence[id_orig]
-								deleteItem	m_facade.sequence	id_orig
-								insertItem	itemTmp		m_facade.sequence	(id_orig+1)
+							if id_orig < m_facade_courante.sequence.count do (
+								local itemTmp = m_facade_courante.sequence[id_orig]
+								deleteItem	m_facade_courante.sequence	id_orig
+								insertItem	itemTmp		m_facade_courante.sequence	(id_orig+1)
 								lbx_sequence.selection	+= 1
 							)
 							actualiser ()
@@ -331,41 +359,41 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		----  FENETRE  ----------
 		fn actualiser = (
 			
-			edt_nom_facade.text 			= m_facade.nom
+			edt_nom_facade.text 			= m_facade_courante.nom
 			
-			chk_etages.checked				= m_facade.etages_use_min
-			spn_etages.indeterminate 		= not m_facade.etages_use_min	
-			spn_etages.enabled 				= m_facade.etages_use_min	
+			chk_etages.checked				= m_facade_courante.etages_use_min
+			spn_etages.indeterminate 		= not m_facade_courante.etages_use_min	
+			spn_etages.enabled 				= m_facade_courante.etages_use_min	
 			if not spn_etages.indeterminate do
-				spn_etages.value				= m_facade.etages_nbre_min
+				spn_etages.value				= m_facade_courante.etages_nbre_min
 			
-			chk_etagesMax.checked		= m_facade.etages_use_max
-			spn_etagesMax.indeterminate = not m_facade.etages_use_max	
-			spn_etagesMax.enabled		= m_facade.etages_use_max			
+			chk_etagesMax.checked		= m_facade_courante.etages_use_max
+			spn_etagesMax.indeterminate = not m_facade_courante.etages_use_max	
+			spn_etagesMax.enabled		= m_facade_courante.etages_use_max			
 			if not spn_etagesMax.indeterminate do
-				spn_etagesMax.value		= m_facade.etages_nbre_max	
+				spn_etagesMax.value		= m_facade_courante.etages_nbre_max	
 			
 			
 			
-			chk_longueur_min.checked				= m_facade.longueur_use_min
-			spn_longueur_min.indeterminate 		= not m_facade.longueur_use_min	
-			spn_longueur_min.enabled 			= m_facade.longueur_use_min	
+			chk_longueur_min.checked				= m_facade_courante.longueur_use_min
+			spn_longueur_min.indeterminate 		= not m_facade_courante.longueur_use_min	
+			spn_longueur_min.enabled 			= m_facade_courante.longueur_use_min	
 			if not spn_longueur_min.indeterminate do
-				spn_longueur_min.value				= m_facade.longueur_nbre_min
+				spn_longueur_min.value				= m_facade_courante.longueur_nbre_min
 			
-			chk_longueur_max.checked				= m_facade.longueur_use_max
-			spn_longueur_max.indeterminate 		= not m_facade.longueur_use_max	
-			spn_longueur_max.enabled 				= m_facade.longueur_use_max	
+			chk_longueur_max.checked				= m_facade_courante.longueur_use_max
+			spn_longueur_max.indeterminate 		= not m_facade_courante.longueur_use_max	
+			spn_longueur_max.enabled 				= m_facade_courante.longueur_use_max	
 			if not spn_longueur_max.indeterminate do
-				spn_longueur_max.value				= m_facade.longueur_nbre_max
+				spn_longueur_max.value				= m_facade_courante.longueur_nbre_max
 			
 			
-			ddl_murs.selection 				= m_facade.murs
-			ddl_mode.selection 				= m_facade.mode
+			ddl_murs.selection 				= m_facade_courante.murs
+			ddl_mode.selection 				= m_facade_courante.mode
 			
 			local itemsTmp = #()
 			local est_dansBalcon = false
-			for comp in m_facade.sequence		do	(
+			for comp in m_facade_courante.sequence		do	(
 				local affichage = ""
 				local suffix		= ""
 				
@@ -440,52 +468,52 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		
 		on edt_nom_facade entered txt 	do
 		(
-							m_facade.nom 					=	txt		
+							m_facade_courante.nom 					=	txt		
 							actualiser ()
 						)
 		on spn_etages 	changed val 	do
 		(
-							m_facade.etages_nbre_min 	= 	val
+							m_facade_courante.etages_nbre_min 	= 	val
 							actualiser ()
 						)
 		on spn_etagesMax changed val 	do
 		(
-							m_facade.etages_nbre_max 	= 	val
+							m_facade_courante.etages_nbre_max 	= 	val
 							actualiser ()
 						)
 		on spn_longueur_min changed val 	do
 		(
-							m_facade.longueur_nbre_min 	= 	val
+							m_facade_courante.longueur_nbre_min 	= 	val
 							actualiser ()
 						)
 		on spn_longueur_max changed val 	do
 		(
-							m_facade.longueur_nbre_max 	= 	val
+							m_facade_courante.longueur_nbre_max 	= 	val
 							actualiser ()
 						)
 		on chk_longueur_max changed state do
 		(
-							m_facade.longueur_use_max 	= 	state		
+							m_facade_courante.longueur_use_max 	= 	state		
 							actualiser ()
 						)
 		on chk_longueur_min changed state do
 		(
-							m_facade.longueur_use_min 	= 	state		
+							m_facade_courante.longueur_use_min 	= 	state		
 							actualiser ()
 						)
 		on ddl_murs selected sel	 do
 		(
-							m_facade.murs 	= 	sel
+							m_facade_courante.murs 	= 	sel
 							actualiser ()
 						)
 		on chk_etagesMax changed state do
 		(
-							m_facade.etages_use_max 	= 	state		
+							m_facade_courante.etages_use_max 	= 	state		
 							actualiser ()
 						)
 		on lbx_sequence selected _sel 	do
 		(
-							m_composant_courant = m_facade.sequence[_sel]
+							m_composant_courant = m_facade_courante.sequence[_sel]
 							afficher_proprietes ()
 							--actualiser ()
 						)
@@ -502,9 +530,9 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		(
 							local id_orig = lbx_sequence.selection
 							if id_orig >1 do (
-								local itemTmp = m_facade.sequence[id_orig]
-								deleteItem	m_facade.sequence	id_orig
-								insertItem	itemTmp		m_facade.sequence	(id_orig-1)
+								local itemTmp = m_facade_courante.sequence[id_orig]
+								deleteItem	m_facade_courante.sequence	id_orig
+								insertItem	itemTmp		m_facade_courante.sequence	(id_orig-1)
 								lbx_sequence.selection	-= 1
 							)
 							actualiser ()
@@ -512,22 +540,22 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		on btn_descendre pressed do
 		(
 							local id_orig = lbx_sequence.selection
-							if id_orig < m_facade.sequence.count do (
-								local itemTmp = m_facade.sequence[id_orig]
-								deleteItem	m_facade.sequence	id_orig
-								insertItem	itemTmp		m_facade.sequence	(id_orig+1)
+							if id_orig < m_facade_courante.sequence.count do (
+								local itemTmp = m_facade_courante.sequence[id_orig]
+								deleteItem	m_facade_courante.sequence	id_orig
+								insertItem	itemTmp		m_facade_courante.sequence	(id_orig+1)
 								lbx_sequence.selection	+= 1
 							)
 							actualiser ()
 						)
 		on ddl_mode selected sel	 do
 		(
-							m_facade.mode 	= 	sel
+							m_facade_courante.mode 	= 	sel
 							actualiser ()
 						)
 		on chk_etages changed state do
 		(
-							m_facade.etages_use_min 	= 	state		
+							m_facade_courante.etages_use_min 	= 	state		
 							actualiser ()
 						)
 		on btn_ajouter_espacement pressed do
@@ -551,7 +579,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		(
 							local id = lbx_sequence.selection
 							if id != 0 do
-								deleteItem	m_facade.sequence	id					
+								deleteItem	m_facade_courante.sequence	id					
 							actualiser ()
 						)
 						

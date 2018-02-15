@@ -1,6 +1,13 @@
 
 
-
+-- fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - material IDs.ms"
+ struct 	str_prefs_matID (
+	mur 				= 	10,
+	menuiserie 	= 	20,
+	vitrage 			= 	30,
+	toiture 			= 	40,
+	metal			=	50
+)
 
 ----------- Construction des batiments----------------------------------------------------------------------
 struct str_construction (
@@ -23,23 +30,22 @@ struct str_construction (
 		m_plug,
 	public			
 		m_geo		= 	str_geometrie 	(),
-		m_matID	= 	str_prefs_matID (),
-		
-		
+		m_matID	= 	str_prefs_matID () ,	--fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - material IDs.ms",
 		
 		---- Outils -------------
 	private
 		m_outils_poly			=	str_poly_outils (),
 		m_outils_shape			=	str_shape_outils (),
 		
-		---- Constructeur -------------
-	private
-		cstr_composants 	= str_constructeur_composants (),
+-- 		---- Constructeur -------------
+-- 	private
+		cstr_composants /* 	= str_constructeur_composants () */,
 		
 		---- tracé Logo  -------------------
 	private
 		logo = #(	[14.1994,37.717,0], 	[14.1994,-189.586,0], 	[287.927,-189.586,0], 	[287.927,139.601,0], 	[174.501,253.027,0], 	[174.501,479.879,0], 	[61.0754,479.879,0], 	[61.0754,366.453,0], \
 						[-52.3504,479.879,0], 	[-392.628,139.601,0], 	[-392.628,-189.586,0],	[-118.9,-189.586,0], 	[-118.9,37.717,0]),
+		
 		
 		---- constantes------------------
 	private
@@ -61,48 +67,49 @@ struct str_construction (
 			local facades_result =#()
 			
 			--- on filtre par etages ---------------
-			for fcade in _facades 		do (					
-				if fcade.etages_min_use then (
-					if _etageCourant	>= fcade.etages_min  do (
-						if fcade.etages_max_use then (
-							if _etageCourant <= fcade.etages_max   do 	
-								append facades_result fcade
+			for facde in _facades 		 where facde.sequence.count >0 do (
+				if facde.etages_min_use then (
+					if _etageCourant	>= facde.etages_min  do (
+						if facde.etages_max_use then (
+							if _etageCourant <= facde.etages_max   do 	
+								append facades_result facde
 						)	else (
-							append facades_result fcade
+							append facades_result facde
 						)
 					)
 				) else (
-					append facades_result fcade
+					append facades_result facde
 				)
 			)
 			
 			facades_result
 		),
-		
 		fn filtrer_facades_parMurs		_facades	_mur_longueur		_pts		_id_pt				=(
 			
 			local facades_result 		= #()
 			local est_pignon				= m_outils_shape.estPignon 	_pts		_id_pt
 			
 			---- si la sequence peut rentrer sur le segment de facade ------------
-			for fcde in _facades where /* fcde.sequence_longueur != 0 and  */	fcde.sequence_longueur < _mur_longueur do (
-				---- si la facade est limité en longueur min -----
-				if not fcde.longueur_min_use or fcde.longueur_min_use	 and 	fcde.longueur_min < _mur_longueur do
-					---- si la facade est limité en longueur max -----
-					if not fcde.longueur_max_use or fcde.longueur_max_use	 and 	fcde.longueur_max > _mur_longueur do (
-						---- si la facade est sur le bon type de mur -----
-						case  fcde.murs of (
-							1: append facades_result fcde
-							2: if not est_pignon do append facades_result fcde
-							3: if est_pignon do append facades_result fcde
+			for facde in _facades where  	 facde.sequence.count >0 do
+				if facde.sequence_longueur < _mur_longueur do (
+					---- si la facade est limité en longueur min -----
+					if not facde.longueur_min_use or facde.longueur_min_use	 and 	facde.longueur_min < _mur_longueur do
+						---- si la facade est limité en longueur max -----
+						if not facde.longueur_max_use or facde.longueur_max_use	 and 	facde.longueur_max > _mur_longueur do (
+							---- si la facade est sur le bon type de mur -----
+							case  facde.murs of (
+								1: append facades_result facde
+								2: if not est_pignon do append facades_result facde
+								3: if est_pignon do append facades_result facde
+							)
 						)
-					)
-			)
+				)
+			
 	
 			facades_result
 			
 		),
-		
+		/* 
 -- 		fn filtrer_facades		
 		fn choisir_parProbas		_liste	 = (
 			local result 	
@@ -126,14 +133,199 @@ struct str_construction (
 			)
 			result
 		),
-		
+		 */
 		
 		---- elements simples-------------------
+	private
 		fn creer_murPlein		_longueur	 =(
-			local 	nvComposant 	= 	cstr_composants.murPlein	()
+			local 	nvComposant 	= 	cstr_composants.get_murPlein	()
 			nvComposant.params.longueur 	= _longueur
 			nvComposant
 		),	
+		fn creer_sequence		_pt1		_pt2		_facade					=(
+		
+		
+-- 			-------- DEBUG----------------------
+-- 			local chrono_debut = timeStamp ()
+-- 			-------- DEBUG----------------------
+			
+			--- passerelle ----------
+-- 			local creer_murPlein = m_plug.facades.creer_murPlein
+			
+			debug "creer_sequence"
+			
+			------------ ANALYSE ------------------------
+			local pt_bas, pt_ht	 
+			
+			local longueurFacade 		= distance _pt1 _pt2
+			local normDir					=	normalize ( _pt2 - _pt1)
+			local rot 							= m_outils_poly.get_angle_vecteur		normDir
+			local longueur_sequence 	= _facade.get_sequence_longueur		()
+			local sequence 					= _facade.sequence 		
+			local b_espacer 				= _facade.mode == 4
+			
+			debug "creer_sequence	-1-"
+			
+			-----	si on a une sequence avec une longueur nulle, on creer un seul mur plein	--------------------------------------
+			if longueur_sequence	== 0 then (
+				
+				sequence = #( creer_murPlein  longueurFacade )
+				
+			) 
+			
+				
+			-----	calcul du nombre d'espacements de la sequence	--------------------------------------
+			local nbr_espacemts 		= 0
+			for compo in sequence do
+					if compo.type  == #FAC_COMP_ESP 	do
+						nbr_espacemts += 1
+			
+			debug "creer_sequence	-2-"
+			
+			-----	calcul de la longueur des espacements de la sequence	--------------------------------------
+			local nbrRepetitions
+			local longueur_restant
+			local longueur_espacement
+			case _facade.mode of (
+				1:  	(	--- Repeter ----
+					nbrRepetitions				= floor ( longueurFacade / longueur_sequence )
+					longueur_restant 			= longueurFacade - longueur_sequence * nbrRepetitions
+					longueur_espacement 	= longueur_restant / ( 2	+ nbr_espacemts * nbrRepetitions )
+					b_espacer = false
+				)
+				2: 	(	--- Etirer ----
+					nbrRepetitions				= 1						
+					longueur_restant 			= longueurFacade - longueur_sequence * nbrRepetitions 	
+					longueur_espacement 	= longueur_restant / ( 2	+ nbr_espacemts * nbrRepetitions )
+
+				)
+				3: 	(	--- Centrer ----					
+					nbrRepetitions				= 1		
+					longueur_restant 			= longueurFacade - longueur_sequence * nbrRepetitions 	
+					longueur_espacement 	= longueur_restant / (  nbr_espacemts * nbrRepetitions )
+					
+				)
+				4:		(	--- Espacer ----	
+					nbrRepetitions				= floor ( longueurFacade / longueur_sequence )
+					longueur_restant 			= longueurFacade - longueur_sequence * (nbrRepetitions )		
+					longueur_espacement 	= longueur_restant / ( 1 + nbr_espacemts * nbrRepetitions)
+				)						
+			)
+			
+			debug "nbrRepetitions"	var:nbrRepetitions
+			
+			------------ CONSTRUCTION ------------------------
+			
+			debug "creer_sequence	-3-"
+			
+			---- pour les balcons --------
+			local 	balcon_aConstruire = undefined
+			local 	balcon_pt_debut 	, balcon_ptID_debut
+			
+			--- on creer les 3 premiers points --------				
+			local pt_accroche_1 	= 	_pt1
+			local pt_accroche_2 	= 	pt_accroche_1 + [0,0,m_plug.etages_epaiss_dalle]
+			local pt_accroche_3 	= 	pt_accroche_2 + [0,0,m_plug.etages_hauteur]
+			
+			local ptsIDs_accroche 		= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	 	)
+			
+			
+			----- le premier espacement ------------
+			if _facade.mode != 3 do (
+				
+				--- Composant 'Mur plein' temporaire	------
+				local compoTmp = creer_murPlein		longueur_espacement
+				ptsIDs_accroche = compoTmp.construire		m_plug	 	ptsIDs_accroche		normDir
+				
+			)
+			
+		
+			----- les repetitions de sequence ------------------
+			for i = 1 to nbrRepetitions do (
+				
+				debug "creer_sequence	-	nbrRepetitions" var:i
+				
+				--- la sequence --------
+				for composant in sequence do (
+					
+					-------- DEBUG----------------------
+					local chrono_debut_compo = timeStamp ()
+					-------- DEBUG----------------------
+					
+					case composant.type    of (
+						 #Modele:			(
+														
+						) -- fin modele 
+						#Parametrique: 	(
+							local pts_accroche 
+							local est_espacement 	= findString composant.param[1].id "#FAC_PES" != undefined
+							local est_Balcon_deb 	= findString composant.param[1].id "#FAC_PBD" != undefined
+							local est_Balcon_fin 	= findString composant.param[1].id "#FAC_PBF" != undefined
+							
+							---  ESPACEMENT  ----------
+							if 	est_espacement 	then (
+								
+								--- Composant 'Mur plein' temporaire	------
+								local compoTmp = creer_murPlein		longueur_espacement 
+								ptsIDs_accroche = compoTmp.param[1].construire	 ptsIDs_accroche		normDir 
+								
+							---  BALCON  ----------
+							) else 	if est_Balcon_deb then  (
+								balcon_ptID_debut 	= ptsIDs_accroche[1]	
+								balcon_pt_debut 		= polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
+								balcon_aConstruire 	= composant
+							) else if 	est_Balcon_fin 	then (
+								balcon_aConstruire.longueur 			= distance	(polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	) 	balcon_pt_debut
+								balcon_aConstruire.param[1].construire	 #(balcon_ptID_debut, ptsIDs_accroche[2], ptsIDs_accroche[3])		normDir 
+								balcon_aConstruire.longueur 			= 0
+								balcon_aConstruire = undefined
+							---  DEFAULT  ----------
+							) else (
+								
+								ptsIDs_accroche = composant.param[1].construire	 ptsIDs_accroche		normDir	 		est_DansBalcon:(balcon_aConstruire != undefined )
+								
+							)
+						) -- fin 	#Parametrique
+						
+					) -- fin case ---------------
+					
+					
+					-------- DEBUG----------------------
+					local chrono_fin_compo = timeStamp ()
+-- 						debug "creer_sequence		compo" var:composant.nom
+-- 						debug "creer_sequence		durée compo" var:(   (chrono_fin_compo - chrono_debut_compo ) / 1000.0)
+					-------- DEBUG----------------------
+				
+					
+					
+				) --- fin de la sequence -----
+				
+				if b_espacer do (
+					
+					--- Composant 'Mur plein' temporaire	------
+					local compoTmp = creer_murPlein		longueur_espacement 		
+					ptsIDs_accroche = compoTmp.param[1].construire	 ptsIDs_accroche		normDir
+					
+				)
+				
+			)  --- fin de la repetition
+			 
+			
+			if not b_espacer and  _facade.mode != 3 do (
+				
+				--- le dernier espacement --------				
+				--- Composant 'Mur plein' temporaire	------
+				local compoTmp = creer_murPlein		longueur_espacement 		
+				ptsIDs_accroche = compoTmp.construire		m_plug	 	ptsIDs_accroche		normDir
+				
+			)
+			
+-- 			-------- DEBUG----------------------
+-- 			local chrono_fin = timeStamp ()
+-- 			debug "creer_sequence		durée TOTAL" var:(   (chrono_fin - chrono_debut ) / 1000.0)
+-- 			-------- DEBUG----------------------
+			
+		),
 		
 		
 		------------ TOITURES-------------------------		
@@ -447,271 +639,102 @@ struct str_construction (
 		
 		------------ FACADES-------------------------
 	private
-		fn ssBassement  			&z	=(
+		fn creer_ssBassement  		&z	=(
 			
 			local surface_points 	= m_plug.core.get_surface_points ()
 			m_geo.facesContour	 	surface_points		z 	const_ep_ssBassement	
 			z += const_ep_ssBassement
 			
 		),
-		fn creer_mur 	_pt_bas		_pt_ht	_pt2 		 ht:	m_matID:	= (
-			local hauteur
--- 			debug "creer_mur"
--- 			debug "_pt_bas" var:_pt_bas
--- 			debug "_pt2" var:_pt2
--- 			debug "(distance _pt2 _pt_bas )" var:(distance _pt2 	(polyop.getvert m_plug.delegate _pt_bas ) )
-			if ht != unsupplied then	hauteur = ht
-				else hauteur 	=	m_plug.etages_hauteur 
-			
-			local pts_pos_esp = 	#()		
-			append pts_pos_esp 	( _pt2 )
-			append pts_pos_esp 	( _pt2 + [0,0,hauteur] )
-			
-			local pts_ids_esp = m_geo.points  pts_pos_esp 	
-			append pts_ids_esp 	( _pt_ht )
-			append pts_ids_esp 	( _pt_bas )
-			
-			m_geo.edges  pts_ids_esp 		--	fermer:true		
-			local nvlFace = m_geo.pointsEtFaces 	 pts_ids_esp 	
-			
-			--- mat ID -----
-			if m_matID != unsupplied do
-				polyop.setFaceMatID	 m_plug.delegate		nvlFace	  m_matID
-			
-			local pt_bas 	= pts_ids_esp[1]
-			local pt_ht		= pts_ids_esp[2]
-			
-			#(pt_bas, pt_ht)
-		),
-		fn creer_sequence		_pt1		_pt2		_facade					=(
-			
-			
--- 			-------- DEBUG----------------------
--- 			local chrono_debut = timeStamp ()
--- 			-------- DEBUG----------------------
-			
-			--- passerelle ----------
--- 			local creer_murPlein = m_plug.facades.creer_murPlein
-			
-			
-			------------ ANALYSE ------------------------
-			local pt_bas, pt_ht	 
-			
-			local longueurFacade 		= distance _pt1 _pt2
-			local normDir					=	normalize ( _pt2 - _pt1)
-			local rot 							= m_outils_poly.get_angle_vecteur		normDir
-			local longueur_sequence 	= _facade.sequence_longueur
-			local sequence 					= _facade.sequence 		
-			local b_espacer 				= _facade.mode == 4
-			
-			local nbr_espacemts 		= 0
-			for compo in sequence do
-				if compo.type == #Parametrique do
-					if findString compo.param[1].id "#FAC_PES" != undefined do
-						nbr_espacemts += 1
-					
-			local nbrRepetitions 		
-			local longueur_restant 			
-			local longueur_espacement 			
-			case _facade.mode of (
-				1:  	(	--- Repeter ----
-					nbrRepetitions				= floor ( longueurFacade / longueur_sequence )
-					longueur_restant 			= longueurFacade - longueur_sequence * nbrRepetitions
-					longueur_espacement 	= longueur_restant / ( 2	+ nbr_espacemts * nbrRepetitions )
-					b_espacer = false
-				)
-				2: 	(	--- Etirer ----
-					nbrRepetitions				= 1						
-					longueur_restant 			= longueurFacade - longueur_sequence * nbrRepetitions 	
-					longueur_espacement 	= longueur_restant / ( 2	+ nbr_espacemts * nbrRepetitions )
-
-				)
-				3: 	(	--- Centrer ----					
-					nbrRepetitions				= 1		
-					longueur_restant 			= longueurFacade - longueur_sequence * nbrRepetitions 	
-					longueur_espacement 	= longueur_restant / (  nbr_espacemts * nbrRepetitions )
-					
-				)
-				4:		(	--- Espacer ----	
-					nbrRepetitions				= floor ( longueurFacade / longueur_sequence )
-					longueur_restant 			= longueurFacade - longueur_sequence * (nbrRepetitions )		
-					longueur_espacement 	= longueur_restant / ( 1 + nbr_espacemts * nbrRepetitions)
-				)						
-			)
-			
-			------------ CONSTRUCTION ------------------------
-			
-			---- pour les balcons --------
-			local 	balcon_aConstruire = undefined
-			local 	balcon_pt_debut 	, balcon_ptID_debut
-			
-			--- les 3 premiers points --------				
-			local pt_accroche_1 	= 	_pt1
-			local pt_accroche_2 	= 	pt_accroche_1 + [0,0,m_plug.etages_epaiss_dalle]
-			local pt_accroche_3 	= 	pt_accroche_2 + [0,0,m_plug.etages_hauteur]
-			
-			local ptsIDs_accroche 		= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	 	)
-			
-			
-			--- si c'est pas en mode centrer ...
-			----- le premier espacement ------------
-			if _facade.mode != 3 do (
-				
-				--- Composant 'Mur plein' temporaire	------
-				local compoTmp = creer_murPlein		longueur_espacement
-				ptsIDs_accroche = compoTmp.construire		m_plug	 	ptsIDs_accroche		normDir		
-			)
-			
-			----- les repetitions de sequence ------------------
-			for i = 1 to nbrRepetitions do (
-				
-				--- la sequence --------
-				for composant in sequence do (
-					
-					-------- DEBUG----------------------
-					local chrono_debut_compo = timeStamp ()
-					-------- DEBUG----------------------
-					
-					case composant.type    of (
-						 #Modele:			(
-							/* 
-							---- on tire au hasare le modele  ------------
-							local probaTotal = 0
-							for proba in composant.modeles_probas do 
-								probaTotal += proba
-							local tirage = random  1.  probaTotal
-							local modele
-							local trouve = false
-							local id = 1
-							local probacourant = 0
-							while not trouve and probacourant <= probaTotal	do (
-								probacourant += composant.modeles_probas[id]
-								if tirage < probacourant do (
-									trouve = true
-									modele = composant.modeles[id]
-								)
-								id += 1
-							)
-							
-							if modele != undefined then	(
-								
-								-- si le modele est trop long on met un mur plein ----------
-								pt2 = pt1 + normDir * modele.longueur	
-								if composant.longueur>distance _pt2	pt1   then (	
-									
-									pt2		=	_pt2							
-									local pts_accroche = creer_mur 	pt_bas		pt_ht		pt2 		m_plug		
-									pt_bas 	= pts_accroche[1]
-									pt_ht		= pts_accroche[2]
-									
-									pt1 = pt2
-									
-								) else (
-								---- sinon, pose du modele -----
-									local modeleTmp_id		=	m_plug.facades.get_modele_idParam		modele.id		m_plug
-									local modele_node 		= modeles_import[modeleTmp_id]
-									local nv_modele 			= copy modele_node
-									
-									rotate nv_modele (angleaxis rot [0,0,1])
-									nv_modele.pos 				= pt1
-									nv_modele.pos.z 				= z
-									
-									m_plug.delegate.attach	nv_modele		modele_node
-									
-									
-									-----	facette du dessus -----
-									pt2 = pt1 + normDir * modele.longueur								
-									local hauteurQuiReste = 	m_plug.etages_hauteur 	- modele.hauteur	
-									
-									local pts_accroche = creer_mur 	pt_bas		pt_ht		pt2 		m_plug		ht:hauteurQuiReste	
-									pt_bas 	= pts_accroche[1]
-									pt_ht		= pts_accroche[2]	
-									
-									pt1 = pt2
-								)
-							) -- fin if modele undeinde
-							 */
-							
-						) -- fin modele 
-						#Parametrique: 	(
-							local pts_accroche 
-							local est_espacement 	= findString composant.param[1].id "#FAC_PES" != undefined
-							local est_Balcon_deb 	= findString composant.param[1].id "#FAC_PBD" != undefined
-							local est_Balcon_fin 	= findString composant.param[1].id "#FAC_PBF" != undefined
-							
-							---  ESPACEMENT  ----------
-							if 	est_espacement 	then (
-								
-								--- Composant 'Mur plein' temporaire	------
-								local compoTmp = creer_murPlein		longueur_espacement 
-								ptsIDs_accroche = compoTmp.param[1].construire	 ptsIDs_accroche		normDir 
-								
-							---  BALCON  ----------
-							) else 	if est_Balcon_deb then  (
-								balcon_ptID_debut 	= ptsIDs_accroche[1]	
-								balcon_pt_debut 		= polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
-								balcon_aConstruire 	= composant
-							) else if 	est_Balcon_fin 	then (
-								balcon_aConstruire.longueur 			= distance	(polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	) 	balcon_pt_debut
-								balcon_aConstruire.param[1].construire	 #(balcon_ptID_debut, ptsIDs_accroche[2], ptsIDs_accroche[3])		normDir 
-								balcon_aConstruire.longueur 			= 0
-								balcon_aConstruire = undefined
-							---  DEFAULT  ----------
-							) else (
-								
-								ptsIDs_accroche = composant.param[1].construire	 ptsIDs_accroche		normDir	 		est_DansBalcon:(balcon_aConstruire != undefined )
-								
-							)
-						) -- fin 	#Parametrique
-						
-					) -- fin case ---------------
-					
-					
-					-------- DEBUG----------------------
-					local chrono_fin_compo = timeStamp ()
--- 						debug "creer_sequence		compo" var:composant.nom
--- 						debug "creer_sequence		durée compo" var:(   (chrono_fin_compo - chrono_debut_compo ) / 1000.0)
-					-------- DEBUG----------------------
-				
-					
-					
-				) --- fin de la sequence -----
-		
-				if b_espacer do (
-					
-					--- Composant 'Mur plein' temporaire	------
-					local compoTmp = creer_murPlein		longueur_espacement 		
-					ptsIDs_accroche = compoTmp.param[1].construire	 ptsIDs_accroche		normDir	 
-					
-	
-				)
-				
-			)  --- fin de la repetition
-			
-			
-			if not b_espacer and  _facade.mode != 3 do (
-				
-				
-				--- le dernier espacement --------				
-				--- Composant 'Mur plein' temporaire	------
-				local compoTmp = creer_murPlein		longueur_espacement 		
-				ptsIDs_accroche = compoTmp.param[1].construire	 ptsIDs_accroche		normDir	 
-				
-			)
-			
--- 			-------- DEBUG----------------------
--- 			local chrono_fin = timeStamp ()
--- 			debug "creer_sequence		durée TOTAL" var:(   (chrono_fin - chrono_debut ) / 1000.0)
--- 			-------- DEBUG----------------------
-			
-		),
-		fn etages 								&z	=(
+		fn creer_facades 				&z	=(
 			
 			debug "Construction des étages ----------------------------------------------------------------------"
 			
-			local z_initial = copy z
-			local facades_total		= 	m_plug.core.get_facades ()
+			local z_initial 			= copy z
+			local facades_total	= 	m_plug.core.get_facades ()			
+			local surface_points 	= m_plug.core.get_surface_points ()
 			
+			---- boucle étages ---------------------
+			for n_etage = 0 to m_plug.etages_nbre do (
+				
+-- 				debug "etage num" var:n_etage
+				
+				--- on regarde si on a des facades pour cet étage	---------------
+				local facades_etages 	= 	filtrer_facades_parEtages		facades_total 		n_etage
+				local onA_uneFacade 	= 	facades_etages.count > 0
+				
+				---- on fait le tour des murs 	---------------------
+				for id_pt = 1 to surface_points.count do	 (
+-- 					
+-- 					debug "id_pt	-----------------------------------" 
+					
+					--- on chope les 2 points du mur a construire et quelques infos (longueur et normal)----------
+					local pt_mur_1 = surface_points[ id_pt ]
+					local pt_mur_2						
+					if id_pt == surface_points.count 	then	pt_mur_2 = surface_points[ 1 ]
+																		else	pt_mur_2 = surface_points[ id_pt + 1 ]
+					pt_mur_1.z = pt_mur_2.z = z
+					local	mur_longueur 		= distance pt_mur_1 	pt_mur_2
+					local	mur_norm 			= normalize ( pt_mur_2 -	pt_mur_1 )
+					
+					---  on regarde si on a des facades pour ce mur ---------------
+					local facades_pourCeMur		=	filtrer_facades_parMurs		facades_etages		mur_longueur	surface_points		id_pt
+					
+					if facades_pourCeMur.count > 0 and facades_pourCeMur[1] != undefined
+							do		onA_uneFacade = true
+					
+-- 					debug "onA_uneFacade" var:onA_uneFacade
+-- 					debug "facades_pourCeMur" var:facades_pourCeMur
+									
+					
+					---- si on  a des facades ------
+					if 	onA_uneFacade  then (
+						
+						--- on construit la sequence --------------
+						creer_sequence		pt_mur_1		pt_mur_2	 facades_pourCeMur[1]
+						
+					) else (
+					--- sinon un mur plein --------------
+						
+						local pt_accroche_1 	= 	pt_mur_1 
+						local pt_accroche_2 	= 	pt_mur_1 + [0,0,	m_plug.etages_epaiss_dalle]
+						local pt_accroche_3 	= 	pt_accroche_2 + [0,0,m_plug.etages_hauteur]	
+						
+						local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	)
+						
+						--- le Composant 'Mur plein' temporaire	------
+						local compoTmp 	= creer_murPlein		mur_longueur 	
+						ptsIDs_accroche 	= compoTmp.construire	m_plug 		 ptsIDs_accroche		mur_norm 
+						
+					)
+					
+				)
+				
+				z += m_plug.etages_hauteur + m_plug.etages_epaiss_dalle
+				
+				/* --- dalle plancher ---
+				if const_ep_dalle  != 0 do (
+					local nvlsFaces = m_geo.facesContour	m_plug.surface_points	z 	const_ep_dalle	m_plug
+					facesDunEtage  += nvlsFaces
+					z += const_ep_dalle
+				)  */
+				
+			) --- fin boucle etages -------------
+			
+			m_geo.facesContour	 (	m_plug.core.get_surface_points ()	)	z 	m_plug.etages_epaiss_dalle
+			z += m_plug.etages_epaiss_dalle
+			
+		),
+		
+		
+		
+		/* 
+		fn creer_facades 					&z	=(
+			
+			debug "Construction des étages ----------------------------------------------------------------------"
+			
+			local z_initial 			= copy z
+			local facades_total	= 	m_plug.core.get_facades ()			
 			local surface_points 	= m_plug.core.get_surface_points ()
 			
 			---- boucle étages ---------------------
@@ -736,28 +759,28 @@ struct str_construction (
 					pt_mur_1.z = pt_mur_2.z = z
 					
 					local	mur_longueur 		= distance pt_mur_1 	pt_mur_2
-					local	norm_mur 			= normalize ( pt_mur_2 -	pt_mur_1 )
+					local	mur_norm 			= normalize ( pt_mur_2 -	pt_mur_1 )
 					
-				
 					---  filtre par  murs  ---------------
-					local facade_choisi			=	filtrer_facades_parMurs		facades_etages		mur_longueur	surface_points		id_pt
+					local facades_pourCeMur			=	filtrer_facades_parMurs		facades_etages		mur_longueur	surface_points		id_pt
 					
-					
-					
-					if facade_choisi.count > 0 then 
-						onA_uneFacade = true
-					
+					if facades_pourCeMur.count > 0 do 
+						if facades_pourCeMur[1].sequence.count == 0
+							then		onA_uneFacade = false
+							else 		onA_uneFacade = true
 					
 					debug "onA_uneFacade" var:onA_uneFacade
-					debug "facade_choisi" var:facade_choisi
+					debug "facades_pourCeMur" var:facades_pourCeMur
+					
+					-- on verifie qu'il a des composants -----
+					
+					
 					
 					---- si on  a des facades ------
 					if 	onA_uneFacade  then (
-					
 						
 						--- on construit la sequence --------------
-						creer_sequence		pt_mur_1		pt_mur_2	 facade_choisi[1]
-						
+						creer_sequence		pt_mur_1		pt_mur_2	 facades_pourCeMur[1]
 						
 					) else (
 					--- sinon un mur plein --------------
@@ -770,7 +793,7 @@ struct str_construction (
 						local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	)
 						
 						local compoTmp 	= creer_murPlein		mur_longueur 	
-						ptsIDs_accroche 	= compoTmp.construire	m_plug 		 ptsIDs_accroche		norm_mur 
+						ptsIDs_accroche 	= compoTmp.construire	m_plug 		 ptsIDs_accroche		mur_norm 
 						
 					)
 					
@@ -778,12 +801,12 @@ struct str_construction (
 				
 				z += m_plug.etages_hauteur + m_plug.etages_epaiss_dalle
 				
-				/* --- dalle plancher ---
-				if const_ep_dalle  != 0 do (
-					local nvlsFaces = m_geo.facesContour	m_plug.surface_points	z 	const_ep_dalle	m_plug
-					facesDunEtage  += nvlsFaces
-					z += const_ep_dalle
-				)  */
+-- 				 --- dalle plancher ---
+-- 				if const_ep_dalle  != 0 do (
+-- 					local nvlsFaces = m_geo.facesContour	m_plug.surface_points	z 	const_ep_dalle	m_plug
+-- 					facesDunEtage  += nvlsFaces
+-- 					z += const_ep_dalle
+-- 				)  
 				
 			) --- fin boucle etages -------------
 			
@@ -791,7 +814,7 @@ struct str_construction (
 			z += m_plug.etages_epaiss_dalle
 			
 		),
-		
+		 */
 		
 		/* 
 		--------- MODELES -----------------
@@ -818,7 +841,7 @@ struct str_construction (
 		fn initialiser 	_plug =(
 			m_plug = _plug
 			m_geo.initialiser	_plug
-			cstr_composants.m_plug = _plug
+			cstr_composants = _plug.core.get_mgr_composants ()
 			
 		),
 		fn actualiser 	 =(
@@ -832,9 +855,9 @@ struct str_construction (
 			--- si on a pas de surface on dessine le logo ------------
 			if m_plug.surface_node == undefined then 				
 				m_geo.face		logo
-				
-				
-				
+			
+			
+			
 			--- sinon on consrtuit le batiment ------------
 			else 	with redraw OFF (
 				
@@ -849,8 +872,8 @@ struct str_construction (
 					local zCourant = -( const_ep_ssBassement + m_plug.etages_epaiss_dalle )
 					
 					---- ...  et on construit le batiment -----
-					ssBassement 		&zCourant
-					etages					&zCourant
+					creer_ssBassement 			&zCourant
+					creer_facades					&zCourant
 -- 					toit					&zCourant
 					
 					

@@ -1,13 +1,5 @@
 
 
- 
- struct 	str_prefs_matID (
-	mur 				= 	10,
-	menuiserie 	= 	20,
-	vitrage 			= 	30,
-	toiture 			= 	40,
-	metal			=	50
-)
 
 struct str_plan (
 	
@@ -101,7 +93,7 @@ struct str_datasToString (
 		separateur_items 				= "^",
 	
 	
-	private
+	public
 		fn array_to_string		_tab	=(
 			local tabString = ""
 			for item in _tab do (
@@ -241,8 +233,6 @@ struct str_mgr_arrayParametres (
 		---- Le tableau des éléments --------
 		m_items	=	#(),
 		
-		---- Manager de presets -------------
-		mgr_datas 				= str_datasToString 	m_prt:this,
 		
 	---- FONCTIONS ----------------------------------------------------------------------------------------------------------------
 
@@ -267,11 +257,11 @@ struct str_mgr_arrayParametres (
 		),
 		
 		---- Accessions ---
-		fn get_parID  	_id =(
+		fn get_parID  	_idUnique =(
 			
 			local result
 			for item in m_items do
-				if item.id == _id do result = compo
+				if item.id == _idUnique do result = compo
 			result
 			
 		),
@@ -285,7 +275,9 @@ struct str_mgr_arrayParametres (
 		
 		---- Creation/Suppression ----
 		fn creer		enregistrer:true		=(
+			
 			debug "creer"
+			
 			local nv_element = m_class ()
 			append		m_items	nv_element
 			
@@ -296,7 +288,10 @@ struct str_mgr_arrayParametres (
 			
 		),	
 		
-		fn supprimer 	=	()
+		fn supprimer 	_idUnique	=	(
+			local elem_a_supprimer = get_parID	_idUnique
+			elem_a_supprimer.supprimer		m_plug
+		)
 		
 	
 -- 		---- Parametres Block ----

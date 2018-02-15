@@ -9,8 +9,6 @@ include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Construction.m
 
 
 
-
-
 struct str_batiment_core (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
@@ -33,12 +31,16 @@ struct str_batiment_core (
 	private
 		---  Elément du batiments -------------------
 		mgr_facades			= str_mgr_arrayParametres (),
+		mgr_composants 	= str_mgr_composants (),
 		mgr_surface			= str_surfaces (),
 		
+		---- convertisseur Parametres to String  -------------
+		mgr_datas 				= str_datasToString 	m_prt:this,
+		
 		---  Rollouts Facade -------------------
-		roll_facades 			= 	filein	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - rollout facade.ms",
-		roll_facades_pos	= [500,500],
-		roll_facades_taille	= [500,300],
+		roll_facades 				= 	filein	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - rollout facade.ms",
+		roll_facades_pos		= [500,500],
+		roll_facades_taille		= [500,300],
 		
 		--- Sous structures  -------------------
 		m_construction		= str_construction 	(),
@@ -86,13 +88,13 @@ struct str_batiment_core (
 			m_plug = 	_plug			
 			
 			---- initialisation des structures -----
-			mgr_facades.initialiser		class:str_facade	plug:m_plug
+			mgr_facades.initialiser		class:str_facade		plug:m_plug
+			mgr_composants.initialiser		m_plug
 			mgr_surface.initialiser		m_plug
 			m_construction.initialiser	m_plug
 			
 			--- chargement des parametres ------------------
 			charger ()
-			
 			
 		),
 		
@@ -113,10 +115,12 @@ struct str_batiment_core (
 		),
 		fn creer_facade 							=(
 			local nv_facade 	= mgr_facades.creer ()
-			
-			facadeEditeur_ouvrir	 	( mgr_facades.get_items () ).count
-			
 			nv_facade
+		),
+		fn creer_composant	_facade		_type			=(
+			local nv_composant 	= mgr_composants.creer	_type
+			_facade.ajouter_composant	nv_composant
+			nv_composant
 		),
 		
 		
@@ -129,7 +133,14 @@ struct str_batiment_core (
 		fn get_construction		= m_construction,
 		fn get_geo					= m_construction.m_geo,
 		fn get_matID				= m_construction.m_matID,
+			
+		fn get_mgr_composants = mgr_composants,
+		fn get_mgrDatas 			= mgr_datas,
 		
+		
+	---- mutateurs	------
+		fn set_roll_editeurDeFacade_position	_pos 	=( roll_facades_pos = _pos),
+		fn set_roll_editeurDeFacade_taille		_taille 	=( roll_facades_taille = _taille),
 		
 	----- Surface ---------------------
 		fn assigner_surface 		_nodeTHIS		_shape 		=(

@@ -740,7 +740,7 @@ struct str_OSM_importer	(
 			
 				---- Creation du reste	-------
 				if not m_annuleOp and divers do  (
-					creer_elements		m_elems_divers			echelle:echelle			type:"Divers"			wireCol:[155, 155, 50]
+					creer_elements		m_elems_divers			echelle:echelle			type:"Divers"			wireCol:[155, 155, 50]	fermerShape:true
 					m_helper_divers  = m_helper
 				)
 				
