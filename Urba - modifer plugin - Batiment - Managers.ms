@@ -1,4 +1,8 @@
 
+	
+	
+
+	
 
 ----------------- Manager des COMPOSANTS	------------------------------------------
 struct 	str_mgr_composants (
@@ -17,6 +21,8 @@ struct 	str_mgr_composants (
 		m_plug,
 	private
 		
+		m_modelesBase =#(),
+		
 		---- Le tableau des éléments --------
 		m_items	=	#(),
 		
@@ -31,7 +37,7 @@ struct 	str_mgr_composants (
 		
 		---- CONSTRUCTION DES  COMPOSANTS -------------------------------------------
 	private
-		fn espacement 	=(
+	/* 	fn espacement 	=(
 			
 			--- les parametres du composant --------------
 			local params = struct param (
@@ -161,13 +167,13 @@ struct 	str_mgr_composants (
 			
 			local nvComposant = get_nouveauComposant 	()
 			nvComposant.initialiser			#FAC_COMP_MUP		"Mur plein"
-			nvComposant.set_dialog		dialog
+			nvComposant.set_dialog			dialog
 			nvComposant.set_params	 	( params() )
 			nvComposant.set_construire 	fnConstruire
 			
 			nvComposant
 			
-		),
+		), */
 		---- Balcon -------------------------------------------
 		fn balcon 		=(
 			
@@ -292,11 +298,20 @@ struct 	str_mgr_composants (
 		
 		---- INTERFACE -------------------------------------------
 	public
+		fn creerMere  	_idModel	=(
+			debug "creerMere"
+			local nvComposant = get_nouveauComposant ()
+			m_modelesBase[_idModel].initialiser	nvComposant
+			nvComposant
+		),
+		
+		
+		
 		fn creer		_typeDeComposant		=(
 			local nvComposant
 			case	_typeDeComposant of (
-				#espacement:		nvComposant = espacement()
-				#murPlein:			nvComposant = murPlein()
+				#espacement:		nvComposant =  creerMere 1	---		espacement()
+				#murPlein:			nvComposant =  creerMere 2	---		murPlein()
 				#balcon:				nvComposant = balcon()
 				#balconFin:			nvComposant = balconFin()
 			)
@@ -309,21 +324,21 @@ struct 	str_mgr_composants (
 			local index_composant= 0
 			local i=1
 			local trouve = false
-			debug "###### _id #######" var:(( _id ) as string )
+			
 			while i <= m_plug.fac_compos_ids.count and not trouve 	do (
-				debug "id a tester" var:( ( execute m_plug.fac_compos_ids[i] ) as string )
+				
 				if ( execute m_plug.fac_compos_ids[i] ) as string == ( _id ) as string do (
 					index_composant = i
 				)
 				i+= 1
 			)
-			debug "###### index_composant #######" var:index_composant
+			
 			
 			local nvComposant
 			--- on charge	------------------------------------
 			if index_composant != 0 then (
 				local type = m_plug.fac_compos_types[index_composant]
-				debug "######TYPE#######" var:type
+				
 				case		( type as name )	of (
 					#FAC_COMP_ESP:  	nvComposant 	= creer	#espacement
 					#FAC_COMP_MUP:  	nvComposant 	= creer	#murPlein
@@ -339,8 +354,19 @@ struct 	str_mgr_composants (
 		-----INIT	--------------
 	public
 		fn initialiser	_plug	=(
-			
+			debug "initialiser ()"
 			m_plug = _plug
+			
+			
+			--- on va chercher les fichiers des assets pour les composants de facades -------------
+			m_modelesBase =#()
+			local dossier_composants 		= 	getdir #userScripts + "\cp-Urba\assets\composants\\" 
+			local liste_des_fichiersComposants	=	getfiles (dossier_composants+ "*.compo" )
+			
+			for fichierCompo in liste_des_fichiersComposants do (
+				append m_modelesBase  ( fileIn fichierCompo ) 
+			)
+			debug "m_modelesBase" var:m_modelesBase 		param:"titre"
 			
 		)
 		

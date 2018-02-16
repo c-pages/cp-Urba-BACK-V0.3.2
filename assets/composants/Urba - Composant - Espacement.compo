@@ -1,0 +1,38 @@
+
+--- parametres de base	-----------------------------
+titre 	= "Espacement"	
+type	=	#FAC_COMP_ESP
+
+--- les parametres du composant	---------
+struct params	(
+	longueur = 0
+)
+--- les rollout du composant	---------
+rollout dialog "Espacement" width:180 height:70	(
+	local m_compo, m_rollPrt, m_param
+	fn actualiser =()
+)
+--- la fonction de construction	---------
+fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= ()
+	
+
+
+
+
+
+------------------CONSTANT ------------------
+--- on importe le fichier mere des composants ----
+fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - composant mere.ms"
+--- Creation de la strcutre mere	---------
+str_compo_mere 		titre:titre	type:type	params:(params())	dialog:dialog	fnConstruire:fnConstruire
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

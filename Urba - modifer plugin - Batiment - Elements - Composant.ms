@@ -103,7 +103,7 @@ struct 	str_composant (
 			local i= 1
 			local trouve = false
 			while i <= _plug.fac_compos_ids.count and not trouve	do (
-				debug "charger id" var:_plug.fac_compos_ids[i]
+-- 				debug "charger id" var:_plug.fac_compos_ids[i]
 				
 				if _plug.fac_compos_ids[i] as string == id as string do (
 					index_composant = i
