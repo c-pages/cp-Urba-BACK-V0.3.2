@@ -96,7 +96,32 @@ struct 	str_composant (
 				
 			) 
 		),
-		fn charger 	_plug	=(
+		fn charger 	_plug	 =(
+			
+			--- on cherche s'il existe deja comme parametre -----
+			local index_composant = 0
+			local i= 1
+			local trouve = false
+			while i <= _plug.fac_compos_ids.count and not trouve	do (
+				debug "charger id" var:_plug.fac_compos_ids[i]
+				
+				if _plug.fac_compos_ids[i] as string == id as string do (
+					index_composant = i
+					trouve = true
+				)
+				i+= 1
+			)
+			
+			-- on charge	------------------------------------
+			if index_composant != 0 then (
+				
+				id 				= 	_plug.fac_compos_ids[index_facade]
+				nom 				= 	_plug.fac_compos_noms[index_facade]
+				type				=	_plug.fac_compos_types[index_facade]
+				
+				mgr_datas.set_datas_string		_plug.fac_compos_types[index_facade]			params
+				
+			)
 			
 		)
 

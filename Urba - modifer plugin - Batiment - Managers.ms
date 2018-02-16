@@ -1,9 +1,19 @@
 
 
-
-
+----------------- Manager des COMPOSANTS	------------------------------------------
 struct 	str_mgr_composants (
 		
+	
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+		m_debug = true,
+		m_dbgPrefix ="urba | str_mgr_composants",
+		fn debug 	_txt  var:	 param:    =(
+			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
+			catch ()
+		),
+	
+	
+	
 		m_plug,
 	private
 		
@@ -15,6 +25,9 @@ struct 	str_mgr_composants (
 			include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Elements - Composant.ms"
 			str_composant ()
 		),
+		
+		
+		
 		
 		---- CONSTRUCTION DES  COMPOSANTS -------------------------------------------
 	private
@@ -40,7 +53,6 @@ struct 	str_mgr_composants (
 			nvComposant
 			
 		),
-		
 		---- Mur plein -------------------------------------------
 		fn murPlein 	=(
 			
@@ -156,7 +168,6 @@ struct 	str_mgr_composants (
 			nvComposant
 			
 		),
-		
 		---- Balcon -------------------------------------------
 		fn balcon 		=(
 			
@@ -253,7 +264,6 @@ struct 	str_mgr_composants (
 			nvComposant
 			
 		),
-		
 		---- Balcon fin -------------------------------------------
 		fn balconFin 	=(
 			
@@ -282,7 +292,7 @@ struct 	str_mgr_composants (
 		
 		---- INTERFACE -------------------------------------------
 	public
-		fn creer		_typeDeComposant	=(
+		fn creer		_typeDeComposant		=(
 			local nvComposant
 			case	_typeDeComposant of (
 				#espacement:		nvComposant = espacement()
@@ -290,10 +300,41 @@ struct 	str_mgr_composants (
 				#balcon:				nvComposant = balcon()
 				#balconFin:			nvComposant = balconFin()
 			)
-			append m_items	nvComposant
+-- 			if ajouterAItems	do	append m_items	nvComposant
 			nvComposant
 		),
-		fn get_murPlein = murPlein	(),
+		fn charger		_id		  =(
+			
+			--- on cherche s'il existe deja comme parametre -----
+			local index_composant= 0
+			local i=1
+			local trouve = false
+			debug "###### _id #######" var:(( _id ) as string )
+			while i <= m_plug.fac_compos_ids.count and not trouve 	do (
+				debug "id a tester" var:( ( execute m_plug.fac_compos_ids[i] ) as string )
+				if ( execute m_plug.fac_compos_ids[i] ) as string == ( _id ) as string do (
+					index_composant = i
+				)
+				i+= 1
+			)
+			debug "###### index_composant #######" var:index_composant
+			
+			local nvComposant
+			--- on charge	------------------------------------
+			if index_composant != 0 then (
+				local type = m_plug.fac_compos_types[index_composant]
+				debug "######TYPE#######" var:type
+				case		( type as name )	of (
+					#FAC_COMP_ESP:  	nvComposant 	= creer	#espacement
+					#FAC_COMP_MUP:  	nvComposant 	= creer	#murPlein
+				)
+				
+				nvComposant.charger		m_plug		
+			)
+			nvComposant
+		),
+		
+		fn get_murPlein = creer  #murPlein,
 		
 		-----INIT	--------------
 	public
@@ -307,249 +348,269 @@ struct 	str_mgr_composants (
 ) -- fin creer composant ---------
 	
 
- 
 
-------------------------------------------------------------------------------------------------------------------------------------
------------------ FACADE --------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------------
-struct 	str_facade (
+----------------- Manager des FACADES	------------------------------------------
+include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Elements - Facade.ms"
+
+struct str_mgr_facades (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 		m_debug = true,
-		m_dbgPrefix ="urba | str_facade",
+		m_dbgPrefix ="urba | str_mgr_arrayParametres",
 		fn debug 	_txt  var:	 param:    =(
 			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 			catch ()
 		),
-		
-		
-	---------- MEMBRES	--------------------------------------------------------------------------------------
-	public
-		---- Base	-----------
-		nom 							=	"Façade",
-		id								=	"#FACAD_",
-		mode						=	1,					---- ( 1:repeter	2:etrier			3:centrer )	----
-		
-		--- Limiteurs - Murs	---
-		murs							=	1,					---- ( 1:les deux	2:gouttereaux	3:pignons )	----
-		
-		--- Limiteurs - Etages	---
-		etages_min_use		=	false,
-		etages_min				= 	0,
-		etages_max_use			=	false,
-		etages_max			=	0,
-		
-		--- Limiteurs - longueurs	---
-		longueur_min_use			=	false,
-		longueur_min		= 	0,
-		longueur_max_use	=	false,
-		longueur_max		=	0,
-		
-		--- Sequence	---
-		sequence					=	#(),
-		sequence_longueur		=	0,
-		
-		
-	---------- INTERFACE	--------------------------------------------------------------------------------------
-	public
-		fn initialiser 		 		=	(
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
-		),
-		
-		
-		---- Composants -----------------
-		fn get_composants_noms =(
-			for compo in sequence collect compo.nom
-		),
-		fn get_sequence_longueur	=(
-			sequence_longueur		=	0
-			for compo in sequence do
-				sequence_longueur	+=	compo.get_longueur ()
-			
-			sequence_longueur
-		),
-		
-		fn ajouter_composant 		_composant 	=(
-			append sequence 		_composant
-		),
-		fn supprimer_composant 	_composant 	=(
-			
-		),
-		fn dupliquer_composant 	_composant 	=(
-			
-		),
-		fn cloner_composant 		_composant 	=(
-			
-		),
-				
-		---- Enregistrement / chargement	-----------------
-		fn enregistrer 		_plug 	=(
-			
-			debug "enregistrer"
-			local mgr_datas = _plug.core.get_mgrDatas ()
-			
-			--- on cherche s'il existe deja comme parametre -----
-			local index_facade = 0
-			for i = 1 to _plug.fac_ids.count do
-				if _plug.fac_ids[i] == id  do index_facade = i
-			
-			
-			--- s'il n'existe pas encore, on l'ajoute -----
-			if index_facade == 0 then (
-				debug "enregistrer nouvelle facade"
-				append 	_plug.fac_ids 				id
-				append 	_plug.fac_noms  			nom
-				
-				--- Limiteurs - Murs	---
-				append 	_plug.fac_murs		 murs
-				
-				--- Limiteurs - Etages	---
-				append 	_plug.fac_etagesMin_uses 		 etages_min_use
-				append 	_plug.fac_etagesMin  					etages_min
-				append 	_plug.fac_etagesMax_uses 		 etages_max_use
-				append 	_plug.fac_etagesMax 					etages_max
-				
-				--- Limiteurs - longueurs	---
-				append 	_plug.fac_longueurMin_uses 	 longueur_min_use
-				append 	_plug.fac_longueurMin 				longueur_min
-				append 	_plug.fac_longueurMax_uses 		longueur_max_use
-				append 	_plug.fac_longueurMax 			 longueur_max
-				
-				--- la sequence de composants	-------
-				append 	_plug.fac_sequences 						( mgr_datas.array_to_string		#() )
-				append 	_plug.fac_sequence_longueurs 			sequence_longueur
-				
-			--- s'il existe, on l'actualise -----
-			) else (
-				
-				debug "enregistrer facade existante"
-				debug "id"		var:id
-				
-				_plug.fac_noms[index_facade] 		=	nom				
-				_plug.fac_modes[index_facade]		=	mode
-				
-				--- Limiteurs - Murs	---
-				_plug.fac_murs[index_facade]		= murs
-				
-				--- Limiteurs - Etages	---
-				_plug.fac_etagesMin_uses[index_facade] 		= etages_min_use
-				_plug.fac_etagesMin[index_facade]  				=	etages_min
-				_plug.fac_etagesMax_uses[index_facade] 		= etages_max_use
-				_plug.fac_etagesMax[index_facade] 				=	etages_max
-				
-				--- Limiteurs - longueurs	---
-				_plug.fac_longueurMin_uses[index_facade] 	= longueur_min_use
-				_plug.fac_longueurMin[index_facade] 			=	longueur_min
-				_plug.fac_longueurMax_uses[index_facade] 	=	longueur_max_use
-				_plug.fac_longueurMax[index_facade] 			= longueur_max
-				
-				-- la sequence	-----
-				local sequenceIDs = for compo in sequence collect	compo.id
-				_plug.fac_sequences[index_facade] 						= mgr_datas.array_to_string		sequenceIDs		
-				_plug.fac_sequence_longueurs[index_facade] 			= sequence_longueur		
-				
-				--- les composants -----
-				for compo in sequence do
-					compo.enregistrer _plug			
-				
-			)
-			
-			
-		),
-		
-		fn charger	 	_plug		_id  =(
-			
-			debug "charger"
-			debug "_id" var:_id
-			
-			--- on cherche s'il existe deja comme parametre -----
-			local index_facade = 0
-			for i = 1 to _plug.fac_ids.count do (
-				debug "id test" var:_plug.fac_ids[i]
-				
-				if _plug.fac_ids[i] as string == _id as string do (
-					index_facade = i
-				)
-			)
-			
-			if index_facade != 0 then (
-				
-				id 								= _plug.fac_noms[index_facade]
-				nom 								= _plug.fac_noms[index_facade]
-				
-				mode							= _plug.fac_modes[index_facade]
-				
-				--- Limiteurs - Murs	---
-				murs								= _plug.fac_murs[index_facade]
-				
-				--- Limiteurs - Etages	---
-				etages_min_use			= _plug.fac_etagesMin_uses[index_facade] 
-				etages_min					= _plug.fac_etagesMin[index_facade] 
-				etages_max_use			= _plug.fac_etagesMax_uses[index_facade] 
-				etages_max					= _plug.fac_etagesMax[index_facade] 
-				
-				--- Limiteurs - longueurs	---
-				longueur_min_use			= _plug.fac_longueurMin_uses[index_facade] 
-				longueur_min				= _plug.fac_longueurMin[index_facade] 
-				longueur_max_use			= _plug.fac_longueurMax_uses[index_facade] 
-				longueur_max				= _plug.fac_longueurMax[index_facade] 
-				
-				--- Sequence	---
--- 				fac_sequences					= _plug.
--- 				fac_sequence_longueurs		= _plug.
-				
-			) else messagebox ("Erreur de chargement de facade : " + _id as string )
-			
-		),
-		
-		
-	---------- EVENEMENTS	--------------------------------------------------------------------------------------
-	public
-		on create do initialiser ()
 	
-) -- fin Facade	------------
-
-
-
-
-
-
-
-
-
-
-/* 
-struct	str_surface	(
-	---------- Membres	--------------------------------------------------------------------------------------
+	---- MEMBRES ----------------------------------------------------------------------------------------------------------------
 	public
-		---- Base	-----------
-		nom 							=	"Surface",
-		id								=	"#SURF_",
+		m_plug,
+		m_mgr_composants,
 		
-		---- Parametres	-----------
-		points				=	#(),				----	les points du tracé de la surface 						----
-		etages				=	0,					----	le nombre d'étages 										----
-		etages_hauteur	=	0,					----	lea hauteur de chaque étages							----
-		orientation			=	0.0,				----	l'orientation du faitage pour orienter le batiments	----
-		toiture				=	"",					----	ID de la toiture à appliquer à cette surface			----
+	private
 		
-	--- INTERFACE -------------------
+		---- Le tableau des éléments --------
+		m_items	=	#(),
+		
+		
+	---- FONCTIONS ----------------------------------------------------------------------------------------------------------------
+
+	---- INTERFACE -------------------------------------------
 	public
-		---- Destructeur/Copies	-----------------
-		fn supprimer =(
-			
-		),
-		fn dupliquer =(
-			
-		),
-		fn cloner =(
+		fn actualiser = (
 			
 		),
 		
-		---- Parametres	-----------------
-		fn ecrire_parametres 	=(
+		---- Accessions ---
+		fn get_parID  		_idUnique	=(
+			
+			local result
+			for item in m_items do
+				if item.id == _idUnique do result = compo
+			result
+			
+		),
+		fn get_parIndex  	_index 		=(
+			m_items[_index]			
+		),
+		
+		fn get_noms 	=	for item in m_items collect item.nom,
+		fn get_items	= 	m_items,
+		
+		---- Creation/Suppression ----
+		fn creer		enregistrer:true		=(
+			
+			debug "creer"
+			
+			local nv_element = str_facade ()
+			append		m_items	nv_element
+			
+			if enregistrer do
+				nv_element.enregistrer	 	m_plug
+			
+			nv_element
+			
+		),	
+		
+		fn supprimer 	_idUnique	=	(
+			local elem_a_supprimer = get_parID	_idUnique
+			elem_a_supprimer.supprimer		m_plug
+		),
+		
+		fn charger =(
+			
+			for id in m_plug.fac_ids do (
+				debug "charger" var:id
+				nvFacade = creer	enregistrer:false
+				nvFacade.charger 	m_plug		id
+				/* 
+				-- on charge les composants ----
+				for compoID in nvFacade.sequence do (
+-- 					debug "charger" var:id
+					nvComposant = mgr_composants.creer	enregistrer:false
+					nvFacade.charger 	m_plug		id
+				) */
+			)
+		),
+		
+		
+		
+		
+		
+		fn initialiser		class:  plug: =(
+			
+			
+			--- on vide les items ------
+			m_items	=	#()
+			
+			-- on assigne les pointeurs -----------
+			if class== unsupplied or plug == unsupplied do
+				messagebox "str_mgr_arrayParametres : Probleme d'initialisation"
+			m_class 	= 	class
+			m_plug		=	plug
+			m_mgr_composants = plug.core.get_mgr_composants ()
+			
 			
 		)
+		
+	
+-- 		---- Parametres Block ----
+-- 		fn lire			=	lire_parametres(),
+-- 		fn ecrire			=	ecrire_parametres()
+	
+)	--	fin manager de composants ------
+
+
+----------------- Manager des surfaces	------------------------------------------
+----------- Tracé du batiment et autres manipulations du shape source ----------------
+struct str_mgr_surfaces (
+	
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+	m_debug = false,
+	m_dbgPrefix ="urba | str_surfaces",
+	fn debug 	_txt  var:	 param:    =(
+		try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
+		catch ()
+	),
+	
+	
+	
+	
+	---- Pointeurs divers --------------------
+	public
+		m_plug,			---- le plugin: 'this' -----
+		
+	private
+		
+		m_outils					= str_shape_outils (),
+		
+		
+	---- FONCTIONS ----------------------------------------------------------------
+	private
+		
+	--- Aquisition shape ---------------------
+		fn scanner_points 	_shape	=(
+			
+			local ptsSurface				=#()
+			
+			---- On chope les points de la surface a scanner -----------
+			for id_pt = 1 to ( numKnots 	_shape 	1 ) do	(
+				local pt_shape 	= getKnotPoint 	_shape 	1 	id_pt
+				local pt_surface 	= pt_shape * inverse  _shape.transform
+				append ptsSurface 	 pt_surface
+			)
+			
+			
+			--- on fait tourner les spline dans le meme sens ----
+			if not m_outils.est_sensPositif 	ptsSurface 	 do
+				trace_absolu = m_outils.changer_sens		ptsSurface
+			
+			ptsSurface
+			
+		),
+		fn valider_shape 		_shape 	=(
+			
+			local id_premiertraceFerme 	= 0
+			local b_result 						= true
+			
+			--- on ne prend que des splineShape -----
+			if classOf _shape !=	line	 do(
+				messagebox "Attention ! Le shape piqué doit être une Line."
+				b_result = false
+			) 
+			
+			--- on ne prend que la premiere spline fermée -----
+			if b_result and numSplines _shape > 1 do (
+				messagebox "Attention ! Le shape piqué doit posséder une seule spline."
+				b_result = false
+			) 
+			
+			--- si la spline n'est pas close  -----------
+			if b_result and not 	isClosed  _shape 1 then (
+				messagebox "Attention ! Le shape piqué doit être clos."
+				b_result = false
+			) 
+			
+			b_result
+			
+		),
+		
+		
+		
+	---- INTERFACE ----------------------------------------------------------------
+	public
+	--- Initialisation ---------------------
+		fn initialiser _plug =(
+			debug "initialiser"
+			m_plug 				= _plug
+		),
+		
+	--- Actualisation ---------------------
+		fn actualiser  =(
+			
+		),
+		
+	--- Accession ---------------------
+		fn get_points =(
+			
+			debug "actualiser"
+			
+			local pts_surface 
+			
+			if m_plug.surface_node != undefined do (
+				
+				--- on scanne les points ---- 
+				pts_surface = 	scanner_points		m_plug.surface_node		
+				
+				--- on gere les OPTIMISATIONS  ----
+				if m_plug.optim_souder			do	m_outils.souder				&pts_surface		m_plug.optim_souder_seuil
+				if m_plug.optim_orthonormer	do	m_outils.orthonormer		&pts_surface		m_plug.optim_ortho_seuil
+				if m_plug.optim_aplanir			do	m_outils.aplanir				&pts_surface		m_plug.optim_aplanir_seuil
+				if m_plug.optim_aligner			do	m_outils.aligner				&pts_surface		m_plug.optim_aligner_seuil
+				if m_plug.optim_projeter		do	m_outils.projeter			&pts_surface
+				
+			)
+			
+			pts_surface
+
+		),	
+		
+	--- Assigner nouveau shape  ---------------------
+		fn assigner 	_shape  =(
+			
+			debug "assigner"
+			
+			if _shape != undefined do (
+				
+				---- si pas valide on clean -------
+				if not valider_shape 		_shape then 					
+					m_plug.surface_node 				= undefined
+					
+				--- sinon on assigne les points de base ---- 
+				else 	m_plug.surface_node				= 	_shape
+				
+				actualiser ()
+				
+			)
+			
+			debug "surface_node" 	var:m_plug.surface_node
+			
+		)
+		
+		/* ,
+		
+		fn subdiviser		 =(
+			m_outils.subdiviser		 	( get_points() )
+		) */
+		
+		
+) -- fin struct Surface ------------------------
+
+
+
+
+----------------- Manager des Toitures	------------------------------------------
+struct 	str_mgr_toitures (
+	items = #()
 )
 
- */

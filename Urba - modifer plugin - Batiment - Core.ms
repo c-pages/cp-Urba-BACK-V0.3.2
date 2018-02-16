@@ -2,9 +2,8 @@
 
 include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - structures secondaires.ms"
 include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Geometrie.ms"
-include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Surfaces.ms"
-include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Elements.ms"
 include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Construction.ms"
+include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Managers.ms"
 
 
 
@@ -29,10 +28,11 @@ struct str_batiment_core (
 	
 	
 	private
-		---  Elément du batiments -------------------
-		mgr_facades			= str_mgr_arrayParametres (),
+		---  Managers des Eléments du batiments -------------------
+		mgr_facades			= str_mgr_facades (),
 		mgr_composants 	= str_mgr_composants (),
-		mgr_surface			= str_surfaces (),
+		mgr_surface			= str_mgr_surfaces (),
+		mgr_toitures			= str_mgr_toitures (),
 		
 		---- convertisseur Parametres to String  -------------
 		mgr_datas 				= str_datasToString 	m_prt:this,
@@ -56,11 +56,13 @@ struct str_batiment_core (
 			debug "charger"
 			
 			--- les facades --------
-			for id in m_plug.fac_ids do (
+			mgr_facades.charger ()
+			
+		/* 	for id in m_plug.fac_ids do (
 				debug "charger" var:id
 				nvFacade = mgr_facades.creer	enregistrer:false
 				nvFacade.charger 	m_plug		id
-			)
+			) */
 			
 		),
 		

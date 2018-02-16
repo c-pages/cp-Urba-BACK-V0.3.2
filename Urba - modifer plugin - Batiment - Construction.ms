@@ -164,7 +164,7 @@ struct str_construction (
 			local sequence 					= _facade.sequence 		
 			local b_espacer 				= _facade.mode == 4
 			
-			debug "creer_sequence	-1-"
+-- 			debug "creer_sequence	-1-"
 			
 			-----	si on a une sequence avec une longueur nulle, on creer un seul mur plein	--------------------------------------
 			if longueur_sequence	== 0 then (
@@ -216,7 +216,6 @@ struct str_construction (
 			
 			------------ CONSTRUCTION ------------------------
 			
-			debug "creer_sequence	-3-"
 			
 			---- pour les balcons --------
 			local 	balcon_aConstruire = undefined
@@ -230,6 +229,7 @@ struct str_construction (
 			local ptsIDs_accroche 		= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	 	)
 			
 			
+-- 			debug "ptsIDs_accroche	-1-" var:ptsIDs_accroche
 			----- le premier espacement ------------
 			if _facade.mode != 3 do (
 				
@@ -239,11 +239,12 @@ struct str_construction (
 				
 			)
 			
+-- 			debug "ptsIDs_accroche	-2-" var:ptsIDs_accroche
 		
 			----- les repetitions de sequence ------------------
 			for i = 1 to nbrRepetitions do (
 				
-				debug "creer_sequence	-	nbrRepetitions" var:i
+-- 				debug "creer_sequence	-	nbrRepetitions" var:i
 				
 				--- la sequence --------
 				for composant in sequence do (
@@ -252,6 +253,24 @@ struct str_construction (
 					local chrono_debut_compo = timeStamp ()
 					-------- DEBUG----------------------
 					
+-- 			debug "ptsIDs_accroche	-3a-" var:ptsIDs_accroche
+					case  composant.type of (
+						--- espacement	----------
+						#FAC_COMP_ESP: (
+							--- Composant 'Mur plein' temporaire	------
+							local compoTmp = creer_murPlein		longueur_espacement
+							ptsIDs_accroche = compoTmp.construire		m_plug	 	ptsIDs_accroche		normDir
+						)
+						--- mur plein	----------
+						#FAC_COMP_MUP:	(
+							ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		--		est_DansBalcon:(balcon_aConstruire != undefined )
+						)
+					)
+					
+					
+					
+-- 			debug "ptsIDs_accroche	-3b-" var:ptsIDs_accroche
+					/* 
 					case composant.type    of (
 						 #Modele:			(
 														
@@ -288,7 +307,7 @@ struct str_construction (
 						) -- fin 	#Parametrique
 						
 					) -- fin case ---------------
-					
+					 */
 					
 					-------- DEBUG----------------------
 					local chrono_fin_compo = timeStamp ()
@@ -304,7 +323,7 @@ struct str_construction (
 					
 					--- Composant 'Mur plein' temporaire	------
 					local compoTmp = creer_murPlein		longueur_espacement 		
-					ptsIDs_accroche = compoTmp.param[1].construire	 ptsIDs_accroche		normDir
+					ptsIDs_accroche = compoTmp.construire	 	m_plug		ptsIDs_accroche		normDir
 					
 				)
 				
@@ -680,8 +699,12 @@ struct str_construction (
 					---  on regarde si on a des facades pour ce mur ---------------
 					local facades_pourCeMur		=	filtrer_facades_parMurs		facades_etages		mur_longueur	surface_points		id_pt
 					
-					if facades_pourCeMur.count > 0 and facades_pourCeMur[1] != undefined
-							do		onA_uneFacade = true
+					if facades_pourCeMur.count > 0 
+							then	(
+								if facades_pourCeMur[1] != undefined then
+									onA_uneFacade = true
+								else	onA_uneFacade = false
+							)else	onA_uneFacade = false
 					
 -- 					debug "onA_uneFacade" var:onA_uneFacade
 -- 					debug "facades_pourCeMur" var:facades_pourCeMur

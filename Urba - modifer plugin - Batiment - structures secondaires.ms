@@ -120,7 +120,9 @@ struct str_datasToString (
 				--------------- string ---------------
 				if data_exe 		== undefined then 
 					append tabResult ( item )
-				--------------- un objet ---------------
+				else 
+					append tabResult 	data_exe
+				/* --------------- un objet ---------------
 				else	if classof data_exe == Name then (
 					local elemTmp =  ( m_prt.get_parametre	  item 	)						
 					--- un id (name)------
@@ -128,7 +130,7 @@ struct str_datasToString (
 					append tabResult		elemTmp
 				--------------- Nombres ---------------		
 				) else 	append tabResult 	( data_exe)
-				
+				 */
 			)
 			tabResult
 		),
@@ -291,6 +293,15 @@ struct str_mgr_arrayParametres (
 		fn supprimer 	_idUnique	=	(
 			local elem_a_supprimer = get_parID	_idUnique
 			elem_a_supprimer.supprimer		m_plug
+		),
+		
+		fn charger =(
+			
+			for id in m_plug.fac_ids do (
+				debug "charger" var:id
+				nvFacade = creer	enregistrer:false
+				nvFacade.charger 	m_plug		id
+			)
 		)
 		
 	

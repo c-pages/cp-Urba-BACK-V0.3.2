@@ -86,8 +86,8 @@ parameters params_viewport				rollout:roll_viewport	(
 parameters params_facades 				rollout:roll_facades	(
 	
 	---- générale -----------
-	fac_noms 							type:#stringTab 	tabSize:0  		tabSizeVariable:true		--ui:lbx_facades	
 	fac_ids 								type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	fac_noms 							type:#stringTab 	tabSize:0  		tabSizeVariable:true		--ui:lbx_facades	
 	
 	--- Limiteurs - Etages	---
 	fac_etagesMin_uses			type:#boolTab		tabSize:0 			tabSizeVariable:true
@@ -113,8 +113,8 @@ parameters params_facades 				rollout:roll_facades	(
 parameters params_facades_composants 			(
 	
 	---- les composants de facades -----------
-	fac_compos_noms 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	fac_compos_ids 				type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	fac_compos_noms 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	fac_compos_types 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	fac_compos_params			type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	
