@@ -1,0 +1,51 @@
+
+
+
+
+--- parametres de base	-----------------------------
+titre 	= "Balcon fin"	
+type	=	#FAC_COMP_BAF
+
+
+--- les parametres du composant	---------
+struct params	(
+	longueur = 0
+)
+
+
+--- les rollout du composant	---------
+rollout dialog "Balcon fin" width:180 height:70	(
+	
+	)
+
+
+--- la fonction de construction	---------
+fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= ()
+	
+
+------------------CONSTANT ------------------------
+--- on importe le fichier mere des composants ----
+fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - composant mere.ms"
+--- Creation de la structure mere	-----------------
+str_compo_mere 		titre:titre	type:type	params:( params() )		dialog:dialog		fnConstruire:fnConstruire
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

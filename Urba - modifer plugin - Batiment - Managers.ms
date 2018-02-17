@@ -6,17 +6,12 @@
 
 ----------------- Manager des COMPOSANTS	------------------------------------------
 struct 	str_mgr_composants (
-		
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 		m_debug = true,
 		m_dbgPrefix ="urba | str_mgr_composants",
-		fn debug 	_txt  var:	 param:    =(
-			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
-			catch ()
-		),
-	
-	
+		fn debug 	_txt  var:	 param:    =	try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix	catch (),
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	
 		m_plug,
 	private
@@ -35,9 +30,8 @@ struct 	str_mgr_composants (
 		
 		
 		
-		---- CONSTRUCTION DES  COMPOSANTS -------------------------------------------
-	private
-	/* 	fn espacement 	=(
+		/*
+		fn espacement 	=(
 			
 			--- les parametres du composant --------------
 			local params = struct param (
@@ -173,7 +167,7 @@ struct 	str_mgr_composants (
 			
 			nvComposant
 			
-		), */
+		), 
 		---- Balcon -------------------------------------------
 		fn balcon 		=(
 			
@@ -293,13 +287,13 @@ struct 	str_mgr_composants (
 			nvComposant
 			
 		),
-		
+		*/
 		
 		
 		---- INTERFACE -------------------------------------------
 	public
 		fn creerMere  	_idModel	=(
-			debug "creerMere"
+			debug	"creerMere"
 			local nvComposant = get_nouveauComposant ()
 			m_modelesBase[_idModel].initialiser	nvComposant
 			nvComposant

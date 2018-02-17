@@ -6,13 +6,17 @@
 titre 	= "Balcon"	
 type	=	#FAC_COMP_BAD
 
+
 --- les parametres du composant	---------
 struct params	(
 	longueur = 100,
 	largeur	= 100
 )
+
+
 --- les rollout du composant	---------
 rollout dialog "Balcon" width:180 height:70	(
+	
 	local m_compo
 	local m_rollPrt
 	local m_param
@@ -36,6 +40,8 @@ rollout dialog "Balcon" width:180 height:70	(
 	)
 	
 )
+
+
 --- la fonction de construction	---------
 fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 
@@ -93,15 +99,11 @@ fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 )
 	
 
-
-
-
-
 ------------------CONSTANT ------------------------
 --- on importe le fichier mere des composants ----
 fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - composant mere.ms"
 --- Creation de la structure mere	-----------------
-str_compo_mere 		titre:titre	type:type	params:(params())	dialog:dialog	fnConstruire:fnConstruire
+str_compo_mere 		titre:titre	type:type	params:( params() )	dialog:dialog	fnConstruire:fnConstruire
 
 	
 	
