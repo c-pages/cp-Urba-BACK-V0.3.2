@@ -19,7 +19,7 @@ struct	str_compo_mere (
 			_nvComposant.set_dialog			dialog
 			_nvComposant.set_params	 		( copy params )
 			_nvComposant.set_construire 	fnConstruire
-			format "PARAMETRE A INITIALISATION : %\n" params
+			
 			_nvComposant
 			
 		)

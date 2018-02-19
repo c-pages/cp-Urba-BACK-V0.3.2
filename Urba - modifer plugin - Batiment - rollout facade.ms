@@ -23,6 +23,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		local m_plug				---- pointeur vers le plug ----
 		
 		--- les parametres courants ------------
+		local m_facade_initiale
 		local m_facade_courante
 		local m_composant_courant
 		
@@ -37,59 +38,49 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		
 		------------  UI	----------------------------------------------------------------------------------		
 		---- Structures perso pour rollout ----
-		local m_drag			---- Gere le drag de la fenetre ----
+		local m_drag		---- Gere le drag de la fenetre ----
 		local m_titre			---- Gere le titre de la fenetre ----
 		
 		---- le bouton pour fermer la fenetre ----
-		ImgTag 'ui_btnFermer' "X" pos:[0,0] width:20 height:20 toolTip:"Fermer" style:#bmp_center align:#left
-
+-- 		ImgTag 'ui_btnFermer' "X" pos:[0,0] width:20 height:20 toolTip:"Fermer" style:#bmp_center align:#left
+		
 		ImgTag 'ui_titre' "" pos:[8,4] width:66 height:18 align:#left
 		edittext 'edt_nom_facade' "" pos:[7,25] width:200 height:16 align:#left
-				
+		
 		spinner 'spn_etages' "" pos:[103,53] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-		spinner 'spn_etagesMax' "" pos:[180,53] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-				
+		spinner 'spn_etagesMax' "" pos:[180,53] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left		
 		spinner 'spn_longueur_min' "" pos:[103,68] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
 		spinner 'spn_longueur_max' "" pos:[180,68] width:63 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
 		checkbutton 'chk_longueur_max' "" pos:[167,68] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
 		checkbutton 'chk_longueur_min' "" pos:[90,68] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
 		label 'lbl_longueur' "Longueur:" pos:[12,69] width:52 height:15 align:#left
-			
+		
 		dropdownList 'ddl_murs' "" pos:[90,83] width:154 height:21 items:#("Gouttereaux + Pignons", "Gouttereaux", "Pignons") selection:3 align:#left
 		label 'lbl_appliquerA' "Murs:" pos:[12,87] width:32 height:15 align:#left
-			
+		
 		checkbutton 'chk_etagesMax' "" pos:[167,53] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
-			
+		
 		listbox 'lbx_sequence' "" pos:[91,124] width:137 height:9 align:#left
-			
-		button 'btn_dupliquer_composant' "Dupliquer" pos:[10,216] width:75 height:16 toolTip:"Supprimer le composant" align:#left
-			
+		
 		label 'lbl23' "Séquence:" pos:[11,105] width:60 height:15 align:#left
-			
+		
 		button 'btn_enregistrer' "S" pos:[224,24] width:19 height:19 toolTip:"Sauvegarder preset." align:#left
 		button 'btn_charger' "O" pos:[206,24] width:19 height:19 toolTip:"Ouvrir preset." align:#left
-			
+		
 		button 'btn_monter' "/\\" pos:[228,123] width:16 height:19 toolTip:"Monter le composant." align:#left
 		button 'btn_descendre' "\/" pos:[228,141] width:16 height:19 toolTip:"Descendre le composant." align:#left
 		dropdownList 'ddl_mode' "" pos:[90,103] width:154 height:21 items:#("Répéter", "Etrirer", "Centrer", "Espacer") selection:3 align:#left
 		checkbutton 'chk_etages' "" pos:[90,53] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-			
-	-- 		button 'btn_annuler' "Annuler" pos:[127,257] width:118 height:21 align:#left
-	-- 		button 'btn_valider' "Valider" pos:[10,257] width:118 height:21 align:#left
-			
+		
 		label 'lbl95' "Etages:" pos:[12,54] width:43 height:15 align:#left
-			
-			
-
+		
 		subRollout 'subroll_parametres' "Parametres" pos:[267,43] width:210 height:208 align:#left
-			
+		
 		GroupBox 'grp_prop' "Propriétés" pos:[255,25] width:225 height:238 align:#left
-			
-			
+		
+		button 'btn_dupliquer_composant' "Dupliquer" pos:[10,216] width:75 height:16 toolTip:"Supprimer le composant" align:#left
 		button 'btn_supprimer_composant' "Supprimer" pos:[10,231] width:75 height:16 toolTip:"Supprimer le composant" align:#left
-			
-			
-			
+		
 		button 'btn_ajouter_composant_1' "btn1" pos:[10,123] width:75 height:16  	align:#left		visible:false
 		button 'btn_ajouter_composant_2' "btn2" pos:[10,138] width:75 height:16  	align:#left		visible:false
 		button 'btn_ajouter_composant_3' "btn3" pos:[10,153] width:75 height:16 	align:#left		visible:false
@@ -97,8 +88,11 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		button 'btn_ajouter_composant_5' "btn5" pos:[10,183] width:75 height:16 	align:#left		visible:false
 		button 'btn_ajouter_composant_6' "btn6" pos:[10,197] width:75 height:16  	align:#left		visible:false
 		
+		button 'btn_valider' "Valider" pos:[11,271] width:75 height:21 toolTip:"Valider la façade" align:#left
+		button 'btn_annuler' "Annuler" pos:[91,271] width:75 height:21 toolTip:"Annuler les changements" align:#left
+		
 		local		btns_ajouter_composant	=#( btn_ajouter_composant_1, btn_ajouter_composant_2, btn_ajouter_composant_3, btn_ajouter_composant_4, btn_ajouter_composant_5, btn_ajouter_composant_6 )
-
+		
 		------------  Fonctions	----------------------------------------------------------------------------------
 		fn actualiser 							=(
 			
@@ -154,8 +148,8 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			
 			if 	_taille.x < largeur_min do 
 				_taille.x =  largeur_min
-			if 	_taille.y < 255 do 
-				_taille.y =  255
+			if 	_taille.y < 300 do 
+				_taille.y =  300
 			roll_urba_editeurFacades.width 	= _taille.x
 			roll_urba_editeurFacades.height 	= _taille.y
 			
@@ -163,7 +157,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			
 			local largeur_fenetre 	= 	_taille.x - largeur_params
 			
-			ui_btnFermer.pos.x		= 	_taille.x - 20
+-- 			ui_btnFermer.pos.x		= 	_taille.x - 20
 			
 			edt_nom_facade.width 	= 	largeur_fenetre - ( 2* largeur_bord	+ 2 * largeur_btn   )
 			btn_enregistrer.pos.x 	= 	edt_nom_facade.width 	+  edt_nom_facade.pos.x
@@ -179,6 +173,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 -- 			btn_annuler.pos.y 		= btn_valider.pos.y 	= _taille.y - (  largeur_btn +  largeur_bord )
 			
 			btn_monter.pos.x			=	btn_descendre .pos.x		=	lbx_sequence.pos.x + lbx_sequence.width
+			btn_dupliquer_composant.pos.y 			= lbx_sequence.pos.y + lbx_sequence.height - 29
 			btn_supprimer_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 14
 			
 			grp_prop.pos.x 				= ddl_murs.pos.x + ddl_murs.width + largeur_bord 
@@ -186,8 +181,10 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			subroll_parametres.pos.x 	= grp_prop.pos.x + 8
 			subroll_parametres.height 	= grp_prop.height - 23
 			
+			btn_valider.pos.y 			= _taille.y - 25
+			btn_annuler.pos.y 		=  _taille.y - 25
 		)
-		fn initialiser 			_plug 		= (
+		fn initialiser 			_plug 		=(
 			
 			m_plug 		= _plug
 			
@@ -197,8 +194,8 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			m_titre.setCouleur (color 255 255 255 )
 			
 			-- le bouton fermer --
-			ui_btnFermer.pos = [roll_urba_editeurFacades.width - 20,0]
-			ui_btnFermer.bitmap = icos_fermer[1]	
+-- 			ui_btnFermer.pos = [roll_urba_editeurFacades.width - 20,0]
+-- 			ui_btnFermer.bitmap = icos_fermer[1]	
 			
 			-- la fenetre ----
 			redimensionnerFenetre  (getDialogSize	roll_urba_editeurFacades)
@@ -216,18 +213,33 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			)
 			
 		)
-		fn set_facade		_facade 	= (
-			m_facade_courante 	= _facade
+		
+		
+		
+		
+		fn set_facade		_facade 	=(
+			local mgr_facades 	= m_plug.core.get_mgr_facades ()
+			
+			m_facade_initiale 		= 	_facade
+			m_facade_courante 	= 	mgr_facades.dupliquer 		m_facade_initiale
+			
+			debug "ajouter set_facade"
+			debug "m_facade_initiale" 		var:m_facade_initiale
+			debug "m_facade_courante" 	var:m_facade_courante
+			
 			actualiser ()
 		)
-		fn ajouter_composant	_IDmodelCompo =(
+		fn ajouter_composant	_IDmodelCompo	=(
 			debug "ajouter composant"
 			m_composant_courant	=	m_plug.core.creer_composant	m_facade_courante		_IDmodelCompo		position:lbx_sequence.selection
-			 	
+			
+			debug "m_facade_initiale.sequence" 		var:m_facade_initiale.sequence
+			debug "m_facade_courante.sequence" 	var:m_facade_courante.sequence
+			
 			actualiser ()
 		)
 		
-		
+/* 		
 		---- Gere l'état du bouton  -----
 		fn etatBtnFermer		_etat 	=(
 			case _etat of (
@@ -236,7 +248,25 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 				#Press : 	ui_btnFermer.bitmap = icos_fermer[3]	
 			)
 		)
+		 */
 		
+		
+		
+		
+		--------- EVENEMENTS	----------------------------------------------------------------------------------------------
+		on btn_valider	 pressed do (
+			
+			local mgr_facades 	= m_plug.core.get_mgr_facades ()
+			
+			
+			m_facade_initiale = mgr_facades.dupliquer 	 m_facade_courante	cible:m_facade_initiale
+			m_facade_initiale.enregistrer 	m_plug
+			m_plug.core.facadeEditeur_fermer 	()
+			m_plug.core.actualiser ()
+		)
+		on btn_annuler	 pressed do (
+			m_plug.core.facadeEditeur_fermer 	()			
+		)
 		
 		on btn_ajouter_composant_1 pressed do	ajouter_composant	1
 		on btn_ajouter_composant_2 pressed do	ajouter_composant	2
@@ -256,8 +286,8 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		on roll_urba_editeurFacades mouseMove 	_pos 	do
 			m_drag.suivreSouris ()
 		
-		on roll_urba_editeurFacades close do
-			m_plug.core.actualiser ()
+-- 		on roll_urba_editeurFacades close do
+-- 			m_plug.core.actualiser ()
 		
 		on roll_urba_editeurFacades moved 	dest do
 			m_plug.core.set_roll_editeurDeFacade_position	dest
@@ -266,7 +296,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			m_composant_courant = m_facade_courante.sequence[ 	arg ]
 			actualiser ()
 		)
-		
+		/* 
 		on ui_btnFermer mouseover do
 			etatBtnFermer #Survol
 		on ui_btnFermer mouseout do
@@ -279,62 +309,46 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			m_plug.core.facadeEditeur_fermer 	()
 		
 		
-		
+		 */
 		
 		--- parametres ---------------------
 		on edt_nom_facade entered txt 	do (
 			m_facade_courante.nom 	=	txt
-			m_facade_courante.enregistrer 	m_plug
-			m_plug.actualiser_rollouts ()
 		)
 		on ddl_mode selected sel	 do		(
 			m_facade_courante.mode 	= 	sel
-			m_facade_courante.enregistrer 	m_plug
 		)
 		
 		on ddl_murs selected sel	 do		(
 			m_facade_courante.murs 	= 	sel
-			m_facade_courante.enregistrer 	m_plug
 		)
 		
 		
 		on chk_etages changed state do		(
 			m_facade_courante.etages_min_use 	= 	state		
-			m_facade_courante.enregistrer 	m_plug
-			actualiser ()
 		)
 		on spn_etages	 changed val 	do		(
 			m_facade_courante.etages_min 	= 	val
-			m_facade_courante.enregistrer 	m_plug
 		)
 		on chk_etagesMax changed state do		(
 			m_facade_courante.etages_max_use 	= 	state		
-			m_facade_courante.enregistrer 	m_plug
-			actualiser ()
 		)
 		on spn_etagesMax	 changed val 	do		(
 			m_facade_courante.etages_max 	= 	val
-			m_facade_courante.enregistrer 	m_plug
 		)
 		
 		
 		on spn_longueur_min changed val 	do		(
 			m_facade_courante.longueur_min 	= 	val
-			m_facade_courante.enregistrer 	m_plug
 		)
 		on spn_longueur_max changed val 	do		(
 			m_facade_courante.longueur_max 	= 	val
-			m_facade_courante.enregistrer 	m_plug
 		)
 		on chk_longueur_max changed state do		(
 			m_facade_courante.longueur_max_use 	= 	state		
-			m_facade_courante.enregistrer 	m_plug
-			actualiser ()
 		)
 		on chk_longueur_min changed state do		(
 			m_facade_courante.longueur_min_use 	= 	state		
-			m_facade_courante.enregistrer 	m_plug
-			actualiser ()
 		)
 		
 		/* 

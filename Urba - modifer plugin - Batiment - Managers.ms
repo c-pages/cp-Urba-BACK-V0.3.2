@@ -14,8 +14,8 @@ struct 	str_mgr_composants (
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	
 		m_plug,
-	private
-		
+-- 	private
+		public
 		m_modelesBase =#(),
 		
 		---- Le tableau des éléments --------
@@ -25,18 +25,18 @@ struct 	str_mgr_composants (
 		
 		---- INTERFACE -------------------------------------------
 	public
-		fn creer 	_idModel	=(
+		fn creer 	_idModel	/* enregistrer:true  */=(
 			--- on importe le fichier du struct des composants  (pour avoir accés meme si le plug est pas actif)---
 			include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Elements - Composant.ms"
 			
--- 			str_composant ()
-			debug"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! A !m_modelesBase[_idModel]!!!!" var:m_modelesBase[_idModel]
 			local nvComposant = str_composant () ---	get_nouveauComposant ()
 			m_modelesBase[_idModel].initialiser	nvComposant
-			debug"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! B !m_modelesBase[_idModel]!!!!" var:m_modelesBase[_idModel]
+			
+-- 			if enregistrer do
+-- 				nvComposant.enregistrer	 	m_plug
+			
 			nvComposant
 		),
-		
 		
 		
 		
@@ -44,7 +44,7 @@ struct 	str_mgr_composants (
 			local result
 			for i = 1 to m_modelesBase.count  do (
 				local model = m_modelesBase[i]
-				if model.type == _typeAChercher
+				if model.type  as string == _typeAChercher as string
 					do result = i
 			)
 			result
@@ -57,7 +57,7 @@ struct 	str_mgr_composants (
 			result
 		),
 		
-		fn get_murPlein = creer  ( get_model_ID	#murPlein ),
+		fn get_murPlein = creer  ( get_model_ID	#murPlein )  /* enregistrer:false	 */,
 		
 		
 		fn get_modeles = m_modelesBase,
@@ -84,7 +84,7 @@ struct 	str_mgr_composants (
 			if index_composant != 0 then (
 				local type = m_plug.fac_compos_types[index_composant]
 				local id_model = get_model_ID  type
-				nvComposant 	= creer	id_model
+				nvComposant 	= creer	id_model enregistre:false
 				
 				nvComposant.charger		m_plug		
 			)
@@ -104,10 +104,8 @@ struct 	str_mgr_composants (
 			
 			for fichierCompo in liste_des_fichiersComposants do (
 				local nv_model_compo =  fileIn fichierCompo
-				debug "===================nv_model_compo =======" var:nv_model_compo
 				append m_modelesBase  	nv_model_compo
 			)
-			debug "m_modelesBase" var:m_modelesBase 		param:"titre"
 			
 		)
 		
@@ -123,7 +121,7 @@ struct str_mgr_facades (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 		m_debug = true,
-		m_dbgPrefix ="urba | str_mgr_arrayParametres",
+		m_dbgPrefix ="urba | str_mgr_facades",
 		fn debug 	_txt  var:	 param:    =(
 			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 			catch ()
@@ -170,26 +168,49 @@ struct str_mgr_facades (
 			debug "creer"
 			
 			local nv_element = str_facade ()
-			append		m_items	nv_element
 			
-			if enregistrer do
+			
+			if enregistrer do (
+				append		m_items	nv_element
 				nv_element.enregistrer	 	m_plug
+			)
 			
 			nv_element
 			
 		),	
 		
+		fn dupliquer		_facade 	cible:	=(
+			local nvlFacade 
+			if cible == unsupplied then
+				nvlFacade = creer		enregistrer:false
+			else
+				nvlFacade = cible
+			
+			local propNoms = getPropNames _facade
+			for propNom in propNoms do (
+				local propOriginal = ( getProperty  _facade 	propNom )
+				local type = classof propOriginal
+				case type of (
+					--- les trucs qu'on zappe ------
+					MAXScriptFunction:	()
+					array:		setProperty nvlFacade 	propNom 	(for val in propOriginal collect val )
+					default:		setProperty nvlFacade 	propNom 	propOriginal
+				)
+			)
+			nvlFacade
+		),
 		fn supprimer 	_idUnique	=	(
 			local elem_a_supprimer = get_parID	_idUnique
 			elem_a_supprimer.supprimer		m_plug
 		),
 		
 		fn charger =(
-			
+			m_items = #()
 			for id in m_plug.fac_ids do (
 				debug "charger" var:id
 				nvFacade = creer	enregistrer:false
 				nvFacade.charger 	m_plug		id
+				append	m_items	nvFacade
 				/* 
 				-- on charge les composants ----
 				for compoID in nvFacade.sequence do (

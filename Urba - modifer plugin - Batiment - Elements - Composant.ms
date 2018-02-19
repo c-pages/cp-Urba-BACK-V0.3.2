@@ -41,8 +41,8 @@ struct 	str_composant (
 		---- Accessions -----------------------
 		fn get_dialog			=	m_dialog,
 		fn get_longueur 	=	(
-			debug "------get_longueur   "	var:params.longueur
-			debug "------params   "			var:params
+-- 			debug "------get_longueur   "	var:params.longueur
+-- 			debug "------params   "			var:params
 			
 			
 			params.longueur
@@ -83,7 +83,7 @@ struct 	str_composant (
 			
 			--- s'il n'existe pas encore, on l'ajoute -----
 			if index_composant == 0 then (
-				debug "enregistrer nouveau composant"
+-- 				debug "enregistrer nouveau composant"
 				
 				append 	_plug.fac_compos_ids 				id
 				append 	_plug.fac_compos_noms  			nom
@@ -93,7 +93,7 @@ struct 	str_composant (
 			--- s'il existe, on l'actualise -----
 			) else (
 				
-				debug "enregistrer cmoposant existant"
+-- 				debug "enregistrer cmoposant existant"
 				debug "id"		var:id
 				
 				_plug.fac_compos_noms[index_composant] 		=	nom				
@@ -103,6 +103,8 @@ struct 	str_composant (
 			) 
 		),
 		fn charger 	_plug	 =(
+			
+			local mgr_datas = _plug.core.get_mgrDatas ()
 			
 			--- on cherche s'il existe deja comme parametre -----
 			local index_composant = 0
@@ -121,11 +123,11 @@ struct 	str_composant (
 			-- on charge	------------------------------------
 			if index_composant != 0 then (
 				
-				id 				= 	_plug.fac_compos_ids[index_facade]
-				nom 				= 	_plug.fac_compos_noms[index_facade]
-				type				=	_plug.fac_compos_types[index_facade]
+				id 				= 	_plug.fac_compos_ids[index_composant]
+				nom 				= 	_plug.fac_compos_noms[index_composant]
+				type				=	_plug.fac_compos_types[index_composant]
 				
-				mgr_datas.set_datas_string		_plug.fac_compos_types[index_facade]			params
+				mgr_datas.set_datas_string		_plug.fac_compos_params[index_composant]			params
 				
 			)
 			

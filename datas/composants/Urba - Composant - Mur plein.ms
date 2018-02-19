@@ -39,10 +39,6 @@ rollout compo_dialog "Mur plein" width:180 height:70	(
 )
 --- la fonction de construction	---------
 fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
-		
-		format "\n"
-		format "compo_fnConstruire\n"
-		format "\n"
 	
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug

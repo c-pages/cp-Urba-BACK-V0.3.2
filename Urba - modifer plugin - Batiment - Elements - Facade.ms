@@ -221,7 +221,6 @@ struct 	str_facade (
 			
 		),
 		
-		
 	---------- EVENEMENTS	--------------------------------------------------------------------------------------
 	public
 		on create do initialiser ()

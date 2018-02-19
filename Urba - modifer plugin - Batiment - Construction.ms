@@ -85,26 +85,22 @@ struct str_construction (
 			facades_result
 		),
 		fn filtrer_facades_parMurs		_facades	_mur_longueur		_pts		_id_pt				=(
-			debug "filtrer_facades_parMurs------------------------------------"
-				debug "_facades" var:_facades
+			
 			local facades_result 		= #()
 			local est_pignon				= m_outils_shape.estPignon 	_pts		_id_pt
 			
 			---- si la sequence peut rentrer sur le segment de facade ------------
 			for facde in _facades /* where  	 facde.sequence.count >0  */do (
-			debug "facde.sequence.count " var:facde.sequence.count 
-			debug "facde.sequence_longueur" var:facde.sequence_longueur
-			debug "_mur_longueur " var:_mur_longueur
+				
 				if  facde.sequence.count >0  do (
 				if facde.sequence_longueur < _mur_longueur do (
-				debug "filtrer ---------- 1" 
+					
 					---- si la facade est limité en longueur min -----
 					if not facde.longueur_min_use or facde.longueur_min_use	 and 	facde.longueur_min < _mur_longueur do (
 						
-				debug "filtrer ----------2" 
 						---- si la facade est limité en longueur max -----
 						if not facde.longueur_max_use or facde.longueur_max_use	 and 	facde.longueur_max > _mur_longueur do (
-				debug "filtrer ----------3" 
+							
 							---- si la facade est sur le bon type de mur -----
 							case  facde.murs of (
 								1: append facades_result facde

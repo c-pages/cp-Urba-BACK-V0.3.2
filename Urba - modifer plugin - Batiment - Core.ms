@@ -101,6 +101,7 @@ struct str_batiment_core (
 		),
 		
 	----- Editeur de facades -----------------
+		fn get_facadeEditeur_rollout = roll_facades,
 		fn facadeEditeur_ouvrir 	_index	=(
 			debug "ouvrir_facadeEditeur"
 			createDialog 	roll_facades	style:				#(#style_resizing) 	\
@@ -141,6 +142,7 @@ struct str_batiment_core (
 		fn get_matID				= m_construction.m_matID,
 			
 		fn get_mgr_composants = mgr_composants,
+		fn get_mgr_facades	 	= mgr_facades,
 		fn get_mgrDatas 			= mgr_datas,
 		
 		
