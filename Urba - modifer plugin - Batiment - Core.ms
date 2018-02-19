@@ -119,9 +119,13 @@ struct str_batiment_core (
 			local nv_facade 	= mgr_facades.creer ()
 			nv_facade
 		),
-		fn creer_composant	_facade		_type			=(
-			local nv_composant 	= mgr_composants.creer	_type
+		fn creer_composant	_facade		_IDmodelCompo			=(
+			local nv_composant 	= mgr_composants.creer		_IDmodelCompo
 			_facade.ajouter_composant	nv_composant
+			
+			--- maj de la longueur de la sequence ---
+			_facade.update_sequence_longueur ()
+			
 			nv_composant
 		),
 		

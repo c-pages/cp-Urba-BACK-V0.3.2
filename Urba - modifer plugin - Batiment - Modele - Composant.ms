@@ -3,6 +3,7 @@
 struct	str_compo_mere (
 	
 	titre ="",
+	toolTip ="",
 	type ,
 	
 	params,
@@ -16,9 +17,9 @@ struct	str_compo_mere (
 			_nvComposant.initialiser			type		titre
 			
 			_nvComposant.set_dialog			dialog
-			_nvComposant.set_params	 		params
+			_nvComposant.set_params	 		( copy params )
 			_nvComposant.set_construire 	fnConstruire
-			
+			format "PARAMETRE A INITIALISATION : %\n" params
 			_nvComposant
 			
 		)

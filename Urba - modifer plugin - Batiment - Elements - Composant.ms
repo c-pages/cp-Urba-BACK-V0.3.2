@@ -40,18 +40,24 @@ struct 	str_composant (
 		
 		---- Accessions -----------------------
 		fn get_dialog			=	m_dialog,
-		fn get_longueur 	=	params.longueur,
+		fn get_longueur 	=	(
+			debug "------get_longueur   "	var:params.longueur
+			debug "------params   "			var:params
+			
+			
+			params.longueur
+		),
 		
 		--- Initialisations -----------------------
 		fn initialiser_dialog 	_roll_parent 	=(
-			dialog.m_rollPrt	= 	_roll_parent
-			dialog.m_param	=	params
-			dialog.actualiser()
+			m_dialog.m_rollPrt		= 	_roll_parent
+			m_dialog.m_compo	=	this
+			m_dialog.actualiser()
 		),
 		fn initialiser 		_type	_nom 	=(
 			
 			---- id unique ----
-			id += _type
+			id += "compo_"
 			for i= 1 to 10 do id += ( random 0 9 ) as string	
 			
 			type 				=	_type 			

@@ -55,11 +55,20 @@ struct 	str_facade (
 		fn get_composants_noms =(
 			for compo in sequence collect compo.nom
 		),
-		fn get_sequence_longueur	=(
+	/* 	fn get_composant  _posDansSequence	=(
+			local result
+			if   _posDansSequence<= sequence.count	do
+				result = sequence[_posDansSequence]
+			result
+		), */
+		fn update_sequence_longueur =(
 			sequence_longueur		=	0
 			for compo in sequence do
 				sequence_longueur	+=	compo.get_longueur ()
-			
+		),
+		fn get_sequence_longueur	=(
+			update_sequence_longueur ()
+			debug "get_sequence_longueur" var:sequence_longueur
 			sequence_longueur
 		),
 		

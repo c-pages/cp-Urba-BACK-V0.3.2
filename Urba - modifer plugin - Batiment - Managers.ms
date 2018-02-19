@@ -20,298 +20,49 @@ struct 	str_mgr_composants (
 		
 		---- Le tableau des éléments --------
 		m_items	=	#(),
-		
-		fn get_nouveauComposant =(
-			--- on importe le fichier du struct des composants (pour avoir accés meme si le plug est pas actif)---
-			include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Elements - Composant.ms"
-			str_composant ()
-		),
-		
-		
-		
-		
-		/*
-		fn espacement 	=(
-			
-			--- les parametres du composant --------------
-			local params = struct param (
-				longueur = 0
-			)
-			local dialog  = rollout dialog "Espacement" width:180 height:70	(
-									local m_compo, m_rollPrt, m_param
-									fn actualiser =()
-								)
-			fn fnConstruire  	_plug	 	pts_accroches		_normDir			_composant		=()
-			
-			--- Creation du composant --------------
-			local nvComposant = get_nouveauComposant 	()
-			nvComposant.initialiser			#FAC_COMP_ESP		"Espacement"
-			nvComposant.set_dialog			dialog
-			nvComposant.set_params	 	( params () )
-			nvComposant.set_construire 	fnConstruire
-			
-			nvComposant
-			
-		),
-		---- Mur plein -------------------------------------------
-		fn murPlein 	=(
-			
-			local params = struct param (
-				longueur = 100
-			)
-			local dialog  = rollout dialog "Mur plein" width:180 height:70	(
-									local m_compo
-									local m_rollPrt
-									local m_param
-									
-									edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
-									GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
-									label 'lbl19' "Longeur:" pos:[13,37] width:49 height:13 align:#left
-									spinner 'spn_longueur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-									
-									fn actualiser =(
-										spn_longueur.value 	= 	m_compo.longueur
-										edt_nom.text 			=	m_compo.nom
-									)
 
-									on spn_longueur changed val do (
-										m_compo.longueur = val		
-										m_rollPrt.actualiser ()
-									)
-									on edt_nom	 entered txt 	do	(
-										m_compo.nom = txt
-										m_rollPrt.actualiser ()
-									)
-									
-								)
-			fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
-									
-									
-							-------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
-									local ptr_plug				= 	_plug
-									local ptr_composant  	= 	_composant
-									local ptr_geo 				= 	ptr_plug.core.get_geo ()
-									local matID					=	ptr_plug.core.get_matID ()
-									
-							-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
-									local ep_dalle 			= ptr_plug.etages_epaiss_dalle
-									local ht_niveaux 		= ptr_plug.etages_hauteur
-									local longueur 			= ptr_composant.params.longueur
-									
-									
-							-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
-									--- Result -------------
-									local pt_result_1, pt_result_2, pt_result_3
-									
-									--- Vecteurs ------------
-									local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
-									local vec_ht 			= [0,0,1] 		* 	ht_niveaux
-									local vec_longueur 	= _normDir 	* 	longueur
-									
-									--- Points d'accroche ------------
-									local id_ptAccroche_1 	= pts_accroches[1]
-									local id_ptAccroche_2 	= pts_accroches[2]
-									local id_ptAccroche_3 	= pts_accroches[3]
-									
-									local ptAccroche_1		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	
-									local ptAccroche_2		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	
-									local ptAccroche_3		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	
-									
-									
-									
-									---- LA DALLE  -----------------------------------------------------------------------			
-									-------	Creation des points 	--------
-									local pt_2 		= ptAccroche_1		+ 	vec_longueur
-									local pt_3 		= pt_2					+	vec_ep_dalle
-									
-									--- creation des points --------------
-									local pts_pos 	= #( pt_2, pt_3 )
-									local pts_ids 	= ptr_geo.points 	pts_pos		
-									
-									-------	Creation des faces 	--------
-									local nvlFace = ptr_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		 	
-									polyop.setFaceMatID	 ptr_plug.delegate		nvlFace	  ( matID.mur + 1 )
-									
-									--- Result -------------
-									pt_result_1 = pts_ids[1]
-									pt_result_2 = pts_ids[2]
-									
-									
-									
-									---- LE MUR -----------------------------------------------------------------------			
-									-------	Creation des points 	--------
-									local pt_3 		= pt_3		+	vec_ht
-									
-									--- creation des points --------------
-									local pts_pos 	= #( pt_3 )
-									local pts_ids 	= ptr_geo.points 	pts_pos		
-									
-									-------	Creation des faces 	--------
-									local nvlFace = ptr_geo.face 		#(	 		id_ptAccroche_2, 		pt_result_2, 		pts_ids[1], 		id_ptAccroche_3	)		 	
-									polyop.setFaceMatID	 ptr_plug.delegate		nvlFace	  matID.mur
-									
-									--- Result -------------
-									pt_result_3 = pts_ids[1]
-									
-									
-									---- Result final -----------------------------------------------------------------------
-									#( pt_result_1, pt_result_2, pt_result_3 )
-									
-								)
-			
-			local nvComposant = get_nouveauComposant 	()
-			nvComposant.initialiser			#FAC_COMP_MUP		"Mur plein"
-			nvComposant.set_dialog			dialog
-			nvComposant.set_params	 	( params() )
-			nvComposant.set_construire 	fnConstruire
-			
-			nvComposant
-			
-		), 
-		---- Balcon -------------------------------------------
-		fn balcon 		=(
-			
-			--- les parametres du composant --------------
-			local params = struct param (
-				longueur = 100,
-				largeur	= 100
-			)
-			local dialog  = rollout dialog "Balcon" width:180 height:70	(
-											local m_compo
-											local m_rollPrt
-											local m_param
-										
-											edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
-											GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
-											label 'lbl_largeur' "Largeur:" pos:[13,37] width:49 height:13 align:#left
-											spinner 'spn_largeur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-											
-											fn actualiser =(
-												spn_largeur.value 	= 	m_param.largeur
-												edt_nom.text 			=	m_compo.nom
-											)
-
-											on spn_largeur changed val do 
-												m_param.largeur = val		
-											
-											on edt_nom	 entered txt 	do	(
-												m_compo.nom = txt
-												m_rollPrt.actualiser ()
-											)
-											
-									)
-			fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
-				
-				--- Result -------------
-				local pt_result_1, pt_result_2, pt_result_3
-				
-				--- Vecteurs ------------
-				local vec_ep_dalle 	= [0,0,1] 			* 	m_plug.etages_epaiss_dalle			
-				local vec_longueur 	= _normDir 		* 	m_compo.longueur
-				local norm_balcon	= _normDir * rotateZ ( matrix3 1 ) -90
-				local vec_largeur		= norm_balcon 	*	 largeur				
-				
-				--- Points d'accroche ------------
-				local id_ptAccroche_1 	= pts_accroches[1]
-				local id_ptAccroche_2 	= pts_accroches[2]
-				local id_ptAccroche_3 	= pts_accroches[3]
-				
-				local ptAccroche_1		=	polyop.getVert 	m_plug.delegate		id_ptAccroche_1	
-				local ptAccroche_2		=	polyop.getVert 	m_plug.delegate		id_ptAccroche_2	
-				local ptAccroche_3		=	polyop.getVert 	m_plug.delegate		id_ptAccroche_3	
-				
-				
-				-------	Placement des points 	--------
-				local pt_1 		= ptAccroche_1
-				local pt_2 		= pt_1		+  vec_longueur
-				local pt_3 		= pt_2		+ 	vec_ep_dalle				
-				local pt_4		= pt_1		+ 	vec_ep_dalle
-				
-				local pt_5		= pt_1		+	vec_largeur
-				local pt_6		= pt_2		+	vec_largeur		
-				local pt_7		= pt_3		+	vec_largeur
-				local pt_8		= pt_4		+	vec_largeur
-				
-				--- creation des points --------------
-				local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
-				local pts_ids 	= ptr_geo.points 	pts_pos		
-				
-				-------	Creation des faces 	--------
-				local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[5], 		pts_ids[8], 		pts_ids[4] )		 			
-				polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = ptr_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[7] , 	pts_ids[8] )		 				
-				polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )					
-				local nvlFace = ptr_geo.face 		#(	pts_ids[6], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[7] )		 		
-				polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6], 		pts_ids[5] )		 		
-				polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )			
-				local nvlFace = ptr_geo.face 		#(	pts_ids[8], 		pts_ids[7], 		pts_ids[3], 		pts_ids[4] )		 				
-				polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )
-				
-				
-				
-				
-				#()
-			)
-			
-			--- Creation du composant --------------
-			local nvComposant = get_nouveauComposant 	()
-			nvComposant.initialiser			#FAC_COMP_BAL		"Balcon"
-			nvComposant.set_dialog		dialog
-			nvComposant.set_params	 	( params () )
-			nvComposant.set_construire 	fnConstruire
-			
-			nvComposant
-			
-		),
-		---- Balcon fin -------------------------------------------
-		fn balconFin 	=(
-			
-			--- les parametres du composant --------------
-			local params = struct param (
-				longueur = 0
-			)
-			
-			--- les parametres du composant --------------
-			local dialog  = rollout dialog "Balcon fin" (
-								)
-			fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= ()
-			
-			--- Creation du composant --------------
-			local nvComposant = get_nouveauComposant 	()
-			nvComposant.initialiser			#FAC_COMP_BAF		"Balcon fin"
-			nvComposant.set_dialog			dialog
-			nvComposant.set_params	 	( params () )
-			nvComposant.set_construire 	fnConstruire
-			
-			nvComposant
-			
-		),
-		*/
 		
 		
 		---- INTERFACE -------------------------------------------
 	public
-		fn creerMere  	_idModel	=(
-			debug	"creerMere"
-			local nvComposant = get_nouveauComposant ()
+		fn creer 	_idModel	=(
+			--- on importe le fichier du struct des composants  (pour avoir accés meme si le plug est pas actif)---
+			include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Elements - Composant.ms"
+			
+-- 			str_composant ()
+			debug"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! A !m_modelesBase[_idModel]!!!!" var:m_modelesBase[_idModel]
+			local nvComposant = str_composant () ---	get_nouveauComposant ()
 			m_modelesBase[_idModel].initialiser	nvComposant
+			debug"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! B !m_modelesBase[_idModel]!!!!" var:m_modelesBase[_idModel]
 			nvComposant
 		),
 		
 		
 		
-		fn creer		_typeDeComposant		=(
-			local nvComposant
-			case	_typeDeComposant of (
-				#espacement:		nvComposant =  creerMere 1	---		espacement()
-				#murPlein:			nvComposant =  creerMere 2	---		murPlein()
-				#balcon:				nvComposant = balcon()
-				#balconFin:			nvComposant = balconFin()
+		
+		fn get_model_ID 	_typeAChercher	=(
+			local result
+			for i = 1 to m_modelesBase.count  do (
+				local model = m_modelesBase[i]
+				if model.type == _typeAChercher
+					do result = i
 			)
--- 			if ajouterAItems	do	append m_items	nvComposant
-			nvComposant
+			result
 		),
+		fn get_model_par_type 	_typeAChercher	=(
+			local result
+			for model in m_modelesBase do
+				if model.type == _typeAChercher
+					do result = model
+			result
+		),
+		
+		fn get_murPlein = creer  ( get_model_ID	#murPlein ),
+		
+		
+		fn get_modeles = m_modelesBase,
+		
+		
 		fn charger		_id		  =(
 			
 			--- on cherche s'il existe deja comme parametre -----
@@ -332,19 +83,13 @@ struct 	str_mgr_composants (
 			--- on charge	------------------------------------
 			if index_composant != 0 then (
 				local type = m_plug.fac_compos_types[index_composant]
-				
-				case		( type as name )	of (
-					#FAC_COMP_ESP:  	nvComposant 	= creer	#espacement
-					#FAC_COMP_MUP:  	nvComposant 	= creer	#murPlein
-				)
+				local id_model = get_model_ID  type
+				nvComposant 	= creer	id_model
 				
 				nvComposant.charger		m_plug		
 			)
 			nvComposant
 		),
-		
-		fn get_murPlein = creer  #murPlein,
-		
 		-----INIT	--------------
 	public
 		fn initialiser	_plug	=(
@@ -354,11 +99,13 @@ struct 	str_mgr_composants (
 			
 			--- on va chercher les fichiers des assets pour les composants de facades -------------
 			m_modelesBase =#()
-			local dossier_composants 		= 	getdir #userScripts + "\cp-Urba\assets\composants\\" 
-			local liste_des_fichiersComposants	=	getfiles (dossier_composants+ "*.compo" )
+			local dossier_composants 		= 	getdir #userScripts + "\cp-Urba\datas\composants\\" 
+			local liste_des_fichiersComposants	=	getfiles (dossier_composants+ "*.ms" )
 			
 			for fichierCompo in liste_des_fichiersComposants do (
-				append m_modelesBase  ( fileIn fichierCompo ) 
+				local nv_model_compo =  fileIn fichierCompo
+				debug "===================nv_model_compo =======" var:nv_model_compo
+				append m_modelesBase  	nv_model_compo
 			)
 			debug "m_modelesBase" var:m_modelesBase 		param:"titre"
 			

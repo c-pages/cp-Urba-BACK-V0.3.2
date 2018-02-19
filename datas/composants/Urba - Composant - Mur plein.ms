@@ -3,18 +3,19 @@
 
 
 --- parametres de base	-----------------------------
-titre 	= "Mur plein"	
-type	=	#FAC_COMP_MUP
+compo_titre 	= "Mur plein"	
+compo_type	=	#murPlein
+compo_toolTip =	"Ajouter un mur plein de longueur fixe."
 
 --- les parametres du composant	---------
-struct params	(
-	longueur = 100
+struct compo_params	(
+	longueur = 100.,
+	on create do format "CREATION DE COMPO_PARAMS : %\n" this
 )
 --- les rollout du composant	---------
-rollout dialog "Mur plein" width:180 height:70	(
-	local m_compo
+rollout compo_dialog "Mur plein" width:180 height:70	(
 	local m_rollPrt
-	local m_param
+	local m_compo
 	
 	edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
 	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
@@ -22,12 +23,12 @@ rollout dialog "Mur plein" width:180 height:70	(
 	spinner 'spn_longueur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
 	
 	fn actualiser =(
-		spn_longueur.value 	= 	m_compo.longueur
+		spn_longueur.value 	= 	m_compo.params.longueur
 		edt_nom.text 			=	m_compo.nom
 	)
 
 	on spn_longueur changed val do (
-		m_compo.longueur = val		
+		m_compo.params.longueur = val
 		m_rollPrt.actualiser ()
 	)
 	on edt_nom	 entered txt 	do	(
@@ -37,9 +38,12 @@ rollout dialog "Mur plein" width:180 height:70	(
 	
 )
 --- la fonction de construction	---------
-fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
+fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 		
-		
+		format "\n"
+		format "compo_fnConstruire\n"
+		format "\n"
+	
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
 		local ptr_composant  	= 	_composant
@@ -119,9 +123,10 @@ fn fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 
 ------------------CONSTANT ------------------------
 --- on importe le fichier mere des composants ----
-fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - composant mere.ms"
+fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Modele - composant.ms"
 --- Creation de la structure mere	-----------------
-str_compo_mere 		titre:titre	type:type	params:(params())	dialog:dialog	fnConstruire:fnConstruire
+parametresTMP = compo_params () 
+str_compo_mere 	tooltip:compo_tooltip		titre:compo_titre	type:compo_type	params:(parametresTMP)	dialog:compo_dialog	fnConstruire:compo_fnConstruire
 
 	
 	
