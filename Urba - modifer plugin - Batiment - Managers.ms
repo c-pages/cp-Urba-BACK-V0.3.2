@@ -3,6 +3,42 @@
 	
 
 	
+----------------- Manager des Toitures	------------------------------------------
+struct 	str_mgr_toitures (
+	
+	private
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+		m_debug = true,
+		m_dbgPrefix ="urba | str_mgr_toitures",
+		fn debug 	_txt  var:	 param:    =	try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix	catch (),
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+	
+	---- Membres --------------------------------------------------------
+		m_plug =#() ,
+		m_items = #(),
+	
+		--- le dossier on sont rangés les modeles de composants ----------
+		m_dossier_models 		= 	getdir #userScripts + "\cp-Urba\datas\toitures\\" ,
+	
+		---- structures servant de model à la construction des composants	---------------------
+		m_modelesBase =#(),
+		
+		
+	---- INTERFACE -------------------------------------------
+	public
+		fn initialiser	_plug	=(
+			debug "initialiser ()"
+			m_plug = _plug
+			
+			--- on va chercher les fichiers des assets pour les composants de facades -------------
+			m_modelesBase =#()
+			local fichiers_toiture	=	getfiles (m_dossier_models+ "*.ms" )			
+			for fichier_toiture in fichiers_toiture do (
+				local nv_model_toiture =  fileIn fichier_toiture
+				append m_modelesBase  	nv_model_toiture
+			)
+		)
+)
 
 ----------------- Manager des COMPOSANTS	------------------------------------------
 struct 	str_mgr_composants (
@@ -12,34 +48,33 @@ struct 	str_mgr_composants (
 		m_dbgPrefix ="urba | str_mgr_composants",
 		fn debug 	_txt  var:	 param:    =	try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix	catch (),
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-	
+		
 		m_plug,
--- 	private
-		public
+		
+	private
+		--- le dossier on sont rangés les modeles de composants ----------
+		m_dossier_models 		= 	getdir #userScripts + "\cp-Urba\datas\composants\\" ,
+		
+		---- structures servant de model à la construction des composants	---------------------
 		m_modelesBase =#(),
 		
 		---- Le tableau des éléments --------
 		m_items	=	#(),
-
-		
 		
 		---- INTERFACE -------------------------------------------
 	public
-		fn creer 	_idModel	/* enregistrer:true  */=(
+		fn creer 	_idModel		=(
 			--- on importe le fichier du struct des composants  (pour avoir accés meme si le plug est pas actif)---
 			include	 "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - Elements - Composant.ms"
 			
 			local nvComposant = str_composant () ---	get_nouveauComposant ()
 			m_modelesBase[_idModel].initialiser	nvComposant
 			
--- 			if enregistrer do
--- 				nvComposant.enregistrer	 	m_plug
-			
 			nvComposant
 		),
 		
 		
-		
+		---- recupere l'index du modele de composant  ---
 		fn get_model_ID 	_typeAChercher	=(
 			local result
 			for i = 1 to m_modelesBase.count  do (
@@ -90,18 +125,17 @@ struct 	str_mgr_composants (
 			)
 			nvComposant
 		),
+		
+		
+		
 		-----INIT	--------------
-	public
 		fn initialiser	_plug	=(
 			debug "initialiser ()"
 			m_plug = _plug
 			
-			
 			--- on va chercher les fichiers des assets pour les composants de facades -------------
 			m_modelesBase =#()
-			local dossier_composants 		= 	getdir #userScripts + "\cp-Urba\datas\composants\\" 
-			local liste_des_fichiersComposants	=	getfiles (dossier_composants+ "*.ms" )
-			
+			local liste_des_fichiersComposants	=	getfiles (m_dossier_models+ "*.ms" )			
 			for fichierCompo in liste_des_fichiersComposants do (
 				local nv_model_compo =  fileIn fichierCompo
 				append m_modelesBase  	nv_model_compo
@@ -229,7 +263,7 @@ struct str_mgr_facades (
 		fn initialiser		class:  plug: =(
 			
 			
-			--- on vide les items ------
+			--- on vide les m_items ------
 			m_items	=	#()
 			
 			-- on assigne les pointeurs -----------
@@ -398,8 +432,4 @@ struct str_mgr_surfaces (
 
 
 
------------------ Manager des Toitures	------------------------------------------
-struct 	str_mgr_toitures (
-	items = #()
-)
 

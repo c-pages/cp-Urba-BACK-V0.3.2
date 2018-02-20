@@ -58,11 +58,6 @@ struct str_batiment_core (
 			--- les facades --------
 			mgr_facades.charger ()
 			
-		/* 	for id in m_plug.fac_ids do (
-				debug "charger" var:id
-				nvFacade = mgr_facades.creer	enregistrer:false
-				nvFacade.charger 	m_plug		id
-			) */
 			
 		),
 		
@@ -90,10 +85,11 @@ struct str_batiment_core (
 			m_plug = 	_plug			
 			
 			---- initialisation des structures -----
-			mgr_facades.initialiser		class:str_facade		plug:m_plug
+			mgr_surface.initialiser			m_plug
+			mgr_facades.initialiser			class:str_facade		plug:m_plug
 			mgr_composants.initialiser		m_plug
-			mgr_surface.initialiser		m_plug
-			m_construction.initialiser	m_plug
+			mgr_toitures.initialiser			m_plug
+			m_construction.initialiser		m_plug
 			
 			--- chargement des parametres ------------------
 			charger ()
@@ -118,6 +114,9 @@ struct str_batiment_core (
 		fn facadeEditeur_fermer 			=(
 			destroyDialog 	roll_facades
 		),
+		
+		
+	--- manager les facades	---------------
 		fn creer_facade 							=(
 			local nv_facade 	= mgr_facades.creer ()
 			nv_facade
@@ -132,8 +131,10 @@ struct str_batiment_core (
 			
 			actualiser ()
 		),
-		fn creer_composant	_facade		_IDmodelCompo			=(
+		
+		fn creer_composant		_facade		_IDmodelCompo			=(
 			local nv_composant 	= mgr_composants.creer		_IDmodelCompo
+			
 			_facade.ajouter_composant	nv_composant
 			
 			--- maj de la longueur de la sequence ---
@@ -146,16 +147,16 @@ struct str_batiment_core (
 	----- Accessions -----------------------
 		fn get_surface_points		=	mgr_surface.get_points	(),
 		
-		fn get_facades_noms 	=	mgr_facades.get_noms (),
-		fn get_facades				=	mgr_facades.get_items (),
+		fn get_facades_noms 		=	mgr_facades.get_noms (),
+		fn get_facades					=	mgr_facades.get_items (),
 		
-		fn get_construction		= m_construction,
-		fn get_geo					= m_construction.m_geo,
-		fn get_matID				= m_construction.m_matID,
+		fn get_construction			= m_construction,
+		fn get_geo						= m_construction.m_geo,
+		fn get_matID					= m_construction.m_matID,
 			
-		fn get_mgr_composants = mgr_composants,
-		fn get_mgr_facades	 	= mgr_facades,
-		fn get_mgrDatas 			= mgr_datas,
+		fn get_mgr_composants 	= mgr_composants,
+		fn get_mgr_facades	 		= mgr_facades,
+		fn get_mgrDatas 				= mgr_datas,
 		
 	---- mutateurs	------
 		fn set_roll_editeurDeFacade_position	_pos 	=( roll_facades_pos = _pos),

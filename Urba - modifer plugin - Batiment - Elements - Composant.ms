@@ -41,10 +41,6 @@ struct 	str_composant (
 		---- Accessions -----------------------
 		fn get_dialog			=	m_dialog,
 		fn get_longueur 	=	(
--- 			debug "------get_longueur   "	var:params.longueur
--- 			debug "------params   "			var:params
-			
-			
 			params.longueur
 		),
 		
@@ -83,7 +79,6 @@ struct 	str_composant (
 			
 			--- s'il n'existe pas encore, on l'ajoute -----
 			if index_composant == 0 then (
--- 				debug "enregistrer nouveau composant"
 				
 				append 	_plug.fac_compos_ids 				id
 				append 	_plug.fac_compos_noms  			nom
