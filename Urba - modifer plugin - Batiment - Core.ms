@@ -107,7 +107,9 @@ struct str_batiment_core (
 			createDialog 	roll_facades	style:				#(#style_resizing) 	\
 													pos:					roll_facades_pos		\
 													width:				roll_facades_taille.x	\
-													height:				roll_facades_taille.y	
+													height:				roll_facades_taille.y	/* \
+													modal:				true \ 
+													escapeEnable:	true */
 			
 			roll_facades.initialiser 		m_plug
 			roll_facades.set_facade 	( mgr_facades.get_parIndex	_index )
@@ -119,6 +121,16 @@ struct str_batiment_core (
 		fn creer_facade 							=(
 			local nv_facade 	= mgr_facades.creer ()
 			nv_facade
+		),
+		fn supprimer_facade		_index =(
+			local facadeASupprimer = mgr_facades.get_parIndex		_index
+			local confirmation = querybox ( "Supprimer "  + facadeASupprimer.nom + " ?" )
+			if confirmation do (
+				mgr_facades.supprimer		facadeASupprimer.id
+			)
+			m_plug.actualiser_rollouts ()
+			
+			actualiser ()
 		),
 		fn creer_composant	_facade		_IDmodelCompo			=(
 			local nv_composant 	= mgr_composants.creer		_IDmodelCompo
@@ -144,7 +156,6 @@ struct str_batiment_core (
 		fn get_mgr_composants = mgr_composants,
 		fn get_mgr_facades	 	= mgr_facades,
 		fn get_mgrDatas 			= mgr_datas,
-		
 		
 	---- mutateurs	------
 		fn set_roll_editeurDeFacade_position	_pos 	=( roll_facades_pos = _pos),

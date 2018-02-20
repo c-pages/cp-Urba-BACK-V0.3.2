@@ -10,7 +10,7 @@ compo_toolTip =	""
 
 --- les parametres du composant	---------
 struct compo_params	(
-	longueur = 100,
+	longueur = 0,
 	largeur	= 100
 )
 
@@ -20,7 +20,6 @@ rollout compo_dialog "Balcon" width:180 height:70	(
 	
 	local m_compo
 	local m_rollPrt
-	local m_param
 
 	edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
 	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
@@ -28,12 +27,12 @@ rollout compo_dialog "Balcon" width:180 height:70	(
 	spinner 'spn_largeur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
 	
 	fn actualiser =(
-		spn_largeur.value 	= 	m_param.largeur
+		spn_largeur.value 	= 	m_compo.params.largeur
 		edt_nom.text 		=	m_compo.nom
 	)
 
 	on spn_largeur changed val do 
-		m_param.largeur = val		
+		m_compo.params.largeur = val		
 	
 	on edt_nom	 entered txt 	do	(
 		m_compo.nom = txt
@@ -46,23 +45,26 @@ rollout compo_dialog "Balcon" width:180 height:70	(
 --- la fonction de construction	---------
 fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 
+	local ptr_geo 				= 	_plug.core.get_geo ()
+	local matID					=	_plug.core.get_matID ()
+	
 	--- Result -------------
 	local pt_result_1, pt_result_2, pt_result_3
 	
 	--- Vecteurs ------------
-	local vec_ep_dalle 	= [0,0,1] 			* 	m_plug.etages_epaiss_dalle			
-	local vec_longueur 	= _normDir 		* 	m_compo.longueur
+	local vec_ep_dalle 	= [0,0,1] 			* 	_plug.etages_epaiss_dalle			
+	local vec_longueur 	= _normDir 		* 	_composant.params.longueur
 	local norm_balcon	= _normDir * rotateZ ( matrix3 1 ) -90
-	local vec_largeur		= norm_balcon 	*	 largeur				
+	local vec_largeur		= norm_balcon 	*	 _composant.params.largeur				
 	
 	--- Points d'accroche ------------
 	local id_ptAccroche_1 	= pts_accroches[1]
 	local id_ptAccroche_2 	= pts_accroches[2]
 	local id_ptAccroche_3 	= pts_accroches[3]
 	
-	local ptAccroche_1		=	polyop.getVert 	m_plug.delegate		id_ptAccroche_1	
-	local ptAccroche_2		=	polyop.getVert 	m_plug.delegate		id_ptAccroche_2	
-	local ptAccroche_3		=	polyop.getVert 	m_plug.delegate		id_ptAccroche_3	
+	local ptAccroche_1		=	polyop.getVert 	_plug.delegate		id_ptAccroche_1	
+	local ptAccroche_2		=	polyop.getVert 	_plug.delegate		id_ptAccroche_2	
+	local ptAccroche_3		=	polyop.getVert 	_plug.delegate		id_ptAccroche_3	
 	
 	
 	-------	Placement des points 	--------
@@ -82,17 +84,19 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 	
 	-------	Creation des faces 	--------
 	local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[5], 		pts_ids[8], 		pts_ids[4] )		 			
-	polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )			
+	polyop.setFaceMatID	 _plug.delegate		nvlFace	   ( matID.mur + 1 )			
 	local nvlFace = ptr_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[7] , 	pts_ids[8] )		 				
-	polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )					
+	polyop.setFaceMatID	 _plug.delegate		nvlFace	   ( matID.mur + 1 )					
 	local nvlFace = ptr_geo.face 		#(	pts_ids[6], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[7] )		 		
-	polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )			
+	polyop.setFaceMatID	 _plug.delegate		nvlFace	   ( matID.mur + 1 )			
 	local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6], 		pts_ids[5] )		 		
-	polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )			
+	polyop.setFaceMatID	 _plug.delegate		nvlFace	   ( matID.mur + 1 )			
 	local nvlFace = ptr_geo.face 		#(	pts_ids[8], 		pts_ids[7], 		pts_ids[3], 		pts_ids[4] )		 				
-	polyop.setFaceMatID	 m_plug.delegate		nvlFace	   ( matID.mur + 1 )
+	polyop.setFaceMatID	 _plug.delegate		nvlFace	   ( matID.mur + 1 )
 	
 	
+	--- on reinitialise la longueur à 0 --------
+	_composant.params.longueur = 	0
 	
 	
 	#()

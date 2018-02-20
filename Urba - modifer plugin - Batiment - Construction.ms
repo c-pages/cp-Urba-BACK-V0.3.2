@@ -258,10 +258,30 @@ struct str_construction (
 			local pt_accroche_3 		= 	pt_accroche_2 + [0,0,m_plug.etages_hauteur]			
 			local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	 	)
 			
+			
+			--- gestion balcon	------
+			local balcon_ptID_debut, 		balcon_pts_debut, 		balcon_aConstruire
+			
 			---  on créé la facade avec la sequence total --------
 			for composant in sequenceTotal do (
-				-----	construction geometrie du composant	----------
-				ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		--		est_DansBalcon:(balcon_aConstruire != undefined )
+				case composant.type of (
+					#balcon:(
+						balcon_pts_debut 		= ptsIDs_accroche
+						balcon_aConstruire 	= composant
+					)
+					#balconFin:(
+						local		pt_balcon_debut	=	polyop.getVert 	m_plug.delegate		balcon_pts_debut[1]	
+						local		pt_balcon_fin		=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
+						balcon_aConstruire.params.longueur = 		(	distance	pt_balcon_debut 	pt_balcon_fin	)
+						balcon_aConstruire.construire	 	m_plug			balcon_pts_debut		normDir
+-- 					balcon_aConstruire.params.longueur = 	0
+					)
+					default:(
+						-----	construction geometrie du composant	----------
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		--		est_DansBalcon:(balcon_aConstruire != undefined )
+						
+					)
+				)
 			) --- fin de la sequence -----
 			
 		),

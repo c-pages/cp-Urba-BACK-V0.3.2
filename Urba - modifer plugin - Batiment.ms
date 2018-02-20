@@ -105,7 +105,7 @@ extends:Editable_poly replaceUI:true version:0
 		roll_toiture.actualiser ()
 	)
 	
-	
+
 	---- Divers	---------
 	fn assigner_shape 		_nodeTHIS		_shape 		=(
 		core.assigner_surface 	_nodeTHIS		_shape 		

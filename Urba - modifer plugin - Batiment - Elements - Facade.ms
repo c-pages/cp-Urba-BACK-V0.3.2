@@ -86,7 +86,7 @@ struct 	str_facade (
 		),
 				
 		---- Enregistrement / chargement	-----------------
-		fn enregistrer 		_plug 	=(
+		fn enregistrer 	_plug 	=(
 			
 			debug "enregistrer"
 			local mgr_datas = _plug.core.get_mgrDatas ()
@@ -160,10 +160,10 @@ struct 	str_facade (
 			
 		),
 		
-		fn charger	 	_plug		_id  =(
+		fn charger	 		_plug		  =(
 			
 			debug "charger"
-			debug "_id" var:_id
+			debug "id" var:id
 			
 			local		mgr_composant		=	_plug.core.get_mgr_composants ()
 			local 	mgr_datas 			= _plug.core.get_mgrDatas ()
@@ -173,7 +173,7 @@ struct 	str_facade (
 			for i = 1 to _plug.fac_ids.count do (
 				debug "id test" var:_plug.fac_ids[i]
 				
-				if _plug.fac_ids[i] as string == _id as string do (
+				if _plug.fac_ids[i] as string == id as string do (
 					index_facade = i
 				)
 				
@@ -182,7 +182,7 @@ struct 	str_facade (
 			--- on charge	------------------------------------
 			if index_facade != 0 then (
 				
-				id 								= _plug.fac_noms[index_facade]
+				id 								= _plug.fac_ids[index_facade]
 				nom 								= _plug.fac_noms[index_facade]
 				
 				mode							= _plug.fac_modes[index_facade]
@@ -220,7 +220,50 @@ struct 	str_facade (
 			) else messagebox ("Erreur de chargement de facade : " + _id as string )
 			
 		),
-		
+		fn supprimer 	_plug	=(
+			
+			--- on cherche s'il existe deja comme parametre -----
+			local index_facade = 0
+			for i = 1 to _plug.fac_ids.count do (
+				debug "id test" var:_plug.fac_ids[i]
+				
+				if _plug.fac_ids[i] as string == id as string do (
+					index_facade = i
+				)
+				
+			)
+			
+			--- on supprime	------------------------------------
+			if index_facade != 0 then (
+				deleteItem	_plug.fac_ids						index_facade
+				deleteItem	_plug.fac_noms						index_facade    
+				
+				deleteItem	_plug.fac_modes					index_facade    
+				
+				--- Limiteurs - Murs	---
+				deleteItem	_plug.fac_murs						index_facade    
+				
+				--- Limiteurs - Etages	---
+				deleteItem	_plug.fac_etagesMin_uses		index_facade     
+				deleteItem	_plug.fac_etagesMin				index_facade     
+				deleteItem	_plug.fac_etagesMax_uses		index_facade     
+				deleteItem	_plug.fac_etagesMax				index_facade     
+				
+				--- Limiteurs - longueurs	---
+				deleteItem	_plug.fac_longueurMin_uses	index_facade     
+				deleteItem	_plug.fac_longueurMin    		index_facade     
+				deleteItem	_plug.fac_longueurMax_uses	index_facade     
+				deleteItem	_plug.fac_longueurMax			index_facade     
+				
+				--- Sequence	---
+				deleteItem	_plug.fac_sequence_longueurs	index_facade    
+				deleteItem	_plug.fac_sequences					index_facade
+				
+			)
+			
+			index_facade
+			
+		),
 	---------- EVENEMENTS	--------------------------------------------------------------------------------------
 	public
 		on create do initialiser ()

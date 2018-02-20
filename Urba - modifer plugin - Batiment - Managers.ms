@@ -149,12 +149,18 @@ struct str_mgr_facades (
 		---- Accessions ---
 		fn get_parID  		_idUnique	=(
 			
+				debug "get_parID"	
+				format  "_idUnique : %\n"		_idUnique
 			local result
-			for item in m_items do
-				if item.id == _idUnique do result = compo
+			for item in m_items do (
+				if item.id as string == _idUnique  as string do result = item
+				format  "item.id : %\n"		item.id
+-- 				debug "item.id"		var:item.id
+			)
 			result
 			
 		),
+		
 		fn get_parIndex  	_index 		=(
 			m_items[_index]			
 		),
@@ -169,7 +175,6 @@ struct str_mgr_facades (
 			
 			local nv_element = str_facade ()
 			
-			
 			if enregistrer do (
 				append		m_items	nv_element
 				nv_element.enregistrer	 	m_plug
@@ -180,8 +185,9 @@ struct str_mgr_facades (
 		),	
 		
 		fn dupliquer		_facade 	cible:	=(
+			
 			local nvlFacade 
-			if cible == unsupplied then
+			if cible == unsupplied	then
 				nvlFacade = creer		enregistrer:false
 			else
 				nvlFacade = cible
@@ -193,15 +199,16 @@ struct str_mgr_facades (
 				case type of (
 					--- les trucs qu'on zappe ------
 					MAXScriptFunction:	()
-					array:		setProperty nvlFacade 	propNom 	(for val in propOriginal collect val )
+					array:		setProperty nvlFacade 	propNom 	( for val in propOriginal collect val )
 					default:		setProperty nvlFacade 	propNom 	propOriginal
 				)
 			)
 			nvlFacade
 		),
 		fn supprimer 	_idUnique	=	(
-			local elem_a_supprimer = get_parID	_idUnique
-			elem_a_supprimer.supprimer		m_plug
+			local elem_a_supprimer = get_parID		_idUnique
+			local indexASupprimer = elem_a_supprimer.supprimer		m_plug
+			deleteItem	m_items	indexASupprimer
 		),
 		
 		fn charger =(
@@ -209,15 +216,9 @@ struct str_mgr_facades (
 			for id in m_plug.fac_ids do (
 				debug "charger" var:id
 				nvFacade = creer	enregistrer:false
-				nvFacade.charger 	m_plug		id
+				nvFacade.id  = id
+				nvFacade.charger 	m_plug		
 				append	m_items	nvFacade
-				/* 
-				-- on charge les composants ----
-				for compoID in nvFacade.sequence do (
--- 					debug "charger" var:id
-					nvComposant = mgr_composants.creer	enregistrer:false
-					nvFacade.charger 	m_plug		id
-				) */
 			)
 		),
 		

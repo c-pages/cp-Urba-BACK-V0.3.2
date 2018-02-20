@@ -326,12 +326,14 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		
 		on chk_etages changed state do		(
 			m_facade_courante.etages_min_use 	= 	state		
+			actualiser ()
 		)
 		on spn_etages	 changed val 	do		(
 			m_facade_courante.etages_min 	= 	val
 		)
 		on chk_etagesMax changed state do		(
 			m_facade_courante.etages_max_use 	= 	state		
+			actualiser ()
 		)
 		on spn_etagesMax	 changed val 	do		(
 			m_facade_courante.etages_max 	= 	val
@@ -345,10 +347,12 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			m_facade_courante.longueur_max 	= 	val
 		)
 		on chk_longueur_max changed state do		(
-			m_facade_courante.longueur_max_use 	= 	state		
+			m_facade_courante.longueur_max_use 	= 	state	
+			actualiser ()
 		)
 		on chk_longueur_min changed state do		(
 			m_facade_courante.longueur_min_use 	= 	state		
+			actualiser ()
 		)
 		
 		/* 

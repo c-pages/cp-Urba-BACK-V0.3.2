@@ -345,6 +345,9 @@ rollout roll_facades 		"Façades"		rolledUp:false	(
 		
 		core.facadeEditeur_ouvrir	 	lbx_facades.selection
 	)
+	on btn_supprimerFacade 	pressed 		do	(
+		core.supprimer_facade		lbx_facades.selection 
+	)
 	on lbx_facades doubleClicked arg do
 		core.facadeEditeur_ouvrir	 	lbx_facades.selection 
 	
