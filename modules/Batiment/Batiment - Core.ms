@@ -53,12 +53,12 @@ struct str_batiment_core (
 	
 	-------- MEMBRES	--------------------------------------------------------------------------------------------------------
 	public
+		version_du_plugin = "V0.11",
 	
-	
+	private
 	---- pointeur  vers le plugin --------------------
 		m_plug,	
 	
-	private
 		---  Managers des Eléments du batiments -------------------	
 		mgr_surface			= str_mgr_surfaces (),
 		mgr_facades			= str_mgr_facades (),	
@@ -83,9 +83,9 @@ struct str_batiment_core (
 			
 			debug "charger"
 			
-			--- les facades --------
+			--- les parametres à charger --------
 			mgr_facades.charger ()
-			
+			mgr_toiture.charger ()
 			
 		),
 		
@@ -116,7 +116,7 @@ struct str_batiment_core (
 			mgr_toiture.initialiser				m_plug
 			m_construction.initialiser		m_plug
 			
-			mgr_toiture.assigner				1
+-- 			mgr_toiture.assigner				1
 			
 			--- chargement des parametres ------------------
 			charger ()
@@ -133,7 +133,7 @@ struct str_batiment_core (
 		
 		fn get_construction			= m_construction,
 		fn get_geo						= m_construction.m_geo,
-		fn get_matID					= m_construction.m_matID,
+-- 		fn get_matID					= m_construction.m_matID,
 		
 		fn get_toiture_index 			=	mgr_toiture.get_index_courant (),
 		fn get_toiture					=	mgr_toiture.get_courant (),
@@ -182,10 +182,10 @@ struct str_batiment_core (
 		),
 		fn supprimer_facade		_index =(
 			local facadeASupprimer = mgr_facades.get_parIndex		_index
-			local confirmation = querybox ( "Supprimer "  + facadeASupprimer.nom + " ?" )
-			if confirmation do (
+			local confirmation 			= querybox ( "Supprimer "  + facadeASupprimer.nom + " ?" )
+			if confirmation do 
 				mgr_facades.supprimer		facadeASupprimer.id
-			)
+			
 			m_plug.actualiser_rollouts ()
 			
 			actualiser ()
@@ -202,8 +202,39 @@ struct str_batiment_core (
 			nv_composant
 		),
 		
+	----- material ---------------------
+	private
+		fn creer_material =(
+			local matID 				= fileIn "$userScripts\cp-Urba\Modules\Batiment\Batiment - material IDs.ms"
+			local matIDs_noms	= getPropNames  	matID
+			local ids 					= for   matID_nom in matIDs_noms collect ( 	getproperty matID	matID_nom )
+			local materials 			= #()
+			for   i = 1 to matIDs_noms.count	 do(
+				local matID_nom	=	matIDs_noms[i]
+				local val_color 		= 30*i + 30
+				local variante 		= 40
+				append materials    ( CoronaMtl nom:matID_nom  colorDiffuse:[ val_color + random -variante variante  ,  val_color + random -variante variante , val_color   + random -variante variante  ] )				
+			)
+			
+			local nvMat 					= multimaterial  	numsubs:0 --matIDs_noms.count
+			nvMat.names 				= matIDs_noms
+			nvMat.materialIDList		= ids
+			nvMat.materialList			= materials
+			
+			nvMat
+		),
+	public 
+		fn appliquer_material 	_this		=(
+			local nvMat = creer_material ()
+			_this.material = nvMat
+			nvMat
+		),
+		
+		
 	----- Surface ---------------------
 		fn assigner_surface 		_nodeTHIS		_shape 		=(
+			
+			appliquer_material	_nodeTHIS
 			
 			_nodeTHIS.transform = _shape.transform
 			mgr_surface.assigner		_shape

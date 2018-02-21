@@ -26,19 +26,56 @@ struct 	str_mgr_toiture (
 		
 	---- FONCTIONS ---------------------------------------------------------------------------------------------------------------------------------
 	private
-	fn importer_models_toiture =(
-		
-		--- on va chercher les fichiers des assets pour les composants de facades -------------
-		m_modelesBase =#()
-		local fichiers_toiture	=	getfiles (m_dossier_models+ "*.ms" )	
-		for fichier_toiture in fichiers_toiture do (
-			local nv_model_toiture =  fileIn fichier_toiture
-			append m_modelesBase  	nv_model_toiture
-		)
-		
-	),
+		fn importer_models =(
+			
+			--- on va chercher les fichiers des assets pour les composants de facades -------------
+			m_modelesBase =#()
+			local fichiers_toiture	=	getfiles (m_dossier_models+ "*.ms" )	
+			for fichier_toiture in fichiers_toiture do (
+				local nv_model_toiture =  fileIn fichier_toiture
+				append m_modelesBase  	nv_model_toiture
+			)
+			
+		),
 	---- INTERFACE ---------------------------------------------------------------------------------------------------------------------------------
 	public
+		
+			
+		
+	---- accessions ------
+		fn a_desParametres	=	m_toiture.a_desParametres (),
+		fn get_index_courant =(
+			local result
+			for i = 1 to m_modelesBase.count  do (
+				local model = m_modelesBase[i]
+				if model.type  as string == m_toiture.type as string
+					do result = i
+			)
+			result
+		),
+		fn get_index_parType 	_type =(
+			local result
+			for i = 1 to m_modelesBase.count  do (
+				local model = m_modelesBase[i]
+				if model.type  as string == _type as string
+					do result = i
+			)
+			result
+			
+		),
+		fn get_modeles = (
+			
+			if m_modelesBase.count == 0 do
+				importer_models ()
+			
+			m_modelesBase
+		),
+		fn get_courant =(
+			m_toiture
+		),
+		
+		
+		
 	------ creation de la toiture ------
 		fn assigner	_id =(
 			
@@ -50,49 +87,39 @@ struct 	str_mgr_toiture (
 			m_toiture= str_toiture () ---	get_nouveauComposant ()
 			m_modelesBase[_id ].initialiser	m_toiture
 			
+			this.enregistrer ()
+			
 			m_toiture
 			
 		),
 		
-		fn a_desParametres	=	m_toiture.a_desParametres (),
-			
 		
-	---- accessions ------
-		/* 
-		fn get_model_ID 				=(
-			local result
-			for i = 1 to m_modelesBase.count  do (
-				local model = m_modelesBase[i]
-				if model.type  as string == m_toiture.type as string
-					do result = i
-			)
-			result
-		), */
-		fn get_index_courant =(
-			local result
-			for i = 1 to m_modelesBase.count  do (
-				local model = m_modelesBase[i]
-				if model.type  as string == m_toiture.type as string
-					do result = i
-			)
-			result
+		
+	---- parametres du plug -------------------------
+		fn enregistrer =(
+			local mgr_datas = m_plug.core.get_mgrDatas ()
+			m_plug.toiture_type  		=	m_toiture.type as name 
+			m_plug.toiture_params  	=	(	mgr_datas.get_datas_string	m_toiture.params	)
 		),
-		fn get_modeles = (
+		fn charger =(
+			local mgr_datas = m_plug.core.get_mgrDatas ()
 			
-			if m_modelesBase.count == 0 do
-				importer_models_toiture ()
+			local typeACharger 	= m_plug.toiture_type
+			local indexModel 		= get_index_parType    typeACharger
+			assigner	indexModel
 			
-			m_modelesBase
+			mgr_datas.set_datas_string		m_plug.toiture_params  	m_toiture.params		
+			
 		),
-		fn get_courant =(
-			m_toiture
-		),
+	
+		
+		
 		
 	---- Initialisations ------
 		fn initialiser	_plug	=(
 			debug "initialiser ()"
 			m_plug = _plug
-			importer_models_toiture ()
+			importer_models ()
 		)
 		
 		
@@ -477,7 +504,8 @@ struct str_mgr_surfaces (
 			pts_surface
 
 		),	
-		
+		fn get_axePrincipal 	= m_outils.get_axePrincipal_mtrx 		( get_points () ),
+		fn get_axeP_BB			= m_outils.get_axePrincipal_BB 		( get_points () )  ( get_axePrincipal () ),
 	--- Assigner nouveau shape  ---------------------
 		fn assigner 	_shape  =(
 			

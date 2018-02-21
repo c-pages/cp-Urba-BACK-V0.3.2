@@ -1,87 +1,5 @@
 
 
-
-struct str_plan (
-	
-		------------ DEBUG	----------------------------------------------------------------------------------
-		m_debug = true,
-		m_dbgPrefix ="str_plan",
-		fn debug 	_txt  var:	 param:    =(
-			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
-			catch ()
-		),
-		
-		---- Membres --------------
-		a,
-		b,
-		c,
-		d,
-		normal ,
-		
-		---- Fonctions --------------
-		fn creerFrom_2vecs_et_1Point	_vec1 	_vec2  	_point	=(
-			
--- 			debug "creerFrom_2vecs_et_1Point"
-			---le vec normal du plan-----
-			local norm1 = normalize _vec1
-			local norm2 = normalize _vec2		
-			normal =  cross    norm2 	norm1
-			
-			--- definition equation ---------
-			a = normal.x
-			b = normal.y
-			c = normal.z		
-			d = -( a*_point.x + b*_point.y + c*_point.z )
-			
--- 			debug "a" var:a
--- 			debug "b" var:b
--- 			debug "c" var:c
--- 			debug "d" var:d
-		),
-		fn projeter_point_verticalement 		_pt 	=(
--- 			debug "projeter_point_verticalement"
-			local result = copy _pt
-			result.z =  -( a*_pt.x + b*_pt.y + d ) / c
-			result
-			
-		),
-		
-
-		fn get_intersection_segment	_segPt1		_segPt2			=(
-			
-			local k	= -( a * _segPt1.x 		+	b * _segPt1.y 	+	c * _segPt1.z 	+ d ) 	/	( a * ( _segPt2.x -  _segPt1.x ) + b * ( _segPt2.y -  _segPt1.y )  + c * ( _segPt2.z -  _segPt1.z )  )
-
-			local ptResult 	= [0,0,0]
-			ptResult.x 			=  _segPt1.x + k * ( _segPt2.x 	-  _segPt1.x )
-			ptResult.y 			=  _segPt1.y + k * ( _segPt2.y 	-  _segPt1.y )
-			ptResult.z 			=  _segPt1.z + k * ( _segPt2.z 	-  _segPt1.z )
-			
-			ptResult
-			
-		),
-		fn coupe_segment	_segPt1		_segPt2			=(
-			
-			local pointIntersect = get_intersection_segment 	_segPt1		_segPt2 		
-			-- debug-------
--- 			point pos:pointIntersect isSelected:true
-			
-			local vecSeg 	= _segPt2 - _segPt1
-			local vecInter = pointIntersect - _segPt1
-			
-			if dot vecSeg vecInter >0 and length vecSeg > length vecInter then
-				true
-			else
-				false
-			
-		)
-		
-		
-		
-		
-)
-
-
-
 struct str_datasToString (
 	
 		m_prt,
@@ -138,27 +56,30 @@ struct str_datasToString (
 	public
 		fn get_datas_string 		_element	=(
 			local txtResult = ""
-			local propNames = getPropNames _element
-			for param in propNames do (
-				local prop = ( getProperty  _element 	param )
-				local type = classof prop
-				case type of (
-					--- les trucs qu'on zappe ------
-					MAXScriptFunction:	()
-					RolloutClass:()
-					--- les trucs qu'on prend en compte	------
-					array: (
-						local tabString = array_to_string		prop
-						txtResult+=  param as string  + separateur_mutation 	+	tabString  + separateur_params
-					)
-					Name:		(
-						txtResult+=  param as string  + separateur_mutation	+	"#" + prop as string  + separateur_params
-					)
-					default:						(
-							txtResult+=  param as string  + separateur_mutation	+	prop as string  + separateur_params
-					)
-				) -- fin scase --
-				
+			
+			if _element != undefined do (
+				local propNames = getPropNames _element
+				for param in propNames do (
+					local prop = ( getProperty  _element 	param )
+					local type = classof prop
+					case type of (
+						--- les trucs qu'on zappe ------
+						MAXScriptFunction:	()
+						RolloutClass:()
+						--- les trucs qu'on prend en compte	------
+						array: (
+							local tabString = array_to_string		prop
+							txtResult+=  param as string  + separateur_mutation 	+	tabString  + separateur_params
+						)
+						Name:		(
+							txtResult+=  param as string  + separateur_mutation	+	"#" + prop as string  + separateur_params
+						)
+						default:						(
+								txtResult+=  param as string  + separateur_mutation	+	prop as string  + separateur_params
+						)
+					) -- fin scase --
+					
+				)
 			)
 			txtResult
 			
@@ -310,6 +231,88 @@ struct str_mgr_arrayParametres (
 -- 		fn ecrire			=	ecrire_parametres()
 	
 )	--	fin manager de composants ------
+
+
+
+struct str_plan (
+	
+		------------ DEBUG	----------------------------------------------------------------------------------
+		m_debug = true,
+		m_dbgPrefix ="str_plan",
+		fn debug 	_txt  var:	 param:    =(
+			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
+			catch ()
+		),
+		
+		---- Membres --------------
+		a,
+		b,
+		c,
+		d,
+		normal ,
+		
+		---- Fonctions --------------
+		fn creerFrom_2vecs_et_1Point	_vec1 	_vec2  	_point	=(
+			
+-- 			debug "creerFrom_2vecs_et_1Point"
+			---le vec normal du plan-----
+			local norm1 = normalize _vec1
+			local norm2 = normalize _vec2		
+			normal =  cross    norm2 	norm1
+			
+			--- definition equation ---------
+			a = normal.x
+			b = normal.y
+			c = normal.z		
+			d = -( a*_point.x + b*_point.y + c*_point.z )
+			
+-- 			debug "a" var:a
+-- 			debug "b" var:b
+-- 			debug "c" var:c
+-- 			debug "d" var:d
+		),
+		fn projeter_point_verticalement 		_pt 	=(
+-- 			debug "projeter_point_verticalement"
+			local result = copy _pt
+			result.z =  -( a*_pt.x + b*_pt.y + d ) / c
+			result
+			
+		),
+		
+
+		fn get_intersection_segment	_segPt1		_segPt2			=(
+			
+			local k	= -( a * _segPt1.x 		+	b * _segPt1.y 	+	c * _segPt1.z 	+ d ) 	/	( a * ( _segPt2.x -  _segPt1.x ) + b * ( _segPt2.y -  _segPt1.y )  + c * ( _segPt2.z -  _segPt1.z )  )
+
+			local ptResult 	= [0,0,0]
+			ptResult.x 			=  _segPt1.x + k * ( _segPt2.x 	-  _segPt1.x )
+			ptResult.y 			=  _segPt1.y + k * ( _segPt2.y 	-  _segPt1.y )
+			ptResult.z 			=  _segPt1.z + k * ( _segPt2.z 	-  _segPt1.z )
+			
+			ptResult
+			
+		),
+		fn coupe_segment	_segPt1		_segPt2			=(
+			
+			local pointIntersect = get_intersection_segment 	_segPt1		_segPt2 		
+			-- debug-------
+-- 			point pos:pointIntersect isSelected:true
+			
+			local vecSeg 	= _segPt2 - _segPt1
+			local vecInter = pointIntersect - _segPt1
+			
+			if dot vecSeg vecInter >0 and length vecSeg > length vecInter then
+				true
+			else
+				false
+			
+		)
+		
+		
+		
+		
+)
+
 
 
 
@@ -465,7 +468,7 @@ struct str_shape_outils (
 		),
 		
 	-----------------  Axe Principale ----------------------
-	private
+	public
 		fn get_axePrincipal_mtrx				_pts  					=(
 			
 			local ptsEdgeLePlusLong 	= edge_lePlusGrand	_pts

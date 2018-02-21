@@ -46,7 +46,6 @@ rollout compo_dialog "Balcon" width:180 height:70	(
 fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 
 	local ptr_geo 				= 	_plug.core.get_geo ()
-	local matID					=	_plug.core.get_matID ()
 	
 	--- Result -------------
 	local pt_result_1, pt_result_2, pt_result_3
@@ -83,16 +82,16 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 	local pts_ids 	= ptr_geo.points 	pts_pos		
 	
 	-------	Creation des faces 	--------
-	local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[5], 		pts_ids[8], 		pts_ids[4] )		 			
-	polyop.setFaceMatID	 _plug.delegate		nvlFace	   ( matID.mur + 1 )			
-	local nvlFace = ptr_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[7] , 	pts_ids[8] )		 				
-	polyop.setFaceMatID	 _plug.delegate		nvlFace	   ( matID.mur + 1 )					
-	local nvlFace = ptr_geo.face 		#(	pts_ids[6], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[7] )		 		
-	polyop.setFaceMatID	 _plug.delegate		nvlFace	   ( matID.mur + 1 )			
-	local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6], 		pts_ids[5] )		 		
-	polyop.setFaceMatID	 _plug.delegate		nvlFace	   ( matID.mur + 1 )			
-	local nvlFace = ptr_geo.face 		#(	pts_ids[8], 		pts_ids[7], 		pts_ids[3], 		pts_ids[4] )		 				
-	polyop.setFaceMatID	 _plug.delegate		nvlFace	   ( matID.mur + 1 )
+	local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[5], 		pts_ids[8], 		pts_ids[4] )
+	ptr_geo.set_matID 	nvlFace	#mur 	
+	local nvlFace = ptr_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[7] , 	pts_ids[8] )	
+	ptr_geo.set_matID 	nvlFace	#mur 	
+	local nvlFace = ptr_geo.face 		#(	pts_ids[6], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[7] )	
+	ptr_geo.set_matID 	nvlFace	#mur 	
+	local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6], 		pts_ids[5] )	
+	ptr_geo.set_matID 	nvlFace	#mur 	
+	local nvlFace = ptr_geo.face 		#(	pts_ids[8], 		pts_ids[7], 		pts_ids[3], 		pts_ids[4] )	
+	ptr_geo.set_matID 	nvlFace	#mur 		 				
 	
 	
 	--- on reinitialise la longueur à 0 --------

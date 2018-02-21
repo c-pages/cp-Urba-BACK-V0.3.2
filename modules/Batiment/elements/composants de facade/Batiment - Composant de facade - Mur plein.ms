@@ -44,10 +44,9 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 		local ptr_plug				= 	_plug
 		local ptr_composant  	= 	_composant
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
-		local matID					=	ptr_plug.core.get_matID ()
 		
 -------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
-		local ep_dalle 			= ptr_plug.etages_epaiss_dalle
+		local ep_dalle 			= ptr_plug.const_dalle_epaisseur
 		local ht_niveaux 		= ptr_plug.etages_hauteur
 		local longueur 			= ptr_composant.params.longueur
 		
@@ -82,8 +81,8 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 		local pts_ids 	= ptr_geo.points 	pts_pos		
 		
 		-------	Creation des faces 	--------
-		local nvlFace = ptr_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		 	
-		polyop.setFaceMatID	 ptr_plug.delegate		nvlFace	  ( matID.mur + 1 )
+		local nvlFace = ptr_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		
+	ptr_geo.set_matID 	nvlFace	#mur 	
 		
 		--- Result -------------
 		pt_result_1 = pts_ids[1]
@@ -100,8 +99,8 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 		local pts_ids 	= ptr_geo.points 	pts_pos		
 		
 		-------	Creation des faces 	--------
-		local nvlFace = ptr_geo.face 		#(	 		id_ptAccroche_2, 		pt_result_2, 		pts_ids[1], 		id_ptAccroche_3	)		 	
-		polyop.setFaceMatID	 ptr_plug.delegate		nvlFace	  matID.mur
+		local nvlFace = ptr_geo.face 		#(	 		id_ptAccroche_2, 		pt_result_2, 		pts_ids[1], 		id_ptAccroche_3	)		 
+	ptr_geo.set_matID 	nvlFace	#mur 	
 		
 		--- Result -------------
 		pt_result_3 = pts_ids[1]

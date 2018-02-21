@@ -11,6 +11,21 @@ struct	str_geometrie	(
 		
 		m_plug, 
 		
+	---- Material IDs -----------------
+		fn get_id_materialType  _type =(
+			local matID = fileIn "$userScripts\cp-Urba\Modules\Batiment\Batiment - material IDs.ms"
+			local ids_propnames = getpropnames matID
+			local result = 1
+			for propNom in ids_propnames do
+				if _type as name == propNom do
+					result = getproperty 	matID	propNom
+			result
+		),
+		fn set_matID _faces	_matID =(
+			if classof _faces 	!= array 		do _faces 		= #(_faces)
+			if classof _matID 	!= integer		do _matID 	= get_id_materialType  _matID
+			polyop.setFaceMatID m_plug.delegate 	_faces 	 _matID			
+		),
 		
 	----- vider la geometrie ----------------
 		fn vider 													=(
@@ -20,6 +35,7 @@ struct	str_geometrie	(
 				polyop.deleteIsoVerts m_plug.delegate
 			)
 		),
+		
 		
 	----- constructions élémentaires ----------------
 		fn points	_liste_pts_position								=(
@@ -43,7 +59,7 @@ struct	str_geometrie	(
 			)
 			result
 		),
-		fn face		_liste_pts						matID:			=(
+		fn face		_liste_pts						matID:1			=(
 			
 			--- si on a liste de point3 on créé les points d'abord
 			if classof 	_liste_pts[1] 	== Point3 do
@@ -51,6 +67,8 @@ struct	str_geometrie	(
 			
 			-- on crer la face ----
 			local result = polyop.createPolygon m_plug.delegate  _liste_pts
+			set_matID 	result	matID 
+			
 			result
 		),
 		
@@ -113,7 +131,28 @@ struct	str_geometrie	(
 			
 		
 		),
+	
+	
+	---- Operations diverses ------------
+		fn extruder 	_faces 	_hauteur	=(
+			if classof _faces != array do _faces = #(_faces)
+			polyop.extrudeFaces  m_plug.delegate 	_faces 	_hauteur
+		),
+		fn biseauter	_faces 	_hauteur	_largeur =(
+			if classof _faces != array do _faces = #(_faces)
+			polyop.bevelFaces m_plug.delegate 	_faces 	_hauteur 	_largeur			
+		),
+		fn souder	_pts =(
+			polyop.weldVertsByThreshold m_plug.delegate 		( _pts as bitArray)
+		),
 		
+	--- plans ---------------
+		fn get_plan_2vecs_1Point	_vec1	_vec2		_pt_Origine =(
+			
+			local nvPlan  = str_plan ()
+			nvPlan.creerFrom_2vecs_et_1Point	_vec1	_vec2		_pt_Origine
+			nvPlan
+		),
 		
 	------ Initialisation de la structure ------------
 		fn initialiser _plug =(

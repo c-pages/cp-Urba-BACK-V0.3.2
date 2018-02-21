@@ -16,7 +16,6 @@ struct 	str_toiture (
 	------ Membres ------------------------------------------------------------------------------
 	public
 		---- Parametres -----------------------------------
-		id						=	"#",		
 		nom					=	"",
 		type					=	undefined,
 		params				=	undefined,
@@ -47,81 +46,12 @@ struct 	str_toiture (
 		),
 		fn initialiser 		_type	_nom 	=(
 			
-			---- id unique ----
-			id += "toiture_"
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
-			
 			type 				=	_type 			
 			nom				=	_nom
 			
 		),
 		
 		---- Construction du mesh 	( fonction virtuelle ) -----------------------
-		fn construire		_plug	 	pts_accroches					= 		fnVirt_construire	 _plug	pts_accroches		this	/* ,
-		
-		
-		---- Enregistrement / chargement	-----------------
-		fn enregistrer 	_plug	=(
-			
-			local mgr_datas = _plug.core.get_mgrDatas ()
-			
-				--- on cherche s'il existe deja comme parametre -----
-			local index_composant = 0
-			for i = 1 to _plug.fac_compos_ids.count do
-				if _plug.fac_compos_ids[i] == id  do index_composant = i
-			
-			
-			
-			--- s'il n'existe pas encore, on l'ajoute -----
-			if index_composant == 0 then (
-				
-				append 	_plug.fac_compos_ids 				id
-				append 	_plug.fac_compos_noms  			nom
-				append 	_plug.fac_compos_types  			type
-				append 	_plug.fac_compos_params  		(	mgr_datas.get_datas_string	params	)
-				
-			--- s'il existe, on l'actualise -----
-			) else (
-				
--- 				debug "enregistrer cmoposant existant"
-				debug "id"		var:id
-				
-				_plug.fac_compos_noms[index_composant] 		=	nom				
-				_plug.fac_compos_types[index_composant]		=	type		
-				_plug.fac_compos_params[index_composant]		=	(	mgr_datas.get_datas_string	params	)
-				
-			) 
-		),
-		fn charger 	_plug	 =(
-			
-			local mgr_datas = _plug.core.get_mgrDatas ()
-			
-			--- on cherche s'il existe deja comme parametre -----
-			local index_composant = 0
-			local i= 1
-			local trouve = false
-			while i <= _plug.fac_compos_ids.count and not trouve	do (
--- 				debug "charger id" var:_plug.fac_compos_ids[i]
-				
-				if _plug.fac_compos_ids[i] as string == id as string do (
-					index_composant = i
-					trouve = true
-				)
-				i+= 1
-			)
-			
-			-- on charge	------------------------------------
-			if index_composant != 0 then (
-				
-				id 				= 	_plug.fac_compos_ids[index_composant]
-				nom 				= 	_plug.fac_compos_noms[index_composant]
-				type				=	_plug.fac_compos_types[index_composant]
-				
-				mgr_datas.set_datas_string		_plug.fac_compos_params[index_composant]			params
-				
-			)
-			
-		)
-		*/
+		fn construire		_plug	 	pts_accroches					= 		fnVirt_construire	 _plug	pts_accroches		this	
 		
 ) ---- fin composant -------------------------------

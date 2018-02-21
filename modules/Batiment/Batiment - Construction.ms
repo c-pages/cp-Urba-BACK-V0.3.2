@@ -1,14 +1,14 @@
 
 
 -- fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - material IDs.ms"
- struct 	str_prefs_matID (
+/*  struct 	str_prefs_matID (
 	mur 				= 	10,
 	menuiserie 	= 	20,
 	vitrage 			= 	30,
 	toiture 			= 	40,
 	metal			=	50
 )
-
+ */
 
 --- la structure pour créer des geometries du delegate -------------------
 include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Geometrie.ms"
@@ -37,29 +37,18 @@ struct str_construction (
 		m_plug,
 	public			
 		m_geo		= 	str_geometrie 	(),
-		m_matID	= 	str_prefs_matID () ,	--fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - material IDs.ms",
+-- 		m_matID	= 	str_prefs_matID () ,	--fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - material IDs.ms",
 		
 		---- Outils -------------
 	private
 		m_outils_poly			=	str_poly_outils (),
 		m_outils_shape			=	str_shape_outils (),
 		
--- 		---- Constructeur -------------
--- 	private
-		cstr_composants /* 	= str_constructeur_composants () */,
 		
 		---- tracé Logo  -------------------
 	private
 		logo = #(	[14.1994,37.717,0], 	[14.1994,-189.586,0], 	[287.927,-189.586,0], 	[287.927,139.601,0], 	[174.501,253.027,0], 	[174.501,479.879,0], 	[61.0754,479.879,0], 	[61.0754,366.453,0], \
 						[-52.3504,479.879,0], 	[-392.628,139.601,0], 	[-392.628,-189.586,0],	[-118.9,-189.586,0], 	[-118.9,37.717,0]),
-		
-		
-		---- constantes------------------
-	private
-		const_ep_ssBassement 	= 	100,
--- 		const_ep_dalle 				= 20,
-		const_ep_mur	 			= 20,
-		const_ep_couvertine	 	= 5,
 		
 		
 		
@@ -147,14 +136,15 @@ struct str_construction (
 			)
 			result
 		),
-		 */
+		*/
 		
 		---- elements simples-------------------
 	private
 	
 		fn creer_murPlein		_longueur	 =(
-			local 	nvComposant 				= 	cstr_composants.get_murPlein	()
-			nvComposant.params.longueur 	= _longueur
+			local mgr_composants 				=	m_plug.core.get_mgr_composants ()
+			local nvComposant	 				= 	mgr_composants.get_murPlein	()
+			nvComposant.params.longueur 	=	_longueur
 			nvComposant
 		),
 		fn get_sequenceFacade		_facade		_longueur_facade	=(
@@ -261,7 +251,7 @@ struct str_construction (
 			------------ CONSTRUCTION  DE LA FACADE	------------------------------------
 			--- on créé  les 3 premiers points --------				
 			local pt_accroche_1 		= 	_pt1
-			local pt_accroche_2 		= 	pt_accroche_1 + [0,0,m_plug.etages_epaiss_dalle]
+			local pt_accroche_2 		= 	pt_accroche_1 + [0,0,m_plug.const_dalle_epaisseur]
 			local pt_accroche_3 		= 	pt_accroche_2 + [0,0,m_plug.etages_hauteur]			
 			local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	 	)
 			
@@ -293,7 +283,7 @@ struct str_construction (
 			
 		),
 		
-		
+		/* 
 		------------ TOITURES-------------------------		
 	private
 		fn toitPentes 				&z	_nbrePentes	=(
@@ -576,15 +566,16 @@ struct str_construction (
 			polyop.setFaceMatID m_plug.delegate  faceToitsSurface 	m_matID.toiture
 			
 		),		
+		*/
 		
-		
-		------------ FACADES-------------------------
+		------------ Construction-------------------------
 	private
 		fn creer_ssBassement  		&z	=(
 			
 			local surface_points 	= m_plug.core.get_surface_points ()
-			m_geo.facesContour	 	surface_points		z 	const_ep_ssBassement	
-			z += const_ep_ssBassement
+			local faces = m_geo.facesContour	 	surface_points		z 		m_plug.const_ssBassement_epaisseur
+			m_geo.set_matID 		faces		#mur
+			z += m_plug.const_ssBassement_epaisseur
 			
 		),
 		fn creer_facades 				&z	=(
@@ -630,7 +621,7 @@ struct str_construction (
 					--- sinon un mur plein --------------
 						
 						local pt_accroche_1 	= 	pt_mur_1 
-						local pt_accroche_2 	= 	pt_mur_1 			+ [0,0,	m_plug.etages_epaiss_dalle]
+						local pt_accroche_2 	= 	pt_mur_1 			+ [0,0,	m_plug.const_dalle_epaisseur]
 						local pt_accroche_3 	= 	pt_accroche_2 	+ [0,0,m_plug.etages_hauteur]	
 						
 						local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	)
@@ -643,15 +634,16 @@ struct str_construction (
 					
 				)
 				
-				z += m_plug.etages_hauteur + m_plug.etages_epaiss_dalle
+				z += m_plug.etages_hauteur + m_plug.const_dalle_epaisseur
 				
 			) --- fin boucle etages -------------
-			
-			m_geo.facesContour	 (	m_plug.core.get_surface_points ()	)	z 	m_plug.etages_epaiss_dalle
-			z += m_plug.etages_epaiss_dalle
-			
+			/* 
+			local faces = m_geo.facesContour	 (	m_plug.core.get_surface_points ()	)	z 	m_plug.const_dalle_epaisseur
+			m_geo.set_matID 		faces		#mur
+			z += m_plug.const_dalle_epaisseur
+			 */
 		),
-		fn creer_toit 						&z =(
+		fn creer_toiture					&z =(
 			
 			local surface_points 				= m_plug.core.get_surface_points ()
 			for pt in surface_points do
@@ -667,7 +659,6 @@ struct str_construction (
 		fn initialiser 	_plug =(
 			m_plug = _plug
 			m_geo.initialiser	_plug
-			cstr_composants = _plug.core.get_mgr_composants ()
 			
 		),
 		fn actualiser 	 =(
@@ -695,12 +686,12 @@ struct str_construction (
 					local chrono_debut = timeStamp ()
 					
 					---- On définie le Z initial 	----
-					local zCourant = -( const_ep_ssBassement + m_plug.etages_epaiss_dalle )
+					local zCourant = -( m_plug.const_ssBassement_epaisseur + m_plug.const_dalle_epaisseur )
 					
 					---- ...  et on construit le batiment -----
 					creer_ssBassement 			&zCourant
 					creer_facades					&zCourant
-					creer_toit							&zCourant
+					creer_toiture						&zCourant
 					
 					
 					
