@@ -194,7 +194,6 @@ rollout roll_global 			"Global" 		rolledUp:false 	(
 	
 	fn shape_filt 		obj = superclassof obj == shape
 	
-	
 	--- Surface ------
 	pickbutton 'btn_pick_surface' "Pick shape" pos:[10,14] width:150 height:18 filter:shape_filt toolTip:"Le shape à utiliser comme surface de base pour la création du bâtiment." autoDisplay:true align:#left
 	GroupBox 'grp_surface' "Surface:" pos:[4,0] width:162 height:38 align:#left
@@ -261,6 +260,9 @@ rollout roll_global 			"Global" 		rolledUp:false 	(
 	
 	
 	
+	on btn_pick_surface	picked 	_shape do
+		core.assigner_surface 		$		_shape 		
+	
 	on ddl_toiture selected 	_val do (
 		local mgr_toiture 			= core.get_mgr_toiture ()
 		mgr_toiture.assigner 	_val
@@ -277,6 +279,14 @@ rollout roll_global 			"Global" 		rolledUp:false 	(
 		core.actualiser ()
 	on spn_hauteur changed val do
 		core.actualiser ()
+	/* 
+	on spn_hauteur buttonDown do (
+
+		flagForeground $ true
+	)
+	on spn_hauteur buttonup  inCancel_arg do (
+		flagForeground $ false
+	) */
 	on lbx_facades doubleClicked arg do
 		core.facadeEditeur_ouvrir	 	lbx_facades.selection
 	on btn_ajouterFacade pressed do
@@ -291,6 +301,12 @@ rollout roll_global 			"Global" 		rolledUp:false 	(
 	(
 			core.supprimer_facade		lbx_facades.selection 
 		)
+	on btn_editer_toiture pressed do (
+		local toiture = core.get_toiture ()
+		local dialog = toiture.get_dialog ()
+		createDialog 	dialog
+		dialog.initialiser 	$	toiture 
+	)
 )
 rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
 	

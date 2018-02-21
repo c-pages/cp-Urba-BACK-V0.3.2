@@ -678,7 +678,6 @@ struct str_construction (
 			--- sinon on consrtuit le batiment ------------
 			else 	with redraw OFF (
 				
-				debug "On consrtuit le batiment "
 				
 				-- on desactive l'undo pour aller plus vite ---------------
 				undo off (

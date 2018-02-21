@@ -9,8 +9,7 @@ compo_toolTip =	"Ajouter un mur plein de longueur fixe."
 
 --- les parametres du composant	---------
 struct compo_params	(
-	longueur = 100.,
-	on create do format "CREATION DE COMPO_PARAMS : %\n" this
+	longueur = 100.
 )
 --- les rollout du composant	---------
 rollout compo_dialog "Mur plein" width:180 height:70	(

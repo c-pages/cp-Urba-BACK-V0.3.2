@@ -81,8 +81,6 @@ struct 	str_mgr_toiture (
 			
 			--- on importe le fichier du struct des composants  (pour avoir accés meme si le plug est pas actif)---
 			include	 "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Toiture.ms"
-			debug "assigner"
-			debug "m_modelesBase"	var:m_modelesBase
 			
 			m_toiture= str_toiture () ---	get_nouveauComposant ()
 			m_modelesBase[_id ].initialiser	m_toiture
@@ -102,13 +100,17 @@ struct 	str_mgr_toiture (
 			m_plug.toiture_params  	=	(	mgr_datas.get_datas_string	m_toiture.params	)
 		),
 		fn charger =(
-			local mgr_datas = m_plug.core.get_mgrDatas ()
+			debug "charger"
+			
+			local mgr_datas 		= m_plug.core.get_mgrDatas ()
+			local string_params	=	copy m_plug.toiture_params 
 			
 			local typeACharger 	= m_plug.toiture_type
 			local indexModel 		= get_index_parType    typeACharger
 			assigner	indexModel
 			
-			mgr_datas.set_datas_string		m_plug.toiture_params  	m_toiture.params		
+			mgr_datas.set_datas_string		string_params  	m_toiture.params	
+			
 			
 		),
 	
@@ -119,6 +121,7 @@ struct 	str_mgr_toiture (
 		fn initialiser	_plug	=(
 			debug "initialiser ()"
 			m_plug = _plug
+			debug "m_plug.toiture_params  0"	var:m_plug.toiture_params
 			importer_models ()
 		)
 		

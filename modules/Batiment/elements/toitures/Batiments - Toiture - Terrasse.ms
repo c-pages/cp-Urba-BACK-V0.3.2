@@ -13,27 +13,29 @@ struct toiture_params	(
 )
 --- les rollout du composant	---------
 rollout toiture_dialog "Toiture plate" width:180 height:70	(
-	local m_rollPrt
-	local m_compo
+	local m_plug
+	local m_toiture
+	local mgr_toiture
 	
-	edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
-	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
-	label 'lbl19' "Longeur:" pos:[13,37] width:49 height:13 align:#left
-	spinner 'spn_longueur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-	
+	label 'lbl_htAcrotere' "Ht. acrotère:" pos:[9,10] width:61 height:13 align:#left
+	spinner 'spn_htAcrotere' "" pos:[92,9] width:70 height:16 range:[0,100000,0] type:#float scale:1 align:#left
 	fn actualiser =(
-		spn_longueur.value 	= 	m_compo.params.longueur
-		edt_nom.text 			=	m_compo.nom
+		spn_htAcrotere.value 	= 	m_toiture.params.acrotere_ht
 	)
 
-	on spn_longueur changed val do (
-		m_compo.params.longueur = val
-		m_rollPrt.actualiser ()
+	fn initialiser _plug	_toiture	=(
+		m_plug			= _plug
+		m_toiture 		= _toiture
+		mgr_toiture	= m_plug.core.get_mgr_toiture ()
+		actualiser ()
 	)
-	on edt_nom	 entered txt 	do	(
-		m_compo.nom = txt
-		m_rollPrt.actualiser ()
+
+	on spn_htAcrotere changed val do (
+		m_toiture.params.acrotere_ht		= val
+		mgr_toiture.enregistrer ()
+		m_plug.core.actualiser ()
 	)
+	
 	
 )
 --- la fonction de construction	---------

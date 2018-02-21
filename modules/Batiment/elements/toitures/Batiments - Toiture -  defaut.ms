@@ -10,8 +10,9 @@ toiture_type	=	#sans
 fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 		
 		local ptr_geo 				= 	_plug.core.get_geo ()
-		ptr_geo.face		pts_accroches						matID:#mur
-		
+		local face = ptr_geo.face		pts_accroches						matID:#mur
+		ptr_geo.extruder	face	_plug.const_dalle_epaisseur
+	
 	)
 	
 

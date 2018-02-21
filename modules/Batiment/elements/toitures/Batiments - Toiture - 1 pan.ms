@@ -3,39 +3,78 @@
 
 
 --- parametres de base	-----------------------------
-toiture_titre 	= "1 pente"	
-toiture_type	=	#1pente
+toiture_titre 	= "1 pan"	
+toiture_type	=	#1pan
 toiture_toolTip =	"..."
 
 --- les parametres du composant	---------
 struct toiture_params	(
-	pente 		= 30,
-	decalage_hauteur 	= 20
+	pente 					= 15,
+	decalage_hauteur 	= 20,
+	orientation				=	0,
+	debord					= 50.,
+	epaisseur 				= 15
 )
 --- les rollout du composant	---------
-rollout toiture_dialog "Toiture plate" width:180 height:70	(
-	local m_rollPrt
-	local m_compo
+rollout toiture_dialog "Toiture - 1 pan" width:180 height:115
+(
+	local m_plug
+	local m_toiture
+	local mgr_toiture
 	
-	edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
-	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
-	label 'lbl19' "Longeur:" pos:[13,37] width:49 height:13 align:#left
-	spinner 'spn_longueur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
+	label 'lbl_pente' "Pente (°):" pos:[9,10] width:61 height:13 align:#left
+	spinner 'spn_pente' "" pos:[92,9] width:70 height:16 range:[0.001,70,0] type:#float scale:1 align:#left
+	label 'lbl_decallage' "Décallage (z)" pos:[9,26] width:63 height:13 align:#left
+	spinner 'spn_decallage' "" pos:[92,25] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
+	label 'lbl_orientation' "Orientation (°):" pos:[9,42] width:70 height:13 align:#left
+	spinner 'spn_orientation' "" pos:[92,41] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
 	
 	fn actualiser =(
-		spn_longueur.value 	= 	m_compo.params.longueur
-		edt_nom.text 			=	m_compo.nom
+		spn_pente.value 	= 	m_toiture.params.pente
+-- 		edt_nom.text 			=	m_toiture.nom
+	)
+	fn initialiser _plug	_toiture	=(
+		m_plug			= _plug
+		m_toiture 		= _toiture
+		mgr_toiture	= m_plug.core.get_mgr_toiture ()
+		actualiser ()
 	)
 
-	on spn_longueur changed val do (
-		m_compo.params.longueur = val
-		m_rollPrt.actualiser ()
-	)
-	on edt_nom	 entered txt 	do	(
-		m_compo.nom = txt
-		m_rollPrt.actualiser ()
-	)
 	
+	label 'lbl_debord' "Debord" pos:[9,58] width:63 height:13 align:#left
+	spinner 'spn_debord' "" pos:[92,57] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
+	label 'lbl_epaisseur' "Epaisseur" pos:[9,74] width:70 height:13 align:#left
+	spinner 'spn14' "" pos:[92,73] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
+	on spn_pente changed val do
+	(
+			m_toiture.params.pente		= val
+			mgr_toiture.enregistrer ()
+			m_plug.core.actualiser ()
+		)
+	on spn_decallage changed val do
+	(
+			m_toiture.params.decalage_hauteur		= val
+			mgr_toiture.enregistrer ()
+			m_plug.core.actualiser ()
+		)
+	on spn_orientation changed val do
+	(
+			m_toiture.params.orientation		= val
+			mgr_toiture.enregistrer ()
+			m_plug.core.actualiser ()
+		)
+	on spn_debord changed val do
+	(
+			m_toiture.params.debord		= val
+			mgr_toiture.enregistrer ()
+			m_plug.core.actualiser ()
+		)
+	on spn14 changed val do
+	(
+			m_toiture.params.epaisseur		= val
+			mgr_toiture.enregistrer ()
+			m_plug.core.actualiser ()
+		)
 )
 --- la fonction de construction	---------
 fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
@@ -49,11 +88,15 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 -------------  PARAMETRES 	 et constantes		-----------------------------------------------------------------------------------------------------------------
 		local toiture_pente 		= _composant.params.pente
 		local toiture_hauteur		= _composant.params.decalage_hauteur
+		local toiture_orient		= _composant.params.orientation
+		local toiture_debord		= _composant.params.debord
+		local toiture_epaisseur	= _composant.params.epaisseur
 	
 		local	 mtrx_axeP	=	mgr_surface.get_axePrincipal ()
 		local	 BB_axeP		=	mgr_surface.get_axeP_BB ()
-		translate mtrx_axeP	BB_axeP[1]
-		
+		rotateZ 		mtrx_axeP		toiture_orient	
+		translate 	mtrx_axeP		BB_axeP[1]
+	
 		local diag_axeP	=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
 		local largeur 		=	diag_axeP.x
 		local longeur 		= 	diag_axeP.z
@@ -95,6 +138,15 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 			
 		)
 		
+		---- on recalle les points sur Z----
+		local recalleZ = 0
+		for pt in pointsPente do (
+			local ecart = abs ( (z + toiture_hauteur) - pt.z )
+			if pt.z < z + toiture_hauteur and recalleZ < ecart do				
+				recalleZ = ecart
+		)
+		for pt in pointsPente do pt.z += recalleZ			
+		
 		--- creation de la face du dessus ----
 		local faceDessus =  ptr_geo.face 	pointsPente 	
 		append nvlsFaces faceDessus
@@ -133,8 +185,8 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 		
 		
 		---- debord et epaisseur du toit -----
-		ptr_geo.biseauter	faceDessus 	0.0 	30.
-		ptr_geo.extruder	faceDessus 	20.
+		ptr_geo.biseauter	faceDessus 	0.0 	toiture_debord
+		ptr_geo.extruder	faceDessus 	toiture_epaisseur
 
 		
 	)
@@ -151,7 +203,6 @@ fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Mod
 parametresTMP = toiture_params () 
 str_modelBase 	tooltip:toiture_tooltip		titre:toiture_titre	type:toiture_type	params:(parametresTMP)	dialog:toiture_dialog	fnConstruire:toiture_fnConstruire
 
-	
 	
 	
 	

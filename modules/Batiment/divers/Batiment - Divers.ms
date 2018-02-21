@@ -85,50 +85,52 @@ struct str_datasToString (
 			
 		),
 		fn set_datas_string 		_datas_string 		_element 		=(
-			local datasTab 	= filterString 	_datas_string 		separateur_params
-			for datas in datasTab do (
-				local dataTab		= filterString datas 	separateur_mutation
-				local propNom 	= dataTab[1]
-				local typeProp 	= classof ( getProperty _element propNom  )
-				case typeProp of (
-					--- les trucs qu'on zappe ------
-					MAXScriptFunction:	()
-					RolloutClass:()
-					--- les trucs qu'on prend en compte	------
-					string:		(
-							local data =   dataTab[2]
-							if data   == undefined do data =""
-							setProperty _element propNom data
-					)
-					array: (
-						if dataTab.count >1 do (
-							local datas_liste  = filterString	dataTab[2] 	separateur_items
-							local tabResult =#()
-							for data in datas_liste do (
-								local data_exe 	= execute data
-								--------------- string ---------------
-								if data_exe 		== undefined then 	append tabResult ( data)
-								--------------- un objet ---------------
-								else	if classof data_exe == Name then (	
-									local elemTmp =  ( m_prt.get_parametre	  data 	)	
-									--- un id (name)------
-									if elemTmp == undefined do	elemTmp = data
-									append tabResult		elemTmp
-								--------------- Nombres ---------------	
-								) else 	append tabResult 	( data_exe)
-							)
-							setProperty _element 	propNom 	tabResult
+			if _datas_string != undefined then (
+				local datasTab 	= filterString 	_datas_string 		separateur_params
+				for datas in datasTab do (
+					local dataTab		= filterString datas 	separateur_mutation
+					local propNom 	= dataTab[1]
+					local typeProp 	= classof ( getProperty _element propNom  )
+					case typeProp of (
+						--- les trucs qu'on zappe ------
+						MAXScriptFunction:	()
+						RolloutClass:()
+						--- les trucs qu'on prend en compte	------
+						string:		(
+								local data =   dataTab[2]
+								if data   == undefined do data =""
+								setProperty _element propNom data
 						)
-					)
-					default:						(
-						if dataTab[2] != undefined do  (							
-							local data = execute dataTab[2]							
-							setProperty _element propNom data
-						)						
+						array: (
+							if dataTab.count >1 do (
+								local datas_liste  = filterString	dataTab[2] 	separateur_items
+								local tabResult =#()
+								for data in datas_liste do (
+									local data_exe 	= execute data
+									--------------- string ---------------
+									if data_exe 		== undefined then 	append tabResult ( data)
+									--------------- un objet ---------------
+									else	if classof data_exe == Name then (	
+										local elemTmp =  ( m_prt.get_parametre	  data 	)	
+										--- un id (name)------
+										if elemTmp == undefined do	elemTmp = data
+										append tabResult		elemTmp
+									--------------- Nombres ---------------	
+									) else 	append tabResult 	( data_exe)
+								)
+								setProperty _element 	propNom 	tabResult
+							)
+						)
+						default:						(
+							if dataTab[2] != undefined do  (							
+								local data = execute dataTab[2]							
+								setProperty _element propNom data
+							)						
+						)
 					)
 				)
 			)
-			_element
+			_element = undefined
 		)
 
 )
@@ -233,85 +235,6 @@ struct str_mgr_arrayParametres (
 )	--	fin manager de composants ------
 
 
-
-struct str_plan (
-	
-		------------ DEBUG	----------------------------------------------------------------------------------
-		m_debug = true,
-		m_dbgPrefix ="str_plan",
-		fn debug 	_txt  var:	 param:    =(
-			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
-			catch ()
-		),
-		
-		---- Membres --------------
-		a,
-		b,
-		c,
-		d,
-		normal ,
-		
-		---- Fonctions --------------
-		fn creerFrom_2vecs_et_1Point	_vec1 	_vec2  	_point	=(
-			
--- 			debug "creerFrom_2vecs_et_1Point"
-			---le vec normal du plan-----
-			local norm1 = normalize _vec1
-			local norm2 = normalize _vec2		
-			normal =  cross    norm2 	norm1
-			
-			--- definition equation ---------
-			a = normal.x
-			b = normal.y
-			c = normal.z		
-			d = -( a*_point.x + b*_point.y + c*_point.z )
-			
--- 			debug "a" var:a
--- 			debug "b" var:b
--- 			debug "c" var:c
--- 			debug "d" var:d
-		),
-		fn projeter_point_verticalement 		_pt 	=(
--- 			debug "projeter_point_verticalement"
-			local result = copy _pt
-			result.z =  -( a*_pt.x + b*_pt.y + d ) / c
-			result
-			
-		),
-		
-
-		fn get_intersection_segment	_segPt1		_segPt2			=(
-			
-			local k	= -( a * _segPt1.x 		+	b * _segPt1.y 	+	c * _segPt1.z 	+ d ) 	/	( a * ( _segPt2.x -  _segPt1.x ) + b * ( _segPt2.y -  _segPt1.y )  + c * ( _segPt2.z -  _segPt1.z )  )
-
-			local ptResult 	= [0,0,0]
-			ptResult.x 			=  _segPt1.x + k * ( _segPt2.x 	-  _segPt1.x )
-			ptResult.y 			=  _segPt1.y + k * ( _segPt2.y 	-  _segPt1.y )
-			ptResult.z 			=  _segPt1.z + k * ( _segPt2.z 	-  _segPt1.z )
-			
-			ptResult
-			
-		),
-		fn coupe_segment	_segPt1		_segPt2			=(
-			
-			local pointIntersect = get_intersection_segment 	_segPt1		_segPt2 		
-			-- debug-------
--- 			point pos:pointIntersect isSelected:true
-			
-			local vecSeg 	= _segPt2 - _segPt1
-			local vecInter = pointIntersect - _segPt1
-			
-			if dot vecSeg vecInter >0 and length vecSeg > length vecInter then
-				true
-			else
-				false
-			
-		)
-		
-		
-		
-		
-)
 
 
 

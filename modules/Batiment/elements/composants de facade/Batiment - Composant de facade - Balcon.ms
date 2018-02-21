@@ -51,7 +51,7 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 	local pt_result_1, pt_result_2, pt_result_3
 	
 	--- Vecteurs ------------
-	local vec_ep_dalle 	= [0,0,1] 			* 	_plug.etages_epaiss_dalle			
+	local vec_ep_dalle 	= [0,0,1] 			* 	_plug.const_dalle_epaisseur			
 	local vec_longueur 	= _normDir 		* 	_composant.params.longueur
 	local norm_balcon	= _normDir * rotateZ ( matrix3 1 ) -90
 	local vec_largeur		= norm_balcon 	*	 _composant.params.largeur				

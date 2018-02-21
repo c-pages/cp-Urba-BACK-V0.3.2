@@ -30,7 +30,7 @@
 
 
 --- inculsion des fichiers externes	------------------------------
-include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Divers.ms"
+include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Divers.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Construction.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Managers.ms"
 
@@ -116,8 +116,6 @@ struct str_batiment_core (
 			mgr_toiture.initialiser				m_plug
 			m_construction.initialiser		m_plug
 			
--- 			mgr_toiture.assigner				1
-			
 			--- chargement des parametres ------------------
 			charger ()
 			
@@ -133,26 +131,20 @@ struct str_batiment_core (
 		
 		fn get_construction			= m_construction,
 		fn get_geo						= m_construction.m_geo,
--- 		fn get_matID					= m_construction.m_matID,
 		
 		fn get_toiture_index 			=	mgr_toiture.get_index_courant (),
 		fn get_toiture					=	mgr_toiture.get_courant (),
-		
-		
 		
 		fn get_mgr_surface			= mgr_surface,
 		fn get_mgr_composants 	= mgr_facades.get_mgr_composants (),
 		fn get_mgr_facades	 		= mgr_facades,
 		fn get_mgr_toiture	 		= mgr_toiture,
 		fn get_mgrDatas 				= mgr_datas,
-		
-		
+			
 	---- Mutations	------
 	public
 		fn set_roll_editeurDeFacade_position	_pos 	=( roll_facades_pos = _pos),
 		fn set_roll_editeurDeFacade_taille		_taille 	=( roll_facades_taille = _taille),
-		
-		
 		
 	----- Editeur de facades -----------------
 	public
@@ -173,7 +165,6 @@ struct str_batiment_core (
 		fn facadeEditeur_fermer 			=(
 			destroyDialog 	roll_facades
 		),
-		
 		
 	----- Manipuler les facades et leurs composants	---------------
 		fn creer_facade 							=(
@@ -234,7 +225,7 @@ struct str_batiment_core (
 	----- Surface ---------------------
 		fn assigner_surface 		_nodeTHIS		_shape 		=(
 			
-			appliquer_material	_nodeTHIS
+			appliquer_material		_nodeTHIS
 			
 			_nodeTHIS.transform = _shape.transform
 			mgr_surface.assigner		_shape
