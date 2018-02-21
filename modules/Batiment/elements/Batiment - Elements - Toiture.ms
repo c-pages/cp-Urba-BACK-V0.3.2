@@ -3,18 +3,15 @@
  
 
 
-struct 	str_composant (
+struct 	str_toiture (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 		m_debug = true,
-		m_dbgPrefix ="urba | str_composant",
+		m_dbgPrefix ="urba | str_toiture",
 		fn debug 	_txt  var:	 param:    =(
 			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 			catch ()
 		),
-		
-		
-		
 		
 	------ Membres ------------------------------------------------------------------------------
 	public
@@ -41,20 +38,17 @@ struct 	str_composant (
 		---- Accessions -----------------------
 		fn get_dialog				=	m_dialog,
 		fn a_desParametres	=	params != undefined,
-		fn get_longueur 		=	if a_desParametres then params.longueur else 0,
 		
 		--- Initialisations -----------------------
 		fn initialiser_dialog 	_roll_parent 	=(
-			if a_desParametres do (
-				m_dialog.m_rollPrt		= 	_roll_parent
-				m_dialog.m_compo	=	this
-				m_dialog.actualiser()
-			)
+			m_dialog.m_rollPrt		= 	_roll_parent
+			m_dialog.m_compo	=	this
+			m_dialog.actualiser()
 		),
 		fn initialiser 		_type	_nom 	=(
 			
 			---- id unique ----
-			id += "compo_"
+			id += "toiture_"
 			for i= 1 to 10 do id += ( random 0 9 ) as string	
 			
 			type 				=	_type 			
@@ -63,7 +57,7 @@ struct 	str_composant (
 		),
 		
 		---- Construction du mesh 	( fonction virtuelle ) -----------------------
-		fn construire		_plug	 	pts_accroches		_normDir				= 		fnVirt_construire	 _plug	pts_accroches		_normDir		this	,
+		fn construire		_plug	 	pts_accroches					= 		fnVirt_construire	 _plug	pts_accroches		this	/* ,
 		
 		
 		---- Enregistrement / chargement	-----------------
@@ -128,6 +122,6 @@ struct 	str_composant (
 			)
 			
 		)
-
+		*/
 		
 ) ---- fin composant -------------------------------

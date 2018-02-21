@@ -576,31 +576,6 @@ struct str_construction (
 			polyop.setFaceMatID m_plug.delegate  faceToitsSurface 	m_matID.toiture
 			
 		),		
-		fn toit 						&z =(
-			
-			local surface_points 	= m_plug.core.get_surface_points ()
-			
-			case m_plug.toit_type of (
-				1: (	---- PLAT	----	-- for pt in m_plug.surface_points collect [pt.x,pt.y,z]
-					m_geo.pointsEtFaces		surface_points		  	m_matID:m_matID.toiture
-				)
-				2: (	---- ACROTERE	----
-					
-					
-					--- creation de la facette globale-----
-					local faceDuToit 			= m_geo.pointsEtFaces		surface_points		
-					
-					acrotere			faceDuToit
-					
-				)
-				3: (	---- 1 PAN	----
-					toitPentes					&z  1
-				)
-				4: (	---- 2 PANS	----
-					toitPentes					&z  2
-				)
-			)
-		),		
 		
 		
 		------------ FACADES-------------------------
@@ -676,6 +651,15 @@ struct str_construction (
 			z += m_plug.etages_epaiss_dalle
 			
 		),
+		fn creer_toit 						&z =(
+			
+			local surface_points 				= m_plug.core.get_surface_points ()
+			for pt in surface_points do
+				pt.z = z
+			
+			local toiture							=	m_plug.core.get_toiture ()
+			toiture.construire	 	m_plug			surface_points	--	normDir_axeprincipal
+		),		
 		
 		
 		--------- INTERFACE --------------------------------------------------------------------
@@ -716,7 +700,7 @@ struct str_construction (
 					---- ...  et on construit le batiment -----
 					creer_ssBassement 			&zCourant
 					creer_facades					&zCourant
--- 					toit					&zCourant
+					creer_toit							&zCourant
 					
 					
 					

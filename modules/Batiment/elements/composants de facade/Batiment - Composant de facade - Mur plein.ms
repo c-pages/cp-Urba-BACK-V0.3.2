@@ -122,7 +122,7 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Modele de base.ms"
 --- Creation de la structure mere	-----------------
 parametresTMP = compo_params () 
-str_compo_mere 	tooltip:compo_tooltip		titre:compo_titre	type:compo_type	params:(parametresTMP)	dialog:compo_dialog	fnConstruire:compo_fnConstruire
+str_modelBase 	tooltip:compo_tooltip		titre:compo_titre	type:compo_type	params:(parametresTMP)	dialog:compo_dialog	fnConstruire:compo_fnConstruire
 
 	
 	

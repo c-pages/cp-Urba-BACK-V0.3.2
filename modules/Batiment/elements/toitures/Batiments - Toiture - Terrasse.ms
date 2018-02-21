@@ -3,8 +3,8 @@
 
 
 --- parametres de base	-----------------------------
-toiture_titre 	= "Toiture plate"	
-toiture_type	=	#toiturePlate
+toiture_titre 	= "Terrasse"	
+toiture_type	=	#terrasse
 toiture_toolTip =	"..."
 
 --- les parametres du composant	---------
@@ -37,11 +37,8 @@ rollout toiture_dialog "Toiture plate" width:180 height:70	(
 	
 )
 --- la fonction de construction	---------
-fn toiture_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
-		
-		---- Result final -----------------------------------------------------------------------
-		#()
-		
+fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
+				
 	)
 	
 
@@ -54,7 +51,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Modele de base.ms"
 --- Creation de la structure mere	-----------------
 parametresTMP = toiture_params () 
-str_toiture_mere 	tooltip:toiture_tooltip		titre:toiture_titre	type:toiture_type	params:(parametresTMP)	dialog:toiture_dialog	fnConstruire:toiture_fnConstruire
+str_modelBase		tooltip:toiture_tooltip		titre:toiture_titre	type:toiture_type	params:(parametresTMP)	dialog:toiture_dialog	fnConstruire:toiture_fnConstruire
 
 	
 	

@@ -47,7 +47,7 @@ struct	str_geometrie	(
 			
 			--- si on a liste de point3 on créé les points d'abord
 			if classof 	_liste_pts[1] 	== Point3 do
-				_liste_pts = points	_liste_pts
+				_liste_pts = points		_liste_pts
 			
 			-- on crer la face ----
 			local result = polyop.createPolygon m_plug.delegate  _liste_pts

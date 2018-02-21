@@ -1,6 +1,6 @@
 	
 --- la structure mere	du composant	---------
-struct	str_compo_mere (
+struct	str_modelBase (
 	
 	titre ="",
 	toolTip ="",

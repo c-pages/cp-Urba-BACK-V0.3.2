@@ -92,8 +92,6 @@ extends:Editable_poly replaceUI:true version:0
 	)
 	fn actualiser_rollouts =(
 		roll_global.actualiser ()
-		roll_facades.actualiser ()
-		roll_toiture.actualiser ()
 	)
 	
 
@@ -108,7 +106,6 @@ extends:Editable_poly replaceUI:true version:0
 	tool create (	
 		on mousePoint click do	(	
 			nodeTM.translation = worldPoint
-			
 			core.actualiser ()
 			
 			#stop	

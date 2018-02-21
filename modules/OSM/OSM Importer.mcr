@@ -19,7 +19,7 @@ toolTip:""
 	
 		try 	destroydialog ::OSMImporter.m_dialog		catch ()
 		clearListener ()
-	fileIn	 "$userScripts\cp-urba\Urba - OSM Importer.ms" 
+	fileIn	 "$userScripts\cp-urba\modules\OSM\OSM Importer.ms" 
 		::OSMImporter.toggle_ouverture ()
 	
 )

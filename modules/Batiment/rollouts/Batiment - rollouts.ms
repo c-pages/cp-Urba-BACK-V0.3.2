@@ -32,6 +32,7 @@ parameters params_global 				rollout:roll_global		(
 	
 	------- Surface		------------------
 	surface_node					type:#node 								 	ui:btn_pick_surface		animatable:false		invisibleInTV:true
+-- 	orientation						type:#float				default:0.		ui:spn_rotation_axeP		animatable:false		invisibleInTV:true
 	
 	------- Etages			------------------
 	etages_hauteur				type: #float 				default:250.		ui:spn_hauteur		animatable:false		invisibleInTV:true
@@ -39,21 +40,6 @@ parameters params_global 				rollout:roll_global		(
 	etages_epaiss_dalle		type: #float 				default:20.									animatable:false		invisibleInTV:true
 
 )
-/* 
-parameters params_sousPartie 				 rollout:roll_sousPartie	 	(
-	
-	sousPartie_noms				type:#stringTab 	tabSize:0  		tabSizeVariable:true
-	sousPartie_ids 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
-	
-	sousPartie_surfaceMin		type:#floatTab		tabSize:0 			tabSizeVariable:true
-	sousPartie_surfaceMax		type:#floatTab		tabSize:0 			tabSizeVariable:true
-	
-	sousPartie_etages				type:#intTab			tabSize:0 			tabSizeVariable:true
-	
-)
-
-
- */
 
 
 parameters params_optimSurface		rollout:roll_optimSurface	(
@@ -83,7 +69,7 @@ parameters params_viewport				rollout:roll_viewport	(
 	affiche_geometrie			type:#boolean			default:false	ui:ckb_geometrie		animatable:false		invisibleInTV:true
 	
 )
-parameters params_facades 				rollout:roll_facades	(
+parameters params_facades 				rollout:roll_global	(
 	
 	---- générale -----------
 	fac_ids 								type:#stringTab 	tabSize:0  		tabSizeVariable:true
@@ -122,10 +108,12 @@ parameters params_facades_composants 			(
 
 
 
-parameters params_toiture 				rollout:roll_toiture	(
+parameters params_toiture 				rollout:roll_global	(
+	toiture_type						type: #string 		/*	default:1	 	ui:ddl_toiture	 */			animatable:false		invisibleInTV:true
+	toiture_params					type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	
 	/* 
-	toit_type				type: #integer 			default:1		ui:ddl_toiture				animatable:false		invisibleInTV:true
-	toit_pente				type: #float 				default:20		ui:spn_pente					animatable:false		invisibleInTV:true
+	toit_pente			type: #float 				default:20		ui:spn_pente					animatable:false		invisibleInTV:true
 	toit_hauteur			type: #float 				default:20.	ui:spn_toit_hauteur		animatable:false		invisibleInTV:true
 	toit_orientation		type:#float				default:0.											animatable:false		invisibleInTV:true
 	*/
@@ -193,66 +181,110 @@ rollout roll_presets 		"Presets" 		rolledUp:true	(
 		
 	*/ --------------------  CLEANAGE --------------------
 )
-rollout roll_global "Global" width:162 height:93 (
+rollout roll_global "Global" width:162 height:340
+(
 	
 	
 	fn shape_filt 		obj = superclassof obj == shape
 	
-	pickbutton 'btn_pick_surface' "Pick shape" pos:[12,14] width:116 height:18 filter:shape_filt autoDisplay:true align:#left
-	GroupBox 'grp9' "Surface:" pos:[4,0] width:162 height:38 align:#left
-
-	-- 	spinner 'spn_rotation_axeP' "" pos:[87,73] width:54 height:16 range:[-360,360,0] type:#float scale:1 align:#left
-	-- 	label 'lbl_axeP' "Orientation:" pos:[5,74] width:59 height:15 align:#left
-	-- 	button 'btn_rotation' "+90°" pos:[138,73] width:30 height:16 align:#left
-
-	label 'lbl_nbre' "Nbre. d'étages:" pos:[5,44] width:79 height:15 align:#left
-	spinner 'spn_nbres' "" pos:[87,43] width:80 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	spinner 'spn_hauteur' "" pos:[87,58] width:80 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
-	label 'lbl_hauteur' "Htr. des étages:" pos:[5,59] width:76 height:15 align:#left
 	
-	button 'btn_maj' "MAJ" pos:[127,14] width:30 height:18 align:#left
+	--- Surface ------
+	pickbutton 'btn_pick_surface' "Pick shape" pos:[10,14] width:150 height:18 filter:shape_filt toolTip:"Le shape à utiliser comme surface de base pour la création du bâtiment." autoDisplay:true align:#left
+	GroupBox 'grp_surface' "Surface:" pos:[4,0] width:162 height:38 align:#left
+
+	--- Global ------
+	GroupBox 'grp_global' "Etages:" pos:[4,40] width:162 height:51 align:#left
+-- 	spinner 'spn_rotation_axeP' "" pos:[88,87] width:48 height:16 range:[-360,360,0] type:#float scale:1 align:#left
+-- 	label 'lbl_axeP' "Orientation:" pos:[10,87] width:59 height:15 align:#left
+-- 	button 'btn_rotation' "+90" pos:[137,87] width:24 height:16 align:#left
+	label 'lbl_nbre' "Nbre. d'étages:" pos:[10,56] width:79 height:15 align:#left
+	spinner 'spn_nbres' "" pos:[88,55] width:72 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+	spinner 'spn_hauteur' "" pos:[88,71] width:72 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	label 'lbl_hauteur' "Htr. des étages:" pos:[10,72] width:76 height:15 align:#left
+	
+	
+	--- Facades -----
+	GroupBox 'grp_facades' "Façades:" pos:[4,94] width:162 height:121 align:#left
+	listbox 'lbx_facades' "" pos:[10,125] width:150 height:6 align:#left 
+ 
+ 
+	button 'btn_editer_facade' "Edit" pos:[133,108] width:28 height:16 align:#left
+	button 'btn_ajouterFacade' "+" pos:[10,108] width:16 height:16 align:#left
+	button 'btn_supprimerFacade' "-" pos:[25,108] width:16 height:16 align:#left
+	
+	
+	--- Toitures -----
+	GroupBox 'grp14' "Toiture :" pos:[3,217] width:162 height:40 align:#left
+	button 'btn_editer_toiture' "Edit" pos:[133,232] width:28 height:19 align:#left
+	dropdownList 'ddl_toiture' "" pos:[10,232] width:123 height:21 align:#left
+	
+	
 	
 	fn actualiser =(
-		btn_maj.enabled = surface_node != undefined
+		
+		lbx_facades.items 		=  core.get_facades_noms ()
+		
+-- 		if lbx_facades.selection == 0 then (
+			btn_supprimerFacade.enabled	=	 lbx_facades.selection != 0 
+			btn_editer_facade.enabled			=	 lbx_facades.selection != 0 
+-- 		) else (
+			
+-- 		)
+		local mgr_toiture 		= core.get_mgr_toiture ()
+		local index_toiture 	= core.get_toiture_index ()
+		ddl_toiture.selection 	= 	index_toiture
+		
+		btn_editer_toiture.enabled = mgr_toiture.a_desParametres		()
+		
+		if index_toiture == 1 then
+			btn_editer_toiture.enabled = false
+		else
+			btn_editer_toiture.enabled = true
+		
+		
 	)
 	
 	
 	
+	fn initialiser =(
+		local mgr_toiture 			= core.get_mgr_toiture ()
+		local models_toiture 		= mgr_toiture.get_modeles ()
+		ddl_toiture.items 		=  ( for  model in models_toiture collect model.titre )
+	)
 	
-	on roll_global open do actualiser ()
 	
-	on btn_pick_surface picked _shape	 do (
-		core.assigner_surface	 	$		_shape
+	
+	on ddl_toiture selected 	_val do (
+		local mgr_toiture 			= core.get_mgr_toiture ()
+		mgr_toiture.assigner 	_val
+		core.actualiser ()
 		actualiser ()
 	)
 	
-	on btn_maj 	pressed do
-		core.assigner_surface	 	$		$.surface_node
-	
-	on spn_nbres changed arg do
+	on roll_global open do
+	(
+			initialiser()
+			actualiser ()
+		)
+	on spn_nbres changed val do
 		core.actualiser ()
-	on spn_hauteur changed arg do
+	on spn_hauteur changed val do
 		core.actualiser ()
+	on lbx_facades doubleClicked arg do
+		core.facadeEditeur_ouvrir	 	lbx_facades.selection
+	on btn_ajouterFacade pressed do
+	(
+			core.creer_facade ()
+			actualiser ()
+			lbx_facades.selection = lbx_facades.items.count
+			
+			core.facadeEditeur_ouvrir	 	lbx_facades.selection
+		)
+	on btn_supprimerFacade pressed do
+	(
+			core.supprimer_facade		lbx_facades.selection 
+		)
 )
-
-/* 
-rollout roll_sousPartie 		"Sous parties" 		rolledUp:false	(
-	
-	listbox 'lbx_sousPartie' "" pos:[5,16] width:165 height:9 align:#left 
-	button 'btn_ajouterSousPartie' "+" pos:[141,-1] width:16 height:16 align:#left
-	button 'btn_supprimerSousPartie' "-" pos:[156,-1] width:16 height:16 align:#left
-	
-	
-	fn actualiser =(
-		
-		
-	)
-	
-	
-)
-
- */
-
 
 
 rollout roll_optimSurface 		"Surface" 		rolledUp:true	(
@@ -314,22 +346,21 @@ rollout roll_optimSurface 		"Surface" 		rolledUp:true	(
 	on spn_aligner 	changed state  		do	core.actualiser ()
 	
 )
+/* 
 rollout roll_facades 		"Façades"		rolledUp:false	(
 
 	listbox 'lbx_facades' "" pos:[5,16] width:165 height:9 align:#left 
 	button 'btn_ajouterFacade' "+" pos:[141,-1] width:16 height:16 align:#left
 	button 'btn_supprimerFacade' "-" pos:[156,-1] width:16 height:16 align:#left
--- 	button 'btn_dupliquer' "Dup" pos:[96,0] width:27 height:16 align:#left
-	
 	fn actualiser =(
 		
-		/*
-		enabled = a_un_surface
-		lbx_facades.enabled 			= enabled
-		btn_ajouterFacade.enabled 	= enabled
-		btn_supprimerFacade.enabled = enabled		
-		*/
-		
+-- 		
+-- 		enabled = a_un_surface
+-- 		lbx_facades.enabled 			= enabled
+-- 		btn_ajouterFacade.enabled 	= enabled
+-- 		btn_supprimerFacade.enabled = enabled		
+-- 		
+-- 		
 		lbx_facades.items =  core.get_facades_noms ()
 		
 		
@@ -352,118 +383,124 @@ rollout roll_facades 		"Façades"		rolledUp:false	(
 		core.facadeEditeur_ouvrir	 	lbx_facades.selection 
 	
 	
-	/* --------------------  CLEANAGE --------------------
-	
-		
-	on roll_facades open do	(
-		
-			facades.actualiser ()
-			actualiser()
-		)
-	on roll_facades close do
-	(
-			try  destroydialog facades.dialog catch ()			
-		)
-	on lbx_facades selected arg do
-		if  facades.est_ouvert ()  do	facades.ouvrir 	lbx_facades.selection
-	on lbx_facades doubleClicked arg do
-		facades.ouvrir 	lbx_facades.selection 
-	
-	on btn_ajouterFacade pressed do
-	(
-				facades.creer_facade ()
-				facades.ouvrir		(facades.get_facades_count ())	
-			)
-	on btn_supprimerFacade pressed do
-		if queryBox "Supprimer la façade ?"	title:"Urba | Bâtiment | Façade" 	do 
-			with undo "supprimer" on (
-				facades.supprimer_facade  lbx_facades.selection	 
-				actualiser()
-			)
-	on btn_dupliquer pressed do
-	(
-				facades.dupliquer_facade	 lbx_facades.selection 
-		
-	 			actualiser() 
-			)
-			
-	*/ --------------------  CLEANAGE --------------------
+-- 	 --------------------  CLEANAGE --------------------
+-- 	
+-- 		
+-- 	on roll_facades open do	(
+-- 		
+-- 			facades.actualiser ()
+-- 			actualiser()
+-- 		)
+-- 	on roll_facades close do
+-- 	(
+-- 			try  destroydialog facades.dialog catch ()			
+-- 		)
+-- 	on lbx_facades selected arg do
+-- 		if  facades.est_ouvert ()  do	facades.ouvrir 	lbx_facades.selection
+-- 	on lbx_facades doubleClicked arg do
+-- 		facades.ouvrir 	lbx_facades.selection 
+-- 	
+-- 	on btn_ajouterFacade pressed do
+-- 	(
+-- 				facades.creer_facade ()
+-- 				facades.ouvrir		(facades.get_facades_count ())	
+-- 			)
+-- 	on btn_supprimerFacade pressed do
+-- 		if queryBox "Supprimer la façade ?"	title:"Urba | Bâtiment | Façade" 	do 
+-- 			with undo "supprimer" on (
+-- 				facades.supprimer_facade  lbx_facades.selection	 
+-- 				actualiser()
+-- 			)
+-- 	on btn_dupliquer pressed do
+-- 	(
+-- 				facades.dupliquer_facade	 lbx_facades.selection 
+-- 		
+-- 	 			actualiser() 
+-- 			)
+-- 			
+-- 	-------------------  CLEANAGE --------------------
 )
-rollout roll_toiture 		"Toiture"		rolledUp:false	(
+rollout roll_toiture "Toiture" width:189 height:66
+(
 	
-	listbox 'lbx_toiture' "" pos:[5,16] width:165 height:9 align:#left 
-	button 'btn_ajouterToiture' "+" pos:[141,-1] width:16 height:16 align:#left
-	button 'btn_supprimerToiture' "-" pos:[156,-1] width:16 height:16 align:#left
+ 
+-- 	dropDownList 'ddl_toiture_type' "Type:" pos:[8,10] width:171 height:40 align:#left
 	
-	
-	fn actualiser =(
-		
-		
-	)
-	/* 
 	dropdownList 'ddl_toiture' "" pos:[88,1] width:85 height:21 items:#("Plate", "Acrotère", "1 pan", "2 pans") align:#left
 	label 'lbl_facade' "Toiture:" pos:[5,7] width:38 height:15 align:#left
--- 	radiobuttons 'rdo_pentes' "" pos:[89,52] width:29 height:32 labels:#("1", "2") align:#left
-	spinner 'spn_toit_hauteur' "" pos:[87,21] width:85 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
-	label 'lbl_hauteur' "Hauteur:" pos:[5,22] width:45 height:15 align:#left
-	spinner 'spn_pente' "" pos:[87,36] width:85 height:16 range:[0,80,20] type:#float scale:1 align:#left
-	label 'lbl_pente' "Pente(°):" pos:[5,37] width:45 height:15 align:#left
--- 	label 'lbl5' "Pentes:" pos:[5,52] width:45 height:15 align:#left
-	
-	multiListBox 'lbx_facades' "" pos:[5,67] width:165 height:9 align:#left 
- 
- 
-	button 'btn_ajouterFacade' "+" pos:[141,51] width:16 height:16 align:#left
-	
-	button 'btn_supprimerFacade' "-" pos:[156,51] width:16 height:16 align:#left
--- 	label 'lbl_facades' "Facades:" pos:[5,2] width:45 height:15 align:#left
-	
--- 	GroupBox 'grp_prop' "Propriétés" pos:[5,195] width:165 height:41 align:#left
-	label 'lbl_composants' "Composants:" pos:[5,52] width:64 height:15 align:#left
-	 */
-	
-	/* --------------------  CLEANAGE --------------------
 	
 	fn actualiser =(
 		
--- 		lbl12.enabled 			= a_un_surface
-		ddl_toiture.enabled 			= a_un_surface
-		lbl_facade.enabled 			= a_un_surface
--- 		rdo_pentes.enabled 			= a_un_surface
-		spn_toit_hauteur.enabled 	= a_un_surface
-		lbl_hauteur.enabled 			= a_un_surface
-		spn_pente.enabled 			= a_un_surface
-		lbl_pente.enabled 			= a_un_surface
-		lbl_composants.enabled 	= a_un_surface
 		
-		btn_ajouterFacade.enabled 	= a_un_surface
-		btn_supprimerFacade.enabled 	= a_un_surface
--- 		grp_prop.enabled 	= a_un_surface
-		lbx_facades.enabled 	= a_un_surface
-		
-		
-		if a_un_surface do (
--- 			rdo_pentes.enabled 					= ddl_toiture.selection == 3
-			spn_pente.enabled 					= ddl_toiture.selection >= 3
-			lbl_pente.enabled 					= ddl_toiture.selection >= 3
-		)
 	)
+-- 		
+-- 	-- 	radiobuttons 'rdo_pentes' "" pos:[89,52] width:29 height:32 labels:#("1", "2") align:#left
+-- 		spinner 'spn_toit_hauteur' "" pos:[87,21] width:85 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+-- 		label 'lbl_hauteur' "Hauteur:" pos:[5,22] width:45 height:15 align:#left
+-- 		spinner 'spn_pente' "" pos:[87,36] width:85 height:16 range:[0,80,20] type:#float scale:1 align:#left
+-- 		label 'lbl_pente' "Pente(°):" pos:[5,37] width:45 height:15 align:#left
+-- 	-- 	label 'lbl5' "Pentes:" pos:[5,52] width:45 height:15 align:#left
+-- 		
+-- 		multiListBox 'lbx_facades' "" pos:[5,67] width:165 height:9 align:#left 
+-- 	 
+-- 	 
+-- 		button 'btn_ajouterFacade' "+" pos:[141,51] width:16 height:16 align:#left
+-- 		
+-- 		button 'btn_supprimerFacade' "-" pos:[156,51] width:16 height:16 align:#left
+-- 	-- 	label 'lbl_facades' "Facades:" pos:[5,2] width:45 height:15 align:#left
+-- 		
+-- 	-- 	GroupBox 'grp_prop' "Propriétés" pos:[5,195] width:165 height:41 align:#left
+-- 		label 'lbl_composants' "Composants:" pos:[5,52] width:64 height:15 align:#left
+-- 		
 	
+-- 		 --------------------  CLEANAGE --------------------
+-- 		
+-- 		fn actualiser =(
+-- 			
+-- 	-- 		lbl12.enabled 			= a_un_surface
+-- 			ddl_toiture.enabled 			= a_un_surface
+-- 			lbl_facade.enabled 			= a_un_surface
+-- 	-- 		rdo_pentes.enabled 			= a_un_surface
+-- 			spn_toit_hauteur.enabled 	= a_un_surface
+-- 			lbl_hauteur.enabled 			= a_un_surface
+-- 			spn_pente.enabled 			= a_un_surface
+-- 			lbl_pente.enabled 			= a_un_surface
+-- 			lbl_composants.enabled 	= a_un_surface
+-- 			
+-- 			btn_ajouterFacade.enabled 	= a_un_surface
+-- 			btn_supprimerFacade.enabled 	= a_un_surface
+-- 	-- 		grp_prop.enabled 	= a_un_surface
+-- 			lbx_facades.enabled 	= a_un_surface
+-- 			
+-- 			
+-- 			if a_un_surface do (
+-- 	-- 			rdo_pentes.enabled 					= ddl_toiture.selection == 3
+-- 				spn_pente.enabled 					= ddl_toiture.selection >= 3
+-- 				lbl_pente.enabled 					= ddl_toiture.selection >= 3
+-- 			)
+-- 		)
+-- 		
+-- 		
+-- 		
+-- 		on roll_toiture open do 
+-- 			actualiser()
+-- 		on ddl_toiture selected sel 	do
+-- 		(
+-- 					actualiser	()
+-- 					construire.batiment ()
+-- 				)
+-- 		on spn_toit_hauteur changed val 	do
+-- 			construire.batiment ()
+-- 		on spn_pente changed val 	do
+-- 			construire.batiment ()
+-- 	 --------------------  CLEANAGE --------------------
+
+	on ddl_toiture_type selected sel do
+(
 	
-	
-	on roll_toiture open do 
-		actualiser()
-	on ddl_toiture selected sel 	do
-	(
-				actualiser	()
-				construire.batiment ()
-			)
-	on spn_toit_hauteur changed val 	do
-		construire.batiment ()
-	on spn_pente changed val 	do
-		construire.batiment ()
-*/ --------------------  CLEANAGE --------------------
+	)
 )
+ */
 rollout roll_viewport 	"Viewport"	rolledUp:false	(
 	label 'lbl16' "Surface:" pos:[5,90] width:43 height:14 align:#left
 	label 'lbl_surface' "" pos:[85,90] width:78 height:16 align:#left 
@@ -541,13 +578,9 @@ rollout roll_viewport 	"Viewport"	rolledUp:false	(
 rollout roll_aPropos 	"A propos" 	rolledUp:true	(
 	label 'lbl_axeP' "Urba | V0.1  |" pos:[5,2]  align:#left
 	HyperLink 'hpl1' "Christophe Pagès" pos:[76,2] address:"http://c-pages.fr" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
-	HyperLink 'hpl2' "GitHub" pos:[127,17] address:"https://github.com/c-pages/cp-Urba" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
+	HyperLink 'hpl2' "GitHub" pos:[127,17] address:"https://github.com/c-pages/cp-Urba-Cleanage" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
 	label 'lbl6' "2017" pos:[5,17] align:#left
 )
-
-
-
-
 
 
 

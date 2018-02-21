@@ -3,8 +3,8 @@
 	
 
 	
------------------ Manager des TOITURES	------------------------------------------
-struct 	str_mgr_toitures (
+----------------- Manager de laTOITURE	------------------------------------------
+struct 	str_mgr_toiture (
 	
 	private
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
@@ -13,31 +13,91 @@ struct 	str_mgr_toitures (
 		fn debug 	_txt  var:	 param:    =	try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix	catch (),
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	
-	---- Membres --------------------------------------------------------
-		m_plug =#() ,
-		m_items = #(),
+	---- Membres ---------------------------------------------------------------------------------------------------------------------------------
+		m_plug ,				----	le plugin	----
+		m_toiture,				----	la toiture active	----
 	
 		--- le dossier on sont rangés les modeles de composants ----------
-		m_dossier_models 		= 	getdir #userScripts + "\cp-Urba\modules\Batiment\elements\toitures\\" ,
+		m_dossier_models 		= 	getdir #userScripts + "\\cp-Urba\\modules\\Batiment\\elements\\toitures\\" ,
 	
-		---- structures servant de model à la construction des composants	---------------------
-		m_modelesBase =#(),
+		---- Modeles source pour la construction des composants	---------------------
+		m_modelesBase 	=#(),
 		
 		
-	---- INTERFACE -------------------------------------------
+	---- FONCTIONS ---------------------------------------------------------------------------------------------------------------------------------
+	private
+	fn importer_models_toiture =(
+		
+		--- on va chercher les fichiers des assets pour les composants de facades -------------
+		m_modelesBase =#()
+		local fichiers_toiture	=	getfiles (m_dossier_models+ "*.ms" )	
+		for fichier_toiture in fichiers_toiture do (
+			local nv_model_toiture =  fileIn fichier_toiture
+			append m_modelesBase  	nv_model_toiture
+		)
+		
+	),
+	---- INTERFACE ---------------------------------------------------------------------------------------------------------------------------------
 	public
+	------ creation de la toiture ------
+		fn assigner	_id =(
+			
+			--- on importe le fichier du struct des composants  (pour avoir accés meme si le plug est pas actif)---
+			include	 "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Toiture.ms"
+			debug "assigner"
+			debug "m_modelesBase"	var:m_modelesBase
+			
+			m_toiture= str_toiture () ---	get_nouveauComposant ()
+			m_modelesBase[_id ].initialiser	m_toiture
+			
+			m_toiture
+			
+		),
+		
+		fn a_desParametres	=	m_toiture.a_desParametres (),
+			
+		
+	---- accessions ------
+		/* 
+		fn get_model_ID 				=(
+			local result
+			for i = 1 to m_modelesBase.count  do (
+				local model = m_modelesBase[i]
+				if model.type  as string == m_toiture.type as string
+					do result = i
+			)
+			result
+		), */
+		fn get_index_courant =(
+			local result
+			for i = 1 to m_modelesBase.count  do (
+				local model = m_modelesBase[i]
+				if model.type  as string == m_toiture.type as string
+					do result = i
+			)
+			result
+		),
+		fn get_modeles = (
+			
+			if m_modelesBase.count == 0 do
+				importer_models_toiture ()
+			
+			m_modelesBase
+		),
+		fn get_courant =(
+			m_toiture
+		),
+		
+	---- Initialisations ------
 		fn initialiser	_plug	=(
 			debug "initialiser ()"
 			m_plug = _plug
-			
-			--- on va chercher les fichiers des assets pour les composants de facades -------------
-			m_modelesBase =#()
-			local fichiers_toiture	=	getfiles (m_dossier_models+ "*.ms" )			
-			for fichier_toiture in fichiers_toiture do (
-				local nv_model_toiture =  fileIn fichier_toiture
-				append m_modelesBase  	nv_model_toiture
-			)
+			importer_models_toiture ()
 		)
+		
+		
+		
+		
 ) -- fin creer composant ---------
 
 
@@ -60,7 +120,7 @@ struct 	str_mgr_composantsDeFacade (
 		m_plug,
 		
 		--- le dossier on sont rangés les modeles de composants ----------
-		m_dossier_models 		= 	getdir #userScripts + "\cp-Urba\modules\Batiment\elements\composants\\" ,
+		m_dossier_models 		= 	getdir #userScripts + "\cp-Urba\modules\Batiment\elements\composants de facade\\" ,
 		
 		---- structures servant de model à la construction des composants	---------------------
 		m_modelesBase =#(),

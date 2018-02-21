@@ -263,6 +263,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			m_facade_initiale.enregistrer 	m_plug
 			m_plug.core.facadeEditeur_fermer 	()
 			m_plug.core.actualiser ()
+			m_plug.actualiser_rollouts ()
 		)
 		on btn_annuler	 pressed do (
 			m_plug.core.facadeEditeur_fermer 	()			

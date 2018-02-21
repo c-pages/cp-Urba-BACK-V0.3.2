@@ -100,11 +100,11 @@ struct 	str_facade (
 			--- s'il n'existe pas encore, on l'ajoute -----
 			if index_facade == 0 then (
 				debug "enregistrer nouvelle facade"
-				append 	_plug.fac_ids 				id
-				append 	_plug.fac_noms  			nom
-				
+				append 	_plug.fac_ids 		id
+				append 	_plug.fac_noms  	nom
+				append    _plug.fac_modes		mode
 				--- Limiteurs - Murs	---
-				append 	_plug.fac_murs		 murs
+				append 	_plug.fac_murs		murs
 				
 				--- Limiteurs - Etages	---
 				append 	_plug.fac_etagesMin_uses 		 etages_min_use

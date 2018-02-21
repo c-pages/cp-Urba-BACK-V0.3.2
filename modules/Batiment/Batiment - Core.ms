@@ -62,7 +62,7 @@ struct str_batiment_core (
 		---  Managers des Eléments du batiments -------------------	
 		mgr_surface			= str_mgr_surfaces (),
 		mgr_facades			= str_mgr_facades (),	
-		mgr_toitures			= str_mgr_toitures (),
+		mgr_toiture			= str_mgr_toiture (),
 		
 		---- convertisseur Parametres to String  -------------
 		mgr_datas 				= str_datasToString 	m_prt:this,
@@ -113,9 +113,10 @@ struct str_batiment_core (
 			---- initialisation des structures -----
 			mgr_surface.initialiser			m_plug
 			mgr_facades.initialiser			class:str_facade		plug:m_plug
-			mgr_toitures.initialiser			m_plug
-			
+			mgr_toiture.initialiser				m_plug
 			m_construction.initialiser		m_plug
+			
+			mgr_toiture.assigner				1
 			
 			--- chargement des parametres ------------------
 			charger ()
@@ -124,6 +125,7 @@ struct str_batiment_core (
 		
 		
 	----- Accessions -----------------------
+	public
 		fn get_surface_points		=	mgr_surface.get_points	(),
 		
 		fn get_facades_noms 		=	mgr_facades.get_noms (),
@@ -133,18 +135,27 @@ struct str_batiment_core (
 		fn get_geo						= m_construction.m_geo,
 		fn get_matID					= m_construction.m_matID,
 		
+		fn get_toiture_index 			=	mgr_toiture.get_index_courant (),
+		fn get_toiture					=	mgr_toiture.get_courant (),
+		
+		
+		
+		fn get_mgr_surface			= mgr_surface,
 		fn get_mgr_composants 	= mgr_facades.get_mgr_composants (),
 		fn get_mgr_facades	 		= mgr_facades,
+		fn get_mgr_toiture	 		= mgr_toiture,
 		fn get_mgrDatas 				= mgr_datas,
 		
-	---- mutations	------
+		
+	---- Mutations	------
+	public
 		fn set_roll_editeurDeFacade_position	_pos 	=( roll_facades_pos = _pos),
 		fn set_roll_editeurDeFacade_taille		_taille 	=( roll_facades_taille = _taille),
 		
 		
 		
-		
 	----- Editeur de facades -----------------
+	public
 		fn get_facadeEditeur_rollout = roll_facades,
 		fn facadeEditeur_ouvrir 	_index	=(
 			debug "ouvrir_facadeEditeur"
