@@ -41,11 +41,11 @@ struct 	str_composant (
 		---- Accessions -----------------------
 		fn get_dialog				=	m_dialog,
 		fn a_desParametres	=	params != undefined,
-		fn get_longueur 		=	if a_desParametres then params.longueur else 0,
+		fn get_longueur 		=	if ( a_desParametres () ) then params.longueur else 0,
 		
 		--- Initialisations -----------------------
 		fn initialiser_dialog 	_roll_parent 	=(
-			if a_desParametres do (
+			if ( a_desParametres () )  do (
 				m_dialog.m_rollPrt		= 	_roll_parent
 				m_dialog.m_compo	=	this
 				m_dialog.actualiser()
