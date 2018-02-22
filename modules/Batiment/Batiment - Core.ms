@@ -69,6 +69,7 @@ struct str_batiment_core (
 		
 		---  Rollouts Facade -------------------
 		roll_facades 				= 	filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout facade.ms",
+		roll_facades_estOuvert = false,
 		roll_facades_pos		= [700,300],
 		roll_facades_taille		= [500,300],
 		
@@ -160,12 +161,26 @@ struct str_batiment_core (
 			
 			roll_facades.initialiser 		m_plug
 			roll_facades.set_facade 	( mgr_facades.get_parIndex	_index )
-			
+			roll_facades_estOuvert = true
 		),
-		fn facadeEditeur_fermer 			=(
-			destroyDialog 	roll_facades
+		fn facadeEditeur_fermer 		query:false	=(
+			if roll_facades_estOuvert do (
+				
+				if query then 
+					if querybox "Enregistrer la façade ?" do (
+						roll_facades.enregistrer ()
+						actualiser ()
+					)
+				
+				destroyDialog 	roll_facades
+				roll_facades_estOuvert = false
+				
+			)
 		),
-		
+		fn 	fermer_toutes_fenetres	query:false = (
+			debug "fermer_toutes_fenetres"
+			facadeEditeur_fermer query:query
+		),
 	----- Manipuler les facades et leurs composants	---------------
 		fn creer_facade 							=(
 			local nv_facade 	= mgr_facades.creer ()
@@ -180,6 +195,11 @@ struct str_batiment_core (
 			m_plug.actualiser_rollouts ()
 			
 			actualiser ()
+		),
+		fn supprimer_composant 	_facade		_index =(
+			_facade.supprimer_composant 		_index 
+			--- maj de la longueur de la sequence ---
+			_facade.update_sequence_longueur ()
 		),
 		fn creer_composant		_facade		_IDmodelCompo		position:	=(
 			

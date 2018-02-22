@@ -275,6 +275,9 @@ rollout roll_global 			"Global" 		rolledUp:false 	(
 			initialiser()
 			actualiser ()
 		)
+	on roll_global close do	(
+			core.fermer_toutes_fenetres query:true
+		)
 	on spn_nbres changed val do
 		core.actualiser ()
 	on spn_hauteur changed val do

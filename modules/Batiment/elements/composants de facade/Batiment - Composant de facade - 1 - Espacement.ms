@@ -8,7 +8,10 @@ compo_toolTip 	=	"Ajouter un espacement. Mur plein de longueur varirable, répart
 ------ la fonction de construction	---------
 fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= ()
 	
-
+--- les parametres du composant	---------
+struct compo_params	(
+	longueur = 0.
+)
 
 --- les rollout du composant	---------
 rollout compo_dialog "Espacement" width:180 height:70	(

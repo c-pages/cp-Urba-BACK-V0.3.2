@@ -70,8 +70,8 @@ struct 	str_facade (
 			if position == 0 do position = sequence.count+1
 			insertItem _composant		sequence 				position
 		),
-		fn supprimer_composant 	_composant 	=(
-			
+		fn supprimer_composant 	_index 	=(
+			deleteItem sequence	_index
 		),
 		fn dupliquer_composant 	_composant 	=(
 			
