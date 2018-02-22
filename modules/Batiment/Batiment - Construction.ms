@@ -261,11 +261,12 @@ struct str_construction (
 						local		pt_balcon_fin		=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
 						balcon_aConstruire.params.longueur = 		(	distance	pt_balcon_debut 	pt_balcon_fin	)
 						balcon_aConstruire.construire	 	m_plug			balcon_pts_debut		normDir
+						balcon_aConstruire = undefined
 -- 					balcon_aConstruire.params.longueur = 	0
 					)
 					default:(
 						-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		--		est_DansBalcon:(balcon_aConstruire != undefined )
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		est_DansBalcon:(balcon_aConstruire != undefined )
 						
 					)
 				)
@@ -333,7 +334,7 @@ struct str_construction (
 						
 						--- le Composant 'Mur plein' temporaire	------
 						local compoTmp 	= creer_murPlein		mur_longueur 	
-						ptsIDs_accroche 	= compoTmp.construire	m_plug 		 ptsIDs_accroche		mur_norm 
+						ptsIDs_accroche 	= compoTmp.construire	m_plug 		 ptsIDs_accroche		mur_norm  
 						
 					)
 					

@@ -197,7 +197,34 @@ struct str_batiment_core (
 			actualiser ()
 		),
 		fn supprimer_composant 	_facade		_index =(
-			_facade.supprimer_composant 		_index 
+			local supprimer_balconFin 		= false
+			local supprimer_balconDebut		= false
+			if _facade.sequence[_index].type == #balcon  		do supprimer_balconFin 		= true
+			if _facade.sequence[_index].type == #balconFin  	do supprimer_balconDebut 	= true
+				
+			_facade.supprimer_composant 		_index
+			
+			if supprimer_balconFin do (
+				local i = _index  
+				while i <= _facade.sequence.count do (
+					if _facade.sequence[i].type == #balconFin do (
+						_facade.supprimer_composant 		i
+						i  = _facade.sequence.count + 1
+					)
+					i += 1
+				)
+			)
+			if supprimer_balconDebut do (
+				local i = _index  - 1
+				while i > 0 do (
+					if _facade.sequence[i].type == #balcon do (
+						_facade.supprimer_composant 		i
+						i  = 0
+					)
+					i -= 1
+				)
+			)
+			
 			--- maj de la longueur de la sequence ---
 			_facade.update_sequence_longueur ()
 		),
