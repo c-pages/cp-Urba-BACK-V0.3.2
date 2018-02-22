@@ -181,11 +181,22 @@ struct str_batiment_core (
 			
 			actualiser ()
 		),
-		fn creer_composant		_facade		_IDmodelCompo			=(
+		fn creer_composant		_facade		_IDmodelCompo		position:	=(
+			
+			if position == unsupplied  do position = _facade.sequence.count
+			debug"creer_composant"
+			debug"position" var:position
+			
 			local mgr_composants 	= get_mgr_composants ()
 			local nv_composant 		= mgr_composants.creer		_IDmodelCompo
 			
-			_facade.ajouter_composant	nv_composant
+			_facade.ajouter_composant	nv_composant		position:position
+			
+			--- gestion Bacon ----------
+			if nv_composant.type == #balcon do  (
+				local id_baconFin = mgr_composants.get_model_ID	#balconFin
+				creer_composant  _facade	 id_baconFin  position:(position+1)
+			)
 			
 			--- maj de la longueur de la sequence ---
 			_facade.update_sequence_longueur ()

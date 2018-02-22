@@ -10,7 +10,12 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= ()
 	
 
 
-
+--- les rollout du composant	---------
+rollout compo_dialog "Espacement" width:180 height:70	(
+	local m_rollPrt
+	local m_compo
+	fn actualiser =()
+)
 
 
 

@@ -66,8 +66,9 @@ struct 	str_facade (
 			sequence_longueur
 		),
 		
-		fn ajouter_composant 		_composant 	=(
-			append sequence 		_composant
+		fn ajouter_composant 		_composant 	position:(sequence.count+1)  =(
+			if position == 0 do position = sequence.count+1
+			insertItem _composant		sequence 				position
 		),
 		fn supprimer_composant 	_composant 	=(
 			
@@ -78,7 +79,20 @@ struct 	str_facade (
 		fn cloner_composant 		_composant 	=(
 			
 		),
-				
+		
+		fn composant_monter 		_index =(
+			local compoTemp = sequence[_index]
+			deleteItem sequence		_index
+			insertItem compoTemp		sequence 				(_index-1)			
+		),
+		fn composant_descendre 	_index =(
+			local compoTemp = sequence[_index]
+			deleteItem sequence		_index
+			insertItem compoTemp		sequence 				(_index+1)
+			
+		),
+		
+		
 		---- Enregistrement / chargement	-----------------
 		fn enregistrer 	_plug 	=(
 			

@@ -121,7 +121,7 @@ struct 	str_mgr_toiture (
 		fn initialiser	_plug	=(
 			debug "initialiser ()"
 			m_plug = _plug
-			debug "m_plug.toiture_params  0"	var:m_plug.toiture_params
+-- 			debug "m_plug.toiture_params  0"	var:m_plug.toiture_params
 			importer_models ()
 		)
 		
@@ -194,7 +194,7 @@ struct 	str_mgr_composantsDeFacade (
 		
 		----------------- Divers------------------------------	
 		---- pour recuperer un 'mur plein' temporaire ------
-		fn get_murPlein = creer  ( get_model_ID	#murPlein ),
+		fn get_murPlein = creer  ( get_model_ID	#mur ),
 		
 		--- charge en mémoire les parametres des composant des facades depuis le plugin --------
 		fn charger		_id		  =(

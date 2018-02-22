@@ -29,7 +29,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		
 		--- rollout	---------	
 		local largeur_params		= 	235
-		local largeur_min 				= 	510
+		local largeur_min 				= 	490
 		local hauteur_min 			= 	300
 		
 		--- images bouton fermer ---
@@ -94,10 +94,11 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		button 'btn_annuler' "Annuler" pos:[91,271] width:75 height:21 toolTip:"Annuler les changements" align:#left
 		
 		local		btns_ajouter_composant	=#( btn_ajouter_composant_1, btn_ajouter_composant_2, btn_ajouter_composant_3, btn_ajouter_composant_4, btn_ajouter_composant_5, btn_ajouter_composant_6 )
+		local 	btns_ids_models				=#()
 		
 		------------  Fonctions	----------------------------------------------------------------------------------
 		fn actualiser 							=(
-			
+			debug "actualiser ()"
 			edt_nom_facade.text 			= m_facade_courante.nom
 			
 			chk_etages.checked				= m_facade_courante.etages_min_use
@@ -128,7 +129,70 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			ddl_murs.selection 				= m_facade_courante.murs
 			ddl_mode.selection 				= m_facade_courante.mode
 			
-			lbx_sequence.items				=	m_facade_courante.get_composants_noms ()
+			--------- la sequence de composants --------
+			local itemsTmp 		= #()
+			local est_dansBalcon = false
+			local compoCourant_estDansBalcon = false
+			local tabulation		= "    "
+			local i = 1
+			for comp in m_facade_courante.sequence		do	(
+				local affichage 		= ""
+				
+				if comp.type == #balconFin 	do est_dansBalcon = false
+					
+				if est_dansBalcon do affichage += tabulation
+				affichage += comp.nom
+				append itemsTmp affichage
+				
+				if comp.type == #balcon		do est_dansBalcon = true
+					
+				-- pour la gestion du bouton de creation de balcon --------
+				
+					debug "m_composant_courant" var:m_composant_courant.nom
+					debug "i" var:i
+					debug "lbx_sequence.selection " var:lbx_sequence.selection 
+					if i == lbx_sequence.selection do (
+						compoCourant_estDansBalcon = est_dansBalcon
+						debug "===========================" var:m_composant_courant.nom
+					)
+				
+				i += 1
+			)
+			lbx_sequence.items =  itemsTmp
+			
+			
+			--- bloquage du bouton Balcon si on est deja dans un balcon -------------------
+-- 			if compoCourant_estDansBalcon do (
+			local idBalcon = ( m_plug.core.get_mgr_composants() ).get_model_ID #Balcon 
+			btns_ajouter_composant[idBalcon].enabled = not compoCourant_estDansBalcon
+-- 			)
+			
+			
+			
+			-- bouton monter ----
+			local btnMonter_enabled 		= lbx_sequence.selection != 1 and  lbx_sequence.selection != 0
+			if btnMonter_enabled do (
+				if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconFin do (
+					local compo_precedant = m_facade_courante.sequence[lbx_sequence.selection - 1] 
+					if compo_precedant.type == #balcon or compo_precedant.type == #balconFin  do (
+						btnMonter_enabled = false
+					)
+				)
+			)
+			btn_monter.enabled 		= btnMonter_enabled
+			
+			-- bouton descendre ----
+			local btnDescendre_enabled = lbx_sequence.selection != lbx_sequence.items.count and  lbx_sequence.selection != 0
+			if btnDescendre_enabled do (
+				if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconfin do (
+					local compo_suivant = m_facade_courante.sequence[lbx_sequence.selection + 1] 
+					if compo_suivant.type == #balcon or compo_suivant.type == #balconFin  do (
+						btnDescendre_enabled = false
+					)
+				)
+			)
+			btn_descendre.enabled 		= btnDescendre_enabled
+			
 			
 			--- le subRollout des composants	-------
 			for rollAVirer in subroll_parametres.rollouts do
@@ -207,19 +271,19 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			local mgr_compos = m_plug.core.get_mgr_composants ()
 			local models_compos = mgr_compos.get_modeles ()
 			local i =1
-			for  model_compo in  models_compos	where model_compo.est_editable () 	do (
-				
-				btns_ajouter_composant[i].visible 		= true
-				btns_ajouter_composant[i].text 			= model_compo.titre
-				btns_ajouter_composant[i].tooltip 		= model_compo.tooltip
-				
-				i+=1
+			local j = 1
+			for  model_compo in  models_compos	do (
+				if  model_compo.est_editable  () do (
+					btns_ajouter_composant[i].visible 		= true
+					btns_ajouter_composant[i].text 			= model_compo.titre
+					btns_ajouter_composant[i].tooltip 		= model_compo.tooltip
+					btns_ids_models[i] = j
+					i+=1
+				)
+				j += 1
 			)
 			
 		)
-		
-		
-		
 		
 		fn set_facade		_facade 	=(
 			local mgr_facades 	= m_plug.core.get_mgr_facades ()
@@ -227,19 +291,18 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			m_facade_initiale 		= 	_facade
 			m_facade_courante 	= 	mgr_facades.dupliquer 		m_facade_initiale
 			
-			debug "ajouter set_facade"
-			debug "m_facade_initiale" 		var:m_facade_initiale
-			debug "m_facade_courante" 	var:m_facade_courante
-			
 			actualiser ()
 		)
 		fn ajouter_composant	_IDmodelCompo	=(
 			debug "ajouter composant"
-			m_composant_courant	=	m_plug.core.creer_composant	m_facade_courante		_IDmodelCompo		position:lbx_sequence.selection
+			debug "lbx_sequence.selection AVT" var:lbx_sequence.selection 
+			local sequence_selectionBack = lbx_sequence.selection 
+			m_composant_courant	=	m_plug.core.creer_composant	m_facade_courante		_IDmodelCompo		position:(lbx_sequence.selection +1)
 			
-			debug "m_facade_initiale.sequence" 		var:m_facade_initiale.sequence
-			debug "m_facade_courante.sequence" 	var:m_facade_courante.sequence
+			debug "lbx_sequence.selection APRS" var:lbx_sequence.selection 
+			actualiser ()
 			
+			lbx_sequence.selection = sequence_selectionBack +1
 			actualiser ()
 		)
 		
@@ -273,12 +336,23 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			m_plug.core.facadeEditeur_fermer 	()			
 		)
 		
-		on btn_ajouter_composant_1 pressed do	ajouter_composant	1
-		on btn_ajouter_composant_2 pressed do	ajouter_composant	2
-		on btn_ajouter_composant_3 pressed do	ajouter_composant	3
-		on btn_ajouter_composant_4 pressed do	ajouter_composant	4
-		on btn_ajouter_composant_5 pressed do	ajouter_composant	5
-		on btn_ajouter_composant_6 pressed do	ajouter_composant	6
+		on btn_ajouter_composant_1 pressed do	ajouter_composant	btns_ids_models[1]
+		on btn_ajouter_composant_2 pressed do	ajouter_composant	btns_ids_models[2]
+		on btn_ajouter_composant_3 pressed do	ajouter_composant	btns_ids_models[3]
+		on btn_ajouter_composant_4 pressed do	ajouter_composant	btns_ids_models[4]
+		on btn_ajouter_composant_5 pressed do	ajouter_composant	btns_ids_models[5]
+		on btn_ajouter_composant_6 pressed do	ajouter_composant	btns_ids_models[6]
+		
+		on btn_monter pressed 		do (
+			m_facade_courante.composant_monter 	 lbx_sequence.selection
+			lbx_sequence.selection -= 1
+			actualiser ()
+		)
+		on btn_descendre pressed 	do (
+			m_facade_courante.composant_descendre 	 lbx_sequence.selection
+			lbx_sequence.selection += 1
+			actualiser ()
+		)
 		
 		--------------- EVENEMENTS ------------------
 		----- Fenetre ---------------------------------

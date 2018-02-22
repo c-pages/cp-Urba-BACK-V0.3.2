@@ -3,14 +3,15 @@
 
 
 --- parametres de base	-----------------------------
-compo_titre 	= "Mur plein"	
-compo_type	=	#murPlein
+compo_titre 	= "Mur"	
+compo_type	=	#mur
 compo_toolTip =	"Ajouter un mur plein de longueur fixe."
 
 --- les parametres du composant	---------
 struct compo_params	(
 	longueur = 100.
 )
+
 --- les rollout du composant	---------
 rollout compo_dialog "Mur plein" width:180 height:70	(
 	local m_rollPrt
@@ -36,6 +37,7 @@ rollout compo_dialog "Mur plein" width:180 height:70	(
 	)
 	
 )
+
 --- la fonction de construction	---------
 fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 	

@@ -1,15 +1,5 @@
 
 
--- fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - material IDs.ms"
-/*  struct 	str_prefs_matID (
-	mur 				= 	10,
-	menuiserie 	= 	20,
-	vitrage 			= 	30,
-	toiture 			= 	40,
-	metal			=	50
-)
- */
-
 --- la structure pour créer des geometries du delegate -------------------
 include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Geometrie.ms"
 
