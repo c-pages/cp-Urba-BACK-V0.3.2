@@ -1,20 +1,19 @@
 
 
-
-
 --- parametres de base	-----------------------------
-toiture_titre 	= "2 pans"	
-toiture_type	=	#2pans
-toiture_toolTip =	"..."
+toiture_titre 		= "2 pans"	
+toiture_type		=	#2pans
+toiture_toolTip 	=	"..."
 
 --- les parametres du composant	---------
 struct toiture_params	(
 	pente 					= 	30,
 	decalage_hauteur 	= 	0.,
 	orientation				=	0,
-	debord					= 50.,
+	debord					= 15.,
 	epaisseur 				= 15
 )
+
 --- les rollout du composant	---------
 rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 (

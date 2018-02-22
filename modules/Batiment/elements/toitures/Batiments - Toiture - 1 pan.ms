@@ -97,13 +97,13 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 		rotateZ 		mtrx_axeP		toiture_orient	
 		translate 	mtrx_axeP		BB_axeP[1]
 	
-		local diag_axeP	=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
+		local diag_axeP		=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
 		local largeur 		=	diag_axeP.x
 		local longeur 		= 	diag_axeP.z
 		local hauteur 		= largeur * tan 		toiture_pente
 		local z 					= pts_accroches[1].z
 		
-		local nvlsFaces 				= #()
+		local nvlsFaces 		= #()
 		
 -------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 		--- gestion de l'angle de la pente .... ----
@@ -161,15 +161,16 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 			
 			local ptMur1 		= pointsMurs[i]
 			local ptMur2 		= pointsMurs[j]
-			local ptPente3 	= pointsPente[j]
-			local ptPente4	= pointsPente[i]
+			local ptPente3 		= pointsPente[j]
+			local ptPente4		= pointsPente[i]
 			
-			local pointsRaccord = #(ptMur1, ptMur2, ptPente3, ptPente4)
-			local faceMurs = ptr_geo.face 	pointsRaccord
+			local pointsRaccord 	= #(ptMur1, ptMur2, ptPente3, ptPente4)
+			local faceMurs 			= ptr_geo.face 	pointsRaccord
 			
 			ptr_geo.set_matID  faceMurs	#mur
 			
 			append nvlsFaces faceMurs
+			
 		)
 	
 		

@@ -1,7 +1,7 @@
 
 struct str_plan (
-	
 		------------ DEBUG	----------------------------------------------------------------------------------
+	private
 		m_debug = true,
 		m_dbgPrefix ="str_plan",
 		fn debug 	_txt  var:	 param:    =(
@@ -9,14 +9,16 @@ struct str_plan (
 			catch ()
 		),
 		
-		---- Membres --------------
+		------------ Membres ----------------------------------------------------------------------------------
+	private
 		a,
 		b,
 		c,
 		d,
 		normal ,
 		
-		---- Fonctions --------------
+		------------ Fonctions ----------------------------------------------------------------------------------
+	public
 		fn creerFrom_2vecs_et_1Point	_vec1 	_vec2  	_point	=(
 			
 -- 			debug "creerFrom_2vecs_et_1Point"

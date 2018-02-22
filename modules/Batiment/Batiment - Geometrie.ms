@@ -155,6 +155,12 @@ struct	str_geometrie	(
 			nvPlan.creerFrom_2vecs_et_1Point	_vec1	_vec2		_pt_Origine
 			nvPlan
 		),
+	
+	--- accessions diverse -------
+		fn get_vertex  _idPt =(
+			polyop.getVert 	m_plug.delegate		_idPt
+		),
+		
 		
 	------ Initialisation de la structure ------------
 		fn initialiser _plug =(

@@ -263,7 +263,7 @@ struct str_construction (
 			for composant in sequenceTotal do (
 				case composant.type of (
 					#balcon:(
-						balcon_pts_debut 		= ptsIDs_accroche
+						balcon_pts_debut 	= ptsIDs_accroche
 						balcon_aConstruire 	= composant
 					)
 					#balconFin:(
@@ -282,291 +282,6 @@ struct str_construction (
 			) --- fin de la sequence -----
 			
 		),
-		
-		/* 
-		------------ TOITURES-------------------------		
-	private
-		fn toitPentes 				&z	_nbrePentes	=(
-			
-			local surface_points 	= m_plug.core.get_surface_points ()
-			
-			local	 mtrx_axeP	=	m_plug.axeP_mtrx
-			local	 BB_axeP	=	m_plug.axeP_BB
-			translate mtrx_axeP	BB_axeP[1]
-			
-			local diag_axeP	=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
-			local largeur 		=	diag_axeP.x
-			local longeur 		= 	diag_axeP.z
-			local hauteur 		= largeur * tan m_plug.toit_pente		--	largeur /2 --* random .3 1.5
-			
-			local nvlsFaces 				= #()
-			
-			case _nbrePentes of (
-				1: ( ---------- 1 PENTE ----------------------------------------------------------------------------------------------------
-						--- gestion de l'angle de la pente .... ----
-	-- 						hauteur = hauteur/4
-						
-						local pt_0 = (  [0,0,0]  *  mtrx_axeP )
-						local pt_1 = (  [0,0,longeur]  *  mtrx_axeP )
-						local pt_2 = (  [largeur ,hauteur,0]  *  mtrx_axeP )
-						
-						local vec1 = pt_1 - pt_0
-						local vec2 = pt_2 - pt_0
-						
-						local pt_Origine = pt_0
-						pt_Origine.z =  z + m_plug.toit_hauteur
-					
-						local plan_pente = str_plan ()
-						plan_pente.creerFrom_2vecs_et_1Point	vec1	vec2		pt_Origine
-						
-						local pointsPente = #()
-						local pointsMurs   =#()
-						for i = 1 to  surface_points.count do (
-							
-							local j = i+1
-							if j >  surface_points.count  do j = 1
-							
-							--- point Mur ----
-							local pt 			= 	surface_points[i]	
-							pt.z = z
-							append pointsMurs  pt		
-							
-							local pt_result = plan_pente.projeter_point_verticalement 	pt
-	-- 						pt_result.z += m_plug.toit_hauteur
-							append pointsPente  pt_result
-							
-						)
-						
-						--- creation de la face du dessus ----
-						local faceDessus =  m_geo.pointsEtFaces 	pointsPente 	
-						append nvlsFaces faceDessus
-						
-						-- m_matID --
-						polyop.setFaceMatID m_plug.delegate  #(faceDessus) 	m_matID.toiture
-						
-						---- creation des raccord mur ----------
-						local facesMurs = #()
-						for i = 1 to pointsMurs.count  do (
-							
-							local j = i+1
-							if j >  pointsMurs.count  do j = 1
-							
-							local ptMur1 		= pointsMurs[i]
-							local ptMur2 		= pointsMurs[j]
-							local ptPente3 	= pointsPente[j]
-							local ptPente4	= pointsPente[i]
-							
-							local pointsRaccord = #(ptMur1, ptMur2, ptPente3, ptPente4)
-							local faceMurs = m_geo.pointsEtFaces 	pointsRaccord 	
-							append nvlsFaces faceMurs
-							polyop.setFaceMatID m_plug.delegate  #(faceMurs) 	m_matID.mur
-						)
-					
-						
-						
-						-- souder les points --
-						local vertsASouder =#()
-						for IDFace in nvlsFaces do (
-							local vertsFace = polyop.getFaceVerts m_plug.delegate	 IDFace
-							for vert in vertsFace do 
-								appendIfUnique  vertsASouder 	vert
-							-- m_plug.delegate.weldThreshold
-						)
-						polyop.weldVertsByThreshold m_plug.delegate 		(vertsASouder as bitArray)
-						
-						
-						---- debord et epaisseur du toit -----
-						polyop.bevelFaces 	m_plug.delegate  	faceDessus 	0.0 	30.
-						polyop.extrudeFaces m_plug.delegate  	faceDessus 	20.
-						
-						
--- 						format ".extrustionType : %\n" m_plug.delegate.extrustionType
--- 						polyop.extrudeFaces m_plug.delegate  	nvlsFaces 	0.0
--- 						polyop.extrudeFaces m_plug.delegate  	nvlsFaces 	0.0
-						
-						
-				)
-				2: (---------- 2 PENTES ----------------------------------------------------------------------------------------------------
-					
-					
-						--- Plan de la Pente 1  ----
-						local pt_P1_0 = (  [0,0,0]  *  mtrx_axeP )
-						local pt_P1_1 = (  [0,0,longeur]  *  mtrx_axeP )
-						local pt_P1_2 = (  [largeur ,hauteur,0]  *  mtrx_axeP )	
-					
-						local vecP1_1 = pt_P1_1 - pt_P1_0
-						local vecP1_2 = pt_P1_2 - pt_P1_0
-						
-						local pt_Origine = pt_P1_0
-						pt_Origine.z =  z + m_plug.toit_hauteur
-						local plan_pente1 = str_plan ()
-						plan_pente1.creerFrom_2vecs_et_1Point	vecP1_1		vecP1_2		pt_Origine
-					
-					
-					
-						--- Plan de la Pente 1  ----
-						local pt_P2_0 = (  [largeur,0,longeur]  *  mtrx_axeP )
-						local pt_P2_1 = (  [largeur,0,0]  *  mtrx_axeP )
-						local pt_P2_2 = (  [0 ,hauteur,longeur]  *  mtrx_axeP )			
-					
-						local vecP2_1 = pt_P2_1 - pt_P2_0
-						local vecP2_2 = pt_P2_2 - pt_P2_0
-						
-						local pt_Origine = pt_P2_0
-						pt_Origine.z =  z + m_plug.toit_hauteur
-						local plan_pente2 = str_plan ()
-						plan_pente2.creerFrom_2vecs_et_1Point	vecP2_1		vecP2_2		pt_Origine
-					
-						--- Plan verticale faitage ------
-						local pt_F_0 = (  [largeur /2 ,0,0]  *  mtrx_axeP )
-						local pt_F_1 = (  [largeur /2 ,0,longeur]  *  mtrx_axeP )
-						local pt_F_2	=	pt_F_0 + [0,0,100]				
-						
-						local vec_F_1 = pt_F_1 - pt_F_0
-						local vec_F_2 = pt_F_2 - pt_F_0				
-						
-						local pt_Origine = pt_F_0
-						pt_Origine.z =  z 
-						
-						local plan_verticaleFaitage = str_plan ()
-						plan_verticaleFaitage.creerFrom_2vecs_et_1Point	vec_F_1		vec_F_2		pt_Origine
-						
-						
-						
-						---- creation des liste des points-----------
-						local pointsPente = #()
-						local pointsPente1 = #()
-						local pointsPente2 = #()
-						local pointsMurs   =#()
-						for i = 1 to  surface_points.count do (
-							
-							local j = i+1
-							if j >  surface_points.count  do j = 1
-							
-							
-							--- point Mur ----
-							local pt 			= 	surface_points[i]	
-							pt.z = z
-							append pointsMurs  pt		
-							
-							--- point pente ----
-							local pt_pente1 = plan_pente1.projeter_point_verticalement 	pt
-							local pt_pente2 = plan_pente2.projeter_point_verticalement 	pt
-							if pt_pente1.z < pt_pente2.z then (
-								append pointsPente  	pt_pente1
-								append pointsPente1 	pt_pente1
-								
-							) else  (
-								append pointsPente  	pt_pente2
-								append pointsPente2  	pt_pente2
-							)
-							
-							--- point mur - faitage ----
-							local pt_suivant 	= 	surface_points[j]	
-							pt_suivant.z = z
-							local intersect = plan_verticaleFaitage.coupe_segment	pt 	pt_suivant							
-							if intersect do (
-								local pt_faitage_mur = plan_verticaleFaitage.get_intersection_segment 	pt 	pt_suivant
-								append pointsMurs  	pt_faitage_mur
-								local pt_faitage_pente = plan_pente1.projeter_point_verticalement 	pt_faitage_mur
-								append pointsPente  pt_faitage_pente
-								
-								
-								append pointsPente1 	pt_faitage_pente
-								append pointsPente2 	pt_faitage_pente
-							)
-							
-							
-							
-						)
-						
-						
-						
-						
-						--------- creation des geometries ---------------------
-						--- les murs ----
-						for i = 1 to pointsMurs.count  do (
-							
-							local j = i+1
-							if j > pointsMurs.count do j = 1
-							
-							local ptMur1 		= pointsMurs[ i ]
-							local ptMur2 		= pointsMurs[ j ]
-							local ptPente3 	= pointsPente[ j ]
-							local ptPente4	= pointsPente[ i ]
-							
-							local pointsRaccord = #(ptMur1, ptMur2, ptPente3, ptPente4)
-							local nvlFace = m_geo.pointsEtFaces 	pointsRaccord 	
-							append nvlsFaces nvlFace
-							-- m_matID --
-							polyop.setFaceMatID m_plug.delegate  nvlFace 	m_matID.mur
-						) 
-						
-						
-						--- les pentes -----
-						local facesDessus =#()
-						local face1 =  m_geo.pointsEtFaces 		pointsPente1 	
-						local face2 =  m_geo.pointsEtFaces 		pointsPente2 	
-						
-						append facesDessus face1
-						append facesDessus face2
-						
-						append nvlsFaces face1
-						append nvlsFaces face2
-						
-						
-						-- m_matID --
-						polyop.setFaceMatID m_plug.delegate  facesDessus 	m_matID.toiture
-						
-						
-						
-						
-						
-						-- souder les points --
-						local vertsASouder =#()
-						for IDFace in nvlsFaces do (
-							local vertsFace = polyop.getFaceVerts m_plug.delegate	 IDFace
-							for vert in vertsFace do 
-								appendIfUnique  vertsASouder 	vert
-							-- m_plug.delegate.weldThreshold
-						)
-						polyop.weldVertsByThreshold m_plug.delegate 		(vertsASouder as bitArray)
-						
-						facesDessus = #( m_plug.delegate.getNumFaces () - 1, m_plug.delegate.getNumFaces () )
-						---- debord et epaisseur du toit -----
-						polyop.bevelFaces 		m_plug.delegate  	facesDessus 	0.0 	30.
-						polyop.extrudeFaces 	m_plug.delegate  	facesDessus 	20.
-				)
-			)
-		),		
-		fn acrotere					_face		= (
-			
-			---- les murs -----
-			-- m_matID --
-			polyop.setFaceMatID m_plug.delegate  #(_face) 	m_matID.mur
-			-- gemoetrie --			
-			polyop.bevelFaces m_plug.delegate 	#(_face) 	0 	-const_ep_mur
-			local faceAExtruder = #{_face+1..(polyop.getNumFaces m_plug.delegate)} as array
-			polyop.extrudeFaces  m_plug.delegate 	faceAExtruder 	m_plug.toit_hauteur
-			
-			
-			---- la couvertine  -----
-			-- m_matID --
-			polyop.setFaceMatID m_plug.delegate  faceAExtruder 	m_matID.metal
-			-- gemoetrie --
-			polyop.bevelFaces m_plug.delegate 	faceAExtruder		0 	const_ep_couvertine
-			polyop.extrudeFaces m_plug.delegate 	faceAExtruder		const_ep_couvertine
-			
-			local faceToitsSurface = m_outils_poly.etendreFaces  	m_plug.delegate 	#(_face)
-			
-			format "faceToitsSurface : %\n" faceToitsSurface
-			
-			
-			-- m_matID --
-			polyop.setFaceMatID m_plug.delegate  faceToitsSurface 	m_matID.toiture
-			
-		),		
-		*/
 		
 		------------ Construction-------------------------
 	private
@@ -658,8 +373,7 @@ struct str_construction (
 	public
 		fn initialiser 	_plug =(
 			m_plug = _plug
-			m_geo.initialiser	_plug
-			
+			m_geo.initialiser	_plug			
 		),
 		fn actualiser 	 =(
 			
@@ -668,16 +382,12 @@ struct str_construction (
 			--- on vide la geametrie ------------
 			m_geo.vider ()
 			
-			
 			--- si on a pas de surface on dessine le logo ------------
 			if m_plug.surface_node == undefined then 				
 				m_geo.face		logo
 			
-			
-			
 			--- sinon on consrtuit le batiment ------------
-			else 	with redraw OFF (
-				
+			else	with redraw OFF (
 				
 				-- on desactive l'undo pour aller plus vite ---------------
 				undo off (
@@ -692,19 +402,9 @@ struct str_construction (
 					creer_facades					&zCourant
 					creer_toiture						&zCourant
 					
-					
-					
-					/*	--- Mapping de maniere global, TODO:generer par  composants		---
-					
-					matrxMapping = matrix3 1 
-					rotateZ matrxMapping  ( 90 - (quatToEuler2  m_plug.axeP_mtrx.rotationpart).z )
-					polyop.applyUVWMap 	m_plug.delegate  #box	 tm:matrxMapping  channel:1
-					
-					*/	-----------------------------------
-					
 				)
 				
-				displayTempPrompt ("Bâtiment construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 10000
+				displayTempPrompt ("Bâtiment construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
 				
 			)
 			

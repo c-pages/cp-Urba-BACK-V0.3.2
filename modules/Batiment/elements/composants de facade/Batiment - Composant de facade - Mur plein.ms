@@ -56,8 +56,8 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 		
 		--- Vecteurs ------------
 		local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
-		local vec_ht 			= [0,0,1] 		* 	ht_niveaux
-		local vec_longueur 	= _normDir 	* 	longueur
+		local vec_ht 				= [0,0,1] 		* 	ht_niveaux
+		local vec_longueur 	= _normDir 		* 	longueur
 		
 		--- Points d'accroche ------------
 		local id_ptAccroche_1 	= pts_accroches[1]
@@ -81,7 +81,7 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 		
 		-------	Creation des faces 	--------
 		local nvlFace = ptr_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		
-	ptr_geo.set_matID 	nvlFace	#mur 	
+		ptr_geo.set_matID 	nvlFace	#mur 	
 		
 		--- Result -------------
 		pt_result_1 = pts_ids[1]

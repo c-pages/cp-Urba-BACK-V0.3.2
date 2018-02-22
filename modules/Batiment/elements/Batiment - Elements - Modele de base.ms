@@ -2,16 +2,16 @@
 --- la structure mere	du composant	---------
 struct	str_modelBase (
 	
-	titre ="",
-	toolTip ="",
-	type ,
-	
-	params,
-	dialog,
-	fnConstruire,
+		titre ="",
+		toolTip ="",
+		type ,
+		
+		params,
+		dialog,
+		fnConstruire,
 	
 	public
-		
+		fn est_editable = params != undefined ,
 		fn initialiser 	_nvComposant	=(
 			
 			_nvComposant.initialiser			type		titre

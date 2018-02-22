@@ -27,8 +27,10 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		local m_facade_courante
 		local m_composant_courant
 		
-		--- rollout	---------
-		local largeur_params 		= 235
+		--- rollout	---------	
+		local largeur_params		= 	235
+		local largeur_min 				= 	510
+		local hauteur_min 			= 	300
 		
 		--- images bouton fermer ---
 		local murs_types 	= #("Gouttereaux + Pignons", "Gouttereaux", "Pignons")
@@ -138,24 +140,24 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		)
 		fn redimensionnerFenetre 		_taille 	=(
 			
-			local largeur_min_ferme 	= 255
-			local largeur_min_ouvert 	= largeur_min_ferme + largeur_params			
-			local largeur_min 				= 	largeur_min_ouvert
-			local hauteur_min 			= 255
-				
+-- 			local largeur_min_ferme 	= 255
+-- 			local largeur_min_ouvert 	= largeur_min_ferme + largeur_params			
+-- 			local largeur_min 				= 	largeur_min_ouvert
+-- 			local hauteur_min 			= 255
+			
 			local largeur_btn 		= 17
-			local largeur_bord 		= edt_nom_facade.pos.x
+			local largeur_bord 	= edt_nom_facade.pos.x
 			
 			if 	_taille.x < largeur_min do 
 				_taille.x =  largeur_min
-			if 	_taille.y < 300 do 
-				_taille.y =  300
-			roll_urba_editeurFacades.width 	= _taille.x
+			if 	_taille.y < hauteur_min do 
+				_taille.y =  hauteur_min
+			roll_urba_editeurFacades.width 		= _taille.x
 			roll_urba_editeurFacades.height 	= _taille.y
 			
 			m_plug.core.set_roll_editeurDeFacade_taille	_taille
-			
-			local largeur_fenetre 	= 	_taille.x - largeur_params
+-- 			debug "_taille" var:_taille
+			local largeur_fenetre 	= 	_taille.x -  largeur_params
 			
 -- 			ui_btnFermer.pos.x		= 	_taille.x - 20
 			
@@ -204,12 +206,14 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			----- gestion des boutons de creation de composant -----------
 			local mgr_compos = m_plug.core.get_mgr_composants ()
 			local models_compos = mgr_compos.get_modeles ()
-			for  i = 1 to models_compos.count	do (
-				local  model_compo = models_compos[i]
+			local i =1
+			for  model_compo in  models_compos	where model_compo.est_editable () 	do (
+				
 				btns_ajouter_composant[i].visible 		= true
 				btns_ajouter_composant[i].text 			= model_compo.titre
 				btns_ajouter_composant[i].tooltip 		= model_compo.tooltip
 				
+				i+=1
 			)
 			
 		)

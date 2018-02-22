@@ -69,7 +69,7 @@ struct str_batiment_core (
 		
 		---  Rollouts Facade -------------------
 		roll_facades 				= 	filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout facade.ms",
-		roll_facades_pos		= [500,500],
+		roll_facades_pos		= [700,300],
 		roll_facades_taille		= [500,300],
 		
 		--- Sous structures  -------------------

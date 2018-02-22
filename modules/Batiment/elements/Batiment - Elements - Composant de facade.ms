@@ -40,8 +40,8 @@ struct 	str_composant (
 		
 		---- Accessions -----------------------
 		fn get_dialog				=	m_dialog,
-		fn a_desParametres	=	params != undefined,
-		fn get_longueur 		=	if ( a_desParametres () ) then params.longueur else 0,
+		fn a_desParametres		=	params != undefined,
+		fn get_longueur 			=	if ( a_desParametres () ) then params.longueur else 0,
 		
 		--- Initialisations -----------------------
 		fn initialiser_dialog 	_roll_parent 	=(
@@ -63,7 +63,7 @@ struct 	str_composant (
 		),
 		
 		---- Construction du mesh 	( fonction virtuelle ) -----------------------
-		fn construire		_plug	 	pts_accroches		_normDir				= 		fnVirt_construire	 _plug	pts_accroches		_normDir		this	,
+		fn construire		_plug	 	pts_accroches		_normDir		est_DansBalcon:false		= 		fnVirt_construire	 _plug	pts_accroches		_normDir		this	est_DansBalcon:est_DansBalcon,
 		
 		
 		---- Enregistrement / chargement	-----------------
