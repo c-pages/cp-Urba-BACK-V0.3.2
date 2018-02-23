@@ -22,6 +22,8 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		---- Pointeurs ----
 		local m_plug				---- pointeur vers le plug ----
 		
+		local m_changement = false
+		
 		--- les parametres courants ------------
 		local m_facade_initiale
 		local m_facade_courante
@@ -49,11 +51,11 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		
 		ImgTag 'ui_titre' "" pos:[8,4] width:66 height:18 align:#left
 		edittext 'edt_nom_facade' "" pos:[7,25] width:200 height:16 align:#left
-			
+		
 		spinner 'spn_etages' "" pos:[103,53] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
 		spinner 'spn_etagesMax' "" pos:[180,53] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left		
-			
-			
+		
+		
 		spinner 'spn_longueur_min' "" pos:[103,68] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
 		spinner 'spn_longueur_max' "" pos:[180,68] width:63 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
 		checkbutton 'chk_longueur_max' "" pos:[167,68] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
@@ -384,91 +386,124 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 	on edt_nom_facade entered txt 	do
 	(
 				m_facade_courante.nom 	=	txt
+		m_changement = true
 			)
 	on spn_etages changed val 	do
 	(
 				m_facade_courante.etages_min 	= 	val
+		m_changement = true
 			)
 	on spn_etagesMax changed val 	do
 	(
 				m_facade_courante.etages_max 	= 	val
+		m_changement = true
 			)
 	on spn_longueur_min changed val 	do
 	(
 				m_facade_courante.longueur_min 	= 	val
+		m_changement = true
 			)
 	on spn_longueur_max changed val 	do
 	(
 				m_facade_courante.longueur_max 	= 	val
+		m_changement = true
 			)
 	on chk_longueur_max changed state do
 	(
 				m_facade_courante.longueur_max_use 	= 	state	
+		m_changement = true
 				actualiser ()
 			)
 	on chk_longueur_min changed state do
 	(
 				m_facade_courante.longueur_min_use 	= 	state		
+		m_changement = true
 				actualiser ()
 			)
 	on ddl_murs selected sel	 do
 	(
 				m_facade_courante.murs 	= 	sel
+		m_changement = true
 			)
 	on chk_etagesMax changed state do
 	(
 				m_facade_courante.etages_max_use 	= 	state		
+		m_changement = true
 				actualiser ()
 			)
 	on lbx_sequence selected arg do
 	(
 				m_composant_courant = m_facade_courante.sequence[ 	arg ]
+		m_changement = true
 				actualiser ()
 			)
 	on btn_monter pressed do
 	(
 				m_facade_courante.composant_monter 	 lbx_sequence.selection
 				lbx_sequence.selection -= 1
+		m_changement = true
 				actualiser ()
 			)
 	on btn_descendre pressed do
 	(
 				m_facade_courante.composant_descendre 	 lbx_sequence.selection
 				lbx_sequence.selection += 1
+		m_changement = true
 				actualiser ()
 			)
 	on ddl_mode selected sel	 do
 	(
 				m_facade_courante.mode 	= 	sel
+		m_changement = true
 			)
 	on chk_etages changed state do
 	(
 				m_facade_courante.etages_min_use 	= 	state		
 				actualiser ()
+		m_changement = true
 			)
 	on btn_supprimer_composant pressed do
 	(
 				if queryBox "Supprimer le composant" do (
 					m_plug.core.supprimer_composant 	m_facade_courante		lbx_sequence.selection
 					actualiser ()
+		m_changement = true
 				)
 			)
-	on btn_ajouter_composant_1 pressed do
+	on btn_ajouter_composant_1 pressed do (
 		ajouter_composant	btns_ids_models[1]
-	on btn_ajouter_composant_2 pressed do
+		m_changement = true
+	)
+	on btn_ajouter_composant_2 pressed do (
 		ajouter_composant	btns_ids_models[2]
-	on btn_ajouter_composant_3 pressed do
+		m_changement = true
+	)
+	on btn_ajouter_composant_3 pressed do (
 		ajouter_composant	btns_ids_models[3]
-	on btn_ajouter_composant_4 pressed do
+		m_changement = true
+	)
+	on btn_ajouter_composant_4 pressed do (
 		ajouter_composant	btns_ids_models[4]
-	on btn_ajouter_composant_5 pressed do
+		m_changement = true
+	)
+	on btn_ajouter_composant_5 pressed do (
 		ajouter_composant	btns_ids_models[5]
-	on btn_ajouter_composant_6 pressed do
+		m_changement = true
+	)
+	on btn_ajouter_composant_6 pressed do (
 		ajouter_composant	btns_ids_models[6]
+		m_changement = true
+	)
 	
 	  
-	on btn_dupliquer_composant pressed do dupliquer_composant ()
-	on btn_instancier_composant pressed do instancier_composant ()
+	on btn_dupliquer_composant pressed do (
+		dupliquer_composant ()
+		m_changement = true
+	)
+	on btn_instancier_composant pressed do (
+		instancier_composant ()
+		m_changement = true
+	)
 		
 	
 	on btn_valider pressed do

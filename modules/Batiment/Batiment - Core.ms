@@ -149,21 +149,7 @@ struct str_batiment_core (
 		
 		fn get_facadeEditeur_rollout = roll_facades,
 		fn facadeEditeur_est_ouvert = roll_facades_estOuvert,
-		fn facadeEditeur_ouvrir 	_index	=(
-			debug "ouvrir_facadeEditeur"
-			createDialog 	roll_facades	style:				#(#style_resizing) 	\
-													pos:					roll_facades_pos		\
-													width:				roll_facades_taille.x	\
-													height:				roll_facades_taille.y	/* \
-													modal:				true \ 
-													escapeEnable:	true */
-			
-			roll_facades.initialiser 		m_plug
-			roll_facades.set_facade 	( mgr_facades.get_parIndex	_index )
-			roll_facades_estOuvert = true
-			m_plug.actualiser_rollouts ()
-		),
-		fn facadeEditeur_fermer 		query:false	=(
+		fn facadeEditeur_fermer 		query:roll_facades.m_changement	=(
 			if roll_facades_estOuvert do (
 				
 				if query then 
@@ -177,9 +163,24 @@ struct str_batiment_core (
 			)
 			m_plug.actualiser_rollouts ()
 		),
-		fn 	fermer_toutes_fenetres	query:false = (
+		fn facadeEditeur_ouvrir 	_index	=(
+			if roll_facades_estOuvert do facadeEditeur_fermer ()
+			debug "ouvrir_facadeEditeur"
+			createDialog 	roll_facades	style:				#(#style_resizing) 	\
+													pos:					roll_facades_pos		\
+													width:				roll_facades_taille.x	\
+													height:				roll_facades_taille.y	/* \
+													modal:				true \ 
+													escapeEnable:	true */
+			
+			roll_facades.initialiser 		m_plug
+			roll_facades.set_facade 		( mgr_facades.get_parIndex	_index )
+			roll_facades_estOuvert = true
+			m_plug.actualiser_rollouts ()
+		),
+		fn fermer_toutes_fenetres	query:false = (
 			debug "fermer_toutes_fenetres"
-			facadeEditeur_fermer query:query
+			facadeEditeur_fermer ()
 		),
 		
 		
@@ -194,7 +195,7 @@ struct str_batiment_core (
 			local confirmation 			= querybox ( "Supprimer "  + facadeASupprimer.nom + " ?" )
 			if confirmation do 
 				mgr_facades.supprimer		_index
-				
+			
 			actualiser ()
 		),
 		fn dupliquer_facade		_index =(

@@ -367,6 +367,7 @@ struct str_mgr_facades (
 			
 			if enregistrer do (
 				append		m_items	nv_element
+				nv_element.nom += " " + m_items.count as string
 				nv_element.enregistrer	 	m_plug
 			)
 			

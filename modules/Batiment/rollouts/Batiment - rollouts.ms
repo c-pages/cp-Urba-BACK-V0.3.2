@@ -189,8 +189,7 @@ rollout roll_presets 			"Presets" 		rolledUp:true		(
 		
 	*/ --------------------  CLEANAGE --------------------
 )
-rollout roll_global "Global" width:162 height:261
-(
+rollout roll_global "Global" width:162 height:261(
 	
 	
 	fn shape_filt 		obj = superclassof obj == shape
@@ -289,11 +288,13 @@ rollout roll_global "Global" width:162 height:261
 	on lbx_facades doubleClicked arg do
 		core.facadeEditeur_ouvrir	 	lbx_facades.selection
 	
-	on lbx_facades selected val do
+	on lbx_facades selected val do(
+		if core.facadeEditeur_est_ouvert () do
+			core.facadeEditeur_ouvrir	 	lbx_facades.selection
 		actualiser ()
+	)
 	
-	on btn_ajouterFacade pressed do
-	(
+	on btn_ajouterFacade pressed do	(
 			core.creer_facade ()
 			actualiser ()
 			lbx_facades.selection = lbx_facades.items.count
@@ -303,6 +304,7 @@ rollout roll_global "Global" width:162 height:261
 	on btn_supprimerFacade pressed do
 	(
 			core.supprimer_facade		lbx_facades.selection 
+			core.facadeEditeur_fermer ()
 			actualiser ()
 		)
 		
