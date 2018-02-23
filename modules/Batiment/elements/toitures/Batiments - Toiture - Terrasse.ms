@@ -19,6 +19,7 @@ rollout toiture_dialog "Toiture plate" width:180 height:70	(
 	
 	label 'lbl_htAcrotere' "Ht. acrotère:" pos:[9,10] width:61 height:13 align:#left
 	spinner 'spn_htAcrotere' "" pos:[92,9] width:70 height:16 range:[0,100000,0] type:#float scale:1 align:#left
+	
 	fn actualiser =(
 		spn_htAcrotere.value 	= 	m_toiture.params.acrotere_ht
 	)
@@ -51,8 +52,13 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 		local ep_murExt		= ptr_plug.const_murExt_epaisseur
 		local ht_acrotere 		= ptr_composant.params.acrotere_ht
 		local ep_couvertine	= ptr_plug.const_couvertine_epaisseur
+		local ep_dalle			= ptr_plug.const_dalle_epaisseur
 		
 -------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
+		
+		--- la dalle	-------
+		ptr_geo.facesContour	pts_accroches	 pts_accroches[1].z 		ep_dalle  matid:#mur
+		for pt in pts_accroches do pt.z += ep_dalle
 		
 		--- la face de base 	--------
 		local faceBase 	= ptr_geo.face		pts_accroches						matID:1

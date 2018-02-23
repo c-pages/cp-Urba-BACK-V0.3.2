@@ -72,7 +72,6 @@ struct	str_geometrie	(
 			result
 		),
 		
-		
 	----- constructions élémentaires 2 ----------------
 		fn faceVerticale 	pt1 	pt2 		z 					ht:			=(
 		
@@ -104,7 +103,7 @@ struct	str_geometrie	(
 				polyop.createPolygon m_plug.delegate  #((verts+4),(verts+3),(verts+2),(verts+1))
 			)
 		),
-		fn facesContour	ptsContours	 altitude 		hauteur 			=(
+		fn facesContour	ptsContours	 altitude 		hauteur 		matID:	=(
 			
 			
 			local facesDuContour =#()
@@ -127,6 +126,8 @@ struct	str_geometrie	(
 				
 			)
 			
+			if matID != unsupplied do set_matID  facesDuContour matID
+				
 			facesDuContour
 			
 		
@@ -144,6 +145,10 @@ struct	str_geometrie	(
 		),
 		fn souder	_pts =(
 			polyop.weldVertsByThreshold m_plug.delegate 		( _pts as bitArray)
+		),
+		fn flipNormal  _faces =(
+			if classof _faces != array do _faces = #(_faces )
+			polyop.flipNormals m_plug.delegate	 _faces
 		),
 		
 	--- plans ---------------

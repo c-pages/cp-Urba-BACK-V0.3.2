@@ -128,7 +128,10 @@ parameters params_toiture 							(
 	
 )
 
-
+parameters params_interieur				rollout:roll_global					(
+	interieur_planchers		type:#boolean			default:false	ui:chk_planchers		animatable:false		invisibleInTV:true
+	
+)
 -------------------------------------------------------------------------------------------------------------------------------------------------
 --------------- ROLLOUT  --------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -189,17 +192,18 @@ rollout roll_presets 			"Presets" 		rolledUp:true		(
 		
 	*/ --------------------  CLEANAGE --------------------
 )
-rollout roll_global "Global" width:162 height:261(
+rollout roll_global "Global" width:162 height:341
+(
 	
 	
 	fn shape_filt 		obj = superclassof obj == shape
 	
 	--- Surface ------
 	pickbutton 'btn_pick_surface' "Pick shape" pos:[10,14] width:150 height:18 filter:shape_filt toolTip:"Le shape à utiliser comme surface de base pour la création du bâtiment." autoDisplay:true align:#left
-	GroupBox 'grp_surface' "Surface:" pos:[4,0] width:162 height:38 align:#left
+	GroupBox 'grp_surface' "Surface :" pos:[4,0] width:162 height:38 align:#left
 
 	--- Global ------
-	GroupBox 'grp_global' "Etages:" pos:[4,40] width:162 height:51 align:#left
+	GroupBox 'grp_global' "Etages :" pos:[4,40] width:162 height:51 align:#left
 -- 	spinner 'spn_rotation_axeP' "" pos:[88,87] width:48 height:16 range:[-360,360,0] type:#float scale:1 align:#left
 -- 	label 'lbl_axeP' "Orientation:" pos:[10,87] width:59 height:15 align:#left
 -- 	button 'btn_rotation' "+90" pos:[137,87] width:24 height:16 align:#left
@@ -210,8 +214,9 @@ rollout roll_global "Global" width:162 height:261(
 	
 	
 	--- Facades -----
-	GroupBox 'grp_facades' "Façades:" pos:[4,94] width:162 height:121 align:#left
+	GroupBox 'grp_facades' "Façades :" pos:[4,94] width:162 height:121 align:#left
 	listbox 'lbx_facades' "" pos:[10,125] width:150 height:6 align:#left 
+ 
  
  
  
@@ -226,6 +231,10 @@ rollout roll_global "Global" width:162 height:261(
 	dropdownList 'ddl_toiture' "" pos:[10,232] width:123 height:21 align:#left
 	
 	
+	
+	GroupBox 'grp_interieur' "Interieur :" pos:[3,259] width:162 height:40 align:#left
+-- 	label 'lbl_dalles' "Dalles " pos:[33,274] width:40 height:15 align:#left
+	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 align:#left
 	
 	fn actualiser =(
 		
@@ -264,6 +273,18 @@ rollout roll_global "Global" width:162 height:261(
 	
 	
 	
+			
+			
+			
+			
+			
+	
+	
+	
+		
+		
+		
+	
 	on roll_global open do
 	(
 			initialiser()
@@ -273,57 +294,47 @@ rollout roll_global "Global" width:162 height:261(
 	(
 				core.fermer_toutes_fenetres query:true
 			)
-			
-			
-			
-			
-			
 	on btn_pick_surface picked _shape do
 		core.assigner_surface 		$		_shape
 	on spn_nbres changed val do
 		core.actualiser ()
 	on spn_hauteur changed val do
 		core.actualiser ()
-	
+	on lbx_facades selected val do
+	(
+			if core.facadeEditeur_est_ouvert () do
+				core.facadeEditeur_ouvrir	 	lbx_facades.selection
+			actualiser ()
+		)
 	on lbx_facades doubleClicked arg do
 		core.facadeEditeur_ouvrir	 	lbx_facades.selection
-	
-	on lbx_facades selected val do(
-		if core.facadeEditeur_est_ouvert () do
-			core.facadeEditeur_ouvrir	 	lbx_facades.selection
-		actualiser ()
-	)
-	
-	on btn_ajouterFacade pressed do	(
-			core.creer_facade ()
+	on btn_dupliquer_facade pressed do
+	(
+				core.dupliquer_facade		lbx_facades.selection 
 			actualiser ()
-			lbx_facades.selection = lbx_facades.items.count
-			
-			core.facadeEditeur_ouvrir	 	lbx_facades.selection
 		)
+	on btn_ajouterFacade pressed do
+	(
+				core.creer_facade ()
+				actualiser ()
+				lbx_facades.selection = lbx_facades.items.count
+				
+				core.facadeEditeur_ouvrir	 	lbx_facades.selection
+			)
 	on btn_supprimerFacade pressed do
 	(
 			core.supprimer_facade		lbx_facades.selection 
 			core.facadeEditeur_fermer ()
 			actualiser ()
 		)
-		
-		
-		
-	on btn_dupliquer_facade pressed do (
-			core.dupliquer_facade		lbx_facades.selection 
-		actualiser ()
-	)
-	on btn_editer_facade 	changed state  do (
-		case state of (
-			true:		core.facadeEditeur_ouvrir	 	lbx_facades.selection
-			false:	core.facadeEditeur_fermer ()
+	on btn_editer_facade changed state  do
+	(
+			case state of (
+				true:		core.facadeEditeur_ouvrir	 	lbx_facades.selection
+				false:	core.facadeEditeur_fermer ()
+			)
+			actualiser ()
 		)
-		actualiser ()
-	)
-	
-	
-	
 	on btn_editer_toiture pressed do
 	(
 			local toiture = core.get_toiture ()
@@ -338,6 +349,10 @@ rollout roll_global "Global" width:162 height:261(
 			core.actualiser ()
 			actualiser ()
 		)
+		
+		
+	on chk_planchers changed state do 
+			core.actualiser ()
 )
 rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
 	

@@ -218,6 +218,9 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	est_Dan
 		local ptr_composant  	= 	_composant
 		local ptr_params		  	= 	_composant.params
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
+	
+	-------------  constantes locales			-----------------------------------------------------------------------------------------------------------------
+		local decalage_epaisseur = 1
 		
 	-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
 		local longueur						= ptr_params.longueur
@@ -298,8 +301,8 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	est_Dan
 		local pt_ht 	= ptAccroche_3
 		
 		local pt_1 		= pt_bas	+  vec_longueur
-		local pt_2 		= pt_1		+  vec_allege
-		local pt_3 		= pt_bas	+ 	vec_allege
+		local pt_2 		= pt_1		+  vec_allege + [0,0,decalage_epaisseur]
+		local pt_3 		= pt_bas	+ 	vec_allege + [0,0,decalage_epaisseur]
 		
 		local pt_4 		= pt_bas	+ 	vec_ht
 		local pt_5 		= pt_4		+ 	vec_longueur				
@@ -411,7 +414,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	est_Dan
 			local vec_tab_cote	= _normDir 	* tablette_cote					
 			
 			-------	Placement des points 	--------
-			local pt_1 		= pt_bas	+  vec_allege 	- 	vec_tab_ht		-	vec_tab_cote	+ vec_tab_deb
+			local pt_1 		= pt_bas	+  vec_allege 	- 	vec_tab_ht		-	vec_tab_cote	+ vec_tab_deb + [ 0,0, decalage_epaisseur ]
 			local pt_2 		= pt_1		+  2 * vec_tab_cote 				+	vec_longueur 	
 			local pt_3 		= pt_2		+ 	vec_tab_ht				
 			local pt_4		= pt_1		+ 	vec_tab_ht

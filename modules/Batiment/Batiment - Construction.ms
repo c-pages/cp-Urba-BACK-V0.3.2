@@ -137,6 +137,14 @@ struct str_construction (
 			nvComposant.params.longueur 	=	_longueur
 			nvComposant
 		),
+		fn creer_dalle	z 	matID:#int_sol		flipNormal:false	=(
+			local surface_points 	= m_plug.core.get_surface_points ()
+			for pt in surface_points do pt.z = z
+			local face = m_geo.face		surface_points 	matID:matID
+			
+			if flipNormal do m_geo.flipNormal	face
+			face
+		),
 		fn get_sequenceFacade		_facade		_longueur_facade	=(
 			
 -- 			debug "get_sequenceFacade" 
@@ -293,6 +301,11 @@ struct str_construction (
 			---- boucle étages ---------------------
 			for n_etage = 0 to m_plug.etages_nbre do (
 				
+				--- Creation du sol	-----------------------------
+				if m_plug.interieur_planchers do
+					creer_dalle	( z + m_plug.const_dalle_epaisseur )  matID:#int_sol
+				
+				
 				--- on regarde si on a des facades pour cet étage	---------------
 				local facades_etages 	= 	filtrer_facades_parEtages		facades_total 		n_etage
 				local onA_uneFacade 	= 	facades_etages.count > 0
@@ -340,7 +353,13 @@ struct str_construction (
 					
 				)
 				
-				z += m_plug.etages_hauteur + m_plug.const_dalle_epaisseur
+				z += m_plug.etages_hauteur 
+				
+				--- Creation du plafond	-----------------------------
+				if m_plug.interieur_planchers do
+					creer_dalle	( z + m_plug.const_dalle_epaisseur )  matID:#int_plafond  -- flipNormal:true
+				
+				z += m_plug.const_dalle_epaisseur
 				
 			) --- fin boucle etages -------------
 			/* 
