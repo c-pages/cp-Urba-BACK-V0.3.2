@@ -189,7 +189,8 @@ rollout roll_presets 			"Presets" 		rolledUp:true		(
 		
 	*/ --------------------  CLEANAGE --------------------
 )
-rollout roll_global 			"Global" 		rolledUp:false 	(
+rollout roll_global "Global" width:162 height:261
+(
 	
 	
 	fn shape_filt 		obj = superclassof obj == shape
@@ -214,10 +215,11 @@ rollout roll_global 			"Global" 		rolledUp:false 	(
 	listbox 'lbx_facades' "" pos:[10,125] width:150 height:6 align:#left 
  
  
-	button 'btn_editer_facade' "Edit" pos:[133,108] width:28 height:16 align:#left
+ 
+	button 'btn_dupliquer_facade' "Dup." pos:[40,108] width:28 height:16 align:#left
 	button 'btn_ajouterFacade' "+" pos:[10,108] width:16 height:16 align:#left
 	button 'btn_supprimerFacade' "-" pos:[25,108] width:16 height:16 align:#left
-	
+	checkbutton 'btn_editer_facade' "Edit" pos:[133,108] width:28 height:16 align:#left
 	
 	--- Toitures -----
 	GroupBox 'grp14' "Toiture :" pos:[3,217] width:162 height:40 align:#left
@@ -233,6 +235,8 @@ rollout roll_global 			"Global" 		rolledUp:false 	(
 -- 		if lbx_facades.selection == 0 then (
 			btn_supprimerFacade.enabled	=	 lbx_facades.selection != 0 
 			btn_editer_facade.enabled			=	 lbx_facades.selection != 0 
+			btn_editer_facade.checked			= 	core.facadeEditeur_est_ouvert ()
+			btn_dupliquer_facade.enabled	=	 lbx_facades.selection != 0 
 -- 		) else (
 			
 -- 		)
@@ -260,38 +264,34 @@ rollout roll_global 			"Global" 		rolledUp:false 	(
 	
 	
 	
-	on btn_pick_surface	picked 	_shape do
-		core.assigner_surface 		$		_shape 		
-	
-	on ddl_toiture selected 	_val do (
-		local mgr_toiture 			= core.get_mgr_toiture ()
-		mgr_toiture.assigner 	_val
-		core.actualiser ()
-		actualiser ()
-	)
 	
 	on roll_global open do
 	(
 			initialiser()
 			actualiser ()
 		)
-	on roll_global close do	(
-			core.fermer_toutes_fenetres query:true
-		)
+	on roll_global close do
+	(
+				core.fermer_toutes_fenetres query:true
+			)
+			
+			
+			
+			
+			
+	on btn_pick_surface picked _shape do
+		core.assigner_surface 		$		_shape
 	on spn_nbres changed val do
 		core.actualiser ()
 	on spn_hauteur changed val do
 		core.actualiser ()
-	/* 
-	on spn_hauteur buttonDown do (
-
-		flagForeground $ true
-	)
-	on spn_hauteur buttonup  inCancel_arg do (
-		flagForeground $ false
-	) */
+	
 	on lbx_facades doubleClicked arg do
 		core.facadeEditeur_ouvrir	 	lbx_facades.selection
+	
+	on lbx_facades selected val do
+		actualiser ()
+	
 	on btn_ajouterFacade pressed do
 	(
 			core.creer_facade ()
@@ -303,13 +303,39 @@ rollout roll_global 			"Global" 		rolledUp:false 	(
 	on btn_supprimerFacade pressed do
 	(
 			core.supprimer_facade		lbx_facades.selection 
+			actualiser ()
 		)
-	on btn_editer_toiture pressed do (
-		local toiture = core.get_toiture ()
-		local dialog = toiture.get_dialog ()
-		createDialog 	dialog
-		dialog.initialiser 	$	toiture 
+		
+		
+		
+	on btn_dupliquer_facade pressed do (
+			core.dupliquer_facade		lbx_facades.selection 
+		actualiser ()
 	)
+	on btn_editer_facade 	changed state  do (
+		case state of (
+			true:		core.facadeEditeur_ouvrir	 	lbx_facades.selection
+			false:	core.facadeEditeur_fermer ()
+		)
+		actualiser ()
+	)
+	
+	
+	
+	on btn_editer_toiture pressed do
+	(
+			local toiture = core.get_toiture ()
+			local dialog = toiture.get_dialog ()
+			createDialog 	dialog
+			dialog.initialiser 	$	toiture 
+		)
+	on ddl_toiture selected _val do
+	(
+			local mgr_toiture 			= core.get_mgr_toiture ()
+			mgr_toiture.assigner 	_val
+			core.actualiser ()
+			actualiser ()
+		)
 )
 rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
 	

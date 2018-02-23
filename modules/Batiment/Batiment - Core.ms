@@ -142,14 +142,13 @@ struct str_batiment_core (
 		fn get_mgr_toiture	 		= mgr_toiture,
 		fn get_mgrDatas 				= mgr_datas,
 			
-	---- Mutations	------
+	----- Editeur de facades -----------------
 	public
 		fn set_roll_editeurDeFacade_position	_pos 	=( roll_facades_pos = _pos),
 		fn set_roll_editeurDeFacade_taille		_taille 	=( roll_facades_taille = _taille),
 		
-	----- Editeur de facades -----------------
-	public
 		fn get_facadeEditeur_rollout = roll_facades,
+		fn facadeEditeur_est_ouvert = roll_facades_estOuvert,
 		fn facadeEditeur_ouvrir 	_index	=(
 			debug "ouvrir_facadeEditeur"
 			createDialog 	roll_facades	style:				#(#style_resizing) 	\
@@ -162,6 +161,7 @@ struct str_batiment_core (
 			roll_facades.initialiser 		m_plug
 			roll_facades.set_facade 	( mgr_facades.get_parIndex	_index )
 			roll_facades_estOuvert = true
+			m_plug.actualiser_rollouts ()
 		),
 		fn facadeEditeur_fermer 		query:false	=(
 			if roll_facades_estOuvert do (
@@ -174,14 +174,17 @@ struct str_batiment_core (
 				
 				destroyDialog 	roll_facades
 				roll_facades_estOuvert = false
-				
 			)
+			m_plug.actualiser_rollouts ()
 		),
 		fn 	fermer_toutes_fenetres	query:false = (
 			debug "fermer_toutes_fenetres"
 			facadeEditeur_fermer query:query
 		),
-	----- Manipuler les facades et leurs composants	---------------
+		
+		
+		
+	----- Facades----------------------------------
 		fn creer_facade 							=(
 			local nv_facade 	= mgr_facades.creer ()
 			nv_facade
@@ -190,12 +193,20 @@ struct str_batiment_core (
 			local facadeASupprimer = mgr_facades.get_parIndex		_index
 			local confirmation 			= querybox ( "Supprimer "  + facadeASupprimer.nom + " ?" )
 			if confirmation do 
-				mgr_facades.supprimer		facadeASupprimer.id
-			
-			m_plug.actualiser_rollouts ()
-			
+				mgr_facades.supprimer		_index
+				
 			actualiser ()
 		),
+		fn dupliquer_facade		_index =(
+			local facadeDuplique =  creer_facade ()
+			local idNouvelleFacade = facadeDuplique.id
+			local facadeSource= mgr_facades.get_parIndex		_index
+			mgr_facades.dupliquer 	facadeSource cible:facadeDuplique 
+			facadeDuplique.nom += " - copie"
+			facadeDuplique.id = idNouvelleFacade
+		),
+		
+	----- Composants----------------------------------
 		fn supprimer_composant 	_facade		_index =(
 			local supprimer_balconFin 		= false
 			local supprimer_balconDebut		= false

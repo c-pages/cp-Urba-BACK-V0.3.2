@@ -395,10 +395,10 @@ struct str_mgr_facades (
 			)
 			nvlFacade
 		),
-		fn supprimer 	_idUnique	=	(
-			local elem_a_supprimer = get_parID		_idUnique
-			local indexASupprimer = elem_a_supprimer.supprimer		m_plug
-			deleteItem	m_items	indexASupprimer
+		fn supprimer 	_index	=	(
+-- 			local elem_a_supprimer = get_parID		_idUnique
+-- 			local indexASupprimer = elem_a_supprimer.supprimer		m_plug
+			deleteItem	m_items	_index
 		),
 		
 		fn charger =(
