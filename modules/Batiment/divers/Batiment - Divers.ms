@@ -23,7 +23,7 @@ struct str_datasToString (
 					Array:	tabString += item 		as string + separateur_items
 					
 					---- les reste doit etre nos struct a nous ... -------
-					default:	tabString += item.id 	as string + separateur_items
+					default:	tabString += item 	as string + separateur_items
 				)
 			)
 			tabString

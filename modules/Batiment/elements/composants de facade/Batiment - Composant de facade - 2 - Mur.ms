@@ -29,7 +29,6 @@ rollout compo_dialog "Mur plein" width:180 height:70	(
 
 	on spn_longueur changed val do (
 		m_compo.params.longueur = val
-		m_rollPrt.actualiser ()
 	)
 	on edt_nom	 entered txt 	do	(
 		m_compo.nom = txt

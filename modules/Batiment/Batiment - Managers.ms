@@ -161,17 +161,6 @@ struct 	str_mgr_composantsDeFacade (
 		
 	------------ INTERFACE  ------------------------------------------------------------------------------------------------------------------------
 	public
-		---- creation d'un composant ------
-		fn creer 	_idModel		=(
-			--- on importe le fichier du struct des composants  (pour avoir accés meme si le plug est pas actif)---
-			include	 "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant de facade.ms"
-			
-			local nvComposant = str_composant () ---	get_nouveauComposant ()
-			m_modelesBase[_idModel].initialiser	nvComposant
-			
-			nvComposant
-		),
-		
 		----------------- Models de base	------------------------------
 		---- recupere l'index du modele de composant  ------
 		fn get_model_ID 				_typeAChercher	=(
@@ -192,12 +181,72 @@ struct 	str_mgr_composantsDeFacade (
 		),
 		fn get_modeles 				= m_modelesBase,
 		
+		
+		
+		---- creation d'un composant ------
+		fn creer 			_idModel		=(
+			--- on importe le fichier du struct des composants  (pour avoir accés meme si le plug est pas actif)---
+			include	 "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant de facade.ms"
+			
+			local nvComposant = str_composant () ---	get_nouveauComposant ()
+			m_modelesBase[_idModel].initialiser	nvComposant
+			
+			nvComposant
+		),
+		fn dupliquer		_composant 	cible:	=(
+			debug "dupliquer"
+			
+			debug "_composant" var:_composant
+			local idModel = get_model_ID 		_composant.type
+			local nvComposant
+			if cible == unsupplied	then
+				nvComposant = creer		idModel
+			else
+				nvComposant = cible
+			
+			
+			local propNoms = getPropNames _composant
+			for propNom in propNoms where propNom != #id do (
+				
+				local propOriginal = ( getProperty  _composant 	propNom )
+				
+				
+				if propNom == #params then (
+					
+					local propParamsNoms = getPropNames 	propOriginal
+					
+					for propParamsNom in propParamsNoms  do (
+						local propParamsOriginal = ( getProperty  propOriginal 	propParamsNom )
+						debug"propParamsNom" var:propParamsNom
+						setProperty nvComposant.params 	propParamsNom 	propParamsOriginal
+					)
+					
+				) else (
+					
+					case classof propOriginal of (
+						--- les trucs qu'on zappe ------
+						MAXScriptFunction:	()					
+						array:					setProperty nvComposant 	propNom 	( for val in propOriginal collect val )
+						default:					setProperty nvComposant 	propNom 	propOriginal
+					)
+				)
+			)
+			
+			nvComposant.nom += " - copie"
+			
+			debug "nvComposant" var:nvComposant
+			nvComposant
+		),
+		
+		
+		
 		----------------- Divers------------------------------	
 		---- pour recuperer un 'mur plein' temporaire ------
 		fn get_murPlein = creer  ( get_model_ID	#mur ),
 		
 		--- charge en mémoire les parametres des composant des facades depuis le plugin --------
-		fn charger		_id		  =(
+		fn charger		_idUnique		  =(
+			debug "charger"
 			
 			--- on cherche s'il existe deja comme parametre -----
 			local index_composant= 0
@@ -206,22 +255,24 @@ struct 	str_mgr_composantsDeFacade (
 			
 			while i <= m_plug.fac_compos_ids.count and not trouve 	do (
 				
-				if ( execute m_plug.fac_compos_ids[i] ) as string == ( _id ) as string do (
+				if ( execute m_plug.fac_compos_ids[i] ) as name == ( _idUnique ) as name do (
 					index_composant = i
 				)
 				i+= 1
 			)
 			
-			
 			local nvComposant
+			
 			--- on charge	------------------------------------
 			if index_composant != 0 then (
+				
 				local type = m_plug.fac_compos_types[index_composant]
 				local id_model = get_model_ID  type
-				nvComposant 	= creer	id_model enregistre:false
+				nvComposant 	= creer		id_model 	enregistre:false
 				
-				nvComposant.charger		m_plug		
+				nvComposant.charger		m_plug		idUnique:_idUnique
 			)
+			
 			nvComposant
 		),
 		
@@ -353,10 +404,9 @@ struct str_mgr_facades (
 		fn charger =(
 			m_items = #()
 			for id in m_plug.fac_ids do (
-				debug "charger" var:id
 				nvFacade = creer	enregistrer:false
 				nvFacade.id  = id
-				nvFacade.charger 	m_plug		
+				nvFacade.charger 	m_plug
 				append	m_items	nvFacade
 			)
 		),

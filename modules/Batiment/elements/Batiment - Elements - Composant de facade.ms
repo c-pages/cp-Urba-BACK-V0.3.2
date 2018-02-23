@@ -89,16 +89,16 @@ struct 	str_composant (
 			--- s'il existe, on l'actualise -----
 			) else (
 				
--- 				debug "enregistrer cmoposant existant"
-				debug "id"		var:id
-				
 				_plug.fac_compos_noms[index_composant] 		=	nom				
 				_plug.fac_compos_types[index_composant]		=	type		
 				_plug.fac_compos_params[index_composant]		=	(	mgr_datas.get_datas_string	params	)
 				
 			) 
 		),
-		fn charger 	_plug	 =(
+		fn charger 	_plug	idUnique: =(
+			
+			debug "charger"
+			if idUnique != unsupplied do id = idUnique as name
 			
 			local mgr_datas = _plug.core.get_mgrDatas ()
 			
@@ -107,9 +107,8 @@ struct 	str_composant (
 			local i= 1
 			local trouve = false
 			while i <= _plug.fac_compos_ids.count and not trouve	do (
--- 				debug "charger id" var:_plug.fac_compos_ids[i]
 				
-				if _plug.fac_compos_ids[i] as string == id as string do (
+				if ( execute _plug.fac_compos_ids[i] ) as name == id  do (
 					index_composant = i
 					trouve = true
 				)
@@ -119,9 +118,8 @@ struct 	str_composant (
 			-- on charge	------------------------------------
 			if index_composant != 0 then (
 				
-				id 				= 	_plug.fac_compos_ids[index_composant]
 				nom 				= 	_plug.fac_compos_noms[index_composant]
-				type				=	_plug.fac_compos_types[index_composant]
+				type				=	_plug.fac_compos_types[index_composant] as name
 				
 				mgr_datas.set_datas_string		_plug.fac_compos_params[index_composant]			params
 				

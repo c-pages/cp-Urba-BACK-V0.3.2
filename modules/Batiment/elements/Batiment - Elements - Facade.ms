@@ -52,32 +52,29 @@ struct 	str_facade (
 		
 		
 		---- Composants -----------------
-		fn get_composants_noms =(
-			for compo in sequence collect compo.nom
+		fn get_composant_parIDUnique		_IDUnique	=(
+			
+			local result = undefined
+			for compo in sequence do (
+				
+				if compo.id  as name == _IDUnique  as name do
+					result = compo
+			)
+			result
 		),
-		
-		fn update_sequence_longueur =(
-			sequence_longueur		=	0
-			for compo in sequence do
-				sequence_longueur	+=	compo.get_longueur ()
-		),
-		fn get_sequence_longueur	=(
-			update_sequence_longueur ()
-			sequence_longueur
-		),
-		
+		fn get_composants_noms =	for compo in sequence collect compo.nom,
 		fn ajouter_composant 		_composant 	position:(sequence.count+1)  =(
 			if position == 0 do position = sequence.count+1
 			insertItem _composant		sequence 				position
 		),
-		fn supprimer_composant 	_index 	=(
-			deleteItem sequence	_index
-		),
-		fn dupliquer_composant 	_composant 	=(
-			
-		),
-		fn cloner_composant 		_composant 	=(
-			
+		fn supprimer_composant 	_index 	=		deleteItem sequence	_index,
+		fn instancier_composant 	_index 	=(
+			debug "sequence[_index]" var:sequence[_index]
+			local compoInstance =  sequence[_index]
+			ajouter_composant  compoInstance 	position:( _index+1)
+			debug "compoInstance" var:compoInstance
+			debug "sequence" var:sequence
+			compoInstance
 		),
 		
 		fn composant_monter 		_index =(
@@ -88,10 +85,20 @@ struct 	str_facade (
 		fn composant_descendre 	_index =(
 			local compoTemp = sequence[_index]
 			deleteItem sequence		_index
-			insertItem compoTemp		sequence 				(_index+1)
-			
+			insertItem compoTemp		sequence 				(_index+1)			
 		),
 		
+		
+		--sequence ----------		
+		fn update_sequence_longueur =(
+			sequence_longueur		=	0
+			for compo in sequence do
+				sequence_longueur	+=	compo.get_longueur ()
+		),
+		fn get_sequence_longueur	=(
+			update_sequence_longueur ()
+			sequence_longueur
+		),
 		
 		---- Enregistrement / chargement	-----------------
 		fn enregistrer 	_plug 	=(
@@ -102,15 +109,16 @@ struct 	str_facade (
 			--- on cherche s'il existe deja comme parametre -----
 			local index_facade = 0
 			for i = 1 to _plug.fac_ids.count do
-				if _plug.fac_ids[i] == id  do index_facade = i
+				if _plug.fac_ids[i] as string == id as string  do index_facade = i
 			
 			
 			--- s'il n'existe pas encore, on l'ajoute -----
 			if index_facade == 0 then (
-				debug "enregistrer nouvelle facade"
+				
 				append 	_plug.fac_ids 		id
 				append 	_plug.fac_noms  	nom
-				append    _plug.fac_modes		mode
+				append    	_plug.fac_modes		mode
+				
 				--- Limiteurs - Murs	---
 				append 	_plug.fac_murs		murs
 				
@@ -132,9 +140,6 @@ struct 	str_facade (
 				
 			--- s'il existe, on l'actualise -----
 			) else (
-				
-				debug "enregistrer facade existante"
-				debug "id"		var:id
 				
 				_plug.fac_noms[index_facade] 		=	nom				
 				_plug.fac_modes[index_facade]		=	mode
@@ -165,32 +170,25 @@ struct 	str_facade (
 				
 			)
 			
-			
 		),
 		
 		fn charger	 		_plug		  =(
 			
 			debug "charger"
-			debug "id" var:id
 			
-			local		mgr_composant		=	_plug.core.get_mgr_composants ()
-			local 	mgr_datas 			= _plug.core.get_mgrDatas ()
+			local mgr_composants 	= _plug.core.get_mgr_composants ()
+			local mgr_datas 			= _plug.core.get_mgrDatas ()
 			
 			--- on cherche s'il existe deja comme parametre -----
 			local index_facade = 0
-			for i = 1 to _plug.fac_ids.count do (
-				debug "id test" var:_plug.fac_ids[i]
-				
-				if _plug.fac_ids[i] as string == id as string do (
+			for i = 1 to _plug.fac_ids.count do 				
+				if _plug.fac_ids[i] as string == id as string do 
 					index_facade = i
-				)
-				
-			)
 			
 			--- on charge	------------------------------------
 			if index_facade != 0 then (
 				
-				id 								= _plug.fac_ids[index_facade]
+				id 								= _plug.fac_ids[index_facade] as name
 				nom 								= _plug.fac_noms[index_facade]
 				
 				mode							= _plug.fac_modes[index_facade]
@@ -213,17 +211,18 @@ struct 	str_facade (
 				--- Sequence	---
 				sequence_longueur		=	_plug.fac_sequence_longueurs[index_facade]
 				
-				
-				
 				sequence						=  #()
-				local mgr_composants 	= _plug.core.get_mgr_composants ()
-				local sequence_IDs	= mgr_datas.string_to_array		 _plug.fac_sequences[index_facade]
-				for compoID in sequence_IDs do (					
-					nvComposant = 		mgr_composant.charger  	compoID
+				local sequence_IDs		= mgr_datas.string_to_array		 _plug.fac_sequences[index_facade]
+				for compoID in sequence_IDs do (
+					
+					local compoInstance = get_composant_parIDUnique	(compoID   as name)
+					
+					if compoInstance != undefined then 
+						nvComposant = 	compoInstance
+					else
+						nvComposant = 	mgr_composants.charger  	( compoID	 as name  )
 					append sequence	nvComposant
 				) 
-				
-				
 				
 			) else messagebox ("Erreur de chargement de facade : " + _id as string )
 			
@@ -233,7 +232,7 @@ struct 	str_facade (
 			--- on cherche s'il existe deja comme parametre -----
 			local index_facade = 0
 			for i = 1 to _plug.fac_ids.count do (
-				debug "id test" var:_plug.fac_ids[i]
+				
 				
 				if _plug.fac_ids[i] as string == id as string do (
 					index_facade = i
@@ -243,9 +242,8 @@ struct 	str_facade (
 			
 			--- on supprime	------------------------------------
 			if index_facade != 0 then (
-				deleteItem	_plug.fac_ids						index_facade
-				deleteItem	_plug.fac_noms						index_facade    
-				
+				deleteItem	_plug.fac_ids							index_facade
+				deleteItem	_plug.fac_noms						index_facade				
 				deleteItem	_plug.fac_modes					index_facade    
 				
 				--- Limiteurs - Murs	---

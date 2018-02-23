@@ -283,7 +283,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	est_Dan
 		
 		-------	Creation des faces 	--------
 		local nvlFace = ptr_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		
-		ptr_geo.set_matID 	nvlFace	#mur 	
+		ptr_geo.set_matID 	nvlFace	#mur
 		
 		--- Result -------------
 		pt_result_1 = pts_ids[1]
@@ -303,7 +303,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	est_Dan
 		
 		local pt_4 		= pt_bas	+ 	vec_ht
 		local pt_5 		= pt_4		+ 	vec_longueur				
-		local pt_6 		= pt_ht	+ 	vec_longueur
+		local pt_6 		= pt_ht		+ 	vec_longueur
 		local pt_7 		= pt_3		+ 	vec_prof
 		local pt_8 		= pt_2		+ 	vec_prof
 		local pt_9 		= pt_5		+ 	vec_prof
