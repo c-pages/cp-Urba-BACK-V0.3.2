@@ -9,9 +9,11 @@ struct	str_modelBase (
 		params,
 		dialog,
 		fnConstruire,
-	
+		
+		invisible = false,
+		
 	public
-		fn est_editable = params != undefined ,
+		fn est_editable = not invisible and params != undefined ,
 		fn initialiser 	_nvComposant	=(
 			
 			_nvComposant.initialiser			type		titre

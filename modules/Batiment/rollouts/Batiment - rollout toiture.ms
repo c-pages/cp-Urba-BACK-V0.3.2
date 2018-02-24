@@ -4,13 +4,13 @@
 	
 	
 
-rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
+rollout roll_urba_editeurToiture "urba_editeurFacades" width:500 height:300
 (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 		fn debug 	_txt  var:	 param:    =(
 			local m_debug = true
-			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:"urba | roll_urba_editeurFacades"
+			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:"urba | roll_urba_editeurToiture"
 			catch ()
 		)
 		
@@ -29,7 +29,6 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		local m_facade_courante
 		local m_composant_courant
 		local m_compoCourant_estDansBalcon = false
-		local m_compoCourant_estDansLoggia = false
 		
 		--- rollout	---------	
 		local largeur_params		= 	235
@@ -109,37 +108,32 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			--------- la sequence de composants --------
 			local itemsTmp 		= #()
 			local est_dansBalcon = false
-			local est_dansLoggia = false
 			m_compoCourant_estDansBalcon = false
-			m_compoCourant_estDansLoggia = false
-			local tabulation		= "     "
+			local tabulation		= "    "
 			local i = 1
 			for comp in m_facade_courante.sequence		do	(
-				local affichage 		= "       "
+				local affichage 		= ""
 				
-				if comp.type == #balcon		do est_dansBalcon = true
-				if comp.type == #loggia		do est_dansLoggia = true
-				
-				if comp.type == #balcon	then affichage = "  _   "
-				else if  comp.type == #balconFin		then affichage = " |_   "
-				else if est_dansBalcon do affichage = " |    "
-				
-				if est_dansLoggia do affichage += "|" + tabulation
-				
+				if comp.type == #balconFin 	do est_dansBalcon = false
+					
+				if est_dansBalcon do affichage += tabulation
 				affichage += comp.nom
 				append itemsTmp affichage
 				
-				if comp.type == #balconFin 	do est_dansBalcon = false
-				if comp.type == #loggiaFin 	do est_dansLoggia = false
+				if comp.type == #balcon		do est_dansBalcon = true
+					
+				-- pour la gestion du bouton de creation de balcon --------
 				
-				if i == lbx_sequence.selection do (
-					m_compoCourant_estDansBalcon = est_dansBalcon
-					m_compoCourant_estDansLoggia = est_dansLoggia
-				)
+-- 					debug "m_composant_courant" var:m_composant_courant.nom
+-- 					debug "i" var:i
+-- 					debug "lbx_sequence.selection " var:lbx_sequence.selection 
+					if i == lbx_sequence.selection do (
+						m_compoCourant_estDansBalcon = est_dansBalcon
+-- 						debug "===========================" var:m_composant_courant.nom
+					)
 				
 				i += 1
 			)
-			
 			lbx_sequence.items =  itemsTmp
 			
 		)
@@ -178,28 +172,21 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			remplir_lbx_sequence ()
 			
 			--- bloquage du bouton Balcon si on est deja dans un balcon -------------------
+-- 			if m_compoCourant_estDansBalcon do (
 			local idBalcon = ( m_plug.core.get_mgr_composants() ).get_model_ID #Balcon 
 			btns_ajouter_composant[idBalcon].enabled = not m_compoCourant_estDansBalcon
+-- 			)
 			
-			
-			--- bloquage du bouton loggia si on est deja dans un loggia -------------------			
-			local idLoggia = ( m_plug.core.get_mgr_composants() ).get_bouton_ID 	#loggia 	
-			btns_ajouter_composant[ idLoggia ].enabled = not m_compoCourant_estDansLoggia
-			debug "idBalcon" var:idBalcon
-			debug "idLoggia" var:idLoggia
-			debug "m_compoCourant_estDansLoggia" var:m_compoCourant_estDansLoggia
-			debug "m_compoCourant_estDansLoggia" var:m_compoCourant_estDansLoggia
-			
-			btn_supprimer_composant.enabled 	= lbx_sequence.selection != 0 
+			btn_supprimer_composant.enabled 	= lbx_sequence.selection != 0
 			btn_instancier_composant.enabled 		= lbx_sequence.selection != 0
 			btn_dupliquer_composant.enabled 		= lbx_sequence.selection != 0
 			
 			-- bouton monter ----
 			local btnMonter_enabled 		= lbx_sequence.selection != 1 and  lbx_sequence.selection != 0 and m_composant_courant != undefined
 			if btnMonter_enabled do (
-				if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconFin or m_composant_courant.type == #loggia  or m_composant_courant.type == #loggiaFin do (
+				if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconFin do (
 					local compo_precedant = m_facade_courante.sequence[lbx_sequence.selection - 1] 
-					if compo_precedant.type == #balcon or compo_precedant.type == #balconFin  or compo_precedant.type == #loggia or compo_precedant.type == #loggiaFin  do (
+					if compo_precedant.type == #balcon or compo_precedant.type == #balconFin  do (
 						btnMonter_enabled = false
 					)
 				)
@@ -209,9 +196,9 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			-- bouton descendre ----
 			local btnDescendre_enabled = lbx_sequence.selection != lbx_sequence.items.count and  lbx_sequence.selection != 0 and m_composant_courant != undefined
 			if btnDescendre_enabled do (
-				if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconFin or m_composant_courant.type == #loggia  or m_composant_courant.type == #loggiaFin do (
+				if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconfin do (
 					local compo_suivant = m_facade_courante.sequence[lbx_sequence.selection + 1] 
-					if compo_suivant.type == #balcon or compo_suivant.type == #balconFin  or compo_suivant.type == #loggia or compo_suivant.type == #loggiaFin  do (
+					if compo_suivant.type == #balcon or compo_suivant.type == #balconFin  do (
 						btnDescendre_enabled = false
 					)
 				)

@@ -172,6 +172,21 @@ struct 	str_mgr_composantsDeFacade (
 			)
 			result
 		),
+		---- recupere l'index du bouton de composant  (ne compte pas les element type balconFin, loggiaFin,  ------
+		fn get_bouton_ID 				_typeAChercher	=(
+			local result
+			local index_bouton = 0
+			for i = 1 to m_modelesBase.count  do (
+				local model = m_modelesBase[i]
+				if model.est_editable  () do (
+					index_bouton += 1
+					if model.type  as string == _typeAChercher as string
+						do result = index_bouton
+				)
+			)
+			result
+		),
+		
 		fn get_model_par_type 		_typeAChercher	=(
 			local result
 			for model in m_modelesBase do
@@ -333,10 +348,8 @@ struct str_mgr_facades (
 			
 		),
 		
-		---- Accessions ----------------
-		
+		---- Accessions ----------------		
 		fn get_mgr_composants 	= mgr_composants,
-			
 		fn get_parID  		_idUnique	=(
 			
 				debug "get_parID"	
@@ -350,11 +363,9 @@ struct str_mgr_facades (
 			result
 			
 		),
-		
 		fn get_parIndex  	_index 		=(
 			m_items[_index]			
 		),
-		
 		fn get_noms 	=	for item in m_items collect item.nom,
 		fn get_items	= 	m_items,
 		
@@ -406,7 +417,7 @@ struct str_mgr_facades (
 			m_items = #()
 			for id in m_plug.fac_ids do (
 				nvFacade = creer	enregistrer:false
-				nvFacade.id  = id
+				nvFacade.id  = id as name
 				nvFacade.charger 	m_plug
 				append	m_items	nvFacade
 			)

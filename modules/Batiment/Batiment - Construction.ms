@@ -27,7 +27,7 @@ struct str_construction (
 		m_plug,
 	public			
 		m_geo		= 	str_geometrie 	(),
--- 		m_matID	= 	str_prefs_matID () ,	--fileIn "$userScripts\cp-Urba\Urba - modifer plugin - Batiment - material IDs.ms",
+		
 		
 		---- Outils -------------
 	private
@@ -140,9 +140,8 @@ struct str_construction (
 		fn creer_dalle	z 	matID:#int_sol		flipNormal:false	=(
 			local surface_points 	= m_plug.core.get_surface_points ()
 			for pt in surface_points do pt.z = z
-			local face = m_geo.face		surface_points 	matID:matID
+			local face = m_geo.face		surface_points 	matID:matID    flipNormal:flipNormal
 			
-			if flipNormal do m_geo.flipNormal	face
 			face
 		),
 		fn get_sequenceFacade		_facade		_longueur_facade	=(
@@ -255,13 +254,20 @@ struct str_construction (
 			
 			
 			--- gestion balcon	------
-			local balcon_ptID_debut, 		balcon_pts_debut, 		balcon_aConstruire
+			local balcon_ptID_debut, 		balcon_pts_debut, 	balcon_aConstruire
+			
+			----gestion loggia -------
+			local	 loggia_ptID_debut, 		loggia_pts_debut, 		loggia_aConstruire
+			
+			local profondeurFacade = 0
 			
 			---  on créé la facade avec la sequence total --------
 			for composant in sequenceTotal do (
 				case composant.type of (
+					
+					
 					#balcon:(
-						balcon_pts_debut 	= ptsIDs_accroche
+						balcon_pts_debut 		= ptsIDs_accroche
 						balcon_aConstruire 	= composant
 					)
 					#balconFin:(
@@ -272,9 +278,34 @@ struct str_construction (
 						balcon_aConstruire = undefined
 -- 					balcon_aConstruire.params.longueur = 	0
 					)
+					
+					
+					
+					#loggia:(
+						loggia_pts_debut 		= ptsIDs_accroche
+						loggia_aConstruire 	= composant
+						profondeurFacade 		= loggia_aConstruire.params.profondeur
+					-----	construction geometrie du composant	----------
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir	--	est_DansBalcon:(balcon_aConstruire != undefined )  -- profondeur:profondeurFacade
+						
+					)
+					#loggiaFin:(
+						local		pt_loggia_debut			=	polyop.getVert 	m_plug.delegate		loggia_pts_debut[1]	
+						local		pt_loggia_fin					=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
+						composant.params.longueur 		= 		(	distance	pt_loggia_debut 	pt_loggia_fin	)
+						composant.params.profondeur 	= 		loggia_aConstruire.params.profondeur
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir
+						composant.params.longueur 		= 		0
+						loggia_aConstruire = undefined
+-- 						profondeurFacade 		= 0
+					
+					)
+					
+					
+					
 					default:(
 						-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		est_DansBalcon:(balcon_aConstruire != undefined )
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		est_DansBalcon:(balcon_aConstruire != undefined )  -- profondeur:profondeurFacade
 						
 					)
 				)
@@ -292,7 +323,7 @@ struct str_construction (
 			z += m_plug.const_ssBassement_epaisseur
 			
 		),
-		fn creer_facades 				&z	=(
+		fn creer_etages 				&z	=(
 			
 			local z_initial 			= copy z
 			local facades_total	= 	m_plug.core.get_facades ()			
@@ -325,13 +356,12 @@ struct str_construction (
 					---  on regarde si on a des facades pour ce mur ---------------
 					local facades_pourCeMur		=	filtrer_facades_parMurs		facades_etages		mur_longueur	surface_points		id_pt
 					
-					if facades_pourCeMur.count > 0 
-							then	(
-								if facades_pourCeMur[1] != undefined then
-									onA_uneFacade = true
-								else	onA_uneFacade = false
-							) else	onA_uneFacade = false
-							
+					if facades_pourCeMur.count > 0 	then	(
+							if facades_pourCeMur[1] != undefined then
+								onA_uneFacade = true
+							else	onA_uneFacade = false
+						) else	onA_uneFacade = false
+						
 					---- si on  a des facades on construit la sequence --------------------
 					if 	onA_uneFacade  then 
 						creer_sequence		pt_mur_1		pt_mur_2	 facades_pourCeMur[1]
@@ -355,9 +385,10 @@ struct str_construction (
 				
 				z += m_plug.etages_hauteur 
 				
-				--- Creation du plafond	-----------------------------
+				--- Creation du plafond, ------------------------
 				if m_plug.interieur_planchers do
-					creer_dalle	( z + m_plug.const_dalle_epaisseur )  matID:#int_plafond  -- flipNormal:true
+					creer_dalle	( z + m_plug.const_dalle_epaisseur )  matID:#int_plafond   flipNormal:true
+				
 				
 				z += m_plug.const_dalle_epaisseur
 				
@@ -409,7 +440,7 @@ struct str_construction (
 					
 					---- ...  et on construit le batiment -----
 					creer_ssBassement 			&zCourant
-					creer_facades					&zCourant
+					creer_etages					&zCourant
 					creer_toiture						&zCourant
 					
 				)

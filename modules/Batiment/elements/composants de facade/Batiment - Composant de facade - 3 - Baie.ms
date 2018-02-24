@@ -410,7 +410,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	est_Dan
 		if tablette_use and not est_DansBalcon do (
 			
 			local vec_tab_ht		= 	[0,0,1] 		* tablette_hauteur
-			local vec_tab_deb	= -norm_prof 	* tablette_debord
+			local vec_tab_deb		= -norm_prof 	* tablette_debord
 			local vec_tab_cote	= _normDir 	* tablette_cote					
 			
 			-------	Placement des points 	--------

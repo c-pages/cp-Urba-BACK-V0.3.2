@@ -70,8 +70,8 @@ struct str_batiment_core (
 		---  Rollouts Facade -------------------
 		roll_facades 				= 	filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout facade.ms",
 		roll_facades_estOuvert = false,
-		roll_facades_pos		= [700,300],
-		roll_facades_taille		= [500,300],
+		roll_facades_pos		= [700,200],
+		roll_facades_taille		= [500,500],
 		
 		--- Sous structures  -------------------
 		m_construction		= str_construction 	(),
@@ -209,13 +209,21 @@ struct str_batiment_core (
 		
 	----- Composants----------------------------------
 		fn supprimer_composant 	_facade		_index =(
+			
 			local supprimer_balconFin 		= false
 			local supprimer_balconDebut		= false
 			if _facade.sequence[_index].type == #balcon  		do supprimer_balconFin 		= true
 			if _facade.sequence[_index].type == #balconFin  	do supprimer_balconDebut 	= true
+			
+			local supprimer_loggiaFin 		= false
+			local supprimer_loggiaDebut		= false
+			if _facade.sequence[_index].type == #loggia  		do supprimer_loggiaFin 		= true
+			if _facade.sequence[_index].type == #loggiaFin  	do supprimer_loggiaDebut 	= true
 				
 			_facade.supprimer_composant 		_index
 			
+			
+			--- les balcons -----------------
 			if supprimer_balconFin do (
 				local i = _index  
 				while i <= _facade.sequence.count do (
@@ -230,6 +238,28 @@ struct str_batiment_core (
 				local i = _index  - 1
 				while i > 0 do (
 					if _facade.sequence[i].type == #balcon do (
+						_facade.supprimer_composant 		i
+						i  = 0
+					)
+					i -= 1
+				)
+			)
+			
+			--- les loggia -----------------
+			if supprimer_loggiaFin do (
+				local i = _index  
+				while i <= _facade.sequence.count do (
+					if _facade.sequence[i].type == #loggiaFin do (
+						_facade.supprimer_composant 		i
+						i  = _facade.sequence.count + 1
+					)
+					i += 1
+				)
+			)
+			if supprimer_loggiaDebut do (
+				local i = _index  - 1
+				while i > 0 do (
+					if _facade.sequence[i].type == #loggia do (
 						_facade.supprimer_composant 		i
 						i  = 0
 					)
@@ -253,9 +283,16 @@ struct str_batiment_core (
 			
 			--- gestion Bacon ----------
 			if nv_composant.type == #balcon do  (
-				local id_baconFin = mgr_composants.get_model_ID	#balconFin
-				creer_composant  _facade	 id_baconFin  position:(position+1)
+				local id_baclonFin = mgr_composants.get_model_ID	#balconFin
+				creer_composant  _facade	 id_baclonFin  position:(position+1)
 			)
+			
+			--- gestion Loggia ----------
+			if nv_composant.type == #loggia do  (
+				local id_loggiaFin = mgr_composants.get_model_ID	#loggiaFin
+				creer_composant  _facade	 id_loggiaFin  position:(position+1)
+			)
+			
 			
 			--- maj de la longueur de la sequence ---
 			_facade.update_sequence_longueur ()

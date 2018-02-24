@@ -22,8 +22,8 @@ struct	str_geometrie	(
 			result
 		),
 		fn set_matID _faces	_matID =(
-			if classof _faces 	!= array 		do _faces 		= #(_faces)
-			if classof _matID 	!= integer		do _matID 	= get_id_materialType  _matID
+			if classof _faces 	!= array 		do _faces 		= #( _faces)
+			if classof _matID 	== name		do _matID 	= get_id_materialType  _matID
 			polyop.setFaceMatID m_plug.delegate 	_faces 	 _matID			
 		),
 		
@@ -36,6 +36,10 @@ struct	str_geometrie	(
 			)
 		),
 		
+		fn fliperNormal  _faces =(
+			if classof _faces != array do _faces = #(_faces )
+			polyop.flipNormals m_plug.delegate	 _faces
+		),
 		
 	----- constructions élémentaires ----------------
 		fn points	_liste_pts_position								=(
@@ -59,16 +63,27 @@ struct	str_geometrie	(
 			)
 			result
 		),
-		fn face		_liste_pts						matID:1			=(
+		fn face		_liste_pts						matID:1		flipNormal:false		=(
 			
 			--- si on a liste de point3 on créé les points d'abord
 			if classof 	_liste_pts[1] 	== Point3 do
 				_liste_pts = points		_liste_pts
 			
+			-- si on doit inverser les points pour fliper la face ---------
+			if flipNormal do (				local result =#()
+				for i= _liste_pts.count to 1 by -1 do 
+					append result 	_liste_pts[i]
+				_liste_pts =  result
+			)
+
 			-- on crer la face ----
 			local result = polyop.createPolygon m_plug.delegate  _liste_pts
 			set_matID 	result	matID 
 			
+			
+-- 			-- si on doit inverser les points pour fliper la face ---------
+-- 			if flipNormal do fliperNormal	result
+				
 			result
 		),
 		
@@ -145,10 +160,6 @@ struct	str_geometrie	(
 		),
 		fn souder	_pts =(
 			polyop.weldVertsByThreshold m_plug.delegate 		( _pts as bitArray)
-		),
-		fn flipNormal  _faces =(
-			if classof _faces != array do _faces = #(_faces )
-			polyop.flipNormals m_plug.delegate	 _faces
 		),
 		
 	--- plans ---------------
