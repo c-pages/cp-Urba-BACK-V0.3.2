@@ -261,7 +261,7 @@ struct 	str_mgr_composantsDeFacade (
 		
 		--- charge en mémoire les parametres des composant des facades depuis le plugin --------
 		fn charger		_idUnique		  =(
-			debug "charger"
+-- 			debug "charger"
 			
 			--- on cherche s'il existe deja comme parametre -----
 			local index_composant= 0
@@ -363,6 +363,16 @@ struct str_mgr_facades (
 			result
 			
 		),
+		fn get_index_facadeOuverte 	=(
+			local rollout_editeurFacde =  m_plug.core.get_facadeEditeur_rollout ()
+			local result
+			for i = 1 to m_items.count do (
+				if m_items[i].id as string == rollout_editeurFacde.m_facade_courante.id  as string do result = i
+-- 				format  "item.id : %\n"		item.id
+			)
+			result
+		),
+		
 		fn get_parIndex  	_index 		=(
 			m_items[_index]			
 		),
@@ -372,7 +382,7 @@ struct str_mgr_facades (
 		---- Creation/Suppression ----
 		fn creer		enregistrer:true		=(
 			
-			debug "creer"
+-- 			debug "creer"
 			
 			local nv_element = str_facade ()
 			
@@ -401,7 +411,9 @@ struct str_mgr_facades (
 				case type of (
 					--- les trucs qu'on zappe ------
 					MAXScriptFunction:	()
-					array:		setProperty nvlFacade 	propNom 	( for val in propOriginal collect val )
+					array:		(
+						setProperty nvlFacade 	propNom 	( for val in propOriginal collect val )
+					)
 					default:		setProperty nvlFacade 	propNom 	propOriginal
 				)
 			)

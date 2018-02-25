@@ -4,7 +4,7 @@
 	
 	
 
-rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
+rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500 height:300
 (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
@@ -14,9 +14,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			catch ()
 		)
 		
-		------- includes ------------------
-		include "$userScripts\cp - GLOBAL\UI.ms"
-		include "$userScripts\cp - GLOBAL\DragDialog.ms"
+		
 		
 		------------  Membres	----------------------------------------------------------------------------------
 		---- Pointeurs ----
@@ -38,67 +36,59 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		
 		--- images bouton fermer ---
 		local murs_types 	= #("Gouttereaux + Pignons", "Gouttereaux", "Pignons")
-		local icos_fermer 	= #(	openBitMap "$userScripts\cp - GLOBAL\ico\ico_fermer_R.jpg" ,		-- Repos ----
-											openBitMap "$userScripts\cp - GLOBAL\ico\ico_fermer_S.jpg" ,		-- Survol ----
-											openBitMap "$userScripts\cp - GLOBAL\ico\ico_fermer_P.jpg" )		-- Pressé ----
+		
 		
 		------------  UI	----------------------------------------------------------------------------------		
-		---- Structures perso pour rollout ----
-		local m_drag		---- Gere le drag de la fenetre ----
-		local m_titre			---- Gere le titre de la fenetre ----
+											
+	edittext 'edt_nom_facade' "" pos:[7,10] width:200 height:16 align:#left
 		
-		---- le bouton pour fermer la fenetre ----
--- 		ImgTag 'ui_btnFermer' "X" pos:[0,0] width:20 height:20 toolTip:"Fermer" style:#bmp_center align:#left
-		
-		ImgTag 'ui_titre' "" pos:[8,4] width:66 height:18 align:#left
-		edittext 'edt_nom_facade' "" pos:[7,25] width:200 height:16 align:#left
-		
-		spinner 'spn_etages' "" pos:[103,53] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-		spinner 'spn_etagesMax' "" pos:[180,53] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left		
+	spinner 'spn_etages' "" pos:[103,38] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+	spinner 'spn_etagesMax' "" pos:[180,38] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left		
 		
 		
-		spinner 'spn_longueur_min' "" pos:[103,68] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
-		spinner 'spn_longueur_max' "" pos:[180,68] width:63 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
-		checkbutton 'chk_longueur_max' "" pos:[167,68] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
-		checkbutton 'chk_longueur_min' "" pos:[90,68] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-		label 'lbl_longueur' "Longueur:" pos:[12,69] width:52 height:15 align:#left
+		
+	spinner 'spn_longueur_min' "" pos:[103,53] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	spinner 'spn_longueur_max' "" pos:[180,53] width:63 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	checkbutton 'chk_longueur_max' "" pos:[167,53] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
+	checkbutton 'chk_longueur_min' "" pos:[90,53] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+	label 'lbl_longueur' "Longueur:" pos:[12,54] width:52 height:15 align:#left
 			
-		dropdownList 'ddl_murs' "" pos:[90,83] width:154 height:21 items:#("Gouttereaux + Pignons", "Gouttereaux", "Pignons") selection:3 align:#left
-		label 'lbl_appliquerA' "Murs:" pos:[12,87] width:32 height:15 align:#left
+	dropdownList 'ddl_murs' "" pos:[90,68] width:154 height:21 items:#("Gouttereaux + Pignons", "Gouttereaux", "Pignons") selection:3 align:#left
+	label 'lbl_appliquerA' "Murs:" pos:[12,72] width:32 height:15 align:#left
 			
-		checkbutton 'chk_etagesMax' "" pos:[167,53] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
+	checkbutton 'chk_etagesMax' "" pos:[167,38] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
 			
-		listbox 'lbx_sequence' "" pos:[91,124] width:137 height:10 align:#left
+	listbox 'lbx_sequence' "" pos:[91,109] width:137 height:10 align:#left
 			
-		label 'lbl23' "Séquence:" pos:[11,105] width:60 height:15 align:#left
+	label 'lbl23' "Séquence:" pos:[11,90] width:60 height:15 align:#left
 			
-		button 'btn_enregistrer' "S" pos:[224,24] width:19 height:19 toolTip:"Sauvegarder preset." align:#left
-		button 'btn_charger' "O" pos:[206,24] width:19 height:19 toolTip:"Ouvrir preset." align:#left
+	button 'btn_enregistrer' "S" pos:[224,9] width:19 height:19 toolTip:"Sauvegarder preset." align:#left
+	button 'btn_charger' "O" pos:[206,9] width:19 height:19 toolTip:"Ouvrir preset." align:#left
 			
-		button 'btn_monter' "/\\" pos:[228,123] width:16 height:19 toolTip:"Monter le composant." align:#left
-		button 'btn_descendre' "\/" pos:[228,141] width:16 height:19 toolTip:"Descendre le composant." align:#left
-		dropdownList 'ddl_mode' "" pos:[90,103] width:154 height:21 items:#("Répéter", "Etrirer", "Centrer", "Espacer") selection:3 align:#left
-		checkbutton 'chk_etages' "" pos:[90,53] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+	button 'btn_monter' "/\\" pos:[228,108] width:16 height:19 toolTip:"Monter le composant." align:#left
+	button 'btn_descendre' "\/" pos:[228,126] width:16 height:19 toolTip:"Descendre le composant." align:#left
+	dropdownList 'ddl_mode' "" pos:[90,88] width:154 height:21 items:#("Répéter", "Etrirer", "Centrer", "Espacer") selection:3 align:#left
+	checkbutton 'chk_etages' "" pos:[90,38] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
 			
-		label 'lbl95' "Etages:" pos:[12,54] width:43 height:15 align:#left
+	label 'lbl95' "Etages:" pos:[12,39] width:43 height:15 align:#left
 			
-		subRollout 'subroll_parametres' "Parametres" pos:[267,43] width:210 height:208 align:#left
+	subRollout 'subroll_parametres' "Parametres" pos:[267,28] width:210 height:208 align:#left
 			
-		GroupBox 'grp_prop' "Propriétés" pos:[255,25] width:225 height:238 align:#left
+	GroupBox 'grp_prop' "Propriétés" pos:[255,10] width:225 height:238 align:#left
 			
-		button 'btn_dupliquer_composant' "Dupliquer" pos:[10,221] width:75 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
-		button 'btn_instancier_composant' "Instancier" pos:[10,236] width:75 height:16 toolTip:"Créer une instance du composant sélectionné." align:#left
-		button 'btn_supprimer_composant' "Supprimer" pos:[10,251] width:75 height:16 toolTip:"Supprimer le composant sélectionné." align:#left
+	button 'btn_dupliquer_composant' "Dupliquer" pos:[10,206] width:75 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
+	button 'btn_instancier_composant' "Instancier" pos:[10,221] width:75 height:16 toolTip:"Créer une instance du composant sélectionné." align:#left
+	button 'btn_supprimer_composant' "Supprimer" pos:[10,236] width:75 height:16 toolTip:"Supprimer le composant sélectionné." align:#left
 			
-		button 'btn_ajouter_composant_1' "btn1" pos:[10,123] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_2' "btn2" pos:[10,138] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_3' "btn3" pos:[10,153] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_4' "btn4" pos:[10,168] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_5' "btn5" pos:[10,183] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_6' "btn6" pos:[10,197] width:75 height:16 visible:false align:#left
+	button 'btn_ajouter_composant_1' "btn1" pos:[10,108] width:75 height:16 visible:false align:#left
+	button 'btn_ajouter_composant_2' "btn2" pos:[10,123] width:75 height:16 visible:false align:#left
+	button 'btn_ajouter_composant_3' "btn3" pos:[10,138] width:75 height:16 visible:false align:#left
+	button 'btn_ajouter_composant_4' "btn4" pos:[10,153] width:75 height:16 visible:false align:#left
+	button 'btn_ajouter_composant_5' "btn5" pos:[10,168] width:75 height:16 visible:false align:#left
+	button 'btn_ajouter_composant_6' "btn6" pos:[10,182] width:75 height:16 visible:false align:#left
 			
-		button 'btn_valider' "Valider" pos:[10,271] width:78 height:25 toolTip:"Valider la façade" align:#left
-		button 'btn_annuler' "Annuler" pos:[86,271] width:79 height:25 toolTip:"Annuler les changements" align:#left
+	button 'btn_valider' "Valider" pos:[10,271] width:78 height:25 toolTip:"Valider la façade" align:#left
+	button 'btn_annuler' "Annuler" pos:[86,271] width:79 height:25 toolTip:"Annuler les changements" align:#left
 			
 		local		btns_ajouter_composant	=#( btn_ajouter_composant_1, btn_ajouter_composant_2, btn_ajouter_composant_3, btn_ajouter_composant_4, btn_ajouter_composant_5, btn_ajouter_composant_6 )
 		local 	btns_ids_models				=#()
@@ -185,10 +175,6 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			--- bloquage du bouton loggia si on est deja dans un loggia -------------------			
 			local idLoggia = ( m_plug.core.get_mgr_composants() ).get_bouton_ID 	#loggia 	
 			btns_ajouter_composant[ idLoggia ].enabled = not m_compoCourant_estDansLoggia
-			debug "idBalcon" var:idBalcon
-			debug "idLoggia" var:idLoggia
-			debug "m_compoCourant_estDansLoggia" var:m_compoCourant_estDansLoggia
-			debug "m_compoCourant_estDansLoggia" var:m_compoCourant_estDansLoggia
 			
 			btn_supprimer_composant.enabled 	= lbx_sequence.selection != 0 
 			btn_instancier_composant.enabled 		= lbx_sequence.selection != 0
@@ -260,13 +246,10 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			lbx_sequence.height 		= _taille.y - ( lbx_sequence.pos.y + largeur_btn + 2 * largeur_bord )
 			
 			
--- 			btn_annuler.pos.x		= largeur_fenetre - (  118 + largeur_bord )
--- 			btn_annuler.pos.y 		= btn_valider.pos.y 	= _taille.y - (  largeur_btn +  largeur_bord )
-			
 			btn_monter.pos.x			=	btn_descendre .pos.x		=	lbx_sequence.pos.x + lbx_sequence.width
-			btn_dupliquer_composant.pos.y 			= lbx_sequence.pos.y + lbx_sequence.height - 44
-			btn_instancier_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 29
-			btn_supprimer_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 14
+			btn_dupliquer_composant.pos.y 			= lbx_sequence.pos.y + lbx_sequence.height - 47
+			btn_instancier_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 32
+			btn_supprimer_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 17
 			
 			grp_prop.pos.x 				= ddl_murs.pos.x + ddl_murs.width + largeur_bord 
 			grp_prop.height 				= _taille.y - ( grp_prop.pos.y + largeur_bord )
@@ -280,14 +263,6 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			
 			m_plug 		= _plug
 			
-			m_drag 		= str_drag 	m_prt:roll_urba_editeurFacades		
-			
-			m_titre 		= str_label 	m_ui:ui_titre			m_texte:"Urba | Bâtiment | Façade"
-			m_titre.setCouleur (color 255 255 255 )
-			
-			-- le bouton fermer --
--- 			ui_btnFermer.pos = [roll_urba_editeurFacades.width - 20,0]
--- 			ui_btnFermer.bitmap = icos_fermer[1]	
 			
 			-- la fenetre ----
 			redimensionnerFenetre  (getDialogSize	roll_urba_editeurFacades)
@@ -374,6 +349,9 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 			m_facade_initiale = mgr_facades.dupliquer 	 m_facade_courante	cible:m_facade_initiale
 			m_facade_initiale.enregistrer 	m_plug
 			
+			
+			m_changement = false
+			
 		)
 		
 		
@@ -383,23 +361,33 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		
 	----------------- Evenements ------------------------------------------------------------------------
 						
+	
+	
+	
+	  
+		
+	
 	on roll_urba_editeurFacades resized _taille 				do
 		redimensionnerFenetre 	_taille
+	
 	on roll_urba_editeurFacades moved dest do
-		m_plug.core.set_roll_editeurDeFacade_position	dest
-	on roll_urba_editeurFacades lbuttondown _pos 	do
-		m_drag.demarrer ()
-	on roll_urba_editeurFacades lbuttonup _pos 	do
-		m_drag.arreter ()
-	on roll_urba_editeurFacades mouseMove _pos 	do
-		m_drag.suivreSouris ()
+		m_plug.core.set_roll_editeurDeFacade_position   dest
 	
-	
+	on roll_urba_editeurFacades close do (
+		
+		if m_changement then 
+			if querybox "Enregistrer la façade ?" do (
+				enregistrer ()
+				m_plug.core.actualiser ()
+			)
+		
+		m_plug.actualiser_rollouts ()
+	)
 	
 	on edt_nom_facade entered txt 	do
 	(
 				m_facade_courante.nom 	=	txt
-		m_changement = true
+				m_changement = true
 			)
 	on spn_etages changed val 	do
 	(
@@ -447,7 +435,7 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 	on lbx_sequence selected arg do
 	(
 				m_composant_courant = m_facade_courante.sequence[ 	arg ]
-		m_changement = true
+-- 		m_changement = true
 				actualiser ()
 			)
 	on btn_monter pressed do
@@ -475,6 +463,16 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 				actualiser ()
 		m_changement = true
 			)
+	on btn_dupliquer_composant pressed do
+	(
+			dupliquer_composant ()
+			m_changement = true
+		)
+	on btn_instancier_composant pressed do
+	(
+			instancier_composant ()
+			m_changement = true
+		)
 	on btn_supprimer_composant pressed do
 	(
 				if queryBox "Supprimer le composant" do (
@@ -483,53 +481,46 @@ rollout roll_urba_editeurFacades "urba_editeurFacades" width:500 height:300
 		m_changement = true
 				)
 			)
-	on btn_ajouter_composant_1 pressed do (
-		ajouter_composant	btns_ids_models[1]
-		m_changement = true
-	)
-	on btn_ajouter_composant_2 pressed do (
-		ajouter_composant	btns_ids_models[2]
-		m_changement = true
-	)
-	on btn_ajouter_composant_3 pressed do (
-		ajouter_composant	btns_ids_models[3]
-		m_changement = true
-	)
-	on btn_ajouter_composant_4 pressed do (
-		ajouter_composant	btns_ids_models[4]
-		m_changement = true
-	)
-	on btn_ajouter_composant_5 pressed do (
-		ajouter_composant	btns_ids_models[5]
-		m_changement = true
-	)
-	on btn_ajouter_composant_6 pressed do (
-		ajouter_composant	btns_ids_models[6]
-		m_changement = true
-	)
-	
-	  
-	on btn_dupliquer_composant pressed do (
-		dupliquer_composant ()
-		m_changement = true
-	)
-	on btn_instancier_composant pressed do (
-		instancier_composant ()
-		m_changement = true
-	)
-		
-	
+	on btn_ajouter_composant_1 pressed do
+	(
+			ajouter_composant	btns_ids_models[1]
+			m_changement = true
+		)
+	on btn_ajouter_composant_2 pressed do
+	(
+			ajouter_composant	btns_ids_models[2]
+			m_changement = true
+		)
+	on btn_ajouter_composant_3 pressed do
+	(
+			ajouter_composant	btns_ids_models[3]
+			m_changement = true
+		)
+	on btn_ajouter_composant_4 pressed do
+	(
+			ajouter_composant	btns_ids_models[4]
+			m_changement = true
+		)
+	on btn_ajouter_composant_5 pressed do
+	(
+			ajouter_composant	btns_ids_models[5]
+			m_changement = true
+		)
+	on btn_ajouter_composant_6 pressed do
+	(
+			ajouter_composant	btns_ids_models[6]
+			m_changement = true
+		)
 	on btn_valider pressed do
 	(
 				enregistrer ()
-				m_changement = false
+		
 				m_plug.core.facadeEditeur_fermer 	()
 				m_plug.core.actualiser ()
 				m_plug.actualiser_rollouts ()
 			)
-	on btn_annuler pressed do
-	(
-				m_plug.core.facadeEditeur_fermer 	()			
+	on btn_annuler pressed do	(
+				m_plug.core.facadeEditeur_fermer 	()
 			)
 )
 	

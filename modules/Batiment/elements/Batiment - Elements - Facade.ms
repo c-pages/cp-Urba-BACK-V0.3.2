@@ -174,7 +174,7 @@ struct 	str_facade (
 		
 		fn charger	 		_plug		  =(
 			
-			debug "charger"
+-- 			debug "charger"
 			
 			local mgr_composants 	= _plug.core.get_mgr_composants ()
 			local mgr_datas 			= _plug.core.get_mgrDatas ()
@@ -221,7 +221,7 @@ struct 	str_facade (
 -- 					format "\n"
 -- 					debug"compoID" var:compoID
 					local compoInstance = get_composant_parIDUnique	(compoID  )
-					debug"compoInstance" var:compoInstance
+-- 					debug"compoInstance" var:compoInstance
 					if compoInstance != undefined then 
 						nvComposant = 	compoInstance
 					else

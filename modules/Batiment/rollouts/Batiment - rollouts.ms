@@ -142,85 +142,27 @@ rollout roll_presets 			"Presets" 		rolledUp:true		(
 	button 'btn_charger' 	"Charger" 		pos:[5,2] width:85 height:16 align:#left
 	button 'btn_coller' 		"Coller" 		pos:[88,17] width:85 height:16 align:#left
 	button 'btn_copier' 		"Copier" 		pos:[5,17] width:85 height:16 align:#left
-	
-	
-	
+
 		fn actualiser =(
-			btn_coller.enabled 			= urba_clipboard_batiment != ""
-			 
-		)
-		
-		
-		
+		btn_coller.enabled 			= urba_clipboard_batiment != ""
+		 
+	)
+	
 	on roll_presets open do actualiser ()
 	on btn_copier pressed do	(
 		core.preset_copier ()
-		
--- 			local datas = core.get_datas ()
--- 		debug "datas" var:datas
 			actualiser()
 		)
 	on btn_coller pressed do	(
 		core.preset_coller ()
-		
--- 			local datas = core.get_datas ()
--- 		debug "datas" var:datas
 			actualiser()
-		)
-		
+		)		
 	on btn_enregistrer pressed do
-		core.preset_enregistrer ()
-	
-	
+		core.preset_enregistrer ()	
 	on btn_charger pressed do
 		core.preset_charger ()
 	
-	/* --------------------  CLEANAGE --------------------
-	fn actualiser =(
-		
-		btn_coller.enabled 			= a_un_surface and urba_clipboard_batiment != ""
-		btn_copier.enabled 			= a_un_surface
-		btn_enregistrer.enabled 	= a_un_surface
-		btn_charger.enabled 		= a_un_surface
-		 
-	)
-	
-	
-	
-	
-	on roll_presets open do actualiser ()
-
-	on btn_enregistrer pressed do
-		presets.enregistrer 	this
-	on btn_charger pressed do
-	(
-			presets.charger 					this
-		
-			facades.actualiser ()
-		
-			surface.actualiser 	()
-			construire.batiment 	()
-			actualiser_rollouts()
-		)
-	on btn_coller pressed do
-	(
-			presets.coller 	this 
-		
-			facades.actualiser ()
-		
-			surface.actualiser ()
-			construire.batiment ()
-			actualiser_rollouts()
-			
-		)
-	on btn_copier pressed do
-	(
-			presets.copier 	this 
-			actualiser()
-		)
-		
-	*/ --------------------  CLEANAGE --------------------
-)
+) -- fin rllout presets -
 rollout roll_global "Global" width:162 height:341
 (
 	
@@ -244,11 +186,7 @@ rollout roll_global "Global" width:162 height:341
 	
 	--- Facades -----
 	GroupBox 'grp_facades' "Façades :" pos:[4,94] width:162 height:121 align:#left
-	listbox 'lbx_facades' "" pos:[10,125] width:150 height:6 align:#left 
- 
- 
- 
- 
+	listbox 'lbx_facades' "" pos:[10,125] width:150 height:6 align:#left
 	button 'btn_dupliquer_facade' "Dup." pos:[40,108] width:28 height:16 align:#left
 	button 'btn_ajouterFacade' "+" pos:[10,108] width:16 height:16 align:#left
 	button 'btn_supprimerFacade' "-" pos:[25,108] width:16 height:16 align:#left
@@ -259,24 +197,19 @@ rollout roll_global "Global" width:162 height:341
 	button 'btn_editer_toiture' "Edit" pos:[133,232] width:28 height:19 align:#left
 	dropdownList 'ddl_toiture' "" pos:[10,232] width:123 height:21 align:#left
 	
-	
-	
+	--- Interieur  -----
 	GroupBox 'grp_interieur' "Interieur :" pos:[3,259] width:162 height:40 align:#left enabled:false
--- 	label 'lbl_dalles' "Dalles " pos:[33,274] width:40 height:15 align:#left
 	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 align:#left	enabled:false
 	
 	fn actualiser =(
 		
 		lbx_facades.items 		=  core.get_facades_noms ()
 		
--- 		if lbx_facades.selection == 0 then (
-			btn_supprimerFacade.enabled	=	 lbx_facades.selection != 0 
-			btn_editer_facade.enabled			=	 lbx_facades.selection != 0 
-			btn_editer_facade.checked			= 	core.facadeEditeur_est_ouvert ()
-			btn_dupliquer_facade.enabled	=	 lbx_facades.selection != 0 
--- 		) else (
-			
--- 		)
+		btn_supprimerFacade.enabled	=	 lbx_facades.selection != 0 
+		btn_editer_facade.enabled			=	 lbx_facades.selection != 0 
+		btn_editer_facade.checked			= 	core.facadeEditeur_est_ouvert ()
+		btn_dupliquer_facade.enabled	=	 lbx_facades.selection != 0 
+		
 		local mgr_toiture 		= core.get_mgr_toiture ()
 		local index_toiture 	= core.get_toiture_index ()
 		ddl_toiture.selection 	= 	index_toiture
@@ -299,21 +232,10 @@ rollout roll_global "Global" width:162 height:341
 		ddl_toiture.items 		=  ( for  model in models_toiture collect model.titre )
 	)
 	
-	
-	
-	
-			
-			
-			
-			
-			
-	
-	
-	
-		
-		
-		
-	
+
+
+
+
 	on roll_global open do
 	(
 			initialiser()
@@ -329,14 +251,19 @@ rollout roll_global "Global" width:162 height:341
 		core.actualiser ()
 	on spn_hauteur changed val do
 		core.actualiser ()
-	on lbx_facades selected val do
-	(
-			if core.facadeEditeur_est_ouvert () do
-				core.facadeEditeur_ouvrir	 	lbx_facades.selection
+	on lbx_facades selected val do	(
+			if core.facadeEditeur_est_ouvert () do (
+				local index_facade_ouverte = ( core.get_mgr_facades () ).get_index_facadeOuverte ()
+				if lbx_facades.selection != index_facade_ouverte do
+					core.facadeEditeur_ouvrir	 	lbx_facades.selection
+			)
 			actualiser ()
 		)
-	on lbx_facades doubleClicked arg do
-		core.facadeEditeur_ouvrir	 	lbx_facades.selection
+	on lbx_facades doubleClicked arg do (
+			if not core.facadeEditeur_est_ouvert () do (
+					core.facadeEditeur_ouvrir	 	lbx_facades.selection
+			)
+		)
 	on btn_dupliquer_facade pressed do
 	(
 				core.dupliquer_facade		lbx_facades.selection 
@@ -352,7 +279,8 @@ rollout roll_global "Global" width:162 height:341
 			)
 	on btn_supprimerFacade pressed do
 	(
-			core.supprimer_facade		lbx_facades.selection 
+			core.supprimer_facade		lbx_facades.selection
+			lbx_facades.selection  -= 1
 			core.facadeEditeur_fermer ()
 			actualiser ()
 		)

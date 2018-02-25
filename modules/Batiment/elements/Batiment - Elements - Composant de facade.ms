@@ -105,7 +105,7 @@ struct 	str_composant (
 		),
 		fn charger 	_plug	idUnique: =(
 			
-			debug "charger"
+-- 			debug "charger"
 			if idUnique != unsupplied do id = idUnique as name
 			
 			local mgr_datas = _plug.core.get_mgrDatas ()

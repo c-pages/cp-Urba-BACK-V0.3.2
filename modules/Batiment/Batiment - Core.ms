@@ -123,8 +123,8 @@ struct str_batiment_core (
 			mgr_toiture.initialiser				m_plug
 			m_construction.initialiser		m_plug
 			
-			--- chargement des parametres ------------------
-			charger ()
+-- 			--- chargement des parametres ------------------
+-- 			charger ()
 			
 		),
 		
@@ -180,6 +180,9 @@ struct str_batiment_core (
 		fn get_facadeEditeur_rollout = roll_facades,
 		fn facadeEditeur_est_ouvert = roll_facades_estOuvert,
 		fn facadeEditeur_fermer 		query:roll_facades.m_changement	=(
+			debug "facadeEditeur_fermer"
+			debug "query" var:query
+			
 			if roll_facades_estOuvert do (
 				
 				if query then 
@@ -195,12 +198,11 @@ struct str_batiment_core (
 		),
 		fn facadeEditeur_ouvrir 	_index	=(
 			if roll_facades_estOuvert do facadeEditeur_fermer ()
-			debug "ouvrir_facadeEditeur"
-			createDialog 	roll_facades	style:				#(#style_resizing) 	\
+-- 			debug "ouvrir_facadeEditeur"
+			createDialog 	roll_facades	style:				#(#style_resizing, #style_titlebar, #style_border, #style_sysmenu) 	\
 													pos:					roll_facades_pos		\
 													width:				roll_facades_taille.x	\
-													height:				roll_facades_taille.y	/* \
-													modal:				true \ 
+													height:				roll_facades_taille.y	/* \modal:				true \ 
 													escapeEnable:	true */
 			
 			roll_facades.initialiser 		m_plug
@@ -303,8 +305,8 @@ struct str_batiment_core (
 		fn creer_composant		_facade		_IDmodelCompo		position:	=(
 			
 			if position == unsupplied  do position = _facade.sequence.count
-			debug"creer_composant"
-			debug"position" var:position
+-- 			debug"creer_composant"
+-- 			debug"position" var:position
 			
 			local mgr_composants 	= get_mgr_composants ()
 			local nv_composant 		= mgr_composants.creer		_IDmodelCompo
