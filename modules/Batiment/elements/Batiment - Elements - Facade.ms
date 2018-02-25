@@ -21,7 +21,7 @@ struct 	str_facade (
 	public
 		---- Base	-----------
 		nom 							=	"Façade",
-		id								=	"#FACAD_",
+		id								=	"Facade_",
 		mode						=	1,					---- ( 1:repeter	2:etrier			3:centrer )	----
 		
 		--- Limiteurs - Murs	---
@@ -56,13 +56,13 @@ struct 	str_facade (
 			
 			local result = undefined
 			for compo in sequence do (
-				
-				if compo.id  as name == _IDUnique  as name do
+				if compo.id  == _IDUnique  do
 					result = compo
 			)
 			result
 		),
 		fn get_composants_noms =	for compo in sequence collect compo.nom,
+			
 		fn ajouter_composant 		_composant 	position:(sequence.count+1)  =(
 			if position == 0 do position = sequence.count+1
 			insertItem _composant		sequence 				position
@@ -162,7 +162,7 @@ struct 	str_facade (
 				-- la sequence	-----
 				local sequenceIDs = for compo in sequence collect	compo.id
 				_plug.fac_sequences[index_facade] 						= mgr_datas.array_to_string		sequenceIDs		
-				_plug.fac_sequence_longueurs[index_facade] 			= sequence_longueur		
+				_plug.fac_sequence_longueurs[index_facade] 		= sequence_longueur		
 				
 				--- les composants -----
 				for compo in sequence do
@@ -188,7 +188,7 @@ struct 	str_facade (
 			--- on charge	------------------------------------
 			if index_facade != 0 then (
 				
-				id 								= _plug.fac_ids[index_facade] as name
+				id 								= _plug.fac_ids[index_facade]
 				nom 								= _plug.fac_noms[index_facade]
 				
 				mode							= _plug.fac_modes[index_facade]
@@ -213,14 +213,20 @@ struct 	str_facade (
 				
 				sequence						=  #()
 				local sequence_IDs		= mgr_datas.string_to_array		 _plug.fac_sequences[index_facade]
+-- 					debug"sequence_IDs" var:sequence_IDs
+-- 					debug"_plug.fac_sequences[index_facade]" var:_plug.fac_sequences[index_facade]
+-- 					format "\n"
 				for compoID in sequence_IDs do (
 					
-					local compoInstance = get_composant_parIDUnique	(compoID   as name)
-					
+-- 					format "\n"
+-- 					debug"compoID" var:compoID
+					local compoInstance = get_composant_parIDUnique	(compoID  )
+					debug"compoInstance" var:compoInstance
 					if compoInstance != undefined then 
 						nvComposant = 	compoInstance
 					else
-						nvComposant = 	mgr_composants.charger  	( compoID	 as name  )
+						nvComposant = 	mgr_composants.charger  	( compoID	 )
+-- 					debug"nvComposant" var:nvComposant
 					append sequence	nvComposant
 				) 
 				

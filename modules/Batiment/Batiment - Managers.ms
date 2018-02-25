@@ -270,7 +270,7 @@ struct 	str_mgr_composantsDeFacade (
 			
 			while i <= m_plug.fac_compos_ids.count and not trouve 	do (
 				
-				if ( execute m_plug.fac_compos_ids[i] ) as name == ( _idUnique ) as name do (
+				if (  m_plug.fac_compos_ids[i] ) == ( _idUnique )  do (
 					index_composant = i
 				)
 				i+= 1
@@ -417,7 +417,7 @@ struct str_mgr_facades (
 			m_items = #()
 			for id in m_plug.fac_ids do (
 				nvFacade = creer	enregistrer:false
-				nvFacade.id  = id as name
+				nvFacade.id  = id
 				nvFacade.charger 	m_plug
 				append	m_items	nvFacade
 			)

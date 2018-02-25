@@ -129,7 +129,7 @@ parameters params_toiture 							(
 )
 
 parameters params_interieur				rollout:roll_global					(
-	interieur_planchers		type:#boolean			default:true	ui:chk_planchers		animatable:false		invisibleInTV:true
+	interieur_planchers		type:#boolean			default:false	ui:chk_planchers		animatable:false		invisibleInTV:true
 	
 )
 -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -145,6 +145,25 @@ rollout roll_presets 			"Presets" 		rolledUp:true		(
 	button 'btn_charger' 	"Charger" 	pos:[5,2] width:85 height:16 align:#left
 	button 'btn_coller' 		"Coller" 		pos:[88,17] width:85 height:16 align:#left
 	button 'btn_copier' 		"Copier" 		pos:[5,17] width:85 height:16 align:#left
+	
+	
+	
+		fn actualiser =(
+			 
+		)
+	on btn_copier pressed do
+	(
+			local datas = core.get_datas ()
+		debug "datas" var:datas
+			actualiser()
+		)
+		
+	on btn_enregistrer pressed do
+		core.preset_enregistrer ()
+	
+	
+	on btn_charger pressed do
+		core.preset_charger ()
 	
 	/* --------------------  CLEANAGE --------------------
 	fn actualiser =(
@@ -232,9 +251,9 @@ rollout roll_global "Global" width:162 height:341
 	
 	
 	
-	GroupBox 'grp_interieur' "Interieur :" pos:[3,259] width:162 height:40 align:#left
+	GroupBox 'grp_interieur' "Interieur :" pos:[3,259] width:162 height:40 align:#left enabled:false
 -- 	label 'lbl_dalles' "Dalles " pos:[33,274] width:40 height:15 align:#left
-	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 align:#left
+	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 align:#left	enabled:false
 	
 	fn actualiser =(
 		

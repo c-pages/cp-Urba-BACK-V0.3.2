@@ -246,7 +246,7 @@ struct str_construction (
 			local sequenceTotal  		=	get_sequenceFacade		_facade		longueur_facade	
 			
 			------------ CONSTRUCTION  DE LA FACADE	------------------------------------
-			--- on créé  les 3 premiers points --------				
+			--- on créé  les 3 premiers points --------
 			local pt_accroche_1 		= 	_pt1
 			local pt_accroche_2 		= 	pt_accroche_1 + [0,0,m_plug.const_dalle_epaisseur]
 			local pt_accroche_3 		= 	pt_accroche_2 + [0,0,m_plug.etages_hauteur]			
@@ -282,17 +282,18 @@ struct str_construction (
 					
 					
 					#loggia:(
-						loggia_pts_debut 		= ptsIDs_accroche
 						loggia_aConstruire 	= composant
 						profondeurFacade 		= loggia_aConstruire.params.profondeur
 					-----	construction geometrie du composant	----------
 						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir	--	est_DansBalcon:(balcon_aConstruire != undefined )  -- profondeur:profondeurFacade
 						
+						loggia_pts_debut 		= ptsIDs_accroche
 					)
 					#loggiaFin:(
 						local		pt_loggia_debut			=	polyop.getVert 	m_plug.delegate		loggia_pts_debut[1]	
 						local		pt_loggia_fin					=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
 						composant.params.longueur 		= 		(	distance	pt_loggia_debut 	pt_loggia_fin	)
+
 						composant.params.profondeur 	= 		loggia_aConstruire.params.profondeur
 						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir
 						composant.params.longueur 		= 		0
@@ -304,8 +305,9 @@ struct str_construction (
 					
 					
 					default:(
+						local onConstruitLaDalle = (balcon_aConstruire == undefined )  and (loggia_aConstruire == undefined ) 
 						-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		est_DansBalcon:(balcon_aConstruire != undefined )  -- profondeur:profondeurFacade
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		onConstruitLaDalle:onConstruitLaDalle			-- profondeur:profondeurFacade
 						
 					)
 				)

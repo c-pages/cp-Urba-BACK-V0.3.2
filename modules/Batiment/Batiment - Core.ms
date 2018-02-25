@@ -33,6 +33,7 @@
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Divers.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Construction.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Managers.ms"
+include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - presets.ms"
 
 
 
@@ -65,7 +66,12 @@ struct str_batiment_core (
 		mgr_toiture			= str_mgr_toiture (),
 		
 		---- convertisseur Parametres to String  -------------
-		mgr_datas 				= str_datasToString 	m_prt:this,
+		mgr_datas 			= str_datasToString 	m_prt:this,
+		
+		---- les presets (chargement et enregistrement des parametres dans un fichier -----------------
+		mgr_presets			= str_presets_batiment  fichier_dossier:		"$userScripts\cp-Urba\lib\\" 	\
+																		fichier_categorie:	"Urba_batiment"\
+																		fichier_extension:	"bati",
 		
 		---  Rollouts Facade -------------------
 		roll_facades 				= 	filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout facade.ms",
@@ -73,8 +79,8 @@ struct str_batiment_core (
 		roll_facades_pos		= [700,200],
 		roll_facades_taille		= [500,500],
 		
-		--- Sous structures  -------------------
-		m_construction		= str_construction 	(),
+		--- construction de la geometrie  -------------------
+		m_construction			= str_construction 	(),
 		
 		
 	-------- FONCTIONS	--------------------------------------------------------------------------------------------------------
@@ -105,7 +111,7 @@ struct str_batiment_core (
 			
 		),		
 	----- Initialisation  -----------------------
-		fn initialiser 	_plug		= (
+		fn initialiser 		_plug		= (
 			
 			debug "initialiser"
 			
@@ -120,6 +126,17 @@ struct str_batiment_core (
 			--- chargement des parametres ------------------
 			charger ()
 			
+		),
+		
+	----- Presets -----------------------
+		fn preset_enregistrer  =(
+			mgr_presets.enregistrer	 m_plug
+		),
+		fn preset_charger  =(
+			mgr_presets.charger	 m_plug
+			charger ()
+			m_plug.actualiser_rollouts ()
+			actualiser ()
 		),
 		
 		
@@ -140,8 +157,12 @@ struct str_batiment_core (
 		fn get_mgr_composants 	= mgr_facades.get_mgr_composants (),
 		fn get_mgr_facades	 		= mgr_facades,
 		fn get_mgr_toiture	 		= mgr_toiture,
-		fn get_mgrDatas 				= mgr_datas,
 			
+		fn get_mgrDatas 				= mgr_datas,
+		fn get_mgrPresets 			= mgr_presets,
+		
+		
+		
 	----- Editeur de facades -----------------
 	public
 		fn set_roll_editeurDeFacade_position	_pos 	=( roll_facades_pos = _pos),

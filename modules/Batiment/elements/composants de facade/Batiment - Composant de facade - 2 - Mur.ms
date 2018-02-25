@@ -39,7 +39,7 @@ rollout compo_dialog "Mur plein" width:180 height:70	(
 )
 
 --- la fonction de construction	---------
-fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		profondeur:0	= (
+fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		profondeur:0		onConstruitLaDalle:true	= (
 	
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
@@ -80,11 +80,13 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		profondeur:
 		
 		--- creation des points --------------
 		local pts_pos 	= #( pt_2, pt_3 )
-		local pts_ids 	= ptr_geo.points 	pts_pos		
+		local pts_ids 	= ptr_geo.points 	pts_pos	
 		
 		-------	Creation des faces 	--------
-		local nvlFace = ptr_geo.face 		#( id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2 )		
-		ptr_geo.set_matID 	nvlFace	#mur 	
+		if onConstruitLaDalle do (
+			local nvlFace = ptr_geo.face 		#( id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2 )		
+			ptr_geo.set_matID 	nvlFace	#mur 	
+		)
 		
 		--- Result -------------
 		pt_result_1 = pts_ids[1]

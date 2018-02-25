@@ -17,7 +17,7 @@ struct str_datasToString (
 			for item in _tab do (
 				case classof item  of (
 					string:	tabString += item 		as string + separateur_items
-					Integer:	tabString += item 		as string + separateur_items
+					Integer:	tabString += item 	as string + separateur_items
 					Float:	tabString += item 		as string + separateur_items
 					Point3:	tabString += item 		as string + separateur_items
 					Array:	tabString += item 		as string + separateur_items
@@ -34,7 +34,9 @@ struct str_datasToString (
 			local items 	= filterString 	_string 		separateur_items
 			
 			for item in items do (
-				local data_exe 	= execute item
+				
+				local data_exe 	
+				try data_exe = execute item catch ()
 				--------------- string ---------------
 				if data_exe 		== undefined then 
 					append tabResult ( item )
@@ -48,7 +50,7 @@ struct str_datasToString (
 					append tabResult		elemTmp
 				--------------- Nombres ---------------		
 				) else 	append tabResult 	( data_exe)
-				 */
+				*/
 			)
 			tabResult
 		),

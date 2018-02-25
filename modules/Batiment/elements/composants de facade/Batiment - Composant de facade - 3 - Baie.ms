@@ -206,7 +206,7 @@ rollout compo_dialog "Baie" width:180 height:532 (
 	)
 	
 ------ la fonction de construction	---------
-fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	est_DansBalcon:false	= ( 
+fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConstruitLaDalle:false	= ( 
 -- 		_plug		pts_accroches		_normDir		 _composant	
 	
 		--- Result -------------
@@ -285,8 +285,10 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	est_Dan
 		local pts_ids 	= ptr_geo.points 	pts_pos		
 		
 		-------	Creation des faces 	--------
-		local nvlFace = ptr_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		
-		ptr_geo.set_matID 	nvlFace	#mur
+		if onConstruitLaDalle do (
+			local nvlFace = ptr_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		
+			ptr_geo.set_matID 	nvlFace	#mur
+		)
 		
 		--- Result -------------
 		pt_result_1 = pts_ids[1]
@@ -328,7 +330,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	est_Dan
 		ptr_geo.set_matID 	nvlFace	#mur 	
 		
 		local nvlFace = ptr_geo.face 		#(	pts_ids[3], 		pts_ids[2], 		pts_ids[8] , 	pts_ids[7] )		 	
-		if tablette_use and not est_DansBalcon	then		ptr_geo.set_matID 	nvlFace	#menuiserie
+		if tablette_use and  onConstruitLaDalle	then		ptr_geo.set_matID 	nvlFace	#menuiserie
 																		else 	ptr_geo.set_matID 	nvlFace	#mur
 		
 		local nvlFace = ptr_geo.face 		#(	pts_ids[10], 	pts_ids[9], 		pts_ids[5], 		pts_ids[4] )
@@ -407,7 +409,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	est_Dan
 		
 		
 		--- TABLETTE  ----------------------------------------------------------------------------------------------------------------		
-		if tablette_use and not est_DansBalcon do (
+		if tablette_use and onConstruitLaDalle do (
 			
 			local vec_tab_ht		= 	[0,0,1] 		* tablette_hauteur
 			local vec_tab_deb		= -norm_prof 	* tablette_debord

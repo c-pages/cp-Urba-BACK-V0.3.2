@@ -19,7 +19,7 @@ struct 	str_composant (
 	------ Membres ------------------------------------------------------------------------------
 	public
 		---- Parametres -----------------------------------
-		id						=	"#",		
+		id						=	"FacCompo_",		
 		nom					=	"",
 		type					=	undefined,
 		params				=	undefined,
@@ -54,7 +54,7 @@ struct 	str_composant (
 		fn initialiser 		_type	_nom 	=(
 			
 			---- id unique ----
-			id += "compo_"
+-- 			id += "compo_"
 			for i= 1 to 10 do id += ( random 0 9 ) as string	
 			
 			type 				=	_type 			
@@ -63,21 +63,21 @@ struct 	str_composant (
 		),
 		
 		---- Construction du mesh 	( fonction virtuelle ) -----------------------
-		fn construire		_plug	 	pts_accroches		_normDir		est_DansBalcon:false	 profondeur:0	= 		
-						fnVirt_construire	 _plug	pts_accroches		_normDir		this	est_DansBalcon:est_DansBalcon  profondeur:profondeur,
+		fn construire		_plug	 	pts_accroches		_normDir		onConstruitLaDalle:true	 profondeur:0	= 		
+						fnVirt_construire	 _plug	pts_accroches		_normDir		this	onConstruitLaDalle:onConstruitLaDalle  profondeur:profondeur,
 		
 		
 		---- Enregistrement / chargement	-----------------
 		fn enregistrer 	_plug	=(
-			debug "enregistrer"
-			debug "id  "var:( id   as name )
+-- 			debug "enregistrer"
+-- 			debug "id  "var:( id   as name )
 			local mgr_datas = _plug.core.get_mgrDatas ()
 			
 				--- on cherche s'il existe deja comme parametre -----
 			local index_composant = 0
 			for i = 1 to _plug.fac_compos_ids.count do (
-				debug "_plug.fac_compos_ids[i] as name	  "var:(_plug.fac_compos_ids[i] as name	)  
-				debug "	== id   as name "var:( execute (_plug.fac_compos_ids[i] ) as string	== ( id   as string ) )
+-- 				debug "_plug.fac_compos_ids[i] as name	  "var:(_plug.fac_compos_ids[i] as name	)  
+-- 				debug "	== id   as name "var:( execute (_plug.fac_compos_ids[i] ) as string	== ( id   as string ) )
 				
 				if  execute (_plug.fac_compos_ids[i] ) as string	== id  as string do 
 					index_composant = i
@@ -116,7 +116,7 @@ struct 	str_composant (
 			local trouve = false
 			while i <= _plug.fac_compos_ids.count and not trouve	do (
 				
-				if ( execute _plug.fac_compos_ids[i] ) as name == id  do (
+				if (  _plug.fac_compos_ids[i] ) as name == id  do (
 					index_composant = i
 					trouve = true
 				)
