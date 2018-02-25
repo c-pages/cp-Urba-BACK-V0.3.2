@@ -138,6 +138,15 @@ struct str_batiment_core (
 			m_plug.actualiser_rollouts ()
 			actualiser ()
 		),
+		fn preset_copier  =(
+			mgr_presets.copier	 m_plug
+		),
+		fn preset_coller  =(
+			mgr_presets.coller	 	m_plug
+			charger ()
+			m_plug.actualiser_rollouts ()
+			actualiser ()
+		),
 		
 		
 	----- Accessions -----------------------

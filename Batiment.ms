@@ -43,10 +43,9 @@
 
 
 
+---- le presse papier pour copier coller -----
+global urba_clipboard_batiment	=	""
 
-
----------------presse papier ---------
-global batiment_pressePapier	= ""
 
 
 

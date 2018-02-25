@@ -137,24 +137,34 @@ parameters params_interieur				rollout:roll_global					(
 -------------------------------------------------------------------------------------------------------------------------------------------------
 rollout roll_presets 			"Presets" 		rolledUp:true		(
 	
-	fn shape_filt 		obj = superclassof obj == shape
 	
 	button 'btn_enregistrer' "Enregistrer" pos:[88,2] width:85 height:16 align:#left		
-		
-		
-	button 'btn_charger' 	"Charger" 	pos:[5,2] width:85 height:16 align:#left
+	button 'btn_charger' 	"Charger" 		pos:[5,2] width:85 height:16 align:#left
 	button 'btn_coller' 		"Coller" 		pos:[88,17] width:85 height:16 align:#left
 	button 'btn_copier' 		"Copier" 		pos:[5,17] width:85 height:16 align:#left
 	
 	
 	
 		fn actualiser =(
+			btn_coller.enabled 			= urba_clipboard_batiment != ""
 			 
 		)
-	on btn_copier pressed do
-	(
-			local datas = core.get_datas ()
-		debug "datas" var:datas
+		
+		
+		
+	on roll_presets open do actualiser ()
+	on btn_copier pressed do	(
+		core.preset_copier ()
+		
+-- 			local datas = core.get_datas ()
+-- 		debug "datas" var:datas
+			actualiser()
+		)
+	on btn_coller pressed do	(
+		core.preset_coller ()
+		
+-- 			local datas = core.get_datas ()
+-- 		debug "datas" var:datas
 			actualiser()
 		)
 		
