@@ -388,14 +388,16 @@ struct str_mgr_facades (
 	private
 		m_plug,
 		
-		--- le manager des composants -------------
+		---- le manager des composants -------------
 		mgr_composants 	= str_mgr_composantsDeFacade (),
 		
-		--- le rollout	--------------------
+		---- le rollout	--------------------
 		m_dialog					= 	filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout facade.ms",
 		m_dialog_estOuvert 	= false,
 		m_dialog_pos			= [700,200],
 		m_dialog_taille			= [500,500],
+		
+		
 		
 		
 	---- FONCTIONS --------------------------------------------------------------------------------------------------------------

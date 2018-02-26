@@ -7,204 +7,216 @@ compo_toolTip 	=	"Ouverture dans un mur."
 
 --- les parametres du composant	---------
 struct compo_params	(
-		
+		--- global	-------------
 		longueur						= 100,
 		hauteur							= 210,
-		hauteur_use					=	true,
-		profondeur					= 20,
-		
+		profondeur					= 20,		
 		allege_hauteur 		 		= 100,
-		allege_use					=	true,
 		
-		menuis_largeur				=	7.,
-		menuis_epaisseur			=	3.,			
-		menuis_divisions			=	0,	
-		menuis_allege_use		=	false,
-		menuis_allege_ht			=	100,
-		menuis_trav_use			=	false,
-		menuis_trav_ht			=	210,			
-		menuis_ouvrant_use		=	true,
-		menuis_double_use		=	true,
+		--- Traverses	-------------
+		traverses 						= #(),		---- liste des traverses par hauteur	----------
 		
-		tablette_use					= true,
-		tablette_hauteur 			= 5,
-		tablette_debord 			= 5,
-		tablette_cote 				= 5,
+		--- Traverses	-------------
+		sequence 						= #(),		---- La seuqnce qui compose la baie ( ouvrant, fixe  ...)	----------
 		
-		volet								= false,
-		coffre							= false
+		--- Volets	-------------
+		volet								= 1,			----	1:Aucun		2:roulants		3:battants	----------
+		volet_double					= false,		----	pour les 'Battants' 	----------
+		volet_clos_proba			= 0.,			----	pourcentage de chance d'avoir un volet fermé	----------
+		volet_clos_min				= 0.,			----	fermenture minimum du volet fermé	----------
+		volet_clos_max				= 100.,		----	fermenture maximum du volet fermé	----------
 		
+	----fonctions	--------
+	private
+		fn get_nvl_menuierie =(
+			
+			struct str_menuierie (
+				id 		="Menuis_",
+				type 		= "Fxe",
+				on create do (
+					---- id unique ----
+					for i= 1 to 10 do id += ( random 0 9 ) as string
+				)
+			) --- fin struct menuiserie	------------
+			
+			str_menuierie()
+			
+		),
+	public
+		fn ajouter_menuierie =(
+			local nvl_menuiserie = get_nvl_menuierie ()
+			append sequence		nvl_menuiserie
+		),
+		fn supprimer_menuierie =(
+			
+		)
 )
 
 --- les rollout du composant	---------
-rollout compo_dialog "Baie" width:180 height:532 (
+rollout compo_dialog "Baie" width:433 height:621
+(
 		local m_rollPrt
 		local m_compo
+		local m_dialog_menuiserie		= filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout menuiserie.ms"
 		
-		edittext 'edt_nom' "" pos:[7,3] width:186 height:16 align:#left
+		---- golbal --------------
+	edittext 'edt_nom' "" pos:[3,3] width:187 height:16 align:#left
+	label 'lbl19' "Longeur:" pos:[11,36] width:49 height:13 align:#left
+	spinner 'spn_longueur' "" pos:[116,36] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+	label 'lbl21' "Hauteur:" pos:[11,51] width:49 height:13 align:#left
+	spinner 'spn_hauteur' "" pos:[116,51] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+	GroupBox 'grp1' "Global" pos:[6,21] width:187 height:83 align:#left
+	label 'lbl24' "Allège pleine :" pos:[11,81] width:77 height:13 align:#left
+	spinner 'spn_allege' "" pos:[116,81] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+	label 'lbl29' "Profondeur:" pos:[11,66] width:59 height:13 align:#left
+	spinner 'spn_profondeur' "" pos:[116,66] width:70 height:16 range:[-5,100000,0] type:#worldunits scale:1 align:#left
 		
-		label 'lbl19' "Longeur:" pos:[11,37] width:49 height:13 align:#left
-		spinner 'spn_longueur' "" pos:[116,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-		label 'lbl21' "Hauteur:" pos:[11,53] width:49 height:13 align:#left
-		spinner 'spn_hauteur' "" pos:[116,52] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-		GroupBox 'grp1' "Baie" pos:[6,21] width:187 height:85 align:#left
-		label 'lbl24' "Allège:" pos:[11,68] width:49 height:13 align:#left
-		spinner 'spn_allege' "" pos:[116,67] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-		checkbutton 'ckb_hauteur' "" pos:[96,51] width:17 height:17 toolTip:"Toute hauteur Valeur négative pour descendre depuis plafond" align:#left
-		checkbutton 'ckb_allege' "" pos:[96,67] width:17 height:17 align:#left
-		label 'lbl29' "Profondeur:" pos:[11,84] width:59 height:13 align:#left
-		spinner 'spn_profondeur' "" pos:[116,83] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
+		---- traverses --------
+	GroupBox 'grp_traverses' "Traverses horizontales" pos:[6,108] width:187 height:104 align:#left
+	listbox 'lbx_traverses' "" pos:[17,143] width:166 height:3 align:#left
+	button 'btn_ajouter_traverse' "+" pos:[16,123] width:18 height:18 align:#left
+	button 'btn_supprimer_traverse' "-" pos:[32,123] width:18 height:18 align:#left
+	label 'lbl_traverses_ht' "Hauteur:" pos:[16,190] width:49 height:13 align:#left
+	spinner 'spn_traverse_ht' "" pos:[116,189] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
+	
+	---- sequence --------
+	GroupBox 'grp_sequence' "Séquence" pos:[6,215] width:187 height:90 align:#left
+	listbox 'lbx_sequence' "" pos:[17,253] width:166 height:3 align:#left
+	button 'btn_ajouter_element' "+" pos:[16,232] width:18 height:18 align:#left
+	button 'btn_supprimer_element' "-" pos:[33,232] width:18 height:18 align:#left
+	button 'btn_dupliquer_element' "Dup." pos:[50,232] width:35 height:18 toolTip:"Dupliquer l'élément" align:#left
+	button 'btn_instancier_element' "Inst." pos:[83,232] width:35 height:18 align:#left
+	button 'btn_editer_element' "Edit." pos:[147,231] width:35 height:18 align:#left
 		
-		GroupBox 'grp_divers' "Divers" pos:[6,254] width:187 height:114 align:#left
-		checkbox 'chk_tablette' "Tablette" pos:[10,269] width:59 height:16 align:#left
-		label 'lbl_tablette_hauteur' "Hauteur:" pos:[11,284] width:49 height:13 align:#left
-		spinner 'spn_tablette_hauteur' "" pos:[116,283] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-		label 'lbl_tablette_debord' "Débord:" pos:[11,299] width:49 height:13 align:#left
-		spinner 'spn_tablette_debord' "" pos:[116,298] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-		label 'lbl_tablette_cote' "Cotés:" pos:[11,315] width:59 height:13 align:#left
-		spinner 'spn_tablette_cote' "" pos:[116,314] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-		checkbox 'chk_volets' "Volets" pos:[10,330] width:47 height:16 align:#left
-		checkbox 'chk_coffreStore' "Coffre store" pos:[10,344] width:81 height:16 align:#left
-		GroupBox 'grp_menuiseries' "Menuiseries" pos:[6,110] width:187 height:141 align:#left
-		
-		label 'lbl_allege_hauteur' "Hauteur:" pos:[11,199] width:50 height:13 align:#left
-		spinner 'spn_allege_hauteur' "" pos:[116,198] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-		checkbox 'chk_allege' "Allège" pos:[10,184] width:48 height:16 align:#left
-		label 'lbl_traverse_hauteur' "Hauteur:" pos:[11,228] width:50 height:13 align:#left
-		spinner 'spn_traverse_hauteur' "" pos:[116,227] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-		checkbox 'chk_traverse' "Traverse" pos:[10,213] width:64 height:16 align:#left
-		label 'lbl_menuis_epaisseur' "Epaisseur:" pos:[11,139] width:51 height:13 align:#left
-		spinner 'spn_menuis_epaisseur' "" pos:[116,138] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-		label 'lbl_menuis_largeur' "Largeur:" pos:[11,124] width:42 height:13 align:#left
-		spinner 'spn_menuis_Largeur' "" pos:[116,123] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-		checkbox 'chk_double' "Double" pos:[137,154] width:48 height:16 enabled:false align:#left
-		checkbox 'chk_ouvrant' "Ouvrant" pos:[10,154] width:57 height:16 align:#left
-		
-		label 'lb_divisions' "Divisions:" pos:[11,171] width:59 height:13 align:#left
-		spinner 'spn_divisions' "" pos:[116,170] width:70 height:16 range:[0,4,0] type:#integer scale:1 align:#left
-		
+		---- volet --------
+	GroupBox 'grp_volet' "Volets" pos:[5,309] width:187 height:119 align:#left
+	dropdownList 'ddl_volet' "" pos:[17,327] width:161 height:21 items:#("Aucun", "Roulant", "Battant simple", "Battant double") align:#left
+	label 'lbl_volet_proba' "Probabilité (%) :" pos:[23,365] width:80 height:13 align:#left
+	spinner 'spn_volet_ferm_proba' "" pos:[106,365] width:70 height:16 range:[0,100,0] scale:1 align:#left
+	label 'lbl_volet_max' "Maximum (%) :" pos:[23,395] width:80 height:13 align:#left
+	spinner 'spn_volet_ferm_max' "" pos:[106,395] width:70 height:16 range:[0,100,0] scale:1 align:#left
+	label 'lbl_volet_min' "Minimum (%) :" pos:[23,380] width:80 height:13 align:#left
+	spinner 'spn_volet_ferm_min' "" pos:[106,380] width:70 height:16 range:[0,100,0] scale:1 align:#left
+	GroupBox 'grp_volet_fermeture' "Fermeture" pos:[14,348] width:169 height:71 align:#left
 		
 		fn actualiser =(
-			spn_longueur.value 			= m_compo.params.longueur
-			edt_nom.text 					=	m_compo.nom
-			spn_profondeur.value 		=	m_compo.params.profondeur	
-			ckb_hauteur.checked		=	m_compo.params.hauteur_use 
-			ckb_allege.checked			=	m_compo.params.allege_use
-	
-			if not ckb_hauteur.checked then (
-				spn_hauteur.enabled 	= true
-				spn_hauteur.value 		=	m_compo.params.hauteur 
-			) else (
-				spn_hauteur.enabled 			= false
-				spn_hauteur.indeterminate 	=	true
-			)
-			if not ckb_allege.checked then (
-				spn_allege.enabled 				= true
-				spn_allege.value 					=	m_compo.params.allege_hauteur 
-			) else (
-				spn_allege.enabled 				= false
-				spn_allege.indeterminate 		=	true
-			)
 			
-			chk_tablette.checked 				= m_compo.params.tablette_use
-			lbl_tablette_hauteur.enabled 		= m_compo.params.tablette_use
-			spn_tablette_hauteur.enabled 	= m_compo.params.tablette_use
-			lbl_tablette_cote.enabled 			= m_compo.params.tablette_use
-			spn_tablette_cote.enabled 		= m_compo.params.tablette_use
-			spn_tablette_debord.enabled 	= m_compo.params.tablette_use
-			lbl_tablette_debord.enabled 		= m_compo.params.tablette_use
+			--- global ------
+			spn_longueur.value 		= m_compo.params.longueur
+			edt_nom.text 				=	m_compo.nom
+			spn_profondeur.value 	=	m_compo.params.profondeur	
+			spn_allege.value 			=	m_compo.params.allege_hauteur
 			
-			spn_profondeur.value 					=	m_compo.params.profondeur
-			spn_tablette_hauteur.value 			=	m_compo.params.tablette_hauteur
-			spn_tablette_debord.value 			=	m_compo.params.tablette_debord
-			spn_tablette_cote.value 				=	m_compo.params.tablette_cote
+			--- traverses -----------
+			lbx_traverses.items		=	for ht_trav in m_compo.params.traverses collect (ht_trav as string + "cm." )
+			if lbx_traverses.selection == 0 and lbx_traverses.items.count > 0 do
+				lbx_traverses.selection = 1
+			local traverse_edition	= lbx_traverses.selection != 0
+			btn_supprimer_traverse.enabled		= traverse_edition
+			lbl_traverses_ht.enabled				= traverse_edition
+			spn_traverse_ht.enabled				= traverse_edition
+			spn_traverse_ht.Indeterminate		= not traverse_edition
+			if traverse_edition do spn_traverse_ht.value = m_compo.params.traverses [ lbx_traverses.selection ]
 			
-			spn_tablette_hauteur.indeterminate = not m_compo.params.tablette_use
-			spn_tablette_cote.indeterminate 	= not m_compo.params.tablette_use
-			spn_tablette_debord.indeterminate 	= not m_compo.params.tablette_use
+			--- sequence -----------
+			lbx_sequence.items		=	for element in m_compo.params.sequence collect ( element.type )
+			if lbx_sequence.selection == 0 and lbx_sequence.items.count > 0 do
+				lbx_sequence.selection = 1
+			local sequence_edition	= lbx_sequence.selection != 0
+			btn_supprimer_element.enabled	= sequence_edition
+			btn_dupliquer_element.enabled	= sequence_edition
+			btn_instancier_element.enabled	= sequence_edition
+-- 			btn_editer_element.enabled		= sequence_edition
 			
-			spn_menuis_epaisseur.value 				=	m_compo.params.menuis_epaisseur
-			spn_menuis_Largeur.value 				=	m_compo.params.menuis_largeur
-			chk_double.checked 						=	m_compo.params.menuis_double_use
-			chk_ouvrant.checked 						=	m_compo.params.menuis_ouvrant_use
-			
-			spn_allege_hauteur.value 					=	m_compo.params.menuis_allege_ht
-			spn_allege_hauteur.enabled 				=	m_compo.params.menuis_allege_use
-			spn_allege_hauteur.indeterminate 		= not m_compo.params.menuis_allege_use
-			lbl_allege_hauteur.enabled 				=	m_compo.params.menuis_allege_use
-			chk_allege.checked 							=	m_compo.params.menuis_allege_use
-			
-			spn_traverse_hauteur.value 				=	m_compo.params.menuis_trav_ht
-			lbl_traverse_hauteur.enabled 				=	m_compo.params.menuis_trav_use
-			spn_traverse_hauteur.indeterminate 	= not m_compo.params.menuis_trav_use
-			chk_traverse.checked 						=	m_compo.params.menuis_trav_use
-			spn_traverse_hauteur.enabled 			=	m_compo.params.menuis_trav_use
-			
-			spn_divisions.value 							=	m_compo.params.menuis_divisions
+			--- volet -----------
+			ddl_volet.selection 	= m_compo.params.volet 
+			local volet_edition		= m_compo.params.volet != 1
+			lbl_volet_proba.enabled							= volet_edition
+			spn_volet_ferm_proba.enabled				= volet_edition
+			spn_volet_ferm_proba.Indeterminate		= not volet_edition
+			lbl_volet_max.enabled							= volet_edition
+			spn_volet_ferm_max.enabled					= volet_edition
+			spn_volet_ferm_max.Indeterminate		= not volet_edition
+			lbl_volet_min.enabled							= volet_edition
+			spn_volet_ferm_min.enabled					= volet_edition
+			spn_volet_ferm_min.Indeterminate			= not volet_edition
+			grp_volet_fermeture.enabled					= volet_edition
 			
 		) -- fin actualiser -------
-	
-		on edt_nom entered txt 	do			(
+		
+		fn ajouter_traverse =(
+			local trav_ht  =100
+			if m_compo.params.traverses.count == 1 do
+				trav_ht = 210
+			append m_compo.params.traverses	trav_ht
+			lbx_traverses.items		=	for ht_trav in m_compo.params.traverses collect (ht_trav as string + "cm." )
+			lbx_traverses.selection += 1
+			actualiser	()
+		)
+		fn supprimer_traverse  =(
+			deleteItem m_compo.params.traverses	lbx_traverses.selection
+			lbx_traverses.items		=	for ht_trav in m_compo.params.traverses collect (ht_trav as string + "cm." )
+			lbx_traverses.selection -= 1
+			actualiser	()
+		)
+		
+		----- global -----------
+		
+		----- traverses -----------
+		 ----- volets ------------
+
+	on edt_nom entered txt 	do
+	(
 				m_compo.nom = txt
 				m_rollPrt.actualiser ()
 			)
-		on spn_longueur changed val 	do
-			m_compo.params.longueur 					= val
-		on spn_hauteur changed val 	do
-			m_compo.params.hauteur 					= val
-		on spn_allege changed val 	do
-			m_compo.params.allege_hauteur 	= val
-		on ckb_hauteur changed state do			(
-				m_compo.params.hauteur_use 	= state
-				actualiser ()
-			)
-		on ckb_allege changed state do			(
-				m_compo.params.allege_use 	= state											
-				actualiser ()
-			)
-		on spn_profondeur changed val 	do
-			m_compo.params.profondeur	= val
-		on chk_tablette changed state do			(
-				m_compo.params.tablette_use 	= state											
-				actualiser ()
-			)
-		on spn_tablette_hauteur changed val 	do
-			m_compo.params.tablette_hauteur 					= val
-		on spn_tablette_debord changed val 	do
-			m_compo.params.tablette_debord 	= val
-		on spn_tablette_cote changed val 	do
-			m_compo.params.tablette_cote	= val
-		on spn_allege_hauteur changed val 	do
-			m_compo.params.menuis_allege_ht 		= val
-		on chk_allege changed state do			(
-				m_compo.params.menuis_allege_use 	= state											
-				actualiser ()
-			)
-		on spn_traverse_hauteur changed val 	do
-			m_compo.params.menuis_trav_ht 					= val
-		on chk_traverse changed state do			(
-				m_compo.params.menuis_trav_use 	= state											
-				actualiser ()
-			)
-		on spn_menuis_epaisseur changed val 	do
-			m_compo.params.menuis_epaisseur 					= val
-		on spn_menuis_Largeur changed val 	do
-			m_compo.params.menuis_largeur 					= val
-		on chk_double changed state do			(
-				m_compo.params.menuis_double_use 	= state											
-				actualiser ()
-			)
-		on chk_ouvrant changed state do			(
-				m_compo.params.menuis_ouvrant_use 	= state											
-				actualiser ()
-			)
-		on spn_divisions changed val 	do
-			m_compo.params.menuis_divisions	= val
+	on spn_longueur changed val 	do
+		m_compo.params.longueur 					= val
+	on spn_hauteur changed val 	do
+		m_compo.params.hauteur 					= val
+	on spn_allege changed val 	do
+		m_compo.params.allege_hauteur 	= val
+	on spn_profondeur changed val 	do
+		m_compo.params.profondeur	= val
+	on lbx_traverses selected _index do
+		actualiser ()
+	on btn_ajouter_traverse pressed do
+		ajouter_traverse	()
+	on btn_editer_element pressed do (
+		createDialog	m_dialog_menuiserie	
+-- 		m_dialog_menuiserie.m_menuiserie = 
 		
 	)
+	on btn_ajouter_element pressed do (
+		m_compo.params.ajouter_menuierie	()
+		actualiser ()
+	)
+	on btn_supprimer_traverse pressed do
+		supprimer_traverse	()
+	on spn_traverse_ht changed val 	do (
+				m_compo.params.traverses[ lbx_traverses.selection ] = val
+				actualiser ()
+			)
+	on ddl_volet selected _index  	do
+	(
+				m_compo.params.volet = _index
+				actualiser ()
+			)
+	on spn_volet_ferm_proba changed val 	do
+		m_compo.params.volet_clos_proba	= val
+	on spn_volet_ferm_max changed val 	do
+		m_compo.params.volet_clos_max 	= val
+	on spn_volet_ferm_min changed val 	do
+		m_compo.params.volet_clos_min	= val
+)
 	
 ------ la fonction de construction	---------
 fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConstruitLaDalle:false	= ( 
+_ptsIDs_accroche
+	)
+	
+	
+fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConstruitLaDalle:false	= ( 
 -- 		_plug		pts_accroches		_normDir		 _composant	
 	
 		--- Result -------------
@@ -218,16 +230,19 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 	
 	-------------  constantes locales			-----------------------------------------------------------------------------------------------------------------
-		local decalage_epaisseur = 1
-		
+		local decalage_epaisseur 		= 1
+		local menuis_largeur				=	7.
+		local menuis_epaisseur			=	3.
+	
+	
 	-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
 		local longueur						= ptr_params.longueur
 		local hauteur						= ptr_params.hauteur
-		local hauteur_use					=	ptr_params.hauteur_use
-		local profondeur					= ptr_params.profondeur
-		
+		local profondeur					= ptr_params.profondeur		
 		local allege_hauteur 		 		= ptr_params.allege_hauteur
-		local allege_use					=	ptr_params.allege_use
+		
+		
+		
 		
 		local menuis_largeur				=	ptr_params.menuis_largeur
 		local menuis_epaisseur			=	ptr_params.menuis_epaisseur
@@ -608,154 +623,6 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 
 
 
-
-	
-	
-	
-	
-	/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	------------  VERSION ANTERIEURE   ---------------------------------------------------------------------------------------------------------------------------------------
-	-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	
-						,
-				
-				
-				
-				
-				
-													
-													
-													
-				
-				
-				
-				
-				local pos_largeur_temp1 = pts_pourOuvrant[1]
-				local pos_largeur_temp2 = pts_pourOuvrant[4]
-				--- DOUBLE  ----------------------------------------------------------------------------------------------------------------	
-				for i = 1 to  menuis_divisions  do (
--- 				if menuis_double_use do (
-					
-					local largeur_vitre = ( distance	pts_pourOuvrant[1] 	pts_pourOuvrant[2] ) / ( menuis_divisions + 1 )
-					
-					-------	Placement des points 	--------
-					local pt_1		= pts_pourOuvrant[1]   			- 		vec_men_lrg - vec_men_ep 	+ _normDir * largeur_vitre * i 
-					local pt_2		= pt_1 + 2 * vec_men_lrg
-					local pt_3		= pts_pourOuvrant[4]   			+ 		vec_men_lrg - vec_men_ep	+ _normDir * largeur_vitre * i 
-					local pt_4		= pt_3  - 2 * vec_men_lrg
-					
-					local pt_5		= pt_1		+ 	vec_men_ep
-					local pt_6		= pt_2		+ 	vec_men_ep
-					local pt_7		= pt_3		+ 	vec_men_ep
-					local pt_8		= pt_4		+ 	vec_men_ep
-					
-					--- creation des points --------------
-					local pts_pos 	= #( pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
-					local pts_ids 	= ptr_geo.points 	pts_pos
-					
-					---- faces ------
-					local nvlFace = ptr_geo.face 		#(	pts_ids[2], 		pts_ids[6], 		pts_ids[7],   	pts_ids[3]  )				
-					ptr_geo.set_matID 	nvlFace	#menuiserie			
-					local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[3],   	pts_ids[4]  )				
-					ptr_geo.set_matID 	nvlFace	#menuiserie			
-					local nvlFace = ptr_geo.face 		#(	pts_ids[5], 		pts_ids[1], 		pts_ids[4],   	pts_ids[8]  )				
-					ptr_geo.set_matID 	nvlFace	#menuiserie			
-					
-					if menuis_ouvrant_use do (
-						
-						local pt_1_men = pt_1
-						local pt_2_men = pt_2
-						local pt_3_men = pt_3
-						local pt_4_men = pt_4
-						
-						local vec_bandeau_ep = vec_men_ep/2
-						
-						-------	Placement des points 	--------
-						local pt_1		= pt_1_men	+ vec_men_lrg * 3/4	-  	vec_bandeau_ep 	-  	vec_men_ht
-						local pt_2		= pt_2_men 	- vec_men_lrg * 3/4	-  	vec_bandeau_ep 	-  	vec_men_ht
-						local pt_3		= pt_3_men	- vec_men_lrg * 3/4	-  	vec_bandeau_ep 	+  vec_men_ht
-						local pt_4		= pt_4_men  	+ vec_men_lrg * 3/4	-  	vec_bandeau_ep 	+  vec_men_ht
-						
-						local pt_5		= pt_1		+ 	vec_bandeau_ep
-						local pt_6		= pt_2		+ 	vec_bandeau_ep
-						local pt_7		= pt_3		+ 	vec_bandeau_ep
-						local pt_8		= pt_4		+ 	vec_bandeau_ep
-						
-						--- creation des points --------------
-						local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
-						local pts_ids 	= ptr_geo.points 	pts_pos
-						
-						---- faces ------
-						local nvlFace = 	ptr_geo.face 		#(	pts_ids[2], 		pts_ids[6], 		pts_ids[7],   	pts_ids[3]  )					
-						ptr_geo.set_matID 	nvlFace	#menuiserie			
-						local nvlFace = 	ptr_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[3],   	pts_ids[4]  )					
-						ptr_geo.set_matID 	nvlFace	#menuiserie			
-						local nvlFace = 	ptr_geo.face 		#(	pts_ids[5], 		pts_ids[1], 		pts_ids[4],   	pts_ids[8]  )				
-						ptr_geo.set_matID 	nvlFace	#menuiserie			
-						
-					)
-				)
-				
-				
--- 				 
--- 				--- OUVRANT  ----------------------------------------------------------------------------------------------------------------	
--- 				if menuis_ouvrant_use do (
--- 					
--- 					-------	Placement des points 	--------
--- 					local pt_1		= pts_pourOuvrant[1]
--- 					local pt_2		= pts_pourOuvrant[2]
--- 					local pt_3		= pts_pourOuvrant[3]
--- 					local pt_4		= pts_pourOuvrant[4]
--- 					
--- 					local pt_5		= pt_1		+ 	vec_men_lrg 	+ 	vec_men_ht
--- 					local pt_6		= pt_2		- 	vec_men_lrg 	+ 	vec_men_ht
--- 					local pt_7		= pt_3		- 	vec_men_lrg 	- 	vec_men_ht
--- 					local pt_8		= pt_4		+ 	vec_men_lrg 	- 	vec_men_ht
--- 					
--- 					local pt_9		= pt_5		+ 	vec_men_ep
--- 					local pt_10		= pt_6		+ 	vec_men_ep
--- 					local pt_11		= pt_7		+ 	vec_men_ep
--- 					local pt_12		= pt_8		+ 	vec_men_ep
--- 					
--- 					local pts_pourOuvrant	= #( pt_9, pt_10, pt_11, pt_12  )
--- 					
--- 					--- creation des points --------------
--- 					local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 , pt_9, pt_10, pt_11, pt_12 )
--- 					local pts_ids 	= ptr_geo.points 	pts_pos
--- 					
--- 					---- cadre ------
--- 					
--- 					local nvlFace = ptr_geo.face 		#(	pts_ids[1]	, pts_ids[2], pts_ids[3], pts_ids[4], pts_ids[8], pts_ids[7], pts_ids[6], pts_ids[5], pts_ids[8], pts_ids[4] )	
--- 					ptr_geo.set_matID 	nvlFace	#menuiserie					
--- 					
--- 					local nvlFace = ptr_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[10],   	pts_ids[9]  )		
--- 					ptr_geo.set_matID 	nvlFace	#menuiserie			
--- 					local nvlFace = ptr_geo.face 		#(	pts_ids[10], 	pts_ids[6], 		pts_ids[7],   	pts_ids[11]  )		
--- 					ptr_geo.set_matID 	nvlFace	#menuiserie			
--- 					local nvlFace = ptr_geo.face 		#(	pts_ids[12], 	pts_ids[11], 	pts_ids[7],   	pts_ids[8]  )		
--- 					ptr_geo.set_matID 	nvlFace	#menuiserie			
--- 					local nvlFace = ptr_geo.face 		#(	pts_ids[5], 		pts_ids[9], 		pts_ids[12],   	pts_ids[8]  )		
--- 					ptr_geo.set_matID 	nvlFace	#menuiserie			
-					
-					----vitrage
--- 					local nvlFace = ptr_geo.face 		#(	pts_ids[9], 		pts_ids[10], 		pts_ids[11],   	pts_ids[12]  )		
--- 					ptr_geo.set_matID 	nvlFace	#vitrage			
--- 					
--- 				)
--- 				
--- 				 			
-				
-				----------------------------
--- 				format "-------------> 	BAIE -> pt_results :%\n" #( pt_result_1, pt_result_2, pt_result_3 )
-				
-				---- Result final -----------------------------------------------------------------------
-				#( pt_result_1, pt_result_2, pt_result_3 )
-				
-				
-			), 
-	*/
-	
-	
 	
 	
 
@@ -765,7 +632,6 @@ fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Mod
 --- Creation de la structure mere	-----------------
 str_modelBase 	tooltip:compo_tooltip		titre:compo_titre	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire
 
-	
 	
 	
 	
