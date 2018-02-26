@@ -21,7 +21,7 @@ struct 	str_facade (
 	public
 		---- Base	-----------
 		nom 							=	"Façade",
-		id								=	"Facade_",
+		id								=	"",
 		mode						=	1,					---- ( 1:repeter	2:etrier			3:centrer )	----
 		
 		--- Limiteurs - Murs	---
@@ -47,7 +47,10 @@ struct 	str_facade (
 	---------- INTERFACE	--------------------------------------------------------------------------------------
 	public
 		fn initialiser 		 		=	(
-			for i= 1 to 10 do id += ( random 0 9 ) as string	
+			if id == "" do (
+				id = "Facade_"
+				for i= 1 to 10 do id +=  ( random 0 9 ) as string
+			)
 		),
 		
 		
@@ -99,7 +102,7 @@ struct 	str_facade (
 			update_sequence_longueur ()
 			sequence_longueur
 		),
-		
+		/* 
 		---- Enregistrement / chargement	-----------------
 		fn enregistrer 	_plug 	=(
 			
@@ -171,7 +174,7 @@ struct 	str_facade (
 			)
 			
 		),
-		
+		 
 		fn charger	 		_plug		  =(
 			
 -- 			debug "charger"
@@ -275,7 +278,7 @@ struct 	str_facade (
 			
 			index_facade
 			
-		),
+		),*/
 	---------- EVENEMENTS	--------------------------------------------------------------------------------------
 	public
 		on create do initialiser ()

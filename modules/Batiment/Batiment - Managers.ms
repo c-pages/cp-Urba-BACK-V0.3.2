@@ -17,23 +17,23 @@ struct 	str_mgr_toiture (
 		m_plug ,				----	le plugin	----
 		m_toiture,				----	la toiture active	----
 	
-		--- le dossier on sont rangés les modeles de composants ----------
-		m_dossier_models 		= 	getdir #userScripts + "\\cp-Urba\\modules\\Batiment\\elements\\toitures\\" ,
+		--- le dossier on sont rangés les constructeurs de composants ----------
+		m_dossier_constructeurs 		= 	getdir #userScripts + "\\cp-Urba\\modules\\Batiment\\elements\\toitures\\" ,
 	
-		---- Modeles source pour la construction des composants	---------------------
-		m_modelesBase 	=#(),
+		---- constructeurs source pour la construction des composants	---------------------
+		m_constructeursBase 	=#(),
 		
 		
 	---- FONCTIONS ---------------------------------------------------------------------------------------------------------------------------------
 	private
-		fn importer_models =(
+		fn importer_constructeurs =(
 			
 			--- on va chercher les fichiers des assets pour les composants de facades -------------
-			m_modelesBase =#()
-			local fichiers_toiture	=	getfiles (m_dossier_models+ "*.ms" )	
+			m_constructeursBase =#()
+			local fichiers_toiture	=	getfiles ( m_dossier_constructeurs+ "*.ms" )	
 			for fichier_toiture in fichiers_toiture do (
-				local nv_model_toiture =  fileIn fichier_toiture
-				append m_modelesBase  	nv_model_toiture
+				local nv_constructeur_toiture =  fileIn fichier_toiture
+				append m_constructeursBase  	nv_constructeur_toiture
 			)
 			
 		),
@@ -43,34 +43,34 @@ struct 	str_mgr_toiture (
 			
 		
 	---- accessions ------
-		fn a_desParametres	=	m_toiture.a_desParametres (),
-		fn get_index_courant =(
+		fn a_desParametres		=	m_toiture.a_desParametres (),
+		fn get_index_courant 	=(
 			local result
-			for i = 1 to m_modelesBase.count  do (
-				local model = m_modelesBase[i]
-				if model.type  as string == m_toiture.type as string
+			for i = 1 to m_constructeursBase.count  do (
+				local constructeur = m_constructeursBase[i]
+				if constructeur.type  as string == m_toiture.type as string
 					do result = i
 			)
 			result
 		),
 		fn get_index_parType 	_type =(
 			local result
-			for i = 1 to m_modelesBase.count  do (
-				local model = m_modelesBase[i]
-				if model.type  as string == _type as string
+			for i = 1 to m_constructeursBase.count  do (
+				local constructeur = m_constructeursBase[i]
+				if constructeur.type  as string == _type as string
 					do result = i
 			)
 			result
 			
 		),
-		fn get_modeles = (
+		fn get_constructeurs		= (
 			
-			if m_modelesBase.count == 0 do
-				importer_models ()
+			if m_constructeursBase.count == 0 do
+				importer_constructeurs ()
 			
-			m_modelesBase
+			m_constructeursBase
 		),
-		fn get_courant =(
+		fn get_courant		=(
 			m_toiture
 		),
 		
@@ -83,7 +83,7 @@ struct 	str_mgr_toiture (
 			include	 "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Toiture.ms"
 			
 			m_toiture= str_toiture () ---	get_nouveauComposant ()
-			m_modelesBase[_id ].initialiser	m_toiture
+			m_constructeursBase[_id ].initialiser	m_toiture
 			
 			this.enregistrer ()
 			
@@ -106,8 +106,8 @@ struct 	str_mgr_toiture (
 			local string_params	=	copy m_plug.toiture_params 
 			
 			local typeACharger 	= m_plug.toiture_type
-			local indexModel 		= get_index_parType    typeACharger
-			assigner	indexModel
+			local indexconstructeur 		= get_index_parType    typeACharger
+			assigner	indexconstructeur
 			
 			mgr_datas.set_datas_string		string_params  	m_toiture.params	
 			
@@ -122,7 +122,7 @@ struct 	str_mgr_toiture (
 			debug "initialiser ()"
 			m_plug = _plug
 -- 			debug "m_plug.toiture_params  0"	var:m_plug.toiture_params
-			importer_models ()
+			importer_constructeurs ()
 		)
 		
 		
@@ -149,116 +149,172 @@ struct 	str_mgr_composantsDeFacade (
 	private
 		m_plug,
 		
-		--- le dossier on sont rangés les modeles de composants ----------
-		m_dossier_models 		= 	getdir #userScripts + "\cp-Urba\modules\Batiment\elements\composants de facade\\" ,
+		--- le dossier on sont rangés les constructeurs de composants ----------
+		m_dossier_constructeurs 		= 	getdir #userScripts + "\cp-Urba\modules\Batiment\elements\composants de facade\\" ,
 		
-		---- structures servant de model à la construction des composants	---------------------
-		m_modelesBase =#(),
+		---- structures servant de constructeur à la construction des composants	---------------------
+		m_constructeursBase =#(),
 		
-		---- Le tableau des éléments --------
-		m_items	=	#(),
 		
 		
 	------------ INTERFACE  ------------------------------------------------------------------------------------------------------------------------
-	public
-		----------------- Models de base	------------------------------
-		---- recupere l'index du modele de composant  ------
-		fn get_model_ID 				_typeAChercher	=(
+	public	
+		---- Parametres ----------------	
+		fn enregistrer_parametres		_composant		=(
+			
+			local mgr_datas = m_plug.core.get_mgrDatas ()
+				
+				--- on cherche s'il existe deja comme parametre -----
+			local index_composant = 0
+			for i = 1 to m_plug.fac_compos_ids.count do 
+				if  m_plug.fac_compos_ids[i]  == _composant.id  do 
+					index_composant = i
+			
+			--- s'il n'existe pas encore, on l'ajoute -----
+			if index_composant == 0 then (
+				
+				append 	m_plug.fac_compos_ids 				_composant.id
+				append 	m_plug.fac_compos_noms  			_composant.nom
+				append 	m_plug.fac_compos_types  			_composant.type
+				append 	m_plug.fac_compos_params  		(	mgr_datas.get_datas_string	_composant.params	)
+				
+			--- s'il existe, on l'actualise -----
+			) else (
+				
+				m_plug.fac_compos_noms[index_composant] 		=	_composant.nom				
+				m_plug.fac_compos_types[index_composant]			=	_composant.type		
+				m_plug.fac_compos_params[index_composant]		=	(	mgr_datas.get_datas_string	_composant.params	)
+				
+			) 
+		),
+		fn charger_parametres 			_composant		=(
+			
+			local mgr_datas = m_plug.core.get_mgrDatas ()
+			
+			--- on cherche s'il existe deja comme parametre -----
+			local index_composant = 0
+			local i= 1
+			local trouve = false
+			while i <= m_plug.fac_compos_ids.count and not trouve	do (
+				
+				if  m_plug.fac_compos_ids[i]  == _composant.id  do (
+					index_composant = i
+					trouve = true
+				)
+				i+= 1
+			)
+			
+			-- on charge	------------------------------------
+			if index_composant != 0 then (
+				
+				_composant.nom 				= 	m_plug.fac_compos_noms[index_composant]
+				_composant.type				=	m_plug.fac_compos_types[index_composant] as name
+				
+				mgr_datas.set_datas_string		m_plug.fac_compos_params[index_composant]			_composant.params
+				
+			)
+		),
+		
+		
+		
+		----------------- constructeurs de base	------------------------------
+		fn get_constructeurs 					= m_constructeursBase,
+		fn get_constructeur_ID 				_typeAChercher		=(
 			local result
-			for i = 1 to m_modelesBase.count  do (
-				local model = m_modelesBase[i]
-				if model.type  as string == _typeAChercher as string
+			for i = 1 to m_constructeursBase.count  do (
+				local constructeur = m_constructeursBase[i]
+				if constructeur.type  as string == _typeAChercher as string
 					do result = i
 			)
 			result
 		),
-		---- recupere l'index du bouton de composant  (ne compte pas les element type balconFin, loggiaFin,  ------
-		fn get_bouton_ID 				_typeAChercher	=(
+		fn get_constructeur_par_type 	_typeAChercher		=(
+			local result
+			for constructeur in m_constructeursBase do
+				if constructeur.type == _typeAChercher
+					do result = constructeur
+			result
+		),
+		
+		
+		
+		---- creation d'un composant ------
+		fn creer_composant 				_idconstructeur		=(
+			
+			-- si on a un type et non pas un index	de constructeur -------------
+			if classof 	_idconstructeur == name do
+				_idconstructeur = get_constructeur_ID	_idconstructeur
+			
+			--- on importe le fichier du struct des composants  (pour avoir accés meme si le plug est pas actif)---
+			include	 "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant de facade.ms"
+			
+			if classof 	_idconstructeur == string do
+				_idconstructeur = get_constructeur_ID	_idconstructeur
+			
+			local nvComposant = str_composant () ---	get_nouveauComposant ()
+			m_constructeursBase[_idconstructeur].initialiser	nvComposant
+			
+			nvComposant
+		),
+		fn dupliquer_composant			_composant 			=(
+			debug "dupliquer"
+			
+			debug "_composant" var:_composant
+			local idconstructeur	= 		get_constructeur_ID 		_composant.type
+			local nvComposant	= 		creer_composant			idconstructeur
+			
+			nvComposant.nom 	= _composant.nom	--	 +  " - copie"
+			local nomsParams 	= getPropNames nvComposant.params
+			for nomParam in nomsParams do 
+				setProperty  nvComposant.params		nomParam   (	getProperty  _composant.params		nomParam  	)
+			
+			enregistrer_parametres		nvComposant
+			
+			nvComposant
+		),
+		
+		
+		---- accession des composants -----------
+		fn	get_composant_parIndex				_index =(
+			local nv_composant 	= creer_composant  	m_plug.fac_compos_types[_index]
+			nv_composant.id 		= m_plug.fac_compos_ids[_index]
+			charger_parametres		nv_composant
+			nv_composant
+		),
+		fn get_composant_parIDUnique  		_idUnique	=(
+			local result
+			local index_result = 0
+			for i = 1 to m_plug.fac_compos_ids.count do 
+				if m_plug.fac_compos_ids[i] == _idUnique do index_result = i
+					
+			if index_result != 0 do
+				result = get_composant_parIndex 		index_result
+			
+			result
+		),
+		
+		
+		
+		---- boutons ------
+		fn get_bouton_ID 							_typeAChercher		=(
 			local result
 			local index_bouton = 0
-			for i = 1 to m_modelesBase.count  do (
-				local model = m_modelesBase[i]
-				if model.est_editable  () do (
+			for i = 1 to m_constructeursBase.count  do (
+				local constructeur = m_constructeursBase[i]
+				if constructeur.est_editable  () do (
 					index_bouton += 1
-					if model.type  as string == _typeAChercher as string
+					if constructeur.type  as string == _typeAChercher as string
 						do result = index_bouton
 				)
 			)
 			result
 		),
 		
-		fn get_model_par_type 		_typeAChercher	=(
-			local result
-			for model in m_modelesBase do
-				if model.type == _typeAChercher
-					do result = model
-			result
-		),
-		fn get_modeles 				= m_modelesBase,
-		
-		
-		
-		---- creation d'un composant ------
-		fn creer 			_idModel		=(
-			--- on importe le fichier du struct des composants  (pour avoir accés meme si le plug est pas actif)---
-			include	 "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant de facade.ms"
-			
-			local nvComposant = str_composant () ---	get_nouveauComposant ()
-			m_modelesBase[_idModel].initialiser	nvComposant
-			
-			nvComposant
-		),
-		fn dupliquer		_composant 	cible:	=(
-			debug "dupliquer"
-			
-			debug "_composant" var:_composant
-			local idModel = get_model_ID 		_composant.type
-			local nvComposant
-			if cible == unsupplied	then
-				nvComposant = creer		idModel
-			else
-				nvComposant = cible
-			
-			
-			local propNoms = getPropNames _composant
-			for propNom in propNoms where propNom != #id do (
-				
-				local propOriginal = ( getProperty  _composant 	propNom )
-				
-				
-				if propNom == #params then (
-					
-					local propParamsNoms = getPropNames 	propOriginal
-					
-					for propParamsNom in propParamsNoms  do (
-						local propParamsOriginal = ( getProperty  propOriginal 	propParamsNom )
-						debug"propParamsNom" var:propParamsNom
-						setProperty nvComposant.params 	propParamsNom 	propParamsOriginal
-					)
-					
-				) else (
-					
-					case classof propOriginal of (
-						--- les trucs qu'on zappe ------
-						MAXScriptFunction:	()					
-						array:					setProperty nvComposant 	propNom 	( for val in propOriginal collect val )
-						default:					setProperty nvComposant 	propNom 	propOriginal
-					)
-				)
-			)
-			
-			nvComposant.nom += " - copie"
-			
-			debug "nvComposant" var:nvComposant
-			nvComposant
-		),
-		
-		
 		
 		----------------- Divers------------------------------	
 		---- pour recuperer un 'mur plein' temporaire ------
-		fn get_murPlein = creer  ( get_model_ID	#mur ),
-		
+		fn get_murPlein = creer_composant  ( get_constructeur_ID	#mur ),
+		/* 
 		--- charge en mémoire les parametres des composant des facades depuis le plugin --------
 		fn charger		_idUnique		  =(
 -- 			debug "charger"
@@ -282,26 +338,26 @@ struct 	str_mgr_composantsDeFacade (
 			if index_composant != 0 then (
 				
 				local type = m_plug.fac_compos_types[index_composant]
-				local id_model = get_model_ID  type
-				nvComposant 	= creer		id_model 	enregistre:false
+				local id_constructeur = get_constructeur_ID  type
+				nvComposant 	= creer		id_constructeur 	enregistre:false
 				
 				nvComposant.charger		m_plug		idUnique:_idUnique
 			)
 			
 			nvComposant
 		),
-		
+		*/
 		-----------------Initialisastion	---------------------------------------------------
 		fn initialiser	_plug	=(
 			debug "initialiser ()"
 			m_plug = _plug
 			
 			--- on va chercher les fichiers des assets pour les composants de facades -------------
-			m_modelesBase =#()
-			local liste_des_fichiersComposants	=	getfiles (m_dossier_models+ "*.ms" )			
+			m_constructeursBase =#()
+			local liste_des_fichiersComposants	=	getfiles (m_dossier_constructeurs+ "*.ms" )			
 			for fichierCompo in liste_des_fichiersComposants do (
-				local nv_model_compo =  fileIn fichierCompo
-				append m_modelesBase  	nv_model_compo
+				local nv_constructeur_compo =  fileIn fichierCompo
+				append m_constructeursBase  	nv_constructeur_compo
 			)
 			
 		)
@@ -328,6 +384,9 @@ struct str_mgr_facades (
 			catch ()
 		),
 	
+	
+	
+	
 	---- MEMBRES ----------------------------------------------------------------------------------------------------------------
 	private
 		m_plug,
@@ -335,133 +394,276 @@ struct str_mgr_facades (
 		--- le manager des composants -------------
 		mgr_composants 	= str_mgr_composantsDeFacade (),
 		
+		--- le rollout	--------------------
+		m_dialog					= 	filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout facade.ms",
+		m_dialog_estOuvert 	= false,
+		m_dialog_pos			= [700,200],
+		m_dialog_taille			= [500,500],
 		
-		---- Le tableau des éléments --------
-		m_items	=	#(),
 		
-		
-	---- FONCTIONS ----------------------------------------------------------------------------------------------------------------
-
+	---- FONCTIONS --------------------------------------------------------------------------------------------------------------
 	---- INTERFACE -------------------------------------------
 	public
-		fn actualiser = (
+		---- Parametres ----------------		
+		fn enregistrer_parametres		_facade		=(
+			
+			debug "enregistrer_parametres"
+			
+			local mgr_datas 			= m_plug.core.get_mgrDatas ()
+			
+			--- on cherche s'il existe deja comme parametre -----
+			local index_facade = 0
+			for i = 1 to m_plug.fac_ids.count do
+				if m_plug.fac_ids[i]  == _facade.id  do index_facade = i
+			
+			
+			--- s'il n'existe pas encore, on l'ajoute -----
+			if index_facade == 0 then (
+				
+				append 	m_plug.fac_ids 			_facade.id
+				append 	m_plug.fac_noms  	_facade.nom
+				append    	m_plug.fac_modes		_facade.mode
+				
+				--- Limiteurs - Murs	---
+				append 	m_plug.fac_murs		_facade.murs
+				
+				--- Limiteurs - Etages	---
+				append 	m_plug.fac_etagesMin_uses 		_facade.etages_min_use
+				append 	m_plug.fac_etagesMin  				_facade.etages_min
+				append 	m_plug.fac_etagesMax_uses 		_facade.etages_max_use
+				append 	m_plug.fac_etagesMax 				_facade.etages_max
+				
+				--- Limiteurs - longueurs	---
+				append 	m_plug.fac_longueurMin_uses 	_facade.longueur_min_use
+				append 	m_plug.fac_longueurMin 			_facade.longueur_min
+				append 	m_plug.fac_longueurMax_uses 	_facade.longueur_max_use
+				append 	m_plug.fac_longueurMax 			_facade.longueur_max
+				
+				--- la sequence de composants	-------
+				append 	m_plug.fac_sequences 					( mgr_datas.array_to_string		#() )
+				append 	m_plug.fac_sequence_longueurs 	_facade.sequence_longueur
+				
+			--- s'il existe, on l'actualise -----
+			) else (
+				
+				m_plug.fac_noms[index_facade] 		=	_facade.nom				
+				m_plug.fac_modes[index_facade]		=	_facade.mode
+				
+				--- Limiteurs - Murs	---
+				m_plug.fac_murs[index_facade]			= _facade.murs
+				
+				--- Limiteurs - Etages	---
+				m_plug.fac_etagesMin_uses[index_facade] 		= _facade.etages_min_use
+				m_plug.fac_etagesMin[index_facade]  				=	_facade.etages_min
+				m_plug.fac_etagesMax_uses[index_facade] 		= _facade.etages_max_use
+				m_plug.fac_etagesMax[index_facade] 				=	_facade.etages_max
+				
+				--- Limiteurs - longueurs	---
+				m_plug.fac_longueurMin_uses[index_facade] 		= 	_facade.longueur_min_use
+				m_plug.fac_longueurMin[index_facade] 				=	_facade.longueur_min
+				m_plug.fac_longueurMax_uses[index_facade] 	=	_facade.longueur_max_use
+				m_plug.fac_longueurMax[index_facade] 				= _facade.longueur_max
+				
+				-- la sequence	-----
+				local sequenceIDs 	= for compo in _facade.sequence collect	compo.id
+				m_plug.fac_sequences[index_facade] 					= mgr_datas.array_to_string		sequenceIDs		
+				m_plug.fac_sequence_longueurs[index_facade] 		= _facade.sequence_longueur		
+				
+				--- les composants -----
+				for compo in _facade.sequence do
+					mgr_composants.enregistrer_parametres	 compo			
+				
+			)
+		),
+		fn charger_parametres 			_facade		  =(
+			
+			debug "charger_parametres"
+			
+			local mgr_datas 			= m_plug.core.get_mgrDatas ()
+			
+			debug "_facade.id" var:_facade.id
+			debug "m_plug.fac_ids" var:m_plug.fac_ids
+			
+			--- on cherche s'il existe deja comme parametre -----
+			local index_facade = 0
+			for i = 1 to m_plug.fac_ids.count do 				
+				if m_plug.fac_ids[i] == _facade.id do 
+					index_facade = i
+			
+			debug "index_facade" var:index_facade
+			
+			--- on charge	------------------------------------
+			if index_facade != 0 then (
+				
+				_facade.id 								= m_plug.fac_ids[index_facade]
+				_facade.nom 								= m_plug.fac_noms[index_facade]
+				
+				_facade.mode							= m_plug.fac_modes[index_facade]
+				
+				--- Limiteurs - Murs	---
+				_facade.murs								= m_plug.fac_murs[index_facade]
+				
+				--- Limiteurs - Etages	---
+				_facade.etages_min_use			= m_plug.fac_etagesMin_uses[index_facade] 
+				_facade.etages_min					= m_plug.fac_etagesMin[index_facade] 
+				_facade.etages_max_use			= m_plug.fac_etagesMax_uses[index_facade] 
+				_facade.etages_max					= m_plug.fac_etagesMax[index_facade] 
+				
+				--- Limiteurs - longueurs	---
+				_facade.longueur_min_use			= m_plug.fac_longueurMin_uses[index_facade] 
+				_facade.longueur_min				= m_plug.fac_longueurMin[index_facade] 
+				_facade.longueur_max_use		= m_plug.fac_longueurMax_uses[index_facade] 
+				_facade.longueur_max				= m_plug.fac_longueurMax[index_facade] 
+				
+				--- Sequence	---
+				_facade.sequence_longueur		=	m_plug.fac_sequence_longueurs[index_facade]
+				
+				_facade.sequence						=  #()
+				local sequence_IDs					= mgr_datas.string_to_array		 m_plug.fac_sequences[index_facade]
+				
+				for compoID in sequence_IDs do (
+					
+					local compoInstance = mgr_composants.get_composant_parIDUnique		compoID  
+					
+					if compoInstance != undefined then 
+						nvComposant = 	compoInstance
+					else	nvComposant = 	mgr_composants.charger_parametres 	compoID	
+					
+					append _facade.sequence	nvComposant
+					
+				) 
+				
+			) else messagebox ("Erreur de chargement de facade : " + _id as string )
 			
 		),
 		
-		---- Accessions ----------------		
-		fn get_mgr_composants 	= mgr_composants,
-		fn get_parID  		_idUnique	=(
-			
-				debug "get_parID"	
-				format  "_idUnique : %\n"		_idUnique
+		
+		---- Accessions ----------------
+		--- manager ---
+		fn get_mgr_composants = mgr_composants,		
+		--- facade ----
+		fn	get_facade_parIndex				_index =(
+			local nvl_facade = str_facade 	id:m_plug.fac_ids[_index]
+			charger_parametres		nvl_facade
+			nvl_facade
+		),
+		fn get_facade_parIDUnique  		_idUnique	=(
 			local result
-			for item in m_items do (
-				if item.id as string == _idUnique  as string do result = item
-				format  "item.id : %\n"		item.id
--- 				debug "item.id"		var:item.id
+			local index_result = 0
+			for i = 1 to m_plug.fac_ids.count do (
+				if m_plug.fac_ids[i] == _idUnique do index_result = i
 			)
-			result
-			
-		),
-		fn get_index_facadeOuverte 	=(
-			local rollout_editeurFacde =  m_plug.core.get_facadeEditeur_rollout ()
-			local result
-			for i = 1 to m_items.count do (
-				if m_items[i].id as string == rollout_editeurFacde.m_facade_courante.id  as string do result = i
--- 				format  "item.id : %\n"		item.id
-			)
-			result
+			result = get_facade_parIndex 	index_result
 		),
 		
-		fn get_parIndex  	_index 		=(
-			m_items[_index]			
+		
+		---- Creation/Suppression etc. ----
+		fn creer_facade	=(
+			
+			local nvl_facade = str_facade ()
+			
+			nvl_facade.nom += " " + m_plug.fac_ids.count as string
+			enregistrer_parametres		nvl_facade
+			
+			nvl_facade
+			
 		),
-		fn get_noms 	=	for item in m_items collect item.nom,
-		fn get_items	= 	m_items,
-		
-		---- Creation/Suppression ----
-		fn creer		enregistrer:true		=(
+		fn supprimer_facade 		_index	=	(		
 			
--- 			debug "creer"
+				deleteItem 	m_plug.fac_ids 							_index
+				deleteItem 	m_plug.fac_noms  						_index
+				deleteItem    m_plug.fac_modes						_index
+				
+				--- Limiteurs - Murs	---
+				deleteItem 	m_plug.fac_murs							_index
+				
+				--- Limiteurs - Etages	---
+				deleteItem 	m_plug.fac_etagesMin_uses 			 _index
+				deleteItem 	m_plug.fac_etagesMin  				_index
+				deleteItem 	m_plug.fac_etagesMax_uses 		 _index
+				deleteItem 	m_plug.fac_etagesMax 					_index
+				
+				--- Limiteurs - longueurs	---
+				deleteItem 	m_plug.fac_longueurMin_uses 	 	_index
+				deleteItem 	m_plug.fac_longueurMin 				_index
+				deleteItem 	m_plug.fac_longueurMax_uses 		_index
+				deleteItem 	m_plug.fac_longueurMax 			 	_index
+				
+				--- la sequence de composants	-------
+				deleteItem 	m_plug.fac_sequences 					_index
+				deleteItem 	m_plug.fac_sequence_longueurs 	_index
 			
-			local nv_element = str_facade ()
+		),
+		fn dupliquer_facade 		_facadeADupliquer	=(
 			
-			if enregistrer do (
-				append		m_items	nv_element
-				nv_element.nom += " " + m_items.count as string
-				nv_element.enregistrer	 	m_plug
+			local nvlFacade 	= creer_facade		enregistrer:false
+			nvlFacade.nom   	= _facadeADupliquer.nom + " - copie"
+			nvlFacade.mode		= _facadeADupliquer.mode
+			
+			nvlFacade.murs		= _facadeADupliquer.murs
+			
+			nvlFacade.etages_min_use		= _facadeADupliquer.etages_min_use
+			nvlFacade.etages_min			= _facadeADupliquer.etages_min
+			nvlFacade.etages_max_use	= _facadeADupliquer.etages_max_use
+			nvlFacade.etages_max			= _facadeADupliquer.etages_max
+			
+			nvlFacade.longueur_min_use	= _facadeADupliquer.longueur_min_use
+			nvlFacade.longueur_min			= _facadeADupliquer.longueur_min
+			nvlFacade.longueur_max_use	= _facadeADupliquer.longueur_max_use
+			nvlFacade.longueur_max		= _facadeADupliquer.longueur_max
+			
+			nvlFacade.sequence_longueur		= _facadeADupliquer.sequence_longueur
+			for compoADupliquer in _facadeADupliquer.sequence do (
+				local nvCompo	=	mgr_composants.dupliquer_composant		compoADupliquer
+-- 				nvCompo.nom +=  " - copie"
+				append 	nvlFacade.sequence	nvCompo
 			)
 			
-			nv_element
 			
-		),	
-		
-		fn dupliquer		_facade 	cible:	=(
 			
-			local nvlFacade 
-			if cible == unsupplied	then
-				nvlFacade = creer		enregistrer:false
-			else
-				nvlFacade = cible
+			enregistrer_parametres		nvlFacade
 			
-			local propNoms = getPropNames _facade
-			for propNom in propNoms do (
-				local propOriginal = ( getProperty  _facade 	propNom )
-				local type = classof propOriginal
-				case type of (
-					--- les trucs qu'on zappe ------
-					MAXScriptFunction:	()
-					array:		(
-						setProperty nvlFacade 	propNom 	( for val in propOriginal collect val )
-					)
-					default:		setProperty nvlFacade 	propNom 	propOriginal
-				)
-			)
 			nvlFacade
 		),
-		fn supprimer 	_index	=	(
--- 			local elem_a_supprimer = get_parID		_idUnique
--- 			local indexASupprimer = elem_a_supprimer.supprimer		m_plug
-			deleteItem	m_items	_index
-		),
-		
-		fn charger =(
-			m_items = #()
-			for id in m_plug.fac_ids do (
-				nvFacade = creer	enregistrer:false
-				nvFacade.id  = id
-				nvFacade.charger 	m_plug
-				append	m_items	nvFacade
-			)
-		),
 		
 		
 		
 		
-		
-		fn initialiser		class:  plug: =(
+		----- rollout --------------------------
+		fn dialog_estOuvert				= m_dialog_estOuvert,
+		fn ouvrir_dialog 	_index		=(
 			
-			
-			--- on vide les m_items ------
-			m_items	=	#()
+			createDialog 	m_dialog		style:				#(#style_resizing, #style_titlebar, #style_border, #style_sysmenu) 	\
+													pos:					m_dialog_pos		\
+													width:				m_dialog_taille.x	\
+													height:				m_dialog_taille.y	
+													
+			m_dialog.initialiser 		m_plug
+			local facadeAOuvrir 		= 	get_facade_parIndex		_index
+			m_dialog.set_facade 		facadeAOuvrir
+			m_dialog_estOuvert 		= true
+		),
+		fn fermer_dialog 					=(
+				destroyDialog 	m_dialog
+				m_dialog_estOuvert = false
+		),
+		fn	set_dialog_taille	_taille 	=	m_dialog_taille 	= _taille,
+		fn	set_dialog_pos		_pos 	=	m_dialog_pos 	= _pos,
+		
+		
+		
+		---- Initialisation  ----
+		fn initialiser		_plug =(
 			
 			-- on assigne les pointeurs -----------
-			if class== unsupplied or plug == unsupplied do
-				messagebox "str_mgr_arrayParametres : Probleme d'initialisation"
-			m_class 	= 	class
-			m_plug		=	plug
+			m_plug		=	_plug
 			
 			-- on initialiser le manager des composants
 			mgr_composants.initialiser		m_plug
 			
-			
 		)
 		
-	
--- 		---- Parametres Block ----
--- 		fn lire			=	lire_parametres(),
--- 		fn ecrire			=	ecrire_parametres()
-	
+		
 )	--	fin manager de facades ------
 
 
@@ -552,10 +754,12 @@ struct str_mgr_surfaces (
 			m_plug 				= _plug
 		),
 		
+		
 	--- Actualisation ---------------------
 		fn actualiser  =(
 			
 		),
+		
 		
 	--- Accession ---------------------
 		fn get_points =(
@@ -583,7 +787,10 @@ struct str_mgr_surfaces (
 		),	
 		fn get_axePrincipal 	= m_outils.get_axePrincipal_mtrx 		( get_points () ),
 		fn get_axeP_BB			= m_outils.get_axePrincipal_BB 		( get_points () )  ( get_axePrincipal () ),
-	--- Assigner nouveau shape  ---------------------
+	
+		
+		
+		--- Assigner nouveau shape  ---------------------
 		fn assigner 	_shape  =(
 			
 			debug "assigner"

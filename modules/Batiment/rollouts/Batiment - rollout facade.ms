@@ -18,7 +18,8 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 		
 		------------  Membres	----------------------------------------------------------------------------------
 		---- Pointeurs ----
-		local m_plug				---- pointeur vers le plug ----
+		local m_plug						---- pointeur vers le plug ----
+		local mgr_facade
 		
 		local m_changement = false
 		
@@ -91,7 +92,7 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 	button 'btn_annuler' "Annuler" pos:[86,271] width:79 height:25 toolTip:"Annuler les changements" align:#left
 			
 		local		btns_ajouter_composant	=#( btn_ajouter_composant_1, btn_ajouter_composant_2, btn_ajouter_composant_3, btn_ajouter_composant_4, btn_ajouter_composant_5, btn_ajouter_composant_6 )
-		local 	btns_ids_models				=#()
+		local 	btns_ids_constructeurs				=#()
 		
 		------------  Fonctions	----------------------------------------------------------------------------------
 		fn  remplir_lbx_sequence =(
@@ -168,7 +169,7 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 			remplir_lbx_sequence ()
 			
 			--- bloquage du bouton Balcon si on est deja dans un balcon -------------------
-			local idBalcon = ( m_plug.core.get_mgr_composants() ).get_model_ID #Balcon 
+			local idBalcon = ( m_plug.core.get_mgr_composants() ).get_constructeur_ID #Balcon 
 			btns_ajouter_composant[idBalcon].enabled = not m_compoCourant_estDansBalcon
 			
 			
@@ -230,7 +231,8 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 			roll_urba_editeurFacades.width 		= _taille.x
 			roll_urba_editeurFacades.height 	= _taille.y
 			
-			m_plug.core.set_roll_editeurDeFacade_taille	_taille
+			mgr_facade.set_dialog_taille		_taille
+			
 -- 			debug "_taille" var:_taille
 			local largeur_fenetre 	= 	_taille.x -  largeur_params
 			
@@ -246,12 +248,12 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 			lbx_sequence.height 		= _taille.y - ( lbx_sequence.pos.y + largeur_btn + 2 * largeur_bord )
 			
 			
-			btn_monter.pos.x			=	btn_descendre .pos.x		=	lbx_sequence.pos.x + lbx_sequence.width
+			btn_monter.pos.x								=	btn_descendre .pos.x		=	lbx_sequence.pos.x + lbx_sequence.width
 			btn_dupliquer_composant.pos.y 			= lbx_sequence.pos.y + lbx_sequence.height - 47
 			btn_instancier_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 32
 			btn_supprimer_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 17
 			
-			grp_prop.pos.x 				= ddl_murs.pos.x + ddl_murs.width + largeur_bord 
+			grp_prop.pos.x 					= ddl_murs.pos.x + ddl_murs.width + largeur_bord 
 			grp_prop.height 				= _taille.y - ( grp_prop.pos.y + largeur_bord )
 			subroll_parametres.pos.x 	= grp_prop.pos.x + 8
 			subroll_parametres.height 	= grp_prop.height - 23
@@ -261,8 +263,8 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 		)
 		fn initialiser 			_plug 		=(
 			
-			m_plug 		= _plug
-			
+			m_plug 			= _plug
+			mgr_facade		=	_plug.core.get_mgr_facades ()
 			
 			-- la fenetre ----
 			redimensionnerFenetre  (getDialogSize	roll_urba_editeurFacades)
@@ -270,15 +272,15 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 			
 			----- gestion des boutons de creation de composant -----------
 			local mgr_compos = m_plug.core.get_mgr_composants ()
-			local models_compos = mgr_compos.get_modeles ()
+			local constructeurs_compos = mgr_compos.get_constructeurs ()
 			local i =1
 			local j = 1
-			for  model_compo in  models_compos	do (
-				if  model_compo.est_editable  () do (
+			for  constructeur_compo in  constructeurs_compos	do (
+				if  constructeur_compo.est_editable  () do (
 					btns_ajouter_composant[i].visible 		= true
-					btns_ajouter_composant[i].text 			= model_compo.titre
-					btns_ajouter_composant[i].tooltip 		= model_compo.tooltip
-					btns_ids_models[i] = j
+					btns_ajouter_composant[i].text 			= constructeur_compo.titre
+					btns_ajouter_composant[i].tooltip 		= constructeur_compo.tooltip
+					btns_ids_constructeurs[i] = j
 					i+=1
 				)
 				j += 1
@@ -286,14 +288,15 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 			
 		)
 		fn set_facade		_facade 	=(
-			local mgr_facades 	= m_plug.core.get_mgr_facades ()
+			-- la facade courante	----
+			m_facade_courante 	= 	_facade
 			
-			m_facade_initiale 		= 	_facade
-			m_facade_courante 	= 	mgr_facades.dupliquer 		m_facade_initiale
+			--- la sequence	----------
 			if m_facade_courante.sequence.count>0 do (
 				lbx_sequence.selection  = 1
 				m_composant_courant = m_facade_courante.sequence[ 	1 ]
 			)
+			
 			actualiser ()
 		)
 		
@@ -301,13 +304,11 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 		
 		
 		
-		fn ajouter_composant	_IDmodelCompo	=(
-			debug "ajouter composant"
--- 			debug "lbx_sequence.selection AVT" var:lbx_sequence.selection 
-			local sequence_selectionBack = lbx_sequence.selection 
-			m_composant_courant	=	m_plug.core.creer_composant	m_facade_courante		_IDmodelCompo		position:(lbx_sequence.selection +1)
+		fn ajouter_composant	_IDconstructeurCompo	=(
 			
--- 			debug "lbx_sequence.selection APRS" var:lbx_sequence.selection 
+			local sequence_selectionBack = lbx_sequence.selection 
+			m_composant_courant	=	m_plug.core.creer_composant	m_facade_courante		_IDconstructeurCompo		position:(lbx_sequence.selection +1)
+			
 			remplir_lbx_sequence ()
 			
 			lbx_sequence.selection = sequence_selectionBack +1
@@ -343,14 +344,10 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 			actualiser ()
 		)
 		fn enregistrer =(
-			local mgr_facades 	= m_plug.core.get_mgr_facades ()
 			
-			
-			m_facade_initiale = mgr_facades.dupliquer 	 m_facade_courante	cible:m_facade_initiale
-			m_facade_initiale.enregistrer 	m_plug
-			
-			
-			m_changement = false
+			local		mgr_facade		=	m_plug.core.get_mgr_facades ()
+			mgr_facade.enregistrer_parametres	m_facade_courante
+			m_changement 				= false
 			
 		)
 		
@@ -367,21 +364,21 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 	  
 		
 	
-	on roll_urba_editeurFacades resized _taille 				do
+	on roll_urba_editeurFacades resized 	_taille 				do
 		redimensionnerFenetre 	_taille
 	
-	on roll_urba_editeurFacades moved dest do
-		m_plug.core.set_roll_editeurDeFacade_position   dest
+	on roll_urba_editeurFacades moved 	_pos do
+		m_plug.core.set_facadeEditeur_position   	_pos
 	
 	on roll_urba_editeurFacades close do (
-		
-		if m_changement then 
+		/*
+		if m_changement then  
 			if querybox "Enregistrer la façade ?" do (
 				enregistrer ()
 				m_plug.core.actualiser ()
 			)
 		
-		m_plug.actualiser_rollouts ()
+		m_plug.actualiser_rollouts () */
 	)
 	
 	on edt_nom_facade entered txt 	do
@@ -481,34 +478,37 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 		m_changement = true
 				)
 			)
+			
+			
+			
 	on btn_ajouter_composant_1 pressed do
 	(
-			ajouter_composant	btns_ids_models[1]
+			ajouter_composant	btns_ids_constructeurs[1]
 			m_changement = true
 		)
 	on btn_ajouter_composant_2 pressed do
 	(
-			ajouter_composant	btns_ids_models[2]
+			ajouter_composant	btns_ids_constructeurs[2]
 			m_changement = true
 		)
 	on btn_ajouter_composant_3 pressed do
 	(
-			ajouter_composant	btns_ids_models[3]
+			ajouter_composant	btns_ids_constructeurs[3]
 			m_changement = true
 		)
 	on btn_ajouter_composant_4 pressed do
 	(
-			ajouter_composant	btns_ids_models[4]
+			ajouter_composant	btns_ids_constructeurs[4]
 			m_changement = true
 		)
 	on btn_ajouter_composant_5 pressed do
 	(
-			ajouter_composant	btns_ids_models[5]
+			ajouter_composant	btns_ids_constructeurs[5]
 			m_changement = true
 		)
 	on btn_ajouter_composant_6 pressed do
 	(
-			ajouter_composant	btns_ids_models[6]
+			ajouter_composant	btns_ids_constructeurs[6]
 			m_changement = true
 		)
 	on btn_valider pressed do

@@ -202,25 +202,25 @@ rollout roll_global "Global" width:162 height:341
 	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 align:#left	enabled:false
 	
 	fn actualiser =(
+		lbx_facades.items 						=  for facadeNom in fac_noms collect facadeNom
 		
-		lbx_facades.items 		=  core.get_facades_noms ()
-		
+		/* 
 		btn_supprimerFacade.enabled	=	 lbx_facades.selection != 0 
 		btn_editer_facade.enabled			=	 lbx_facades.selection != 0 
 		btn_editer_facade.checked			= 	core.facadeEditeur_est_ouvert ()
 		btn_dupliquer_facade.enabled	=	 lbx_facades.selection != 0 
 		
-		local mgr_toiture 		= core.get_mgr_toiture ()
-		local index_toiture 	= core.get_toiture_index ()
-		ddl_toiture.selection 	= 	index_toiture
+		local mgr_toiture 						= core.get_mgr_toiture ()
+		local index_toiture 					= core.get_toiture_index ()
+		ddl_toiture.selection 					= 	index_toiture
 		
-		btn_editer_toiture.enabled = mgr_toiture.a_desParametres		()
+		btn_editer_toiture.enabled 		= mgr_toiture.a_desParametres		()
 		
 		if index_toiture == 1 then
 			btn_editer_toiture.enabled = false
 		else
 			btn_editer_toiture.enabled = true
-		
+		*/
 		
 	)
 	
@@ -228,7 +228,7 @@ rollout roll_global "Global" width:162 height:341
 	
 	fn initialiser =(
 		local mgr_toiture 			= core.get_mgr_toiture ()
-		local models_toiture 		= mgr_toiture.get_modeles ()
+		local models_toiture 		= mgr_toiture.get_constructeurs ()
 		ddl_toiture.items 		=  ( for  model in models_toiture collect model.titre )
 	)
 	
@@ -243,7 +243,7 @@ rollout roll_global "Global" width:162 height:341
 		)
 	on roll_global close do
 	(
-				core.fermer_toutes_fenetres query:true
+-- 				core.fermer_toutes_fenetres query:true
 			)
 	on btn_pick_surface picked _shape do
 		core.assigner_surface 		$		_shape
@@ -253,8 +253,8 @@ rollout roll_global "Global" width:162 height:341
 		core.actualiser ()
 	on lbx_facades selected val do	(
 			if core.facadeEditeur_est_ouvert () do (
-				local index_facade_ouverte = ( core.get_mgr_facades () ).get_index_facadeOuverte ()
-				if lbx_facades.selection != index_facade_ouverte do
+-- 				local index_facade_ouverte = ( core.get_mgr_facades () ).get_index_facadeOuverte ()
+-- 				if lbx_facades.selection != index_facade_ouverte do
 					core.facadeEditeur_ouvrir	 	lbx_facades.selection
 			)
 			actualiser ()
@@ -266,7 +266,7 @@ rollout roll_global "Global" width:162 height:341
 		)
 	on btn_dupliquer_facade pressed do
 	(
-				core.dupliquer_facade		lbx_facades.selection 
+			core.dupliquer_facade		lbx_facades.selection 
 			actualiser ()
 		)
 	on btn_ajouterFacade pressed do

@@ -421,7 +421,7 @@ struct str_construction (
 		fn actualiser 	 =(
 			
 			debug "actualiser"
-			
+			/* 
 			--- on vide la geametrie ------------
 			m_geo.vider ()
 			
@@ -450,7 +450,7 @@ struct str_construction (
 				displayTempPrompt ("Bâtiment construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
 				
 			)
-			
+			 */
 			redrawViews ()
 			
 		)

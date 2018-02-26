@@ -64,9 +64,9 @@ struct 	str_composant (
 		
 		---- Construction du mesh 	( fonction virtuelle ) -----------------------
 		fn construire		_plug	 	pts_accroches		_normDir		onConstruitLaDalle:true	 profondeur:0	= 		
-						fnVirt_construire	 _plug	pts_accroches		_normDir		this	onConstruitLaDalle:onConstruitLaDalle  profondeur:profondeur,
+						fnVirt_construire	 _plug	pts_accroches		_normDir		this	onConstruitLaDalle:onConstruitLaDalle  profondeur:profondeur
 		
-		
+		/* 
 		---- Enregistrement / chargement	-----------------
 		fn enregistrer 	_plug	=(
 -- 			debug "enregistrer"
@@ -132,8 +132,8 @@ struct 	str_composant (
 				mgr_datas.set_datas_string		_plug.fac_compos_params[index_composant]			params
 				
 			)
-			
 		)
 
+			 */
 		
 ) ---- fin composant -------------------------------

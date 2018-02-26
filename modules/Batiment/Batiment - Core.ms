@@ -72,13 +72,13 @@ struct str_batiment_core (
 		mgr_presets			= str_presets_batiment  fichier_dossier:		"$userScripts\cp-Urba\lib\\" 	\
 																		fichier_categorie:	"Urba_batiment"\
 																		fichier_extension:	"bati",
-		
+		/* 
 		---  Rollouts Facade -------------------
 		roll_facades 				= 	filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout facade.ms",
 		roll_facades_estOuvert = false,
 		roll_facades_pos		= [700,200],
 		roll_facades_taille		= [500,500],
-		
+		 */
 		--- construction de la geometrie  -------------------
 		m_construction			= str_construction 	(),
 		
@@ -119,7 +119,7 @@ struct str_batiment_core (
 			
 			---- initialisation des structures -----
 			mgr_surface.initialiser			m_plug
-			mgr_facades.initialiser			class:str_facade		plug:m_plug
+			mgr_facades.initialiser			m_plug
 			mgr_toiture.initialiser				m_plug
 			m_construction.initialiser		m_plug
 			
@@ -151,9 +151,19 @@ struct str_batiment_core (
 		
 	----- Accessions -----------------------
 	public
+		fn get_mgr_surface			= mgr_surface,
+		fn get_mgr_composants 	= mgr_facades.get_mgr_composants (),
+		fn get_mgr_facades	 		= mgr_facades,
+		fn get_mgr_toiture	 		= mgr_toiture,
+		
+		fn get_mgrDatas 				= mgr_datas,
+		fn get_mgrPresets 			= mgr_presets,
+		
+	public
 		fn get_surface_points		=	mgr_surface.get_points	(),
 		
-		fn get_facades_noms 		=	mgr_facades.get_noms (),
+		fn get_facade	_index		=	mgr_facades.get_facade		_index,
+		
 		fn get_facades					=	mgr_facades.get_items (),
 		
 		fn get_construction			= m_construction,
@@ -162,18 +172,17 @@ struct str_batiment_core (
 		fn get_toiture_index 			=	mgr_toiture.get_index_courant (),
 		fn get_toiture					=	mgr_toiture.get_courant (),
 		
-		fn get_mgr_surface			= mgr_surface,
-		fn get_mgr_composants 	= mgr_facades.get_mgr_composants (),
-		fn get_mgr_facades	 		= mgr_facades,
-		fn get_mgr_toiture	 		= mgr_toiture,
-			
-		fn get_mgrDatas 				= mgr_datas,
-		fn get_mgrPresets 			= mgr_presets,
-		
 		
 		
 	----- Editeur de facades -----------------
 	public
+		fn facadeEditeur_ouvrir 				_index	=	mgr_facades.ouvrir_dialog 		_index,		
+		fn facadeEditeur_fermer 						=	mgr_facades.fermer_dialog 	(),		
+		fn facadeEditeur_est_ouvert 					= mgr_facades.dialog_estOuvert (),
+		fn set_facadeEditeur_position		_pos 	= mgr_facades.set_dialog_pos  	_pos,
+		
+			
+		/* 
 		fn set_roll_editeurDeFacade_position	_pos 	=( roll_facades_pos = _pos),
 		fn set_roll_editeurDeFacade_taille		_taille 	=( roll_facades_taille = _taille),
 		
@@ -202,41 +211,47 @@ struct str_batiment_core (
 			createDialog 	roll_facades	style:				#(#style_resizing, #style_titlebar, #style_border, #style_sysmenu) 	\
 													pos:					roll_facades_pos		\
 													width:				roll_facades_taille.x	\
-													height:				roll_facades_taille.y	/* \modal:				true \ 
-													escapeEnable:	true */
-			
+													height:				roll_facades_taille.y	
+													
+			local facadeTemp = mgr_facades.get_facade		_index
 			roll_facades.initialiser 		m_plug
-			roll_facades.set_facade 		( mgr_facades.get_parIndex	_index )
+			roll_facades.set_facade 		facadeTemp
 			roll_facades_estOuvert = true
 			m_plug.actualiser_rollouts ()
-		),
+		), 
+		*/
+		
+		/* 
 		fn fermer_toutes_fenetres	query:false = (
 			debug "fermer_toutes_fenetres"
 			facadeEditeur_fermer ()
 		),
-		
+		 */
 		
 		
 	----- Facades----------------------------------
-		fn creer_facade 							=(
-			local nv_facade 	= mgr_facades.creer ()
+		fn creer_facade 			=(
+			local nv_facade 	= mgr_facades.creer_facade ()
 			nv_facade
 		),
 		fn supprimer_facade		_index =(
+			mgr_facades.supprimer		_index
+			
+			/* 
 			local facadeASupprimer = mgr_facades.get_parIndex		_index
 			local confirmation 			= querybox ( "Supprimer "  + facadeASupprimer.nom + " ?" )
 			if confirmation do 
 				mgr_facades.supprimer		_index
-			
+			 */
 			actualiser ()
 		),
 		fn dupliquer_facade		_index =(
-			local facadeDuplique =  creer_facade ()
-			local idNouvelleFacade = facadeDuplique.id
-			local facadeSource= mgr_facades.get_parIndex		_index
-			mgr_facades.dupliquer 	facadeSource cible:facadeDuplique 
-			facadeDuplique.nom += " - copie"
-			facadeDuplique.id = idNouvelleFacade
+			
+			local facadeSource		=	mgr_facades.get_facade_parIndex		_index			
+			local facadeDuplique 	=	mgr_facades.dupliquer_facade 	facadeSource 
+			m_plug.actualiser_rollouts ()
+			
+			facadeDuplique
 		),
 		
 	----- Composants----------------------------------
@@ -302,26 +317,24 @@ struct str_batiment_core (
 			--- maj de la longueur de la sequence ---
 			_facade.update_sequence_longueur ()
 		),
-		fn creer_composant		_facade		_IDmodelCompo		position:	=(
+		fn creer_composant		_facade		_IDconstructeurCompo		position:	=(
 			
 			if position == unsupplied  do position = _facade.sequence.count
--- 			debug"creer_composant"
--- 			debug"position" var:position
 			
 			local mgr_composants 	= get_mgr_composants ()
-			local nv_composant 		= mgr_composants.creer		_IDmodelCompo
+			local nv_composant 		= mgr_composants.creer_composant		_IDconstructeurCompo
 			
 			_facade.ajouter_composant	nv_composant		position:position
 			
 			--- gestion Bacon ----------
 			if nv_composant.type == #balcon do  (
-				local id_baclonFin = mgr_composants.get_model_ID	#balconFin
+				local id_baclonFin = mgr_composants.get_constructeur_ID	#balconFin
 				creer_composant  _facade	 id_baclonFin  position:(position+1)
 			)
 			
 			--- gestion Loggia ----------
 			if nv_composant.type == #loggia do  (
-				local id_loggiaFin = mgr_composants.get_model_ID	#loggiaFin
+				local id_loggiaFin = mgr_composants.get_constructeur_ID	#loggiaFin
 				creer_composant  _facade	 id_loggiaFin  position:(position+1)
 			)
 			
@@ -331,6 +344,8 @@ struct str_batiment_core (
 			
 			nv_composant
 		),
+		
+		
 		
 	----- material ---------------------
 	private
