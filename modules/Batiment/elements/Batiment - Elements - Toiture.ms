@@ -39,9 +39,10 @@ struct 	str_toiture (
 		fn a_desParametres	=	params != undefined,
 		
 		--- Initialisations -----------------------
-		fn initialiser_dialog 	_roll_parent 	=(
-			m_dialog.m_rollPrt		= 	_roll_parent
-			m_dialog.m_compo	=	this
+		fn initialiser_dialog 	_plug 	=(
+			m_dialog.m_plug		= 	_plug
+			m_dialog.m_toiture	=	this
+			m_dialog.mgr_toiture	= _plug.core.get_mgr_toiture ()
 			m_dialog.actualiser()
 		),
 		fn initialiser 		_type	_nom 	=(

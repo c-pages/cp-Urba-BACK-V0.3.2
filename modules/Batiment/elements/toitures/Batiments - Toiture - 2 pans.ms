@@ -46,24 +46,19 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 		spn_debord.value 			= 	m_toiture.params.debord
 		spn_epaisseur.value 		= 	m_toiture.params.epaisseur
 	)
-	fn initialiser _plug	_toiture	=(
-		m_plug			= _plug
-		m_toiture 		= _toiture
-		mgr_toiture	= m_plug.core.get_mgr_toiture ()
-		actualiser ()
-	)
+	
 
 	
 	on spn_pente changed val do
 	(
 			m_toiture.params.pente		= val
-			mgr_toiture.enregistrer ()
+			mgr_toiture.enregistrer_parametres 	m_toiture
 			m_plug.core.actualiser ()
 		)
 	on spn_decallage changed val do
 	(
 			m_toiture.params.decalage_hauteur		= val
-			mgr_toiture.enregistrer ()
+			mgr_toiture.enregistrer_parametres 	m_toiture
 			m_plug.core.actualiser ()
 		)
 	on spn_orientation changed val do
@@ -94,19 +89,19 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 			
 		
 			m_toiture.params.orientation		= val
-			mgr_toiture.enregistrer ()
+			mgr_toiture.enregistrer_parametres 	m_toiture
 			m_plug.core.actualiser ()
 		)
 	on spn_debord changed val do
 	(
 			m_toiture.params.debord		= val
-			mgr_toiture.enregistrer ()
+			mgr_toiture.enregistrer_parametres 	m_toiture
 			m_plug.core.actualiser ()
 		)
 	on spn_epaisseur changed val do
 	(
 			m_toiture.params.epaisseur		= val
-			mgr_toiture.enregistrer ()
+			mgr_toiture.enregistrer_parametres 	m_toiture
 			m_plug.core.actualiser ()
 		)
 	on spn_decallage_larg changed val do
@@ -136,7 +131,7 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 			
 			m_toiture.params.decalage_largeur		= decallage_largeur
 			spn_decallage_larg.value = decallage_largeur
-			mgr_toiture.enregistrer ()
+			mgr_toiture.enregistrer_parametres 	m_toiture
 			actualiser ()
 			m_plug.core.actualiser ()
 		)
@@ -186,7 +181,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 		) */
 		/* 
 		_composant.params.decalage_largeur = decallage_largeur
-		mgr_toiture.enregistrer ()
+		mgr_toiture.enregistrer_parametres ()
 		( _composant.get_dialog () ).actualiser () 
 		*/
 		

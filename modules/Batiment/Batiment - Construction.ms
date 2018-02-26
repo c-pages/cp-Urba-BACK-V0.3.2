@@ -79,7 +79,7 @@ struct str_construction (
 			for facde in _facades /* where  	 facde.sequence.count >0  */do (
 				
 				if  facde.sequence.count >0  do (
-				if facde.sequence_longueur < _mur_longueur do (
+				if facde.get_sequence_longueur () < _mur_longueur do (
 					
 					---- si la facade est limité en longueur min -----
 					if not facde.longueur_min_use or facde.longueur_min_use	 and 	facde.longueur_min < _mur_longueur do (
@@ -407,7 +407,7 @@ struct str_construction (
 			for pt in surface_points do
 				pt.z = z
 			
-			local toiture							=	m_plug.core.get_toiture ()
+			local toiture				=	m_plug.core.get_toiture ()
 			toiture.construire	 	m_plug			surface_points	--	normDir_axeprincipal
 		),		
 		
@@ -421,7 +421,7 @@ struct str_construction (
 		fn actualiser 	 =(
 			
 			debug "actualiser"
-			/* 
+			
 			--- on vide la geametrie ------------
 			m_geo.vider ()
 			
@@ -442,7 +442,7 @@ struct str_construction (
 					
 					---- ...  et on construit le batiment -----
 					creer_ssBassement 			&zCourant
-					creer_etages					&zCourant
+					creer_etages						&zCourant
 					creer_toiture						&zCourant
 					
 				)
@@ -450,7 +450,7 @@ struct str_construction (
 				displayTempPrompt ("Bâtiment construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
 				
 			)
-			 */
+			
 			redrawViews ()
 			
 		)

@@ -104,7 +104,7 @@ parameters params_facades 						rollout:roll_global	(
 	
 	--- Sequence	---
 	fac_sequences					type:#stringTab 	tabSize:0 			tabSizeVariable:true
-	fac_sequence_longueurs		type:#floatTab	 	tabSize:0 			tabSizeVariable:true
+-- 	fac_sequence_longueurs		type:#floatTab	 	tabSize:0 			tabSizeVariable:true
 	
 )
 parameters params_facades_composants 		(
@@ -204,23 +204,24 @@ rollout roll_global "Global" width:162 height:341
 	fn actualiser =(
 		lbx_facades.items 						=  for facadeNom in fac_noms collect facadeNom
 		
-		/* 
+		
 		btn_supprimerFacade.enabled	=	 lbx_facades.selection != 0 
 		btn_editer_facade.enabled			=	 lbx_facades.selection != 0 
-		btn_editer_facade.checked			= 	core.facadeEditeur_est_ouvert ()
-		btn_dupliquer_facade.enabled	=	 lbx_facades.selection != 0 
+		btn_dupliquer_facade.enabled	=	 lbx_facades.selection != 0
+		
+		btn_editer_facade.checked			= 	core.facadeEditeur_estOuvert ()
+		
+-- 		local index_toiture 					= core.get_toiture_index ()
+-- 		ddl_toiture.selection 					= 	index_toiture
 		
 		local mgr_toiture 						= core.get_mgr_toiture ()
-		local index_toiture 					= core.get_toiture_index ()
-		ddl_toiture.selection 					= 	index_toiture
-		
 		btn_editer_toiture.enabled 		= mgr_toiture.a_desParametres		()
 		
-		if index_toiture == 1 then
-			btn_editer_toiture.enabled = false
-		else
-			btn_editer_toiture.enabled = true
-		*/
+-- 		if index_toiture == 1 then
+-- 			btn_editer_toiture.enabled = false
+-- 		else
+-- 			btn_editer_toiture.enabled = true
+		
 		
 	)
 	
@@ -252,7 +253,7 @@ rollout roll_global "Global" width:162 height:341
 	on spn_hauteur changed val do
 		core.actualiser ()
 	on lbx_facades selected val do	(
-			if core.facadeEditeur_est_ouvert () do (
+			if core.facadeEditeur_estOuvert () do (
 -- 				local index_facade_ouverte = ( core.get_mgr_facades () ).get_index_facadeOuverte ()
 -- 				if lbx_facades.selection != index_facade_ouverte do
 					core.facadeEditeur_ouvrir	 	lbx_facades.selection
@@ -260,7 +261,7 @@ rollout roll_global "Global" width:162 height:341
 			actualiser ()
 		)
 	on lbx_facades doubleClicked arg do (
-			if not core.facadeEditeur_est_ouvert () do (
+			if not core.facadeEditeur_estOuvert () do (
 					core.facadeEditeur_ouvrir	 	lbx_facades.selection
 			)
 		)
@@ -278,11 +279,14 @@ rollout roll_global "Global" width:162 height:341
 				core.facadeEditeur_ouvrir	 	lbx_facades.selection
 			)
 	on btn_supprimerFacade pressed do
-	(
-			core.supprimer_facade		lbx_facades.selection
-			lbx_facades.selection  -= 1
-			core.facadeEditeur_fermer ()
-			actualiser ()
+	(		
+			local confirmation 			= querybox ( "Supprimer "  + facadeASupprimer.nom + " ?" )
+			if confirmation do (
+				core.supprimer_facade		lbx_facades.selection
+				lbx_facades.selection  -= 1
+				core.facadeEditeur_fermer ()
+				actualiser ()
+			)
 		)
 	on btn_editer_facade changed state  do
 	(
@@ -294,15 +298,15 @@ rollout roll_global "Global" width:162 height:341
 		)
 	on btn_editer_toiture pressed do
 	(
+			local mgr_toiture = core.get_mgr_toiture()
 			local toiture = core.get_toiture ()
-			local dialog = toiture.get_dialog ()
-			createDialog 	dialog
-			dialog.initialiser 	$	toiture 
+			mgr_toiture.ouvrir_dialog		toiture
+-- 			dialog.initialiser 	$	toiture 
 		)
 	on ddl_toiture selected _val do
 	(
 			local mgr_toiture 			= core.get_mgr_toiture ()
-			mgr_toiture.assigner 	_val
+			mgr_toiture.creer_toiture 	_val
 			core.actualiser ()
 			actualiser ()
 		)

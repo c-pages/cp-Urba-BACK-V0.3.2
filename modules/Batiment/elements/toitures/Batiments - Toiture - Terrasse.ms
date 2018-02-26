@@ -24,16 +24,9 @@ rollout toiture_dialog "Toiture plate" width:180 height:70	(
 		spn_htAcrotere.value 	= 	m_toiture.params.acrotere_ht
 	)
 
-	fn initialiser _plug	_toiture	=(
-		m_plug			= _plug
-		m_toiture 		= _toiture
-		mgr_toiture	= m_plug.core.get_mgr_toiture ()
-		actualiser ()
-	)
-
 	on spn_htAcrotere changed val do (
 		m_toiture.params.acrotere_ht		= val
-		mgr_toiture.enregistrer ()
+		mgr_toiture.enregistrer_parametres 	m_toiture
 		m_plug.core.actualiser ()
 	)
 	

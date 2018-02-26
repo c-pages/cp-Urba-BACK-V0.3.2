@@ -40,8 +40,8 @@ struct 	str_composant (
 		
 		---- Accessions -----------------------
 		fn get_dialog				=	m_dialog,
-		fn a_desParametres		=	params != undefined,
-		fn get_longueur 			=	if ( a_desParametres () ) then params.longueur else 0,
+		fn a_desParametres	=	params != undefined,
+		fn get_longueur 		=	if ( a_desParametres () ) then params.longueur else 0,
 		
 		--- Initialisations -----------------------
 		fn initialiser_dialog 	_roll_parent 	=(
@@ -54,7 +54,6 @@ struct 	str_composant (
 		fn initialiser 		_type	_nom 	=(
 			
 			---- id unique ----
--- 			id += "compo_"
 			for i= 1 to 10 do id += ( random 0 9 ) as string	
 			
 			type 				=	_type 			

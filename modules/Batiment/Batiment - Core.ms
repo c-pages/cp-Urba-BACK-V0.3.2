@@ -84,7 +84,7 @@ struct str_batiment_core (
 		
 		
 	-------- FONCTIONS	--------------------------------------------------------------------------------------------------------
-	private
+/* 	private
 	---- Parametres --------------------
 		fn charger =(
 			
@@ -95,7 +95,7 @@ struct str_batiment_core (
 			mgr_toiture.charger ()
 			
 		),
-		
+		 */
 		
 	-------- INTERFACE	--------------------------------------------------------------------------------------------------------
 	public	
@@ -123,9 +123,6 @@ struct str_batiment_core (
 			mgr_toiture.initialiser				m_plug
 			m_construction.initialiser		m_plug
 			
--- 			--- chargement des parametres ------------------
--- 			charger ()
-			
 		),
 		
 	----- Presets -----------------------
@@ -151,6 +148,7 @@ struct str_batiment_core (
 		
 	----- Accessions -----------------------
 	public
+		---- managers et autres ----------
 		fn get_mgr_surface			= mgr_surface,
 		fn get_mgr_composants 	= mgr_facades.get_mgr_composants (),
 		fn get_mgr_facades	 		= mgr_facades,
@@ -159,18 +157,19 @@ struct str_batiment_core (
 		fn get_mgrDatas 				= mgr_datas,
 		fn get_mgrPresets 			= mgr_presets,
 		
-	public
-		fn get_surface_points		=	mgr_surface.get_points	(),
-		
-		fn get_facade	_index		=	mgr_facades.get_facade		_index,
-		
-		fn get_facades					=	mgr_facades.get_items (),
-		
 		fn get_construction			= m_construction,
 		fn get_geo						= m_construction.m_geo,
 		
-		fn get_toiture_index 			=	mgr_toiture.get_index_courant (),
-		fn get_toiture					=	mgr_toiture.get_courant (),
+		
+	public
+		---- elements de construction	---------------
+		fn get_surface_points				=	mgr_surface.get_points	(),
+		fn get_facade				_index	=	mgr_facades.get_facade		_index,
+		fn get_facades							=	mgr_facades.get_facades (),
+		
+		fn get_toiture_index 		=	mgr_toiture.get_index_courant (),
+		fn get_toiture				=	mgr_toiture.get_toiture (),
+		
 		
 		
 		
@@ -178,55 +177,11 @@ struct str_batiment_core (
 	public
 		fn facadeEditeur_ouvrir 				_index	=	mgr_facades.ouvrir_dialog 		_index,		
 		fn facadeEditeur_fermer 						=	mgr_facades.fermer_dialog 	(),		
-		fn facadeEditeur_est_ouvert 					= mgr_facades.dialog_estOuvert (),
+		fn facadeEditeur_estOuvert 					= mgr_facades.dialog_estOuvert (),
 		fn set_facadeEditeur_position		_pos 	= mgr_facades.set_dialog_pos  	_pos,
 		
-			
-		/* 
-		fn set_roll_editeurDeFacade_position	_pos 	=( roll_facades_pos = _pos),
-		fn set_roll_editeurDeFacade_taille		_taille 	=( roll_facades_taille = _taille),
 		
-		fn get_facadeEditeur_rollout = roll_facades,
-		fn facadeEditeur_est_ouvert = roll_facades_estOuvert,
-		fn facadeEditeur_fermer 		query:roll_facades.m_changement	=(
-			debug "facadeEditeur_fermer"
-			debug "query" var:query
-			
-			if roll_facades_estOuvert do (
-				
-				if query then 
-					if querybox "Enregistrer la façade ?" do (
-						roll_facades.enregistrer ()
-						actualiser ()
-					)
-				
-				destroyDialog 	roll_facades
-				roll_facades_estOuvert = false
-			)
-			m_plug.actualiser_rollouts ()
-		),
-		fn facadeEditeur_ouvrir 	_index	=(
-			if roll_facades_estOuvert do facadeEditeur_fermer ()
--- 			debug "ouvrir_facadeEditeur"
-			createDialog 	roll_facades	style:				#(#style_resizing, #style_titlebar, #style_border, #style_sysmenu) 	\
-													pos:					roll_facades_pos		\
-													width:				roll_facades_taille.x	\
-													height:				roll_facades_taille.y	
-													
-			local facadeTemp = mgr_facades.get_facade		_index
-			roll_facades.initialiser 		m_plug
-			roll_facades.set_facade 		facadeTemp
-			roll_facades_estOuvert = true
-			m_plug.actualiser_rollouts ()
-		), 
-		*/
 		
-		/* 
-		fn fermer_toutes_fenetres	query:false = (
-			debug "fermer_toutes_fenetres"
-			facadeEditeur_fermer ()
-		),
-		 */
 		
 		
 	----- Facades----------------------------------
@@ -236,13 +191,6 @@ struct str_batiment_core (
 		),
 		fn supprimer_facade		_index =(
 			mgr_facades.supprimer		_index
-			
-			/* 
-			local facadeASupprimer = mgr_facades.get_parIndex		_index
-			local confirmation 			= querybox ( "Supprimer "  + facadeASupprimer.nom + " ?" )
-			if confirmation do 
-				mgr_facades.supprimer		_index
-			 */
 			actualiser ()
 		),
 		fn dupliquer_facade		_index =(
@@ -314,8 +262,6 @@ struct str_batiment_core (
 				)
 			)
 			
-			--- maj de la longueur de la sequence ---
-			_facade.update_sequence_longueur ()
 		),
 		fn creer_composant		_facade		_IDconstructeurCompo		position:	=(
 			
@@ -339,8 +285,6 @@ struct str_batiment_core (
 			)
 			
 			
-			--- maj de la longueur de la sequence ---
-			_facade.update_sequence_longueur ()
 			
 			nv_composant
 		),

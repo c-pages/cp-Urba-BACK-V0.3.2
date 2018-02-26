@@ -29,50 +29,47 @@ rollout toiture_dialog "Toiture - 1 pan" width:180 height:115
 	label 'lbl_orientation' "Orientation (°):" pos:[9,42] width:70 height:13 align:#left
 	spinner 'spn_orientation' "" pos:[92,41] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
 	
-	fn actualiser =(
-		spn_pente.value 	= 	m_toiture.params.pente
--- 		edt_nom.text 			=	m_toiture.nom
-	)
-	fn initialiser _plug	_toiture	=(
-		m_plug			= _plug
-		m_toiture 		= _toiture
-		mgr_toiture	= m_plug.core.get_mgr_toiture ()
-		actualiser ()
-	)
-
 	
 	label 'lbl_debord' "Debord" pos:[9,58] width:63 height:13 align:#left
 	spinner 'spn_debord' "" pos:[92,57] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
 	label 'lbl_epaisseur' "Epaisseur" pos:[9,74] width:70 height:13 align:#left
 	spinner 'spn14' "" pos:[92,73] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
+	
+	
+	
+	fn actualiser =(
+		spn_pente.value 	= 	m_toiture.params.pente
+-- 		edt_nom.text 			=	m_toiture.nom
+	)
+
 	on spn_pente changed val do
 	(
 			m_toiture.params.pente		= val
-			mgr_toiture.enregistrer ()
+			mgr_toiture.enregistrer_parametres 	m_toiture
 			m_plug.core.actualiser ()
 		)
 	on spn_decallage changed val do
 	(
 			m_toiture.params.decalage_hauteur		= val
-			mgr_toiture.enregistrer ()
+			mgr_toiture.enregistrer_parametres 	m_toiture
 			m_plug.core.actualiser ()
 		)
 	on spn_orientation changed val do
 	(
 			m_toiture.params.orientation		= val
-			mgr_toiture.enregistrer ()
+			mgr_toiture.enregistrer_parametres 	m_toiture
 			m_plug.core.actualiser ()
 		)
 	on spn_debord changed val do
 	(
 			m_toiture.params.debord		= val
-			mgr_toiture.enregistrer ()
+			mgr_toiture.enregistrer_parametres 	m_toiture
 			m_plug.core.actualiser ()
 		)
 	on spn14 changed val do
 	(
 			m_toiture.params.epaisseur		= val
-			mgr_toiture.enregistrer ()
+			mgr_toiture.enregistrer_parametres 	m_toiture
 			m_plug.core.actualiser ()
 		)
 )
