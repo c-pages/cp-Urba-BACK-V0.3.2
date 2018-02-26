@@ -203,7 +203,7 @@ rollout roll_global "Global" width:162 height:341
 	
 	fn actualiser =(
 		lbx_facades.items 						=  for facadeNom in fac_noms collect facadeNom
-		
+		 
 		
 		btn_supprimerFacade.enabled	=	 lbx_facades.selection != 0 
 		btn_editer_facade.enabled			=	 lbx_facades.selection != 0 
@@ -280,7 +280,7 @@ rollout roll_global "Global" width:162 height:341
 			)
 	on btn_supprimerFacade pressed do
 	(		
-			local confirmation 			= querybox ( "Supprimer "  + facadeASupprimer.nom + " ?" )
+			local confirmation 			= querybox ( "Supprimer "  + lbx_facades.items [lbx_facades.selection ] + " ?" )
 			if confirmation do (
 				core.supprimer_facade		lbx_facades.selection
 				lbx_facades.selection  -= 1
@@ -306,7 +306,8 @@ rollout roll_global "Global" width:162 height:341
 	on ddl_toiture selected _val do
 	(
 			local mgr_toiture 			= core.get_mgr_toiture ()
-			mgr_toiture.creer_toiture 	_val
+			local toiture = mgr_toiture.creer_toiture 	_val
+			mgr_toiture.enregistrer_parametres 	toiture
 			core.actualiser ()
 			actualiser ()
 		)

@@ -86,12 +86,14 @@ rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500
 	button 'btn_ajouter_composant_3' "btn3" pos:[10,138] width:75 height:16 visible:false align:#left
 	button 'btn_ajouter_composant_4' "btn4" pos:[10,153] width:75 height:16 visible:false align:#left
 	button 'btn_ajouter_composant_5' "btn5" pos:[10,168] width:75 height:16 visible:false align:#left
-	button 'btn_ajouter_composant_6' "btn6" pos:[10,182] width:75 height:16 visible:false align:#left
+	button 'btn_ajouter_composant_6' "btn6" pos:[10,183] width:75 height:16 visible:false align:#left
+	button 'btn_ajouter_composant_7' "btn7" pos:[10,198] width:75 height:16 visible:false align:#left
+	button 'btn_ajouter_composant_8' "btn8" pos:[10,213] width:75 height:16 visible:false align:#left
 			
 	button 'btn_valider' "Valider" pos:[10,271] width:78 height:25 toolTip:"Valider la façade" align:#left
 	button 'btn_annuler' "Annuler" pos:[86,271] width:79 height:25 toolTip:"Annuler les changements" align:#left
 			
-		local		btns_ajouter_composant	=#( btn_ajouter_composant_1, btn_ajouter_composant_2, btn_ajouter_composant_3, btn_ajouter_composant_4, btn_ajouter_composant_5, btn_ajouter_composant_6 )
+		local		btns_ajouter_composant	=#( btn_ajouter_composant_1, btn_ajouter_composant_2, btn_ajouter_composant_3, btn_ajouter_composant_4, btn_ajouter_composant_5, btn_ajouter_composant_6 , btn_ajouter_composant_7 , btn_ajouter_composant_8)
 		local 	btns_ids_constructeurs				=#()
 		
 		------------  Fonctions	----------------------------------------------------------------------------------

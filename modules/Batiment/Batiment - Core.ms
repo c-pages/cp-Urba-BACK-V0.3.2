@@ -190,7 +190,7 @@ struct str_batiment_core (
 			nv_facade
 		),
 		fn supprimer_facade		_index =(
-			mgr_facades.supprimer		_index
+			mgr_facades.supprimer_facade		_index
 			actualiser ()
 		),
 		fn dupliquer_facade		_index =(

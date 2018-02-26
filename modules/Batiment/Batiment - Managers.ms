@@ -56,31 +56,32 @@ struct 	str_mgr_toiture (
 		
 	---- parametres du plug -------------------------
 		fn enregistrer_parametres 		_toiture	=(
+-- 			debug"enregistrer_parametres"
 			local mgr_datas = m_plug.core.get_mgrDatas ()
-			m_plug.toiture_type  		=	_toiture.type as name 
+			m_plug.toiture_type  		=	_toiture.type as name
 			m_plug.toiture_params  	=	(	mgr_datas.get_datas_string	_toiture.params	)
+-- 			debug"enregistrer_parametres" var:m_plug.toiture_params 
 		),
 		fn charger_parametres 		_toiture		=(
-			debug "charger_parametres"
 			
 			local mgr_datas 		= m_plug.core.get_mgrDatas ()
 			local string_params	=	copy m_plug.toiture_params 
 			
-			_toiture.type			= m_plug.toiture_type
-			mgr_datas.set_datas_string		string_params  	_toiture.params	
+			_toiture.type				= m_plug.toiture_type
+			mgr_datas.set_datas_string		string_params  		_toiture.params	
 			
 		),
 		
 		
 	------ creation de la toiture ------
 		fn creer_toiture		_idConstructeur	 =(
-			
+-- 			debug "creer_toiture"
 			--- on importe le fichier du struct des composants  (pour avoir accés meme si le plug est pas actif)---
 			include	 "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Toiture.ms"
 			
 			local nvl_toiture= str_toiture () 
 			m_constructeursBase[ _idConstructeur ].initialiser	nvl_toiture
-			enregistrer_parametres 	nvl_toiture
+-- 			enregistrer_parametres 	nvl_toiture
 			
 			nvl_toiture
 			
@@ -123,8 +124,8 @@ struct 	str_mgr_toiture (
 			m_dialog_estOuvert 		= true
 		),
 		fn fermer_dialog 					=(
-				destroyDialog 	m_dialog
-				m_dialog_estOuvert = false
+			destroyDialog 	m_dialog
+			m_dialog_estOuvert = false
 		),
 		fn	set_dialog_taille	_taille 	=	m_dialog_taille 	= _taille,
 		fn	set_dialog_pos		_pos 	=	m_dialog_pos 	= _pos,

@@ -1,7 +1,7 @@
 
 ------ parametres de base	-----------------------------
-compo_titre 		= "Baie"	
-compo_type		=	#baie
+compo_titre 		= "Porte"	
+compo_type		=	#porte
 compo_toolTip 	=	"Ouverture dans un mur."
 
 
@@ -14,15 +14,16 @@ struct compo_params	(
 		profondeur					= 20,
 		
 		allege_hauteur 		 		= 100,
-		allege_use					=	true,
+		allege_use						=	true,
 		
 		menuis_largeur				=	7.,
-		menuis_epaisseur			=	3.,			
+		menuis_epaisseur			=	3.,
+		
 		menuis_divisions			=	0,	
 		menuis_allege_use		=	false,
 		menuis_allege_ht			=	100,
 		menuis_trav_use			=	false,
-		menuis_trav_ht			=	210,			
+		menuis_trav_ht				=	210,			
 		menuis_ouvrant_use		=	true,
 		menuis_double_use		=	true,
 		
@@ -54,6 +55,8 @@ rollout compo_dialog "Baie" width:180 height:532 (
 		checkbutton 'ckb_allege' "" pos:[96,67] width:17 height:17 align:#left
 		label 'lbl29' "Profondeur:" pos:[11,84] width:59 height:13 align:#left
 		spinner 'spn_profondeur' "" pos:[116,83] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
+		
+		
 		
 		GroupBox 'grp_divers' "Divers" pos:[6,254] width:187 height:114 align:#left
 		checkbox 'chk_tablette' "Tablette" pos:[10,269] width:59 height:16 align:#left
@@ -398,10 +401,10 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		ptr_geo.set_matID 	nvlFace	#menuiserie
 		
 		--- la face du fond -----------
--- 		if not menuis_ouvrant_use do (
-		local nvlFace = ptr_geo.face 		#(	pts_ids[5], 	pts_ids[6], 	pts_ids[7],   	pts_ids[8]  )		
-		ptr_geo.set_matID 	nvlFace	#vitrage
--- 		)
+		if not menuis_ouvrant_use do (
+			local nvlFace = ptr_geo.face 		#(	pts_ids[5], 	pts_ids[6], 	pts_ids[7],   	pts_ids[8]  )		
+			ptr_geo.set_matID 	nvlFace	#vitrage
+		)
 		
 		
 		
