@@ -79,19 +79,42 @@ struct  str_manager_parametres (
 			
 			m_constructeursBase
 		),
-		fn get_constructeur_index 		_type =(
+		fn get_constructeur_index 		_typeAChercher 	visibles:false	=(
 			
 			local result = 0
+			local index_bouton = 0			
+			
 			for i = 1 to m_constructeursBase.count  do (
 				local constructeur = m_constructeursBase[i]
-				if constructeur.type  as string   == _type   as string 
-					do result = i
+				if constructeur.est_editable  () do 
+					index_bouton += 1
+				
+				if constructeur.type  as string == _typeAChercher as string do
+					if visibles 	then		result = index_bouton
+									else		result = i
+				
 			)
+			
+			
 			result
 			
 		),
 		
-		
+	/* 	---- boutons ------
+		fn get_constructeur_visi							_typeAChercher		=(
+			local result
+			local index_bouton = 0
+			for i = 1 to m_constructeursBase.count  do (
+				local constructeur = m_constructeursBase[i]
+				if constructeur.est_editable  () do (
+					index_bouton += 1
+					if constructeur.type  as string == _typeAChercher as string
+						do result = index_bouton
+				)
+			)
+			result
+		),
+		 */
 		
 		
 		

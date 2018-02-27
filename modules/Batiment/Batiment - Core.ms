@@ -143,19 +143,12 @@ struct str_batiment_core (
 		fn get_geo						= mgr_construction.m_geo,
 		
 		
-		---- elements de construction	---------------
-	public
-		fn get_surface_points				=	mgr_surface.get_points	(),
-		fn get_facade				_index	=	mgr_facades.get_element_parIndex		_index,
-		fn get_facades							=	mgr_facades.get_elements (),
-		
-		fn get_toiture							=	mgr_toiture.get_elements (),
-		fn get_toiture_index 					=	mgr_toiture.get_constructeur_index 	(get_toiture ()).type,
-		
-		
 		
 	----- Facades----------------------------------
 	public
+		fn get_facade				_index	=	mgr_facades.get_element_parIndex		_index,
+		fn get_facades							=	mgr_facades.get_elements (),
+		
 		fn creer_facade 								= mgr_facades.creer_element enregistrer:true,
 		fn supprimer_facade		_index 		=(
 			mgr_facades.supprimer_element		_index
@@ -264,11 +257,14 @@ struct str_batiment_core (
 			
 			nv_composant
 		),
+		fn get_composants_bouton_index	_type	=		mgr_facCompos.get_constructeur_index		_type	visibles:true,
 		
 		
-		
-	----- Facades----------------------------------
+	---- toiture	---------------
 	public
+		fn get_toiture							=	mgr_toiture.get_elements (),
+		fn get_toiture_index 					=	mgr_toiture.get_constructeur_index 	(get_toiture ()).type,
+
 		fn creer_toiture				_indexConstr				= (
 			mgr_toiture.creer_element 		idConstructeur:_indexConstr 	enregistrer:true
 			actualiser ()
@@ -276,7 +272,14 @@ struct str_batiment_core (
 		
 		
 		
+		
+		
+		
+		
+		
 	----- Surface ---------------------
+	public
+		fn get_surface_points				=	mgr_surface.get_points	(),
 		fn assigner_surface 		_nodeTHIS		_shape 		=(
 			
 -- 			appliquer_material		_nodeTHIS
@@ -298,7 +301,7 @@ struct str_batiment_core (
 			local dialg_facades	=	mgr_facades.ouvrir_dialog 		()
 			local facade_aOuvrir 	= get_facade  		_index
 			debug "facade_aOuvrir" var:facade_aOuvrir
--- 			dialg_facades.set_facade	(  )
+			dialg_facades.set_facade	facade_aOuvrir
 			
 		),
 		fn facadeEditeur_fermer 						=	mgr_facades.fermer_dialog 	(),		
