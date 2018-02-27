@@ -13,38 +13,43 @@ struct str_mgr_elements (
 		fn debug 	_txt  var:	 param:    =	try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix	catch (),
 	------------ DEBUG		-------------------------------------------------------------------------------------------------------------------------
 	
+	
+	
+	
+	
 	------------ MEMBRES	-------------------------------------------------------------------------------------------------------------------------
--- 	private
-	public
+	private
 		m_plug,
 		
 	-------- Les managers des differents éléments du batiment ---------------
-	---- facades	----------
+		---- facades	----------
 		mgr_facades 			= str_manager_parametres (),
 		mgr_facCompos 	= str_manager_parametres (),
 		mgr_facMenuiseries,
 		
-	---- toiture	----------
-		mgr_toiture 		= str_manager_parametres (),
+		---- toiture	----------
+		mgr_toiture 			= str_manager_parametres (),
 		mgr_toitElements,
 		
+		
+		
+		
 	------------ FONCTIONS	-------------------------------------------------------------------------------------------------------------------------
+-- 	private
+	
+	
+	
+	------------ INTERFACE	-------------------------------------------------------------------------------------------------------------------------
 	public	
-	---- facades	----------
-		fn get_facades	=(
-			mgr_facades.get_elements ()
-		),
+		---- facades	----------
+		fn get_facades						=	mgr_facades.get_elements (),
+		fn ajouter_facade					=	mgr_facades.creer_element			enregistrer:true,
+		fn supprimer_facade	_fcd		=	mgr_facades.supprimer_element	_fcd,
 		
+		---- toiture	----------
+		fn get_toiture	=	mgr_facades.get_elements (),
 		
-	---- toiture	----------
-		fn get_toiture =(
-			mgr_facades.get_elements ()
-		),
-		
-		
-		
-		
-	public
+		---- initialiser	 avant utilisation----------
 		fn initialiser _plug =(
 			
 			m_plug = _plug

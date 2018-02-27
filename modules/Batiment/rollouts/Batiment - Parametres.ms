@@ -119,9 +119,8 @@ parameters params_facades_composants 		(
 )
 parameters params_toiture 							(
 	
--- 	toiture_id 						type:#string		default:"TOITURE_UNIQUE"	animatable:false		invisibleInTV:true
-	toiture_type					type:#string 		default:"sans"			animatable:false		invisibleInTV:true
-	toiture_params				type:#string		default:""					animatable:false		invisibleInTV:true /* tabSize:0  		tabSizeVariable:true */
+	toiture_type					type:#string 		default:"sans"		animatable:false		invisibleInTV:true
+	toiture_params				type:#string		default:""				animatable:false		invisibleInTV:true /* tabSize:0  		tabSizeVariable:true */
 	
 )
 

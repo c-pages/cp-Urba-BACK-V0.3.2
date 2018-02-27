@@ -132,9 +132,7 @@ struct str_construction (
 	private
 	
 		fn creer_murPlein		_longueur	 =(
-			local mgr_composants 				=	m_plug.core.get_mgr_composants ()
-			local nvComposant	 				= 	mgr_composants.get_murPlein	()
-			nvComposant.params.longueur 	=	_longueur
+			local nvComposant	 				= 	m_plug.core.get_murPlein _longueur
 			nvComposant
 		),
 		fn creer_dalle	z 	matID:#int_sol		flipNormal:false	=(

@@ -99,28 +99,30 @@ rollout roll_global "Global" width:162 height:341
 	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 align:#left	enabled:false
 	
 	fn actualiser =(
-		/* 
-		lbx_facades.items 						=  for facadeNom in fac_noms collect facadeNom
-		 
 		
-		btn_supprimerFacade.enabled	=	 lbx_facades.selection != 0 
-		btn_editer_facade.enabled			=	 lbx_facades.selection != 0 
-		btn_dupliquer_facade.enabled	=	 lbx_facades.selection != 0
+		lbx_facades.items 						=  for facadeNom in facades_nom collect facadeNom
 		
-		btn_editer_facade.checked			= 	core.facadeEditeur_estOuvert ()
+		btn_supprimerFacade.enabled	=	lbx_facades.selection != 0 
+		btn_editer_facade.enabled			=	lbx_facades.selection != 0 
+		btn_dupliquer_facade.enabled	=	lbx_facades.selection != 0
 		
--- 		local index_toiture 					= core.get_toiture_index ()
--- 		ddl_toiture.selection 					= 	index_toiture
+		btn_editer_facade.checked			=	core.facadeEditeur_estOuvert ()
 		
-		local mgr_toiture 						= core.get_mgr_toiture ()
-		btn_editer_toiture.enabled 		= mgr_toiture.a_desParametres		()
+		
+		local mgr_toiture 						=	core.get_mgr_toiture ()
+		btn_editer_toiture.enabled 		=	mgr_toiture.a_desParametres		()
+		
+		ddl_toiture.items						=	for constr in ( mgr_toiture.get_constructeurs () ) collect constr.titre  
+		
+		local index_toiture 					=	core.get_toiture_index ()
+		ddl_toiture.selection 					= 	index_toiture
 		
 -- 		if index_toiture == 1 then
 -- 			btn_editer_toiture.enabled = false
 -- 		else
 -- 			btn_editer_toiture.enabled = true
 		
-		 */
+		
 	)
 	
 	
@@ -203,12 +205,8 @@ rollout roll_global "Global" width:162 height:341
 			mgr_toiture.ouvrir_dialog		toiture
 -- 			dialog.initialiser 	$	toiture 
 		)
-	on ddl_toiture selected _val do
-	(
-			local mgr_toiture 			= core.get_mgr_toiture ()
-			local toiture = mgr_toiture.creer_toiture 	_val
-			mgr_toiture.enregistrer_parametres 	toiture
-			core.actualiser ()
+	on ddl_toiture selected _val do 	(
+			local toiture = core.creer_toiture 	_val
 			actualiser ()
 		)
 		

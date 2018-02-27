@@ -56,14 +56,11 @@ struct  str_manager_parametres (
 		---- Constructeur	---------------------------------------------------
 	private
 		fn a_constructeurs = (
-			
--- 			debug "a_constructeurs" 
 			local result = m_dossier_constructeurs != undefined 
--- 			debug "a_constructeurs"  var:result
 			result
 		),
 		fn initialiser_constructeurs =(
-			debug "initialiser_constructeurs"
+			
 			if a_constructeurs () do (
 				--- on va chercher les fichiers des assets pour les composants de facades -------------
 				m_constructeursBase =#()
@@ -74,9 +71,16 @@ struct  str_manager_parametres (
 				)
 			)
 		),
-		fn get_constructeur_ID 		_type =(
-			debug "get_constructeur_ID"
-			debug "_type" var:_type
+	public
+		fn get_constructeurs		= (
+			
+			if m_constructeursBase.count == 0 do
+				initialiser_constructeurs ()
+			
+			m_constructeursBase
+		),
+		fn get_constructeur_index 		_type =(
+			
 			local result = 0
 			for i = 1 to m_constructeursBase.count  do (
 				local constructeur = m_constructeursBase[i]
@@ -85,13 +89,6 @@ struct  str_manager_parametres (
 			)
 			result
 			
-		),
-		fn get_constructeurs		= (
-			
-			if m_constructeursBase.count == 0 do
-				initialiser_constructeurs ()
-			
-			m_constructeursBase
 		),
 		
 		
@@ -102,19 +99,21 @@ struct  str_manager_parametres (
 	private
 		--- pour recuperer lindex dans les tableaux de parametre, correspondant a l'element a cet IDUnique	--------
 		fn get_param_index_parIDUnique		_idUnique =(
+			
 			local index 			= 0
 			local param_id 		= m_prefix_nomParametres + "_id" 
-			local param_arrayId_TEMP 	= getProperty	m_plug	  param_id				
-			for i = 1 to param_arrayId_TEMP.count do
-				if param_arrayId_TEMP[i] == _idUnique do
+			local param_arrayId_TEMP 	= getProperty	m_plug	  param_id	
+			
+			for i = 1 to param_arrayId_TEMP.count do 
+				if param_arrayId_TEMP[i] == _idUnique do 
 					index = i
+			
 			index
 		),
 		
 		
 	public
 		fn enregistrer_parametres		_element		=(
-			debug "enregistrer_parametres () "
 			
 			local prop_element_Noms = getPropNames	_element
 			
@@ -208,11 +207,8 @@ struct  str_manager_parametres (
 		
 		
 		
-		
-		
 		---- Creation/Suppression etc. ---------------------------------------------------
-		fn creer_element		idUnique:		idConstructeur:		=(
-			debug "creer_composant"
+		fn creer_element		idUnique:		idConstructeur:		enregistrer:false	=(
 			
 			----------------- Structure d'un élément	------------------------------------------
 			m_classeBase	=	fileIn	 m_fichier_classeBase
@@ -223,7 +219,7 @@ struct  str_manager_parametres (
 			if idConstructeur != unsupplied do (
 				-- si on a un type et non pas un index	de constructeur -------------
 				if classof 	idConstructeur == name or classof idConstructeur == string	do
-					idConstructeur = get_constructeur_ID		idConstructeur			
+					idConstructeur = get_constructeur_index		idConstructeur			
 				if idConstructeur != 0 do
 					m_constructeursBase[ idConstructeur ].initialiser		nvl_element
 			)
@@ -232,16 +228,60 @@ struct  str_manager_parametres (
 			if idUnique != unsupplied do 
 				nvl_element.id = idUnique
 			
+			-- si besoin on enregistre direct sur le plug -----
+			if enregistrer do enregistrer_parametres	nvl_element
+			
 			nvl_element
 			
 		),
+		fn supprimer_element 		_element	=(
+			
+			--- si on a recuperer un index à la place de l'element lui-meme, on va chercher l'élément ---------------------------
+			if classof  _element == integer then
+				_element = this.get_element_parIndex  _element
+			
+			local prop_element_Noms = getPropNames	_element
+			
+			local param_index = 0
+			-- si c'est un tableau de parametres ( donc s'il exite une liste d'IDs )-------------
+			if hasproperty	m_plug	  ( m_prefix_nomParametres + "_id" ) do 			
+				param_index = get_param_index_parIDUnique 		_element.id
+			
+			
+			--- si param deja present, on actualise -------------------
+			for prop_element_Nom in prop_element_Noms do (
+				
+				
+				local prop_element 	= getProperty 	_element  	prop_element_Nom
+				
+				-- si c'est pas une fonction --------------
+				if classof prop_element != MAXScriptFunction do (
+					
+					
+					-- si c'est un tableau de parametres ( donc s'il exite une liste d'IDs )-------------
+					if hasproperty	m_plug	  ( m_prefix_nomParametres + "_id" ) do (
+						
+						debug "prop_element_Nom" var:prop_element_Nom
+						
+						local param_nom 		= m_prefix_nomParametres + "_" + prop_element_Nom					
+						local param_value		= getProperty	m_plug		param_nom
+						
+						
+						deleteItem	param_value	 param_index 
+					)
+					
+				) -- fin if MAXScriptFunction --------
+			) -- fin for prop_element	--------
+		),			
+		
+		
+		
 		
 		
 		
 		
 		---- Accessions	-------------------
 		fn	get_element_parIndex				_index =(
-			debug "get_element_parIndex"
 			
 			local element
 			local params_ids 	= getProperty	m_plug	  ( m_prefix_nomParametres + "_id" )
@@ -258,7 +298,7 @@ struct  str_manager_parametres (
 			element
 		),
 		fn get_element_parIDUnique  		_idUnique	=(
-			debug "get_element_parIDUnique"
+			
 			local result
 			local index_result = 0
 			local params_ids 			= getProperty	m_plug	  ( m_prefix_nomParametres + "_id" )
@@ -268,7 +308,7 @@ struct  str_manager_parametres (
 			result = get_element_parIndex 	index_result
 		),
 		fn get_elements =(
-			debug "get_elements"
+			
 			local result
 			
 			-- si c'est un tableau de parametres ( donc s'il exite une liste d'IDs )-------------
@@ -316,9 +356,30 @@ struct  str_manager_parametres (
 				
 			)
 			
-			
 			result
 		),
+		
+		
+		fn a_desParametres	_index:	=(
+			local result
+			
+			local params_nom 	= m_prefix_nomParametres + "_params"
+			local params
+			
+			-- si c'est un tableau de parametres ( donc s'il exite une liste d'IDs )-------------
+			if hasproperty	m_plug	  ( m_prefix_nomParametres + "_id" ) then (				
+				local params_liste		= getProperty m_plug  	params_nom
+				params						= params_liste[_index ]				
+			) else 	params				= getProperty m_plug  	params_nom
+			
+			result = params != ""
+			
+			result
+			
+		),
+		
+		
+		
 		
 		
 		
@@ -334,6 +395,7 @@ struct  str_manager_parametres (
 				
 				m_dialog.initialiser 		m_plug		
 				m_dialog_estOuvert 		= true
+				m_dialog
 			)
 		),
 		fn fermer_dialog 			=(

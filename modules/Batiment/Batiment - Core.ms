@@ -32,7 +32,9 @@
 --- inculsion des fichiers externes	------------------------------
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Divers.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Construction.ms"
-include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Managers.ms"
+-- include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Managers.ms"
+include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager Surface.ms"
+include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager Parametres.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - presets.ms"
 
 
@@ -54,68 +56,58 @@ struct str_batiment_core (
 	
 	-------- MEMBRES	--------------------------------------------------------------------------------------------------------
 	public
-		version_du_plugin = "V0.11",
-		
-		mgr_elements = str_mgr_elements(),
-		
+		version_du_plugin = "V0.11",		
 		
 	private
 	---- pointeur  vers le plugin --------------------
 		m_plug,	
 		
-		/* 
-		---  Managers des Eléments du batiments -------------------	
-		mgr_surface			= str_mgr_surfaces (),
-		mgr_facades			= str_mgr_facades (),	
-		mgr_toiture			= str_mgr_toiture (),
-		 */
+	--------  managers divers ---------------
 		---- convertisseur Parametres to String  -------------
-		mgr_datas 			= str_datasToString 	m_prt:this,
+		mgr_datas 				= str_datasToString 	m_prt:this,
 		
 		---- les presets (chargement et enregistrement des parametres dans un fichier -----------------
-		mgr_presets			= str_presets_batiment  fichier_dossier:		"$userScripts\cp-Urba\lib\\" 	\
-																		fichier_categorie:	"Urba_batiment"\
-																		fichier_extension:	"bati",
-		/* 
-		---  Rollouts Facade -------------------
-		roll_facades 				= 	filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout facade.ms",
-		roll_facades_estOuvert = false,
-		roll_facades_pos		= [700,200],
-		roll_facades_taille		= [500,500],
-		 */
-		--- construction de la geometrie  -------------------
-		m_construction			= str_construction 	(),
+		mgr_presets				= str_presets_batiment  fichier_dossier:		"$userScripts\cp-Urba\lib\\" 	\
+																			fichier_categorie:	"Urba_batiment"\
+																			fichier_extension:	"bati",
 		
+		--- construction de la geometrie  -------------------
+		mgr_construction		= str_construction 	(),
+		
+	-------- Les managers des differents éléments du batiment ---------------
+		---- facades	----------
+		mgr_facades 				= str_manager_parametres (),
+		mgr_facCompos 		= str_manager_parametres (),
+		mgr_facMenuiseries,
+		
+		---- toiture	----------
+		mgr_toiture 				= str_manager_parametres (),
+		mgr_toitElements,
+		
+		--- surface -----
+		mgr_surface				= str_mgr_surfaces (),
 		
 	-------- FONCTIONS	--------------------------------------------------------------------------------------------------------
-/* 	private
-	---- Parametres --------------------
-		fn charger =(
-			
-			debug "charger"
-			
-			--- les parametres à charger --------
-			mgr_facades.charger ()
-			mgr_toiture.charger ()
-			
-		),
-		 */
+-- private
+		
+		
+		
 		
 	-------- INTERFACE	--------------------------------------------------------------------------------------------------------
-	public	
-		
 	----- Actualiser  -----------------------
+	public
 		fn actualiser =(
-			/* 
+			
 			---- on actualise la surface ----
 			mgr_surface.actualiser ()
 			
 			---- on consrtuit ----
-			m_construction.actualiser ()
-			 */
+			mgr_construction.actualiser ()
+			
 		),		
 		
 	----- Presets -----------------------
+	public
 		fn preset_enregistrer  =(
 			mgr_presets.enregistrer	 m_plug
 		),
@@ -136,51 +128,37 @@ struct str_batiment_core (
 		),
 		
 		
-	----- Accessions -----------------------
-	public
+	----- Accessions ---------------------------------------------------------------------------------------------
 		---- managers et autres ----------
+	public
 		fn get_mgr_surface			= mgr_surface,
-		fn get_mgr_composants 	= mgr_facades.get_mgr_composants (),
+		fn get_mgr_composants 	= mgr_facCompos,
 		fn get_mgr_facades	 		= mgr_facades,
 		fn get_mgr_toiture	 		= mgr_toiture,
 		
 		fn get_mgrDatas 				= mgr_datas,
 		fn get_mgrPresets 			= mgr_presets,
 		
-		fn get_construction			= m_construction,
-		fn get_geo						= m_construction.m_geo,
+		fn get_construction			= mgr_construction,
+		fn get_geo						= mgr_construction.m_geo,
 		
 		
-	public
 		---- elements de construction	---------------
-		fn get_surface_points				=	mgr_surface.get_points	(),
-		fn get_facade				_index	=	mgr_facades.get_facade		_index,
-		fn get_facades							=	mgr_facades.get_facades (),
-		
-		fn get_toiture_index 		=	mgr_toiture.get_index_courant (),
-		fn get_toiture				=	mgr_toiture.get_toiture (),
-		
-		
-		
-		
-	----- Editeur de facades -----------------
 	public
-		fn facadeEditeur_ouvrir 				_index	=	mgr_facades.ouvrir_dialog 		_index,		
-		fn facadeEditeur_fermer 						=	mgr_facades.fermer_dialog 	(),		
-		fn facadeEditeur_estOuvert 					= mgr_facades.dialog_estOuvert (),
-		fn set_facadeEditeur_position		_pos 	= mgr_facades.set_dialog_pos  	_pos,
+		fn get_surface_points				=	mgr_surface.get_points	(),
+		fn get_facade				_index	=	mgr_facades.get_element_parIndex		_index,
+		fn get_facades							=	mgr_facades.get_elements (),
 		
-		
+		fn get_toiture							=	mgr_toiture.get_elements (),
+		fn get_toiture_index 					=	mgr_toiture.get_constructeur_index 	(get_toiture ()).type,
 		
 		
 		
 	----- Facades----------------------------------
-		fn creer_facade 			=(
-			local nv_facade 	= mgr_facades.creer_facade ()
-			nv_facade
-		),
-		fn supprimer_facade		_index =(
-			mgr_facades.supprimer_facade		_index
+	public
+		fn creer_facade 								= mgr_facades.creer_element enregistrer:true,
+		fn supprimer_facade		_index 		=(
+			mgr_facades.supprimer_element		_index
 			actualiser ()
 		),
 		fn dupliquer_facade		_index =(
@@ -191,8 +169,16 @@ struct str_batiment_core (
 			
 			facadeDuplique
 		),
+		fn get_murPlein  _longueur 	= (
+			local murTemp = mgr_facCompos.creer_element  idConstructeur:#mur
+			murTemp.params.longueur 	=	_longueur
+			murTemp
+		),
+		
+		
 		
 	----- Composants----------------------------------
+	public
 		fn supprimer_composant 	_facade		_index =(
 			
 			local supprimer_balconFin 		= false
@@ -281,39 +267,19 @@ struct str_batiment_core (
 		
 		
 		
-	----- material ---------------------
-	private
-		fn creer_material =(
-			local matID 				= ( include "$userScripts\cp-Urba\Modules\Batiment\Batiment - material IDs.ms" )
-			local matIDs_noms	= getPropNames  	matID
-			local ids 					= for   matID_nom in matIDs_noms collect ( 	getproperty matID	matID_nom )
-			local materials 			= #()
-			for   i = 1 to matIDs_noms.count	 do(
-				local matID_nom	=	matIDs_noms[i]
-				local val_color 		= 30*i + 30
-				local variante 		= 40
-				append materials    ( CoronaMtl nom:matID_nom  colorDiffuse:[ val_color + random -variante variante  ,  val_color + random -variante variante , val_color   + random -variante variante  ] )				
-			)
-			
-			local nvMat 					= multimaterial  	numsubs:0 --matIDs_noms.count
-			nvMat.names 				= matIDs_noms
-			nvMat.materialIDList		= ids
-			nvMat.materialList			= materials
-			
-			nvMat
+	----- Facades----------------------------------
+	public
+		fn creer_toiture				_indexConstr				= (
+			mgr_toiture.creer_element 		idConstructeur:_indexConstr 	enregistrer:true
+			actualiser ()
 		),
-	public 
-		fn appliquer_material 	_this		=(
-			local nvMat = creer_material ()
-			_this.material = nvMat
-			nvMat
-		),
+		
 		
 		
 	----- Surface ---------------------
 		fn assigner_surface 		_nodeTHIS		_shape 		=(
 			
-			appliquer_material		_nodeTHIS
+-- 			appliquer_material		_nodeTHIS
 			
 			_nodeTHIS.transform = _shape.transform
 			mgr_surface.assigner		_shape
@@ -323,34 +289,56 @@ struct str_batiment_core (
 		),
 		
 		
+		
+		
+		
+	----- rollout	Editeur de  facades -----------------
+	public
+		fn facadeEditeur_ouvrir 				_index	=	(
+			local dialg_facades	=	mgr_facades.ouvrir_dialog 		()
+			local facade_aOuvrir 	= get_facade  		_index
+			debug "facade_aOuvrir" var:facade_aOuvrir
+-- 			dialg_facades.set_facade	(  )
+			
+		),
+		fn facadeEditeur_fermer 						=	mgr_facades.fermer_dialog 	(),		
+		fn facadeEditeur_estOuvert 					= mgr_facades.dialog_estOuvert (),
+		fn set_facadeEditeur_position		_pos 	= mgr_facades.set_dialog_pos  	_pos,
+		
+		
+		
+		
+		
+		
+		
 	----- Initialisation  -----------------------
 		fn initialiser 		_plug		= (
 			
 			debug "initialiser"
 			
-			m_plug = 	_plug			
+			m_plug = 	_plug
 			
-			
-			mgr_elements.initialiser _plug
-			
-			/* 
-			---- initialisation des structures -----
+			---- initialisation des managers -----
 			mgr_surface.initialiser			m_plug
-			mgr_facades.initialiser			m_plug
-			mgr_toiture.initialiser				m_plug
-			m_construction.initialiser		m_plug
-			*/
-			/* 
-			mgr_facades_test.initialiser 	plug:m_plug					\
-														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Facade.ms" )	\
-														fichier_dialog:				( "Batiment - rollout facade.ms" )		\
-														prefix_nomParametres:	"facades"
+			mgr_construction.initialiser		m_plug			
 			
--- 			mgr_facades_test.initialiser 	plug:m_plug					\
--- 														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant de facade.ms" )	\
--- 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\composants de facade\\" )					\
--- 														prefix_nomParametres:	"facCompos"
-			 */
+			mgr_facades.initialiser 		plug:m_plug					\
+													fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Facade.ms" )	\
+													fichier_dialog:				( "Batiment - rollout facade.ms" )		\
+													prefix_nomParametres:	"facades"
+			
+			mgr_facCompos.initialiser 	plug:m_plug					\
+													fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant de facade.ms" )	\
+													dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\composants de facade\\" )					\
+													prefix_nomParametres:	"facCompos"
+			
+			mgr_toiture.initialiser 		plug:m_plug					\
+													fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Toiture.ms")	\
+													dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\"  )					\
+													fichier_dialog:				( "Batiment - rollout toiture.ms" )		\
+													prefix_nomParametres:	"toiture" 
+			
+			
 		)
 		
 )  ---- fin batiment core -------------------------
