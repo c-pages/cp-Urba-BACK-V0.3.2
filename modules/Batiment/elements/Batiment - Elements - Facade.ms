@@ -21,27 +21,27 @@ struct 	str_facade (
 	---------- MEMBRES	--------------------------------------------------------------------------------------
 	public
 		---- Base	-----------
-		nom 							=	"Façade",
-		id								=	"",
-		mode						=	1,					---- ( 1:repeter	2:etrier			3:centrer )	----
+		nom 						=	"Façade",
+		id							=	"",
+		mode					=	1,					---- ( 1:repeter	2:etrier			3:centrer )	----
 		
 		--- Limiteurs - Murs	---
-		murs							=	1,					---- ( 1:les deux	2:gouttereaux	3:pignons )	----
+		murs						=	1,					---- ( 1:les deux	2:gouttereaux	3:pignons )	----
 		
 		--- Limiteurs - Etages	---
 		etagesMin_use		=	false,
 		etagesMin				= 	0,
-		etagesMax_use			=	false,
-		etagesMax			=	0,
+		etagesMax_use		=	false,
+		etagesMax				=	0,
 		
 		--- Limiteurs - longueurs	---
 		longueurMin_use	=	false,
-		longueurMin		= 	0,
+		longueurMin			= 	0,
 		longueurMax_use	=	false,
-		longueurMax		=	0,
+		longueurMax			=	0,
 		
 		--- Sequence	---
-		sequence					=	#(),
+		sequence				=	#(),
 		
 		
 	---------- INTERFACE	--------------------------------------------------------------------------------------

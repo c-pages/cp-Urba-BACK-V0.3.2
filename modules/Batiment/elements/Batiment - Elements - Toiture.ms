@@ -6,17 +6,20 @@
 struct 	str_toiture (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+	private
 		m_debug = true,
 		m_dbgPrefix ="urba | str_toiture",
 		fn debug 	_txt  var:	 param:    =(
 			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 			catch ()
 		),
-		
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+	
+	
 	------ Membres ------------------------------------------------------------------------------
 	public
 		---- Parametres -----------------------------------
-		nom					=	"",
+-- 		nom					=	"",
 		type					=	undefined,
 		params				=	undefined,
 		

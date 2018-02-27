@@ -32,7 +32,6 @@
 --- inculsion des fichiers externes	------------------------------
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Divers.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Construction.ms"
-include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager Generale.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Managers.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - presets.ms"
 
@@ -57,19 +56,19 @@ struct str_batiment_core (
 	public
 		version_du_plugin = "V0.11",
 		
-		mgr_facades_test = str_manager_parametres_univ(),
+		mgr_elements = str_mgr_elements(),
 		
 		
 	private
 	---- pointeur  vers le plugin --------------------
 		m_plug,	
 		
-		
+		/* 
 		---  Managers des Eléments du batiments -------------------	
 		mgr_surface			= str_mgr_surfaces (),
 		mgr_facades			= str_mgr_facades (),	
 		mgr_toiture			= str_mgr_toiture (),
-		
+		 */
 		---- convertisseur Parametres to String  -------------
 		mgr_datas 			= str_datasToString 	m_prt:this,
 		
@@ -285,7 +284,7 @@ struct str_batiment_core (
 	----- material ---------------------
 	private
 		fn creer_material =(
-			local matID 				= fileIn "$userScripts\cp-Urba\Modules\Batiment\Batiment - material IDs.ms"
+			local matID 				= ( include "$userScripts\cp-Urba\Modules\Batiment\Batiment - material IDs.ms" )
 			local matIDs_noms	= getPropNames  	matID
 			local ids 					= for   matID_nom in matIDs_noms collect ( 	getproperty matID	matID_nom )
 			local materials 			= #()
@@ -330,6 +329,10 @@ struct str_batiment_core (
 			debug "initialiser"
 			
 			m_plug = 	_plug			
+			
+			
+			mgr_elements.initialiser _plug
+			
 			/* 
 			---- initialisation des structures -----
 			mgr_surface.initialiser			m_plug
@@ -337,20 +340,17 @@ struct str_batiment_core (
 			mgr_toiture.initialiser				m_plug
 			m_construction.initialiser		m_plug
 			*/
-			
 			/* 
 			mgr_facades_test.initialiser 	plug:m_plug					\
 														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Facade.ms" )	\
-														dossier_constructeurs:		""				\
-														dialog:							( filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout facade.ms" )		\
+														fichier_dialog:				( "Batiment - rollout facade.ms" )		\
 														prefix_nomParametres:	"facades"
-			*/
-			mgr_facades_test.initialiser 	plug:m_plug					\
-														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant de facade.ms" )	\
-														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\composants de facade\\" )					\
-														dialog:							""				\
-														prefix_nomParametres:	"facCompos"
 			
+-- 			mgr_facades_test.initialiser 	plug:m_plug					\
+-- 														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant de facade.ms" )	\
+-- 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\composants de facade\\" )					\
+-- 														prefix_nomParametres:	"facCompos"
+			 */
 		)
 		
 )  ---- fin batiment core -------------------------
