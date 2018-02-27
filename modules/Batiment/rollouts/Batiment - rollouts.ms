@@ -51,7 +51,9 @@ parameters params_constantes 							(
 	const_murExt_epaisseur				type: #float 				default:30.	animatable:false		invisibleInTV:true
 	const_ssBassement_epaisseur	type: #float 				default:100.	animatable:false		invisibleInTV:true
 	const_couvertine_epaisseur		type: #float 				default:5.		animatable:false		invisibleInTV:true
-
+	const_menuiseries_epaisseur		type: #float 				default:4.		animatable:false		invisibleInTV:true
+	const_menuiseries_largeur			type: #float 				default:5.		animatable:false		invisibleInTV:true
+	
 )
 parameters params_optimSurface				rollout:roll_optimSurface	(
 	
@@ -76,55 +78,50 @@ parameters params_viewport					rollout:roll_viewport	(
 	affiche_surface				type:#boolean			default:false	ui:ckb_surface			animatable:false		invisibleInTV:true
 	affiche_gouttereaux		type:#boolean			default:false	ui:ckb_gouttereaux	animatable:false		invisibleInTV:true
 	affiche_pignons				type:#boolean			default:false	ui:ckb_pignons			animatable:false		invisibleInTV:true
-	affiche_ssSurfaces			type:#boolean			default:false	ui:ckb_ssSurfaces		animatable:false		invisibleInTV:true	
+	affiche_ssSurfaces		type:#boolean			default:false	ui:ckb_ssSurfaces		animatable:false		invisibleInTV:true	
 	affiche_geometrie			type:#boolean			default:false	ui:ckb_geometrie		animatable:false		invisibleInTV:true
 	
 )
 parameters params_facades 						rollout:roll_global	(
 	
 	---- générale -----------
-	fac_ids 								type:#stringTab 	tabSize:0  		tabSizeVariable:true
-	fac_noms 							type:#stringTab 	tabSize:0  		tabSizeVariable:true		--ui:lbx_facades	
+	facades_id 							type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facades_nom 						type:#stringTab 	tabSize:0  		tabSizeVariable:true		--ui:lbx_facades	
 	
 	--- Limiteurs - Etages	---
-	fac_etagesMin_uses			type:#boolTab		tabSize:0 			tabSizeVariable:true
-	fac_etagesMin					type:#intTab			tabSize:0 			tabSizeVariable:true
-	fac_etagesMax_uses			type:#boolTab		tabSize:0 			tabSizeVariable:true
-	fac_etagesMax					type:#intTab			tabSize:0 			tabSizeVariable:true
+	facades_etagesMin_use		type:#boolTab		tabSize:0 			tabSizeVariable:true
+	facades_etagesMin				type:#intTab			tabSize:0 			tabSizeVariable:true
+	facades_etagesMax_use		type:#boolTab		tabSize:0 			tabSizeVariable:true
+	facades_etagesMax				type:#intTab			tabSize:0 			tabSizeVariable:true
 	
 	--- Limiteurs - longueurs	---
-	fac_longueurMin_uses		type:#boolTab		tabSize:0 			tabSizeVariable:true
-	fac_longueurMin				type:#floatTab		tabSize:0 			tabSizeVariable:true
-	fac_longueurMax_uses		type:#boolTab		tabSize:0 			tabSizeVariable:true
-	fac_longueurMax				type:#floatTab		tabSize:0 			tabSizeVariable:true
+	facades_longueurMin_use		type:#boolTab		tabSize:0 			tabSizeVariable:true
+	facades_longueurMin				type:#floatTab		tabSize:0 			tabSizeVariable:true
+	facades_longueurMax_use	type:#boolTab		tabSize:0 			tabSizeVariable:true
+	facades_longueurMax			type:#floatTab		tabSize:0 			tabSizeVariable:true
 	
 	--- Limiteurs - Murs	---
-	fac_murs							type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:les deux	2:gouttereaux	3:pignons )	----
-	fac_modes							type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:repeter	2:etrier			3:centrer )	----
+	facades_murs						type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:les deux	2:gouttereaux	3:pignons )	----
+	facades_mode						type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:repeter	2:etrier			3:centrer )	----
 	
 	--- Sequence	---
-	fac_sequences					type:#stringTab 	tabSize:0 			tabSizeVariable:true
--- 	fac_sequence_longueurs		type:#floatTab	 	tabSize:0 			tabSizeVariable:true
+	facades_sequence					type:#stringTab 	tabSize:0 			tabSizeVariable:true
+	
 	
 )
 parameters params_facades_composants 		(
 	
 	---- les composants de facades -----------
-	fac_compos_ids 				type:#stringTab 	tabSize:0  		tabSizeVariable:true
-	fac_compos_noms 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
-	fac_compos_types 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
-	fac_compos_params			type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facCompos_id 				type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facCompos_nom 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facCompos_type 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facCompos_params		type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	
 )
 parameters params_toiture 							(
-	toiture_type						type:#string 		 default:"sans"	 		 	animatable:false		invisibleInTV:true
-	toiture_params					type:#string	 				animatable:false		invisibleInTV:true /* tabSize:0  		tabSizeVariable:true */
+	toiture_type						type:#string 		default:"sans"	animatable:false		invisibleInTV:true
+	toiture_params					type:#string		default:""			animatable:false		invisibleInTV:true /* tabSize:0  		tabSizeVariable:true */
 	
-	/* 
-	toit_pente			type: #float 				default:20		ui:spn_pente					animatable:false		invisibleInTV:true
-	toit_hauteur			type: #float 				default:20.	ui:spn_toit_hauteur		animatable:false		invisibleInTV:true
-	toit_orientation		type:#float				default:0.											animatable:false		invisibleInTV:true
-	*/
 	
 )
 
@@ -202,6 +199,7 @@ rollout roll_global "Global" width:162 height:341
 	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 align:#left	enabled:false
 	
 	fn actualiser =(
+		/* 
 		lbx_facades.items 						=  for facadeNom in fac_noms collect facadeNom
 		 
 		
@@ -222,15 +220,17 @@ rollout roll_global "Global" width:162 height:341
 -- 		else
 -- 			btn_editer_toiture.enabled = true
 		
-		
+		 */
 	)
 	
 	
 	
 	fn initialiser =(
+		/* 
 		local mgr_toiture 			= core.get_mgr_toiture ()
 		local models_toiture 		= mgr_toiture.get_constructeurs ()
 		ddl_toiture.items 		=  ( for  model in models_toiture collect model.titre )
+		 */
 	)
 	
 

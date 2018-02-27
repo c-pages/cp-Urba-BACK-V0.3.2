@@ -9,6 +9,7 @@
 struct 	str_facade (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+	private
 		m_debug = true,
 		m_dbgPrefix ="urba | str_facade",
 		fn debug 	_txt  var:	 param:    =(
@@ -28,16 +29,16 @@ struct 	str_facade (
 		murs							=	1,					---- ( 1:les deux	2:gouttereaux	3:pignons )	----
 		
 		--- Limiteurs - Etages	---
-		etages_min_use		=	false,
-		etages_min				= 	0,
-		etages_max_use			=	false,
-		etages_max			=	0,
+		etagesMin_use		=	false,
+		etagesMin				= 	0,
+		etagesMax_use			=	false,
+		etagesMax			=	0,
 		
 		--- Limiteurs - longueurs	---
-		longueur_min_use	=	false,
-		longueur_min		= 	0,
-		longueur_max_use	=	false,
-		longueur_max		=	0,
+		longueurMin_use	=	false,
+		longueurMin		= 	0,
+		longueurMax_use	=	false,
+		longueurMax		=	0,
 		
 		--- Sequence	---
 		sequence					=	#(),

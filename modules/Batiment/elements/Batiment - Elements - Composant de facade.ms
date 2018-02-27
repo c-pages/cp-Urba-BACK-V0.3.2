@@ -6,12 +6,14 @@
 struct 	str_composant (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+	private
 		m_debug = true,
 		m_dbgPrefix ="urba | str_composant",
 		fn debug 	_txt  var:	 param:    =(
 			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 			catch ()
 		),
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 		
 		
 		
