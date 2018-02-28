@@ -212,10 +212,189 @@ rollout compo_dialog "Baie" width:433 height:621
 	
 ------ la fonction de construction	---------
 fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConstruitLaDalle:false	= ( 
-_ptsIDs_accroche
+		--- Result -------------
+		local pt_result_1, pt_result_2, pt_result_3
+	
+	
+	-------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
+		local ptr_plug				= 	_plug
+		local ptr_composant  	= 	_composant
+		local ptr_params		  	= 	_composant.params
+		local ptr_geo 				= 	ptr_plug.core.get_geo ()
+	
+	-------------  constantes locales			-----------------------------------------------------------------------------------------------------------------
+		local decalage_epaisseur 		= 1
+		local menuis_largeur				=	ptr_plug.const_menuiseries_largeur
+		local menuis_epaisseur			=	ptr_plug.const_menuiseries_epaisseur
+		local menuis_allege_ht			=	ptr_plug.const_menuiseries_allege_ht
+		local menuis_trav_ht				=	ptr_plug.const_menuiseries_trav_ht
+	
+	-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
+		local longueur						= ptr_params.longueur
+		local hauteur						= ptr_params.hauteur
+		local profondeur					= ptr_params.profondeur		
+		local allege_hauteur 		 		= ptr_params.allege_hauteur
+		local	etage_hauteur				=	ptr_plug.etages_hauteur 
+		local	retombe						= etage_hauteur - (allege_hauteur + hauteur ) 
+	
+	
+		--- Vecteurs directeurs ------------
+		local vec_ep_dalle 	= [0,0,1] 		* 	ptr_plug.const_dalle_epaisseur		
+		local vec_allege 		= 	[0,0,1] 		*	allege_hauteur
+		local vec_rtmb 			= [0,0,1] 		*	retombe
+		local norm_prof			= _normDir 	* rotateZ ( matrix3 1 ) 90				
+		local vec_ht 				= 	[0,0,1] * 	 hauteur				
+		local vec_longueur 	= _normDir * longueur
+		local norm_prof			= _normDir * rotateZ ( matrix3 1 ) 90
+		local vec_prof			=  norm_prof * profondeur
+		
+		--- Points d'accroche ------------
+		local id_ptAccroche_1 	= _ptsIDs_accroche[1]
+		local id_ptAccroche_2 	= _ptsIDs_accroche[2]
+		local id_ptAccroche_3 	= _ptsIDs_accroche[3]
+		
+		local ptAccroche_1		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	
+		local ptAccroche_2		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	
+		local ptAccroche_3		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	
+		
+		
+	-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
+		
+		---- LA DALLE  -----------------------------------------------------------------------			
+		-------	Creation des points 	--------
+		local pt_2 		= ptAccroche_1		+ 	vec_longueur
+		local pt_3 		= pt_2					+	vec_ep_dalle
+		
+		--- creation des points --------------
+		local pts_pos 	= #( pt_2, pt_3 )
+		local pts_ids 	= ptr_geo.points 	pts_pos		
+		
+		-------	Creation des faces 	--------
+		if onConstruitLaDalle do (
+			local nvlFace = ptr_geo.face 		#(	 id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2	)		
+			ptr_geo.set_matID 	nvlFace	#mur
+		)
+		
+		--- Result -------------
+		pt_result_1 = pts_ids[1]
+		pt_result_2 = pts_ids[2]
+		
+		
+		
+		---- LA BAIE -----------------------------------------------------------------------				
+		-------	Creation des points 	--------
+		--- mur d'allege ----
+		local pt_bas 	= ptAccroche_2
+		local pt_ht 	= ptAccroche_3
+		
+		local pt_1 		= pt_bas	+  vec_longueur
+		local pt_2 		= pt_1		+  vec_allege + [0,0,decalage_epaisseur]
+		local pt_3 		= pt_bas	+ 	vec_allege + [0,0,decalage_epaisseur]
+		
+		local pt_4 		= pt_bas	+ 	vec_ht
+		local pt_5 		= pt_4		+ 	vec_longueur				
+		local pt_6 		= pt_ht		+ 	vec_longueur
+		local pt_7 		= pt_3		+ 	vec_prof
+		local pt_8 		= pt_2		+ 	vec_prof
+		local pt_9 		= pt_5		+ 	vec_prof
+		local pt_10		= pt_4		+ 	vec_prof
+		
+		--- creation des points --------------
+		local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8, pt_9, pt_10 )
+		local pts_ids 	= ptr_geo.points 	pts_pos	
+		
+		--- Result -------------
+		pt_result_3 = pts_ids[6]
+		
+		
+		----- pour plus tard, ...  le raccord avec les menuiseries, et return -----
+		local ids_pts_racc_menuis =#(pts_ids[7], pts_ids[8], pts_ids[9], pts_ids[10])
+		
+		-------	Creation des faces 	--------
+		local nvlFace = ptr_geo.face 		#(	id_ptAccroche_2, 	pts_ids[1], 		pts_ids[2], 		pts_ids[3] )		 
+		ptr_geo.set_matID 	nvlFace	#mur 	
+		
+		local nvlFace = ptr_geo.face 		#(	pts_ids[3], 		pts_ids[2], 		pts_ids[8] , 	pts_ids[7] )		 	
+		if  onConstruitLaDalle	then		ptr_geo.set_matID 	nvlFace	#menuiserie
+										else 		ptr_geo.set_matID 	nvlFace	#mur
+		
+		local nvlFace = ptr_geo.face 		#(	pts_ids[10], 	pts_ids[9], 		pts_ids[5], 		pts_ids[4] )
+		ptr_geo.set_matID 	nvlFace	#mur
+		
+		local nvlFace = ptr_geo.face 		#(	pts_ids[4], 		pts_ids[5], 		pts_ids[6], 		id_ptAccroche_3 )
+		ptr_geo.set_matID 	nvlFace	#mur
+		
+		local nvlFace = ptr_geo.face 		#(	pts_ids[3], 		pts_ids[7], 		pts_ids[10],   	pts_ids[4] )
+		ptr_geo.set_matID 	nvlFace	#mur
+		
+		local nvlFace = ptr_geo.face 		#(	pts_ids[8], 		pts_ids[2], 		pts_ids[5],   	pts_ids[9] )
+		ptr_geo.set_matID 	nvlFace	#mur
+		
+		
+		
+		
+		--- CADRE MENUISERIE ----------------------------------------------------------------------------------------------------------------		
+		
+		local vec_men_ep			= norm_prof		*	menuis_epaisseur
+		local vec_men_lrg			=	_normDir		*	menuis_largeur
+		local vec_men_ht				=	[0,0,1] 		*	menuis_largeur
+		local vec_men_allegeHt	=	[0,0,1] 			*	menuis_allege_ht
+		local vec_men_travHt		=	[0,0,1] 		*	menuis_trav_ht
+		
+		-------	Placement des points 	--------
+		local pt_A	= ptr_geo.get_vertex	ids_pts_racc_menuis[1]		
+		local pt_B	= ptr_geo.get_vertex	ids_pts_racc_menuis[2]		
+		local pt_C	= ptr_geo.get_vertex	ids_pts_racc_menuis[3]		
+		local pt_D	= ptr_geo.get_vertex	ids_pts_racc_menuis[4]
+		
+		local pt_1		= pt_A		+ 	vec_men_lrg 	
+		local pt_2		= pt_B		- 	vec_men_lrg 	
+		local pt_3		= pt_C		- 	vec_men_lrg 	- 	vec_men_ht
+		local pt_4		= pt_D		+ 	vec_men_lrg 	- 	vec_men_ht
+		
+		local pt_5		= pt_1		+ 	vec_men_ep
+		local pt_6		= pt_2		+ 	vec_men_ep
+		local pt_7		= pt_3		+ 	vec_men_ep
+		local pt_8		= pt_4		+ 	vec_men_ep
+		
+		
+		--- creation des points --------------
+		local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
+		local pts_ids 	= ptr_geo.points 	pts_pos
+		
+		----- pour plus tard, ... 
+		local pts_pourOuvrant	= #( pt_5, pt_6, pt_7, pt_8  )
+		
+		---- cadre ------
+		local nvlFace = ptr_geo.face 		#(	ids_pts_racc_menuis[1]	, 		pts_ids[1] , 		pts_ids[4], 	pts_ids[3], 	pts_ids[2], 	
+																ids_pts_racc_menuis[2],		ids_pts_racc_menuis[3],	ids_pts_racc_menuis[4]	 )		
+		ptr_geo.set_matID 	nvlFace	#menuiserie			
+		
+		local nvlFace = ptr_geo.face 		#(	pts_ids[1], 	pts_ids[2], 	pts_ids[6],   	pts_ids[5]  )	
+		ptr_geo.set_matID 	nvlFace	#menuiserie	
+		local nvlFace = ptr_geo.face 		#(	pts_ids[6], 	pts_ids[2], 	pts_ids[3],   	pts_ids[7]  )	
+		ptr_geo.set_matID 	nvlFace	#menuiserie	
+		local nvlFace = ptr_geo.face 		#(	pts_ids[7], 	pts_ids[3], 	pts_ids[4],   	pts_ids[8]  )	
+		ptr_geo.set_matID 	nvlFace	#menuiserie	
+		local nvlFace = ptr_geo.face 		#(	pts_ids[1], 	pts_ids[5], 	pts_ids[8],   	pts_ids[4]  )		
+		ptr_geo.set_matID 	nvlFace	#menuiserie
+		
+		--- la face du fond -----------
+-- 		if not menuis_ouvrant_use do (
+		local nvlFace = ptr_geo.face 		#(	pts_ids[5], 	pts_ids[6], 	pts_ids[7],   	pts_ids[8]  )		
+		ptr_geo.set_matID 	nvlFace	#vitrage
+-- 		)
+		
+		
+		
+		
+		
+		
+		---- Result final -----------------------------------------------------------------------
+		#( pt_result_1, pt_result_2, pt_result_3 )
 	)
 	
-	
+/* 	
 fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConstruitLaDalle:false	= ( 
 -- 		_plug		pts_accroches		_normDir		 _composant	
 	
@@ -231,8 +410,8 @@ fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onC
 	
 	-------------  constantes locales			-----------------------------------------------------------------------------------------------------------------
 		local decalage_epaisseur 		= 1
-		local menuis_largeur				=	7.
-		local menuis_epaisseur			=	3.
+		local menuis_largeur				=	_plug.const_menuierie_largeur
+		local menuis_epaisseur			=	_plug.const_menuierie_epaisseur
 	
 	
 	-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
@@ -244,14 +423,12 @@ fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onC
 		
 		
 		
-		local menuis_largeur				=	ptr_params.menuis_largeur
-		local menuis_epaisseur			=	ptr_params.menuis_epaisseur
 		local menuis_divisions			=	ptr_params.menuis_divisions
 		local menuis_allege_use		=	ptr_params.menuis_allege_use
 		local menuis_allege_ht			=	ptr_params.menuis_allege_ht
 		local menuis_trav_use			=	ptr_params.menuis_trav_use
-		local menuis_trav_ht			=	ptr_params.menuis_trav_ht
-		local menuis_ouvrant_use	=	ptr_params.menuis_ouvrant_use
+		local menuis_trav_ht				=	ptr_params.menuis_trav_ht
+		local menuis_ouvrant_use		=	ptr_params.menuis_ouvrant_use
 		local menuis_double_use		=	ptr_params.menuis_double_use
 		
 		local tablette_use					= ptr_params.tablette_use
@@ -259,7 +436,7 @@ fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onC
 		local tablette_debord 			= ptr_params.tablette_debord
 		local tablette_cote 				= ptr_params.tablette_cote
 		
-		local volet							= ptr_params.volet
+		local volet								= ptr_params.volet
 		local coffre							= ptr_params.coffre		
 		
 		
@@ -620,7 +797,7 @@ fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onC
 	
 	) ---- fin  compo_fnConstruire	--------
 	
-
+ */
 
 
 	
@@ -628,7 +805,7 @@ fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onC
 
 ------------------CONSTANT ------------------------
 --- on importe le fichier mere des composants ----
-fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Modele de base.ms"
+fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
 str_modelBase 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire
 

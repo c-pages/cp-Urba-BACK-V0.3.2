@@ -22,7 +22,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 
 ------------------CONSTANT ------------------------
 --- on importe le fichier mere des composants ----
-fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Modele de base.ms"
+fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
 str_modelBase 	nom:toiture_nom	type:toiture_type	params:undefined	dialog:undefined	fnConstruire:toiture_fnConstruire
 

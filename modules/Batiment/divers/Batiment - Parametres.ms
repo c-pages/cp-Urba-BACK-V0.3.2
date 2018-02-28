@@ -45,7 +45,6 @@ parameters params_global 						rollout:roll_global		(
 )
 parameters params_constantes 							(
 	
-
 	------- Constantes 	-----------------
 	const_dalle_epaisseur				type: #float 				default:20.	animatable:false		invisibleInTV:true
 	const_murExt_epaisseur				type: #float 				default:30.	animatable:false		invisibleInTV:true
@@ -53,6 +52,8 @@ parameters params_constantes 							(
 	const_couvertine_epaisseur		type: #float 				default:5.		animatable:false		invisibleInTV:true
 	const_menuiseries_epaisseur		type: #float 				default:4.		animatable:false		invisibleInTV:true
 	const_menuiseries_largeur			type: #float 				default:5.		animatable:false		invisibleInTV:true
+	const_menuiseries_allege_ht		type: #float 				default:5.		animatable:false		invisibleInTV:true
+	const_menuiseries_trav_ht			type: #float 				default:5.		animatable:false		invisibleInTV:true
 	
 )
 parameters params_optimSurface				rollout:roll_optimSurface	(

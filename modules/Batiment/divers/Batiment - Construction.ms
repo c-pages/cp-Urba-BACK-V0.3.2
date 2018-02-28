@@ -1,7 +1,7 @@
 
 
 --- la structure pour créer des geometries du delegate -------------------
-include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Geometrie.ms"
+include	 "$userScripts\cp-Urba\modules\Batiment\\divers\\Batiment - Geometrie.ms"
 
 
 

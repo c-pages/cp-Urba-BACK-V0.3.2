@@ -31,11 +31,10 @@
 
 --- inculsion des fichiers externes	------------------------------
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Divers.ms"
-include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Construction.ms"
--- include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - Managers.ms"
+include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Construction.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager Surface.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager Parametres.ms"
-include	 "$userScripts\cp-Urba\modules\Batiment\Batiment - presets.ms"
+include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - presets.ms"
 
 
 

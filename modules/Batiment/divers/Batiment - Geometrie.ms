@@ -13,7 +13,7 @@ struct	str_geometrie	(
 		
 	---- Material IDs -----------------
 		fn get_id_materialType  _type =(
-			local matID = fileIn "$userScripts\cp-Urba\Modules\Batiment\Batiment - material IDs.ms"
+			local matID = include	  "$userScripts\cp-Urba\Modules\Batiment\divers\Batiment - material IDs.ms"
 			local ids_propnames = getpropnames matID
 			local result = 1
 			for propNom in ids_propnames do

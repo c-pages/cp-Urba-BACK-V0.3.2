@@ -167,7 +167,7 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 
 ------------------CONSTANT ------------------------
 --- on importe le fichier mere des composants ----
-fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Modele de base.ms"
+fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
 str_modelBase 		nom:compo_nom	type:compo_type	params:(compo_params()) 	dialog:compo_dialog	fnConstruire:compo_fnConstruire		invisible:true
 
