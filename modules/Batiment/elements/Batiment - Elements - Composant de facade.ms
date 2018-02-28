@@ -21,7 +21,7 @@ struct 	str_composant (
 	------ Membres ------------------------------------------------------------------------------
 	public
 		---- Parametres -----------------------------------
-		id						=	"FacCompo_",		
+		id						=	"ID_facCompo_",		
 		nom					=	"",
 		type					=	undefined,
 		params				=	undefined,
@@ -41,6 +41,7 @@ struct 	str_composant (
 		fn set_params			_params			= ( params					= _params ),
 		
 		---- Accessions -----------------------
+		fn get_typeClasse		= "facCompo",
 		fn get_dialog				=	m_dialog,
 		fn a_desParametres	=	params != undefined,
 		fn get_longueur 		=	if ( a_desParametres () ) then params.longueur else 0,

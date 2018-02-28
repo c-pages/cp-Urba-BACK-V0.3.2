@@ -1,6 +1,6 @@
 
 ------ parametres de base	-----------------------------
-compo_titre 		= "Baie"	
+compo_nom 		= "Baie"	
 compo_type		=	#baie
 compo_toolTip 	=	"Ouverture dans un mur."
 
@@ -630,7 +630,7 @@ fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onC
 --- on importe le fichier mere des composants ----
 fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Modele de base.ms"
 --- Creation de la structure mere	-----------------
-str_modelBase 	tooltip:compo_tooltip		titre:compo_titre	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire
+str_modelBase 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire
 
 	
 	

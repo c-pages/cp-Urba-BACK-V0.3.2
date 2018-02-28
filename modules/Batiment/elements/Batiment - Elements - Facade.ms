@@ -19,10 +19,11 @@ struct 	str_facade (
 		
 		
 	---------- MEMBRES	--------------------------------------------------------------------------------------
+		
 	public
 		---- Base	-----------
+		id							=	"ID_facade_",
 		nom 						=	"Façade",
-		id							=	"",
 		mode					=	1,					---- ( 1:repeter	2:etrier			3:centrer )	----
 		
 		--- Limiteurs - Murs	---
@@ -46,12 +47,7 @@ struct 	str_facade (
 		
 	---------- INTERFACE	--------------------------------------------------------------------------------------
 	public
-		fn initialiser 		 		=	(
-			if id == "" do (
-				id = "Facade_"
-				for i= 1 to 10 do id +=  ( random 0 9 ) as string
-			)
-		),
+		fn get_typeClasse		= "facade",
 		
 		
 		---- Composants -----------------
@@ -98,6 +94,11 @@ struct 	str_facade (
 			for compo in sequence do
 				sequence_longueur	+=	compo.get_longueur ()
 			sequence_longueur
+		),
+		
+		fn initialiser 		 		=	(
+			---- id unique ----
+			for i= 1 to 10 do id += ( random 0 9 ) as string	
 		),
 		
 	---------- EVENEMENTS	--------------------------------------------------------------------------------------

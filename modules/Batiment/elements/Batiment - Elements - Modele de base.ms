@@ -13,7 +13,7 @@ struct	str_modelBase (
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	
 	public
-		titre ="",
+		nom ="",
 		toolTip ="",
 		type ,
 		
@@ -28,7 +28,7 @@ struct	str_modelBase (
 		fn initialiser 	_nvComposant	=(
 			debug "initialiser"
 			debug "type" var:type
-			_nvComposant.initialiser			type		titre
+			_nvComposant.initialiser			type		nom
 			
 			_nvComposant.set_dialog			dialog
 			_nvComposant.set_params	 		( copy params )

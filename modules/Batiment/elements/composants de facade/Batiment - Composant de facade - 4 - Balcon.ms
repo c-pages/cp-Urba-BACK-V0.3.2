@@ -3,7 +3,7 @@
 
 
 --- parametres de base	-----------------------------
-compo_titre 	= "Balcon"	
+compo_nom 	= "Balcon"	
 compo_type	=	#balcon
 compo_toolTip =	""
 
@@ -109,7 +109,7 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 --- on importe le fichier mere des composants ----
 fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Modele de base.ms"
 --- Creation de la structure mere	-----------------
-str_modelBase 	tooltip:compo_tooltip		titre:compo_titre	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire
+str_modelBase 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire
 
 	
 	

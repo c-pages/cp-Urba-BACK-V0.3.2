@@ -1,6 +1,6 @@
 
 ------ parametres de base	-----------------------------
-compo_titre 		= "Espacement"	
+compo_nom 		= "Espacement"	
 compo_type		=	#espacement
 compo_toolTip 	=	"Ajouter un espacement. Mur plein de longueur varirable, répartis par facade, entre tous les espacement"
 
@@ -26,7 +26,7 @@ rollout compo_dialog "Espacement" width:180 height:70	(
 --- on importe le fichier mere des composants ----
 fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Modele de base.ms"
 --- Creation de la structure mere	-----------------
-str_modelBase 	tooltip:compo_tooltip		titre:compo_titre	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire
+str_modelBase 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire
 
 	
 	

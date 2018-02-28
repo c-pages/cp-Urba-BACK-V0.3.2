@@ -19,7 +19,6 @@ struct 	str_toiture (
 	------ Membres ------------------------------------------------------------------------------
 	public
 		---- Parametres -----------------------------------
--- 		nom					=	"",
 		type					=	undefined,
 		params				=	undefined,
 		
@@ -37,7 +36,8 @@ struct 	str_toiture (
 		fn set_construire 		_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
 		fn set_params			_params			= ( params					= _params ),
 		
-		---- Accessions -----------------------
+		---- Accessions -----------------------		
+		fn get_typeClasse		= "toiture",
 		fn get_dialog				=	m_dialog,
 		fn a_desParametres	=	params != undefined,
 		

@@ -3,7 +3,7 @@
 
 
 --- parametres de base	-----------------------------
-compo_titre 	= "Mur"	
+compo_nom 	= "Mur"	
 compo_type	=	#mur
 compo_toolTip =	"Ajouter un mur plein de longueur fixe."
 
@@ -126,7 +126,7 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		profondeur:
 fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Modele de base.ms"
 --- Creation de la structure mere	-----------------
 parametresTMP = compo_params () 
-str_modelBase 	tooltip:compo_tooltip		titre:compo_titre	type:compo_type	params:(parametresTMP)	dialog:compo_dialog	fnConstruire:compo_fnConstruire
+str_modelBase 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(parametresTMP)	dialog:compo_dialog	fnConstruire:compo_fnConstruire
 
 	
 	

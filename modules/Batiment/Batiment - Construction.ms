@@ -54,10 +54,10 @@ struct str_construction (
 			
 			--- on filtre par etages ---------------
 			for facde in _facades 		 where facde.sequence.count >0 do (
-				if facde.etages_min_use then (
-					if _etageCourant	>= facde.etages_min  do (
-						if facde.etages_max_use then (
-							if _etageCourant <= facde.etages_max   do 	
+				if facde.etagesMin_use then (
+					if _etageCourant	>= facde.etagesMin  do (
+						if facde.etagesMax_use then (
+							if _etageCourant <= facde.etagesMax   do 	
 								append facades_result facde
 						)	else (
 							append facades_result facde
@@ -82,10 +82,10 @@ struct str_construction (
 				if facde.get_sequence_longueur () < _mur_longueur do (
 					
 					---- si la facade est limité en longueur min -----
-					if not facde.longueur_min_use or facde.longueur_min_use	 and 	facde.longueur_min < _mur_longueur do (
+					if not facde.longueurMin_use or facde.longueurMin_use	 and 	facde.longueurMin < _mur_longueur do (
 						
 						---- si la facade est limité en longueur max -----
-						if not facde.longueur_max_use or facde.longueur_max_use	 and 	facde.longueur_max > _mur_longueur do (
+						if not facde.longueurMax_use or facde.longueurMax_use	 and 	facde.longueurMax > _mur_longueur do (
 							
 							---- si la facade est sur le bon type de mur -----
 							case  facde.murs of (
@@ -158,7 +158,7 @@ struct str_construction (
 			
 			-----	calcul du nombre d'espacements de la sequence	--------------------------------------
 			for compo in _facade.sequence do
-					if compo.type  == #espacement 	do
+					if compo.type  as name == #espacement 	do
 						nbr_espacemts += 1
 			
 			-----	calcul de la longueur des espacements de la sequence	--------------------------------------
@@ -206,7 +206,7 @@ struct str_construction (
 				local sequence_simple		= for compo in 	_facade.sequence collect compo
 				for i=1 to _facade.sequence.count do (
 					local composant = sequence_simple[i]
-					if composant.type  == #espacement 	then
+					if composant.type  as name == #espacement 	then
 						sequence_simple[i] = creer_murPlein  longueur_espacement
 				)
 				
@@ -248,7 +248,7 @@ struct str_construction (
 			local pt_accroche_1 		= 	_pt1
 			local pt_accroche_2 		= 	pt_accroche_1 + [0,0,m_plug.const_dalle_epaisseur]
 			local pt_accroche_3 		= 	pt_accroche_2 + [0,0,m_plug.etages_hauteur]			
-			local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	 	)
+			local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 ) )
 			
 			
 			--- gestion balcon	------
@@ -261,6 +261,7 @@ struct str_construction (
 			
 			---  on créé la facade avec la sequence total --------
 			for composant in sequenceTotal do (
+				
 				case composant.type of (
 					
 					
@@ -308,7 +309,8 @@ struct str_construction (
 						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		onConstruitLaDalle:onConstruitLaDalle			-- profondeur:profondeurFacade
 						
 					)
-				)
+				) -- fin case	-----------------
+				
 			) --- fin de la sequence -----
 			
 		),

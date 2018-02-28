@@ -3,8 +3,8 @@
 
 
 --- parametres de base	-----------------------------
-toiture_titre 	= "1 pan"	
-toiture_type	=	#1pan
+toiture_nom 	= "1 pan"	
+toiture_type	=	#pan1
 toiture_toolTip =	"..."
 
 --- les parametres du composant	---------
@@ -199,7 +199,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Modele de base.ms"
 --- Creation de la structure mere	-----------------
 parametresTMP = toiture_params () 
-str_modelBase 	tooltip:toiture_tooltip		titre:toiture_titre	type:toiture_type	params:(parametresTMP)	dialog:toiture_dialog	fnConstruire:toiture_fnConstruire
+str_modelBase 	tooltip:toiture_tooltip		nom:toiture_nom	type:toiture_type	params:(parametresTMP)	dialog:toiture_dialog	fnConstruire:toiture_fnConstruire
 
 	
 	

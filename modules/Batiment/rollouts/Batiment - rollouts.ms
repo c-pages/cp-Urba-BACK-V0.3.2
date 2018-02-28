@@ -100,54 +100,35 @@ rollout roll_global "Global" width:162 height:341
 	
 	fn actualiser =(
 		
-		lbx_facades.items 						=  for facadeNom in facades_nom collect facadeNom
+		lbx_facades.items 						=  facades_nom as array
 		
 		btn_supprimerFacade.enabled	=	lbx_facades.selection != 0 
 		btn_editer_facade.enabled			=	lbx_facades.selection != 0 
 		btn_dupliquer_facade.enabled	=	lbx_facades.selection != 0
 		
 		btn_editer_facade.checked			=	core.facadeEditeur_estOuvert ()
+		btn_editer_toiture.enabled 		=	toiture_params != ""
 		
-		
-		local mgr_toiture 						=	core.get_mgr_toiture ()
-		btn_editer_toiture.enabled 		=	mgr_toiture.a_desParametres		()
-		
-		ddl_toiture.items						=	for constr in ( mgr_toiture.get_constructeurs () ) collect constr.titre  
-		
-		local index_toiture 					=	core.get_toiture_index ()
-		ddl_toiture.selection 					= 	index_toiture
-		
--- 		if index_toiture == 1 then
--- 			btn_editer_toiture.enabled = false
--- 		else
--- 			btn_editer_toiture.enabled = true
-		
+		ddl_toiture.items						=	core.get_toiture_constructeursNoms ()		
+		ddl_toiture.selection 					= 	core.get_toiture_index ()
 		
 	)
 	
 	
 	
-	fn initialiser =(
-		/* 
-		local mgr_toiture 			= core.get_mgr_toiture ()
-		local models_toiture 		= mgr_toiture.get_constructeurs ()
-		ddl_toiture.items 		=  ( for  model in models_toiture collect model.titre )
-		 */
-	)
 	
 
 
 
 
-	on roll_global open do
-	(
-			initialiser()
-			actualiser ()
-		)
+	on roll_global open do			actualiser ()
+		
 	on roll_global close do
 	(
 -- 				core.fermer_toutes_fenetres query:true
 			)
+			
+			
 	on btn_pick_surface picked _shape do
 		core.assigner_surface 		$		_shape
 	on spn_nbres changed val do

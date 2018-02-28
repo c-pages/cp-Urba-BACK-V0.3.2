@@ -3,7 +3,7 @@
 
 
 --- parametres de base	-----------------------------
-compo_titre 	= "Loggia fin"	
+compo_nom 	= "Loggia fin"	
 compo_type	=	#loggiaFin
 compo_toolTip =	""
 
@@ -169,7 +169,7 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 --- on importe le fichier mere des composants ----
 fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Elements - Modele de base.ms"
 --- Creation de la structure mere	-----------------
-str_modelBase 		titre:compo_titre	type:compo_type	params:(compo_params()) 	dialog:compo_dialog	fnConstruire:compo_fnConstruire		invisible:true
+str_modelBase 		nom:compo_nom	type:compo_type	params:(compo_params()) 	dialog:compo_dialog	fnConstruire:compo_fnConstruire		invisible:true
 
 	
 	

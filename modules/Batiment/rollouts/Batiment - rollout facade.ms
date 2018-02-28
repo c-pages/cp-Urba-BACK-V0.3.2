@@ -24,9 +24,9 @@
 			local m_changement = false
 			
 			--- les parametres courants ------------
-			local m_facade_initiale
 			local m_facade_courante
 			local m_composant_courant
+			
 			local m_compoCourant_estDansBalcon = false
 			local m_compoCourant_estDansLoggia = false
 			
@@ -280,7 +280,7 @@
 				for  constructeur_compo in  constructeurs_compos	do (
 					if  constructeur_compo.est_editable  () do (
 						btns_ajouter_composant[i].visible 		= true
-						btns_ajouter_composant[i].text 			= constructeur_compo.titre
+						btns_ajouter_composant[i].text 			= constructeur_compo.nom
 						btns_ajouter_composant[i].tooltip 		= constructeur_compo.tooltip
 						btns_ids_constructeurs[i] = j
 						i+=1
@@ -319,15 +319,17 @@
 			
 			fn dupliquer_composant =(
 				
+
+				/* 
 				local mgr_composants 	= m_plug.core.get_mgr_composants ()
-				
 				local composantDuplique =  	mgr_composants.dupliquer 		m_composant_courant
 				m_facade_courante.ajouter_composant	composantDuplique	position:(lbx_sequence.selection +1)
-				m_composant_courant = composantDuplique
-				remplir_lbx_sequence ()
+				*/
 				
+				m_composant_courant = m_plug.core.dupliquer_composant	m_facade_courante	m_composant_courant
+				
+				remplir_lbx_sequence ()				
 				lbx_sequence.selection += 1
-				
 				
 				actualiser ()
 			)

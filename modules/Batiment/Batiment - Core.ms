@@ -128,12 +128,11 @@ struct str_batiment_core (
 		),
 		
 		
-	----- Accessions ---------------------------------------------------------------------------------------------
 		---- managers et autres ----------
 	public
 		fn get_mgr_surface			= mgr_surface,
-		fn get_mgr_composants 	= mgr_facCompos,
 		fn get_mgr_facades	 		= mgr_facades,
+		fn get_mgr_composants 	= mgr_facCompos,
 		fn get_mgr_toiture	 		= mgr_toiture,
 		
 		fn get_mgrDatas 				= mgr_datas,
@@ -146,23 +145,17 @@ struct str_batiment_core (
 		
 	----- Facades----------------------------------
 	public
-		fn get_facade				_index	=	mgr_facades.get_element_parIndex		_index,
-		fn get_facades							=	mgr_facades.get_elements (),
+		fn get_facade_parIndex		_index			=	mgr_facades.get_element_parIndex		_index,
+		fn get_facade_parID			_idUnique		=	mgr_facades.get_element_parID			_idUnique,
+		fn get_facades										=	mgr_facades.get_elements (),
 		
-		fn creer_facade 								= mgr_facades.creer_element enregistrer:true,
-		fn supprimer_facade		_index 		=(
-			mgr_facades.supprimer_element		_index
+		fn creer_facade 								=		mgr_facades.creer_element 	enregistrer:true,
+		fn supprimer_facade		_facade		= (
+			mgr_facades.supprimer_element		_facade
 			actualiser ()
 		),
-		fn dupliquer_facade		_index =(
-			
-			local facadeSource		=	mgr_facades.get_facade_parIndex		_index			
-			local facadeDuplique 	=	mgr_facades.dupliquer_facade 	facadeSource 
-			m_plug.actualiser_rollouts ()
-			
-			facadeDuplique
-		),
-		fn get_murPlein  _longueur 	= (
+		fn dupliquer_facade		_facade	 	=		mgr_facades.dupliquer_element 	_facade  enregistrer:true,
+		fn get_murPlein  			_longueur 	= (
 			local murTemp = mgr_facCompos.creer_element  idConstructeur:#mur
 			murTemp.params.longueur 	=	_longueur
 			murTemp
@@ -172,6 +165,11 @@ struct str_batiment_core (
 		
 	----- Composants----------------------------------
 	public
+		fn dupliquer_composant 	_facade		_composant 	=(
+			local nv_compo	=	mgr_facCompos.dupliquer_element		_composant
+			_facade.ajouter_composant	nv_compo 
+			nv_compo
+		),
 		fn supprimer_composant 	_facade		_index =(
 			
 			local supprimer_balconFin 		= false
@@ -235,39 +233,75 @@ struct str_batiment_core (
 		fn creer_composant		_facade		_IDconstructeurCompo		position:	=(
 			
 			if position == unsupplied  do position = _facade.sequence.count
-			
-			local mgr_composants 	= get_mgr_composants ()
-			local nv_composant 		= mgr_composants.creer_composant		_IDconstructeurCompo
-			
+				
+			local nv_composant 		= mgr_facCompos.creer_element 		idConstructeur:_IDconstructeurCompo	--	enregistrer:true
 			_facade.ajouter_composant	nv_composant		position:position
 			
 			--- gestion Bacon ----------
 			if nv_composant.type == #balcon do  (
-				local id_baclonFin = mgr_composants.get_constructeur_ID	#balconFin
-				creer_composant  _facade	 id_baclonFin  position:(position+1)
+				local composant_fin = 	mgr_facCompos.creer_element 		idConstructeur:#balconFin  position:(position+1)
+				_facade.ajouter_composant	composant_fin		position:(position+1)
 			)
 			
 			--- gestion Loggia ----------
 			if nv_composant.type == #loggia do  (
-				local id_loggiaFin = mgr_composants.get_constructeur_ID	#loggiaFin
-				creer_composant  _facade	 id_loggiaFin  position:(position+1)
+				local composant_fin = 	mgr_facCompos.creer_element 		idConstructeur:#loggiaFin  position:(position+1)
+				_facade.ajouter_composant	composant_fin		position:(position+1)
 			)
 			
-			
+			mgr_facades.enregistrer_parametres		_facade
 			
 			nv_composant
 		),
 		fn get_composants_bouton_index	_type	=		mgr_facCompos.get_constructeur_index		_type	visibles:true,
 		
 		
+		
 	---- toiture	---------------
 	public
-		fn get_toiture							=	mgr_toiture.get_elements (),
-		fn get_toiture_index 					=	mgr_toiture.get_constructeur_index 	(get_toiture ()).type,
+		fn get_toiture								=	mgr_toiture.get_elements (),
+		fn get_toiture_index 						=	mgr_toiture.get_constructeur_index 	(get_toiture ()).type,
+		fn get_toiture_constructeursNoms 	= 	for constr in ( mgr_toiture.get_constructeurs () ) collect constr.nom ,
 
 		fn creer_toiture				_indexConstr				= (
 			mgr_toiture.creer_element 		idConstructeur:_indexConstr 	enregistrer:true
 			actualiser ()
+		),
+		
+		
+		
+		
+	---- universel ---------------
+		fn get_manager_parElement 	_element =(
+			
+			local mgr
+			case ( _element.get_typeClasse 	() ) of (
+					"toiture":		mgr = mgr_toiture
+					"facade": 		mgr = mgr_facades
+					"facCompo": 	mgr = mgr_facCompos
+			)
+			mgr
+		),
+		fn enregistrer_element	_element =(
+			local mgr = 		get_manager_parElement	_element
+			mgr.enregistrer_parametres			_element
+		),
+		fn dupliquer_element		_element	enregistrer:false	=(			
+			local mgr = 		get_manager_parElement	_element
+			mgr.dupliquer_element			_element	enregistrer:enregistrer
+		),
+		
+		fn get_element_parID	_idUnique =(
+			local elem
+			--- on cherche dans les facades -----------
+			if mgr_facades.get_element_parID	 	_idUnique != undefined then
+				elem	=	mgr_facades.get_element_parID	 	_idUnique
+			
+			--- on cherche dans les composants -----------
+			else if mgr_facCompos.get_element_parID	 		_idUnique != undefined then
+				elem	=	mgr_facCompos.get_element_parID	 	_idUnique
+			
+			elem
 		),
 		
 		
@@ -299,10 +333,8 @@ struct str_batiment_core (
 	public
 		fn facadeEditeur_ouvrir 				_index	=	(
 			local dialg_facades	=	mgr_facades.ouvrir_dialog 		()
-			local facade_aOuvrir 	= get_facade  		_index
-			debug "facade_aOuvrir" var:facade_aOuvrir
-			dialg_facades.set_facade	facade_aOuvrir
-			
+			local facade_aOuvrir 	= get_facade_parIndex  		_index
+			dialg_facades.set_facade	facade_aOuvrir			
 		),
 		fn facadeEditeur_fermer 						=	mgr_facades.fermer_dialog 	(),		
 		fn facadeEditeur_estOuvert 					= mgr_facades.dialog_estOuvert (),
