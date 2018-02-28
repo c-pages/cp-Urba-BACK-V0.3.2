@@ -77,7 +77,7 @@ struct str_batiment_core (
 		---- facades	----------
 		mgr_facades 				= str_manager_parametres (),
 		mgr_facCompos 		= str_manager_parametres (),
-		mgr_facMenuiseries,
+		mgr_facMenuiseries	= str_manager_parametres (),
 		
 		---- toiture	----------
 		mgr_toiture 				= str_manager_parametres (),
@@ -112,7 +112,6 @@ struct str_batiment_core (
 		),
 		fn preset_charger  =(
 			mgr_presets.charger	 m_plug
-			charger ()
 			m_plug.actualiser_rollouts ()
 			actualiser ()
 		),
@@ -132,6 +131,7 @@ struct str_batiment_core (
 		fn get_mgr_surface			= mgr_surface,
 		fn get_mgr_facades	 		= mgr_facades,
 		fn get_mgr_composants 	= mgr_facCompos,
+		fn get_mgr_facMenuiseries	= mgr_facMenuiseries,
 		fn get_mgr_toiture	 		= mgr_toiture,
 		
 		fn get_mgrDatas 				= mgr_datas,
@@ -278,6 +278,7 @@ struct str_batiment_core (
 					"toiture":		mgr = mgr_toiture
 					"facade": 		mgr = mgr_facades
 					"facCompo": 	mgr = mgr_facCompos
+					"facMenis":	mgr = mgr_facMenuiseries
 			)
 			mgr
 		),
@@ -356,21 +357,26 @@ struct str_batiment_core (
 			mgr_surface.initialiser			m_plug
 			mgr_construction.initialiser		m_plug			
 			
-			mgr_facades.initialiser 		plug:m_plug					\
-													fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Facade.ms" )	\
-													fichier_dialog:				( "Batiment - rollout facade.ms" )		\
-													prefix_nomParametres:	"facades"
+			mgr_facades.initialiser 			plug:m_plug					\
+														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Facade.ms" )	\
+														fichier_dialog:				( "Batiment - rollout facade.ms" )		\
+														prefix_nomParametres:	"facades"
 			
-			mgr_facCompos.initialiser 	plug:m_plug					\
-													fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant de facade.ms" )	\
-													dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\composants de facade\\" )					\
-													prefix_nomParametres:	"facCompos"
+			mgr_facCompos.initialiser 		plug:m_plug					\
+														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant de facade.ms" )	\
+														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\composants de facade\\" )					\
+														prefix_nomParametres:	"facCompos"
 			
-			mgr_toiture.initialiser 		plug:m_plug					\
-													fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Toiture.ms")	\
-													dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\"  )					\
-													fichier_dialog:				( "Batiment - rollout toiture.ms" )		\
-													prefix_nomParametres:	"toiture" 
+			mgr_facMenuiseries.initialiser plug:m_plug					\
+														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Menuiserie.ms" )	\
+														fichier_dialog:				( "Batiment - rollout menuiserie.ms" )		\
+														prefix_nomParametres:	"facMenuis"
+			
+			mgr_toiture.initialiser 			plug:m_plug					\
+														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Toiture.ms")	\
+														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\"  )					\
+														fichier_dialog:				( "Batiment - rollout toiture.ms" )		\
+														prefix_nomParametres:	"toiture" 
 			
 			
 		)

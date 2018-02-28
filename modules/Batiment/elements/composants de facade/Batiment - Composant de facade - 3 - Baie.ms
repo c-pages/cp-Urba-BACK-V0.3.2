@@ -7,9 +7,10 @@ compo_toolTip 	=	"Ouverture dans un mur."
 
 --- les parametres du composant	---------
 struct compo_params	(
+	
 		--- global	-------------
 		longueur						= 100,
-		hauteur							= 210,
+		hauteur							= 110,
 		profondeur					= 20,		
 		allege_hauteur 		 		= 100,
 		
@@ -24,38 +25,16 @@ struct compo_params	(
 		volet_double					= false,		----	pour les 'Battants' 	----------
 		volet_clos_proba			= 0.,			----	pourcentage de chance d'avoir un volet fermé	----------
 		volet_clos_min				= 0.,			----	fermenture minimum du volet fermé	----------
-		volet_clos_max				= 100.,		----	fermenture maximum du volet fermé	----------
+		volet_clos_max				= 100.		----	fermenture maximum du volet fermé	----------
 		
 	----fonctions	--------
-	private
-		fn get_nvl_menuierie =(
-			
-			struct str_menuierie (
-				id 		="Menuis_",
-				type 		= "Fxe",
-				on create do (
-					---- id unique ----
-					for i= 1 to 10 do id += ( random 0 9 ) as string
-				)
-			) --- fin struct menuiserie	------------
-			
-			str_menuierie()
-			
-		),
-	public
-		fn ajouter_menuierie =(
-			local nvl_menuiserie = get_nvl_menuierie ()
-			append sequence		nvl_menuiserie
-		),
-		fn supprimer_menuierie =(
-			
-		)
 )
 
 --- les rollout du composant	---------
 rollout compo_dialog "Baie" width:433 height:621
 (
 		local m_rollPrt
+		local		m_plug
 		local m_compo
 		local m_dialog_menuiserie		= filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout menuiserie.ms"
 		
@@ -105,6 +84,7 @@ rollout compo_dialog "Baie" width:433 height:621
 			spn_longueur.value 		= m_compo.params.longueur
 			edt_nom.text 				=	m_compo.nom
 			spn_profondeur.value 	=	m_compo.params.profondeur	
+			spn_hauteur.value 		= m_compo.params.hauteur
 			spn_allege.value 			=	m_compo.params.allege_hauteur
 			
 			--- traverses -----------
@@ -128,6 +108,11 @@ rollout compo_dialog "Baie" width:433 height:621
 			btn_instancier_element.enabled	= sequence_edition
 -- 			btn_editer_element.enabled		= sequence_edition
 			
+			
+			spn_volet_ferm_proba.value	=	m_compo.params.volet_clos_proba
+			spn_volet_ferm_max.value		=	m_compo.params.volet_clos_max
+			spn_volet_ferm_min.value		=	m_compo.params.volet_clos_min
+			
 			--- volet -----------
 			ddl_volet.selection 	= m_compo.params.volet 
 			local volet_edition		= m_compo.params.volet != 1
@@ -145,6 +130,7 @@ rollout compo_dialog "Baie" width:433 height:621
 		) -- fin actualiser -------
 		
 		fn ajouter_traverse =(
+
 			local trav_ht  =100
 			if m_compo.params.traverses.count == 1 do
 				trav_ht = 210
@@ -167,9 +153,9 @@ rollout compo_dialog "Baie" width:433 height:621
 
 	on edt_nom entered txt 	do
 	(
-				m_compo.nom = txt
-				m_rollPrt.actualiser ()
-			)
+		m_compo.nom = txt
+		m_rollPrt.actualiser ()
+	)
 	on spn_longueur changed val 	do
 		m_compo.params.longueur 					= val
 	on spn_hauteur changed val 	do
@@ -184,11 +170,15 @@ rollout compo_dialog "Baie" width:433 height:621
 		ajouter_traverse	()
 	on btn_editer_element pressed do (
 		createDialog	m_dialog_menuiserie	
--- 		m_dialog_menuiserie.m_menuiserie = 
-		
+		local menuis = m_compo.params.sequence[ lbx_sequence.selection ]
+		format "menuis :%\n" menuis
+		m_dialog_menuiserie.initialiser	m_plug		menuis
 	)
 	on btn_ajouter_element pressed do (
-		m_compo.params.ajouter_menuierie	()
+		local	mgr_facMenuiseries = m_plug.core.get_mgr_facMenuiseries ()
+		local menuis = mgr_facMenuiseries.creer_element 	()	-- enregistrer:true
+		append		m_compo.params.sequence	menuis
+-- 		format " #### 	menuis	#### --> %\n" 	menuis
 		actualiser ()
 	)
 	on btn_supprimer_traverse pressed do
@@ -230,11 +220,12 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local menuis_trav_ht				=	ptr_plug.const_menuiseries_trav_ht
 	
 	-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
-		local longueur						= ptr_params.longueur
-		local hauteur						= ptr_params.hauteur
-		local profondeur					= ptr_params.profondeur		
-		local allege_hauteur 		 		= ptr_params.allege_hauteur
 		local	etage_hauteur				=	ptr_plug.etages_hauteur 
+		local longueur						= ptr_params.longueur
+		local allege_hauteur 		 		= ptr_params.allege_hauteur
+		local hauteur						= if ptr_params.hauteur == 0 	then	etage_hauteur - decalage_epaisseur
+																									else 	ptr_params.hauteur + allege_hauteur
+		local profondeur					= ptr_params.profondeur		
 		local	retombe						= etage_hauteur - (allege_hauteur + hauteur ) 
 	
 	
@@ -381,8 +372,8 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		
 		--- la face du fond -----------
 -- 		if not menuis_ouvrant_use do (
-		local nvlFace = ptr_geo.face 		#(	pts_ids[5], 	pts_ids[6], 	pts_ids[7],   	pts_ids[8]  )		
-		ptr_geo.set_matID 	nvlFace	#vitrage
+-- 		local nvlFace = ptr_geo.face 		#(	pts_ids[5], 	pts_ids[6], 	pts_ids[7],   	pts_ids[8]  )		
+-- 		ptr_geo.set_matID 	nvlFace	#vitrage
 -- 		)
 		
 		

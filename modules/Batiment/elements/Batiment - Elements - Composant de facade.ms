@@ -33,24 +33,29 @@ struct 	str_composant (
 		---- Fonction virtuelle pure pour construire le composant	----
 		fnVirt_construire	= (),
 		
+		mgr, 		-------  le manager manipulant ces structs  ---------------
+		
 	------ Fonctions ------------------------------------------------------------------------------
 	public
 		---- Mutations -----------------------
-		fn set_dialog 			_dialog 				= ( m_dialog 				= _dialog ),
-		fn set_construire 		_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
-		fn set_params			_params			= ( params					= _params ),
+		fn set_dialog 		_dialog 				= ( m_dialog 				= _dialog ),
+		fn set_construire 	_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
+		fn set_params		_params			= ( params					= _params ),
+		fn set_manager		_mgr				= ( mgr						= _mgr ),
 		
 		---- Accessions -----------------------
 		fn get_typeClasse		= "facCompo",
 		fn get_dialog				=	m_dialog,
+		fn get_manager			= mgr,
 		fn a_desParametres	=	params != undefined,
 		fn get_longueur 		=	if ( a_desParametres () ) then params.longueur else 0,
 		
 		--- Initialisations -----------------------
-		fn initialiser_dialog 	_roll_parent 	=(
+		fn initialiser_dialog 	_roll_parent 	_plug =(
 			if ( a_desParametres () )  do (
 				m_dialog.m_rollPrt		= 	_roll_parent
 				m_dialog.m_compo	=	this
+				m_dialog.m_plug		=	_plug
 				m_dialog.actualiser()
 			)
 		),

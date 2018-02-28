@@ -145,6 +145,7 @@ struct  str_manager_parametres (
 	public
 		fn enregistrer_parametres		_element		=(
 			debug "enregistrer_parametres"
+			debug "_element" var:_element
 			local prop_element_Noms 	= getPropNames	_element
 			local elem_index 				= get_element_index		_element
 			
@@ -218,7 +219,7 @@ struct  str_manager_parametres (
 							if tab_params.count > 0 then (
 								if classOf	tab_params[1] == string do
 									if findString tab_params[1]	"ID_" != undefined do (
--- 										param_value = for elemID in tab_params collect ( m_core.get_element_parID  elemID )
+										
 										-- on check si c'est l'instance d'un element deja present -----------
 										param_value = #()
 										for elemID in tab_params do	(
@@ -281,6 +282,8 @@ struct  str_manager_parametres (
 			--- id Unique -----------
 			if idUnique != unsupplied do 
 				nvl_element.id = idUnique
+			
+			nvl_element.set_manager 	this
 			
 			-- si besoin on enregistre direct sur le plug -----
 			if enregistrer do enregistrer_parametres	nvl_element

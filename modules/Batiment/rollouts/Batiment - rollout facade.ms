@@ -213,7 +213,7 @@
 					removeSubRollout	subroll_parametres	rollAVirer
 				if m_composant_courant != undefined do (
 					addSubRollout	subroll_parametres ( m_composant_courant.get_dialog () )
-					m_composant_courant.initialiser_dialog	 	roll_urba_editeurFacades
+					m_composant_courant.initialiser_dialog	 	roll_urba_editeurFacades	m_plug
 				)
 			)
 			fn redimensionnerFenetre 		_taille 	=(

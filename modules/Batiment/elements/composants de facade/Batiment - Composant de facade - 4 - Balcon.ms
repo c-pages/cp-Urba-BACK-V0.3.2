@@ -20,6 +20,7 @@ rollout compo_dialog "Balcon" width:180 height:70	(
 	
 	local m_compo
 	local m_rollPrt
+	local m_plug
 
 	edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
 	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left

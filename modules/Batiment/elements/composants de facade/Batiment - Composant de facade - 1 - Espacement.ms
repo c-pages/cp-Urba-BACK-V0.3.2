@@ -17,6 +17,7 @@ struct compo_params	(
 rollout compo_dialog "Espacement" width:180 height:70	(
 	local m_rollPrt
 	local m_compo
+	local m_plug
 	fn actualiser =()
 )
 

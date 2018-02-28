@@ -14,6 +14,7 @@ compo_toolTip =	""
 rollout compo_dialog "Loggia fin" width:180 height:70	(
 	local m_rollPrt
 	local m_compo
+	local m_plug
 	fn actualiser =()
 )
 

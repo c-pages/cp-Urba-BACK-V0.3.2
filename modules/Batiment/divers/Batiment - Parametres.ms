@@ -118,6 +118,26 @@ parameters params_facades_composants 		(
 	facCompos_params		type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	
 )
+
+parameters params_facades_menuiseries 		(
+	
+	---- Parametres -----------------------------------
+	facMenuis_id 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facMenuis_nom 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facMenuis_type 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
+
+	facMenuis_longueur 	type:#floatTab		tabSize:0 			tabSizeVariable:true
+	facMenuis_allege_ht	type:#floatTab		tabSize:0 			tabSizeVariable:true
+		
+	facMenuis_ouvrant_ht		type:#floatTab		tabSize:0 			tabSizeVariable:true
+	facMenuis_ouvrant_sens		type:#intTab			tabSize:0 			tabSizeVariable:true	
+	
+	facMenuis_ouvert_proba 	type:#floatTab		tabSize:0 			tabSizeVariable:true
+	facMenuis_ouvert_min	 	type:#floatTab		tabSize:0 			tabSizeVariable:true
+	facMenuis_ouvert_max 		type:#floatTab		tabSize:0 			tabSizeVariable:true
+	
+)
+
 parameters params_toiture 							(
 	
 	toiture_type					type:#string 		default:"sans"		animatable:false		invisibleInTV:true

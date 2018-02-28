@@ -2,6 +2,13 @@
 
 struct str_datasToString (
 	
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+	private
+		m_debug = true,
+		fn debug 	_txt  var:	 param:    =	try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:"urba | str_datasToString"	catch (),
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+	
+	public
 		m_prt,
 		
 	private
@@ -57,6 +64,7 @@ struct str_datasToString (
 		
 	public
 		fn get_datas_string 		_element	=(
+			debug "get_datas_string"
 			local txtResult = ""
 			
 			if _element != undefined do (
@@ -77,6 +85,8 @@ struct str_datasToString (
 							txtResult+=  param as string  + separateur_mutation	+	"#" + prop as string  + separateur_params
 						)
 						default:						(
+							
+			debug "type" var:type
 								txtResult+=  param as string  + separateur_mutation	+	prop as string  + separateur_params
 						)
 					) -- fin scase --

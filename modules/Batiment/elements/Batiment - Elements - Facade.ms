@@ -20,6 +20,9 @@ struct 	str_facade (
 		
 	---------- MEMBRES	--------------------------------------------------------------------------------------
 		
+	private
+		mgr,
+		
 	public
 		---- Base	-----------
 		id							=	"ID_facade_",
@@ -48,7 +51,9 @@ struct 	str_facade (
 	---------- INTERFACE	--------------------------------------------------------------------------------------
 	public
 		fn get_typeClasse		= "facade",
+		fn set_manager		_mgr				= ( mgr						= _mgr ),
 		
+		fn get_manager						= mgr,
 		
 		---- Composants -----------------
 		fn get_composant_parIDUnique		_IDUnique	=(
