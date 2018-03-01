@@ -55,7 +55,7 @@ rollout roll_urba_editeurToiture "Urba - Editeur de toiture" width:256 height:29
 			m_plug 		= _plug
 			
 			-- la fenetre ----
-			redimensionnerFenetre  (getDialogSize	roll_urba_editeurFacades)
+			redimensionnerFenetre  (getDialogSize	roll_urba_editeurToiture)
 			
 		)
 		

@@ -214,10 +214,12 @@ rollout compo_dialog "Baie" width:433 height:621
 	
 ------ la fonction de construction	---------
 fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConstruitLaDalle:false	= ( 
+	
+	
 		--- Result -------------
 		local pt_result_1, pt_result_2, pt_result_3
 	
-	
+		
 	-------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
 		local ptr_composant  	= 	_composant
@@ -240,6 +242,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local profondeur					= ptr_params.profondeur		
 		local	retombe						= etage_hauteur - (allege_hauteur + hauteur ) 
 	
+		local	sequence						= ptr_params.sequence
 	
 		--- Vecteurs directeurs ------------
 		local vec_ep_dalle 	= [0,0,1] 		* 	ptr_plug.const_dalle_epaisseur		
@@ -249,8 +252,16 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local vec_ht 				= 	[0,0,1] * 	 hauteur				
 		local vec_longueur 	= _normDir * longueur
 		local norm_prof			= _normDir * rotateZ ( matrix3 1 ) 90
-		local vec_prof			=  norm_prof * profondeur
+		local vec_murEp		=	norm_prof * ptr_plug.const_murExt_epaisseur
 		
+		local vec_men_nu				=  norm_prof * profondeur
+		local vec_men_ep				= norm_prof		*	menuis_epaisseur
+		local vec_men_lrg				=	_normDir		*	menuis_largeur
+		local vec_men_ht				=	[0,0,1] 		*	menuis_largeur
+		local vec_men_allegeHt		=	[0,0,1] 		*	menuis_allege_ht
+		local vec_men_travHt		=	[0,0,1] 		*	menuis_trav_ht
+		
+			
 		--- Points d'accroche ------------
 		local id_ptAccroche_1 	= _ptsIDs_accroche[1]
 		local id_ptAccroche_2 	= _ptsIDs_accroche[2]
@@ -259,6 +270,11 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local ptAccroche_1		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	
 		local ptAccroche_2		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	
 		local ptAccroche_3		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	
+		
+		
+		
+		
+		
 		
 		
 	-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
@@ -291,16 +307,16 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local pt_ht 	= ptAccroche_3
 		
 		local pt_1 		= pt_bas	+  vec_longueur
-		local pt_2 		= pt_1		+  vec_allege + [0,0,decalage_epaisseur]
-		local pt_3 		= pt_bas	+ 	vec_allege + [0,0,decalage_epaisseur]
+		local pt_2 		= pt_1		+  vec_allege 	+ [0,0,decalage_epaisseur]
+		local pt_3 		= pt_bas	+ 	vec_allege 	+ [0,0,decalage_epaisseur]
 		
 		local pt_4 		= pt_bas	+ 	vec_ht
 		local pt_5 		= pt_4		+ 	vec_longueur				
 		local pt_6 		= pt_ht		+ 	vec_longueur
-		local pt_7 		= pt_3		+ 	vec_prof
-		local pt_8 		= pt_2		+ 	vec_prof
-		local pt_9 		= pt_5		+ 	vec_prof
-		local pt_10		= pt_4		+ 	vec_prof
+		local pt_7 		= pt_3		+ 	vec_murEp
+		local pt_8 		= pt_2		+ 	vec_murEp
+		local pt_9 		= pt_5		+ 	vec_murEp
+		local pt_10		= pt_4		+ 	vec_murEp
 		
 		--- creation des points --------------
 		local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8, pt_9, pt_10 )
@@ -311,45 +327,56 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		
 		
 		----- pour plus tard, ...  le raccord avec les menuiseries, et return -----
-		local ids_pts_racc_menuis =#(pts_ids[7], pts_ids[8], pts_ids[9], pts_ids[10])
+		local pts_baie = #( pt_3+ vec_men_nu, pt_4+ vec_men_nu, pt_5+ vec_men_nu, pt_2 + vec_men_nu)
+		
 		
 		-------	Creation des faces 	--------
-		local nvlFace = ptr_geo.face 		#(	id_ptAccroche_2, 	pts_ids[1], 		pts_ids[2], 		pts_ids[3] )		 
-		ptr_geo.set_matID 	nvlFace	#mur 	
+		ptr_geo.face 		#(	id_ptAccroche_2, 	pts_ids[1], 		pts_ids[2], 		pts_ids[3] )		matID:#mur  
 		
 		local nvlFace = ptr_geo.face 		#(	pts_ids[3], 		pts_ids[2], 		pts_ids[8] , 	pts_ids[7] )		 	
 		if  onConstruitLaDalle	then		ptr_geo.set_matID 	nvlFace	#menuiserie
 										else 		ptr_geo.set_matID 	nvlFace	#mur
 		
-		local nvlFace = ptr_geo.face 		#(	pts_ids[10], 	pts_ids[9], 		pts_ids[5], 		pts_ids[4] )
-		ptr_geo.set_matID 	nvlFace	#mur
-		
-		local nvlFace = ptr_geo.face 		#(	pts_ids[4], 		pts_ids[5], 		pts_ids[6], 		id_ptAccroche_3 )
-		ptr_geo.set_matID 	nvlFace	#mur
-		
-		local nvlFace = ptr_geo.face 		#(	pts_ids[3], 		pts_ids[7], 		pts_ids[10],   	pts_ids[4] )
-		ptr_geo.set_matID 	nvlFace	#mur
-		
-		local nvlFace = ptr_geo.face 		#(	pts_ids[8], 		pts_ids[2], 		pts_ids[5],   	pts_ids[9] )
-		ptr_geo.set_matID 	nvlFace	#mur
+		ptr_geo.face 		#(	pts_ids[10], 		pts_ids[9], 		pts_ids[5], 		pts_ids[4] )				matID:#mur 
+		ptr_geo.face 		#(	pts_ids[4], 		pts_ids[5], 		pts_ids[6], 		id_ptAccroche_3 )		matID:#mur 
+		ptr_geo.face 		#(	pts_ids[3], 		pts_ids[7], 		pts_ids[10],   	pts_ids[4] )				matID:#mur 
+		ptr_geo.face 		#(	pts_ids[8], 		pts_ids[2], 		pts_ids[5],   		pts_ids[9] )				matID:#mur 
 		
 		
 		
 		
-		--- CADRE MENUISERIE ----------------------------------------------------------------------------------------------------------------		
+		---  MENUISERIE -	CADRE 	---------------------------------------------------------------------------------------------------------------		
+		--- menuiserie du haut	------------
+		local ptTmp				=	pts_baie[2] -  vec_men_ht
+		local vecTMP_long 	= (pts_baie[3] - pts_baie[2] ) 
+		ptr_geo.tube		ptTmp		vecTMP_long		vec_men_ht				   vec_men_ep			matID:#menuiserie 
 		
-		local vec_men_ep			= norm_prof		*	menuis_epaisseur
-		local vec_men_lrg			=	_normDir		*	menuis_largeur
-		local vec_men_ht				=	[0,0,1] 		*	menuis_largeur
-		local vec_men_allegeHt	=	[0,0,1] 			*	menuis_allege_ht
-		local vec_men_travHt		=	[0,0,1] 		*	menuis_trav_ht
+		--- menuiserie de gauche	------------
+-- 		local ptTmp				=	pts_baie[2] -  vec_men_ht
+		local vecTMP_ht 	= ( pts_baie[2] - pts_baie[1] )	- vec_men_ht
+		ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg      vec_men_ep				matID:#menuiserie --	flip:true
 		
-		-------	Placement des points 	--------
-		local pt_A	= ptr_geo.get_vertex	ids_pts_racc_menuis[1]		
-		local pt_B	= ptr_geo.get_vertex	ids_pts_racc_menuis[2]		
-		local pt_C	= ptr_geo.get_vertex	ids_pts_racc_menuis[3]		
-		local pt_D	= ptr_geo.get_vertex	ids_pts_racc_menuis[4]
+		--- menuiserie de droite	------------
+		local ptTmp			=	pts_baie[3]  -  vec_men_lrg - vec_men_ht
+		ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg		vec_men_ep				matID:#menuiserie 	
 		
+		/*  */
+		/* 
+		local vecTMP_ht = ( pts_baie[2] - pts_baie[1] )	
+		ptr_geo.tube		pts_baie[1]		vecTMP_ht		vec_men_ep		vec_men_lrg		matID:#menuiserie 	
+		local vecTMP_ht = ( pts_baie[4] - pts_baie[3] )
+		ptr_geo.tube		pts_baie[3]		vecTMP_ht		vec_men_ep		-vec_men_lrg		matID:#menuiserie 		
+		local ptTmp	=	pts_baie[2] + vec_men_lrg
+		local vecTMP_ht = (pts_baie[3] - vec_men_lrg ) - ptTmp
+		ptr_geo.tube		ptTmp	vecTMP_ht		vec_men_ep		-vec_men_ht		matID:#menuiserie 	
+		 */
+		-- si besoin on fait la menuiserie du bas	et le vitrage	---------
+		if sequence.count == 0 do (
+-- 			construire_menuiseries	(pts_baie[4]-vec_men_lrg )	( (pts_baie[1]+vec_men_lrg ) - (pts_baie[4]-vec_men_lrg )  )		vec_men_ep		vec_men_ht	ptr_geo
+			
+		)
+		----- la sequence de menuiserie -------------
+		/* 
 		local pt_1		= pt_A		+ 	vec_men_lrg 	
 		local pt_2		= pt_B		- 	vec_men_lrg 	
 		local pt_3		= pt_C		- 	vec_men_lrg 	- 	vec_men_ht
@@ -381,7 +408,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		ptr_geo.set_matID 	nvlFace	#menuiserie	
 		local nvlFace = ptr_geo.face 		#(	pts_ids[1], 	pts_ids[5], 	pts_ids[8],   	pts_ids[4]  )		
 		ptr_geo.set_matID 	nvlFace	#menuiserie
-		
+		*/
 		--- la face du fond -----------
 -- 		if not menuis_ouvrant_use do (
 -- 		local nvlFace = ptr_geo.face 		#(	pts_ids[5], 	pts_ids[6], 	pts_ids[7],   	pts_ids[8]  )		
@@ -454,7 +481,7 @@ fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onC
 																	else		[0,0,1] * 	 hauteur				
 		local vec_longueur 	= _normDir * longueur
 		local norm_prof		= _normDir * rotateZ ( matrix3 1 ) 90
-		local vec_prof			=  norm_prof * profondeur
+		local vec_men_nu			=  norm_prof * profondeur
 		
 		--- Points d'accroche ------------
 		local id_ptAccroche_1 	= _ptsIDs_accroche[1]
@@ -502,10 +529,10 @@ fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onC
 		local pt_4 		= pt_bas	+ 	vec_ht
 		local pt_5 		= pt_4		+ 	vec_longueur				
 		local pt_6 		= pt_ht		+ 	vec_longueur
-		local pt_7 		= pt_3		+ 	vec_prof
-		local pt_8 		= pt_2		+ 	vec_prof
-		local pt_9 		= pt_5		+ 	vec_prof
-		local pt_10		= pt_4		+ 	vec_prof
+		local pt_7 		= pt_3		+ 	vec_men_nu
+		local pt_8 		= pt_2		+ 	vec_men_nu
+		local pt_9 		= pt_5		+ 	vec_men_nu
+		local pt_10		= pt_4		+ 	vec_men_nu
 		
 		--- creation des points --------------
 		local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8, pt_9, pt_10 )
@@ -647,7 +674,7 @@ fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onC
 		if menuis_allege_use do (
 			local vec_allege_ht = vec_men_ht * 1.5
 			-------	Placement des points 	--------
-			local pt_1 		= pt_bas	+ 	[0,0,1] * menuis_allege_ht	- 	 vec_allege_ht	 + vec_men_lrg + vec_prof
+			local pt_1 		= pt_bas	+ 	[0,0,1] * menuis_allege_ht	- 	 vec_allege_ht	 + vec_men_lrg + vec_men_nu
 			local pt_2 		= pt_1		+	vec_longueur 			- 2 * vec_men_lrg 
 			local pt_3 		= pt_2		+   vec_allege_ht	
 			local pt_4		= pt_1		+ 	 vec_allege_ht
@@ -689,7 +716,7 @@ fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onC
 			
 			local vec_traverse_ht = vec_men_ht * 1.5
 			-------	Placement des points 	--------
-			local pt_1 		= pt_bas	+ 	[0,0,1] * menuis_trav_ht	- 	 vec_allege_ht	 + vec_men_lrg + vec_prof
+			local pt_1 		= pt_bas	+ 	[0,0,1] * menuis_trav_ht	- 	 vec_allege_ht	 + vec_men_lrg + vec_men_nu
 			local pt_2 		= pt_1		+	vec_longueur 			- 2 * vec_men_lrg 
 			local pt_3 		= pt_2		+   vec_allege_ht	
 			local pt_4		= pt_1		+ 	 vec_allege_ht

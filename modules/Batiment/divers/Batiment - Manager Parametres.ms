@@ -127,7 +127,7 @@ struct  str_manager_parametres (
 			
 			local param 				= getProperty	m_plug	  _param_nom
 			
-			if index!= undefined and index!=unsupplied then (
+			if index != undefined and index!=unsupplied then (
 				
 				if  index  	!= 0 then 
 					param[ index ] =		_value
@@ -135,7 +135,7 @@ struct  str_manager_parametres (
 					append 	param		_value
 			
 			--- sinon on a un parametre simple ----------------
-			) else 	setProperty	m_plug	  param_nom		_value
+			) else 	setProperty	m_plug	  _param_nom		_value
 		
 		),
 		
@@ -202,7 +202,8 @@ struct  str_manager_parametres (
 		
 		public	
 		fn enregistrer_parametres		_element		=(
-			
+			debug "###		enregistrer_parametres		###"
+			debug "###		_element" var:_element
 			local prop_element_Noms 	= getPropNames	_element
 			local elem_index 				= get_element_index		_element
 			

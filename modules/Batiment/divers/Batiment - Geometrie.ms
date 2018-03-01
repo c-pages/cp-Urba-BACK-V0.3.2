@@ -37,8 +37,12 @@ struct	str_geometrie	(
 		),
 		
 		fn fliperNormal  _faces =(
+			debug "	###	fliperNormal	###	"
 			if classof _faces != array do _faces = #(_faces )
-			polyop.flipNormals m_plug.delegate	 _faces
+			debug " _faces" var:_faces
+			
+			resultFlip = polyop.flipNormals m_plug.delegate	 _faces
+			debug " resultFlip" var:resultFlip
 		),
 		
 	----- constructions élémentaires ----------------
@@ -162,6 +166,12 @@ struct	str_geometrie	(
 			polyop.weldVertsByThreshold m_plug.delegate 		( _pts as bitArray)
 		),
 		
+	--- accessions diverse -------
+		fn get_vertex  _idPt =(
+			polyop.getVert 	m_plug.delegate		_idPt
+		),
+		
+		
 	--- plans ---------------
 		fn get_plan_2vecs_1Point	_vec1	_vec2		_pt_Origine =(
 			
@@ -172,9 +182,36 @@ struct	str_geometrie	(
 			nvPlan
 		),
 	
-	--- accessions diverse -------
-		fn get_vertex  _idPt =(
-			polyop.getVert 	m_plug.delegate		_idPt
+		
+		
+		
+		fn tube 		_pt_A	_vec_ht		_vec_larg		_vec_ep		matID:  flip:false	=(
+			
+			--- localiser les point dans l'espace	--------			
+			local pt_1			=	_pt_A
+			local pt_2 		= pt_1	+ 	_vec_ht	
+			local pt_3 		= 	pt_2	+ 	_vec_larg		
+			local pt_4 		= pt_1	+ 	_vec_larg
+			
+			local pt_5 		= pt_1	+ 	_vec_ep				
+			local pt_6 		= pt_2	+ 	_vec_ep
+			local pt_7			= pt_3	+ 	_vec_ep				
+			local pt_8 		= pt_4	+ 	_vec_ep
+			
+			--- creation des points 		--------------
+			local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
+			local pts_ids 	= points 	pts_pos
+			
+			-------	Creation des faces 	--------
+			local faces =#()
+			append faces ( face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[3] , 		pts_ids[4] )		 matID:matID )
+			append faces ( face 		#(	pts_ids[5], 		pts_ids[8], 		pts_ids[7] , 		pts_ids[6] )		 matID:matID )
+			append faces ( face 		#(	pts_ids[4], 		pts_ids[3], 		pts_ids[7] , 		pts_ids[8] )		 matID:matID )
+			append faces ( face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6] , 		pts_ids[5] )		 matID:matID )
+			
+			--- sens des faces ------
+			if flip do fliperNormal  faces
+				
 		),
 		
 		

@@ -19,7 +19,7 @@
 		public
 			---- Parametres -----------------------------------
 			id 			="Menuis_",
-			nom 			= "",
+			nom 			= "Menuiserie",
 			
 			type 			= "Fixe",	----  liste_types = #( "Fixe", "Fenêtre", "Porte pleine", "Porte vitrée", "Porte de garage" )
 			longueur 	= 0,	

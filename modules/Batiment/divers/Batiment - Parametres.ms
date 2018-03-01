@@ -50,10 +50,10 @@ parameters params_constantes 							(
 	const_murExt_epaisseur				type: #float 				default:30.	animatable:false		invisibleInTV:true
 	const_ssBassement_epaisseur	type: #float 				default:100.	animatable:false		invisibleInTV:true
 	const_couvertine_epaisseur		type: #float 				default:5.		animatable:false		invisibleInTV:true
-	const_menuiseries_epaisseur		type: #float 				default:4.		animatable:false		invisibleInTV:true
-	const_menuiseries_largeur			type: #float 				default:5.		animatable:false		invisibleInTV:true
-	const_menuiseries_allege_ht		type: #float 				default:5.		animatable:false		invisibleInTV:true
-	const_menuiseries_trav_ht			type: #float 				default:5.		animatable:false		invisibleInTV:true
+	const_menuiseries_epaisseur		type: #float 				default:3.		animatable:false		invisibleInTV:true
+	const_menuiseries_largeur			type: #float 				default:10.		animatable:false		invisibleInTV:true
+	const_menuiseries_allege_ht		type: #float 				default:15.		animatable:false		invisibleInTV:true
+	const_menuiseries_trav_ht			type: #float 				default:7.		animatable:false		invisibleInTV:true
 	
 )
 parameters params_optimSurface				rollout:roll_optimSurface	(
@@ -122,12 +122,12 @@ parameters params_facades_composants 		(
 parameters params_facades_menuiseries 		(
 	
 	---- Parametres -----------------------------------
-	facMenuis_id 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
-	facMenuis_nom 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
-	facMenuis_type 			type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facMenuis_id 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facMenuis_nom 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facMenuis_type 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
 
-	facMenuis_longueur 	type:#floatTab		tabSize:0 			tabSizeVariable:true
-	facMenuis_allege_ht	type:#floatTab		tabSize:0 			tabSizeVariable:true
+	facMenuis_longueur 			type:#floatTab		tabSize:0 			tabSizeVariable:true
+	facMenuis_allege_ht			type:#floatTab		tabSize:0 			tabSizeVariable:true
 		
 	facMenuis_ouvrant_ht		type:#floatTab		tabSize:0 			tabSizeVariable:true
 	facMenuis_ouvrant_sens		type:#intTab			tabSize:0 			tabSizeVariable:true	

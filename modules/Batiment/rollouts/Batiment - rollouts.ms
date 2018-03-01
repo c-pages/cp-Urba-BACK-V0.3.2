@@ -183,7 +183,8 @@ rollout roll_global "Global" width:162 height:341
 	(
 			local mgr_toiture = core.get_mgr_toiture()
 			local toiture = core.get_toiture ()
-			mgr_toiture.ouvrir_dialog		toiture
+			local toit_dialog = mgr_toiture.ouvrir_dialog	()
+		toit_dialog.set_toiture 	toiture
 -- 			dialog.initialiser 	$	toiture 
 		)
 	on ddl_toiture selected _val do 	(
