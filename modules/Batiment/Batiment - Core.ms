@@ -248,7 +248,7 @@ struct str_batiment_core (
 				_facade.ajouter_composant	composant_fin		position:(position+1)
 			)
 			
-			mgr_facades.enregistrer_parametres		_facade
+-- 			mgr_facades.enregistrer_parametres		_facade
 			
 			nv_composant
 		),
@@ -300,6 +300,10 @@ struct str_batiment_core (
 			--- on cherche dans les composants -----------
 			else if mgr_facCompos.get_element_parID	 		_idUnique != undefined then
 				elem	=	mgr_facCompos.get_element_parID	 	_idUnique
+			
+			--- on cherche dans les menuiseries	 -----------
+			else if mgr_facMenuiseries.get_element_parID	 		_idUnique != undefined then
+				elem	=	mgr_facMenuiseries.get_element_parID	 	_idUnique
 			
 			elem
 		),

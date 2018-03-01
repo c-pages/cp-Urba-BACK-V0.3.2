@@ -1,4 +1,9 @@
 
+	
+( ----	FileIn ----
+	
+	
+
 
 --- parametres de base	-----------------------------
 toiture_nom 		= "2 pans"	
@@ -366,10 +371,9 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 
 ------------------CONSTANT ------------------------
 --- on importe le fichier mere des composants ----
-fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
+_str_contructeur = fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
-parametresTMP = toiture_params () 
-str_modelBase 	tooltip:toiture_tooltip		nom:toiture_nom	type:toiture_type	params:(parametresTMP)	dialog:toiture_dialog	fnConstruire:toiture_fnConstruire
+_str_contructeur  	tooltip:toiture_tooltip		nom:toiture_nom	type:toiture_type	params:(toiture_params () )	dialog:toiture_dialog	fnConstruire:toiture_fnConstruire
 
 	
 	
@@ -379,8 +383,9 @@ str_modelBase 	tooltip:toiture_tooltip		nom:toiture_nom	type:toiture_type	params
 	
 	
 	
-	
-	
+) ----	FileIn ----
+
+
 	
 	
 	

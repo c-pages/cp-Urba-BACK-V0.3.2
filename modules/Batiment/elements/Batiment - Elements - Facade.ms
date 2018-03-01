@@ -1,4 +1,4 @@
-
+(
 
 
  
@@ -93,6 +93,13 @@ struct 	str_facade (
 		),
 		
 		
+		--- parametres -------------------
+		fn enregistrer			= mgr.enregistrer_parametres	this,
+		fn charger					= mgr.charger_parametres			this,
+			
+		
+		
+		
 		--sequence ----------		
 		fn get_sequence_longueur	=(
 			local sequence_longueur		=	0
@@ -114,5 +121,5 @@ struct 	str_facade (
 
 
 
-
+)
 

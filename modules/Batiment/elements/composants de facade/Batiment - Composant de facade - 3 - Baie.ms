@@ -1,4 +1,9 @@
 
+	
+( ----	FileIn ----
+	
+	
+
 ------ parametres de base	-----------------------------
 compo_nom 		= "Baie"	
 compo_type		=	#baie
@@ -34,9 +39,9 @@ struct compo_params	(
 rollout compo_dialog "Baie" width:433 height:621
 (
 		local m_rollPrt
-		local		m_plug
+		local	 m_plug
 		local m_compo
-		local m_dialog_menuiserie		= filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout menuiserie.ms"
+		local m_dialog_menuiserie	
 		
 		---- golbal --------------
 	edittext 'edt_nom' "" pos:[3,3] width:187 height:16 align:#left
@@ -168,12 +173,19 @@ rollout compo_dialog "Baie" width:433 height:621
 		actualiser ()
 	on btn_ajouter_traverse pressed do
 		ajouter_traverse	()
+	
+	
+	
 	on btn_editer_element pressed do (
-		createDialog	m_dialog_menuiserie	
+		m_dialog_menuiserie = ( m_plug.core.get_mgr_facMenuiseries () ).ouvrir_dialog ()	
+-- 		createDialog	m_dialog_menuiserie	
 		local menuis = m_compo.params.sequence[ lbx_sequence.selection ]
 		format "menuis :%\n" menuis
-		m_dialog_menuiserie.initialiser	m_plug		menuis
+		m_dialog_menuiserie.initialiser	m_plug		
+		m_dialog_menuiserie.set_menuiserie	menuis
 	)
+	
+	
 	on btn_ajouter_element pressed do (
 		local	mgr_facMenuiseries = m_plug.core.get_mgr_facMenuiseries ()
 		local menuis = mgr_facMenuiseries.creer_element 	()	-- enregistrer:true
@@ -796,13 +808,19 @@ fn compo_fnConstruireBACK  		_plug			_ptsIDs_accroche		_normDir		_composant 	onC
 
 ------------------CONSTANT ------------------------
 --- on importe le fichier mere des composants ----
-fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
+_str_contructeur = fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
-str_modelBase 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire
+_str_contructeur  	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire
 
 	
 	
 	
+	
+	
+	
+) ----	FileIn ----
+
+
 	
 	
 	

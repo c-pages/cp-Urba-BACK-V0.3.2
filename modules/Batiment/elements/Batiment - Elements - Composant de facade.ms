@@ -1,6 +1,6 @@
 
 
- 
+ (
 
 
 struct 	str_composant (
@@ -49,6 +49,10 @@ struct 	str_composant (
 		fn get_manager			= mgr,
 		fn a_desParametres	=	params != undefined,
 		fn get_longueur 		=	if ( a_desParametres () ) then params.longueur else 0,
+		
+		--- parametres -------------------
+		fn enregistrer			= mgr.enregistrer_parametres	this,
+		fn charger					= mgr.charger_parametres			this,
 		
 		--- Initialisations -----------------------
 		fn initialiser_dialog 	_roll_parent 	_plug =(
@@ -144,3 +148,6 @@ struct 	str_composant (
 			 */
 		
 ) ---- fin composant -------------------------------
+
+
+)

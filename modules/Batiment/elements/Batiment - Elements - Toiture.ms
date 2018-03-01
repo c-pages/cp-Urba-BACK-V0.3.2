@@ -1,64 +1,69 @@
-
+(
 
  
 
 
-struct 	str_toiture (
-	
-	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-	private
-		m_debug = true,
-		m_dbgPrefix ="urba | str_toiture",
-		fn debug 	_txt  var:	 param:    =(
-			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
-			catch ()
-		),
-	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-	
-	
-	------ Membres ------------------------------------------------------------------------------
-	public
-		---- Parametres -----------------------------------
-		type					=	undefined,
-		params				=	undefined,
+	struct 	str_toiture (
 		
-	private		
-		---- Rollout -----------------------------------
-		m_dialog 			= undefined,
+		------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+		private
+			m_debug = true,
+			m_dbgPrefix ="urba | str_toiture",
+			fn debug 	_txt  var:	 param:    =(
+				try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
+				catch ()
+			),
+		------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 		
-		---- Fonction virtuelle pure pour construire le composant	----
-		fnVirt_construire	= (),
-		mgr,
 		
-	------ Fonctions ------------------------------------------------------------------------------
-	public
-		---- Mutations -----------------------
-		fn set_dialog 			_dialog 				= ( m_dialog 				= _dialog ),
-		fn set_construire 		_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
-		fn set_manager			_mgr				= ( mgr						= _mgr ),
-		fn set_params			_params			= ( params					= _params ),
-		
-		---- Accessions -----------------------		
-		fn get_typeClasse		= "toiture",
-		fn get_dialog				=	m_dialog,
-		fn a_desParametres	=	params != undefined,
-		fn get_manager						= mgr,
-		
-		--- Initialisations -----------------------
-		fn initialiser_dialog 	_plug 	=(
-			m_dialog.m_plug		= 	_plug
-			m_dialog.m_toiture	=	this
-			m_dialog.mgr_toiture	= _plug.core.get_mgr_toiture ()
-			m_dialog.actualiser()
-		),
-		fn initialiser 		_type	_nom 	=(
+		------ Membres ------------------------------------------------------------------------------
+		public
+			---- Parametres -----------------------------------
+			type					=	undefined,
+			params				=	undefined,
 			
-			type 				=	_type 			
-			nom				=	_nom
+		private		
+			---- Rollout -----------------------------------
+			m_dialog 			= undefined,
 			
-		),
-		
-		---- Construction du mesh 	( fonction virtuelle ) -----------------------
-		fn construire		_plug	 	pts_accroches					= 		fnVirt_construire	 _plug	pts_accroches		this	
-		
-) ---- fin composant -------------------------------
+			---- Fonction virtuelle pure pour construire le composant	----
+			fnVirt_construire	= (),
+			mgr,
+			
+		------ Fonctions ------------------------------------------------------------------------------
+		public
+			---- Mutations -----------------------
+			fn set_dialog 			_dialog 				= ( m_dialog 				= _dialog ),
+			fn set_construire 		_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
+			fn set_manager			_mgr				= ( mgr						= _mgr ),
+			fn set_params			_params			= ( params					= _params ),
+			
+			---- Accessions -----------------------		
+			fn get_typeClasse		= "toiture",
+			fn get_dialog				=	m_dialog,
+			fn a_desParametres	=	params != undefined,
+			fn get_manager						= mgr,
+			
+			--- parametres -------------------
+			fn enregistrer			= mgr.enregistrer_parametres	this,
+			fn charger					= mgr.charger_parametres			this,
+			
+			--- Initialisations -----------------------
+			fn initialiser_dialog 	_plug 	=(
+				m_dialog.m_plug		= 	_plug
+				m_dialog.m_toiture	=	this
+				m_dialog.mgr_toiture	= _plug.core.get_mgr_toiture ()
+				m_dialog.actualiser()
+			),
+			fn initialiser 		_type	_nom 	=(
+				
+				type 				=	_type 			
+				nom				=	_nom
+				
+			),
+			
+			---- Construction du mesh 	( fonction virtuelle ) -----------------------
+			fn construire		_plug	 	pts_accroches					= 		fnVirt_construire	 _plug	pts_accroches		this	
+			
+	) ---- fin composant -------------------------------
+)

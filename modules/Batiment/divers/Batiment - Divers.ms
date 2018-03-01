@@ -4,7 +4,7 @@ struct str_datasToString (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug = true,
+		m_debug = false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:"urba | str_datasToString"	catch (),
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	
@@ -22,6 +22,7 @@ struct str_datasToString (
 		fn array_to_string		_tab	=(
 			local tabString = ""
 			for item in _tab do (
+				debug "array_to_string" var:(classof item)
 				case classof item  of (
 					string:	tabString += item 		as string + separateur_items
 					Integer:	tabString += item 	as string + separateur_items
@@ -64,7 +65,7 @@ struct str_datasToString (
 		
 	public
 		fn get_datas_string 		_element	=(
-			debug "get_datas_string"
+			
 			local txtResult = ""
 			
 			if _element != undefined do (
@@ -86,7 +87,6 @@ struct str_datasToString (
 						)
 						default:						(
 							
-			debug "type" var:type
 								txtResult+=  param as string  + separateur_mutation	+	prop as string  + separateur_params
 						)
 					) -- fin scase --

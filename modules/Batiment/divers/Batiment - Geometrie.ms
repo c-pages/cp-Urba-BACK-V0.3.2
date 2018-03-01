@@ -167,7 +167,7 @@ struct	str_geometrie	(
 			
 			
 			
-			local nvPlan  = filein		"$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Plan.ms"
+			local nvPlan  = include		"$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Plan.ms"
 			nvPlan.creerFrom_2vecs_et_1Point	_vec1	_vec2		_pt_Origine
 			nvPlan
 		),

@@ -115,7 +115,6 @@ struct  str_manager_parametres (
 			
 			index
 		),
-		
 		fn get_element_index 	_element	=(
 			local param_index 
 			if hasProperty	_element	"id" do
@@ -123,7 +122,7 @@ struct  str_manager_parametres (
 			param_index
 		),
 		
-	private		
+		--- enrgistrer un parametre simple ---------
 		fn enregistrer_parametre 	_param_nom		_value		index:	=(
 			
 			local param 				= getProperty	m_plug	  _param_nom
@@ -140,16 +139,72 @@ struct  str_manager_parametres (
 		
 		),
 		
+		--- gestion #PARAMS --------
+		fn enregistrer_paramsElem 	_params	=(			
+			
+			local params_TMP = copy 	_params
+			
+			for prop_params_Nom in  ( getPropNames	_params ) do (
+				
+				local prop_value	= getProperty _params  prop_params_Nom
+				case classOf prop_value of (
+					Array:(
+							local tab_value =#()
+						
+							if prop_value.count > 0 then (
+								
+								-- on a une structure à nous --------
+								if superclassOf prop_value[1] == StructDef then (
+									
+									for _struct in  prop_value do (
+										-- on enregistre l'element sur le plug ------------
+										m_core.enregistrer_element 	_struct
+										
+										-- on ajoute l'id au tableau du params a enrgistrer -------
+										append tab_value 	_struct.id
+									)
+									--- on enregistre les parametres de la structure 
+									
+									prop_value = tab_value
+								) 
+							) 
+							
+						)
+					default:(		)
+				)	---- fin case	---------
+				
+				
+				setProperty params_TMP 	prop_params_Nom 	( prop_value )
+				
+			) -- fin 	for prop_params_Nom   -----
+			local result = mgr_datas.get_datas_string		params_TMP
+			result
+		),
+		fn charger_paramsElem 		_value		_params	=(
+			
+			local params_TMP 	= copy 	_params
+			if _params != undefined do (
+				mgr_datas.set_datas_string		_value		params_TMP
+				
+				for paramNom in getPropNames	params_TMP  do (
+					local propVal = getProperty params_TMP	paramNom
+					if classOf propVal == array do (
+						for i = 1 to propVal.count do (
+							local env_elem = m_core.get_element_parID 	propVal[i]
+							if env_elem != undefined do propVal[i] = env_elem
+						)
+					)
+				)
+			)
+			params_TMP
+		),
+	
 		
-		
-	public
+		public	
 		fn enregistrer_parametres		_element		=(
-			debug "enregistrer_parametres"
-			debug "_element" var:_element
+			
 			local prop_element_Noms 	= getPropNames	_element
 			local elem_index 				= get_element_index		_element
-			
-			debug "elem_index" var:elem_index
 			
 			--- si param deja present, on actualise -------------------
 			for prop_element_Nom in prop_element_Noms do (
@@ -180,8 +235,8 @@ struct  str_manager_parametres (
 					default: 	(
 						
 						---- si on a les #PARAMS ---------------
-						if prop_element_Nom == #params do
-							prop_element = mgr_datas.get_datas_string		prop_element
+						if prop_element_Nom == #params do 							
+							prop_element = enregistrer_paramsElem  	prop_element
 						
 						--- on enregistre -----------
 						enregistrer_parametre 	param_nom		prop_element		index:elem_index
@@ -245,9 +300,15 @@ struct  str_manager_parametres (
 							setProperty	_element	  prop_element_Nom		param_value
 						)
 						default: 	(
+							
 							--- si on a les parametres #PARAMS d'un composant  -----
-							if prop_element_Nom == #params then 									
-								mgr_datas.set_datas_string		param_value		_element.params
+							if prop_element_Nom == #params then (
+								
+								param_value = charger_paramsElem  	param_value			_element.params
+								setProperty	_element	  prop_element_Nom		param_value	
+								
+							)
+							
 							--- sinon on a un parametres classique -----
 							else 	setProperty	_element	  prop_element_Nom		param_value		
 						)
@@ -264,7 +325,6 @@ struct  str_manager_parametres (
 		
 		---- Creation/Suppression etc. ---------------------------------------------------
 		fn creer_element		idUnique:		idConstructeur:		enregistrer:false	=(
-
 			
 			----------------- Structure d'un élément	------------------------------------------
 			m_classeBase	=	fileIn	 m_fichier_classeBase			
@@ -283,6 +343,7 @@ struct  str_manager_parametres (
 			if idUnique != unsupplied do 
 				nvl_element.id = idUnique
 			
+			---	la reference au manager	--------------
 			nvl_element.set_manager 	this
 			
 			-- si besoin on enregistre direct sur le plug -----
@@ -414,7 +475,7 @@ struct  str_manager_parametres (
 		
 		---- Accessions	-------------------
 		fn	get_element_parIndex				_index =(
-			debug "get_element_parIndex"
+-- 			debug "get_element_parIndex"
 			local element
 			local params_ids 	= getProperty	m_plug	  ( m_prefix_nomParametres + "_id" )
 			local param_id		= params_ids[ _index ]
@@ -429,7 +490,7 @@ struct  str_manager_parametres (
 				
 				charger_parametres		element
 			)
-			debug "element PAR INDEX ---------->" var:element
+-- 			debug "element PAR INDEX ---------->" var:element
 			element
 		),
 		fn get_element_parID  		_idUnique	=(
@@ -564,7 +625,7 @@ struct  str_manager_parametres (
 			if dossier_constructeurs != unsupplied do 
 				m_dossier_constructeurs 	= 	dossier_constructeurs
 			if fichier_dialog != unsupplied do 
-				m_dialog 						= 	( fileIn 	( "$userScripts\cp-Urba\modules\Batiment\\rollouts\\" + fichier_dialog ) )
+				m_dialog 						= 	fileIn 	( "$userScripts\cp-Urba\modules\Batiment\\rollouts\\" + fichier_dialog ) 
 			m_prefix_nomParametres 	= 	prefix_nomParametres
 			
 			mgr_datas 						= m_core.get_mgrDatas ()
