@@ -2,14 +2,28 @@
 
 
 	--- les rollout du composant	---------
-	rollout rollout_menuiserie "Menuiserie" width:203 height:233 (
+	rollout rollout_menuiserie "Menuiserie" width:200 height:419
+	(
 		
 		
-			local m_rollPrt
-			local m_compo
 			local m_plug
+		
 			local m_menuiserie
+		
+				---- golbal --------------
+		label 'lbl19' "Longeur:" pos:[11,42] width:49 height:13 align:#left
+		spinner 'spn_longueur' "" pos:[116,42] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+		GroupBox 'grp1' "Global" pos:[6,7] width:187 height:59 align:#left
 			
+		dropdownList 'ddl_type' "" pos:[76,23] width:111 height:21 align:#left
+		label 'lbl51' "Type :" pos:[11,25] width:49 height:13 align:#left
+			
+			---- traverses --------
+			
+-- 		??? 'cust1' "???" pos:[11,90] width:171 height:313 align:#left
+		subRollout 'subroll_parametres' "Paramètres" pos:[5,71] width:187 height:338 align:#left
+
+			/* 
 				---- golbal --------------
 			label 'lbl19' "Longeur:" pos:[11,42] width:49 height:13 align:#left
 			spinner 'spn_longueur' "" pos:[116,42] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
@@ -34,73 +48,57 @@
 			dropdownList 'ddl_ouverture_sens' "" pos:[76,123] width:111 height:21 items:#("Auto", "Droite", "Gauche", "Vers le haut", "Vers le bas") align:#left
 			
 			GroupBox 'grp_ouverture' "Ouverture" pos:[12,147] width:169 height:66 align:#left
-
+ */
 			
 			
-			local btns_ouverture = #( lbl_hauteur, spn_hauteur, grp_ouverture, grp_ouvrant, lbl_ouvert_proba, spn_ouvert_proba, lbl_ouvert_max, spn_ouvert_max, lbl_ouvert_min, spn_ouvert_min, lbl_sens, ddl_ouverture_sens)
-			local	 liste_types = #( "Fixe", "Fenêtre", "Porte pleine", "Porte vitrée", "Porte de garage" )
+-- 			local btns_ouverture 	= #( lbl_hauteur, spn_hauteur, grp_ouverture, grp_ouvrant, lbl_ouvert_proba, spn_ouvert_proba, lbl_ouvert_max, spn_ouvert_max, lbl_ouvert_min, spn_ouvert_min, lbl_sens, ddl_ouverture_sens)
+-- 			local	 liste_types 		= #( #Fixe, #Fenêtre, #PortePleine, #PorteVitree, #Porte_garage )
 			
 			fn actualiser =(
-				local indexTypeTmp = findItem  liste_types	m_menuiserie.type  
-				format "m_menuiserie.type  : %\n"  m_menuiserie.type 
-				format "indexTypeTmp : %\n"  indexTypeTmp
-				ddl_type.selection = indexTypeTmp
 				
-				if ddl_type.selection == 1 then
-					rollout_menuiserie.height		=	90
-				else 
-					rollout_menuiserie.height		=	233
-				
-				btns_ouverture.enabled 	= ddl_type.selection != 1
-				
-				
-				spn_hauteur.indeterminate 		= not ddl_type.selection != 1
-				spn_ouvert_proba.indeterminate	= not ddl_type.selection != 1
-				spn_ouvert_max.indeterminate 	= not ddl_type.selection != 1
-				spn_ouvert_min.indeterminate 	= not ddl_type.selection != 1
+				local menuis_types 			= m_plug.core.get_menuiserie_constructeursTypes ()
+				ddl_type.selection 				= findItem  menuis_types		m_menuiserie.type  
 				
 				spn_longueur.value			=	m_menuiserie.longueur
-				spn_allege.value				=	m_menuiserie.allege_ht
 				
-				if ddl_type.selection != 1 do (
-					spn_hauteur.value 		= m_menuiserie.ouvrant_ht
-					spn_ouvert_proba.value	= m_menuiserie.ouvert_proba
-					spn_ouvert_max.value 	= m_menuiserie.ouvert_min
-					spn_ouvert_min.value 	= m_menuiserie.ouvert_max
+				--- le subRollout des composants	-------
+				for rollAVirer in subroll_parametres.rollouts do
+					removeSubRollout	subroll_parametres	rollAVirer
+				if m_menuiserie != undefined do (
+					local menuis_dialog = m_menuiserie.get_dialog ()
+					addSubRollout	subroll_parametres 	menuis_dialog
+					menuis_dialog.initialiser	 	m_plug
+					menuis_dialog.set_menuiserie	m_menuiserie
 				)
 				
-				
-				if ddl_type.selection == 1 then ddl_ouverture_sens.selection = 0
-														else ddl_ouverture_sens.selection = m_menuiserie.ouvrant_sens
 				
 			)
 			fn initialiser	_plug		=(
 				m_plug 			= _plug
-				ddl_type.items 	= liste_types
+				ddl_type.items 	= m_plug.core.get_menuiserie_constructeursNoms ()
+			)
+			
+			fn redimensionnerFenetre 		_taille 	=(
+				rollout_menuiserie.width 		= 200
+				subroll_parametres.height 		= _taille.y - ( subroll_parametres.pos.y + 9 )
+				
+				
 			)
 			fn set_menuiserie _menuis =(
 				m_menuiserie	=	_menuis
 				actualiser ()
 			)
-	-- 		
-	-- 		on rollout_menuiserie open do
-	-- 			actualiser ()
-			on ddl_type selected _val do (
-				m_menuiserie.type = liste_types[_val]
+			
+			
+		
+		on rollout_menuiserie resized _taille 				do
+			redimensionnerFenetre 	_taille
+		on spn_longueur changed val  		do
+			m_menuiserie.longueur = val
+		on ddl_type selected _val do		(
+			m_plug.core.appliquer_menuiserie_type		m_menuiserie	_val
 				actualiser ()
 			)
-			
-			on ddl_ouverture_sens selected _val do (
-				m_menuiserie.ouvrant_sens = _val
-				actualiser ()
-			)
-			on spn_longueur  changed val  		do		m_menuiserie.longueur = val
-			on spn_allege  changed val 			do		m_menuiserie.allege_ht = val
-			on spn_hauteur  changed val  		do		m_menuiserie.ouvrant_ht = val
-			on spn_ouvert_proba  changed val  do		m_menuiserie.ouvert_proba = val
-			on spn_ouvert_max  changed val  	do		m_menuiserie.ouvert_min = val
-			on spn_ouvert_min  changed val  	do		m_menuiserie.ouvert_max = val
-			
 	)
 	
 	rollout_menuiserie

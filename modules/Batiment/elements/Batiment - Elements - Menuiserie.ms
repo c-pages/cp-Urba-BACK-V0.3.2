@@ -16,25 +16,18 @@
 		private 
 			mgr,
 			
+		---- Parametres -----------------------------------
 		public
-			---- Parametres -----------------------------------
 			id 			="Menuis_",
 			nom 			= "Menuiserie",
+			type 			= undefined ,	----  liste_types = #( "Fixe", "Fenêtre", "Porte pleine", "Porte vitrée", "Porte de garage"   ......   )
 			
-			type 			= "Fixe",	----  liste_types = #( "Fixe", "Fenêtre", "Porte pleine", "Porte vitrée", "Porte de garage" )
-			longueur 	= 0,	
-			allege_ht	=	0,
+			longueur 	= 0,			
 			
-			ouvrant_ht		=	0,
-			ouvrant_sens		=	1,
+			params		=	undefined,
 			
-			ouvert_proba 	= 0,
-			ouvert_min	 	= 0,
-			ouvert_max 		= 0,
-			
-			
+		---- Rollout et fct internes	-----------------------------------
 		private		
-			---- Rollout -----------------------------------
 			m_dialog 			= undefined,
 			
 			---- Fonction virtuelle pure pour construire le composant	----
@@ -45,8 +38,18 @@
 			---- Mutations -----------------------
 			fn set_dialog 			_dialog 				= ( m_dialog 				= _dialog ),
 			fn set_construire 		_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
-			fn set_params			_params			= ( params					= _params ),
-			
+			fn set_params			_params			= ( 
+				params					= copy  _params 
+				if params != undefined do (
+					for propnom in  getpropnames _params do (
+						local val = getproperty	_params	propnom 
+						case classOf val of (
+						array:	setproperty	_params	propnom 	(for elem in val collect copy elem )
+							default:	setproperty	_params	propnom 	(copy val )
+						)
+					)
+				)
+			),
 			---- Accessions -----------------------		
 			fn get_typeClasse		= "facMenis",			
 			fn set_manager		_mgr				= ( mgr						= _mgr ),
@@ -66,53 +69,22 @@
 				m_dialog.mgr_toiture		= _plug.core.get_mgr_toiture ()
 				m_dialog.actualiser()
 			),
-			/* 
-			fn initialiser_dialog 	_roll_parent 	_plug =(
-				if ( a_desParametres () )  do (
-					m_dialog.m_rollPrt		= 	_roll_parent
-					m_dialog.m_compo	=	this
-					m_dialog.m_plug		=	_plug
-					m_dialog.actualiser()
-				)
-			), */
-			fn initialiser 	=(
+			
+			fn initialiser 		_type	_nom 	=(
 				
 				---- id unique ----
 				for i= 1 to 10 do id += ( random 0 9 ) as string	
 				
+				type 				=	_type 			
+				nom				=	_nom
+				
 			),
 			
 			---- Construction du mesh 	-----------------------
-			fn construire		plug		 pt_origine		_normDir		hauteur		= 	(
-				local ptr_geo = plug.core.get_geo ()
-			-------------  constantes 			-----------------------------------------------------------------------------------------------------------------
-				local menuis_largeur				=	plug.const_menuiseries_largeur
-				local menuis_epaisseur			=	plug.const_menuiseries_epaisseur
-				
-			-------------  vecteurs directeurs  		-----------------------------------------------------------------------------------------------------------------
-				local norm_prof			= _normDir 	* rotateZ ( matrix3 1 ) 90		
-						
-				local vec_longueur 	= _normDir 	*	longueur
-				
-				local vec_men_ep				=	norm_prof		*	menuis_epaisseur
-				local vec_men_lrg				=	_normDir		*	menuis_largeur
-				local vec_men_ht				=	[0,0,1] 			*	menuis_largeur
-				
-				local vec_vitrage_ep			=	[0,0,1] 		*	hauteur		
-				
-				
-				
-			-------------   menuiserie du bas		-----------------------------------------------------------------------------------------------------------------
-				local ptTmp				=	pt_origine --vec_men_ht
-				ptr_geo.tube		ptTmp		vec_longueur		vec_men_ht				   vec_men_ep			matID:#menuiserie 
-				
-				
-				
-				
-				
-			),
+			fn construire		_plug		_ptr_baie		 pt_origine	_normDir		_hauteur	= 	
+							fnVirt_construire  _plug		_ptr_baie		 pt_origine	_normDir		_hauteur	  this--,
 
 		
-			on create do initialiser ()
+-- 			on create do initialiser ()
 	) ---- fin composant -------------------------------
 )

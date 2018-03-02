@@ -132,15 +132,9 @@ parameters params_facades_menuiseries 		(
 	facMenuis_nom 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	facMenuis_type 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
 
-	facMenuis_longueur 			type:#floatTab		tabSize:0 			tabSizeVariable:true
-	facMenuis_allege_ht			type:#floatTab		tabSize:0 			tabSizeVariable:true
-		
-	facMenuis_ouvrant_ht		type:#floatTab		tabSize:0 			tabSizeVariable:true
-	facMenuis_ouvrant_sens		type:#intTab			tabSize:0 			tabSizeVariable:true	
+	facMenuis_longueur 			type:#floatTab		tabSize:0 			tabSizeVariable:true	
 	
-	facMenuis_ouvert_proba 	type:#floatTab		tabSize:0 			tabSizeVariable:true
-	facMenuis_ouvert_min	 	type:#floatTab		tabSize:0 			tabSizeVariable:true
-	facMenuis_ouvert_max 		type:#floatTab		tabSize:0 			tabSizeVariable:true
+	facMenuis_params				type:#stringTab		tabSize:0 			tabSizeVariable:true	
 	
 )
 
@@ -155,3 +149,18 @@ parameters params_interieur				rollout:roll_global					(
 	interieur_planchers		type:#boolean			default:false	ui:chk_planchers		animatable:false		invisibleInTV:true
 	
 )
+
+parameters params_aleatoire				rollout:roll_aleatoire					(
+	
+	alea_ouvrant_ouvert_proba	type:#float				default:0.			ui:spn_ouvrt_proba	animatable:false		invisibleInTV:true
+	alea_ouvrant_ouvert_min		type:#float				default:0.			ui:spn_ouvrt_min		animatable:false		invisibleInTV:true
+	alea_ouvrant_ouvert_max		type:#float				default:0.			ui:spn_ouvrt_max		animatable:false		invisibleInTV:true
+	
+	alea_volet_clos_proba			type:#float				default:0.			ui:spn_volet_proba	animatable:false		invisibleInTV:true
+	alea_volet_clos_min				type:#float				default:0.			ui:spn_volet_min		animatable:false		invisibleInTV:true
+	alea_volet_clos_max				type:#float				default:100.		ui:spn_volet_max		animatable:false		invisibleInTV:true
+	
+)
+
+
+
