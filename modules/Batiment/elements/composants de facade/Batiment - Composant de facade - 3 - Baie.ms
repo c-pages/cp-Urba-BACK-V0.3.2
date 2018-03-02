@@ -356,11 +356,8 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		--- menuiserie de gauche	------------
 		local vecTMP_ht 	= ( pts_baie[2] - pts_baie[1] )	- vec_men_ht
 		ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg      vec_men_ep				matID:#menuiserie --	flip:true
-		
-		--- menuiserie de droite	------------
-		local ptTmp			=	pts_baie[3]  -  vec_men_lrg - vec_men_ht
-		ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg		vec_men_ep				matID:#menuiserie 	
-		
+		/* 
+		 */
 		-- si besoin on fait la menuiserie du bas	et le vitrage	---------
 		if sequence.count == 0 then (
 			--- menuiserie du bas ------------
@@ -368,6 +365,9 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 			local vecTMP_longBas 	= vecTMP_long - 2*vec_men_lrg
 			ptr_geo.tube		ptTmp		vecTMP_longBas		-vec_men_ht		vec_men_ep				matID:#menuiserie 
 			
+			--- menuiserie de droite	------------
+			local ptTmp			=	pts_baie[3]  -  vec_men_lrg - vec_men_ht
+			ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg		vec_men_ep				matID:#menuiserie 	
 			
 			--- vitrage	------------
 			local ptTmp					=	pts_baie[1]  +  vec_men_lrg + vec_men_ht + ( (vec_men_ep - vec_vitrage_ep )/ 2 )
@@ -380,35 +380,43 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 			
 			------- la SEQUENCE de MENUISERIE ----------------------------------------------------------------		
 			--- on cherche la longueur pour chaque div de menuiserie	----------
-			local longueur_a_diviser = longueur - 2*menuis_largeur
-			local nbr_div	=	1
+			format "sequence.count : %\n" sequence.count
+			local longueur_a_diviser = longueur - menuis_largeur
+			local nbr_div	=	0
 			for menuis in sequence do (
 				if menuis.longueur  == 0 then
 					nbr_div+=1
 				else longueur_a_diviser -= menuis.longueur 
+				longueur_a_diviser -= menuis_largeur
 			)
-			local longueur_div = longueur_a_diviser / nbr_div
+			if	nbr_div	==	0  do nbr_div	= 1
+			local longueur_div = longueur_a_diviser / nbr_div	--- ( nbr_div - 1 ) * menuis_largeur
 			format "longueur_div : % - nbr_div : %\n" longueur_div   nbr_div
 			
 			
 			-- on construit la sequence	--------------------
-			local pt_menuis = pts_baie[1]  + vec_men_lrg /2
+			local pt_menuis = pts_baie[1]  + vec_men_lrg 
 			local vec_menDivVert_ht 	= ( pts_baie[2] - pts_baie[1] )	- vec_men_ht  
 			
 			for i = 1 to sequence.count	do (
 				local		menuis = sequence[i]
-				if menuis.longueur == 0 do
+				local 	menuis_aReseter = false
+				if menuis.longueur == 0 do (
 					menuis.longueur  = longueur_div -- menuis_largeur
-				
+					menuis_aReseter = true
+				)
 				-- on construit la menuiserie --------
 				menuis.construire	_plug		 pt_menuis		_normDir		hauteur
 				
 				pt_menuis += _normDir * longueur_div
 				
 				--- on construit la menuiserie verticale -----------
-				if i !=  sequence.count do
+-- 				if i !=  sequence.count do
 					ptr_geo.tube		pt_menuis		vec_menDivVert_ht		vec_men_lrg      vec_men_ep				matID:#menuiserie --	flip:true
 				
+				pt_menuis += _normDir * menuis_largeur
+				
+				if menuis_aReseter do menuis.longueur = 0
 			)
 			
 		) --- fin else sequence
