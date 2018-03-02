@@ -1,10 +1,10 @@
-struct str_mgr_material =(
+struct str_mgr_material (
 	
 		
 	----- material ---------------------
-	public
+	private
 		fn creer_material =(
-			local matID 				= ( include "$userScripts\cp-Urba\Modules\Batiment\Batiment - material IDs.ms" )
+			local matID 				= ( include "$userScripts\cp-Urba\Modules\Batiment\divers\Batiment - material IDs.ms" )
 			local matIDs_noms	= getPropNames  	matID
 			local ids 					= for   matID_nom in matIDs_noms collect ( 	getproperty matID	matID_nom )
 			local materials 			= #()
@@ -12,7 +12,7 @@ struct str_mgr_material =(
 				local matID_nom	=	matIDs_noms[i]
 				local val_color 		= 30*i + 30
 				local variante 		= 40
-				append materials    ( CoronaMtl nom:matID_nom  colorDiffuse:[ val_color + random -variante variante  ,  val_color + random -variante variante , val_color   + random -variante variante  ] )				
+				append materials    ( CoronaMtl name:matID_nom  colorDiffuse:[ val_color + random -variante variante  ,  val_color + random -variante variante , val_color   + random -variante variante  ] )				
 			)
 			
 			local nvMat 					= multimaterial  	numsubs:0 --matIDs_noms.count

@@ -33,6 +33,7 @@
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Divers.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Construction.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager Surface.ms"
+include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Material.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager Parametres.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - presets.ms"
 
@@ -72,6 +73,10 @@ struct str_batiment_core (
 		
 		--- construction de la geometrie  -------------------
 		mgr_construction		= str_construction 	(),
+		
+		-- materiaux ----------
+		mgr_mat	=str_mgr_material () ,
+		
 		
 	-------- Les managers des differents éléments du batiment ---------------
 		---- facades	----------
@@ -313,6 +318,10 @@ struct str_batiment_core (
 		
 		
 		
+	----- materiaux ---------
+		fn appliquer_mat = mgr_mat.appliquer_material  m_plug,
+		
+		
 		
 		
 	----- Surface ---------------------
@@ -320,17 +329,15 @@ struct str_batiment_core (
 		fn get_surface_points				=	mgr_surface.get_points	(),
 		fn assigner_surface 		_nodeTHIS		_shape 		=(
 			
--- 			appliquer_material		_nodeTHIS
+			 mgr_mat.appliquer_material  		_nodeTHIS
 			
 			_nodeTHIS.transform = _shape.transform
 			mgr_surface.assigner		_shape
 			
+			
 			actualiser ()
 			
 		),
-		
-		
-		
 		
 		
 	----- rollout	Editeur de  facades -----------------
@@ -381,7 +388,6 @@ struct str_batiment_core (
 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\"  )					\
 														fichier_dialog:				( "Batiment - rollout toiture.ms" )		\
 														prefix_nomParametres:	"toiture" 
-			
 			
 		)
 		

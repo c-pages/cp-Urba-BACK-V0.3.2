@@ -59,29 +59,36 @@ struct str_presets_batiment (
 			local txtResult 					= ""
 			local parametres_noms 		=  getpropNames 	_this
 			for param in parametres_noms where param  != #Editable_Poly and param != #surface_node		do (
-				local prop = ( getProperty  _this 	param )
-				local type = classof prop
 				
-				case type of (
-					MAXScriptFunction:	()
-					ArrayParameter: (
-						local tabString = ""
-						for item in prop do
-							tabString += item as string + separateur_items
-						txtResult+=  param as string  + separateur_mutation 	+	tabString  + separateur_params
+				
+				-- seulement les non constantes	-------
+				if findString	( param as string )  "const" == undefined do (
 					
-					)
-					default:						(
-						txtResult+=  param as string  + separateur_mutation	+	prop as string  + separateur_params
+					local prop = ( getProperty  _this 	param )
+					local type = classof prop
+					
+					case type of (
+						MAXScriptFunction:	()
+						ArrayParameter: (
+							local tabString = ""
+							for item in prop do
+								tabString += item as string + separateur_items
+							txtResult+=  param as string  + separateur_mutation 	+	tabString  + separateur_params
+						
+						)
+						default:						(
+							txtResult+=  param as string  + separateur_mutation	+	prop as string  + separateur_params
+						)
 					)
 				)
-				
 				
 			
 			)
 			txtResult
 		),
 		fn set_params 		_this		_datas =(
+			
+			
 			
 			local params = filterString _datas		separateur_params
 			for paramStrg in params do (
@@ -91,30 +98,34 @@ struct str_presets_batiment (
 				local prop 		= ( getProperty  _this 	nomProp )
 				local type 		= classof prop
 				
-				case type of (
-					MAXScriptFunction:	()
-					string:						( 
-						if param[2] == undefined do param[2]  = ""
-						setproperty 	_this 	nomProp	param[2]
-					)
-					ArrayParameter: (
-						if param[2] != undefined then (
-							local paramTab = filterString 	param[2]		separateur_items
-							if paramTab.count > 0 then (
-								
-								try ( 
-									local param_exe = execute paramTab[1] 
-									if param_exe != undefined then
-										setproperty 	_this 	nomProp		( for param in  paramTab collect (execute param ) )
-									else setproperty 	_this 	nomProp		( paramTab ) 
-								) catch setproperty 	_this 	nomProp		( paramTab ) 
-								
-							)	else 	setproperty 	_this 	nomProp		#()
-						) else 
-							setproperty 	_this 	nomProp		#()
-					)
-					default:						(
-						setproperty 	_this 	nomProp	(execute param[2])
+				
+				-- seulement les non constantes	-------
+				if findString	( nomProp as string ) "const" == undefined do (
+					case type of (
+						MAXScriptFunction:	()
+						string:						( 
+							if param[2] == undefined do param[2]  = ""
+							setproperty 	_this 	nomProp	param[2]
+						)
+						ArrayParameter: (
+							if param[2] != undefined then (
+								local paramTab = filterString 	param[2]		separateur_items
+								if paramTab.count > 0 then (
+									
+									try ( 
+										local param_exe = execute paramTab[1] 
+										if param_exe != undefined then
+											setproperty 	_this 	nomProp		( for param in  paramTab collect (execute param ) )
+										else setproperty 	_this 	nomProp		( paramTab ) 
+									) catch setproperty 	_this 	nomProp		( paramTab ) 
+									
+								)	else 	setproperty 	_this 	nomProp		#()
+							) else 
+								setproperty 	_this 	nomProp		#()
+						)
+						default:						(
+							setproperty 	_this 	nomProp	(execute param[2])
+						)
 					)
 				)
 			)

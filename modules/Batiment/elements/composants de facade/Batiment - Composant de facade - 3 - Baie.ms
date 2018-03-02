@@ -226,8 +226,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local ptr_params		  	= 	_composant.params
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 	
-	-------------  constantes locales			-----------------------------------------------------------------------------------------------------------------
-		local decalage_epaisseur 		= 1
+	-------------  constantes 			-----------------------------------------------------------------------------------------------------------------
 		local menuis_largeur				=	ptr_plug.const_menuiseries_largeur
 		local menuis_epaisseur			=	ptr_plug.const_menuiseries_epaisseur
 		local menuis_allege_ht			=	ptr_plug.const_menuiseries_allege_ht
@@ -237,31 +236,34 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local	etage_hauteur				=	ptr_plug.etages_hauteur 
 		local longueur						= ptr_params.longueur
 		local allege_hauteur 		 		= ptr_params.allege_hauteur
-		local hauteur						= if ptr_params.hauteur == 0 	then	etage_hauteur - decalage_epaisseur
+		local hauteur						= if ptr_params.hauteur == 0 	then	etage_hauteur --	- decalage_epaisseur
 																									else 	ptr_params.hauteur + allege_hauteur
 		local profondeur					= ptr_params.profondeur		
 		local	retombe						= etage_hauteur - (allege_hauteur + hauteur ) 
-	
+		
 		local	sequence						= ptr_params.sequence
-	
-		--- Vecteurs directeurs ------------
-		local vec_ep_dalle 	= [0,0,1] 		* 	ptr_plug.const_dalle_epaisseur		
+		
+		local	vitrage_ep						=	ptr_plug.const_vitrage_epaisseur
+		
+	-------------  VECTEURS DIRECTEURS  		-----------------------------------------------------------------------------------------------------------------
+		local norm_prof			= _normDir 	* rotateZ ( matrix3 1 ) 90		
+		
+		local vec_ep_dalle 	= 	[0,0,1] 		* 	ptr_plug.const_dalle_epaisseur		
 		local vec_allege 		= 	[0,0,1] 		*	allege_hauteur
-		local vec_rtmb 			= [0,0,1] 		*	retombe
-		local norm_prof			= _normDir 	* rotateZ ( matrix3 1 ) 90				
-		local vec_ht 				= 	[0,0,1] * 	 hauteur				
-		local vec_longueur 	= _normDir * longueur
-		local norm_prof			= _normDir * rotateZ ( matrix3 1 ) 90
-		local vec_murEp		=	norm_prof * ptr_plug.const_murExt_epaisseur
+		local vec_rtmb 			= 	[0,0,1] 		*	retombe		
+		local vec_ht 				= 	[0,0,1] 		*	hauteur				
+		local vec_longueur 	= _normDir 	*	longueur
+		local vec_murEp		=	norm_prof *	ptr_plug.const_murExt_epaisseur
 		
-		local vec_men_nu				=  norm_prof * profondeur
-		local vec_men_ep				= norm_prof		*	menuis_epaisseur
+		local vec_men_nu				=  norm_prof 	*	profondeur
+		local vec_men_ep				=	norm_prof		*	menuis_epaisseur
 		local vec_men_lrg				=	_normDir		*	menuis_largeur
-		local vec_men_ht				=	[0,0,1] 		*	menuis_largeur
-		local vec_men_allegeHt		=	[0,0,1] 		*	menuis_allege_ht
-		local vec_men_travHt		=	[0,0,1] 		*	menuis_trav_ht
+		local vec_men_ht				=	[0,0,1] 			*	menuis_largeur
+		local vec_men_allegeHt		=	[0,0,1] 			*	menuis_allege_ht
+		local vec_men_travHt		=	[0,0,1] 			*	menuis_trav_ht
 		
-			
+		local vec_vitrage_ep			=	norm_prof		*	vitrage_ep
+		
 		--- Points d'accroche ------------
 		local id_ptAccroche_1 	= _ptsIDs_accroche[1]
 		local id_ptAccroche_2 	= _ptsIDs_accroche[2]
@@ -307,8 +309,8 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local pt_ht 	= ptAccroche_3
 		
 		local pt_1 		= pt_bas	+  vec_longueur
-		local pt_2 		= pt_1		+  vec_allege 	+ [0,0,decalage_epaisseur]
-		local pt_3 		= pt_bas	+ 	vec_allege 	+ [0,0,decalage_epaisseur]
+		local pt_2 		= pt_1		+  vec_allege 		--		+ [0,0,decalage_epaisseur]
+		local pt_3 		= pt_bas	+ 	vec_allege 		--		+ [0,0,decalage_epaisseur]
 		
 		local pt_4 		= pt_bas	+ 	vec_ht
 		local pt_5 		= pt_4		+ 	vec_longueur				
@@ -323,19 +325,19 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local pts_ids 	= ptr_geo.points 	pts_pos	
 		
 		--- Result -------------
-		pt_result_3 = pts_ids[6]
+		pt_result_3 		= pts_ids[6]
 		
 		
-		----- pour plus tard, ...  le raccord avec les menuiseries, et return -----
-		local pts_baie = #( pt_3+ vec_men_nu, pt_4+ vec_men_nu, pt_5+ vec_men_nu, pt_2 + vec_men_nu)
+		----- pour plus loin dans le code ...  le raccord avec les menuiseries, -----
+		local pts_baie	= #( pt_3+ vec_men_nu, pt_4+ vec_men_nu, pt_5+ vec_men_nu, pt_2 + vec_men_nu)
 		
 		
 		-------	Creation des faces 	--------
 		ptr_geo.face 		#(	id_ptAccroche_2, 	pts_ids[1], 		pts_ids[2], 		pts_ids[3] )		matID:#mur  
 		
 		local nvlFace = ptr_geo.face 		#(	pts_ids[3], 		pts_ids[2], 		pts_ids[8] , 	pts_ids[7] )		 	
-		if  onConstruitLaDalle	then		ptr_geo.set_matID 	nvlFace	#menuiserie
-										else 		ptr_geo.set_matID 	nvlFace	#mur
+		if allege_hauteur	!= 0 	then		ptr_geo.set_matID 	nvlFace	#menuiserie
+											else 		ptr_geo.set_matID 	nvlFace	#mur
 		
 		ptr_geo.face 		#(	pts_ids[10], 		pts_ids[9], 		pts_ids[5], 		pts_ids[4] )				matID:#mur 
 		ptr_geo.face 		#(	pts_ids[4], 		pts_ids[5], 		pts_ids[6], 		id_ptAccroche_3 )		matID:#mur 
@@ -352,7 +354,6 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		ptr_geo.tube		ptTmp		vecTMP_long		vec_men_ht				   vec_men_ep			matID:#menuiserie 
 		
 		--- menuiserie de gauche	------------
--- 		local ptTmp				=	pts_baie[2] -  vec_men_ht
 		local vecTMP_ht 	= ( pts_baie[2] - pts_baie[1] )	- vec_men_ht
 		ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg      vec_men_ep				matID:#menuiserie --	flip:true
 		
@@ -360,22 +361,57 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local ptTmp			=	pts_baie[3]  -  vec_men_lrg - vec_men_ht
 		ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg		vec_men_ep				matID:#menuiserie 	
 		
-		/*  */
-		/* 
-		local vecTMP_ht = ( pts_baie[2] - pts_baie[1] )	
-		ptr_geo.tube		pts_baie[1]		vecTMP_ht		vec_men_ep		vec_men_lrg		matID:#menuiserie 	
-		local vecTMP_ht = ( pts_baie[4] - pts_baie[3] )
-		ptr_geo.tube		pts_baie[3]		vecTMP_ht		vec_men_ep		-vec_men_lrg		matID:#menuiserie 		
-		local ptTmp	=	pts_baie[2] + vec_men_lrg
-		local vecTMP_ht = (pts_baie[3] - vec_men_lrg ) - ptTmp
-		ptr_geo.tube		ptTmp	vecTMP_ht		vec_men_ep		-vec_men_ht		matID:#menuiserie 	
-		 */
 		-- si besoin on fait la menuiserie du bas	et le vitrage	---------
-		if sequence.count == 0 do (
--- 			construire_menuiseries	(pts_baie[4]-vec_men_lrg )	( (pts_baie[1]+vec_men_lrg ) - (pts_baie[4]-vec_men_lrg )  )		vec_men_ep		vec_men_ht	ptr_geo
+		if sequence.count == 0 then (
+			--- menuiserie du bas ------------
+			local ptTmp					=	pts_baie[1]  +  vec_men_lrg + vec_men_ht
+			local vecTMP_longBas 	= vecTMP_long - 2*vec_men_lrg
+			ptr_geo.tube		ptTmp		vecTMP_longBas		-vec_men_ht		vec_men_ep				matID:#menuiserie 
 			
-		)
-		----- la sequence de menuiserie -------------
+			
+			--- vitrage	------------
+			local ptTmp					=	pts_baie[1]  +  vec_men_lrg + vec_men_ht + ( (vec_men_ep - vec_vitrage_ep )/ 2 )
+			local vecTMP_htVitr		= vecTMP_ht 	- 	vec_men_ht
+			ptr_geo.tube		ptTmp		vecTMP_htVitr		vecTMP_longBas	vec_vitrage_ep				matID:#vitrage 
+			
+		)  else  (
+		
+			
+			
+			------- la SEQUENCE de MENUISERIE ----------------------------------------------------------------		
+			--- on cherche la longueur pour chaque div de menuiserie	----------
+			local longueur_a_diviser = longueur - 2*menuis_largeur
+			local nbr_div	=	1
+			for menuis in sequence do (
+				if menuis.longueur  == 0 then
+					nbr_div+=1
+				else longueur_a_diviser -= menuis.longueur 
+			)
+			local longueur_div = longueur_a_diviser / nbr_div
+			format "longueur_div : % - nbr_div : %\n" longueur_div   nbr_div
+			
+			
+			-- on construit la sequence	--------------------
+			local pt_menuis = pts_baie[1]  + vec_men_lrg /2
+			local vec_menDivVert_ht 	= ( pts_baie[2] - pts_baie[1] )	- vec_men_ht  
+			
+			for i = 1 to sequence.count	do (
+				local		menuis = sequence[i]
+				if menuis.longueur == 0 do
+					menuis.longueur  = longueur_div -- menuis_largeur
+				
+				-- on construit la menuiserie --------
+				menuis.construire	_plug		 pt_menuis		_normDir		hauteur
+				
+				pt_menuis += _normDir * longueur_div
+				
+				--- on construit la menuiserie verticale -----------
+				if i !=  sequence.count do
+					ptr_geo.tube		pt_menuis		vec_menDivVert_ht		vec_men_lrg      vec_men_ep				matID:#menuiserie --	flip:true
+				
+			)
+			
+		) --- fin else sequence
 		/* 
 		local pt_1		= pt_A		+ 	vec_men_lrg 	
 		local pt_2		= pt_B		- 	vec_men_lrg 	

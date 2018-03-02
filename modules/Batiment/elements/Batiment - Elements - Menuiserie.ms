@@ -82,8 +82,35 @@
 				
 			),
 			
-			---- Construction du mesh 	( fonction virtuelle ) -----------------------
-			fn construire		_plug	 	pts_accroches					= 		fnVirt_construire	 _plug	pts_accroches		this	,
+			---- Construction du mesh 	-----------------------
+			fn construire		plug		 pt_origine		_normDir		hauteur		= 	(
+				local ptr_geo = plug.core.get_geo ()
+			-------------  constantes 			-----------------------------------------------------------------------------------------------------------------
+				local menuis_largeur				=	plug.const_menuiseries_largeur
+				local menuis_epaisseur			=	plug.const_menuiseries_epaisseur
+				
+			-------------  vecteurs directeurs  		-----------------------------------------------------------------------------------------------------------------
+				local norm_prof			= _normDir 	* rotateZ ( matrix3 1 ) 90		
+						
+				local vec_longueur 	= _normDir 	*	longueur
+				
+				local vec_men_ep				=	norm_prof		*	menuis_epaisseur
+				local vec_men_lrg				=	_normDir		*	menuis_largeur
+				local vec_men_ht				=	[0,0,1] 			*	menuis_largeur
+				
+				local vec_vitrage_ep			=	[0,0,1] 		*	hauteur		
+				
+				
+				
+			-------------   menuiserie du bas		-----------------------------------------------------------------------------------------------------------------
+				local ptTmp				=	pt_origine --vec_men_ht
+				ptr_geo.tube		ptTmp		vec_longueur		vec_men_ht				   vec_men_ep			matID:#menuiserie 
+				
+				
+				
+				
+				
+			),
 
 		
 			on create do initialiser ()

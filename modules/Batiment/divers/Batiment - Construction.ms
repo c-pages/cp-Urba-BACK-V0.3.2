@@ -252,17 +252,21 @@ struct str_construction (
 			
 			
 			--- gestion balcon	------
-			local balcon_ptID_debut, 		balcon_pts_debut, 	balcon_aConstruire
+			local balcon_ptID_debut
+			local balcon_pts_debut
+			local balcon_aConstruire = undefined
 			
 			----gestion loggia -------
-			local	 loggia_ptID_debut, 		loggia_pts_debut, 		loggia_aConstruire
+			local	 loggia_ptID_debut
+			local loggia_pts_debut
+			local loggia_aConstruire = undefined
 			
 			local profondeurFacade = 0
 			
 			---  on créé la facade avec la sequence total --------
 			for composant in sequenceTotal do (
 				
-				case composant.type of (
+				case composant.type as name of (
 					
 					
 					#balcon:(
@@ -284,17 +288,18 @@ struct str_construction (
 						loggia_aConstruire 	= composant
 						profondeurFacade 		= loggia_aConstruire.params.profondeur
 					-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir	--	est_DansBalcon:(balcon_aConstruire != undefined )  -- profondeur:profondeurFacade
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir	onConstruitLaDalle:false
 						
 						loggia_pts_debut 		= ptsIDs_accroche
+					
 					)
 					#loggiaFin:(
 						local		pt_loggia_debut			=	polyop.getVert 	m_plug.delegate		loggia_pts_debut[1]	
 						local		pt_loggia_fin					=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
-						composant.params.longueur 		= 		(	distance	pt_loggia_debut 	pt_loggia_fin	)
+						composant.params.longueur 		= 	(	distance	pt_loggia_debut 	pt_loggia_fin	)
 
 						composant.params.profondeur 	= 		loggia_aConstruire.params.profondeur
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		onConstruitLaDalle:false
 						composant.params.longueur 		= 		0
 						loggia_aConstruire = undefined
 -- 						profondeurFacade 		= 0
@@ -304,7 +309,8 @@ struct str_construction (
 					
 					
 					default:(
-						local onConstruitLaDalle = (balcon_aConstruire == undefined )  and (loggia_aConstruire == undefined ) 
+						local onConstruitLaDalle = ( balcon_aConstruire == undefined )  and  ( loggia_aConstruire == undefined )
+						
 						-----	construction geometrie du composant	----------
 						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		onConstruitLaDalle:onConstruitLaDalle			-- profondeur:profondeurFacade
 						

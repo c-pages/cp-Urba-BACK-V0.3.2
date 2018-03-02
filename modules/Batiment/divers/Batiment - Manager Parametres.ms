@@ -308,7 +308,10 @@ struct  str_manager_parametres (
 								param_value = charger_paramsElem  	param_value			_element.params
 								setProperty	_element	  prop_element_Nom		param_value	
 								
-							)
+							)	
+							-- si on a un type -------------
+							else if prop_element_Nom == #type then 
+								setProperty	_element	  prop_element_Nom		(  param_value	as name )
 							
 							--- sinon on a un parametres classique -----
 							else 	setProperty	_element	  prop_element_Nom		param_value		
