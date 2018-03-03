@@ -57,7 +57,7 @@ struct 	str_composant (
 		---- Accessions -----------------------
 		fn get_typeClasse		= "facCompo",
 		fn get_dialog				=	m_dialog,
-		fn get_manager			= mgr,
+-- 		fn get_manager			= mgr,
 		fn a_desParametres	=	params != undefined,
 		fn get_longueur 		=	if ( a_desParametres () ) then params.longueur else 0,
 		

@@ -141,43 +141,42 @@ struct  str_manager_parametres (
 		
 		--- gestion #PARAMS --------
 		fn enregistrer_paramsElem 	_params	=(			
+			local result 
 			
-			local params_TMP = copy 	_params
-			
-			for prop_params_Nom in  ( getPropNames	_params ) do (
+			if _params != undefined then (
+				local params_TMP = copy 	_params
 				
-				local prop_value	= getProperty _params  prop_params_Nom
-				case classOf prop_value of (
-					Array:(
-							local tab_value =#()
-						
-							if prop_value.count > 0 then (
-								
-								-- on a une structure à nous --------
-								if superclassOf prop_value[1] == StructDef then (
-									
-									for _struct in  prop_value do (
-										-- on enregistre l'element sur le plug ------------
-										m_core.enregistrer_element 	_struct
-										
-										-- on ajoute l'id au tableau du params a enrgistrer -------
-										append tab_value 	_struct.id
-									)
-									--- on enregistre les parametres de la structure 
-									
-									prop_value = tab_value
-								) 
-							) 
+				for prop_params_Nom in  ( getPropNames	_params ) do (
+					
+					local prop_value	= getProperty _params  prop_params_Nom
+					case classOf prop_value of (
+						Array:(
+								local tab_value =#()
 							
-						)
-					default:(		)
-				)	---- fin case	---------
-				
-				
-				setProperty params_TMP 	prop_params_Nom 	( prop_value )
-				
-			) -- fin 	for prop_params_Nom   -----
-			local result = mgr_datas.get_datas_string		params_TMP
+								if prop_value.count > 0 then (								
+									-- on a une structure à nous --------
+									if superclassOf prop_value[1] == StructDef then (
+										
+										for _struct in  prop_value do (
+											-- on enregistre l'element sur le plug ------------
+											m_core.enregistrer_element 	_struct
+											
+											-- on ajoute l'id au tableau du params a enrgistrer -------
+											append tab_value 	_struct.id
+										)
+										--- on enregistre les parametres de la structure 									
+										prop_value = tab_value
+									) 
+								) 							
+							)
+						default:()
+					)	---- fin case	---------
+					
+					setProperty params_TMP 	prop_params_Nom 	( prop_value )
+					
+				) -- fin 	for prop_params_Nom   -----
+				result = mgr_datas.get_datas_string		params_TMP
+			) else result = "undefined"
 			result
 		),
 		fn charger_paramsElem 		_value		_params	=(
@@ -322,7 +321,18 @@ struct  str_manager_parametres (
 		),
 		
 		
-		
+		fn appliquer_type  _element	_type =(
+			
+			----- facon constructeur --------
+			-- si on a un type et non pas un index	de constructeur -------------
+			if classof 	_type == name or classof _type == string	do
+				_type = get_constructeur_index		_type	
+			
+			if _type != 0 do
+				m_constructeursBase[ idConstructeur ].initialiser		_element
+			
+			_element
+		),
 		
 		
 		
@@ -372,25 +382,11 @@ struct  str_manager_parametres (
 			else 	nvl_element = creer_element	enregistrer:enregistrer
 			
 			
-			debug "nvl_element -	AVANT" var:nvl_element
-			
-			debug "nvl_element.id -	avant" var:nvl_element.id
 			-- on charge dans le nvl element les parametre de l'element à dupliquer ------------
 			local id_nvl_elementBACK 	= nvl_element.id
 			nvl_element.id 						= _element.id
-			
-			debug "nvl_element.id -	avant 2" var:nvl_element.id
-			
 			charger_parametres	nvl_element
-			
-			debug "nvl_element.id -	avant 3" var:nvl_element.id
-			
 			nvl_element.id 						= id_nvl_elementBACK
-			
-			debug "nvl_element.id -	avant 4" var:nvl_element.id
-			
-			debug "nvl_element -	APRES" var:nvl_element
-			
 			enregistrer_parametres	nvl_element
 			
 			nvl_element
