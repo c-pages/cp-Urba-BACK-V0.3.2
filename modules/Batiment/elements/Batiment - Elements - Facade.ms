@@ -23,6 +23,8 @@ struct 	str_facade (
 	private
 		mgr,
 		
+		m_prefix_nomParametres = "facades_",
+		
 	public
 		---- Base	-----------
 		id							=	"ID_facade_",
@@ -51,9 +53,8 @@ struct 	str_facade (
 	---------- INTERFACE	--------------------------------------------------------------------------------------
 	public
 		fn get_typeClasse		= "facade",
-		fn set_manager		_mgr				= ( mgr						= _mgr ),
-		
-		fn get_manager						= mgr,
+-- 		fn set_manager		_mgr	= ( mgr	= _mgr ),		
+-- 		fn get_manager					= mgr,
 		
 		---- Composants -----------------
 		fn get_composant_parIDUnique		_IDUnique	=(
@@ -92,12 +93,12 @@ struct 	str_facade (
 			insertItem compoTemp		sequence 				(_index+1)			
 		),
 		
-		
+		/* 
 		--- parametres -------------------
 		fn enregistrer			= mgr.enregistrer_parametres	this,
 		fn charger					= mgr.charger_parametres			this,
 			
-		
+		*/
 		
 		
 		--sequence ----------		
@@ -107,6 +108,55 @@ struct 	str_facade (
 				sequence_longueur	+=	compo.get_longueur ()
 			sequence_longueur
 		),
+		
+		
+		
+			
+		
+		/* 
+		
+		
+		------ parametres -----------
+		fn enregistrer 	_plug 	=(
+			
+			-- on check si l'element est deja present ou a ajouter ------------
+			local index_param	= _plug.core.get_element_index_parID 	id
+			
+			--- on parse tout les parametres à enregistrer	-----------
+			for prop_nom in getPropNames	this do (
+				
+				--- en fonction de la classe, on fait differents trucs --------
+				local val
+				case prop_nom of (
+					#sequence: 	(	
+											val =#()
+											for elem in sequence do (
+												elem.enregistrer ()
+												append val elem.id
+											)
+											val = ( _plug.core.get_mgr_datas () ).array_to_string		val
+						)
+					default: 		val = getProperty	this  prop_nom					
+				) -- fin case
+				
+				-- on enregistre le parametre sur le plug ----------
+				local nom_dans_parametres = m_prefix_nomParametres + prop_nom
+				local parametre = getproperty   _plug  	nom_dans_parametres
+				if index_param == 0 then 
+					append	parametre	val
+				else 
+					parametre[ index_param ] = 	val
+				
+			)-- fin for --------
+		),
+		fn charger 	_plug	=(
+			
+		),
+		
+		
+		 */
+		
+		
 		
 		fn initialiser 		 		=	(
 			---- id unique ----
