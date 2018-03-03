@@ -260,6 +260,20 @@ struct str_batiment_core (
 		fn get_composants_bouton_index	_type	=		mgr_facCompos.get_constructeur_index		_type	visibles:true,
 		
 		
+	---- menuiseries	---------------
+	public
+		fn get_menuiserie_constructeursNoms = for constr in ( mgr_facMenuiseries.get_constructeurs () ) collect constr.nom,
+		fn get_menuiserie_constructeursTypes = for constr in ( mgr_facMenuiseries.get_constructeurs () ) collect constr.type,
+		fn creer_menuiserie		_baie_parent			_position	=(
+			
+			local nv_menuis = mgr_facMenuiseries.creer_element 	idConstructeur:#fixe
+			append		_baie_parent.params.sequence	nv_menuis
+			
+			nv_menuis
+		),
+		fn appliquer_menuiserie_type  _menuis		_index_type	=		mgr_facMenuiseries.appliquer_type  	_menuis		_index_type	,
+		
+		
 		
 	---- toiture	---------------
 	public
@@ -395,6 +409,7 @@ struct str_batiment_core (
 			
 			mgr_facMenuiseries.initialiser plug:m_plug					\
 														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Menuiserie.ms" )	\
+														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\menuiseries\\" )					\
 														fichier_dialog:				( "Batiment - rollout menuiserie.ms" )		\
 														prefix_nomParametres:	"facMenuis"
 			

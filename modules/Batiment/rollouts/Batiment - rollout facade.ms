@@ -73,7 +73,7 @@
 				
 		label 'lbl95' "Etages:" pos:[12,39] width:43 height:15 align:#left
 				
-		subRollout 'subroll_parametres' "Parametres" pos:[267,28] width:210 height:208 align:#left
+		subRollout 'subroll_parametres' "Paramètres" pos:[267,28] width:210 height:208 align:#left
 				
 		GroupBox 'grp_prop' "Propriétés" pos:[255,10] width:225 height:238 align:#left
 				

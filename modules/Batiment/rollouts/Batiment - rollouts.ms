@@ -255,6 +255,28 @@ rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
 	on spn_aligner 	changed state  		do	core.actualiser ()
 	
 )
+
+rollout roll_aleatoire "Aléatoire" 	rolledUp:true		
+(
+	GroupBox 'grp_ouvrants' "Ouverture fenetres" pos:[6,5] width:162 height:71 align:#left
+	label 'lbl_ouvrt_proba' "Probabilité (%):" pos:[15,22] width:80 height:13 align:#left
+	spinner 'spn_ouvrt_proba' "" pos:[88,22] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	label 'lbl_ouvrt_max' "Maximum (%):" pos:[15,52] width:80 height:13 align:#left
+	spinner 'spn_ouvrt_max' "" pos:[88,52] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	label 'lbl_ouvrt_min' "Minimum (%):" pos:[15,37] width:80 height:13 align:#left
+	spinner 'spn_ouvrt_min' "" pos:[88,37] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	
+	GroupBox 'grp_volet' "Fermeture volets" pos:[6,80] width:162 height:71 align:#left
+	label 'lbl_volet_proba' "Probabilité (%):" pos:[16,97] width:80 height:13 align:#left
+	spinner 'spn_volet_proba' "" pos:[88,97] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	label 'lbl_volet_max' "Maximum (%):" pos:[16,127] width:80 height:13 align:#left
+	spinner 'spn_volet_max' "" pos:[88,127] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	label 'lbl_volet_min' "Minimum (%):" pos:[16,112] width:80 height:13 align:#left
+	spinner 'spn_volet_min' "" pos:[88,112] width:72 height:16 range:[0,100,0] scale:1 align:#left
+)
+
+
+
 rollout roll_viewport 			"Viewport"		rolledUp:true		(
 	label 'lbl16' "Surface:" pos:[5,90] width:43 height:14 align:#left
 	label 'lbl_surface' "" pos:[85,90] width:78 height:16 align:#left 
