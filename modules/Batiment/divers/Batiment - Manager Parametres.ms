@@ -201,8 +201,8 @@ struct  str_manager_parametres (
 		
 		public	
 		fn enregistrer_parametres		_element		=(
-			debug "enregistrer_parametres"
-			debug "_element" var:_element
+			debug "###		enregistrer_parametres		###"
+			debug "###		_element" var:_element
 			local prop_element_Noms 	= getPropNames	_element
 			local elem_index 				= get_element_index		_element
 			
@@ -235,11 +235,9 @@ struct  str_manager_parametres (
 					default: 	(
 						
 						---- si on a les #PARAMS ---------------
-						if prop_element_Nom == #params do
-							if prop_element != undefined then
-								prop_element = enregistrer_paramsElem  	prop_element
-						else prop_element ="undefined"
-							
+						if prop_element_Nom == #params do 							
+							prop_element = enregistrer_paramsElem  	prop_element
+						
 						--- on enregistre -----------
 						enregistrer_parametre 	param_nom		prop_element		index:elem_index
 						
@@ -248,8 +246,7 @@ struct  str_manager_parametres (
 			)-- fin for
 		),
 		fn charger_parametres 			_element		=(
-			debug "charger_parametres"
-			debug "_element" var:_element
+			
 			local prop_element_Noms = getPropNames	_element
 			
 			--- si param deja present, on actualise -------------------
@@ -306,9 +303,8 @@ struct  str_manager_parametres (
 							
 							--- si on a les parametres #PARAMS d'un composant  -----
 							if prop_element_Nom == #params then (
-								if param_value != "undefined" then 
-									param_value = charger_paramsElem  	param_value			_element.params
-								else param_value = undefined
+								
+								param_value = charger_paramsElem  	param_value			_element.params
 								setProperty	_element	  prop_element_Nom		param_value	
 								
 							)	
@@ -329,20 +325,9 @@ struct  str_manager_parametres (
 		
 		
 		
-		fn appliquer_type  _element	_type	=(
-			-- si on a un type et non pas un index	de constructeur -------------
-				if classof 	_type == name or classof _type == string	do
-					_type = get_constructeur_index		_type			
-				if _type != 0 do
-					m_constructeursBase[ _type ].initialiser		_element
-				
-				_element
-		),
-		
-		
 		
 		---- Creation/Suppression etc. ---------------------------------------------------
-		fn creer_element			idUnique:		idConstructeur:		enregistrer:false	=(
+		fn creer_element		idUnique:		idConstructeur:		enregistrer:false	=(
 			
 			----------------- Structure d'un élément	------------------------------------------
 			m_classeBase	=	fileIn	 m_fichier_classeBase			
@@ -361,8 +346,8 @@ struct  str_manager_parametres (
 			if idUnique != unsupplied do 
 				nvl_element.id = idUnique
 			
-			---	la reference au manager	--------------
-			nvl_element.set_manager 	this
+-- 			---	la reference au manager	--------------
+-- 			nvl_element.set_manager 	this
 			
 			-- si besoin on enregistre direct sur le plug -----
 			if enregistrer do enregistrer_parametres	nvl_element
@@ -386,13 +371,27 @@ struct  str_manager_parametres (
 				nvl_element = creer_element	enregistrer:enregistrer	idConstructeur:( _element.type )
 			else 	nvl_element = creer_element	enregistrer:enregistrer
 			
+			
+			debug "nvl_element -	AVANT" var:nvl_element
+			
+			debug "nvl_element.id -	avant" var:nvl_element.id
 			-- on charge dans le nvl element les parametre de l'element à dupliquer ------------
 			local id_nvl_elementBACK 	= nvl_element.id
 			nvl_element.id 						= _element.id
+			
+			debug "nvl_element.id -	avant 2" var:nvl_element.id
+			
 			charger_parametres	nvl_element
+			
+			debug "nvl_element.id -	avant 3" var:nvl_element.id
+			
 			nvl_element.id 						= id_nvl_elementBACK
 			
+			debug "nvl_element.id -	avant 4" var:nvl_element.id
 			
+			debug "nvl_element -	APRES" var:nvl_element
+			
+			enregistrer_parametres	nvl_element
 			
 			nvl_element
 			
@@ -427,29 +426,8 @@ struct  str_manager_parametres (
 				
 				---- si on a les #PARAMS ---------------
 				if prop_element_Nom == #params then (
-					
-					
-					if prop_element != undefined then (
-						
-						nvl_element.params = copy  prop_element
-						for propNomPARAMS in getPropNames nvl_element.params do (
-							local val = getProperty nvl_element.params	propNomPARAMS
-							case classOf val of (
-								array:	(
-									
-									setproperty	nvl_element.params		propNomPARAMS 	(for elem in val collect copy elem )
-									
-								)
-								default:	setproperty	nvl_element.params		propNomPARAMS 	(copy val )
-							)
-						)
-						
-					) else nvl_element.params = undefined
-					
-					
-					
-					
-					
+					prop_element = mgr_datas.get_datas_string		prop_element
+					mgr_datas.set_datas_string		prop_element		nvl_element.params
 					
 				) else (
 				----  sinon en fonction de la classe du param ---------------
@@ -653,10 +631,10 @@ struct  str_manager_parametres (
 		fn ouvrir_dialog 			=(
 			if m_dialog != undefined do (
 				createDialog 	m_dialog		style:				#(#style_resizing, #style_titlebar, #style_border, #style_sysmenu) 	\
-														pos:					m_dialog_pos		/*\
+														pos:					m_dialog_pos		\
 														width:				m_dialog_taille.x	\
-														height:				m_dialog_taille.y	 \
-														lockWidth:			true */
+														height:				m_dialog_taille.y	\
+														lockWidth:			true
 				
 				m_dialog.initialiser 		m_plug		
 				m_dialog_estOuvert 		= true
@@ -691,15 +669,11 @@ struct  str_manager_parametres (
 			m_fichier_classeBase 		= 	fichier_classeBase
 			if dossier_constructeurs != unsupplied do 
 				m_dossier_constructeurs 	= 	dossier_constructeurs
-			if fichier_dialog != unsupplied do (
-				m_dialog 			= 	fileIn 	( "$userScripts\cp-Urba\modules\Batiment\\rollouts\\" + fichier_dialog ) 
-				
-				m_dialog_taille = getDialogSize	m_dialog
-			)
+			if fichier_dialog != unsupplied do 
+				m_dialog 						= 	fileIn 	( "$userScripts\cp-Urba\modules\Batiment\\rollouts\\" + fichier_dialog ) 
 			m_prefix_nomParametres 	= 	prefix_nomParametres
 			
 			mgr_datas 						= m_core.get_mgrDatas ()
-			
 			
 			
 			--- les constructeurs -----------

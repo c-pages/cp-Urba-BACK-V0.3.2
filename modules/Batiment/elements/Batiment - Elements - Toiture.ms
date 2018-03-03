@@ -35,7 +35,7 @@
 			---- Mutations -----------------------
 			fn set_dialog 			_dialog 				= ( m_dialog 				= _dialog ),
 			fn set_construire 		_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
-			fn set_manager			_mgr				= ( mgr						= _mgr ),
+-- 			fn set_manager			_mgr				= ( mgr						= _mgr ),
 			fn set_params			_params			= ( 
 				params					= copy  _params 
 				if params != undefined do (
@@ -53,12 +53,12 @@
 			fn get_typeClasse		= "toiture",
 			fn get_dialog				=	m_dialog,
 			fn a_desParametres	=	params != undefined,
-			fn get_manager						= mgr,
+/* 			fn get_manager						= mgr,
 			
 			--- parametres -------------------
 			fn enregistrer			= mgr.enregistrer_parametres	this,
 			fn charger					= mgr.charger_parametres			this,
-			
+			 */
 			--- Initialisations -----------------------
 			fn initialiser_dialog 	_plug 	=(
 				m_dialog.m_plug		= 	_plug

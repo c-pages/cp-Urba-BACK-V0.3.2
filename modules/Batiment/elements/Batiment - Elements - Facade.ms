@@ -53,8 +53,8 @@ struct 	str_facade (
 	---------- INTERFACE	--------------------------------------------------------------------------------------
 	public
 		fn get_typeClasse		= "facade",
-		fn set_manager		_mgr	= ( mgr	= _mgr ),		
-		fn get_manager					= mgr,
+-- 		fn set_manager		_mgr	= ( mgr	= _mgr ),		
+-- 		fn get_manager					= mgr,
 		
 		---- Composants -----------------
 		fn get_composant_parIDUnique		_IDUnique	=(
@@ -113,7 +113,7 @@ struct 	str_facade (
 		
 			
 		
-		
+		/* 
 		
 		
 		------ parametres -----------
@@ -151,10 +151,10 @@ struct 	str_facade (
 		),
 		fn charger 	_plug	=(
 			
-		)
+		),
 		
 		
-		
+		 */
 		
 		
 		
