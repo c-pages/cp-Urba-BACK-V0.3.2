@@ -1,62 +1,43 @@
 
 
-
+	
 	
 ( ----	FileIn ----
-	
-	
-
 
 
 --- parametres de base	-----------------------------
-compo_nom 	= "Mur"	
-compo_type	=	#mur
-compo_toolTip =	"Ajouter un mur plein de longueur fixe."
+compo_nom 	= "Loggia"	
+compo_type	=	#loggia
+compo_toolTip =	""
+
 
 --- les parametres du composant	---------
 struct compo_params	(
-		longueur = 100.,
-	private
-	
-		------ parametres -----------
-		fn enregistrer 	_plug 	=(
-			
-			local prop_Noms 	= getPropNames	this			
-			
-			for prop_nom in prop_Noms do (
-				--- on recupere le parametre  ------
-				val = getProperty	this  prop_nom
-										
-				-- on chope le nom du parametre
-				local nom_dans_parametres = "facades_" + prop_nom
-				--- on enregistre le parametre normalement ------
-				setproperty   _plug  	nom_dans_parametres  	val
-				
-			)-- fin for
-		)
-	
+	longueur = 0,
+	profondeur	= 100
 )
 
+
 --- les rollout du composant	---------
-rollout compo_dialog "Mur plein" width:180 height:70	(
+rollout compo_dialog "Loggia" width:180 height:70	(
 	
-	local m_rollPrt
 	local m_compo
+	local m_rollPrt
 	local m_plug
-	
+
 	edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
 	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
-	label 'lbl19' "Longeur:" pos:[13,37] width:49 height:13 align:#left
-	spinner 'spn_longueur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
+	label 'lbl_profondeur' "profondeur:" pos:[13,37] width:49 height:13 align:#left
+	spinner 'spn_profondeur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
 	
 	fn actualiser =(
-		spn_longueur.value 	= 	m_compo.params.longueur
-		edt_nom.text 			=	m_compo.nom
+		spn_profondeur.value 	= 	m_compo.params.profondeur
+		edt_nom.text 		=	m_compo.nom
 	)
 
-	on spn_longueur changed val do (
-		m_compo.params.longueur = val
-	)
+	on spn_profondeur changed val do 
+		m_compo.params.profondeur = val		
+	
 	on edt_nom	 entered txt 	do	(
 		m_compo.nom = txt
 		m_rollPrt.actualiser ()
@@ -64,8 +45,9 @@ rollout compo_dialog "Mur plein" width:180 height:70	(
 	
 )
 
+
 --- la fonction de construction	---------
-fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		profondeur:0		onConstruitLaDalle:true	= (
+fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		onConstruitLaDalle:false		= (
 	
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
@@ -85,28 +67,26 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		profondeur:
 		--- Vecteurs ------------
 		local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
 		local vec_ht 				= [0,0,1] 		* 	ht_niveaux
-		local vec_longueur 	= _normDir 		* 	longueur
-		local vec_prof			= ( _normDir * rotateZ ( matrix3 1 ) 90 ) *  profondeur
+		local vec_longueur 	= _normDir 	* 	longueur
+		local vec_prof			= ( _normDir * rotateZ ( matrix3 1 ) 90 ) *  _composant.params.profondeur 
 		
 		--- Points d'accroche ------------
 		local id_ptAccroche_1 	= pts_accroches[1]
 		local id_ptAccroche_2 	= pts_accroches[2]
 		local id_ptAccroche_3 	= pts_accroches[3] 
 		
-		local ptAccroche_1		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	) -- + vec_prof
-		local ptAccroche_2		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	)  --+ vec_prof
-		local ptAccroche_3		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	)  --+ vec_prof
-		
-		
+		local ptAccroche_1		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	) 
+		local ptAccroche_2		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	) 
+		local ptAccroche_3		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	) 
 		
 		---- LA DALLE  -----------------------------------------------------------------------			
 		-------	Creation des points 	--------
-		local pt_2 		= ptAccroche_1		+ 	vec_longueur 
-		local pt_3 		= pt_2					+	vec_ep_dalle
+		local pt_2 		= ptAccroche_1		+ vec_prof
+		local pt_3 		= pt_2					+	vec_ep_dalle 
 		
 		--- creation des points --------------
 		local pts_pos 	= #( pt_2, pt_3 )
-		local pts_ids 	= ptr_geo.points 	pts_pos	
+		local pts_ids 	= ptr_geo.points 	pts_pos		
 		
 		-------	Creation des faces 	--------
 		if onConstruitLaDalle do (
@@ -122,7 +102,7 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		profondeur:
 		
 		---- LE MUR -----------------------------------------------------------------------			
 		-------	Creation des points 	--------
-		local pt_3 		= pt_3 +	vec_ht
+		local pt_3 		= pt_3 +	vec_ht 
 		
 		--- creation des points --------------
 		local pts_pos 	= #( pt_3 )
@@ -139,10 +119,10 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		profondeur:
 		---- Result final -----------------------------------------------------------------------
 		#( pt_result_1, pt_result_2, pt_result_3 )
 		
-	)
+
+		
+)
 	
-
-
 
 
 
@@ -150,9 +130,8 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		profondeur:
 --- on importe le fichier mere des composants ----
 _str_contructeur = fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
-_str_contructeur 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:( compo_params () )	dialog:compo_dialog	fnConstruire:compo_fnConstruire
+_str_contructeur 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire
 
-	
 	
 	
 	
@@ -164,12 +143,6 @@ _str_contructeur 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:( 
 	
 	
 ) ----	FileIn ----
-
-
-	
-	
-	
-	
 	
 	
 	
