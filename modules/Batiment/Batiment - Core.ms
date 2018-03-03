@@ -293,17 +293,20 @@ struct str_batiment_core (
 		fn get_manager_parElement 	_element =(
 			
 			local mgr
-			case ( _element.get_typeClasse 	() ) of (
-					"toiture":		mgr = mgr_toiture
-					"facade": 		mgr = mgr_facades
-					"facCompo": 	mgr = mgr_facCompos
-					"facMenis":	mgr = mgr_facMenuiseries
-			)
+			if hasProperty 	_element	#get_typeClasse do (
+				case ( _element.get_typeClasse 	() ) of (
+						"toiture":		mgr = mgr_toiture
+						"facade": 		mgr = mgr_facades
+						"facCompo": 	mgr = mgr_facCompos
+						"facMenis":	mgr = mgr_facMenuiseries
+				)
+			)  
 			mgr
 		),
 		fn enregistrer_element	_element =(
 			local mgr = 		get_manager_parElement	_element
-			mgr.enregistrer_parametres			_element
+			if mgr != undefined do 
+				mgr.enregistrer_parametres			_element
 		),
 		fn dupliquer_element		_element	enregistrer:false	=(			
 			local mgr = 		get_manager_parElement	_element

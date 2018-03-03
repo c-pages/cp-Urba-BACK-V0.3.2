@@ -362,7 +362,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 			
 		---- ANALYSE	---------------
 			--- on cherche la longueur pour chaque div de menuiserie	----------
-			format "sequence.count : %\n" sequence.count
+			
 			local longueur_a_diviser = longueur - menuis_largeur
 			local nbr_div	=	0
 			for menuis in sequence do (

@@ -457,6 +457,7 @@ struct str_construction (
 				
 			)
 			
+			debug "Batiment construit en "var:( (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 			redrawViews ()
 			
 		)

@@ -268,8 +268,8 @@ struct  str_manager_parametres (
 		),
 		*/
 		fn enregistrer_parametres		_element		=(
-			debug "enregistrer_parametres"
-			debug "_element" var:_element
+-- 			debug "enregistrer_parametres"
+-- 			debug "_element" var:_element
 			local prop_element_Noms 	= getPropNames	_element
 			local elem_index 				= get_element_index		_element
 			
@@ -315,13 +315,13 @@ struct  str_manager_parametres (
 			)-- fin for
 		), 
 		fn charger_parametres 			_element		=(
-			debug "charger_parametres"
-			debug "_element" var:_element
+-- 			debug "charger_parametres"
+-- 			debug "_element" var:_element
 			local prop_element_Noms = getPropNames	_element
 			
 			--- si param deja present, on actualise -------------------
-			for prop_element_Nom in prop_element_Noms do (
-				
+			for prop_element_Nom in prop_element_Noms do	try (
+				 
 				local prop_element 	= getProperty 	_element  	prop_element_Nom
 				
 				-- si c'est pas une fonction --------------
@@ -389,7 +389,7 @@ struct  str_manager_parametres (
 						
 					) -- fin case  classOf prop_element 
 				) -- fin if MAXScriptFunction --------
-			) -- fin for prop_element	--------
+			)  catch (debug "ERREUR CHARGEMENT")-- fin for prop_element	--------
 		),
 		
 		
