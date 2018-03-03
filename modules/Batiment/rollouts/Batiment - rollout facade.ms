@@ -119,7 +119,14 @@
 					
 					if est_dansLoggia do affichage += "|" + tabulation
 					
-					affichage += comp.nom
+					-- le nom ---
+					affichage += comp.nom 
+					
+					-- quelques infos -----
+					if comp.params.longueur != 0 do
+						affichage += " - " + comp.params.longueur as string + " cm." 
+					
+					
 					append itemsTmp affichage
 					
 					if comp.type == #balconFin 	do est_dansBalcon = false

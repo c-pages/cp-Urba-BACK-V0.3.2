@@ -181,10 +181,8 @@ rollout compo_dialog "Baie" width:433 height:747
 				)
 	on btn_ajouter_element pressed do
 	( 
-		 	local	nv_menuis = m_plug.core.creer_menuiserie		m_compo			 (lbx_sequence.selection 	 + 1 )
-		
+		 	local	nv_menuis = m_plug.core.creer_menuiserie		m_compo			 lbx_sequence.selection 	
 			actualiser () 
-			lbx_sequence.selection 	 += 1
 		)
 	on btn_editer_element pressed do editer_element ()
 	on ddl_volet selected _index  	do

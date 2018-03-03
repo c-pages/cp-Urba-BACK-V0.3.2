@@ -8,7 +8,7 @@
 ------ parametres de base	-----------------------------
 compo_nom 		= "Espacement"	
 compo_type		=	#espacement
-compo_toolTip 	=	"Ajouter un espacement. Mur plein de longueur variable, répartis par facade, entre tous les espacement"
+compo_toolTip 	=	"Ajouter un espacement. Mur plein de longueur varirable, répartis par facade, entre tous les espacement"
 
 
 ------ la fonction de construction	---------

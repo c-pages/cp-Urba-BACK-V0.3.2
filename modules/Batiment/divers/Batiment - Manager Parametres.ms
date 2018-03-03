@@ -100,7 +100,7 @@ struct  str_manager_parametres (
 		
 		
 		
-		---- Parametres ---------------------------------------------------
+	---- Parametres ---------------------------------------------------
 	private
 		--- pour recuperer lindex dans les tableaux de parametre, correspondant a l'element a cet IDUnique	--------
 		fn get_param_index_parIDUnique		_idUnique =(
@@ -125,6 +125,7 @@ struct  str_manager_parametres (
 		--- enrgistrer un parametre simple ---------
 		fn enregistrer_parametre 	_param_nom		_value		index:	=(
 			
+-- 			local param_nom 		= m_prefix_nomParametres + "_" + _param_nom		
 			local param 				= getProperty	m_plug	  _param_nom
 			
 			if index != undefined and index!=unsupplied then (
@@ -139,44 +140,47 @@ struct  str_manager_parametres (
 		
 		),
 		
-		--- gestion #PARAMS --------
+		
+		
+		---  #PARAMS --------
 		fn enregistrer_paramsElem 	_params	=(			
-			local result 
 			
-			if _params != undefined then (
-				local params_TMP = copy 	_params
+			local params_TMP = copy 	_params
+			
+			for prop_params_Nom in  ( getPropNames	_params ) do (
 				
-				for prop_params_Nom in  ( getPropNames	_params ) do (
-					
-					local prop_value	= getProperty _params  prop_params_Nom
-					case classOf prop_value of (
-						Array:(
-								local tab_value =#()
-							
-								if prop_value.count > 0 then (								
-									-- on a une structure à nous --------
-									if superclassOf prop_value[1] == StructDef then (
+				local prop_value	= getProperty _params  prop_params_Nom
+				case classOf prop_value of (
+					Array:(
+							local tab_value =#()
+						
+							if prop_value.count > 0 then (
+								
+								-- on a une structure à nous --------
+								if superclassOf prop_value[1] == StructDef then (
+									
+									for _struct in  prop_value do (
+										-- on enregistre l'element sur le plug ------------
+										m_core.enregistrer_element 	_struct
 										
-										for _struct in  prop_value do (
-											-- on enregistre l'element sur le plug ------------
-											m_core.enregistrer_element 	_struct
-											
-											-- on ajoute l'id au tableau du params a enrgistrer -------
-											append tab_value 	_struct.id
-										)
-										--- on enregistre les parametres de la structure 									
-										prop_value = tab_value
-									) 
-								) 							
-							)
-						default:()
-					)	---- fin case	---------
-					
-					setProperty params_TMP 	prop_params_Nom 	( prop_value )
-					
-				) -- fin 	for prop_params_Nom   -----
-				result = mgr_datas.get_datas_string		params_TMP
-			) else result = "undefined"
+										-- on ajoute l'id au tableau du params a enrgistrer -------
+										append tab_value 	_struct.id
+									)
+									--- on enregistre les parametres de la structure 
+									
+									prop_value = tab_value
+								) 
+							) 
+							
+						)
+					default:(		)
+				)	---- fin case	---------
+				
+				
+				setProperty params_TMP 	prop_params_Nom 	( prop_value )
+				
+			) -- fin 	for prop_params_Nom   -----
+			local result = mgr_datas.get_datas_string		params_TMP
 			result
 		),
 		fn charger_paramsElem 		_value		_params	=(
@@ -197,11 +201,75 @@ struct  str_manager_parametres (
 			)
 			params_TMP
 		),
+		fn dupliquer_paramsElem 	_params	=(
+	
+	
+		),
 		
-		public	
+		
+		
+		
+	--- interface	 PARAMETRES du plugin	 --------
+	public	/* 
 		fn enregistrer_parametres		_element		=(
-			debug "###		enregistrer_parametres		###"
-			debug "###		_element" var:_element
+			debug "enregistrer_parametres"
+			debug "_element" var:_element
+			
+			
+			-- puis on duplique chaque prop de la structure -----------
+			for propnom in getpropNames _element do (				
+				local val_orig = getProperty  _element	propnom
+				
+				--tout sauf les fonctions ----------
+				if classof val_orig != MAXScriptFunction do (				
+					local val_aEnregistrer
+					
+					--- si on a un struct ------
+					if superclassOf val_orig == StructDef then (
+						m_core.enregistrer_element	val_orig
+						val_aEnregistrer = val_orig.id		
+					
+					-- sinon on regarde si on a un tableau
+					) else if  classof val_orig ==  array then (
+						val_aEnregistrer  = #()
+						if val_orig.count> 0 then (
+							
+							--- si on a des struct, ----------
+							if superclassOf val_orig[1] == StructDef then (
+								
+								for valTab_orig in val_orig do (
+									m_core.enregistrer_element	valTab_orig
+									append	val_aEnregistrer		valTab_orig.id		
+								)
+								
+							--- sinon on les copie basiquement ----------
+							) else	val_aEnregistrer = for valTab_orig in val_orig collect copy  valTab_orig		
+							
+						)  
+						
+						-- on fait un string du tableau --
+						val_aEnregistrer		=		 mgr_datas.array_to_string	val_aEnregistrer
+					
+					---- sinon on a une valeur de base -------
+					) else val_aEnregistrer = copy val_orig
+					
+					-- on enregistre le parametre	---------
+					enregistrer_parametre 	_param_nom		_value		index:( get_element_index		_element )					
+					
+				)	---	fin if not function	-------
+			)	---	fin for propNoms	---------
+			
+			
+			--- on  change l'ID du struct dupliqué, si on peut ----------------
+			if hasproperty elem_dupl 	#generer_ID do
+				elem_dupl.generer_ID ()
+			
+			
+		),
+		*/
+		fn enregistrer_parametres		_element		=(
+			debug "enregistrer_parametres"
+			debug "_element" var:_element
 			local prop_element_Noms 	= getPropNames	_element
 			local elem_index 				= get_element_index		_element
 			
@@ -222,7 +290,7 @@ struct  str_manager_parametres (
 								local liste_ids = #()
 								for ss_elem in prop_element do (
 									append 	liste_ids	ss_elem.id
-									m_core.enregistrer_element  	ss_elem
+									m_core.enregistrer_element  	ss_elem									
 								)
 								prop_element = liste_ids								
 							)
@@ -234,18 +302,21 @@ struct  str_manager_parametres (
 					default: 	(
 						
 						---- si on a les #PARAMS ---------------
-						if prop_element_Nom == #params do 							
-							prop_element = enregistrer_paramsElem  	prop_element
-						
+						if prop_element_Nom == #params do
+							if prop_element != undefined then
+								prop_element = enregistrer_paramsElem  	prop_element
+						else prop_element ="undefined"
+							
 						--- on enregistre -----------
 						enregistrer_parametre 	param_nom		prop_element		index:elem_index
 						
 					)
 				) -- fin case
 			)-- fin for
-		),
+		), 
 		fn charger_parametres 			_element		=(
-			
+			debug "charger_parametres"
+			debug "_element" var:_element
 			local prop_element_Noms = getPropNames	_element
 			
 			--- si param deja present, on actualise -------------------
@@ -302,8 +373,9 @@ struct  str_manager_parametres (
 							
 							--- si on a les parametres #PARAMS d'un composant  -----
 							if prop_element_Nom == #params then (
-								
-								param_value = charger_paramsElem  	param_value			_element.params
+								if param_value != "undefined" then 
+									param_value = charger_paramsElem  	param_value			_element.params
+								else param_value = undefined
 								setProperty	_element	  prop_element_Nom		param_value	
 								
 							)	
@@ -321,43 +393,38 @@ struct  str_manager_parametres (
 		),
 		
 		
-		fn appliquer_type  _element	_type =(
-			
-			----- facon constructeur --------
+		
+		
+		
+		fn appliquer_type  	_element	_type	=(
 			-- si on a un type et non pas un index	de constructeur -------------
-			if classof 	_type == name or classof _type == string	do
-				_type = get_constructeur_index		_type	
-			
-			if _type != 0 do
-				m_constructeursBase[ idConstructeur ].initialiser		_element
-			
-			_element
+				if classof 	_type == name or classof _type == string	do
+					_type = get_constructeur_index		_type			
+				if _type != 0 do
+					m_constructeursBase[ _type ].initialiser		_element
+				
+				_element
 		),
 		
 		
 		
 		---- Creation/Suppression etc. ---------------------------------------------------
-		fn creer_element		idUnique:		idConstructeur:		enregistrer:false	=(
+		fn creer_element			idUnique:		idConstructeur:		enregistrer:false	=(
 			
 			----------------- Structure d'un élément	------------------------------------------
 			m_classeBase	=	fileIn	 m_fichier_classeBase			
 			nvl_element 		= m_classeBase 	()
 			
-			----- facon constructeur --------
-			if idConstructeur != unsupplied do (
-				-- si on a un type et non pas un index	de constructeur -------------
-				if classof 	idConstructeur == name or classof idConstructeur == string	do
-					idConstructeur = get_constructeur_index		idConstructeur			
-				if idConstructeur != 0 do
-					m_constructeursBase[ idConstructeur ].initialiser		nvl_element
-			)
+			----- si constructeur --------
+			if idConstructeur != unsupplied do 
+				appliquer_type  	nvl_element	idConstructeur
 			
 			--- id Unique -----------
 			if idUnique != unsupplied do 
 				nvl_element.id = idUnique
 			
--- 			---	la reference au manager	--------------
--- 			nvl_element.set_manager 	this
+			---	la reference au manager	--------------
+			nvl_element.set_manager 	this
 			
 			-- si besoin on enregistre direct sur le plug -----
 			if enregistrer do enregistrer_parametres	nvl_element
@@ -365,106 +432,59 @@ struct  str_manager_parametres (
 			nvl_element
 			
 		),
-		
 		fn dupliquer_element			_element		enregistrer:false 	=(
-			debug "dupliquer_element"
 			
 			--- si on a recuperer un index à la place de l'element lui-meme, on va chercher l'élément ---------------------------
 			if classof  _element == integer then
 				_element = this.get_element_parIndex  _element
 			
-			debug "_element" var:_element
+			-- on opie la structure basiquement ------
+			local elem_dupl = copy _element
 			
-			-- On construit l'element dupliqué	 ----------------
-			local nvl_element
-			if a_constructeurs () then
-				nvl_element = creer_element	enregistrer:enregistrer	idConstructeur:( _element.type )
-			else 	nvl_element = creer_element	enregistrer:enregistrer
+			-- puis on duplique chaque prop de la structure -----------
+			for propnom in getpropNames _element do (				
+				local val_orig = getProperty  _element	propnom
+				
+				--tout sauf les fonctions ----------
+				if classof val_orig != MAXScriptFunction do (				
+					local val_dup
+					
+					--- si on a un struct ------
+					if superclassOf val_orig == StructDef then (
+						val_dup = dupliquer_element  val_orig	enregistrer:enregistrer
+					
+					-- sinon on regarde si on a un tableau
+					) else if  classof val_orig ==  array then (
+						
+						if val_orig.count> 0 then (
+							--- si on a des struct, on les dupplique----------
+							if superclassOf val_orig[1] == StructDef then
+								val_dup = for valTab_orig in val_orig collect dupliquer_element  valTab_orig	enregistrer:enregistrer
+								
+							--- sinon on les copie basiquement ----------
+							else	val_dup = for valTab_orig in val_orig collect copy  valTab_orig		
+							
+						) else val_dup = #()
+					
+					---- sinon on a une valeur de base -------
+					) else val_dup = copy val_orig
+					
+					setproperty	elem_dupl	propnom 	val_dup
+				)	---	fin if not function	-------
+			)	---	fin for propNoms	---------
 			
 			
-			-- on charge dans le nvl element les parametre de l'element à dupliquer ------------
-			local id_nvl_elementBACK 	= nvl_element.id
-			nvl_element.id 						= _element.id
-			charger_parametres	nvl_element
-			nvl_element.id 						= id_nvl_elementBACK
-			enregistrer_parametres	nvl_element
+			--- on  change l'ID du struct dupliqué, si on peut ----------------
+			if hasproperty elem_dupl 	#generer_ID do
+				elem_dupl.generer_ID ()
 			
-			nvl_element
+			--- on  enregistre si besoin  ----------------
+			if enregistrer do m_core.enregistrer_element 	elem_dupl
+			
+			elem_dupl
 			
 		),
-		/* 
-		fn dupliquer_element			_element		enregistrer:false 	=(
-			debug "dupliquer_element"
-			
-			--- si on a recuperer un index à la place de l'element lui-meme, on va chercher l'élément ---------------------------
-			if classof  _element == integer then
-				_element = this.get_element_parIndex  _element
-			
-			debug "_element" var:_element
-			
-			-- On construit l'element dupliqué	 ----------------
-			local nvl_element
-			if a_constructeurs () then
-				nvl_element = creer_element	enregistrer:enregistrer	idConstructeur:( _element.type )
-			else 	nvl_element = creer_element	enregistrer:enregistrer
-			
-			
-			
-			
-			--- On duplique les parametres ----------------
-			local prop_element_Noms = getPropNames	_element
-			
-			--- si param deja present, on actualise -------------------
-			for prop_element_Nom in prop_element_Noms where prop_element_Nom != #id do (
-				
-				debug "prop_element_Nom" var:prop_element_Nom
-				local prop_element 			= getProperty _element  prop_element_Nom
-				
-				---- si on a les #PARAMS ---------------
-				if prop_element_Nom == #params then (
-					prop_element = mgr_datas.get_datas_string		prop_element
-					mgr_datas.set_datas_string		prop_element		nvl_element.params
-					
-				) else (
-				----  sinon en fonction de la classe du param ---------------
-					case classOf prop_element of (
-						MAXScriptFunction:() 
-						Array: 		(
-							
-							---- si on a un tableau de STRUCTs à nous (composants, menuiseries, ... )	on fait la liste des IDUniques	---------------------
-							if prop_element.count != 0 then 
-								if superclassOf	prop_element[1] == StructDef do	(
-									local liste_copie = #()
-									for ss_elem in prop_element do (
-										local		ss_elem_copie = m_core.dupliquer_element	ss_elem 	enregistrer:enregistrer
-										append 	liste_copie		ss_elem_copie
-										
-									)
-									prop_element = liste_copie								
-								)
-							
-							debug "Array----> prop_element" var:prop_element
-							setProperty	nvl_element	  prop_element_Nom		prop_element 
-						)
-						default: 	(
-							debug "default----> prop_element" var:prop_element
-							setProperty	nvl_element	  prop_element_Nom		prop_element
-						)
-					) -- fin case
-					
-				)
-				
-				debug "prop_element" var:prop_element
-				
-			)-- fin for
-			nvl_element.nom += " - copie"
-			debug "RESULT DUPLIQUER" var:nvl_element
-			if enregistrer do
-				m_core.enregistrer_element	nvl_element
-			
-			nvl_element
-			
-		), */
+		
 		fn supprimer_element 		_element	=(
 			debug"supprimer_element"
 			debug"_element -1-"	var:_element
@@ -627,10 +647,10 @@ struct  str_manager_parametres (
 		fn ouvrir_dialog 			=(
 			if m_dialog != undefined do (
 				createDialog 	m_dialog		style:				#(#style_resizing, #style_titlebar, #style_border, #style_sysmenu) 	\
-														pos:					m_dialog_pos		\
+														pos:					m_dialog_pos		/*\
 														width:				m_dialog_taille.x	\
-														height:				m_dialog_taille.y	\
-														lockWidth:			true
+														height:				m_dialog_taille.y	 \
+														lockWidth:			true */
 				
 				m_dialog.initialiser 		m_plug		
 				m_dialog_estOuvert 		= true
@@ -665,11 +685,15 @@ struct  str_manager_parametres (
 			m_fichier_classeBase 		= 	fichier_classeBase
 			if dossier_constructeurs != unsupplied do 
 				m_dossier_constructeurs 	= 	dossier_constructeurs
-			if fichier_dialog != unsupplied do 
-				m_dialog 						= 	fileIn 	( "$userScripts\cp-Urba\modules\Batiment\\rollouts\\" + fichier_dialog ) 
+			if fichier_dialog != unsupplied do (
+				m_dialog 			= 	fileIn 	( "$userScripts\cp-Urba\modules\Batiment\\rollouts\\" + fichier_dialog ) 
+				
+				m_dialog_taille = getDialogSize	m_dialog
+			)
 			m_prefix_nomParametres 	= 	prefix_nomParametres
 			
 			mgr_datas 						= m_core.get_mgrDatas ()
+			
 			
 			
 			--- les constructeurs -----------

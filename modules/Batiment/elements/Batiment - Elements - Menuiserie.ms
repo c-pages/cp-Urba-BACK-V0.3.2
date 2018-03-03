@@ -18,7 +18,7 @@
 			
 		---- Parametres -----------------------------------
 		public
-			id 			="Menuis_",
+			id 			="",
 			nom 			= "Menuiserie",
 			type 			= undefined ,	----  liste_types = #( "Fixe", "Fenêtre", "Porte pleine", "Porte vitrée", "Porte de garage"   ......   )
 			
@@ -70,10 +70,14 @@
 				m_dialog.actualiser()
 			),
 			
+			fn generer_ID =(
+				id = "ID_" + get_typeClasse () + "_"
+				for i= 1 to 10 do id += ( random 0 9 ) as string	
+			),
 			fn initialiser 		_type	_nom 	=(
 				
 				---- id unique ----
-				for i= 1 to 10 do id += ( random 0 9 ) as string	
+				generer_ID()
 				
 				type 				=	_type 			
 				nom				=	_nom

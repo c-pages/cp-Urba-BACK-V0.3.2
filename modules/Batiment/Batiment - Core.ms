@@ -25,9 +25,6 @@
 	*v0.2 - [20/02/2018] -----------------------------------------------------------------------------
 	- Reorganisation globale
 	
-	BORDEL
-	
-	
 ########################################################################################################################*/
 
 
@@ -263,17 +260,20 @@ struct str_batiment_core (
 		fn get_composants_bouton_index	_type	=		mgr_facCompos.get_constructeur_index		_type	visibles:true,
 		
 		
-	---- Menuiseries	---------------
-		fn appliquer_menuiserie_type 	_menuis	_type =(
-			mgr_facMenuiseries.appliquer_type		_menuis	_type
-		),
-		fn creer_menuiserie 	_compo			 _position =(
+	---- menuiseries	---------------
+	public
+		fn get_menuiserie_constructeursNoms = for constr in ( mgr_facMenuiseries.get_constructeurs () ) collect constr.nom,
+		fn get_menuiserie_constructeursTypes = for constr in ( mgr_facMenuiseries.get_constructeurs () ) collect constr.type,
+		fn creer_menuiserie		_baie_parent			_position	=(
 			
-			local nvl_menuis 		= mgr_facMenuiseries.creer_element 		()
-			insertItem		nvl_menuis	_compo.params.sequence		_position
--- 			_compo.ajouter_menuiserie	nvl_menuis		position:_position
-			nvl_menuis
+			local nv_menuis = mgr_facMenuiseries.creer_element 	idConstructeur:#fixe
+			append		_baie_parent.params.sequence	nv_menuis
+			
+			nv_menuis
 		),
+		fn appliquer_menuiserie_type  _menuis		_index_type	=		mgr_facMenuiseries.appliquer_type  	_menuis		_index_type	,
+		
+		
 		
 	---- toiture	---------------
 	public
@@ -285,6 +285,7 @@ struct str_batiment_core (
 			mgr_toiture.creer_element 		idConstructeur:_indexConstr 	enregistrer:true
 			actualiser ()
 		),
+		
 		
 		
 		
@@ -327,22 +328,7 @@ struct str_batiment_core (
 		),
 		
 		
-		fn get_element_index_parID	_idUnique =(
-			local index
-			--- on cherche dans les facades -----------
-			if mgr_facades.get_element_parID	 	_idUnique != undefined then
-				index	=	mgr_facades.get_param_index_parIDUnique	 	_idUnique
-			
-			--- on cherche dans les composants -----------
-			else if mgr_facCompos.get_element_parID	 		_idUnique != undefined then
-				index	=	mgr_facCompos.get_param_index_parIDUnique	 	_idUnique
-			
-			--- on cherche dans les menuiseries	 -----------
-			else if mgr_facMenuiseries.get_element_parID	 		_idUnique != undefined then
-				index	=	mgr_facMenuiseries.get_param_index_parIDUnique	 	_idUnique
-			
-			index
-		),
+		
 		
 		
 		
@@ -408,6 +394,7 @@ struct str_batiment_core (
 			
 			mgr_facMenuiseries.initialiser plug:m_plug					\
 														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Menuiserie.ms" )	\
+														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\menuiseries\\" )					\
 														fichier_dialog:				( "Batiment - rollout menuiserie.ms" )		\
 														prefix_nomParametres:	"facMenuis"
 			

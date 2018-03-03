@@ -9,31 +9,13 @@
 
 
 --- parametres de base	-----------------------------
-compo_nom 		= "Mur"	
-compo_type		=	#mur
-compo_toolTip 	=	"Ajouter un mur plein de longueur fixe."
+compo_nom 	= "Mur"	
+compo_type	=	#mur
+compo_toolTip =	"Ajouter un mur plein de longueur fixe."
 
 --- les parametres du composant	---------
 struct compo_params	(
-		longueur = 100.
-	/* private
-	
-		------ parametres -----------
-		fn enregistrer 	_plug 	=(
-			
-			local prop_Noms 	= getPropNames	this			
-			
-			for prop_nom in prop_Noms do (
-				--- on recupere le parametre  ------
-				val = getProperty	this  prop_nom
-										
-				-- on chope le nom du parametre
-				local nom_dans_parametres = "facades_" + prop_nom
-				--- on enregistre le parametre normalement ------
-				setproperty   _plug  	nom_dans_parametres  	val
-				
-			)-- fin for
-		) */
+	longueur = 100.
 	
 )
 
