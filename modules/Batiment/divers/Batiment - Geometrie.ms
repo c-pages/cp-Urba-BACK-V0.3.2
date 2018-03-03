@@ -183,42 +183,9 @@ struct	str_geometrie	(
 		),
 	
 		
-	----- ELEMENTS BASIQUES DE CONSTRUCTION 		----------------------
-		
-		---  Boite sans les faces dessus et dessus-------------------
-		fn allege 		_pt_A		_vec_long		_hauteur		_profondeur			matID:1 	=(
-			
-			--- les vecteurs -------------------------
-			local norm_prof = (normalize _vec_long ) 	* rotateZ ( matrix3 1 ) 90
-			
-			local	vec_lg		= _vec_long
-			local	vec_ht		= [0,0,1] * _hauteur
-			local	vec_prof	= norm_prof * _profondeur
-			
-			--- localiser les point dans l'espace	--------			
-			local pt_1			=	_pt_A
-			local pt_2 		= pt_1	+ 	vec_ht	
-			local pt_3 		= 	pt_2	+ 	vec_lg		
-			local pt_4 		= pt_1	+ 	vec_lg
-			
-			local pt_5 		= pt_2	+ 	vec_prof				
-			local pt_6 		= pt_3	+ 	vec_prof
-			
-			--- creation des points 		--------------
-			local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6 )
-			local pts_ids 	= points 	pts_pos
-			
-			-------	Creation des faces 	--------
-			local faces =#()
-			append faces ( face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[3] , 		pts_ids[4] )		 matID:matID )
-			append faces ( face 		#(	pts_ids[2], 		pts_ids[5], 		pts_ids[6] , 		pts_ids[3] )		 matID:matID )
-			
-			faces
-		),
 		
 		
-		---  Boite sans les faces dessus et dessus-------------------
-		fn tube 		_pt_A	_vec_ht		_vec_larg		_vec_ep		matID:1 	=(
+		fn tube 		_pt_A	_vec_ht		_vec_larg		_vec_ep		matID:  flip:false	=(
 			
 			--- localiser les point dans l'espace	--------			
 			local pt_1			=	_pt_A
@@ -242,7 +209,9 @@ struct	str_geometrie	(
 			append faces ( face 		#(	pts_ids[4], 		pts_ids[3], 		pts_ids[7] , 		pts_ids[8] )		 matID:matID )
 			append faces ( face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6] , 		pts_ids[5] )		 matID:matID )
 			
-			faces
+			--- sens des faces ------
+			if flip do fliperNormal  faces
+				
 		),
 		
 		

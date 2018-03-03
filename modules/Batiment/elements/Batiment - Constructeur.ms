@@ -31,7 +31,7 @@
 				_nvComposant.initialiser			type		nom
 				
 				_nvComposant.set_dialog			dialog
-				_nvComposant.set_params	 		params
+				_nvComposant.set_params	 		( copy params )
 				_nvComposant.set_construire 	fnConstruire
 				
 				_nvComposant

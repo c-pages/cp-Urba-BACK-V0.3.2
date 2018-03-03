@@ -36,18 +36,7 @@
 			fn set_dialog 			_dialog 				= ( m_dialog 				= _dialog ),
 			fn set_construire 		_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
 			fn set_manager			_mgr				= ( mgr						= _mgr ),
-			fn set_params			_params			= ( 
-				params					= copy  _params 
-				if params != undefined do (
-					for propnom in  getpropnames _params do (
-						local val = getproperty	_params	propnom 
-						case classOf val of (
-						array:	setproperty	_params	propnom 	(for elem in val collect copy elem )
-							default:	setproperty	_params	propnom 	(copy val )
-						)
-					)
-				)
-			),
+			fn set_params			_params			= ( params					= _params ),
 			
 			---- Accessions -----------------------		
 			fn get_typeClasse		= "toiture",

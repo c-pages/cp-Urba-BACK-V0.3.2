@@ -40,18 +40,7 @@ struct 	str_composant (
 		---- Mutations -----------------------
 		fn set_dialog 		_dialog 				= ( m_dialog 				= _dialog ),
 		fn set_construire 	_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
-		fn set_params			_params			= ( 
-			params					= copy  _params 
-			if params != undefined do (
-				for propnom in  getpropnames _params do (
-					local val = getproperty	_params	propnom 
-					case classOf val of (
-						array:	setproperty	_params	propnom 	(for elem in val collect copy elem )
-						default:	setproperty	_params	propnom 	(copy val )
-					)
-				)
-			)
-		),
+		fn set_params		_params			= ( params					= _params ),
 		fn set_manager		_mgr				= ( mgr						= _mgr ),
 		
 		---- Accessions -----------------------
@@ -122,6 +111,76 @@ struct 	str_composant (
 		fn charger _plug =(
 			
 		)
+		
+		/* 
+		---- Enregistrement / chargement	-----------------
+		fn enregistrer 	_plug	=(
+-- 			debug "enregistrer"
+-- 			debug "id  "var:( id   as name )
+			local mgr_datas = _plug.core.get_mgrDatas ()
+			
+				--- on cherche s'il existe deja comme parametre -----
+			local index_composant = 0
+			for i = 1 to _plug.fac_compos_ids.count do (
+-- 				debug "_plug.fac_compos_ids[i] as name	  "var:(_plug.fac_compos_ids[i] as name	)  
+-- 				debug "	== id   as name "var:( execute (_plug.fac_compos_ids[i] ) as string	== ( id   as string ) )
+				
+				if  execute (_plug.fac_compos_ids[i] ) as string	== id  as string do 
+					index_composant = i
+				
+				)
+			
+			
+			
+			--- s'il n'existe pas encore, on l'ajoute -----
+			if index_composant == 0 then (
+				
+				append 	_plug.fac_compos_ids 				id
+				append 	_plug.fac_compos_noms  			nom
+				append 	_plug.fac_compos_types  			type
+				append 	_plug.fac_compos_params  		(	mgr_datas.get_datas_string	params	)
+				
+			--- s'il existe, on l'actualise -----
+			) else (
+				
+				_plug.fac_compos_noms[index_composant] 		=	nom				
+				_plug.fac_compos_types[index_composant]		=	type		
+				_plug.fac_compos_params[index_composant]		=	(	mgr_datas.get_datas_string	params	)
+				
+			) 
+		),
+		fn charger 	_plug	idUnique: =(
+			
+-- 			debug "charger"
+			if idUnique != unsupplied do id = idUnique as name
+			
+			local mgr_datas = _plug.core.get_mgrDatas ()
+			
+			--- on cherche s'il existe deja comme parametre -----
+			local index_composant = 0
+			local i= 1
+			local trouve = false
+			while i <= _plug.fac_compos_ids.count and not trouve	do (
+				
+				if (  _plug.fac_compos_ids[i] ) as name == id  do (
+					index_composant = i
+					trouve = true
+				)
+				i+= 1
+			)
+			
+			-- on charge	------------------------------------
+			if index_composant != 0 then (
+				
+				nom 				= 	_plug.fac_compos_noms[index_composant]
+				type				=	_plug.fac_compos_types[index_composant] as name
+				
+				mgr_datas.set_datas_string		_plug.fac_compos_params[index_composant]			params
+				
+			)
+		)
+
+			 */
 		
 ) ---- fin composant -------------------------------
 
