@@ -123,8 +123,9 @@
 					affichage += comp.nom 
 					
 					-- quelques infos -----
-					if comp.params.longueur != 0 do
-						affichage += " - " + comp.params.longueur as string + " cm." 
+					if comp.params != undefined do
+						if comp.params.longueur != 0 do
+							affichage += " - " + comp.params.longueur as string + " cm." 
 					
 					
 					append itemsTmp affichage

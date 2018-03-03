@@ -14,6 +14,7 @@ menuis_toolTip 	=	""
 	
 --- les parametres du composant	---------
 struct menuis_params	(
+	longueur = 0,
 	hauteur					=	0,
 	ouverture_sens 		= 1
 )
@@ -52,37 +53,38 @@ rollout menuis_dialog "Espacement" (
 
 
 ------ la fonction de construction	---------
-fn menuis_fnConstruire  	_plug		_ptr_baie		 _pt_origine		_normDir		_dist_hauteur			 _this		= (
+fn menuis_fnConstruire  	_plug	_pt_origine		norm_dir:		dist_hauteur:	ptr_baie:		 this:		= (
+	
 			
 			local ptr_geo = _plug.core.get_geo ()
 			
 		-------------  constantes 			-----------------------------------------------------------------------------------------------------------------
-			local 	normDir				=	_normDir
-			local		baie_longueur		=	_this.longueur
-			local		baie_hauteur			=	_dist_hauteur
+			local 	norm_dir				=	norm_dir
+			local		baie_longueur		=	this.longueur
+			local		baie_hauteur			=	dist_hauteur
 			local		baie_profondeur		=	_plug.const_murExt_epaisseur
 			
 			local menuis_largeur			=	_plug.const_menuiseries_largeur
 			local menuis_epaisseur		=	_plug.const_menuiseries_epaisseur		
-			local menuis_nu				=	_ptr_baie.params.profondeur		
+			local menuis_nu				=	ptr_baie.params.profondeur		
 			local vitrage_epaisseur		=	_plug.const_vitrage_epaisseur
 			
--- 			local allege_ht					=	_this.params.allege_vitree_ht
+-- 			local allege_ht					=	this.params.allege_vitree_ht
 			
-			local traverses					=_ptr_baie.params.traverses
+			local traverses					=ptr_baie.params.traverses
 			
-			local		baie_hauteur			=	_dist_hauteur
-			local 	porte_hauteur		=	if _this.params.hauteur == 0 then baie_hauteur else _this.params.hauteur 
+			local		baie_hauteur			=	dist_hauteur
+			local 	porte_hauteur		=	if this.params.hauteur == 0 then baie_hauteur else this.params.hauteur 
 			if porte_hauteur	>baie_hauteur do porte_hauteur = baie_hauteur
 			
 		-------------  vecteurs directeurs  		-----------------------------------------------------------------------------------------------------------------
-			local norm_prof				= normDir 		* rotateZ ( matrix3 1 ) 90		
+			local norm_prof				= norm_dir 		* rotateZ ( matrix3 1 ) 90		
 			
-			local vec_longueur 		= normDir 		*	baie_longueur
+			local vec_longueur 		= norm_dir 		*	baie_longueur
 			local vec_hauteur	 		= [0,0,1]  		*	baie_hauteur
 			
 			local vec_men_ep			=	norm_prof		*	menuis_epaisseur
-			local vec_men_lrg			=	normDir		*	menuis_largeur
+			local vec_men_lrg			=	norm_dir		*	menuis_largeur
 			local vec_men_ht			=	[0,0,1] 			*	menuis_largeur
 			local vec_men_nu			=  norm_prof 	*	menuis_nu
 			

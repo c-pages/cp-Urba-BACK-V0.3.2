@@ -21,8 +21,8 @@ struct 	str_facade (
 	---------- MEMBRES	--------------------------------------------------------------------------------------
 		
 	private
-		mgr,
-		
+		m_type_classe = "",
+-- 		
 	public
 		---- Base	-----------
 		id							=	"",
@@ -51,27 +51,16 @@ struct 	str_facade (
 	---------- INTERFACE	--------------------------------------------------------------------------------------
 	public
 		fn get_typeClasse		= "facade",
-		fn set_manager		_mgr				= ( mgr						= _mgr ),
+		fn set_typeClasse	_type_classe	= m_type_classe = m_type_classe,
+
 		
-		fn get_manager						= mgr,
-		
-		---- Composants -----------------
-		fn get_composant_parIDUnique		_IDUnique	=(
-			
-			local result = undefined
-			for compo in sequence do (
-				if compo.id  == _IDUnique  do
-					result = compo
-			)
-			result
-		),
-		fn get_composants_noms =	for compo in sequence collect compo.nom,
 		
 		fn ajouter_composant 		_composant 	position:(sequence.count+1)  =(
 			if position == 0 do position = sequence.count+1
 			insertItem _composant		sequence 				position
 		),
 		fn supprimer_composant 	_index 	=		deleteItem sequence	_index,
+			
 		fn instancier_composant 	_index 	=(
 			debug "sequence[_index]" var:sequence[_index]
 			local compoInstance =  sequence[_index]

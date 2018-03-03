@@ -193,7 +193,7 @@ rollout compo_dialog "Baie" width:433 height:747
 )
 	
 ------ la fonction de construction	---------
-fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConstruitLaDalle:false	= ( 
+fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruitLaDalle:false	= ( 
 	
 	
 		--- Result -------------
@@ -202,8 +202,8 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		
 	-------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
-		local ptr_composant  	= 	_composant
-		local ptr_params		  	= 	_composant.params
+		local ptr_composant  	= 	this
+		local ptr_params		  	= 	this.params
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 	
 	-------------  constantes 			-----------------------------------------------------------------------------------------------------------------
@@ -227,18 +227,18 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 		local	vitrage_ep						=	ptr_plug.const_vitrage_epaisseur
 		
 	-------------  VECTEURS DIRECTEURS  		-----------------------------------------------------------------------------------------------------------------
-		local norm_prof			= _normDir 	* rotateZ ( matrix3 1 ) 90		
+		local norm_prof			= norm_dir 	* rotateZ ( matrix3 1 ) 90		
 		
 		local vec_ep_dalle 	= 	[0,0,1] 		* 	ptr_plug.const_dalle_epaisseur		
 		local vec_allege 		= 	[0,0,1] 		*	allege_hauteur
 		local vec_rtmb 			= 	[0,0,1] 		*	retombe		
 		local vec_ht 				= 	[0,0,1] 		*	hauteur				
-		local vec_longueur 	= _normDir 	*	longueur
+		local vec_longueur 	= norm_dir 	*	longueur
 		local vec_murEp		=	norm_prof *	ptr_plug.const_murExt_epaisseur
 		
 		local vec_men_nu				=  norm_prof 	*	profondeur
 		local vec_men_ep				=	norm_prof		*	menuis_epaisseur
-		local vec_men_lrg				=	_normDir		*	menuis_largeur
+		local vec_men_lrg				=	norm_dir		*	menuis_largeur
 		local vec_men_ht				=	[0,0,1] 			*	menuis_largeur
 		local vec_men_allegeHt		=	[0,0,1] 			*	menuis_allege_ht
 		local vec_men_travHt		=	[0,0,1] 			*	menuis_trav_ht
@@ -366,9 +366,9 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 			local longueur_a_diviser = longueur - menuis_largeur
 			local nbr_div	=	0
 			for menuis in sequence do (
-				if menuis.longueur  == 0 then
+				if menuis.params.longueur  == 0 then
 					nbr_div+=1
-				else longueur_a_diviser -= menuis.longueur 
+				else longueur_a_diviser -= menuis.params.longueur 
 				longueur_a_diviser -= menuis_largeur
 			)
 			if	nbr_div	==	0  do nbr_div	= 1
@@ -386,23 +386,23 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		_normDir		_composant 	onConst
 				
 				-- la longueur de l'element ---------------
 				local 	menuis_aReseter = false
-				if menuis.longueur == 0 do (
-					menuis.longueur  = longueur_div -- menuis_largeur
+				if menuis.params.longueur == 0 do (
+					menuis.params.longueur  = longueur_div -- menuis_largeur
 					menuis_aReseter = true
 				)
 				
 				
 				-- on construit la menuiserie --------
-				menuis.construire		_plug		_composant	 pt_menuis		_normDir		baie_hauteur
+				menuis.construire		_plug	pt_menuis		 		norm_dir:	norm_dir		dist_hauteur:baie_hauteur		ptr_baie:this
+			
 				
-				
-				pt_menuis += _normDir * menuis.longueur + _normDir * menuis_largeur
+				pt_menuis += norm_dir * menuis.params.longueur + norm_dir * menuis_largeur
 				
 				--- on construit la menuiserie verticale -----------
 				ptr_geo.tube		pt_menuis		vec_menDivVert_ht		-vec_men_lrg      vec_men_ep		matID:#menuiserie
 				
 				-- si on a changé la longueur de la menuiserie on reset ------
-				if menuis_aReseter do menuis.longueur = 0
+				if menuis_aReseter do menuis.params.longueur = 0
 				
 			)
 			

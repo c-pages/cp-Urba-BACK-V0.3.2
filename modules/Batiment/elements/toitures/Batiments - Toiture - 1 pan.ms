@@ -79,7 +79,7 @@ rollout toiture_dialog "Toiture - 1 pan" width:180 height:115
 		)
 )
 --- la fonction de construction	---------
-fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
+fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 	
 	
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
@@ -88,11 +88,11 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 		local ptr_geo 				= 	_plug.core.get_geo ()
 		
 -------------  PARAMETRES 	 et constantes		-----------------------------------------------------------------------------------------------------------------
-		local toiture_pente 		= _composant.params.pente
-		local toiture_hauteur		= _composant.params.decalage_hauteur
-		local toiture_orient		= _composant.params.orientation
-		local toiture_debord		= _composant.params.debord
-		local toiture_epaisseur	= _composant.params.epaisseur
+		local toiture_pente 		= this.params.pente
+		local toiture_hauteur		= this.params.decalage_hauteur
+		local toiture_orient		= this.params.orientation
+		local toiture_debord		= this.params.debord
+		local toiture_epaisseur	= this.params.epaisseur
 	
 		local	 mtrx_axeP	=	mgr_surface.get_axePrincipal ()
 		local	 BB_axeP		=	mgr_surface.get_axeP_BB ()

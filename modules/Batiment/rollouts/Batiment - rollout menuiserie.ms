@@ -59,7 +59,7 @@
 				local menuis_types 			= m_plug.core.get_menuiserie_constructeursTypes ()
 				ddl_type.selection 				= findItem  menuis_types		m_menuiserie.type  
 				
-				spn_longueur.value			=	m_menuiserie.longueur
+				spn_longueur.value			=	m_menuiserie.params.longueur
 				
 				--- le subRollout des composants	-------
 				for rollAVirer in subroll_parametres.rollouts do

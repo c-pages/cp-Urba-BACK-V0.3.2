@@ -13,7 +13,10 @@ toiture_nom 	= "- Sans -"
 toiture_type	=	#sans
 
 --- la fonction de construction	---------
-fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
+fn toiture_fnConstruire  	_plug		pts_accroches		 		= (
+		_composant = this
+		
+		format "TOITURE_FNCONSTRUIRE : _composant :%\n"	_composant
 		
 		local ptr_geo 				= 	_plug.core.get_geo ()
 		local face = ptr_geo.face		pts_accroches						matID:#mur

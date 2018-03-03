@@ -238,7 +238,7 @@ struct str_construction (
 			
 			------------ ANALYSE ------------------------------------------------------------------
 			local longueur_facade 	= 	distance _pt1 _pt2
-			local normDir				=	normalize ( _pt2 - _pt1)			
+			local norm_dir				=	normalize ( _pt2 - _pt1)			
 			
 			--- on  recupere la sequence totale de la facade en question ----
 			local sequenceTotal  		=	get_sequenceFacade		_facade		longueur_facade	
@@ -277,7 +277,7 @@ struct str_construction (
 						local		pt_balcon_debut	=	polyop.getVert 	m_plug.delegate		balcon_pts_debut[1]	
 						local		pt_balcon_fin		=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
 						balcon_aConstruire.params.longueur = 		(	distance	pt_balcon_debut 	pt_balcon_fin	)
-						balcon_aConstruire.construire	 	m_plug			balcon_pts_debut		normDir
+						balcon_aConstruire.construire	 	m_plug			balcon_pts_debut		norm_dir:norm_dir
 						balcon_aConstruire = undefined
 -- 					balcon_aConstruire.params.longueur = 	0
 					)
@@ -288,7 +288,7 @@ struct str_construction (
 						loggia_aConstruire 	= composant
 						profondeurFacade 		= loggia_aConstruire.params.profondeur
 					-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir	onConstruitLaDalle:false
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	onConstruitLaDalle:false
 						
 						loggia_pts_debut 		= ptsIDs_accroche
 					
@@ -299,7 +299,7 @@ struct str_construction (
 						composant.params.longueur 		= 	(	distance	pt_loggia_debut 	pt_loggia_fin	)
 
 						composant.params.profondeur 	= 		loggia_aConstruire.params.profondeur
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		onConstruitLaDalle:false
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir		onConstruitLaDalle:false
 						composant.params.longueur 		= 		0
 						loggia_aConstruire = undefined
 -- 						profondeurFacade 		= 0
@@ -312,7 +312,7 @@ struct str_construction (
 						local onConstruitLaDalle = ( balcon_aConstruire == undefined )  and  ( loggia_aConstruire == undefined )
 						
 						-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		normDir		onConstruitLaDalle:onConstruitLaDalle			-- profondeur:profondeurFacade
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir		onConstruitLaDalle:onConstruitLaDalle			-- profondeur:profondeurFacade
 						
 					)
 				) -- fin case	-----------------
@@ -385,7 +385,7 @@ struct str_construction (
 						
 						--- le Composant 'Mur plein' temporaire	------
 						local compoTmp 	= creer_murPlein		mur_longueur 	
-						ptsIDs_accroche 	= compoTmp.construire	m_plug 		 ptsIDs_accroche		mur_norm  
+						ptsIDs_accroche 	= compoTmp.construire		m_plug 		 ptsIDs_accroche		norm_dir:mur_norm  
 						
 					)
 					

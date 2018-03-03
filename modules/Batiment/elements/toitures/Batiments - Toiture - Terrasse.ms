@@ -39,12 +39,12 @@ rollout toiture_dialog "Toiture plate" width:180 height:70	(
 	
 )
 --- la fonction de construction	---------
-fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
+fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 	
 	
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
-		local ptr_composant  	= 	_composant
+		local ptr_composant  	= 	this
 		local ptr_geo 				= 	_plug.core.get_geo ()
 		
 -------------  PARAMETRES 	 et constantes		-----------------------------------------------------------------------------------------------------------------

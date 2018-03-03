@@ -49,7 +49,7 @@ rollout compo_dialog "Balcon" width:180 height:70	(
 
 
 --- la fonction de construction	---------
-fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
+fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDalle:false	 = (
 
 	local ptr_geo 				= 	_plug.core.get_geo ()
 	
@@ -58,9 +58,9 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 	
 	--- Vecteurs ------------
 	local vec_ep_dalle 	= [0,0,1] 			* 	_plug.const_dalle_epaisseur			
-	local vec_longueur 	= _normDir 		* 	_composant.params.longueur
-	local norm_balcon	= _normDir * rotateZ ( matrix3 1 ) -90
-	local vec_largeur		= norm_balcon 	*	 _composant.params.largeur				
+	local vec_longueur 	= norm_dir 		* 	this.params.longueur
+	local norm_balcon	= norm_dir * rotateZ ( matrix3 1 ) -90
+	local vec_largeur		= norm_balcon 	*	 this.params.largeur				
 	
 	--- Points d'accroche ------------
 	local id_ptAccroche_1 	= pts_accroches[1]
@@ -101,7 +101,7 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= (
 	
 	
 	--- on reinitialise la longueur à 0 --------
-	_composant.params.longueur = 	0
+	this.params.longueur = 	0
 	
 	
 	#()

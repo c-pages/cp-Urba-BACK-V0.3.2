@@ -27,11 +27,11 @@ struct compo_params	(
 
 
 --- la fonction de construction	---------
-fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		onConstruitLaDalle:false	 = (
+fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDalle:false	 = (
 	
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
-		local ptr_composant  	= 	_composant
+		local ptr_composant  	= 	this
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 		
 -------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
@@ -47,8 +47,8 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		onConstruit
 		--- Vecteurs ------------
 		local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
 		local vec_ht 				= [0,0,1] 		* 	ht_niveaux
-		local vec_longueur 	= _normDir 	* 	longueur 		* 	-1
-		local vec_prof			= ( _normDir * rotateZ ( matrix3 1 ) 90 ) 	*  _composant.params.profondeur 
+		local vec_longueur 	= norm_dir 	* 	longueur 		* 	-1
+		local vec_prof			= ( norm_dir * rotateZ ( matrix3 1 ) 90 ) 	*  this.params.profondeur 
 		
 		
 		

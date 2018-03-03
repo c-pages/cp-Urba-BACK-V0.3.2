@@ -11,12 +11,13 @@ menuis_type		=	#fixe
 menuis_toolTip 	=	""
 
 
-	/* 
+
 --- les parametres du composant	---------
 struct menuis_params	(
-	allege_ht	=	0
+	allege_ht	=	0,
+	longueur = 0
 )
- */
+
 --- les rollout du composant	---------
 rollout menuis_dialog "Paramètres" width:170 height:44
 (
@@ -47,33 +48,33 @@ rollout menuis_dialog "Paramètres" width:170 height:44
 
 
 ------ la fonction de construction	---------
-fn menuis_fnConstruire  	_plug		_ptr_baie		 _pt_origine		_normDir		_dist_hauteur			 _this		= (
+fn menuis_fnConstruire  	_plug	_pt_origine		norm_dir:		dist_hauteur:	ptr_baie:		 this:		= (
 	
 			local ptr_geo = _plug.core.get_geo ()
 			
 		-------------  constantes 			-----------------------------------------------------------------------------------------------------------------
-			local 	normDir				=	_normDir
-			local		baie_longueur		=	_this.longueur
-			local		baie_hauteur			=	_dist_hauteur
+			local 	norm_dir				=	norm_dir
+			local		baie_longueur		=	this.params.longueur
+			local		baie_hauteur			=	dist_hauteur
 			local		baie_profondeur		=	_plug.const_murExt_epaisseur
 			
 			local menuis_largeur			=	_plug.const_menuiseries_largeur
 			local menuis_epaisseur		=	_plug.const_menuiseries_epaisseur		
-			local menuis_nu				=	_ptr_baie.params.profondeur		
+			local menuis_nu				=	ptr_baie.params.profondeur		
 			local vitrage_epaisseur		=	_plug.const_vitrage_epaisseur
 			
--- 			local allege_ht					=	_this.params.allege_ht
+-- 			local allege_ht					=	this.params.allege_ht
 			
-			local traverses					=_ptr_baie.params.traverses
+			local traverses					=ptr_baie.params.traverses
 			
 		-------------  vecteurs directeurs  		-----------------------------------------------------------------------------------------------------------------
-			local norm_prof				= normDir 		* rotateZ ( matrix3 1 ) 90		
+			local norm_prof				= norm_dir 		* rotateZ ( matrix3 1 ) 90		
 			
-			local vec_longueur 		= normDir 		*	baie_longueur
+			local vec_longueur 		= norm_dir 		*	baie_longueur
 			local vec_hauteur	 		= [0,0,1]  		*	baie_hauteur
 			
 			local vec_men_ep			=	norm_prof		*	menuis_epaisseur
-			local vec_men_lrg			=	normDir		*	menuis_largeur
+			local vec_men_lrg			=	norm_dir		*	menuis_largeur
 			local vec_men_ht			=	[0,0,1] 			*	menuis_largeur
 			local vec_men_nu			=  norm_prof 	*	menuis_nu
 			
@@ -107,7 +108,7 @@ fn menuis_fnConstruire  	_plug		_ptr_baie		 _pt_origine		_normDir		_dist_hauteur
 --- on importe le fichier mere des composants ----
 _str_contructeur = fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
-_str_contructeur 	tooltip:menuis_tooltip		nom:menuis_nom	type:menuis_type	params:undefined		dialog:menuis_dialog	fnConstruire:menuis_fnConstruire
+_str_contructeur 	tooltip:menuis_tooltip		nom:menuis_nom	type:menuis_type	params:(menuis_params())		dialog:menuis_dialog	fnConstruire:menuis_fnConstruire
 
 	
 ) ----	FileIn ----

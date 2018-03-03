@@ -46,12 +46,15 @@ rollout compo_dialog "Mur plein" width:180 height:70	(
 	
 )
 
+
 --- la fonction de construction	---------
-fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		profondeur:0		onConstruitLaDalle:true	= (
+fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 		profondeur:0		onConstruitLaDalle:true		this:	= (
+	
+		
 	
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
-		local ptr_composant  	= 	_composant
+		local ptr_composant  	= 	this
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 		
 -------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
@@ -67,8 +70,8 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		profondeur:
 		--- Vecteurs ------------
 		local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
 		local vec_ht 				= [0,0,1] 		* 	ht_niveaux
-		local vec_longueur 	= _normDir 		* 	longueur
-		local vec_prof			= ( _normDir * rotateZ ( matrix3 1 ) 90 ) *  profondeur
+		local vec_longueur 	= norm_dir 		* 	longueur
+		local vec_prof			= ( norm_dir * rotateZ ( matrix3 1 ) 90 ) *  profondeur
 		
 		--- Points d'accroche ------------
 		local id_ptAccroche_1 	= pts_accroches[1]

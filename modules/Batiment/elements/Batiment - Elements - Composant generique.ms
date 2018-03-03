@@ -3,12 +3,12 @@
  (
 
 
-struct 	str_composant (
+struct 	str_composant_generique	 (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	private
 		m_debug = true,
-		m_dbgPrefix ="urba | str_composant",
+		m_dbgPrefix ="urba | str_composant_generique",
 		fn debug 	_txt  var:	 param:    =(
 			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 			catch ()
@@ -27,20 +27,21 @@ struct 	str_composant (
 		params				=	undefined,
 		
 	private		
+		--- le type de la classe ---
+		m_type_classe ="",
+		
 		---- Rollout -----------------------------------
 		m_dialog 			= undefined,
 		
 		---- Fonction virtuelle pure pour construire le composant	----
 		fnVirt_construire	= (),
 		
-		mgr, 		-------  le manager manipulant ces structs  ---------------
-		
 	------ Fonctions ------------------------------------------------------------------------------
 	public
 		---- Mutations -----------------------
 		fn set_dialog 		_dialog 				= ( m_dialog 				= _dialog ),
 		fn set_construire 	_fnConstruire 	= ( fnVirt_construire 		= _fnConstruire ),
-		fn set_params			_params			= ( 
+		fn set_params			_params		= ( 
 			params					= copy  _params 
 			if params != undefined do (
 				for propnom in  getpropnames _params do (
@@ -52,20 +53,17 @@ struct 	str_composant (
 				)
 			)
 		),
-		fn set_manager		_mgr				= ( mgr						= _mgr ),
 		
 		---- Accessions -----------------------
-		fn get_typeClasse		= "facCompo",
+		fn get_typeClasse		= m_type_classe,
 		fn get_dialog				=	m_dialog,
-		fn get_manager			= mgr,
+		
 		fn a_desParametres	=	params != undefined,
 		fn get_longueur 		=	if ( a_desParametres () ) then params.longueur else 0,
 		
-		--- parametres -------------------
-		fn enregistrer			= mgr.enregistrer_parametres	this,
-		fn charger					= mgr.charger_parametres			this,
 		
 		--- Initialisations -----------------------
+		fn set_typeClasse	_type_classe	= m_type_classe = _type_classe,
 		fn initialiser_dialog 	_roll_parent 	_plug =(
 			if ( a_desParametres () )  do (
 				m_dialog.m_rollPrt		= 	_roll_parent
@@ -80,7 +78,7 @@ struct 	str_composant (
 		),
 		fn initialiser 		_type	_nom 	=(
 			
-			generer_ID()
+			generer_ID ()
 			
 			type 				=	_type 			
 			nom				=	_nom
@@ -88,8 +86,8 @@ struct 	str_composant (
 		),
 		
 		---- Construction du mesh 	( fonction virtuelle ) -----------------------
-		fn construire		_plug	 	pts_accroches		_normDir		onConstruitLaDalle:true	 profondeur:0	= 		
-						fnVirt_construire	 _plug	pts_accroches		_normDir		this	onConstruitLaDalle:onConstruitLaDalle  profondeur:profondeur
+		fn construire							_plug	 	pts		norm_dir:						onConstruitLaDalle:true	 								profondeur:0						dist_hauteur:					ptr_baie:		= 		
+				fnVirt_construire			 _plug		pts		norm_dir:norm_dir		onConstruitLaDalle:onConstruitLaDalle  			profondeur:profondeur		dist_hauteur:dist_hauteur		ptr_baie:ptr_baie		this:this		
 		
 ) ---- fin composant -------------------------------
 

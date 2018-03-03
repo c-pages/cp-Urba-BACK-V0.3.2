@@ -83,6 +83,7 @@ struct str_batiment_core (
 		mgr_facades 				= str_manager_parametres (),
 		mgr_facCompos 		= str_manager_parametres (),
 		mgr_facMenuiseries	= str_manager_parametres (),
+		mgr_gardeCorps		= str_manager_parametres (),
 		
 		---- toiture	----------
 		mgr_toiture 				= str_manager_parametres (),
@@ -170,8 +171,9 @@ struct str_batiment_core (
 	----- Composants----------------------------------
 	public
 		fn dupliquer_composant 	_facade		_composant 	=(
-			local nv_compo	=	mgr_facCompos.dupliquer_element		_composant
-			_facade.ajouter_composant	nv_compo 
+			local nv_compo		=	mgr_facCompos.dupliquer_element		_composant
+			local insertIndex 	= ( findItem	_facade.sequence	_composant ) +1
+			insertItem 	nv_compo		_facade.sequence 			insertIndex
 			nv_compo
 		),
 		fn supprimer_composant 	_facade		_index =(
@@ -238,26 +240,77 @@ struct str_batiment_core (
 			
 			if position == unsupplied  do position = _facade.sequence.count
 				
-			local nv_composant 		= mgr_facCompos.creer_element 		idConstructeur:_IDconstructeurCompo	--	enregistrer:true
-			_facade.ajouter_composant	nv_composant		position:position
+			local nv_composant 		= mgr_facCompos.creer_element 		idConstructeur:_IDconstructeurCompo
+			local insertIndex 	= position
+			insertItem 	nv_composant		_facade.sequence 			insertIndex
 			
 			--- gestion Bacon ----------
 			if nv_composant.type == #balcon do  (
 				local composant_fin = 	mgr_facCompos.creer_element 		idConstructeur:#balconFin  position:(position+1)
-				_facade.ajouter_composant	composant_fin		position:(position+1)
+				insertItem 	nv_composant		_facade.sequence 			(position+1)
 			)
 			
 			--- gestion Loggia ----------
 			if nv_composant.type == #loggia do  (
 				local composant_fin = 	mgr_facCompos.creer_element 		idConstructeur:#loggiaFin  position:(position+1)
-				_facade.ajouter_composant	composant_fin		position:(position+1)
+				insertItem 	nv_composant		_facade.sequence 			(position+1)
 			)
 			
--- 			mgr_facades.enregistrer_parametres		_facade
 			
 			nv_composant
 		),
 		fn get_composants_bouton_index	_type	=		mgr_facCompos.get_constructeur_index		_type	visibles:true,
+		
+		
+		
+		
+		
+		
+		/* 
+		fn ajouter_composant 		_composant 	position:(sequence.count+1)  =(
+			if position == 0 do position = sequence.count+1
+			insertItem _composant		sequence 				position
+		),
+		fn supprimer_composant 	_index 	=		deleteItem sequence	_index,
+			
+		fn instancier_composant 	_index 	=(
+			debug "sequence[_index]" var:sequence[_index]
+			local compoInstance =  sequence[_index]
+			ajouter_composant  compoInstance 	position:( _index+1)
+			debug "compoInstance" var:compoInstance
+			debug "sequence" var:sequence
+			compoInstance
+		),
+		
+		fn composant_monter 		_index =(
+			local compoTemp = sequence[_index]
+			deleteItem sequence		_index
+			insertItem compoTemp		sequence 				(_index-1)			
+		),
+		fn composant_descendre 	_index =(
+			local compoTemp = sequence[_index]
+			deleteItem sequence		_index
+			insertItem compoTemp		sequence 				(_index+1)			
+		),
+		 */
+		
+		
+		
+		
+		--sequence ----------		
+		fn get_sequence_longueur	=(
+			local sequence_longueur		=	0
+			for compo in sequence do
+				sequence_longueur	+=	compo.get_longueur ()
+			sequence_longueur
+		),
+		
+		
+		
+		
+		
+		
+		
 		
 		
 	---- menuiseries	---------------
@@ -292,19 +345,26 @@ struct str_batiment_core (
 	---- universel ---------------
 		fn get_manager_parElement 	_element =(
 			
+			debug "##### get_manager_parElement ##### "
+			debug "##### hasProperty 	_element	#get_typeClasse ##### " var:(hasProperty 	_element	#get_typeClasse)
+			
+			
 			local mgr
 			if hasProperty 	_element	#get_typeClasse do (
 				case ( _element.get_typeClasse 	() ) of (
-						"toiture":		mgr = mgr_toiture
-						"facade": 		mgr = mgr_facades
-						"facCompo": 	mgr = mgr_facCompos
-						"facMenis":	mgr = mgr_facMenuiseries
+						"toiture":			mgr = mgr_toiture
+						"facades": 		mgr = mgr_facades
+						"facCompos": 	mgr = mgr_facCompos
+						"facMenuis":		mgr = mgr_facMenuiseries
+						"gardeCorps":	mgr = mgr_gardeCorps
 				)
 			)  
 			mgr
 		),
 		fn enregistrer_element	_element =(
+			debug "##### CORE ##### enregistrer_element"
 			local mgr = 		get_manager_parElement	_element
+			debug "##### CORE ##### mgr" var:mgr
 			if mgr != undefined do 
 				mgr.enregistrer_parametres			_element
 		),
@@ -388,24 +448,29 @@ struct str_batiment_core (
 			mgr_facades.initialiser 			plug:m_plug					\
 														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Facade.ms" )	\
 														fichier_dialog:				( "Batiment - rollout facade.ms" )		\
-														prefix_nomParametres:	"facades"
+														typeParametre:				"facades"
 			
 			mgr_facCompos.initialiser 		plug:m_plug					\
-														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant de facade.ms" )	\
+														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant generique.ms" )	\
 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\composants de facade\\" )					\
-														prefix_nomParametres:	"facCompos"
+														typeParametre:				"facCompos"
 			
 			mgr_facMenuiseries.initialiser plug:m_plug					\
-														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Menuiserie.ms" )	\
+														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant generique.ms" )	\
 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\menuiseries\\" )					\
 														fichier_dialog:				( "Batiment - rollout menuiserie.ms" )		\
-														prefix_nomParametres:	"facMenuis"
+														typeParametre:				"facMenuis"
+			
+			mgr_gardeCorps.initialiser 		plug:m_plug					\
+														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant generique.ms" )	\
+														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\garde-corps\\" )					\
+														typeParametre:				"gardeCorps"
 			
 			mgr_toiture.initialiser 			plug:m_plug					\
-														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Toiture.ms")	\
+														fichier_classeBase:			( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant generique.ms")	\
 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\"  )					\
 														fichier_dialog:				( "Batiment - rollout toiture.ms" )		\
-														prefix_nomParametres:	"toiture" 
+														typeParametre:				"toiture" 
 			
 		)
 		

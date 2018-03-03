@@ -105,14 +105,16 @@ struct  str_manager_parametres (
 		--- pour recuperer lindex dans les tableaux de parametre, correspondant a l'element a cet IDUnique	--------
 		fn get_param_index_parIDUnique		_idUnique =(
 			
-			local index 			= 0
+			local index 			= undefined
 			local param_id 		= m_prefix_nomParametres + "_id" 
-			local param_arrayId_TEMP 	= getProperty	m_plug	  param_id	
-			
-			for i = 1 to param_arrayId_TEMP.count do 
-				if param_arrayId_TEMP[i] == _idUnique do 
-					index = i
-			
+			if hasProperty	m_plug 	param_id do (
+				local index 			= 0
+				local param_arrayId_TEMP 	= getProperty	m_plug	  param_id	
+				
+				for i = 1 to param_arrayId_TEMP.count do 
+					if param_arrayId_TEMP[i] == _idUnique do 
+						index = i
+			)
 			index
 		),
 		fn get_element_index 	_element	=(
@@ -144,7 +146,8 @@ struct  str_manager_parametres (
 		
 		---  #PARAMS --------
 		fn enregistrer_paramsElem 	_params	=(			
-			
+			debug "enregistrer_paramsElem"
+			debug "_params" var:_params
 			local params_TMP = copy 	_params
 			
 			for prop_params_Nom in  ( getPropNames	_params ) do (
@@ -160,6 +163,9 @@ struct  str_manager_parametres (
 								if superclassOf prop_value[1] == StructDef then (
 									
 									for _struct in  prop_value do (
+										
+										debug "----------->	on enregistre un element d'un tableau de PARAMS" var:_params	_struct
+										
 										-- on enregistre l'element sur le plug ------------
 										m_core.enregistrer_element 	_struct
 										
@@ -185,8 +191,8 @@ struct  str_manager_parametres (
 		),
 		fn charger_paramsElem 		_value		_params	=(
 			
-			local params_TMP 	= copy 	_params
 			if _params != undefined do (
+				local params_TMP 	= copy 	_params
 				mgr_datas.set_datas_string		_value		params_TMP
 				
 				for paramNom in getPropNames	params_TMP  do (
@@ -268,128 +274,142 @@ struct  str_manager_parametres (
 		),
 		*/
 		fn enregistrer_parametres		_element		=(
--- 			debug "enregistrer_parametres"
--- 			debug "_element" var:_element
+			debug "enregistrer_parametres"
+			debug "_element" var:_element
 			local prop_element_Noms 	= getPropNames	_element
 			local elem_index 				= get_element_index		_element
 			
-			--- si param deja present, on actualise -------------------
+			
 			for prop_element_Nom in prop_element_Noms do (
 				
+			debug "prop_element_Nom" var:prop_element_Nom
 				local prop_element 			= getProperty _element  prop_element_Nom
 				local param_nom 				= m_prefix_nomParametres + "_" + prop_element_Nom
 				
-				----  en fonction de la classe du param ---------------
-				case classOf prop_element of (
-					MAXScriptFunction:() 
-					Array: 		(
-						
-						---- si on a un tableau de STRUCTs à nous (composants, menuiseries, ... )	on fait la liste des IDUniques	---------------------
-						if prop_element.count != 0 then 
-							if superclassOf	prop_element[1] == StructDef do	(
-								local liste_ids = #()
-								for ss_elem in prop_element do (
-									append 	liste_ids	ss_elem.id
-									m_core.enregistrer_element  	ss_elem									
-								)
-								prop_element = liste_ids								
-							)
-						
-						--- on enregistre -----------
-						enregistrer_parametre 	param_nom		( mgr_datas.array_to_string	prop_element )		index:elem_index
-						
-					)
-					default: 	(
-						
-						---- si on a les #PARAMS ---------------
-						if prop_element_Nom == #params do
-							if prop_element != undefined then
-								prop_element = enregistrer_paramsElem  	prop_element
-						else prop_element ="undefined"
+				-- check si le parametre existe sur le plug -----------
+				if hasProperty m_plug	param_nom	 do  (
+					----  en fonction de la classe du param ---------------
+					case classOf prop_element of (
+						MAXScriptFunction:() 
+						Array: 		(
 							
-						--- on enregistre -----------
-						enregistrer_parametre 	param_nom		prop_element		index:elem_index
-						
-					)
-				) -- fin case
+							---- si on a un tableau de STRUCTs à nous (composants, menuiseries, ... )	on fait la liste des IDUniques	---------------------
+							if prop_element.count != 0 then 
+								if superclassOf	prop_element[1] == StructDef do	(
+									local liste_ids = #()
+									for ss_elem in prop_element do (
+										debug "val dans tableau à enregistrer" var:ss_elem
+										
+										append 	liste_ids	ss_elem.id
+										m_core.enregistrer_element  	ss_elem									
+									)
+									prop_element = liste_ids								
+								)
+							
+			debug "val tableau" var:( mgr_datas.array_to_string	prop_element )
+							--- on enregistre -----------
+							enregistrer_parametre 	param_nom		( mgr_datas.array_to_string	prop_element )		index:elem_index
+							
+						)
+						default: 	(
+							
+							---- si on a les #PARAMS ---------------
+							if prop_element_Nom == #params do
+								if prop_element != undefined then
+									prop_element = enregistrer_paramsElem  	prop_element
+								else prop_element ="undefined"
+								
+			debug "val simple" var:prop_element
+							--- on enregistre -----------
+							enregistrer_parametre 	param_nom		prop_element		index:elem_index
+							
+						)
+					) -- fin case
+				)
 			)-- fin for
 		), 
 		fn charger_parametres 			_element		=(
--- 			debug "charger_parametres"
--- 			debug "_element" var:_element
+			debug "charger_parametres"
+			debug "_element" var:_element
 			local prop_element_Noms = getPropNames	_element
 			
 			--- si param deja present, on actualise -------------------
-			for prop_element_Nom in prop_element_Noms do	try (
+			for prop_element_Nom in prop_element_Noms do	/* try */ (
 				 
 				local prop_element 	= getProperty 	_element  	prop_element_Nom
 				
 				-- si c'est pas une fonction --------------
 				if classof prop_element != MAXScriptFunction do (
 					
-					local param_nom 		= m_prefix_nomParametres + "_" + prop_element_Nom					
-					local param_value		= getProperty	m_plug		param_nom
-					
-					-- si c'est un tableau de parametres ( donc s'il exite une liste d'IDs )-------------
-					if hasproperty	m_plug	  ( m_prefix_nomParametres + "_id" ) do (
-						local param_index = get_param_index_parIDUnique 		_element.id
-						param_value		=	param_value[ param_index ]
-					)
-					
-					case classOf prop_element of (
-						MAXScriptFunction:()
-						Array: 		(
-							-- si on a une liste d'élément à nous	-------------
-							local tab_params	=		( mgr_datas.string_to_array	param_value )
-							if tab_params.count > 0 then (
-								if classOf	tab_params[1] == string do
-									if findString tab_params[1]	"ID_" != undefined do (
-										
-										-- on check si c'est l'instance d'un element deja present -----------
-										param_value = #()
-										for elemID in tab_params do	(
+					local param_nom 		= m_prefix_nomParametres + "_" + prop_element_Nom	
+					if hasProperty		m_plug		( param_nom as name ) do (
+						local param_value		= getProperty	m_plug		param_nom
+						
+						-- si c'est un tableau de parametres ( donc s'il exite une liste d'IDs )-------------
+						if hasproperty	m_plug	  ( ( m_prefix_nomParametres + "_id" ) as name ) do (
+							local param_index = get_param_index_parIDUnique 		_element.id
+							param_value		=	param_value[ param_index ]
+						)
+						
+						case classOf prop_element of (
+							MAXScriptFunction:()
+							Array: 		(
+								
+								-- si on a une liste d'élément à nous	-------------
+								local tab_params	=		( mgr_datas.string_to_array	param_value )
+								
+								if tab_params.count > 0 then (
+									if classOf	tab_params[1] == string do
+										if findString tab_params[1]	"ID_" != undefined do (
 											
-											local	param_instance
-											
-											for param_present in param_value do 
-												if param_present.id == elemID do
-													param_instance = param_present
-											
-											
-											if param_instance != undefined then 
-												append	param_value  	param_instance
-											else append param_value	( m_core.get_element_parID  elemID )
+											param_value = #()
+											for elemID in tab_params do	(
+												
+												-- on check si c'est l'instance d'un element deja present -----------
+												local	param_instance												
+												for param_present in param_value do 
+													if hasproperty	param_present	#id do
+														if param_present.id == elemID do
+															param_instance = param_present
+												
+												debug "param_instance" var:param_instance
+												
+												-- on check si c'est l'instance d'un element deja present -----------
+												if param_instance != undefined then 
+													append	param_value  	param_instance												
+												else append param_value	( m_core.get_element_parID  elemID )
+												
+											)
 											
 										)
 										
-									)
-									
-							)  else param_value = tab_params
-							
-							---- on charge ----------------
-							setProperty	_element	  prop_element_Nom		param_value
-						)
-						default: 	(
-							
-							--- si on a les parametres #PARAMS d'un composant  -----
-							if prop_element_Nom == #params then (
-								if param_value != "undefined" then 
-									param_value = charger_paramsElem  	param_value			_element.params
-								else param_value = undefined
-								setProperty	_element	  prop_element_Nom		param_value	
+								)  else param_value = tab_params
 								
-							)	
-							-- si on a un type -------------
-							else if prop_element_Nom == #type then 
-								setProperty	_element	  prop_element_Nom		(  param_value	as name )
+								---- on charge ----------------
+								setProperty	_element	  prop_element_Nom		param_value
+							)
+							default: 	(
+								
+								--- si on a les parametres #PARAMS d'un composant  -----
+								if prop_element_Nom == #params then (
+									if param_value != "undefined" then 
+										param_value = charger_paramsElem  	param_value			_element.params
+									else param_value = undefined
+									setProperty	_element	  prop_element_Nom		param_value	
+									
+								)	
+								-- si on a un type -------------
+								else if prop_element_Nom == #type then 
+									setProperty	_element	  prop_element_Nom		(  param_value	as name )
+								
+								--- sinon on a un parametres classique -----
+								else 	setProperty	_element	  prop_element_Nom		param_value		
+							)
 							
-							--- sinon on a un parametres classique -----
-							else 	setProperty	_element	  prop_element_Nom		param_value		
-						)
-						
-					) -- fin case  classOf prop_element 
-				) -- fin if MAXScriptFunction --------
-			)  catch (debug "ERREUR CHARGEMENT")-- fin for prop_element	--------
+						) -- fin case  classOf prop_element 
+					) -- fin if MAXScriptFunction --------
+				)
+			)  -- 		catch (debug "ERREUR CHARGEMENT")-- fin for prop_element	--------
 		),
 		
 		
@@ -414,6 +434,7 @@ struct  str_manager_parametres (
 			----------------- Structure d'un élément	------------------------------------------
 			m_classeBase	=	fileIn	 m_fichier_classeBase			
 			nvl_element 		= m_classeBase 	()
+			nvl_element.set_typeClasse  	m_prefix_nomParametres
 			
 			----- si constructeur --------
 			if idConstructeur != unsupplied do 
@@ -423,8 +444,8 @@ struct  str_manager_parametres (
 			if idUnique != unsupplied do 
 				nvl_element.id = idUnique
 			
-			---	la reference au manager	--------------
-			nvl_element.set_manager 	this
+-- 			---	la reference au manager	--------------
+-- 			nvl_element.set_manager 	this
 			
 			-- si besoin on enregistre direct sur le plug -----
 			if enregistrer do enregistrer_parametres	nvl_element
@@ -551,19 +572,24 @@ struct  str_manager_parametres (
 				
 				charger_parametres		element
 			)
+-- 			debug "get_element_parIndex	--------->	element" var:element
 -- 			debug "element PAR INDEX ---------->" var:element
 			element
 		),
 		fn get_element_parID  		_idUnique	=(
+-- 			debug "get_element_parID"
+-- 			debug "_idUnique" var:_idUnique
 			
 			local result
 			local index_result = 0
 			local params_ids 			= getProperty	m_plug	  ( m_prefix_nomParametres + "_id" )
+			debug "params_ids" var:params_ids
 			for i = 1 to params_ids.count do (
 				if params_ids[i] == _idUnique do index_result = i
 			)
 			if index_result != 0 do
 				result = get_element_parIndex 	index_result
+-- 			debug "get_element_parID	--------->	result" var:result
 			result
 		),
 		fn get_elements =(
@@ -676,7 +702,7 @@ struct  str_manager_parametres (
 							fichier_classeBase:			\
 							dossier_constructeurs:	\
 							fichier_dialog:				\
-							prefix_nomParametres:	=(
+							typeParametre:			=(
 			
 			debug "initialiser ()"
 			
@@ -690,7 +716,7 @@ struct  str_manager_parametres (
 				
 				m_dialog_taille = getDialogSize	m_dialog
 			)
-			m_prefix_nomParametres 	= 	prefix_nomParametres
+			m_prefix_nomParametres 	= 	typeParametre
 			
 			mgr_datas 						= m_core.get_mgrDatas ()
 			

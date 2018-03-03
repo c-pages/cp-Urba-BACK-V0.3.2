@@ -23,7 +23,7 @@ rollout compo_dialog "Balcon fin" width:180 height:70	(
 
 
 --- la fonction de construction	---------
-fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= ()
+fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDalle:false	 = ()
 	
 	
 	

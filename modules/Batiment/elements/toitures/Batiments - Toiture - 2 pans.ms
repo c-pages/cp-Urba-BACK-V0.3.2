@@ -142,7 +142,7 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 		)
 )
 --- la fonction de construction	---------
-fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
+fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 	
 	
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
@@ -156,12 +156,12 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 	
 		
 -------------  PARAMETRES 	 et constantes		-----------------------------------------------------------------------------------------------------------------
-		local toiture_pente 		= _composant.params.pente
-		local toiture_decal_ht	= _composant.params.decalage_hauteur
-		local toiture_decal_larg	= _composant.params.decalage_largeur
-		local toiture_orient		= _composant.params.orientation
-		local toiture_debord		= _composant.params.debord
-		local toiture_epaisseur	= _composant.params.epaisseur
+		local toiture_pente 		= this.params.pente
+		local toiture_decal_ht	= this.params.decalage_hauteur
+		local toiture_decal_larg	= this.params.decalage_largeur
+		local toiture_orient		= this.params.orientation
+		local toiture_debord		= this.params.debord
+		local toiture_epaisseur	= this.params.epaisseur
 	
 		local	 mtrx_axeP	=	mgr_surface.get_axePrincipal ()
 		local	 BB_axeP		=	mgr_surface.get_axeP_BB ()
@@ -185,9 +185,9 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 _composant		= (
 				decallage_largeur =  largeur/ 2  - 50
 		) */
 		/* 
-		_composant.params.decalage_largeur = decallage_largeur
+		this.params.decalage_largeur = decallage_largeur
 		mgr_toiture.enregistrer_parametres ()
-		( _composant.get_dialog () ).actualiser () 
+		( this.get_dialog () ).actualiser () 
 		*/
 		
 		local vec_decall_larg 	= [toiture_decal_larg,0, 0]  * mtrx_axeP_temp 
