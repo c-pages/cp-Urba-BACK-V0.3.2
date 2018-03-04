@@ -216,63 +216,7 @@ struct  str_manager_parametres (
 		
 		
 	--- interface	 PARAMETRES du plugin	 --------
-	public	/* 
-		fn enregistrer_parametres		_element		=(
-			debug "enregistrer_parametres"
-			debug "_element" var:_element
-			
-			
-			-- puis on duplique chaque prop de la structure -----------
-			for propnom in getpropNames _element do (				
-				local val_orig = getProperty  _element	propnom
-				
-				--tout sauf les fonctions ----------
-				if classof val_orig != MAXScriptFunction do (				
-					local val_aEnregistrer
-					
-					--- si on a un struct ------
-					if superclassOf val_orig == StructDef then (
-						m_core.enregistrer_element	val_orig
-						val_aEnregistrer = val_orig.id		
-					
-					-- sinon on regarde si on a un tableau
-					) else if  classof val_orig ==  array then (
-						val_aEnregistrer  = #()
-						if val_orig.count> 0 then (
-							
-							--- si on a des struct, ----------
-							if superclassOf val_orig[1] == StructDef then (
-								
-								for valTab_orig in val_orig do (
-									m_core.enregistrer_element	valTab_orig
-									append	val_aEnregistrer		valTab_orig.id		
-								)
-								
-							--- sinon on les copie basiquement ----------
-							) else	val_aEnregistrer = for valTab_orig in val_orig collect copy  valTab_orig		
-							
-						)  
-						
-						-- on fait un string du tableau --
-						val_aEnregistrer		=		 mgr_datas.array_to_string	val_aEnregistrer
-					
-					---- sinon on a une valeur de base -------
-					) else val_aEnregistrer = copy val_orig
-					
-					-- on enregistre le parametre	---------
-					enregistrer_parametre 	_param_nom		_value		index:( get_element_index		_element )					
-					
-				)	---	fin if not function	-------
-			)	---	fin for propNoms	---------
-			
-			
-			--- on  change l'ID du struct dupliqué, si on peut ----------------
-			if hasproperty elem_dupl 	#generer_ID do
-				elem_dupl.generer_ID ()
-			
-			
-		),
-		*/
+	public	
 		fn enregistrer_parametres		_element		=(
 			debug "enregistrer_parametres"
 			debug "_element" var:_element
@@ -416,6 +360,10 @@ struct  str_manager_parametres (
 		
 		
 		
+		
+		
+		
+		---- Creation/Suppression etc. ---------------------------------------------------
 		fn appliquer_type  	_element	_type	=(
 			-- si on a un type et non pas un index	de constructeur -------------
 				if classof 	_type == name or classof _type == string	do
@@ -425,10 +373,6 @@ struct  str_manager_parametres (
 				
 				_element
 		),
-		
-		
-		
-		---- Creation/Suppression etc. ---------------------------------------------------
 		fn creer_element			idUnique:		idConstructeur:		enregistrer:false	=(
 			
 			----------------- Structure d'un élément	------------------------------------------
@@ -505,7 +449,6 @@ struct  str_manager_parametres (
 			elem_dupl
 			
 		),
-		
 		fn supprimer_element 		_element	=(
 			debug"supprimer_element"
 			debug"_element -1-"	var:_element
@@ -643,8 +586,6 @@ struct  str_manager_parametres (
 			
 			result
 		),
-		
-		
 		fn a_desParametres	_index:	=(
 			local result
 			

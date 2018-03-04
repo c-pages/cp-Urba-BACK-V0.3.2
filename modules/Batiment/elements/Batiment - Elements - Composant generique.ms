@@ -20,21 +20,17 @@ struct 	str_composant_generique	 (
 		
 	------ Membres ------------------------------------------------------------------------------
 	public
-		---- Parametres -----------------------------------
 		id						=	"",		
 		nom					=	"",
-		type					=	undefined,
+		type					=	undefined,		
 		params				=	undefined,
 		
+		
 	private		
-		--- le type de la classe ---
-		m_type_classe ="",
+		m_type_classe ="",						--- le type de la classe ---
+		m_dialog 				= undefined,		---- Rollout -----------------------------------
+		fnVirt_construire	= (),					---- Fonction virtuelle pour construire le composant	----
 		
-		---- Rollout -----------------------------------
-		m_dialog 			= undefined,
-		
-		---- Fonction virtuelle pure pour construire le composant	----
-		fnVirt_construire	= (),
 		
 	------ Fonctions ------------------------------------------------------------------------------
 	public
@@ -54,10 +50,10 @@ struct 	str_composant_generique	 (
 			)
 		),
 		
+		
 		---- Accessions -----------------------
 		fn get_typeClasse		= m_type_classe,
-		fn get_dialog				=	m_dialog,
-		
+		fn get_dialog				=	m_dialog,		
 		fn a_desParametres	=	params != undefined,
 		fn get_longueur 		=	if ( a_desParametres () ) then params.longueur else 0,
 		
@@ -85,8 +81,11 @@ struct 	str_composant_generique	 (
 			
 		),
 		
+		
+		
+		
 		---- Construction du mesh 	( fonction virtuelle ) -----------------------
-		fn construire							_plug	 	pts		norm_dir:						onConstruitLaDalle:true	 								profondeur:0						dist_hauteur:					ptr_baie:		= 		
+		fn construire							_plug	 	pts		norm_dir:						onConstruitLaDalle:true	 								profondeur:0						dist_hauteur:						ptr_baie:		= 		
 				fnVirt_construire			 _plug		pts		norm_dir:norm_dir		onConstruitLaDalle:onConstruitLaDalle  			profondeur:profondeur		dist_hauteur:dist_hauteur		ptr_baie:ptr_baie		this:this		
 		
 ) ---- fin composant -------------------------------
