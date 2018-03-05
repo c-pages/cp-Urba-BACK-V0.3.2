@@ -86,8 +86,24 @@ struct 	str_composant_generique	 (
 		
 		
 		---- Construction du mesh 	( fonction virtuelle ) -----------------------
-		fn construire							_plug	 	pts		norm_dir:						onConstruitLaDalle:true	 								profondeur:0						dist_hauteur:						ptr_baie:		= 		
-				fnVirt_construire			 _plug		pts		norm_dir:norm_dir		onConstruitLaDalle:onConstruitLaDalle  			profondeur:profondeur		dist_hauteur:dist_hauteur		ptr_baie:ptr_baie		this:this		
+		fn construire							_plug	 	pts		\
+													norm_dir:				\
+													onConstruitLaDalle:true	 	\
+													profondeur:0			\
+													dist_hauteur:		\
+													ptr_baie:				\
+													compo_debut:	\
+													onConstruit_gardeCorps:		= 
+		
+				fnVirt_construire			 _plug		pts	\
+													norm_dir:norm_dir		\
+													onConstruitLaDalle:onConstruitLaDalle  		\
+													profondeur:profondeur	\
+													dist_hauteur:dist_hauteur		\
+													ptr_baie:ptr_baie	\
+													this:this	\
+													compo_debut:compo_debut	\
+													onConstruit_gardeCorps:onConstruit_gardeCorps	
 		
 ) ---- fin composant -------------------------------
 

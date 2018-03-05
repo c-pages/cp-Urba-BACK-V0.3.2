@@ -48,7 +48,7 @@ rollout compo_dialog "Mur plein" width:180 height:70	(
 
 
 --- la fonction de construction	---------
-fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 		profondeur:0		onConstruitLaDalle:true		this:	= (
+fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 			onConstruitLaDalle:true		this:	= (
 	
 		
 	
@@ -62,7 +62,6 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 		profondeur:0		onCons
 		local ht_niveaux 		= ptr_plug.etages_hauteur
 		local longueur 			= ptr_composant.params.longueur
 		
-		
 -------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 		--- Result -------------
 		local pt_result_1, pt_result_2, pt_result_3
@@ -71,7 +70,6 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 		profondeur:0		onCons
 		local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
 		local vec_ht 				= [0,0,1] 		* 	ht_niveaux
 		local vec_longueur 	= norm_dir 		* 	longueur
-		local vec_prof			= ( norm_dir * rotateZ ( matrix3 1 ) 90 ) *  profondeur
 		
 		--- Points d'accroche ------------
 		local id_ptAccroche_1 	= pts_accroches[1]

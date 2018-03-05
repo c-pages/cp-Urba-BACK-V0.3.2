@@ -14,7 +14,7 @@ struct  str_manager_parametres (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug = true,
+		m_debug = false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:"urba | str_manager_parametres_univ"	catch (),
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	
@@ -147,7 +147,7 @@ struct  str_manager_parametres (
 		
 		---  #PARAMS --------
 		fn enregistrer_paramsElem 	_params	=(			
-			debug "enregistrer_paramsElem"
+			debug " ********** 	enregistrer_paramsElem	*********"
 			debug "_params" var:_params
 			local params_TMP = copy 	_params
 			
@@ -156,6 +156,7 @@ struct  str_manager_parametres (
 				local prop_value	= getProperty _params  prop_params_Nom
 				if classOf prop_value != MAXScriptFunction do (
 						
+			debug "prop_params_Nom" var:prop_params_Nom
 					case classOf prop_value	of (
 						Array:(
 								local tab_value =#()
@@ -182,10 +183,19 @@ struct  str_manager_parametres (
 								) 
 								
 							)
-						default:(		)
+						default:(	
+									-- on a une structure à nous --------
+									if superclassOf prop_value == StructDef then (
+										-- on enregistre l'element sur le plug ------------
+										m_core.enregistrer_element 	prop_value
+										
+										-- on ajoute l'id au tableau du params a enrgistrer -------
+										prop_value = 	prop_value.id
+									
+									)
+							)
 					)	---- fin case	---------
 					
-											debug "----------->	prop_value" var:prop_value	
 					
 					setProperty params_TMP 	prop_params_Nom 	( prop_value )
 				)
@@ -195,16 +205,27 @@ struct  str_manager_parametres (
 		),
 		fn charger_paramsElem 		_value		_params	=(
 			
+					debug "------####################################################----->	charger_paramsElem" var:_value	
 			if _params != undefined do (
 				local params_TMP 	= copy 	_params
 				mgr_datas.set_datas_string		_value		params_TMP
 				
 				for paramNom in getPropNames	params_TMP  do (
+					
+					debug "------########################################----->	paramNom" var:paramNom	
 					local propVal = getProperty params_TMP	paramNom
-					if classOf propVal == array do (
-						for i = 1 to propVal.count do (
-							local env_elem = m_core.get_element_parID 	propVal[i]
-							if env_elem != undefined do propVal[i] = env_elem
+					if classOf propVal != maxScriptfunction	do (
+						if classOf propVal == array then (
+							for i = 1 to propVal.count do (
+								local env_elem = m_core.get_element_parID 	propVal[i]
+								if env_elem != undefined do propVal[i] = env_elem
+							)
+						) else (
+						debug "------####################################----->	propVal" var:propVal	
+								local env_elem = m_core.get_element_parID 	propVal
+-- 						debug "------####################################----->	env_elem" var:env_elem	
+								if env_elem != undefined do propVal = env_elem
+								setproperty	params_TMP		paramNom		propVal
 						)
 					)
 				)
@@ -230,7 +251,7 @@ struct  str_manager_parametres (
 			
 			for prop_element_Nom in prop_element_Noms do (
 				
-			debug "prop_element_Nom" var:prop_element_Nom
+-- 			debug "prop_element_Nom" var:prop_element_Nom
 				local prop_element 			= getProperty _element  prop_element_Nom
 				local param_nom 				= m_prefix_nomParametres + "_" + prop_element_Nom
 				
@@ -246,7 +267,7 @@ struct  str_manager_parametres (
 								if superclassOf	prop_element[1] == StructDef do	(
 									local liste_ids = #()
 									for ss_elem in prop_element do (
-										debug "val dans tableau à enregistrer" var:ss_elem
+-- 										debug "val dans tableau à enregistrer" var:ss_elem
 										
 										append 	liste_ids	ss_elem.id
 										m_core.enregistrer_element  	ss_elem									
@@ -254,7 +275,7 @@ struct  str_manager_parametres (
 									prop_element = liste_ids								
 								)
 							
-			debug "val tableau" var:( mgr_datas.array_to_string	prop_element )
+-- 			debug "val tableau" var:( mgr_datas.array_to_string	prop_element )
 							--- on enregistre -----------
 							enregistrer_parametre 	param_nom		( mgr_datas.array_to_string	prop_element )		index:elem_index
 							
@@ -267,7 +288,7 @@ struct  str_manager_parametres (
 									prop_element = enregistrer_paramsElem  	prop_element
 								else prop_element ="undefined"
 								
-			debug "val simple" var:prop_element
+-- 			debug "val simple" var:prop_element
 							--- on enregistre -----------
 							enregistrer_parametre 	param_nom		prop_element		index:elem_index
 							
@@ -535,7 +556,7 @@ struct  str_manager_parametres (
 			local result
 			local index_result = 0
 			local params_ids 			= getProperty	m_plug	  ( m_prefix_nomParametres + "_id" )
-			debug "params_ids" var:params_ids
+-- 			debug "params_ids" var:params_ids
 			for i = 1 to params_ids.count do (
 				if params_ids[i] == _idUnique do index_result = i
 			)

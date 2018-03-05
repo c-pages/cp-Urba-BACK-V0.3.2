@@ -172,31 +172,31 @@ struct str_batiment_core (
 	public
 		fn dupliquer_composant 	_facade		_composant 	=(
 			local nv_compo		=	mgr_facCompos.dupliquer_element		_composant
-			local insertIndex 	= ( findItem	_facade.sequence	_composant ) +1
-			insertItem 	nv_compo		_facade.sequence 			insertIndex
+			local insertIndex 	= ( findItem	_facade.params.sequence	_composant ) +1
+			insertItem 	nv_compo		_facade.params.sequence 			insertIndex
 			nv_compo
 		),
 		fn supprimer_composant 	_facade		_index =(
 			
 			local supprimer_balconFin 		= false
 			local supprimer_balconDebut		= false
-			if _facade.sequence[_index].type == #balcon  		do supprimer_balconFin 		= true
-			if _facade.sequence[_index].type == #balconFin  	do supprimer_balconDebut 	= true
+			if _facade.params.sequence[_index].type == #balcon  		do supprimer_balconFin 		= true
+			if _facade.params.sequence[_index].type == #balconFin  	do supprimer_balconDebut 	= true
 			
 			local supprimer_loggiaFin 		= false
 			local supprimer_loggiaDebut		= false
-			if _facade.sequence[_index].type == #loggia  		do supprimer_loggiaFin 		= true
-			if _facade.sequence[_index].type == #loggiaFin  	do supprimer_loggiaDebut 	= true
+			if _facade.params.sequence[_index].type == #loggia  		do supprimer_loggiaFin 		= true
+			if _facade.params.sequence[_index].type == #loggiaFin  	do supprimer_loggiaDebut 	= true
 				
-			_facade.supprimer_composant 		_index
+			_facade.params.supprimer_composant 		_index
 			
 			
 			--- les balcons -----------------
 			if supprimer_balconFin do (
 				local i = _index  
 				while i <= _facade.params.sequence.count do (
-					if _facade.sequence[i].type == #balconFin do (
-						_facade.supprimer_composant 		i
+					if _facade.params.sequence[i].type == #balconFin do (
+						_facade.params.supprimer_composant 		i
 						i  = _facade.params.sequence.count + 1
 					)
 					i += 1
@@ -205,8 +205,8 @@ struct str_batiment_core (
 			if supprimer_balconDebut do (
 				local i = _index  - 1
 				while i > 0 do (
-					if _facade.sequence[i].type == #balcon do (
-						_facade.supprimer_composant 		i
+					if _facade.params.sequence[i].type == #balcon do (
+						_facade.params.supprimer_composant 		i
 						i  = 0
 					)
 					i -= 1
@@ -217,8 +217,8 @@ struct str_batiment_core (
 			if supprimer_loggiaFin do (
 				local i = _index  
 				while i <= _facade.params.sequence.count do (
-					if _facade.sequence[i].type == #loggiaFin do (
-						_facade.supprimer_composant 		i
+					if _facade.params.sequence[i].type == #loggiaFin do (
+						_facade.params.supprimer_composant 		i
 						i  = _facade.params.sequence.count + 1
 					)
 					i += 1
@@ -227,8 +227,8 @@ struct str_batiment_core (
 			if supprimer_loggiaDebut do (
 				local i = _index  - 1
 				while i > 0 do (
-					if _facade.sequence[i].type == #loggia do (
-						_facade.supprimer_composant 		i
+					if _facade.params.sequence[i].type == #loggia do (
+						_facade.params.supprimer_composant 		i
 						i  = 0
 					)
 					i -= 1
@@ -247,13 +247,13 @@ struct str_batiment_core (
 			--- gestion Bacon ----------
 			if nv_composant.type == #balcon do  (
 				local composant_fin = 	mgr_facCompos.creer_element 		idConstructeur:#balconFin  position:(position+1)
-				insertItem 	nv_composant		_facade.params.sequence 			(position+1)
+				insertItem 	composant_fin		_facade.params.sequence 			(position+1)
 			)
 			
 			--- gestion Loggia ----------
 			if nv_composant.type == #loggia do  (
 				local composant_fin = 	mgr_facCompos.creer_element 		idConstructeur:#loggiaFin  position:(position+1)
-				insertItem 	nv_composant		_facade.sequence 			(position+1)
+				insertItem 	composant_fin		_facade.params.sequence 			(position+1)
 			)
 			
 			
@@ -282,6 +282,10 @@ struct str_batiment_core (
 		fn appliquer_menuiserie_type  _menuis		_index_type	=		mgr_facMenuiseries.appliquer_type  	_menuis		_index_type	,
 		
 		
+	---- gardes corps	---------------		
+		fn	get_gardeCorps_constructeursNoms	= for constr in mgr_gardeCorps.get_constructeurs () 	collect constr.nom ,
+		fn get_gardeCorps_constructeursTypes 	= for constr in mgr_gardeCorps.get_constructeurs ()  collect constr.type,
+		fn creer_gardeCorps				_IDconstructeur				= mgr_gardeCorps.creer_element	idConstructeur:_IDconstructeur,
 		
 	---- toiture	---------------
 	public
@@ -300,8 +304,8 @@ struct str_batiment_core (
 	---- universel ---------------
 		fn get_manager_parElement 	_element =(
 			
-			debug "##### get_manager_parElement ##### "
-			debug "##### hasProperty 	_element	#get_typeClasse ##### " var:(hasProperty 	_element	#get_typeClasse)
+-- 			debug "##### get_manager_parElement ##### "
+-- 			debug "##### hasProperty 	_element	#get_typeClasse ##### " var:(hasProperty 	_element	#get_typeClasse)
 			
 			
 			local mgr
@@ -317,9 +321,9 @@ struct str_batiment_core (
 			mgr
 		),
 		fn enregistrer_element	_element =(
-			debug "##### CORE ##### enregistrer_element"
+-- 			debug "##### CORE ##### enregistrer_element"
 			local mgr = 		get_manager_parElement	_element
-			debug "##### CORE ##### mgr" var:mgr
+-- 			debug "##### CORE ##### mgr" var:mgr
 			if mgr != undefined do 
 				mgr.enregistrer_parametres			_element
 		),
@@ -329,6 +333,7 @@ struct str_batiment_core (
 		),
 		
 		fn get_element_parID	_idUnique =(
+			
 			local elem
 			--- on cherche dans les facades -----------
 			if mgr_facades.get_element_parID	 	_idUnique != undefined then
@@ -341,6 +346,10 @@ struct str_batiment_core (
 			--- on cherche dans les menuiseries	 -----------
 			else if mgr_facMenuiseries.get_element_parID	 		_idUnique != undefined then
 				elem	=	mgr_facMenuiseries.get_element_parID	 	_idUnique
+			
+			--- on cherche dans les gadres corps	 -----------
+			else if mgr_gardeCorps.get_element_parID	 		_idUnique != undefined then
+				elem	=	mgr_gardeCorps.get_element_parID	 	_idUnique
 			
 			elem
 		),

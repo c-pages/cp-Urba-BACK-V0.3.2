@@ -142,192 +142,12 @@ struct str_construction (
 			
 			face
 		),
-		/* 
-		fn get_sequenceFacade		_facade		_longueur_facade	=(
-			
--- 			debug "get_sequenceFacade" 
-			
-			local	nbr_espacemts				=	0
-			local	nbr_repetitions				=	0
-			local	longueur_restant			=	0
-			local	longueur_espacement	=	0
-			local	espacer 						= _facade.mode == 4
-			local longueur_sequence 		= _facade.get_longueur		()	
-			
-			local	sequence_totale 			= #()
-			
-			
-			-----	calcul du nombre d'espacements de la sequence	--------------------------------------
-			for compo in _facade.sequence do
-					if compo.type  as name == #espacement 	do
-						nbr_espacemts += 1
-			
-			-----	calcul de la longueur des espacements de la sequence	--------------------------------------
-			case _facade.mode of (
-				1:  	(	--- Repeter ----
-					nbr_repetitions				= floor ( _longueur_facade / longueur_sequence )
-					longueur_restant 			= _longueur_facade - longueur_sequence * nbr_repetitions
-					longueur_espacement 	= longueur_restant / ( 2	+ nbr_espacemts * nbr_repetitions )
-					espacer 						= false
-				)
-				2: 	(	--- Etirer ----
-					nbr_repetitions				= 1						
-					longueur_restant 			= _longueur_facade - longueur_sequence * nbr_repetitions 	
-					longueur_espacement 	= longueur_restant / ( 2	+ nbr_espacemts * nbr_repetitions )
-
-				)
-				3: 	(	--- Centrer ----					
-					nbr_repetitions				= 1		
-					longueur_restant 			= _longueur_facade - longueur_sequence * nbr_repetitions 	
-					longueur_espacement 	= longueur_restant / (  nbr_espacemts * nbr_repetitions )
-					
-				)
-				4:		(	--- Espacer ----	
-					nbr_repetitions				= floor ( _longueur_facade / longueur_sequence )
-					longueur_restant 			= _longueur_facade - longueur_sequence * (nbr_repetitions )		
-					longueur_espacement 	= longueur_restant / ( 1 + nbr_espacemts * nbr_repetitions)
-				)						
-			)
-			
--- 			debug "----------------------------------------------------"
--- 			debug "_longueur_facade" var:_longueur_facade
--- 			debug "longueur_sequence" var:longueur_sequence
--- 			debug "nbr_repetitions" var:nbr_repetitions
--- 			debug "longueur_restant" var:longueur_restant
--- 			debug "longueur_espacement" var:longueur_espacement
--- 			debug "----------------------------------------------------"
-			
-			-------------------- la SEQUENCE TOTALE	----------------------------------------------------------------------------------------
-			-----	si on a une sequence avec une longueur nulle, on creer un seul mur plein	--------------------------------------		
-		 	if longueur_sequence	== 0 then (
-				sequence_totale 	= #( creer_murPlein  longueur_facade )
-			) else (
-				
-				-----	on remplace les espacements de la sequence par des murs pleins	--------------------------------------
-				local sequence_simple		= for compo in 	_facade.sequence collect compo
-				for i=1 to _facade.sequence.count do (
-					local composant = sequence_simple[i]
-					if composant.type  as name == #espacement 	then
-						sequence_simple[i] = creer_murPlein  longueur_espacement
-				)
-				
-				--------------puis on creer la sequence total du mur	--------------------------------------
-				----- le premier espacement ------------
-				if _facade.mode != 3 do 
-					append sequence_totale	(  creer_murPlein  longueur_espacement )
-				
-				-- les boucles de la facade simple	--------
-				for i = 1 to nbr_repetitions do (				
-					----- les repetitions de sequence ------------------
-					for compo	in	 sequence_simple	do 						
-						append sequence_totale	compo
-					if espacer do 
-						append sequence_totale	(  creer_murPlein  longueur_espacement )
-				)
-				
-				----- le dernier espacement ------------
-				if not espacer and  _facade.mode != 3 do 
-						append sequence_totale	(  creer_murPlein  longueur_espacement )					
-				
-			)
-			
-			sequence_totale
-		),
 		
-		fn creer_sequence		_pt1		_pt2		_facade					=(
-			
--- 			debug "creer_sequence"
-			
-			------------ ANALYSE ------------------------------------------------------------------
-			local longueur_facade 	= 	distance _pt1 _pt2
-			local norm_dir				=	normalize ( _pt2 - _pt1)			
-			
-			--- on  recupere la sequence totale de la facade en question ----
-			local sequenceTotal  		=	get_sequenceFacade		_facade		longueur_facade	
-			
-			------------ CONSTRUCTION  DE LA FACADE	------------------------------------
-			--- on créé  les 3 premiers points --------
-			local pt_accroche_1 		= 	_pt1
-			local pt_accroche_2 		= 	pt_accroche_1 + [0,0,m_plug.const_dalle_epaisseur]
-			local pt_accroche_3 		= 	pt_accroche_2 + [0,0,m_plug.etages_hauteur]			
-			local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 ) )
-			
-			
-			--- gestion balcon	------
-			local balcon_ptID_debut
-			local balcon_pts_debut
-			local balcon_aConstruire = undefined
-			
-			----gestion loggia -------
-			local	 loggia_ptID_debut
-			local loggia_pts_debut
-			local loggia_aConstruire = undefined
-			
-			local profondeurFacade = 0
-			
-			---  on créé la facade avec la sequence total --------
-			for composant in sequenceTotal do (
-				
-				case composant.type as name of (
-					
-					
-					#balcon:(
-						balcon_pts_debut 		= ptsIDs_accroche
-						balcon_aConstruire 	= composant
-					)
-					#balconFin:(
-						local		pt_balcon_debut	=	polyop.getVert 	m_plug.delegate		balcon_pts_debut[1]	
-						local		pt_balcon_fin		=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
-						balcon_aConstruire.params.longueur = 		(	distance	pt_balcon_debut 	pt_balcon_fin	)
-						balcon_aConstruire.construire	 	m_plug			balcon_pts_debut		norm_dir:norm_dir
-						balcon_aConstruire = undefined
--- 					balcon_aConstruire.params.longueur = 	0
-					)
-					
-					
-					
-					#loggia:(
-						loggia_aConstruire 	= composant
-						profondeurFacade 		= loggia_aConstruire.params.profondeur
-					-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	onConstruitLaDalle:false
-						
-						loggia_pts_debut 		= ptsIDs_accroche
-					
-					)
-					#loggiaFin:(
-						local		pt_loggia_debut			=	polyop.getVert 	m_plug.delegate		loggia_pts_debut[1]	
-						local		pt_loggia_fin					=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
-						composant.params.longueur 		= 	(	distance	pt_loggia_debut 	pt_loggia_fin	)
-
-						composant.params.profondeur 	= 		loggia_aConstruire.params.profondeur
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir		onConstruitLaDalle:false
-						composant.params.longueur 		= 		0
-						loggia_aConstruire = undefined
--- 						profondeurFacade 		= 0
-					
-					)
-					
-					
-					
-					default:(
-						local onConstruitLaDalle = ( balcon_aConstruire == undefined )  and  ( loggia_aConstruire == undefined )
-						
-						-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir		onConstruitLaDalle:onConstruitLaDalle			-- profondeur:profondeurFacade
-						
-					)
-				) -- fin case	-----------------
-				
-			) --- fin de la sequence -----
-			
-		),
-		*/
 		------------ Construction-------------------------
 	private
 		fn creer_ssBassement  		&z	=(
 			
-			local surface_points 	= m_plug.core.get_surface_points ()
+			local surface_points 	= m_plug.core.get_surface_points 	()
 			local faces = m_geo.facesContour	 	surface_points		z 		m_plug.const_ssBassement_epaisseur
 			m_geo.set_matID 		faces		#mur
 			z += m_plug.const_ssBassement_epaisseur
@@ -374,7 +194,7 @@ struct str_construction (
 						
 					---- si on  a des facades on construit la sequence --------------------
 					if 	onA_uneFacade  then 
-						facades_pourCeMur[1].construire		m_plug 		#(pt_mur_1, pt_mur_2 )	
+						facades_pourCeMur[1].construire		m_plug 		#(pt_mur_1, pt_mur_2 )	onConstruit_gardeCorps:( n_etage!=0 )
 					
 						
 					else (
@@ -404,11 +224,7 @@ struct str_construction (
 				z += m_plug.const_dalle_epaisseur
 				
 			) --- fin boucle etages -------------
-			/* 
-			local faces = m_geo.facesContour	 (	m_plug.core.get_surface_points ()	)	z 	m_plug.const_dalle_epaisseur
-			m_geo.set_matID 		faces		#mur
-			z += m_plug.const_dalle_epaisseur
-			 */
+			
 		),
 		fn creer_toiture					&z =(
 			
@@ -447,7 +263,7 @@ struct str_construction (
 					local chrono_debut = timeStamp ()
 					
 					---- On définie le Z initial 	----
-					local zCourant = -( m_plug.const_ssBassement_epaisseur + m_plug.const_dalle_epaisseur )
+					local zCourant = -( m_plug.const_ssBassement_epaisseur + m_plug.const_dalle_epaisseur )  + m_plug.const_batiment_decallage
 					
 					---- ...  et on construit le batiment -----
 					creer_ssBassement 			&zCourant

@@ -134,13 +134,6 @@ struct facade_params	(
 				)						
 			)
 			
--- 			debug "----------------------------------------------------"
--- 			debug "_longueur_facade" var:_longueur_facade
--- 			debug "longueur_sequence" var:longueur_sequence
--- 			debug "nbr_repetitions" var:nbr_repetitions
--- 			debug "longueur_restant" var:longueur_restant
--- 			debug "longueur_espacement" var:longueur_espacement
--- 			debug "----------------------------------------------------"
 			
 			-------------------- la SEQUENCE TOTALE	----------------------------------------------------------------------------------------
 			-----	si on a une sequence avec une longueur nulle, on creer un seul mur plein	--------------------------------------		
@@ -149,12 +142,15 @@ struct facade_params	(
 				
 			) else (
 				
-				-----	on remplace les espacements de la sequence par des murs pleins	--------------------------------------
 				local sequence_simple		= for compo in 	sequence collect compo
 				for i=1 to sequence.count do (
 					local composant = sequence_simple[i]
-					if composant.type  as name == #espacement 	then
-						sequence_simple[i] = _plug.core.get_murPlein	 longueur_espacement
+					case composant.type  as name of (
+					-----	on remplace les espacements de la sequence par des murs pleins	--------------------------------------
+						#espacement:	sequence_simple[i] = _plug.core.get_murPlein	 longueur_espacement
+						
+						---- on gere les balcons et loggias	---------
+					)
 				)
 				
 				--------------puis on creer la sequence total du mur	--------------------------------------
@@ -183,7 +179,7 @@ struct facade_params	(
 
 
 --- la fonction de construction	---------
-fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		profondeur:0		onConstruitLaDalle:true		this:	= (
+fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit_gardeCorps:true		= (
 	
 			m_plug = _plug
 			m_geo	=	_plug.core.get_geo ()
@@ -249,7 +245,37 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		profondeur:0		onCo
 					)
 					#loggiaFin:(
 						local		pt_loggia_debut			=	polyop.getVert 	m_plug.delegate		loggia_pts_debut[1]	
-						local		pt_loggia_fin					=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
+						local		pt_loggia_fin					=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]
+						
+						composant.params.longueur 		= 	(	distance	pt_loggia_debut 	pt_loggia_fin	)
+						
+						composant.params.profondeur 	= 		loggia_aConstruire.params.profondeur
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	\
+																																			onConstruitLaDalle:false	\
+																																			compo_debut:loggia_aConstruire \
+																																			onConstruit_gardeCorps:onConstruit_gardeCorps
+						composant.params.longueur 		= 		0
+						loggia_aConstruire = undefined
+					
+					)
+					
+					
+					/* 
+					
+					#loggiaTMP:(
+						loggia_aConstruire 	= composant
+						profondeurFacade 		= loggia_aConstruire.params.profondeur
+					-----	construction geometrie du composant	----------
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	onConstruitLaDalle:false
+						
+						loggia_pts_debut 		= ptsIDs_accroche
+					
+					)
+					#loggiaFinTMP:(
+						local		pt_loggia_debut			=	polyop.getVert 	m_plug.delegate		loggia_pts_debut[1]	
+						local		pt_loggia_fin					=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]
+						
+						
 						composant.params.longueur 		= 	(	distance	pt_loggia_debut 	pt_loggia_fin	)
 
 						composant.params.profondeur 	= 		loggia_aConstruire.params.profondeur
@@ -258,15 +284,13 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		profondeur:0		onCo
 						loggia_aConstruire = undefined
 -- 						profondeurFacade 		= 0
 					
-					)
-					
-					
+					) */
 					
 					default:(
 						local onConstruitLaDalle = ( balcon_aConstruire == undefined )  and  ( loggia_aConstruire == undefined )
 						
 						-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir		onConstruitLaDalle:onConstruitLaDalle			-- profondeur:profondeurFacade
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir		onConstruitLaDalle:onConstruitLaDalle		
 						
 					)
 				) -- fin case	-----------------

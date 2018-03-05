@@ -46,6 +46,8 @@ parameters params_global 						rollout:roll_global		(
 parameters params_constantes 							(
 	
 	------- Constantes 	-----------------
+	const_batiment_decallage			type: #float 				default:5.		animatable:false		invisibleInTV:true
+	
 	const_dalle_epaisseur				type: #float 				default:20.	animatable:false		invisibleInTV:true
 	const_murExt_epaisseur				type: #float 				default:30.	animatable:false		invisibleInTV:true
 	
@@ -89,6 +91,7 @@ parameters params_viewport					rollout:roll_viewport	(
 	affiche_geometrie			type:#boolean			default:false	ui:ckb_geometrie		animatable:false		invisibleInTV:true
 	
 )
+
 parameters params_facades 						rollout:roll_global	(
 	
 	---- générale -----------
@@ -135,6 +138,16 @@ parameters params_facades_menuiseries 		(
 	facMenuis_nom 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	facMenuis_type 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	facMenuis_params				type:#stringTab		tabSize:0 			tabSizeVariable:true	
+	
+)
+
+parameters params_gardeCorps 		(
+	
+	---- Parametres -----------------------------------
+	gardeCorps_id 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	gardeCorps_nom 				type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	gardeCorps_type 				type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	gardeCorps_params			type:#stringTab		tabSize:0 			tabSizeVariable:true	
 	
 )
 

@@ -13,38 +13,64 @@ compo_toolTip =	""
 
 --- les parametres du composant	---------
 struct compo_params	(
-	longueur = 0,
-	profondeur	= 100
+	longueur 		= 0,
+	profondeur	= 100,
+	gardeCorps	= undefined
 )
 
 
 --- les rollout du composant	---------
-rollout compo_dialog "Loggia" width:180 height:70	(
+rollout compo_dialog "Loggia" width:180 height:151
+(
 	
 	local m_compo
 	local m_rollPrt
 	local m_plug
 
 	edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
-	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
+	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:72 align:#left
 	label 'lbl_profondeur' "profondeur:" pos:[13,37] width:49 height:13 align:#left
 	spinner 'spn_profondeur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
 	
-	fn actualiser =(
-		spn_profondeur.value 	= 	m_compo.params.profondeur
+	dropDownList 'ddl_gardeCorps' "" pos:[15,64] width:149 height:21 align:#left
+	
+	fn actualiser =(		spn_profondeur.value 	= 	m_compo.params.profondeur
 		edt_nom.text 		=	m_compo.nom
+		
+		
+		
+		local liste_nomsGardesCorps	=	#("aucun")
+		liste_nomsGardesCorps +=	m_plug.core.get_gardeCorps_constructeursNoms ()
+		ddl_gardeCorps.items 			= liste_nomsGardesCorps
+		
+		local gardeCorps_listeTypes	=	m_plug.core.get_gardeCorps_constructeursTypes ()		
+		if m_compo.params.gardeCorps != undefined then (			
+			local indexSelect_gardeCorps	=	findItem	gardeCorps_listeTypes		m_compo.params.gardeCorps.type			
+			ddl_gardeCorps.selection = indexSelect_gardeCorps + 1
+		) else ddl_gardeCorps.selection = 1
+		
 	)
 
-	on spn_profondeur changed val do 
-		m_compo.params.profondeur = val		
 	
-	on edt_nom	 entered txt 	do	(
-		m_compo.nom = txt
-		m_rollPrt.actualiser ()
+	on 	edt_nom entered txt 	do	(
+			m_compo.nom = txt
+			m_rollPrt.actualiser ()
+		)
+	on 	spn_profondeur changed val do
+		m_compo.params.profondeur = val
+	
+	on	ddl_gardeCorps 	selected	_val do (
+		format "GARDE CORPS selected %\n" _val
+		if _val > 1 then (
+			local nv_gardeCorps = m_plug.core.creer_gardeCorps		( _val - 1 )
+			m_compo.params.gardeCorps = nv_gardeCorps 
+			format "nv_gardeCorps: %\n" nv_gardeCorps
+		format "-------> m_compo.params.gardeCorps.type %\n" m_compo.params.gardeCorps.type
+		) else  m_compo.params.gardeCorps = undefined
 	)
+	
 	
 )
-
 
 --- la fonction de construction	---------
 fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDalle:false	 = (
@@ -143,7 +169,6 @@ _str_contructeur 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(c
 	
 	
 ) ----	FileIn ----
-	
 	
 	
 	

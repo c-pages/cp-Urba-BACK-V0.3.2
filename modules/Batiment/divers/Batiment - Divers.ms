@@ -97,23 +97,29 @@ struct str_datasToString (
 			
 		),
 		fn set_datas_string 		_datas_string 		_element 		=(
+							debug "<<<<<<<<<<<<		set_datas_string	>>>>>>>>>>><>>><"
 			if _datas_string != undefined then (
 				local datasTab 	= filterString 	_datas_string 		separateur_params
 				for datas in datasTab do (
 					local dataTab		= filterString datas 	separateur_mutation
 					local propNom 	= dataTab[1]
+							debug "<<<<<<< propNom >>>>>>>" var:propNom
 					local typeProp 	= classof ( getProperty _element propNom  )
+							debug "<<<<<<< typeProp >>>>>>>" var:typeProp
 					case typeProp of (
 						--- les trucs qu'on zappe ------
 						MAXScriptFunction:	()
 						RolloutClass:()
 						--- les trucs qu'on prend en compte	------
 						string:		(
+							debug "string"
 								local data =   dataTab[2]
 								if data   == undefined do data =""
 								setProperty _element propNom data
+							debug "data" var:data
 						)
 						array: (
+							debug "array"
 							if dataTab.count >1 do (
 								local datas_liste  = filterString	dataTab[2] 	separateur_items
 								local tabResult =#()
@@ -131,12 +137,19 @@ struct str_datasToString (
 									) else 	append tabResult 	( data_exe)
 								)
 								setProperty _element 	propNom 	tabResult
+							debug "data" var:tabResult
 							)
 						)
 						default:						(
+							debug "default" 
 							if dataTab[2] != undefined do  (							
-								local data = execute dataTab[2]							
+								local data 		
+								if execute dataTab[2]	 != undefined then
+									data = execute dataTab[2]	
+								else
+									data = dataTab[2]	
 								setProperty _element propNom data
+								debug "data" var:data
 							)						
 						)
 					)

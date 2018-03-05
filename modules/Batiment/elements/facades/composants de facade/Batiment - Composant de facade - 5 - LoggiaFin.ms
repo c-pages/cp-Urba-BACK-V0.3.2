@@ -27,20 +27,20 @@ struct compo_params	(
 
 
 --- la fonction de construction	---------
-fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDalle:false	 = (
+fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDalle:false	 		onConstruit_gardeCorps:	compo_debut:	=(
 	
--------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
+	-------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
 		local ptr_composant  	= 	this
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 		
--------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
+	-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
 		local ep_dalle 			= ptr_plug.const_dalle_epaisseur
 		local ht_niveaux 		= ptr_plug.etages_hauteur
 		local longueur 			= ptr_composant.params.longueur
 		
 		
--------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
+	-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 		--- Result -------------
 		local pt_result_1, pt_result_2, pt_result_3
 		
@@ -49,8 +49,6 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		local vec_ht 				= [0,0,1] 		* 	ht_niveaux
 		local vec_longueur 	= norm_dir 	* 	longueur 		* 	-1
 		local vec_prof			= ( norm_dir * rotateZ ( matrix3 1 ) 90 ) 	*  this.params.profondeur 
-		
-		
 		
 		--- Points d'accroche ------------
 		local id_ptAccroche_1 	= pts_accroches[1]
@@ -151,11 +149,14 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		ptr_geo.set_matID 	nvlFace		#mur 	
 		
 		
--- 		--- Result -------------
--- 		pt_result_3 = pts_ids[1]
 		
 		
 		
+		----------- Garde corps	-------------
+		if compo_debut.params.gardeCorps	!=undefined and 	onConstruit_gardeCorps		do (
+			compo_debut.params.gardeCorps.construire	_plug 	#(pt_sol_2 , pt_sol_3)  norm_dir:norm_dir
+		)
+			
 		
 		
 		---- Result final -----------------------------------------------------------------------

@@ -26,15 +26,15 @@ rollout menuis_dialog "Paramètres" width:180 height:130
 	
 		local m_plug		
 		local m_menuiserie
-	
-			---- golbal --------------
-	label 'lbl_hauteur' "Hauteur : " pos:[6,5] width:75 height:13 align:#left
-	spinner 'spn_hauteur' "" pos:[99,5] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
-	label 'lbl_ouverture' "Ouverture :" pos:[6,38] width:67 height:13 align:#left
-	dropdownList 'ddl_ouverture' "" pos:[68,36] width:100 height:21 items:#("Auto", "Droite", "Gauche") align:#left
 		
-	label 'lbl3' "Allège vitrée" pos:[6,20] width:75 height:13 align:#left
-	spinner 'spn_allege_vitree' "" pos:[99,20] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+		---- golbal --------------
+		label 'lbl_hauteur' "Hauteur : " pos:[6,5] width:75 height:13 align:#left
+		spinner 'spn_hauteur' "" pos:[99,5] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+		label 'lbl_ouverture' "Ouverture :" pos:[6,38] width:67 height:13 align:#left
+		dropdownList 'ddl_ouverture' "" pos:[68,36] width:100 height:21 items:#("Auto", "Droite", "Gauche") align:#left
+			
+		label 'lbl3' "Allège vitrée" pos:[6,20] width:75 height:13 align:#left
+		spinner 'spn_allege_vitree' "" pos:[99,20] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
 		
 		fn actualiser =(
 			spn_hauteur.value 		= m_menuiserie.params.hauteur			
@@ -60,7 +60,7 @@ rollout menuis_dialog "Paramètres" width:180 height:130
 
 
 ------ la fonction de construction	---------
-fn menuis_fnConstruire  	_plug				 _pt_origine		norm_dir:		dist_hauteur:	ptr_baie:		 this:		= (
+fn menuis_fnConstruire  	_plug				 _pt_origine			norm_dir:			dist_hauteur:	ptr_baie:		 this:		= (
 	
 	--------------------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
 			local ptr_geo = _plug.core.get_geo ()
@@ -75,7 +75,7 @@ fn menuis_fnConstruire  	_plug				 _pt_origine		norm_dir:		dist_hauteur:	ptr_bai
 			local menuis_epaisseur		=	_plug.const_menuiseries_epaisseur		
 			local menuis_nu				=	ptr_baie.params.profondeur		
 			local vitrage_epaisseur		=	_plug.const_vitrage_epaisseur
--- 			local fenetre_hauteur		=	this.params.hauteur
+			local fenetre_longeur			=	this.params.longueur
 			
 			local allege_ht					=	this.params.allege_vitree_ht
 	
@@ -84,13 +84,13 @@ fn menuis_fnConstruire  	_plug				 _pt_origine		norm_dir:		dist_hauteur:	ptr_bai
 			
 			
 			
-			local traverses					=ptr_baie.params.traverses
+			local traverses					=	ptr_baie.params.traverses
 			
 			
 		-------------  vecteurs directeurs  		-----------------------------------------------------------------------------------------------------------------
-			local norm_prof				= norm_dir 		* rotateZ ( matrix3 1 ) 90		
+			local norm_prof				= norm_dir 		*	rotateZ ( matrix3 1 ) 90		
 			
-			local vec_longueur 		= norm_dir 		*	baie_longueur
+			local vec_longueur 		= norm_dir 		*	fenetre_longeur
 			local vec_baie_ht	 		= [0,0,1]  		*	baie_hauteur
 			local vec_fenetre_ht		=	[0,0,1]			*	fenetre_hauteur
 			
@@ -135,12 +135,12 @@ fn menuis_fnConstruire  	_plug				 _pt_origine		norm_dir:		dist_hauteur:	ptr_bai
 			ptr_geo.tube		ptFen1		vec_longueur		vec_men_ht				   vec_men_ep			matID:#menuiserie
 
 			-------------   menuiserie haut		-----------------------------------
-			local ptFen2				=	ptFen1 + vec_fenetre_ht	- 2*vec_men_ht		--	_pt_origine + vec_fenetre_ht -   vec_men_ht + vec_men_ep/2
+			local ptFen2				=	ptFen1 + vec_fenetre_ht	- 3*vec_men_ht		--	_pt_origine + vec_fenetre_ht -   vec_men_ht + vec_men_ep/2
 			ptr_geo.tube		ptFen2		vec_longueur		vec_men_ht				   vec_men_ep			matID:#menuiserie
 			
 			-------------   menuiserie gauche		-----------------------------------
 			local ptFen3				=	ptFen1 + vec_men_ht
-			local vec_fen_htTMP	=	(vec_fenetre_ht  - 3*vec_men_ht ) 
+			local vec_fen_htTMP	=	(vec_fenetre_ht  - 4*vec_men_ht ) 
 			ptr_geo.tube		ptFen3		vec_fen_htTMP 		vec_men_lrg      vec_men_ep		matID:#menuiserie
 			
 			-------------   menuiserie droite		-----------------------------------
@@ -152,10 +152,6 @@ fn menuis_fnConstruire  	_plug				 _pt_origine		norm_dir:		dist_hauteur:	ptr_bai
 			local vecTMP_htVitr		=  vec_fen_htTMP
 			ptr_geo.tube		ptTmp		vecTMP_htVitr		( vec_longueur - 2*vec_men_lrg )			-vec_vitrage_ep				matID:#vitrage 
 			
--- 		format "allege_ht	:%\n" allege_ht
--- 		format "fenetre_hauteur	:%\n" fenetre_hauteur
--- 		format "baie_hauteur	:%\n" baie_hauteur
--- 		format "	-->	(	fenetre_hauteur < baie_hauteur )	:%\n" (	allege_ht + fenetre_hauteur < baie_hauteur )
 		
 		-------------   Imposte vitrée				-----------------------------------------------------------------------------------------------------------------
 			if (	fenetre_hauteur < baie_hauteur ) do (
