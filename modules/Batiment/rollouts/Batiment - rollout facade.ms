@@ -107,7 +107,7 @@
 				m_compoCourant_estDansLoggia = false
 				local tabulation		= "     "
 				local i = 1
-				for comp in m_facade_courante.sequence		do	(
+				for comp in m_facade_courante.params.sequence		do	(
 					local affichage 		= "       "
 					
 					if comp.type == #balcon		do est_dansBalcon = true
@@ -148,33 +148,33 @@
 				debug "actualiser ()"
 				edt_nom_facade.text 			= m_facade_courante.nom
 				
-				chk_etages.checked				= m_facade_courante.etagesMin_use
-				spn_etages.indeterminate 		= not m_facade_courante.etagesMin_use	
-				spn_etages.enabled 				= m_facade_courante.etagesMin_use	
+				chk_etages.checked				= m_facade_courante.params.etagesMin_use
+				spn_etages.indeterminate 		= not m_facade_courante.params.etagesMin_use	
+				spn_etages.enabled 				= m_facade_courante.params.etagesMin_use	
 				if not spn_etages.indeterminate do
-					spn_etages.value				= m_facade_courante.etagesMin
+					spn_etages.value				= m_facade_courante.params.etagesMin
 				
-				chk_etagesMax.checked			= m_facade_courante.etagesMax_use
-				spn_etagesMax.indeterminate = not m_facade_courante.etagesMax_use	
-				spn_etagesMax.enabled			= m_facade_courante.etagesMax_use			
+				chk_etagesMax.checked			= m_facade_courante.params.etagesMax_use
+				spn_etagesMax.indeterminate = not m_facade_courante.params.etagesMax_use	
+				spn_etagesMax.enabled			= m_facade_courante.params.etagesMax_use			
 				if not spn_etagesMax.indeterminate do
-					spn_etagesMax.value			 = m_facade_courante.etagesMax	
+					spn_etagesMax.value			 = m_facade_courante.params.etagesMax	
 				
-				chk_longueur_min.checked					= m_facade_courante.longueurMin_use
-				spn_longueur_min.indeterminate 		= not m_facade_courante.longueurMin_use	
-				spn_longueur_min.enabled 				= m_facade_courante.longueurMin_use	
+				chk_longueur_min.checked					= m_facade_courante.params.longueurMin_use
+				spn_longueur_min.indeterminate 		= not m_facade_courante.params.longueurMin_use	
+				spn_longueur_min.enabled 				= m_facade_courante.params.longueurMin_use	
 				if not spn_longueur_min.indeterminate do
-					spn_longueur_min.value				= m_facade_courante.longueurMin
+					spn_longueur_min.value				= m_facade_courante.params.longueurMin
 				
-				chk_longueur_max.checked				= m_facade_courante.longueurMax_use
-				spn_longueur_max.indeterminate 		= not m_facade_courante.longueurMax_use	
-				spn_longueur_max.enabled 				= m_facade_courante.longueurMax_use	
+				chk_longueur_max.checked				= m_facade_courante.params.longueurMax_use
+				spn_longueur_max.indeterminate 		= not m_facade_courante.params.longueurMax_use	
+				spn_longueur_max.enabled 				= m_facade_courante.params.longueurMax_use	
 				if not spn_longueur_max.indeterminate do
-					spn_longueur_max.value				= m_facade_courante.longueurMax
+					spn_longueur_max.value				= m_facade_courante.params.longueurMax
 				
 				
-				ddl_murs.selection 				= m_facade_courante.murs
-				ddl_mode.selection 				= m_facade_courante.mode
+				ddl_murs.selection 				= m_facade_courante.params.murs
+				ddl_mode.selection 				= m_facade_courante.params.mode
 				
 				remplir_lbx_sequence ()
 				
@@ -195,7 +195,7 @@
 				local btnMonter_enabled 		= lbx_sequence.selection != 1 and  lbx_sequence.selection != 0 and m_composant_courant != undefined
 				if btnMonter_enabled do (
 					if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconFin or m_composant_courant.type == #loggia  or m_composant_courant.type == #loggiaFin do (
-						local compo_precedant = m_facade_courante.sequence[lbx_sequence.selection - 1] 
+						local compo_precedant = m_facade_courante.params.sequence[lbx_sequence.selection - 1] 
 						if compo_precedant.type == #balcon or compo_precedant.type == #balconFin  or compo_precedant.type == #loggia or compo_precedant.type == #loggiaFin  do (
 							btnMonter_enabled = false
 						)
@@ -207,7 +207,7 @@
 				local btnDescendre_enabled = lbx_sequence.selection != lbx_sequence.items.count and  lbx_sequence.selection != 0 and m_composant_courant != undefined
 				if btnDescendre_enabled do (
 					if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconFin or m_composant_courant.type == #loggia  or m_composant_courant.type == #loggiaFin do (
-						local compo_suivant = m_facade_courante.sequence[lbx_sequence.selection + 1] 
+						local compo_suivant = m_facade_courante.params.sequence[lbx_sequence.selection + 1] 
 						if compo_suivant.type == #balcon or compo_suivant.type == #balconFin  or compo_suivant.type == #loggia or compo_suivant.type == #loggiaFin  do (
 							btnDescendre_enabled = false
 						)
@@ -302,9 +302,9 @@
 				m_facade_courante 	= 	_facade
 				
 				--- la sequence	----------
-				if m_facade_courante.sequence.count>0 do (
+				if m_facade_courante.params.sequence.count>0 do (
 					lbx_sequence.selection  = 1
-					m_composant_courant = m_facade_courante.sequence[ 	1 ]
+					m_composant_courant = m_facade_courante.params.sequence[ 	1 ]
 				)
 				
 				actualiser ()
@@ -331,7 +331,7 @@
 				/* 
 				local mgr_composants 	= m_plug.core.get_mgr_composants ()
 				local composantDuplique =  	mgr_composants.dupliquer 		m_composant_courant
-				m_facade_courante.ajouter_composant	composantDuplique	position:(lbx_sequence.selection +1)
+				m_facade_courante.params.ajouter_composant	composantDuplique	position:(lbx_sequence.selection +1)
 				*/
 				
 				m_composant_courant = m_plug.core.dupliquer_composant	m_facade_courante	m_composant_courant
@@ -345,7 +345,7 @@
 				
 				
 				
-				m_composant_courant =  	m_facade_courante.instancier_composant	lbx_sequence.selection 
+				m_composant_courant =  	m_facade_courante.params.instancier_composant	lbx_sequence.selection 
 				
 				m_composant_courant = composantDuplique
 				remplir_lbx_sequence ()
@@ -400,75 +400,75 @@
 				)
 		on spn_etages changed val 	do
 		(
-					m_facade_courante.etagesMin 	= 	val
+					m_facade_courante.params.etagesMin 	= 	val
 			m_changement = true
 				)
 		on spn_etagesMax changed val 	do
 		(
-					m_facade_courante.etagesMax 	= 	val
+					m_facade_courante.params.etagesMax 	= 	val
 			m_changement = true
 				)
 		on spn_longueur_min changed val 	do
 		(
-					m_facade_courante.longueurMin 	= 	val
+					m_facade_courante.params.longueurMin 	= 	val
 			m_changement = true
 				)
 		on spn_longueur_max changed val 	do
 		(
-					m_facade_courante.longueurMax 	= 	val
+					m_facade_courante.params.longueurMax 	= 	val
 			m_changement = true
 				)
 		on chk_longueur_max changed state do
 		(
-					m_facade_courante.longueurMax_use 	= 	state	
+					m_facade_courante.params.longueurMax_use 	= 	state	
 			m_changement = true
 					actualiser ()
 				)
 		on chk_longueur_min changed state do
 		(
-					m_facade_courante.longueurMin_use 	= 	state		
+					m_facade_courante.params.longueurMin_use 	= 	state		
 			m_changement = true
 					actualiser ()
 				)
 		on ddl_murs selected sel	 do
 		(
-					m_facade_courante.murs 	= 	sel
+					m_facade_courante.params.murs 	= 	sel
 			m_changement = true
 				)
 		on chk_etagesMax changed state do
 		(
-					m_facade_courante.etagesMax_use 	= 	state		
+					m_facade_courante.params.etagesMax_use 	= 	state		
 			m_changement = true
 					actualiser ()
 				)
 		on lbx_sequence selected arg do
 		(
-					m_composant_courant = m_facade_courante.sequence[ 	arg ]
+					m_composant_courant = m_facade_courante.params.sequence[ 	arg ]
 	-- 		m_changement = true
 					actualiser ()
 				)
 		on btn_monter pressed do
 		(
-					m_facade_courante.composant_monter 	 lbx_sequence.selection
+					m_facade_courante.params.composant_monter 	 lbx_sequence.selection
 					lbx_sequence.selection -= 1
 			m_changement = true
 					actualiser ()
 				)
 		on btn_descendre pressed do
 		(
-					m_facade_courante.composant_descendre 	 lbx_sequence.selection
+					m_facade_courante.params.composant_descendre 	 lbx_sequence.selection
 					lbx_sequence.selection += 1
 			m_changement = true
 					actualiser ()
 				)
 		on ddl_mode selected sel	 do
 		(
-					m_facade_courante.mode 	= 	sel
+					m_facade_courante.params.mode 	= 	sel
 			m_changement = true
 				)
 		on chk_etages changed state do
 		(
-					m_facade_courante.etagesMin_use 	= 	state		
+					m_facade_courante.params.etagesMin_use 	= 	state		
 					actualiser ()
 			m_changement = true
 				)

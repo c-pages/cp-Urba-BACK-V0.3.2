@@ -85,16 +85,19 @@ parameters params_viewport					rollout:roll_viewport	(
 	affiche_surface				type:#boolean			default:false	ui:ckb_surface			animatable:false		invisibleInTV:true
 	affiche_gouttereaux		type:#boolean			default:false	ui:ckb_gouttereaux	animatable:false		invisibleInTV:true
 	affiche_pignons				type:#boolean			default:false	ui:ckb_pignons			animatable:false		invisibleInTV:true
-	affiche_ssSurfaces		type:#boolean			default:false	ui:ckb_ssSurfaces		animatable:false		invisibleInTV:true	
+	affiche_ssSurfaces			type:#boolean			default:false	ui:ckb_ssSurfaces		animatable:false		invisibleInTV:true	
 	affiche_geometrie			type:#boolean			default:false	ui:ckb_geometrie		animatable:false		invisibleInTV:true
 	
 )
 parameters params_facades 						rollout:roll_global	(
 	
 	---- générale -----------
-	facades_id 							type:#stringTab 	tabSize:0  		tabSizeVariable:true
-	facades_nom 						type:#stringTab 	tabSize:0  		tabSizeVariable:true		--ui:lbx_facades	
+	facades_id 						type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facades_nom 					type:#stringTab 	tabSize:0  		tabSizeVariable:true		--ui:lbx_facades	
+	facades_type 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	facades_params					type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	
+	/* 
 	--- Limiteurs - Etages	---
 	facades_etagesMin_use			type:#boolTab		tabSize:0 			tabSizeVariable:true
 	facades_etagesMin					type:#intTab			tabSize:0 			tabSizeVariable:true
@@ -113,7 +116,7 @@ parameters params_facades 						rollout:roll_global	(
 	
 	--- Sequence	---
 	facades_sequence					type:#stringTab 	tabSize:0 			tabSizeVariable:true
-	
+	 */
 )
 parameters params_facades_composants 		(
 	
@@ -131,9 +134,6 @@ parameters params_facades_menuiseries 		(
 	facMenuis_id 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	facMenuis_nom 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	facMenuis_type 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
-
-	facMenuis_longueur 			type:#floatTab		tabSize:0 			tabSizeVariable:true	
-	
 	facMenuis_params				type:#stringTab		tabSize:0 			tabSizeVariable:true	
 	
 )

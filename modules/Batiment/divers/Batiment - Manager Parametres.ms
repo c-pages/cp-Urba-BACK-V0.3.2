@@ -25,8 +25,9 @@ struct  str_manager_parametres (
 		m_plug,
 		m_core,
 		
+	
 		---- la classe de base à gérer	--------------
-		m_fichier_classeBase = "",
+		m_fichier_classeBase = getdir #userScripts + "\cp-Urba\modules\Batiment\elements\Batiment - Elements - Composant generique.ms" ,
 		m_classeBase,
 		
 		---- le prefixe utilisé pour les noms des parametres de l'objet --------
@@ -153,38 +154,41 @@ struct  str_manager_parametres (
 			for prop_params_Nom in  ( getPropNames	_params ) do (
 				
 				local prop_value	= getProperty _params  prop_params_Nom
-				case classOf prop_value of (
-					Array:(
-							local tab_value =#()
+				if classOf prop_value != MAXScriptFunction do (
 						
-							if prop_value.count > 0 then (
-								
-								-- on a une structure à nous --------
-								if superclassOf prop_value[1] == StructDef then (
-									
-									for _struct in  prop_value do (
-										
-										debug "----------->	on enregistre un element d'un tableau de PARAMS" var:_params	_struct
-										
-										-- on enregistre l'element sur le plug ------------
-										m_core.enregistrer_element 	_struct
-										
-										-- on ajoute l'id au tableau du params a enrgistrer -------
-										append tab_value 	_struct.id
-									)
-									--- on enregistre les parametres de la structure 
-									
-									prop_value = tab_value
-								) 
-							) 
+					case classOf prop_value	of (
+						Array:(
+								local tab_value =#()
 							
-						)
-					default:(		)
-				)	---- fin case	---------
-				
-				
-				setProperty params_TMP 	prop_params_Nom 	( prop_value )
-				
+								if prop_value.count > 0 then (
+									
+									-- on a une structure à nous --------
+									if superclassOf prop_value[1] == StructDef then (
+										
+										for _struct in  prop_value do (
+											
+											debug "----------->	on enregistre un element d'un tableau de PARAMS" var:_params	
+											
+											-- on enregistre l'element sur le plug ------------
+											m_core.enregistrer_element 	_struct
+											
+											-- on ajoute l'id au tableau du params a enrgistrer -------
+											append tab_value 	_struct.id
+										)
+										--- on enregistre les parametres de la structure 
+										
+										prop_value = tab_value
+									) 
+								) 
+								
+							)
+						default:(		)
+					)	---- fin case	---------
+					
+											debug "----------->	prop_value" var:prop_value	
+					
+					setProperty params_TMP 	prop_params_Nom 	( prop_value )
+				)
 			) -- fin 	for prop_params_Nom   -----
 			local result = mgr_datas.get_datas_string		params_TMP
 			result
@@ -373,8 +377,8 @@ struct  str_manager_parametres (
 				
 				_element
 		),
-		fn creer_element			idUnique:		idConstructeur:		enregistrer:false	=(
-			
+		fn creer_element			idUnique:		idConstructeur:		enregistrer:false	/* plug: */		=(
+-- 			debug "creer_element"
 			----------------- Structure d'un élément	------------------------------------------
 			m_classeBase	=	fileIn	 m_fichier_classeBase			
 			nvl_element 		= m_classeBase 	()
@@ -386,7 +390,12 @@ struct  str_manager_parametres (
 			
 			--- id Unique -----------
 			if idUnique != unsupplied do 
-				nvl_element.id = idUnique
+				nvl_element.id = idUnique	
+			
+-- 			--- reference au plug --------
+-- 			if plug != unsupplied do 	
+-- 				nvl_element.params.set_plug plug
+			
 			
 -- 			---	la reference au manager	--------------
 -- 			nvl_element.set_manager 	this
@@ -640,7 +649,6 @@ struct  str_manager_parametres (
 		
 		----------------- Initialiser	---------------------------------------------------
 		fn initialiser	plug:							\
-							fichier_classeBase:			\
 							dossier_constructeurs:	\
 							fichier_dialog:				\
 							typeParametre:			=(
@@ -649,7 +657,6 @@ struct  str_manager_parametres (
 			
 			m_plug 							=	plug
 			m_core 							=	m_plug.core
-			m_fichier_classeBase 		= 	fichier_classeBase
 			if dossier_constructeurs != unsupplied do 
 				m_dossier_constructeurs 	= 	dossier_constructeurs
 			if fichier_dialog != unsupplied do (

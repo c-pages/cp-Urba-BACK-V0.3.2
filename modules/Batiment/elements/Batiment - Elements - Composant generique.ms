@@ -43,6 +43,7 @@ struct 	str_composant_generique	 (
 				for propnom in  getpropnames _params do (
 					local val = getproperty	_params	propnom 
 					case classOf val of (
+						MAXScriptFunction:() 
 						array:	setproperty	_params	propnom 	(for elem in val collect copy elem )
 						default:	setproperty	_params	propnom 	(copy val )
 					)

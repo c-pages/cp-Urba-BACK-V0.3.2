@@ -53,11 +53,11 @@ struct str_construction (
 			local facades_result =#()
 			
 			--- on filtre par etages ---------------
-			for facde in _facades 		 where facde.sequence.count >0 do (
-				if facde.etagesMin_use then (
-					if _etageCourant	>= facde.etagesMin  do (
-						if facde.etagesMax_use then (
-							if _etageCourant <= facde.etagesMax   do 	
+			for facde in _facades 		 where facde.params.sequence.count >0 do (
+				if facde.params.etagesMin_use then (
+					if _etageCourant	>= facde.params.etagesMin  do (
+						if facde.params.etagesMax_use then (
+							if _etageCourant <= facde.params.etagesMax   do 	
 								append facades_result facde
 						)	else (
 							append facades_result facde
@@ -78,17 +78,17 @@ struct str_construction (
 			---- si la sequence peut rentrer sur le segment de facade ------------
 			for facde in _facades /* where  	 facde.sequence.count >0  */do (
 				
-				if  facde.sequence.count >0  do (
-				if facde.get_sequence_longueur () < _mur_longueur do (
+				if  facde.params.sequence.count >0  do (
+				if facde.params.get_longueur () < _mur_longueur do (
 					
 					---- si la facade est limité en longueur min -----
-					if not facde.longueurMin_use or facde.longueurMin_use	 and 	facde.longueurMin < _mur_longueur do (
+					if not facde.params.longueurMin_use or facde.params.longueurMin_use	 and 	facde.params.longueurMin < _mur_longueur do (
 						
 						---- si la facade est limité en longueur max -----
-						if not facde.longueurMax_use or facde.longueurMax_use	 and 	facde.longueurMax > _mur_longueur do (
+						if not facde.params.longueurMax_use or facde.params.longueurMax_use	 and 	facde.params.longueurMax > _mur_longueur do (
 							
 							---- si la facade est sur le bon type de mur -----
-							case  facde.murs of (
+							case  facde.params.murs of (
 								1: append facades_result facde
 								2: if not est_pignon do append facades_result facde
 								3: if est_pignon do append facades_result facde
@@ -142,6 +142,7 @@ struct str_construction (
 			
 			face
 		),
+		/* 
 		fn get_sequenceFacade		_facade		_longueur_facade	=(
 			
 -- 			debug "get_sequenceFacade" 
@@ -151,7 +152,7 @@ struct str_construction (
 			local	longueur_restant			=	0
 			local	longueur_espacement	=	0
 			local	espacer 						= _facade.mode == 4
-			local longueur_sequence 		= _facade.get_sequence_longueur		()	
+			local longueur_sequence 		= _facade.get_longueur		()	
 			
 			local	sequence_totale 			= #()
 			
@@ -232,6 +233,7 @@ struct str_construction (
 			
 			sequence_totale
 		),
+		
 		fn creer_sequence		_pt1		_pt2		_facade					=(
 			
 -- 			debug "creer_sequence"
@@ -320,7 +322,7 @@ struct str_construction (
 			) --- fin de la sequence -----
 			
 		),
-		
+		*/
 		------------ Construction-------------------------
 	private
 		fn creer_ssBassement  		&z	=(
@@ -372,7 +374,8 @@ struct str_construction (
 						
 					---- si on  a des facades on construit la sequence --------------------
 					if 	onA_uneFacade  then 
-						creer_sequence		pt_mur_1		pt_mur_2	 facades_pourCeMur[1]
+						facades_pourCeMur[1].construire		m_plug 		#(pt_mur_1, pt_mur_2 )	
+					
 						
 					else (
 					--- sinon un mur plein --------------
