@@ -14,38 +14,59 @@ menuis_toolTip 	=	""
 
 --- les parametres du composant	---------
 struct menuis_params	(
-	allege_ht	=	0,
+-- 	allege_ht	=	0,
 	longueur = 0
 )
 
 --- les rollout du composant	---------
-rollout menuis_dialog "Paramètres" width:170 height:44
+rollout menuis_dialog "Menuiserie" width:221 height:119
 (
 	
-		local m_plug		
-		local m_menuiserie
+	local m_plug		
+	local m_compo
+	local m_rollPrt		
 		
-		/* 
+	GroupBox 'grp1' "Global" pos:[6,7] width:187 height:70 align:#left
+			
+	dropdownList 'ddl_type' "" pos:[67,27] width:111 height:21 align:#left
+	label 'lbl51' "Type :" pos:[15,29] width:49 height:15 align:#left
+			
+		
 			---- golbal --------------
-		label 'lblallege' "Allège:" pos:[11,5] width:49 height:13 align:#left
-		spinner 'spn_allege' "" 	pos:[87,5] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
-	
-	 */
+	label 'lbl_longueur' "Longueur:" pos:[15,54] width:63 height:13 align:#left
+	spinner 'spn_longueur' "" pos:[106,54] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+		
+		
 		fn actualiser =(
--- 			spn_allege.value = m_menuiserie.params.allege_ht
+			ddl_type.items 	= m_plug.core.get_menuiserie_constructeursNoms ()
+			local menuis_types 			= m_plug.core.get_menuiserie_constructeursTypes ()
+			ddl_type.selection 				= findItem  menuis_types		m_compo.type  
+			
+			if m_compo != undefined do
+				spn_longueur.value = m_compo.params.longueur
 		)
 
-		fn set_menuiserie _menuis =(
-			m_menuiserie	=	_menuis
+		fn set_menuiserie 	_menuis =(
+			m_compo	=	_menuis
 			actualiser ()
 		)
 		
-		fn initialiser _plug = m_plug = _plug
+		fn initialiser _plug = (
+			m_plug = _plug
+			
+				
+		)
 
--- 	on spn_allege changed val do m_menuiserie.params.allege_ht = val
 	
+	on spn_longueur changed val do
+		m_compo.params.longueur = val
+	
+		on ddl_type selected _val do		(
+			m_plug.core.appliquer_menuiserie_type		m_compo	_val
+			actualiser ()
+			m_rollPrt.actualiser ()
+		)
 )
-
 
 ------ la fonction de construction	---------
 fn menuis_fnConstruire  	_plug	_pt_origine		norm_dir:		dist_hauteur:	ptr_baie:		 this:		= (

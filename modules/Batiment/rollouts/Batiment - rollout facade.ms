@@ -4,7 +4,7 @@
 (
 	
 
-	rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:500 height:300
+	rollout roll_urba_editeurFacades "Urba - Batiment - Editeur de facade" width:255 height:500
 	(
 		
 		------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
@@ -26,78 +26,105 @@
 			--- les parametres courants ------------
 			local m_facade_courante
 			local m_composant_courant
+			local m_ssComposant_courant
 			
 			local m_compoCourant_estDansBalcon = false
 			local m_compoCourant_estDansLoggia = false
 			
 			--- rollout	---------	
-			local largeur_params		= 	235
-			local largeur_min 				= 	490
-			local hauteur_min 			= 	300
+			local largeur_params		= 	234
+-- 			local largeur_min 			= 	490
+			local largeur_base 		= 250
+			
+			local hauteur_min 		= 	300
 			
 			--- images bouton fermer ---
 			local murs_types 	= #("Gouttereaux + Pignons", "Gouttereaux", "Pignons")
 			
+			local nrbe_subRoll	=	0
 			
 			------------  UI	----------------------------------------------------------------------------------		
 												
 		edittext 'edt_nom_facade' "" pos:[7,10] width:200 height:16 align:#left
+				
+		spinner 'spn_etages' "" pos:[95,49] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+		spinner 'spn_etagesMax' "" pos:[172,49] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left		
+		
+		
 			
-		spinner 'spn_etages' "" pos:[103,38] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-		spinner 'spn_etagesMax' "" pos:[180,38] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left		
-			
-			
-			
-		spinner 'spn_longueur_min' "" pos:[103,53] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
-		spinner 'spn_longueur_max' "" pos:[180,53] width:63 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
-		checkbutton 'chk_longueur_max' "" pos:[167,53] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
-		checkbutton 'chk_longueur_min' "" pos:[90,53] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-		label 'lbl_longueur' "Longueur:" pos:[12,54] width:52 height:15 align:#left
 				
-		dropdownList 'ddl_murs' "" pos:[90,68] width:154 height:21 items:#("Gouttereaux + Pignons", "Gouttereaux", "Pignons") selection:3 align:#left
-		label 'lbl_appliquerA' "Murs:" pos:[12,72] width:32 height:15 align:#left
 				
-		checkbutton 'chk_etagesMax' "" pos:[167,38] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
 				
-		listbox 'lbx_sequence' "" pos:[91,109] width:137 height:10 align:#left
-				
-		label 'lbl23' "Séquence:" pos:[11,90] width:60 height:15 align:#left
-				
+		spinner 'spn_longueur_min' "" pos:[95,64] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+		spinner 'spn_longueur_max' "" pos:[172,64] width:63 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+		checkbutton 'chk_longueur_max' "" pos:[159,64] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
+		checkbutton 'chk_longueur_min' "" pos:[82,64] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+		label 'lbl_longueur' "Longueur:" pos:[17,65] width:52 height:15 align:#left
+					
+		dropdownList 'ddl_murs' "" pos:[82,79] width:154 height:21 items:#("Gouttereaux + Pignons", "Gouttereaux", "Pignons") selection:3 align:#left
+		label 'lbl_appliquerA' "Murs:" pos:[17,83] width:32 height:15 align:#left
+					
+		checkbutton 'chk_etagesMax' "" pos:[159,49] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
+					
+		listbox 'lbx_sequence' "" pos:[90,168] width:135 height:10 align:#left
+					
+		label 'lbl23' "Disposition :" pos:[17,129] width:72 height:15 align:#left
+					
 		button 'btn_enregistrer' "S" pos:[224,9] width:19 height:19 toolTip:"Sauvegarder preset." align:#left
 		button 'btn_charger' "O" pos:[206,9] width:19 height:19 toolTip:"Ouvrir preset." align:#left
-				
-		button 'btn_monter' "/\\" pos:[228,108] width:16 height:19 toolTip:"Monter le composant." align:#left
-		button 'btn_descendre' "\/" pos:[228,126] width:16 height:19 toolTip:"Descendre le composant." align:#left
-		dropdownList 'ddl_mode' "" pos:[90,88] width:154 height:21 items:#("Répéter", "Etrirer", "Centrer", "Espacer") selection:3 align:#left
-		checkbutton 'chk_etages' "" pos:[90,38] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-				
-		label 'lbl95' "Etages:" pos:[12,39] width:43 height:15 align:#left
-				
-		subRollout 'subroll_parametres' "Paramètres" pos:[267,28] width:210 height:208 align:#left
-				
-		GroupBox 'grp_prop' "Propriétés" pos:[255,10] width:225 height:238 align:#left
-				
-		button 'btn_dupliquer_composant' "Dupliquer" pos:[10,206] width:75 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
-		button 'btn_instancier_composant' "Instancier" pos:[10,221] width:75 height:16 toolTip:"Créer une instance du composant sélectionné." align:#left
-		button 'btn_supprimer_composant' "Supprimer" pos:[10,236] width:75 height:16 toolTip:"Supprimer le composant sélectionné." align:#left
-				
-		button 'btn_ajouter_composant_1' "btn1" pos:[10,108] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_2' "btn2" pos:[10,123] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_3' "btn3" pos:[10,138] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_4' "btn4" pos:[10,153] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_5' "btn5" pos:[10,168] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_6' "btn6" pos:[10,183] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_7' "btn7" pos:[10,198] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_8' "btn8" pos:[10,213] width:75 height:16 visible:false align:#left
-				
-		button 'btn_valider' "Valider" pos:[10,271] width:78 height:25 toolTip:"Valider la façade" align:#left
-		button 'btn_annuler' "Annuler" pos:[86,271] width:79 height:25 toolTip:"Annuler les changements" align:#left
-				
+					
+		button 'btn_monter' "/\\" pos:[226,169] width:16 height:16 toolTip:"Monter le composant." align:#left
+		button 'btn_descendre' "\/" pos:[226,184] width:16 height:16 toolTip:"Descendre le composant." align:#left
+		dropdownList 'ddl_mode' "" pos:[90,127] width:135 height:21   selection:3 align:#left
+		checkbutton 'chk_etages' "" pos:[82,49] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+					
+		label 'lbl95' "Etages:" pos:[17,50] width:43 height:15 align:#left
+					
+		subRollout 'subroll_parametres' "Paramètres" pos:[259,16] width:210 height:287 align:#left
+		
+		
+		button 'btn_dupliquer_composant' "Dup." pos:[89,152] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
+		button 'btn_instancier_composant' "Inst." pos:[123,152] width:35 height:16 toolTip:"Créer une instance du composant sélectionné." align:#left
+		button 'btn_supprimer_composant' "Sup." pos:[191,152] width:35 height:16 toolTip:"Supprimer" align:#left
+					
+		button 'btn_ajouter_composant_1' "btn1" pos:[12,167] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_2' "btn2" pos:[12,182] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_3' "btn3" pos:[12,197] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_4' "btn4" pos:[12,212] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_5' "btn5" pos:[12,227] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_6' "btn6" pos:[12,242] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_7' "btn7" pos:[12,257] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_8' "btn8" pos:[12,272] width:75 height:16 visible:false align:#left
+					
+		button 'btn_valider' "Valider" pos:[5,318] width:105 height:30 toolTip:"Valider la façade" align:#left
+		button 'btn_annuler' "Annuler" pos:[605,318] width:105 height:30 toolTip:"Annuler les changements" align:#left
+					
+			
+			
+			
+			
+		GroupBox 'grp_global' "Appliqué à " pos:[6,33] width:238 height:75 align:#left
+					
+					
+					
+		GroupBox 'grp_sequence' "Séquence" pos:[6,110] width:238 height:203 align:#left
+		subRollout 'subroll_parametres_niv2' "Paramètres" pos:[493,16] width:210 height:287 align:#left
+		
+		
+		
+		  
+			
+		GroupBox 'grp_panneau1' "" pos:[250,2] width:228 height:309 align:#left
+		GroupBox 'grp_panneau2' "" pos:[484,2] width:228 height:309 align:#left
+		
+		
 			local		btns_ajouter_composant	=#( btn_ajouter_composant_1, btn_ajouter_composant_2, btn_ajouter_composant_3, btn_ajouter_composant_4, btn_ajouter_composant_5, btn_ajouter_composant_6 , btn_ajouter_composant_7 , btn_ajouter_composant_8)
-			local 	btns_ids_constructeurs				=#()
+			local 	btns_ids_constructeurs		=#()
+			
+			
 			
 			------------  Fonctions	----------------------------------------------------------------------------------
-			fn  remplir_lbx_sequence =(
+			fn  remplir_lbx_sequence 	=(
 				
 				--------- la sequence de composants --------
 				local itemsTmp 		= #()
@@ -115,7 +142,7 @@
 					
 					if comp.type == #balcon	then affichage = "  _   "
 					else if  comp.type == #balconFin		then affichage = " |_   "
-					else if est_dansBalcon do affichage = " |    "
+					else if est_dansBalcon do affichage = " |         "
 					
 					if est_dansLoggia do affichage += "|" + tabulation
 					
@@ -144,8 +171,54 @@
 				lbx_sequence.items =  itemsTmp
 				
 			)
+			
+			fn gerer_boutons_enabled 	=(
+					
+				--- bloquage du bouton Balcon si on est deja dans un balcon -------------------
+				local idBalcon = ( m_plug.core.get_mgr_composants() ).get_constructeur_index #Balcon 
+				btns_ajouter_composant[idBalcon].enabled = not m_compoCourant_estDansBalcon
+				
+				
+-- 				--- bloquage du bouton loggia si on est deja dans un loggia -------------------			
+-- 				local idLoggia = m_plug.core.get_composants_bouton_index 	#loggia 	
+-- 				btns_ajouter_composant[ idLoggia ].enabled = not m_compoCourant_estDansLoggia
+				
+				btn_supprimer_composant.enabled 	= lbx_sequence.selection != 0 
+				btn_instancier_composant.enabled 		= lbx_sequence.selection != 0
+				btn_dupliquer_composant.enabled 		= lbx_sequence.selection != 0
+				
+				-- bouton monter ----
+				local btnMonter_enabled 		= lbx_sequence.selection != 1 and  lbx_sequence.selection != 0 and m_composant_courant != undefined
+				if btnMonter_enabled do (
+					if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconFin do (
+						local compo_precedant = m_facade_courante.params.sequence[lbx_sequence.selection - 1] 
+						if compo_precedant.type == #balcon or compo_precedant.type == #balconFin  do (
+							btnMonter_enabled = false
+						)
+					)
+				)
+				btn_monter.enabled 		= btnMonter_enabled
+				
+				-- bouton descendre ----
+				local btnDescendre_enabled = lbx_sequence.selection != lbx_sequence.items.count and  lbx_sequence.selection != 0 and m_composant_courant != undefined
+				if btnDescendre_enabled do (
+					if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconFin do (
+						local compo_suivant = m_facade_courante.params.sequence[lbx_sequence.selection + 1] 
+						if compo_suivant.type == #balcon or compo_suivant.type == #balconFin   do (
+							btnDescendre_enabled = false
+						)
+					)
+				)
+				btn_descendre.enabled 		= btnDescendre_enabled
+				
+			)
+			
 			fn actualiser 							=(
 				debug "actualiser ()"
+				
+				
+				ddl_mode.items	=	m_facade_courante.params.get_modes_distribution ()
+				
 				edt_nom_facade.text 			= m_facade_courante.nom
 				
 				chk_etages.checked				= m_facade_courante.params.etagesMin_use
@@ -177,52 +250,67 @@
 				ddl_mode.selection 				= m_facade_courante.params.mode
 				
 				remplir_lbx_sequence ()
-				
-				--- bloquage du bouton Balcon si on est deja dans un balcon -------------------
-				local idBalcon = ( m_plug.core.get_mgr_composants() ).get_constructeur_index #Balcon 
-				btns_ajouter_composant[idBalcon].enabled = not m_compoCourant_estDansBalcon
+				gerer_boutons_enabled ()
 				
 				
-				--- bloquage du bouton loggia si on est deja dans un loggia -------------------			
-				local idLoggia = m_plug.core.get_composants_bouton_index 	#loggia 	
-				btns_ajouter_composant[ idLoggia ].enabled = not m_compoCourant_estDansLoggia
-				
-				btn_supprimer_composant.enabled 	= lbx_sequence.selection != 0 
-				btn_instancier_composant.enabled 		= lbx_sequence.selection != 0
-				btn_dupliquer_composant.enabled 		= lbx_sequence.selection != 0
-				
-				-- bouton monter ----
-				local btnMonter_enabled 		= lbx_sequence.selection != 1 and  lbx_sequence.selection != 0 and m_composant_courant != undefined
-				if btnMonter_enabled do (
-					if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconFin or m_composant_courant.type == #loggia  or m_composant_courant.type == #loggiaFin do (
-						local compo_precedant = m_facade_courante.params.sequence[lbx_sequence.selection - 1] 
-						if compo_precedant.type == #balcon or compo_precedant.type == #balconFin  or compo_precedant.type == #loggia or compo_precedant.type == #loggiaFin  do (
-							btnMonter_enabled = false
-						)
-					)
-				)
-				btn_monter.enabled 		= btnMonter_enabled
-				
-				-- bouton descendre ----
-				local btnDescendre_enabled = lbx_sequence.selection != lbx_sequence.items.count and  lbx_sequence.selection != 0 and m_composant_courant != undefined
-				if btnDescendre_enabled do (
-					if m_composant_courant.type == #balcon  or m_composant_courant.type == #balconFin or m_composant_courant.type == #loggia  or m_composant_courant.type == #loggiaFin do (
-						local compo_suivant = m_facade_courante.params.sequence[lbx_sequence.selection + 1] 
-						if compo_suivant.type == #balcon or compo_suivant.type == #balconFin  or compo_suivant.type == #loggia or compo_suivant.type == #loggiaFin  do (
-							btnDescendre_enabled = false
-						)
-					)
-				)
-				btn_descendre.enabled 		= btnDescendre_enabled
-				
-				
-				--- le subRollout des composants	-------
+				--- on retire tout les sous panneaux -------------------
 				for rollAVirer in subroll_parametres.rollouts do
 					removeSubRollout	subroll_parametres	rollAVirer
+				for rollAVirer in subroll_parametres_niv2.rollouts do
+					removeSubRollout	subroll_parametres_niv2	rollAVirer
+				
+				--- le subRollout des composants	PANNEAU 1 -------
 				if m_composant_courant != undefined do (
 					addSubRollout	subroll_parametres ( m_composant_courant.get_dialog () )
 					m_composant_courant.initialiser_dialog		m_plug			 	roll_parent:roll_urba_editeurFacades
 				)
+				
+				--- le subRollout des composants	PANNEAU 2 -------
+				if m_ssComposant_courant != undefined do (
+					addSubRollout	subroll_parametres_niv2 ( m_ssComposant_courant.get_dialog () )
+					m_ssComposant_courant.initialiser_dialog		m_plug			 	roll_parent:roll_urba_editeurFacades
+				)
+				
+-- 				mgr_facade.set_dialog_taille			_taille
+				
+				
+				
+				
+			)
+			
+			fn redim_pour_parametres =(
+				
+				--- dimension du rollout ----------------------------
+				if subroll_parametres_niv2.rollouts.count > 0 then
+					nrbe_subRoll = 2
+				else if subroll_parametres.rollouts.count > 0 then
+					nrbe_subRoll = 1
+				else
+					nrbe_subRoll = 0
+				local largeur_rollout 		= largeur_base + nrbe_subRoll * largeur_params
+				
+				
+				roll_urba_editeurFacades.width 		= largeur_rollout
+			)
+			
+			
+			
+			fn set_ssComposant		_composant	 = (
+				
+				m_ssComposant_courant  = _composant
+				
+				for rollAVirer in subroll_parametres_niv2.rollouts do
+					removeSubRollout	subroll_parametres_niv2	rollAVirer
+				
+				if m_ssComposant_courant != undefined do (
+					local m_dialog_ssCompo = m_ssComposant_courant.get_dialog ()
+					addSubRollout	subroll_parametres_niv2 	m_dialog_ssCompo
+					m_ssComposant_courant.initialiser_dialog		m_plug			 	roll_parent:roll_urba_editeurFacades
+					m_dialog_ssCompo.initialiser			m_plug		
+					m_dialog_ssCompo.set_menuiserie		m_ssComposant_courant
+					
+				)
+				redim_pour_parametres ()
 			)
 			fn redimensionnerFenetre 		_taille 	=(
 				
@@ -233,43 +321,70 @@
 				
 				local largeur_btn 		= 17
 				local largeur_bord 	= edt_nom_facade.pos.x
+				/* 
 				
-				if 	_taille.x < largeur_min do 
-					_taille.x =  largeur_min
+				if subroll_parametres_niv2.rollouts.count > 0 then
+					nrbe_subRoll = 2
+				else if subroll_parametres.rollouts.count > 0 then
+					nrbe_subRoll = 1
+				else
+					nrbe_subRoll = 0
+				local largeur_min 		= largeur_base + nrbe_subRoll * largeur_params
+				 */
+				
+				
+-- 				if 	_taille.x < largeur_min do 
+-- 					_taille.x =  largeur_min
 				if 	_taille.y < hauteur_min do 
 					_taille.y =  hauteur_min
 				roll_urba_editeurFacades.width 		= _taille.x
-				roll_urba_editeurFacades.height 	= _taille.y
-				
+				roll_urba_editeurFacades.height 		= _taille.y
 				mgr_facade.set_dialog_taille		_taille
 				
-	-- 			debug "_taille" var:_taille
-				local largeur_fenetre 	= 	_taille.x -  largeur_params
+				lbx_sequence.height 		= _taille.y - ( lbx_sequence.pos.y + largeur_btn + 2 * largeur_bord  + 5)
+				grp_sequence.height 		= _taille.y - 150
 				
-	-- 			ui_btnFermer.pos.x		= 	_taille.x - 20
-				
-				edt_nom_facade.width 	= 	largeur_fenetre - ( 2* largeur_bord	+ 2 * largeur_btn   )
-				btn_enregistrer.pos.x 	= 	edt_nom_facade.width 	+  edt_nom_facade.pos.x
-				btn_charger.pos.x 			= 	largeur_btn 	+  btn_enregistrer.pos.x
-				
-				ddl_murs.width 			= 	ddl_mode.width  = 	largeur_fenetre  - ( ddl_murs.pos.x + largeur_bord )
-				lbx_sequence.width 		= ddl_murs.width 	 - largeur_btn
-				
-				lbx_sequence.height 		= _taille.y - ( lbx_sequence.pos.y + largeur_btn + 2 * largeur_bord )
+				grp_panneau1.height		= _taille.y - 3 * largeur_bord  	- 9
+				grp_panneau2.height		= grp_panneau1.height	
 				
 				
-				btn_monter.pos.x								=	btn_descendre .pos.x		=	lbx_sequence.pos.x + lbx_sequence.width
-				btn_dupliquer_composant.pos.y 			= lbx_sequence.pos.y + lbx_sequence.height - 47
-				btn_instancier_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 32
-				btn_supprimer_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 17
+				subroll_parametres.height			= grp_panneau1.height	  	- 19
+				subroll_parametres_niv2.height	= subroll_parametres.height
 				
-				grp_prop.pos.x 					= ddl_murs.pos.x + ddl_murs.width + largeur_bord 
-				grp_prop.height 				= _taille.y - ( grp_prop.pos.y + largeur_bord )
-				subroll_parametres.pos.x 	= grp_prop.pos.x + 8
-				subroll_parametres.height 	= grp_prop.height - 23
 				
-				btn_valider.pos.y 			= _taille.y - 35
+				
+				
+				
+-- 				local largeur_panneau1 = _taille.x 	- 	nrbe_subRoll * largeur_params
+-- 				
+-- 				subroll_parametres.pos.x	=	largeur_panneau1 + 5
+-- 				subroll_parametres_niv2.pos.x	=	subroll_parametres.pos.x + largeur_panneau1 + 10
+				
+-- 				grp_global.width 	= 	largeur_panneau1 - ( 2* largeur_bord	   )
+-- 				grp_sequence.width		= 	largeur_panneau1 - ( 2* largeur_bord	   )
+				
+-- 				edt_nom_facade.width 	= 	largeur_panneau1 - ( 2* largeur_bord	+ 2 * largeur_btn   )
+-- 				btn_enregistrer.pos.x 	= 	edt_nom_facade.width 	+  edt_nom_facade.pos.x
+-- 				btn_charger.pos.x 			= 	largeur_btn 	+  btn_enregistrer.pos.x
+				
+-- 				ddl_murs.width 			= 	ddl_mode.width  = 	largeur_panneau1  - ( ddl_murs.pos.x + largeur_bord )
+-- 				lbx_sequence.width 		= ddl_murs.width 	 - largeur_btn
+				
+				
+				
+-- 				btn_monter.pos.x								=	btn_descendre .pos.x		=	lbx_sequence.pos.x + lbx_sequence.width
+-- 				btn_dupliquer_composant.pos.y 			= lbx_sequence.pos.y + lbx_sequence.height - 47
+-- 				btn_instancier_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 32
+-- 				btn_supprimer_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 17
+				
+-- 				grp_prop.pos.x 					= ddl_murs.pos.x + ddl_murs.width + largeur_bord 
+-- 				grp_prop.height 				= _taille.y - ( grp_prop.pos.y + largeur_bord )
+-- 				subroll_parametres.pos.x 	= grp_prop.pos.x + 8
+-- 				subroll_parametres.height 	= grp_prop.height - 23
+				
+				btn_valider.pos.y 		= _taille.y - 35
 				btn_annuler.pos.y 		=  _taille.y - 35
+				btn_annuler.pos.x 		=  _taille.x - 110
 			)
 			fn initialiser 			_plug 		=(
 				
@@ -322,7 +437,12 @@
 				remplir_lbx_sequence ()
 				
 				lbx_sequence.selection = sequence_selectionBack +1
+				
+				m_ssComposant_courant	= undefined
 				actualiser ()
+				redim_pour_parametres ()
+	
+	
 			)
 			
 			fn dupliquer_composant =(
@@ -336,8 +456,12 @@
 				
 				m_composant_courant = m_plug.core.dupliquer_composant	m_facade_courante	m_composant_courant
 				
-				remplir_lbx_sequence ()				
+				remplir_lbx_sequence ()
 				lbx_sequence.selection += 1
+				gerer_boutons_enabled ()				
+				
+				
+				m_ssComposant_courant	= undefined
 				
 				actualiser ()
 			)
@@ -351,6 +475,7 @@
 				remplir_lbx_sequence ()
 				
 				lbx_sequence.selection += 1
+				gerer_boutons_enabled ()				
 				
 				
 				actualiser ()
@@ -372,27 +497,21 @@
 							
 		
 		
-		
-		  
-			
-		
-		on roll_urba_editeurFacades resized 	_taille 				do
-			redimensionnerFenetre 	_taille
-		
-		on roll_urba_editeurFacades moved 	_pos do
-			m_plug.core.set_facadeEditeur_position   	_pos
-		
-		on roll_urba_editeurFacades close do (
-			/*
-			if m_changement then  
-				if querybox "Enregistrer la façade ?" do (
-					enregistrer ()
-					m_plug.core.actualiser ()
+		on roll_urba_editeurFacades close do
+		(
+					/*
+					if m_changement then  
+						if querybox "Enregistrer la façade ?" do (
+							enregistrer ()
+							m_plug.core.actualiser ()
+						)
+					
+					m_plug.actualiser_rollouts () */
 				)
-			
-			m_plug.actualiser_rollouts () */
-		)
-		
+		on roll_urba_editeurFacades resized _taille 				do
+			redimensionnerFenetre 	_taille
+		on roll_urba_editeurFacades moved _pos do
+			m_plug.core.set_facadeEditeur_position   	_pos
 		on edt_nom_facade entered txt 	do
 		(
 					m_facade_courante.nom 	=	txt
@@ -441,25 +560,38 @@
 			m_changement = true
 					actualiser ()
 				)
+				
+				
+				
+				
+				
+				
 		on lbx_sequence selected arg do
 		(
-					m_composant_courant = m_facade_courante.params.sequence[ 	arg ]
-	-- 		m_changement = true
+					m_composant_courant 		= m_facade_courante.params.sequence[ 	arg ]
+					m_ssComposant_courant	= undefined
+		-- 					for rollAVirer in subroll_parametres_niv2.rollouts do
+		-- 						removeSubRollout	subroll_parametres	rollAVirer
+					
+		-- 		m_changement = true
 					actualiser ()
+				redim_pour_parametres ()
 				)
 		on btn_monter pressed do
 		(
 					m_facade_courante.params.composant_monter 	 lbx_sequence.selection
 					lbx_sequence.selection -= 1
 			m_changement = true
-					actualiser ()
+					remplir_lbx_sequence ()
+				gerer_boutons_enabled ()				
 				)
 		on btn_descendre pressed do
 		(
 					m_facade_courante.params.composant_descendre 	 lbx_sequence.selection
 					lbx_sequence.selection += 1
 			m_changement = true
-					actualiser ()
+					remplir_lbx_sequence ()
+				gerer_boutons_enabled ()				
 				)
 		on ddl_mode selected sel	 do
 		(
@@ -476,11 +608,15 @@
 		(
 				dupliquer_composant ()
 				m_changement = true
+				m_ssComposant_courant	= undefined
+				actualiser ()
 			)
 		on btn_instancier_composant pressed do
 		(
 				instancier_composant ()
 				m_changement = true
+				m_ssComposant_courant	= undefined
+				actualiser ()
 			)
 		on btn_supprimer_composant pressed do
 		(
@@ -489,10 +625,10 @@
 						actualiser ()
 			m_changement = true
 					)
+				m_ssComposant_courant	= undefined
+				actualiser ()
+				redim_pour_parametres ()
 				)
-				
-				
-				
 		on btn_ajouter_composant_1 pressed do
 		(
 				ajouter_composant	btns_ids_constructeurs[1]
@@ -531,9 +667,10 @@
 					m_plug.core.actualiser ()
 					m_plug.actualiser_rollouts ()
 				)
-		on btn_annuler pressed do	(
-					m_plug.core.facadeEditeur_fermer 	()
-				)
+		on btn_annuler pressed do
+		(
+							m_plug.core.facadeEditeur_fermer 	()
+						)
 	)
 		
 		
@@ -542,5 +679,3 @@
 	roll_urba_editeurFacades
 	
 )
-	
-	

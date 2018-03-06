@@ -70,11 +70,13 @@ struct	str_geometrie	(
 		fn face		_liste_pts						matID:1		flipNormal:false		=(
 			
 			--- si on a liste de point3 on créé les points d'abord
-			if classof 	_liste_pts[1] 	== Point3 do
-				_liste_pts = points		_liste_pts
+			for i = 1 to _liste_pts.count do
+				if classof 	_liste_pts[i]	== Point3 do
+					_liste_pts[i] = (points		#(_liste_pts[i]) )[1]
 			
 			-- si on doit inverser les points pour fliper la face ---------
-			if flipNormal do (				local result =#()
+			if flipNormal do (				
+				local result =#()
 				for i= _liste_pts.count to 1 by -1 do 
 					append result 	_liste_pts[i]
 				_liste_pts =  result

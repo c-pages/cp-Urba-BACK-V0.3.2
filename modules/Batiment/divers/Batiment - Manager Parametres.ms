@@ -43,7 +43,7 @@ struct  str_manager_parametres (
 		m_dialog,					----			= 	filein	 "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout facade.ms",
 		m_dialog_estOuvert 	= false,
 		m_dialog_pos			= [700,200],
-		m_dialog_taille			= [500,500],
+		m_dialog_taille			= [500,700],
 		
 		--- pour transformer tableaux et struct en texte pour les enregistrer et inversement our les lire ----------
 		mgr_datas ,			
@@ -644,10 +644,11 @@ struct  str_manager_parametres (
 		fn ouvrir_dialog 			=(
 			if m_dialog != undefined do (
 				createDialog 	m_dialog		style:				#(#style_resizing, #style_titlebar, #style_border, #style_sysmenu) 	\
-														pos:					m_dialog_pos		/*\
-														width:				m_dialog_taille.x	\
+														pos:					m_dialog_pos		\
+														lockWidth:			true 
+														/*width:				m_dialog_taille.x	\
 														height:				m_dialog_taille.y	 \
-														lockWidth:			true */
+														*/
 				
 				m_dialog.initialiser 		m_plug		
 				m_dialog_estOuvert 		= true

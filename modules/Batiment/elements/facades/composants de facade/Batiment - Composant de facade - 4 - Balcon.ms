@@ -15,8 +15,9 @@ compo_toolTip =	""
 
 --- les parametres du composant	---------
 struct compo_params	(
-	longueur = 0,
-	largeur	= 100,
+	longueur 		= 0,
+	largeur			= 100,
+	profondeur	= 100,
 	gardeCorps	= undefined
 )
 
@@ -31,14 +32,20 @@ rollout compo_dialog "Balcon" width:180 height:120
 
 	edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
 	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:73 align:#left
-	label 'lbl_largeur' "Largeur:" pos:[13,37] width:49 height:13 align:#left
-	spinner 'spn_largeur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
+	label 'lbl_largeur' "Balcon:" pos:[13,37] width:49 height:13 align:#left
+	spinner 'spn_balcon_largeur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
 	
-	dropdownList 'ddl_gardeCorps' "" pos:[15,64] width:149 height:21 align:#left
+	label 'lbl_profondeur' "Loggia" pos:[13,51] width:49 height:13 align:#left
+	spinner 'spn_loggia_profondeur' "" pos:[96,51] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
+	
+	
+	dropdownList 'ddl_gardeCorps' "" pos:[15,70] width:149 height:21 align:#left
+	
+	
 	fn actualiser =(
-		spn_largeur.value 	= 	m_compo.params.largeur
+		spn_balcon_largeur.value 	= 	m_compo.params.largeur
 		edt_nom.text 		=	m_compo.nom
-		
+		spn_loggia_profondeur.value 	= 	m_compo.params.profondeur
 		
 		
 		local liste_nomsGardesCorps	=	#("aucun")
@@ -54,95 +61,103 @@ rollout compo_dialog "Balcon" width:180 height:120
 
 	
 	
+	
+	
+	
 	on edt_nom entered txt 	do
 	(
 			m_compo.nom = txt
 			m_rollPrt.actualiser ()
 		)
-	on spn_largeur changed val do
+	on spn_balcon_largeur changed val do
 		m_compo.params.largeur = val
-	
-	
-	on	ddl_gardeCorps 	selected	_val do (
-		format "GARDE CORPS selected %\n" _val
-		if _val > 1 then (
-			local nv_gardeCorps = m_plug.core.creer_gardeCorps		( _val - 1 )
-			m_compo.params.gardeCorps = nv_gardeCorps 
-			format "nv_gardeCorps: %\n" nv_gardeCorps
-		format "-------> m_compo.params.gardeCorps.type %\n" m_compo.params.gardeCorps.type
-		) else  m_compo.params.gardeCorps = undefined
-	)
-	
+	on 	spn_loggia_profondeur changed val do
+		m_compo.params.profondeur = val
+	on ddl_gardeCorps selected _val do
+	(
+			format "GARDE CORPS selected %\n" _val
+			if _val > 1 then (
+				local nv_gardeCorps = m_plug.core.creer_gardeCorps		( _val - 1 )
+				m_compo.params.gardeCorps = nv_gardeCorps 
+				format "nv_gardeCorps: %\n" nv_gardeCorps
+			format "-------> m_compo.params.gardeCorps.type %\n" m_compo.params.gardeCorps.type
+			) else  m_compo.params.gardeCorps = undefined
+		)
 )
-
 --- la fonction de construction	---------
 fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDalle:false	 onConstruit_gardeCorps:	= (
 
-	local ptr_geo 				= 	_plug.core.get_geo ()
 	
-	--- Result -------------
-	local pt_result_1, pt_result_2, pt_result_3
-	
-	--- Vecteurs ------------
-	local vec_ep_dalle 	= [0,0,1] 			* 	_plug.const_dalle_epaisseur			
-	local vec_longueur 	= norm_dir 		* 	this.params.longueur
-	local norm_balcon	= norm_dir * rotateZ ( matrix3 1 ) -90
-	local vec_largeur		= norm_balcon 	*	 this.params.largeur				
-	
-	--- Points d'accroche ------------
-	local id_ptAccroche_1 	= pts_accroches[1]
-	local id_ptAccroche_2 	= pts_accroches[2]
-	local id_ptAccroche_3 	= pts_accroches[3]
-	
-	local ptAccroche_1		=	polyop.getVert 	_plug.delegate		id_ptAccroche_1	
-	local ptAccroche_2		=	polyop.getVert 	_plug.delegate		id_ptAccroche_2	
-	local ptAccroche_3		=	polyop.getVert 	_plug.delegate		id_ptAccroche_3	
-	
-	
-	-------	Placement des points 	--------
-	local pt_1 		= ptAccroche_1
-	local pt_2 		= pt_1		+  vec_longueur
-	local pt_3 		= pt_2		+ 	vec_ep_dalle				
-	local pt_4		= pt_1		+ 	vec_ep_dalle
-	
-	local pt_5		= pt_1		+	vec_largeur
-	local pt_6		= pt_2		+	vec_largeur		
-	local pt_7		= pt_3		+	vec_largeur
-	local pt_8		= pt_4		+	vec_largeur
-	
-	--- creation des points --------------
-	local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
-	local pts_ids 	= ptr_geo.points 	pts_pos		
-	
-	-------	Creation des faces 	--------
-	local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[5], 		pts_ids[8], 		pts_ids[4] )
-	ptr_geo.set_matID 	nvlFace	#mur 	
-	local nvlFace = ptr_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[7] , 	pts_ids[8] )	
-	ptr_geo.set_matID 	nvlFace	#mur 	
-	local nvlFace = ptr_geo.face 		#(	pts_ids[6], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[7] )	
-	ptr_geo.set_matID 	nvlFace	#mur 	
-	local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6], 		pts_ids[5] )	
-	ptr_geo.set_matID 	nvlFace	#mur 	
-	local nvlFace = ptr_geo.face 		#(	pts_ids[8], 		pts_ids[7], 		pts_ids[3], 		pts_ids[4] )	
-	ptr_geo.set_matID 	nvlFace	#mur 		 				
-	
-	
-	----------- Garde corps	-------------
-	if onConstruit_gardeCorps do
-		if this.params.gardeCorps	!=undefined  			do ( 
-			-- garde corps de face -------
-			this.params.gardeCorps.construire	_plug 	#(pt_6 + 	vec_ep_dalle	, pt_5 + 	vec_ep_dalle	)  norm_dir:norm_dir
-			-- garde gauche -------
-			this.params.gardeCorps.construire	_plug 	#(pt_5 + 	vec_ep_dalle	, pt_1 + 	vec_ep_dalle	)  norm_dir:norm_balcon
-			-- garde droite -------
-			this.params.gardeCorps.construire	_plug 	#(pt_2 + 	vec_ep_dalle	, pt_6 + 	vec_ep_dalle	)  norm_dir:-norm_balcon
-		)
+-------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
+		local ptr_plug				= 	_plug
+		local ptr_composant  	= 	this
+		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 		
-	--- on reinitialise la longueur à 0 --------
-	this.params.longueur = 	0
-	
-	
-	#()
+-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
+		local ep_dalle 			= ptr_plug.const_dalle_epaisseur
+		local ht_niveaux 		= ptr_plug.etages_hauteur
+		local longueur 			= ptr_composant.params.longueur
+		
+		
+-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
+		--- Result -------------
+		local pt_result_1, pt_result_2, pt_result_3
+		
+		--- Vecteurs ------------
+		local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
+		local vec_ht 				= [0,0,1] 		* 	ht_niveaux
+		local vec_longueur 	= norm_dir 	* 	longueur
+		local vec_prof			= ( norm_dir * rotateZ ( matrix3 1 ) 90 ) *  this.params.profondeur 
+		
+		--- Points d'accroche ------------
+		local id_ptAccroche_1 	= pts_accroches[1]
+		local id_ptAccroche_2 	= pts_accroches[2]
+		local id_ptAccroche_3 	= pts_accroches[3] 
+		
+		local ptAccroche_1		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	) 
+		local ptAccroche_2		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	) 
+		local ptAccroche_3		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	) 
+		
+		---- LA DALLE  -----------------------------------------------------------------------			
+		-------	Creation des points 	--------
+		local pt_2 		= ptAccroche_1		+ vec_prof
+		local pt_3 		= pt_2					+	vec_ep_dalle 
+		
+		--- creation des points --------------
+		local pts_pos 	= #( pt_2, pt_3 )
+		local pts_ids 	= ptr_geo.points 	pts_pos		
+		
+		-------	Creation des faces 	--------
+-- 		if onConstruitLaDalle do (
+			local nvlFace = ptr_geo.face 		#( id_ptAccroche_1, 		pts_ids[1], 		pts_ids[2], 		id_ptAccroche_2 )		
+			ptr_geo.set_matID 	nvlFace	#mur 	
+-- 		)
+		
+		--- Result -------------
+		pt_result_1 = pts_ids[1]
+		pt_result_2 = pts_ids[2]
+		
+		
+		
+		---- LE MUR -----------------------------------------------------------------------			
+		-------	Creation des points 	--------
+		local pt_3 		= pt_3 +	vec_ht 
+		
+		--- creation des points --------------
+		local pts_pos 	= #( pt_3 )
+		local pts_ids 	= ptr_geo.points 	pts_pos		
+		
+		-------	Creation des faces 	--------
+		local nvlFace = ptr_geo.face 		#( id_ptAccroche_2, 		pt_result_2, 		pts_ids[1], 		id_ptAccroche_3 )		 
+		ptr_geo.set_matID 	nvlFace		#mur 	
+		
+		--- Result -------------
+		pt_result_3 = pts_ids[1]
+		
+		
+		---- Result final -----------------------------------------------------------------------
+		#( pt_result_1, pt_result_2, pt_result_3 )
+		
 		
 )
 	

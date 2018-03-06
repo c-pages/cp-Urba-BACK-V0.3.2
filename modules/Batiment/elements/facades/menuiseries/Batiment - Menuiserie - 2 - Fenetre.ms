@@ -25,7 +25,8 @@ rollout menuis_dialog "Paramètres" width:180 height:130
 (
 	
 		local m_plug		
-		local m_menuiserie
+		local m_compo
+		local m_rollPrt		
 		
 		---- golbal --------------
 		label 'lbl_hauteur' "Hauteur : " pos:[6,5] width:75 height:13 align:#left
@@ -37,25 +38,25 @@ rollout menuis_dialog "Paramètres" width:180 height:130
 		spinner 'spn_allege_vitree' "" pos:[99,20] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
 		
 		fn actualiser =(
-			spn_hauteur.value 		= m_menuiserie.params.hauteur			
-			spn_allege_vitree.value 	= m_menuiserie.params.allege_vitree_ht
-			ddl_ouverture.selection	=	m_menuiserie.params.ouverture_sens
+			spn_hauteur.value 		= m_compo.params.hauteur			
+			spn_allege_vitree.value 	= m_compo.params.allege_vitree_ht
+			ddl_ouverture.selection	=	m_compo.params.ouverture_sens
 		)
 		fn initialiser _plug = m_plug = _plug
 		fn set_menuiserie _menuis =(
-			m_menuiserie	=	_menuis
+			m_compo	=	_menuis
 			actualiser ()
 		)
 		
 		
 		on spn_hauteur changed val do	
-			m_menuiserie.params.hauteur		 = val
+			m_compo.params.hauteur		 = val
 		
 		on spn_allege_vitree changed val do	
-			m_menuiserie.params.allege_vitree_ht		 = val
+			m_compo.params.allege_vitree_ht		 = val
 		
 		on ddl_ouverture selected val do	
-			m_menuiserie.params.ouverture_sens		 = val
+			m_compo.params.ouverture_sens		 = val
 )
 
 

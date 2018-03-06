@@ -95,10 +95,6 @@
 			redimensionnerFenetre 	_taille
 		on spn_longueur changed val  		do
 			m_menuiserie.longueur = val
-		on ddl_type selected _val do		(
-			m_plug.core.appliquer_menuiserie_type		m_menuiserie	_val
-				actualiser ()
-			)
 	)
 	
 	rollout_menuiserie

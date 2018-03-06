@@ -23,7 +23,8 @@ struct menuis_params	(
 rollout menuis_dialog "Espacement" (
 	
 			local m_plug		
-			local m_menuiserie
+			local m_compo
+		local m_rollPrt		
 	
 	
 			---- golbal --------------
@@ -33,22 +34,22 @@ rollout menuis_dialog "Espacement" (
 		dropdownList 'ddl_ouverture' "" pos:[68,36] width:100 height:21 items:#("Auto", "Droite", "Gauche") align:#left
 			
 		fn actualiser =(
-			spn_hauteur.value 		= m_menuiserie.params.hauteur			
-			ddl_ouverture.selection	=	m_menuiserie.params.ouverture_sens
+			spn_hauteur.value 		= m_compo.params.hauteur			
+			ddl_ouverture.selection	=	m_compo.params.ouverture_sens
 		)
 		fn initialiser _plug = m_plug = _plug
 		fn set_menuiserie _menuis =(
-			m_menuiserie	=	_menuis
+			m_compo	=	_menuis
 			actualiser ()
 		)
 		
 		
 		on spn_hauteur changed val do	
-			m_menuiserie.params.hauteur		 = val
+			m_compo.params.hauteur		 = val
 		
 		
 		on ddl_ouverture selected val do	
-			m_menuiserie.params.ouverture_sens		 = val
+			m_compo.params.ouverture_sens		 = val
 )
 
 

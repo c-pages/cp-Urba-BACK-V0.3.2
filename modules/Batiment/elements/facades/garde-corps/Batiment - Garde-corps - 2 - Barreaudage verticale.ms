@@ -21,7 +21,7 @@ struct gardeCorps_params (
 
 
 ------ la fonction de construction	---------
-fn gardeCorps_fnConstruire  	_plug		_pts		norm_dir:		 this:		onConstruitLaDalle:false	 = (
+fn gardeCorps_fnConstruire  	_plug		_pts		/* norm_dir:		 */ this:		onConstruitLaDalle:false	 = (
 	
 			
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
@@ -30,6 +30,7 @@ fn gardeCorps_fnConstruire  	_plug		_pts		norm_dir:		 this:		onConstruitLaDalle:
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 		
 -------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
+		local norm_dir 				= normalize	(_pts[2] - _pts[1] )
 		local hauteur	 		= this.params.hauteur
 		local longueur 			= distance _pts[1] _pts[2]
 	
@@ -41,7 +42,7 @@ fn gardeCorps_fnConstruire  	_plug		_pts		norm_dir:		 this:		onConstruitLaDalle:
 	
 		--- Vecteurs ------------
 		local vec_ht 				= [0,0,1] 			* 	hauteur
-		local vec_longueur 	= -norm_dir 		* 	longueur
+		local vec_longueur 	= norm_dir 		* 	longueur
 	
 		local vec_barreaux_ecart 		= -norm_dir 		* 	barreaux_ecart
 		local vec_barreaux_epVert		= norm_dir 		* 	barreaux_ep
@@ -62,14 +63,12 @@ fn gardeCorps_fnConstruire  	_plug		_pts		norm_dir:		 this:		onConstruitLaDalle:
 		----	Barreau Verticaux ------
 		local nombre_barreaux 	= floor (longueur / ( barreaux_ecart+ barreaux_ep) ) + 1
 		local longueur_reste 		= longueur	-	nombre_barreaux * ( barreaux_ecart+ barreaux_ep)		----(longueur / ( barreaux_ecart+ barreaux_ep) ) - nombre_barreaux
--- 		format "longueur : %\n"	longueur
--- 		format "nombre_barreaux : %\n"	nombre_barreaux
--- 		format "(longueur / ( barreaux_ecart+ barreaux_ep) )  : %\n"	(longueur / ( barreaux_ecart+ barreaux_ep) ) 
--- 		format "----->	longueur_reste : %\n\n"	longueur_reste
-		local pt_barreauVert 		= _pts[2] + vec_barreaux_epHoriz  -  norm_dir * longueur_reste/2	-	vec_barreaux_epVert/2
+
+
+		local pt_barreauVert 		= _pts[2] + vec_barreaux_epHoriz  +  norm_dir * longueur_reste/2	-	vec_barreaux_epVert/2
 		for i = 2 to nombre_barreaux do (
 			ptr_geo.tube		pt_barreauVert		(vec_ht -	vec_barreaux_epHoriz )   	vec_barreaux_epVert			vec_barreaux_prof				matID:#menuiserie 
-			pt_barreauVert += norm_dir * ( barreaux_ecart + barreaux_ep )
+			pt_barreauVert += -norm_dir * ( barreaux_ecart + barreaux_ep )
 		)
 		
 		

@@ -33,10 +33,10 @@ struct compo_params	(
 --- les rollout du composant	---------
 rollout compo_dialog "Baie" width:433 height:747
 (
-		local m_rollPrt
-		local	 m_plug
-		local m_compo
-		local m_dialog_menuiserie	
+	local m_rollPrt
+	local	 m_plug
+	local m_compo
+	local m_dialog_menuiserie	
 		
 		---- golbal --------------
 	edittext 'edt_nom' "" pos:[3,3] width:187 height:16 align:#left
@@ -107,8 +107,8 @@ rollout compo_dialog "Baie" width:433 height:747
 			
 			--- sequence -----------
 			lbx_sequence.items		=	for element in m_compo.params.sequence collect ( element.nom )
-			if lbx_sequence.selection == 0 and lbx_sequence.items.count > 0 do
-				lbx_sequence.selection = 1
+-- 			if lbx_sequence.selection == 0 and lbx_sequence.items.count > 0 do
+-- 				lbx_sequence.selection = 1
 			local sequence_edition	= lbx_sequence.selection != 0
 			btn_supprimer_element.enabled	= sequence_edition
 			btn_dupliquer_element.enabled	= sequence_edition
@@ -139,13 +139,11 @@ rollout compo_dialog "Baie" width:433 height:747
 			actualiser	()
 		)
 		fn editer_element = (
-			
-			m_dialog_menuiserie = ( m_plug.core.get_mgr_facMenuiseries () ).ouvrir_dialog ()	
+-- 			m_dialog_menuiserie = ( m_plug.core.get_mgr_facMenuiseries () ).ouvrir_dialog ()	
 	-- 		createDialog	m_dialog_menuiserie	
 			local menuis = m_compo.params.sequence[ lbx_sequence.selection ]
-			format "menuis :%\n" menuis
-			m_dialog_menuiserie.initialiser			m_plug		
-			m_dialog_menuiserie.set_menuiserie	menuis
+			m_rollPrt.set_ssComposant		menuis
+-- 			format "menuis :%\n" menuis
 		)
 		
 	
@@ -177,12 +175,22 @@ rollout compo_dialog "Baie" width:433 height:747
 					m_compo.params.traverses[ lbx_traverses.selection ] = val
 					actualiser ()
 				)
-	on lbx_sequence doubleClicked arg do
+	on lbx_sequence doubleClicked arg do (
 		editer_element ()
+		m_rollPrt.redim_pour_parametres ()
+	)
+	
+	on lbx_sequence selected _index  do (
+		editer_element ()
+		m_rollPrt.redim_pour_parametres ()
+	)
+	
 	on btn_ajouter_element pressed do
 	( 
 		 	local	nv_menuis = m_plug.core.creer_menuiserie		m_compo			 lbx_sequence.selection 	
+			m_rollPrt.set_ssComposant		nv_menuis	
 			actualiser () 
+			lbx_sequence.selection 	+= 1
 		)
 	on btn_editer_element pressed do
 		editer_element ()
@@ -293,7 +301,13 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		pt_result_2 = pts_ids[2]
 		
 		
-		
+		--- tablete ou pas -----		
+		local onConstruit_laTablette = this.params.tablette 
+			if onConstruit_laTablette do
+				if allege_hauteur == 0  and not onConstruitLaDalle do
+					onConstruit_laTablette = false		
+			
+			
 		---- LA BAIE -----------------------------------------------------------------------				
 		-------	Creation des points 	--------
 		--- mur d'allege ----
@@ -327,9 +341,9 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		-------	Creation des faces 	--------
 		ptr_geo.face 		#(	id_ptAccroche_2, 	pts_ids[1], 		pts_ids[2], 		pts_ids[3] )		matID:#mur  
 		
-		local nvlFace = ptr_geo.face 		#(	pts_ids[3], 		pts_ids[2], 		pts_ids[8] , 	pts_ids[7] )		 	
-		if allege_hauteur	!= 0 	then		ptr_geo.set_matID 	nvlFace	#menuiserie
-											else 		ptr_geo.set_matID 	nvlFace	#mur
+		local nvlFace = ptr_geo.face 		#(	pts_ids[3], 		pts_ids[2], 		pts_ids[8] , 	pts_ids[7] )		 
+		if onConstruit_laTablette 	then		ptr_geo.set_matID 	nvlFace	#menuiserie
+												else 		ptr_geo.set_matID 	nvlFace	#mur
 		
 		ptr_geo.face 		#(	pts_ids[10], 		pts_ids[9], 		pts_ids[5], 		pts_ids[4] )				matID:#mur 
 		ptr_geo.face 		#(	pts_ids[4], 		pts_ids[5], 		pts_ids[6], 		id_ptAccroche_3 )		matID:#mur 
@@ -424,8 +438,10 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		
 		
 		-------	  TABLETTE 	---------------------------------------------------------------------------------------------------------------			
-		if this.params.tablette do (
-						
+	
+		
+		if onConstruit_laTablette		do (
+			
 			
 			-------	Placement des points 	--------
 			local pt_1 		= pt_bas	+  vec_allege 	- 	vec_tab_ht		-	vec_tab_cote	+ vec_tab_deb

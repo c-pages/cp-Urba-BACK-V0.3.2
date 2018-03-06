@@ -16,21 +16,22 @@ struct gardeCorps_params (
 
 
 ------ la fonction de construction	---------
-fn gardeCorps_fnConstruire  	_plug		_pts		norm_dir:		 this:		onConstruitLaDalle:false	 = (
+fn gardeCorps_fnConstruire  	_plug		_pts		/* norm_dir:	 */	 this:		onConstruitLaDalle:false	 = (
 			format "CONSTRUCTION DU GARDE-CORPS\n"
 			
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
 		local ptr_composant  	= 	this
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
-		
+		local norm_dir 				= normalize	(_pts[2] - _pts[1] )
+	
 -------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
 		local hauteur	 		= this.params.hauteur
 		local longueur 			= distance _pts[1] _pts[2]
 		
 		--- Vecteurs ------------
 		local vec_ht 				= [0,0,1] 			* 	hauteur
-		local vec_longueur 	= -norm_dir 		* 	longueur
+		local vec_longueur 	= norm_dir 		* 	longueur
 	
 -------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 	

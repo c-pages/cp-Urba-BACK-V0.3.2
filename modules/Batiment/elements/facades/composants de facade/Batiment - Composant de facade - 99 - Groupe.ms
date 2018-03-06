@@ -6,9 +6,9 @@
 
 
 ------ parametres de base	-----------------------------
-compo_nom 		= "Espacement"	
-compo_type		=	#espacement
-compo_toolTip 	=	"Ajouter un espacement. Mur plein de longueur varirable, répartis par facade, entre tous les espacement"
+compo_nom 		= "Groupe"	
+compo_type		=	#Groupe
+compo_toolTip 	=	"Pour grouper des composant entre eux."
 
 
 ------ la fonction de construction	---------
@@ -17,17 +17,43 @@ fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= ()
 --- les parametres du composant	---------
 struct compo_params	(
 	longueur = 0.,
-	longueur_min = 0,
-	longueur_max = 0
+	repetitions = 0,
+	
+	public	
+	fn	get_longueur =(
+		
+	)
 	
 )
 
 --- les rollout du composant	---------
-rollout compo_dialog "Espacement" width:180 height:70	(
+rollout compo_dialog "Groupe" width:180 height:70	(
 	local m_rollPrt
 	local m_compo
 	local m_plug
-	fn actualiser =()
+	
+	
+	edittext 'edt_nom' "" pos:[3,3] width:187 height:16 align:#left
+	label 'lbl19' "Répétitions:" pos:[15,36] width:49 height:13 align:#left
+	spinner 'spn_repetitions' "" pos:[116,36] width:70 height:16 range:[0,100000,0] type:#integer scale:1 align:#left
+	
+	
+	
+	fn actualiser =(
+			--- global ------
+			edt_nom.text 					=	m_compo.nom
+			spn_repetitions.value 		= m_compo.params.repetitions
+		)
+		
+		
+		
+	on edt_nom entered txt 	do
+	(
+		m_compo.nom = txt
+		m_rollPrt.actualiser ()
+	)
+	on spn_repetitions changed val 	do
+		m_compo.params.repetitions 					= val
 )
 
 

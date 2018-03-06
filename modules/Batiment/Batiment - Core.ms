@@ -251,8 +251,8 @@ struct str_batiment_core (
 			)
 			
 			--- gestion Loggia ----------
-			if nv_composant.type == #loggia do  (
-				local composant_fin = 	mgr_facCompos.creer_element 		idConstructeur:#loggiaFin  position:(position+1)
+			if nv_composant.type == #groupe do  (
+				local composant_fin = 	mgr_facCompos.creer_element 		idConstructeur:#groupeFin  position:(position+1)
 				insertItem 	composant_fin		_facade.params.sequence 			(position+1)
 			)
 			

@@ -38,13 +38,16 @@ struct facade_params	(
 		--- Sequence	---
 		sequence				=	#(),
 		
--- 	private
--- 		m_plug,
+		
+	private	
+		modes_distribution	=	#("Centrer", "Répartir", "Répeter - Centrer", "Répeter - Répartir", "Répeter - Répartir éléments" ),
 		
 		------ fonctions ----------------------------------
 	public
 -- 		fn set_plug			_plug				= m_plug = _plug,
 			
+		fn get_modes_distribution = modes_distribution ,
+		
 		---- composants ------------
 		fn ajouter_composant 		_composant 	position:(sequence.count+1)  =(
 			if position == 0 do position = sequence.count+1
@@ -90,59 +93,133 @@ struct facade_params	(
 		),
 		fn get_sequenceFacade		_plug 	_longueur_facade	=(
 			
--- 			debug "get_sequenceFacade" 
-			
-			local	nbr_espacemts				=	0
-			local	nbr_repetitions				=	0
-			local	longueur_restant			=	0
-			local	longueur_espacement	=	0
-			local	espacer 						= mode == 4
-			local longueur_sequence 		= get_longueur		()	
-			
 			local	sequence_totale 			= #()
 			
 			
-			-----	calcul du nombre d'espacements de la sequence	--------------------------------------
-			for compo in sequence do
-					if compo.type  as name == #espacement 	do
-						nbr_espacemts += 1
+			local	nbr_espacemts				=	0
+			local	nbr_espacemts_sequence				=	0
+			local	nbr_repetitions				=	0
+			local	longueur_restant			=	0
+			local	longueur_espacement	=	0
+			local longueur_sequence 		= get_longueur		()	
 			
-			-----	calcul de la longueur des espacements de la sequence	--------------------------------------
-			case mode of (
-				1:  	(	--- Repeter ----
-					nbr_repetitions				= floor ( _longueur_facade / longueur_sequence )
-					longueur_restant 			= _longueur_facade - longueur_sequence * nbr_repetitions
-					longueur_espacement 	= longueur_restant / ( 2	+ nbr_espacemts * nbr_repetitions )
-					espacer 						= false
-				)
-				2: 	(	--- Etirer ----
-					nbr_repetitions				= 1						
-					longueur_restant 			= _longueur_facade - longueur_sequence * nbr_repetitions 	
-					longueur_espacement 	= longueur_restant / ( 2	+ nbr_espacemts * nbr_repetitions )
-
-				)
-				3: 	(	--- Centrer ----					
-					nbr_repetitions				= 1		
-					longueur_restant 			= _longueur_facade - longueur_sequence * nbr_repetitions 	
-					longueur_espacement 	= longueur_restant / (  nbr_espacemts * nbr_repetitions )
-					
-				)
-				4:		(	--- Espacer ----	
-					nbr_repetitions				= floor ( _longueur_facade / longueur_sequence )
-					longueur_restant 			= _longueur_facade - longueur_sequence * (nbr_repetitions )		
-					longueur_espacement 	= longueur_restant / ( 1 + nbr_espacemts * nbr_repetitions)
-				)						
+			
+			--- le nombre l'element de la sequence à prendre en compte (pas les balcons) et espacments
+			local nbr_compos_aPrendreEnCompte	=	0
+			for  elem in sequence do (
+				if elem.type != #balcon	and elem.type != #balconFin do 
+					nbr_compos_aPrendreEnCompte	+= 1	
+-- 					if elem.type != #espacement do
+-- 						nbr_espacemts_sequence += 1
 			)
-			
-			
-			-------------------- la SEQUENCE TOTALE	----------------------------------------------------------------------------------------
-			-----	si on a une sequence avec une longueur nulle, on creer un seul mur plein	--------------------------------------		
-		 	if longueur_sequence	== 0 then (
+			if longueur_sequence	== 0 or nbr_compos_aPrendreEnCompte == 0  then (
+				
 				sequence_totale 	= #( _plug.core.get_murPlein		longueur_facade )
 				
 			) else (
 				
+				--- le nombre l'element de la sequence à prendre en compte (pas les balcons) et espacments
+				local nbr_compos_aPrendreEnCompte	=	0
+				for  elem in sequence do (
+					if elem.type != #balcon	and elem.type != #balconFin do 
+						nbr_compos_aPrendreEnCompte	+= 1	
+-- 					if elem.type != #espacement do
+-- 						nbr_espacemts_sequence += 1
+				)
+				
+				--- la sequence à répartir	---------
 				local sequence_simple		= for compo in 	sequence collect compo
+				
+				-----	calcul de la longueur des espacements de la sequence	--------------------------------------
+				case mode of (
+					1:  (	--- centrer ----	
+						
+						nbr_repetitions				= 1
+						nbr_espacemts				=	2  + nbr_espacemts_sequence
+						longueur_restant 			= _longueur_facade - longueur_sequence
+						longueur_espacement 	= longueur_restant / nbr_espacemts  
+						
+						
+						--- création dela séquence	------------------
+						sequence_simple		= for compo in 	sequence collect compo
+						sequence_totale = #(_plug.core.get_murPlein	  longueur_espacement  )
+						local poser_esp_debut = false
+						for elem in	sequence_simple	do 	
+							append sequence_totale		elem
+							
+						append sequence_totale		(_plug.core.get_murPlein	  longueur_espacement)
+						
+						
+					)		
+					2:  	(	--- repartir ----
+						nbr_repetitions				=  1		
+						nbr_espacemts				=	nbr_compos_aPrendreEnCompte + 1	
+						longueur_restant 			= _longueur_facade - longueur_sequence 
+						longueur_espacement 	= longueur_restant / nbr_espacemts  
+						
+						--- création dela séquence	------------------
+						sequence_totale = #(_plug.core.get_murPlein	  longueur_espacement  )
+						
+						local poser_esp_debut = false
+						for i = 1 to	sequence_simple.count	do 		(
+							local elem = 	sequence_simple[i]
+							
+							append sequence_totale		elem
+							
+							if poser_esp_debut do (								
+								append sequence_totale		(_plug.core.get_murPlein	  longueur_espacement)
+								poser_esp_debut = false
+							)
+							
+							local elem_suivant	=	if i < sequence_simple.count	then sequence_simple[i + 1] else undefined
+							if elem_suivant != undefined do
+								if  elem_suivant.type == #balconFin do (
+									poser_esp_debut = true
+								)
+							
+							if not poser_esp_debut and elem.type != #balcon	and elem.type != #balconFin do 
+								append sequence_totale		(_plug.core.get_murPlein	  longueur_espacement)
+						)
+					)
+					3: 	(	--- repeter	-	centrer ----
+						
+						nbr_repetitions				= floor ( _longueur_facade / longueur_sequence )
+						nbr_espacemts				=	2	--	nbr_compos_aPrendreEnCompte + 1
+						longueur_restant 			= _longueur_facade - longueur_sequence * nbr_repetitions
+						longueur_espacement 	= longueur_restant / nbr_espacemts  
+
+						sequence_totale = #(_plug.core.get_murPlein	  longueur_espacement  )
+						-- les boucles de la facade simple	--------
+						for i = 1 to nbr_repetitions do (				
+							----- les repetitions de sequence ------------------
+							for compo	in	 sequence_simple	do 						
+								append sequence_totale	compo							
+						)
+						append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
+					)
+					4: 	(	--- repeter	-	repartir  ----
+						
+						nbr_repetitions				= floor ( _longueur_facade / longueur_sequence )
+						nbr_espacemts				=	nbr_repetitions + 1
+						longueur_restant 			= _longueur_facade - longueur_sequence * nbr_repetitions
+						longueur_espacement 	= longueur_restant / nbr_espacemts  
+
+						sequence_totale = #(_plug.core.get_murPlein	  longueur_espacement  )
+						-- les boucles de la facade simple	--------
+						for i = 1 to nbr_repetitions do (				
+							----- les repetitions de sequence ------------------
+							for compo	in	 sequence_simple	do 						
+								append sequence_totale	compo							
+							append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
+						)
+					)
+				) -- fin case	-----------
+				
+				/* 
+				-------------------- la SEQUENCE TOTALE	----------------------------------------------------------------------------------------
+				-----	si on a une sequence avec une longueur nulle, on creer un seul mur plein	--------------------------------------		
+
+				
 				for i=1 to sequence.count do (
 					local composant = sequence_simple[i]
 					case composant.type  as name of (
@@ -170,7 +247,7 @@ struct facade_params	(
 				----- le dernier espacement ------------
 				if not espacer and  mode != 3 do 
 						append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )					
-				
+				 */
 			)
 			
 			sequence_totale
@@ -218,26 +295,31 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit
 				
 				case composant.type as name of (
 					
-					
 					#balcon:(
-						balcon_pts_debut 		= ptsIDs_accroche
 						balcon_aConstruire 	= composant
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	onConstruitLaDalle:false				
+						balcon_pts_debut 		= ptsIDs_accroche		
 					)
 					#balconFin:(
 						local		pt_balcon_debut	=	polyop.getVert 	m_plug.delegate		balcon_pts_debut[1]	
 						local		pt_balcon_fin		=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
-						balcon_aConstruire.params.longueur = 		(	distance	pt_balcon_debut 	pt_balcon_fin	)
-						balcon_aConstruire.construire	 	m_plug			balcon_pts_debut		norm_dir:norm_dir	\
-																															onConstruit_gardeCorps:onConstruit_gardeCorps
-						balcon_aConstruire = undefined
--- 					balcon_aConstruire.params.longueur = 	0
+						composant.params.longueur 				= 		distance	pt_balcon_debut 	pt_balcon_fin
+-- 						composant.params.profondeur 			= 		balcon_aConstruire.params.profondeur
+					
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche	norm_dir:norm_dir	\
+																																		compo_debut:balcon_aConstruire \
+																																		onConstruit_gardeCorps:( onConstruit_gardeCorps  )
+						
+						composant.params.longueur 	= 	0
+						balcon_aConstruire 				=	undefined
+					
 					)
 					
-					
+					/* 
 					
 					#loggia:(
 						loggia_aConstruire 	= composant
-						profondeurFacade 		= loggia_aConstruire.params.profondeur
+-- 						profondeurFacade 		= loggia_aConstruire.params.profondeur
 					-----	construction geometrie du composant	----------
 						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	onConstruitLaDalle:false
 						
@@ -259,11 +341,11 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit
 						loggia_aConstruire = undefined
 					
 					)
-					
+					*/
 					
 					
 					default:(
-						local onConstruitLaDalle = ( balcon_aConstruire == undefined )  and  ( loggia_aConstruire == undefined )
+						local onConstruitLaDalle = ( balcon_aConstruire == undefined )  -- and  ( loggia_aConstruire == undefined )
 						
 						-----	construction geometrie du composant	----------
 						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir		onConstruitLaDalle:onConstruitLaDalle		
