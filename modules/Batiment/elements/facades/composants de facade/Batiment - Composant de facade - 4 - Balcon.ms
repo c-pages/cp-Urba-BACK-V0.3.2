@@ -16,40 +16,67 @@ compo_toolTip =	""
 --- les parametres du composant	---------
 struct compo_params	(
 	longueur = 0,
-	largeur	= 100
+	largeur	= 100,
+	gardeCorps	= undefined
 )
 
 
 --- les rollout du composant	---------
-rollout compo_dialog "Balcon" width:180 height:70	(
+rollout compo_dialog "Balcon" width:180 height:120
+(
 	
 	local m_compo
 	local m_rollPrt
 	local m_plug
 
 	edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
-	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
+	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:73 align:#left
 	label 'lbl_largeur' "Largeur:" pos:[13,37] width:49 height:13 align:#left
 	spinner 'spn_largeur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
 	
+	dropdownList 'ddl_gardeCorps' "" pos:[15,64] width:149 height:21 align:#left
 	fn actualiser =(
 		spn_largeur.value 	= 	m_compo.params.largeur
 		edt_nom.text 		=	m_compo.nom
+		
+		
+		
+		local liste_nomsGardesCorps	=	#("aucun")
+		liste_nomsGardesCorps +=	m_plug.core.get_gardeCorps_constructeursNoms ()
+		ddl_gardeCorps.items 			= liste_nomsGardesCorps
+		
+		local gardeCorps_listeTypes	=	m_plug.core.get_gardeCorps_constructeursTypes ()		
+		if m_compo.params.gardeCorps != undefined then (			
+			local indexSelect_gardeCorps	=	findItem	gardeCorps_listeTypes		m_compo.params.gardeCorps.type			
+			ddl_gardeCorps.selection = indexSelect_gardeCorps + 1
+		) else ddl_gardeCorps.selection = 1
 	)
 
-	on spn_largeur changed val do 
-		m_compo.params.largeur = val		
 	
-	on edt_nom	 entered txt 	do	(
-		m_compo.nom = txt
-		m_rollPrt.actualiser ()
+	
+	on edt_nom entered txt 	do
+	(
+			m_compo.nom = txt
+			m_rollPrt.actualiser ()
+		)
+	on spn_largeur changed val do
+		m_compo.params.largeur = val
+	
+	
+	on	ddl_gardeCorps 	selected	_val do (
+		format "GARDE CORPS selected %\n" _val
+		if _val > 1 then (
+			local nv_gardeCorps = m_plug.core.creer_gardeCorps		( _val - 1 )
+			m_compo.params.gardeCorps = nv_gardeCorps 
+			format "nv_gardeCorps: %\n" nv_gardeCorps
+		format "-------> m_compo.params.gardeCorps.type %\n" m_compo.params.gardeCorps.type
+		) else  m_compo.params.gardeCorps = undefined
 	)
 	
 )
 
-
 --- la fonction de construction	---------
-fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDalle:false	 = (
+fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDalle:false	 onConstruit_gardeCorps:	= (
 
 	local ptr_geo 				= 	_plug.core.get_geo ()
 	
@@ -100,6 +127,17 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 	ptr_geo.set_matID 	nvlFace	#mur 		 				
 	
 	
+	----------- Garde corps	-------------
+	if onConstruit_gardeCorps do
+		if this.params.gardeCorps	!=undefined  			do ( 
+			-- garde corps de face -------
+			this.params.gardeCorps.construire	_plug 	#(pt_6 + 	vec_ep_dalle	, pt_5 + 	vec_ep_dalle	)  norm_dir:norm_dir
+			-- garde gauche -------
+			this.params.gardeCorps.construire	_plug 	#(pt_5 + 	vec_ep_dalle	, pt_1 + 	vec_ep_dalle	)  norm_dir:norm_balcon
+			-- garde droite -------
+			this.params.gardeCorps.construire	_plug 	#(pt_2 + 	vec_ep_dalle	, pt_6 + 	vec_ep_dalle	)  norm_dir:-norm_balcon
+		)
+		
 	--- on reinitialise la longueur à 0 --------
 	this.params.longueur = 	0
 	
@@ -130,7 +168,6 @@ _str_contructeur  	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(
 ) ----	FileIn ----
 
 
-	
 	
 	
 	

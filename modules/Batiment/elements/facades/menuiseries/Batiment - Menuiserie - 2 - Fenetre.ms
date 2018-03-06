@@ -79,7 +79,7 @@ fn menuis_fnConstruire  	_plug				 _pt_origine			norm_dir:			dist_hauteur:	ptr_b
 			
 			local allege_ht					=	this.params.allege_vitree_ht
 	
-			local 	fenetre_hauteur		=	if this.params.hauteur == 0 then baie_hauteur else this.params.hauteur - allege_ht
+			local 	fenetre_hauteur		=	if this.params.hauteur == 0 then baie_hauteur - allege_ht	else this.params.hauteur - allege_ht
 			if fenetre_hauteur	>baie_hauteur do fenetre_hauteur = baie_hauteur
 			
 			
@@ -156,7 +156,7 @@ fn menuis_fnConstruire  	_plug				 _pt_origine			norm_dir:			dist_hauteur:	ptr_b
 		-------------   Imposte vitrée				-----------------------------------------------------------------------------------------------------------------
 			if (	fenetre_hauteur < baie_hauteur ) do (
 				-----	menuiserie	-------------
-				local ptImposte1				=	_pt_origine + vec_allege_ht + vec_fenetre_ht 
+				local ptImposte1				=	_pt_origine + vec_allege_ht + vec_fenetre_ht - vec_men_ht
 				ptr_geo.tube		ptImposte1		vec_longueur		vec_men_ht				   vec_men_ep			matID:#menuiserie
 				
 				--- vitrage	------------

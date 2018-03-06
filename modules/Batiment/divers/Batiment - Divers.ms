@@ -142,12 +142,28 @@ struct str_datasToString (
 						)
 						default:						(
 							debug "default" 
+							/* 
+							if dataTab[2] != undefined do  (							
+								local data 		
+								if execute dataTab[2]	 != undefined then
+									data = execute dataTab[2]	
+								else if	dataTab[2] == "undefined" then
+									data = undefined
+								else
+									data = dataTab[2]	
+								setProperty _element propNom data
+								debug "data" var:data 
+							*/
 							if dataTab[2] != undefined do  (							
 								local data 		
 								if execute dataTab[2]	 != undefined then
 									data = execute dataTab[2]	
 								else
 									data = dataTab[2]	
+								
+								if	data== "undefined" then
+									data = undefined
+								
 								setProperty _element propNom data
 								debug "data" var:data
 							)						

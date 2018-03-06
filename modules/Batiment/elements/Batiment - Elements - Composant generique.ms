@@ -61,9 +61,10 @@ struct 	str_composant_generique	 (
 		
 		--- Initialisations -----------------------
 		fn set_typeClasse	_type_classe	= m_type_classe = _type_classe,
-		fn initialiser_dialog 	_roll_parent 	_plug =(
+		fn initialiser_dialog 	 	_plug  roll_parent:		=(
 			if ( a_desParametres () )  do (
-				m_dialog.m_rollPrt		= 	_roll_parent
+				if roll_parent != unsupplied do
+						m_dialog.m_rollPrt		= 	roll_parent
 				m_dialog.m_compo	=	this
 				m_dialog.m_plug		=	_plug
 				m_dialog.actualiser()

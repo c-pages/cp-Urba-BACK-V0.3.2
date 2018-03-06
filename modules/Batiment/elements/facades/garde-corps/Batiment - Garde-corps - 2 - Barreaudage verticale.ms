@@ -62,10 +62,10 @@ fn gardeCorps_fnConstruire  	_plug		_pts		norm_dir:		 this:		onConstruitLaDalle:
 		----	Barreau Verticaux ------
 		local nombre_barreaux 	= floor (longueur / ( barreaux_ecart+ barreaux_ep) ) + 1
 		local longueur_reste 		= longueur	-	nombre_barreaux * ( barreaux_ecart+ barreaux_ep)		----(longueur / ( barreaux_ecart+ barreaux_ep) ) - nombre_barreaux
-		format "longueur : %\n"	longueur
-		format "nombre_barreaux : %\n"	nombre_barreaux
-		format "(longueur / ( barreaux_ecart+ barreaux_ep) )  : %\n"	(longueur / ( barreaux_ecart+ barreaux_ep) ) 
-		format "----->	longueur_reste : %\n\n"	longueur_reste
+-- 		format "longueur : %\n"	longueur
+-- 		format "nombre_barreaux : %\n"	nombre_barreaux
+-- 		format "(longueur / ( barreaux_ecart+ barreaux_ep) )  : %\n"	(longueur / ( barreaux_ecart+ barreaux_ep) ) 
+-- 		format "----->	longueur_reste : %\n\n"	longueur_reste
 		local pt_barreauVert 		= _pts[2] + vec_barreaux_epHoriz  -  norm_dir * longueur_reste/2	-	vec_barreaux_epVert/2
 		for i = 2 to nombre_barreaux do (
 			ptr_geo.tube		pt_barreauVert		(vec_ht -	vec_barreaux_epHoriz )   	vec_barreaux_epVert			vec_barreaux_prof				matID:#menuiserie 

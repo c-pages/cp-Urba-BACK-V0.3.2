@@ -277,24 +277,32 @@ rollout roll_aleatoire "Aléatoire" 	rolledUp:true
 
 
 
-rollout roll_viewport 			"Viewport"		rolledUp:true		(
+rollout roll_viewport "Viewport" width:162 height:204
+(
 	label 'lbl16' "Surface:" pos:[5,90] width:43 height:14 align:#left
 	label 'lbl_surface' "" pos:[85,90] width:78 height:16 align:#left 
+ 
 	label 'lbl_surfacePts' "Tracé (origin.):" pos:[5,105] width:70 height:14 align:#left
 	label 'lbl_surfacePts_val' "" pos:[85,105] width:78 height:16 align:#left 
+ 
 	label 'lbl1_surfacePts_opt' "Tracé (optim.):" pos:[5,120] width:69 height:14 align:#left
 	label 'lbl_surfacePts_opt_val' "" pos:[85,120] width:78 height:16 align:#left 
+ 
 	
 	checkbutton 'ckb_axe' "Axe" pos:[10,14] width:75 height:16 align:#left
 	checkbutton 'ckb_surface' "Points" pos:[84,14] width:75 height:16 align:#left 
+ 
 	checkbutton 'ckb_pignons' "Pignons" pos:[84,29] width:75 height:16 align:#left
 	checkbutton 'ckb_gouttereaux' "Gouttereaux" pos:[10,29] width:75 height:16 align:#left
-	checkbutton 'ckb_geometrie' "Cacher géom." pos:[10,65] width:75 height:16 highlightColor:(color 255 0 0) align:#left
-	checkbutton 'ckb_sssurfaces' "Sous tracés" pos:[10,44] width:75 height:16 align:#left
+	checkbutton 'ckb_geometrie' "Cacher géom." pos:[10,64] width:75 height:16 highlightColor:(color 255 0 0) align:#left
+	checkbutton 'ckb_ssSurfaces' "Sous tracés" pos:[10,44] width:75 height:16 align:#left
 	
 	GroupBox 'grp30' "Afficher:" pos:[5,1] width:158 height:85 align:#left
+	checkbox 'ckb_proxy' "Proxy mode" pos:[12,143] width:134 height:29 align:#left
 	
 	
+	on ckb_proxy changed state 		do
+		core.actualiser ()		
 	
 	/* --------------------  CLEANAGE --------------------
 	
@@ -357,7 +365,6 @@ rollout roll_aPropos 			"A propos" 	rolledUp:false	(
 	HyperLink 'hpl2' "GitHub" pos:[127,17] address:"https://github.com/c-pages/cp-Urba-Cleanage" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
 	label 'lbl6' "2017" pos:[5,17] align:#left
 )
-
 
 
 

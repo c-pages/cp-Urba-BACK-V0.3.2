@@ -98,7 +98,7 @@ fn menuis_fnConstruire  	_plug	_pt_origine		norm_dir:		dist_hauteur:	ptr_baie:		
 			
 		---- traverses ---
 			for trav_ht in traverses do (
-				local ptTmp				=	_pt_origine + [0,0,1] * trav_ht
+				local ptTmp				=	_pt_origine + [0,0,1] * trav_ht - vec_men_ht
 				ptr_geo.tube		ptTmp		vec_longueur		vec_men_ht				   vec_men_ep			matID:#menuiserie 
 			)
 	

@@ -20,19 +20,19 @@ struct toiture_params	(
 --- les rollout du composant	---------
 rollout toiture_dialog "Toiture plate" width:180 height:70	(
 	local m_plug
-	local m_toiture
+	local m_compo
 	local mgr_toiture
 	
 	label 'lbl_htAcrotere' "Ht. acrotère:" pos:[9,10] width:61 height:13 align:#left
 	spinner 'spn_htAcrotere' "" pos:[92,9] width:70 height:16 range:[0,100000,0] type:#float scale:1 align:#left
 	
 	fn actualiser =(
-		spn_htAcrotere.value 	= 	m_toiture.params.acrotere_ht
+		spn_htAcrotere.value 	= 	m_compo.params.acrotere_ht
 	)
 
 	on spn_htAcrotere changed val do (
-		m_toiture.params.acrotere_ht		= val
-		mgr_toiture.enregistrer_parametres 	m_toiture
+		m_compo.params.acrotere_ht		= val
+		mgr_toiture.enregistrer_parametres 	m_compo
 		m_plug.core.actualiser ()
 	)
 	

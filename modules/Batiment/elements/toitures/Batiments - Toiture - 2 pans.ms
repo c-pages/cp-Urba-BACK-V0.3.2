@@ -12,7 +12,7 @@ toiture_toolTip 	=	"..."
 
 --- les parametres du composant	---------
 struct toiture_params	(
-	pente 					= 	30,
+	pente 					= 	15,
 	
 	decalage_hauteur 	= 	0.,
 	decalage_largeur 	= 	0.,
@@ -28,7 +28,7 @@ struct toiture_params	(
 rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 (
 	local m_plug
-	local m_toiture
+	local m_compo
 	local mgr_toiture
 	
 	label 'lbl_pente' "Pente (°):" pos:[9,10] width:61 height:13 align:#left
@@ -45,25 +45,25 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 	spinner 'spn_decallage_larg' "" pos:[92,41] width:70 height:16 range:[-10000,10000,0] type:#worldunits scale:1 align:#left
 	
 	fn actualiser =(
-		spn_pente.value 			= 	m_toiture.params.pente
-		spn_orientation.value 	= 	m_toiture.params.orientation
-		spn_decallage.value 		= 	m_toiture.params.decalage_hauteur
-		spn_debord.value 			= 	m_toiture.params.debord
-		spn_epaisseur.value 		= 	m_toiture.params.epaisseur
+		spn_pente.value 			= 	m_compo.params.pente
+		spn_orientation.value 	= 	m_compo.params.orientation
+		spn_decallage.value 		= 	m_compo.params.decalage_hauteur
+		spn_debord.value 			= 	m_compo.params.debord
+		spn_epaisseur.value 		= 	m_compo.params.epaisseur
 	)
 	
 
 	
 	on spn_pente changed val do
 	(
-			m_toiture.params.pente		= val
-			mgr_toiture.enregistrer_parametres 	m_toiture
+			m_compo.params.pente		= val
+			mgr_toiture.enregistrer_parametres 	m_compo
 			m_plug.core.actualiser ()
 		)
 	on spn_decallage changed val do
 	(
-			m_toiture.params.decalage_hauteur		= val
-			mgr_toiture.enregistrer_parametres 	m_toiture
+			m_compo.params.decalage_hauteur		= val
+			mgr_toiture.enregistrer_parametres 	m_compo
 			m_plug.core.actualiser ()
 		)
 	on spn_orientation changed val do
@@ -71,7 +71,7 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 		
 		--- limiter le décalage -------------
 			local mgr_surface  		= 	m_plug.core.get_mgr_surface ()
-			local toiture_orient		= m_toiture.params.orientation
+			local toiture_orient		= m_compo.params.orientation
 			local	 mtrx_axeP			=	mgr_surface.get_axePrincipal ()
 			local	 BB_axeP				=	mgr_surface.get_axeP_BB ()
 			rotateZ 		mtrx_axeP		toiture_orient	
@@ -93,27 +93,27 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 			
 			
 		
-			m_toiture.params.orientation		= val
-			mgr_toiture.enregistrer_parametres 	m_toiture
+			m_compo.params.orientation		= val
+			mgr_toiture.enregistrer_parametres 	m_compo
 			m_plug.core.actualiser ()
 		)
 	on spn_debord changed val do
 	(
-			m_toiture.params.debord		= val
-			mgr_toiture.enregistrer_parametres 	m_toiture
+			m_compo.params.debord		= val
+			mgr_toiture.enregistrer_parametres 	m_compo
 			m_plug.core.actualiser ()
 		)
 	on spn_epaisseur changed val do
 	(
-			m_toiture.params.epaisseur		= val
-			mgr_toiture.enregistrer_parametres 	m_toiture
+			m_compo.params.epaisseur		= val
+			mgr_toiture.enregistrer_parametres 	m_compo
 			m_plug.core.actualiser ()
 		)
 	on spn_decallage_larg changed val do
 	(
 		--- limiter le décalage -------------
 			local mgr_surface  		= 	m_plug.core.get_mgr_surface ()
-			local toiture_orient		= m_toiture.params.orientation
+			local toiture_orient		= m_compo.params.orientation
 			local	 mtrx_axeP			=	mgr_surface.get_axePrincipal ()
 			local	 BB_axeP				=	mgr_surface.get_axeP_BB ()
 			rotateZ 		mtrx_axeP		toiture_orient	
@@ -134,9 +134,9 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 			
 			
 			
-			m_toiture.params.decalage_largeur		= decallage_largeur
+			m_compo.params.decalage_largeur		= decallage_largeur
 			spn_decallage_larg.value = decallage_largeur
-			mgr_toiture.enregistrer_parametres 	m_toiture
+			mgr_toiture.enregistrer_parametres 	m_compo
 			actualiser ()
 			m_plug.core.actualiser ()
 		)

@@ -145,6 +145,16 @@ struct str_construction (
 		
 		------------ Construction-------------------------
 	private
+		fn creer_proxy					&z =(
+			local hauteur_proxy	=		( m_plug.etages_nbre+ 1 ) 	* ( m_plug.etages_hauteur  + m_plug.const_dalle_epaisseur  ) + m_plug.const_dalle_epaisseur 
+			local surface_points 	= m_plug.core.get_surface_points 	()
+			local faces 				= m_geo.facesContour	 	surface_points		z 		hauteur_proxy
+			m_geo.set_matID 		faces		#mur
+			
+			z += hauteur_proxy
+			creer_dalle	( z ) -- matID:#int_sol
+			
+		),
 		fn creer_ssBassement  		&z	=(
 			
 			local surface_points 	= m_plug.core.get_surface_points 	()
@@ -265,11 +275,19 @@ struct str_construction (
 					---- On définie le Z initial 	----
 					local zCourant = -( m_plug.const_ssBassement_epaisseur + m_plug.const_dalle_epaisseur )  + m_plug.const_batiment_decallage
 					
-					---- ...  et on construit le batiment -----
-					creer_ssBassement 			&zCourant
-					creer_etages						&zCourant
-					creer_toiture						&zCourant
 					
+					if not m_plug.affiche_asProxy then (
+						
+						---- ...  et on construit le batiment -----
+						creer_ssBassement 			&zCourant
+						creer_etages						&zCourant
+						creer_toiture						&zCourant
+					
+					) else (
+						---- ...  et on construit le proxy -----
+						creer_ssBassement 			&zCourant
+						creer_proxy 						&zCourant
+					)
 				)
 				
 				displayTempPrompt ("Bâtiment construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000

@@ -81,6 +81,8 @@ parameters params_optimSurface				rollout:roll_optimSurface	(
 	
 )
 parameters params_viewport					rollout:roll_viewport	(
+	--- proxy_mode	-----
+	affiche_asProxy				type:#boolean			default:false	ui:ckb_proxy			animatable:false		invisibleInTV:true
 	
 	------- AFFICHAGE 		 ------------------
 	affiche_axe					type:#boolean			default:false	ui:ckb_axe				animatable:false		invisibleInTV:true
@@ -99,27 +101,7 @@ parameters params_facades 						rollout:roll_global	(
 	facades_nom 					type:#stringTab 	tabSize:0  		tabSizeVariable:true		--ui:lbx_facades	
 	facades_type 					type:#stringTab 	tabSize:0  		tabSizeVariable:true
 	facades_params					type:#stringTab 	tabSize:0  		tabSizeVariable:true
-	
-	/* 
-	--- Limiteurs - Etages	---
-	facades_etagesMin_use			type:#boolTab		tabSize:0 			tabSizeVariable:true
-	facades_etagesMin					type:#intTab			tabSize:0 			tabSizeVariable:true
-	facades_etagesMax_use			type:#boolTab		tabSize:0 			tabSizeVariable:true
-	facades_etagesMax				type:#intTab			tabSize:0 			tabSizeVariable:true
-	
-	--- Limiteurs - longueurs	---
-	facades_longueurMin_use		type:#boolTab		tabSize:0 			tabSizeVariable:true
-	facades_longueurMin				type:#floatTab		tabSize:0 			tabSizeVariable:true
-	facades_longueurMax_use		type:#boolTab		tabSize:0 			tabSizeVariable:true
-	facades_longueurMax				type:#floatTab		tabSize:0 			tabSizeVariable:true
-	
-	--- Limiteurs - Murs	---
-	facades_murs						type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:les deux	2:gouttereaux	3:pignons )	----
-	facades_mode						type:#intTab			tabSize:0 			tabSizeVariable:true			---- ( 1:repeter	2:etrier			3:centrer )	----
-	
-	--- Sequence	---
-	facades_sequence					type:#stringTab 	tabSize:0 			tabSizeVariable:true
-	 */
+
 )
 parameters params_facades_composants 		(
 	

@@ -52,11 +52,11 @@ struct facade_params	(
 		),
 		fn supprimer_composant 	_index 	=		deleteItem sequence	_index,
 		fn instancier_composant 	_index 	=(
-			debug "sequence[_index]" var:sequence[_index]
+-- 			debug "sequence[_index]" var:sequence[_index]
 			local compoInstance =  sequence[_index]
 			ajouter_composant  compoInstance 	position:( _index+1)
-			debug "compoInstance" var:compoInstance
-			debug "sequence" var:sequence
+-- 			debug "compoInstance" var:compoInstance
+-- 			debug "sequence" var:sequence
 			compoInstance
 		),
 		fn composant_monter 		_index =(
@@ -227,7 +227,8 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit
 						local		pt_balcon_debut	=	polyop.getVert 	m_plug.delegate		balcon_pts_debut[1]	
 						local		pt_balcon_fin		=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
 						balcon_aConstruire.params.longueur = 		(	distance	pt_balcon_debut 	pt_balcon_fin	)
-						balcon_aConstruire.construire	 	m_plug			balcon_pts_debut		norm_dir:norm_dir
+						balcon_aConstruire.construire	 	m_plug			balcon_pts_debut		norm_dir:norm_dir	\
+																															onConstruit_gardeCorps:onConstruit_gardeCorps
 						balcon_aConstruire = undefined
 -- 					balcon_aConstruire.params.longueur = 	0
 					)
@@ -253,38 +254,13 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit
 						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	\
 																																			onConstruitLaDalle:false	\
 																																			compo_debut:loggia_aConstruire \
-																																			onConstruit_gardeCorps:onConstruit_gardeCorps
+																																			onConstruit_gardeCorps:( onConstruit_gardeCorps and balcon_aConstruire == undefined )
 						composant.params.longueur 		= 		0
 						loggia_aConstruire = undefined
 					
 					)
 					
 					
-					/* 
-					
-					#loggiaTMP:(
-						loggia_aConstruire 	= composant
-						profondeurFacade 		= loggia_aConstruire.params.profondeur
-					-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	onConstruitLaDalle:false
-						
-						loggia_pts_debut 		= ptsIDs_accroche
-					
-					)
-					#loggiaFinTMP:(
-						local		pt_loggia_debut			=	polyop.getVert 	m_plug.delegate		loggia_pts_debut[1]	
-						local		pt_loggia_fin					=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]
-						
-						
-						composant.params.longueur 		= 	(	distance	pt_loggia_debut 	pt_loggia_fin	)
-
-						composant.params.profondeur 	= 		loggia_aConstruire.params.profondeur
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir		onConstruitLaDalle:false
-						composant.params.longueur 		= 		0
-						loggia_aConstruire = undefined
--- 						profondeurFacade 		= 0
-					
-					) */
 					
 					default:(
 						local onConstruitLaDalle = ( balcon_aConstruire == undefined )  and  ( loggia_aConstruire == undefined )

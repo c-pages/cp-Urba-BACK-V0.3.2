@@ -14,7 +14,7 @@ toiture_toolTip =	"..."
 
 --- les parametres du composant	---------
 struct toiture_params	(
-	pente 					= 15,
+	pente 					= 6,
 	decalage_hauteur 	= 20,
 	orientation				=	0,
 	debord					= 50.,
@@ -24,7 +24,7 @@ struct toiture_params	(
 rollout toiture_dialog "Toiture - 1 pan" width:180 height:115
 (
 	local m_plug
-	local m_toiture
+	local m_compo
 	local mgr_toiture
 	
 	label 'lbl_pente' "Pente (°):" pos:[9,10] width:61 height:13 align:#left
@@ -43,38 +43,38 @@ rollout toiture_dialog "Toiture - 1 pan" width:180 height:115
 	
 	
 	fn actualiser =(
-		spn_pente.value 	= 	m_toiture.params.pente
--- 		edt_nom.text 			=	m_toiture.nom
+		spn_pente.value 	= 	m_compo.params.pente
+-- 		edt_nom.text 			=	m_compo.nom
 	)
 
 	on spn_pente changed val do
 	(
-			m_toiture.params.pente		= val
-			mgr_toiture.enregistrer_parametres 	m_toiture
+			m_compo.params.pente		= val
+			mgr_toiture.enregistrer_parametres 	m_compo
 			m_plug.core.actualiser ()
 		)
 	on spn_decallage changed val do
 	(
-			m_toiture.params.decalage_hauteur		= val
-			mgr_toiture.enregistrer_parametres 	m_toiture
+			m_compo.params.decalage_hauteur		= val
+			mgr_toiture.enregistrer_parametres 	m_compo
 			m_plug.core.actualiser ()
 		)
 	on spn_orientation changed val do
 	(
-			m_toiture.params.orientation		= val
-			mgr_toiture.enregistrer_parametres 	m_toiture
+			m_compo.params.orientation		= val
+			mgr_toiture.enregistrer_parametres 	m_compo
 			m_plug.core.actualiser ()
 		)
 	on spn_debord changed val do
 	(
-			m_toiture.params.debord		= val
-			mgr_toiture.enregistrer_parametres 	m_toiture
+			m_compo.params.debord		= val
+			mgr_toiture.enregistrer_parametres 	m_compo
 			m_plug.core.actualiser ()
 		)
 	on spn14 changed val do
 	(
-			m_toiture.params.epaisseur		= val
-			mgr_toiture.enregistrer_parametres 	m_toiture
+			m_compo.params.epaisseur		= val
+			mgr_toiture.enregistrer_parametres 	m_compo
 			m_plug.core.actualiser ()
 		)
 )

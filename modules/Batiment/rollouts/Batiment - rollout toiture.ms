@@ -43,8 +43,11 @@ rollout roll_urba_editeurToiture "Urba - Editeur de toiture" width:256 height:29
 			for rollAVirer in subroll_parametres.rollouts do
 				removeSubRollout	subroll_parametres	rollAVirer
 			if m_toiture != undefined do (
-				addSubRollout	subroll_parametres ( m_toiture.get_dialog () )
-				m_toiture.initialiser_dialog	 	m_plug  
+				local toiture_subRoll = m_toiture.get_dialog () 
+				addSubRollout	subroll_parametres 	toiture_subRoll
+				toiture_subRoll.mgr_toiture = m_plug.core.get_mgr_toiture ()
+				m_toiture.initialiser_dialog	 		m_plug  
+				
 			) 
 		)
 		fn redimensionnerFenetre 		_taille 	=(
