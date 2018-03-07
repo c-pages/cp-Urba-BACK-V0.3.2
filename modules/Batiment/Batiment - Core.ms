@@ -132,7 +132,51 @@ struct str_batiment_core (
 		),
 		
 		
-		---- managers et autres ----------
+		
+	---- Etages----------
+	public
+		fn ajouter_etage =(
+			append 	m_plug.etages_min			0
+			append 	m_plug.etages_max_use	false
+			append 	m_plug.etages_max			1
+			append 	m_plug.etages_hauteurs	250.
+		),
+		fn supprimer_etage 		_index	=(
+			deleteItem 	m_plug.etages_min			_index
+			deleteItem 	m_plug.etages_max_use	_index
+			deleteItem 	m_plug.etages_max			_index
+			deleteItem 	m_plug.etages_hauteurs	_index
+		),
+		fn set_etage		_index		_etages_min			_etages_max_use		_etages_max		_etages_hauteurs 	=(
+			m_plug.etages_min[ _index ]			=	_etages_min
+			m_plug.etages_max_use[ _index ]	=	_etages_max_use
+			m_plug.etages_max[ _index ]		=	_etages_max
+			m_plug.etages_hauteurs[ _index ]	=	_etages_hauteurs			
+		),
+		
+		fn get_etage_ht			_num_etage	=(
+			local result	=	m_plug.etages_hauteur_global
+			local i =1
+			local trouve = false
+			while i <= m_plug.etages_min.count and not trouve	do (
+				if _num_etage == m_plug.etages_min[i] then (
+					result = m_plug.etages_hauteurs[ i ]	
+					trouve = true
+				) else 	if _num_etage > m_plug.etages_min[i] and m_plug.etages_max_use[i] do (
+					
+					if   _num_etage <= m_plug.etages_max[i] do (
+						result = m_plug.etages_hauteurs[ i ]	
+						trouve = true
+					)
+					
+				)
+				i+= 1
+			)
+			result
+		),
+		
+		
+	---- managers et autres ----------
 	public
 		fn get_mgr_surface			= mgr_surface,
 		fn get_mgr_facades	 		= mgr_facades,

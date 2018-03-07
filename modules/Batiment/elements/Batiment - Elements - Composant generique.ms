@@ -94,6 +94,7 @@ struct 	str_composant_generique	 (
 													dist_hauteur:		\
 													ptr_baie:				\
 													compo_debut:	\
+													etage_ht:			\
 													onConstruit_gardeCorps:		= 
 		
 				fnVirt_construire			 _plug		pts	\
@@ -104,6 +105,7 @@ struct 	str_composant_generique	 (
 													ptr_baie:ptr_baie	\
 													this:this	\
 													compo_debut:compo_debut	\
+													etage_ht:etage_ht			\
 													onConstruit_gardeCorps:onConstruit_gardeCorps	
 		
 ) ---- fin composant -------------------------------

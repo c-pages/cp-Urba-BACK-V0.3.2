@@ -102,7 +102,7 @@ extends:Editable_poly replaceUI:true version:0
 	
 	
 	--------------- CREATION  ----------------------------------------------------------------------------------------------------------------------	
-	tool create (	
+	tool create (
 		on mousePoint click do	(	
 			nodeTM.translation = worldPoint
 			core.actualiser ()

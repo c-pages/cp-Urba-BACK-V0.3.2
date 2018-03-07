@@ -226,7 +226,19 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		local menuis_trav_ht				=	ptr_plug.const_menuiseries_trav_ht
 	
 	-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
-		local	etage_hauteur				=	ptr_plug.etages_hauteur 
+	
+		--- Points d'accroche ------------
+		local id_ptAccroche_1 	= _ptsIDs_accroche[1]
+		local id_ptAccroche_2 	= _ptsIDs_accroche[2]
+		local id_ptAccroche_3 	= _ptsIDs_accroche[3]
+		
+		local ptAccroche_1		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	
+		local ptAccroche_2		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	
+		local ptAccroche_3		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	
+		
+		
+		
+		local	etage_hauteur				=	distance ptAccroche_2 	ptAccroche_3
 		local longueur						= ptr_params.longueur
 		local allege_hauteur 		 		= ptr_params.allege_hauteur
 		local hauteur						= if ptr_params.hauteur == 0 	then	etage_hauteur --	- decalage_epaisseur
@@ -272,15 +284,6 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		
 	-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 		
-		
-		--- Points d'accroche ------------
-		local id_ptAccroche_1 	= _ptsIDs_accroche[1]
-		local id_ptAccroche_2 	= _ptsIDs_accroche[2]
-		local id_ptAccroche_3 	= _ptsIDs_accroche[3]
-		
-		local ptAccroche_1		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	
-		local ptAccroche_2		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	
-		local ptAccroche_3		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	
 		
 		
 		---- LA DALLE  -----------------------------------------------------------------------			

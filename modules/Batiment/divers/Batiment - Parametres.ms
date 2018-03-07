@@ -35,12 +35,15 @@ parameters params_global 						rollout:roll_global		(
 	
 	------- Surface		------------------
 	surface_node					type:#node 								 	ui:btn_pick_surface		animatable:false		invisibleInTV:true
--- 	orientation						type:#float				default:0.		ui:spn_rotation_axeP		animatable:false		invisibleInTV:true
 	
 	------- Etages			------------------
-	etages_hauteur				type: #float 				default:250.		ui:spn_hauteur		animatable:false		invisibleInTV:true
 	etages_nbre					type: #integer			default:1			ui:spn_nbres			animatable:false		invisibleInTV:true
+	etages_hauteur_global	type: #float 				default:250.		ui:spn_hauteur		animatable:false		invisibleInTV:true
 	
+	etages_min					type:#intTab 			tabSize:0  		tabSizeVariable:true
+	etages_max_use			type:#boolTab	 		tabSize:0  		tabSizeVariable:true
+	etages_max					type:#intTab		 		tabSize:0  		tabSizeVariable:true
+	etages_hauteurs			type:#floatTab	 		tabSize:0  		tabSizeVariable:true
 
 )
 parameters params_constantes 							(

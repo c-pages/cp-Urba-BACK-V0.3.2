@@ -111,7 +111,7 @@ struct facade_params	(
 		),
 		fn get_sequenceFacade		_plug 	_longueur_facade	=(
 			
-										format "----------------- NOUVELLE SEQUENCE ----------\n" 
+-- 										format "----------------- NOUVELLE SEQUENCE ----------\n" 
 			local	sequence_totale 		= #()
 			local longueur_sequence 	= get_longueur ()
 			
@@ -322,7 +322,7 @@ struct facade_params	(
 
 
 --- la fonction de construction	---------
-fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit_gardeCorps:true		= (
+fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit_gardeCorps:true		etage_ht:	= (
 	
 			m_plug = _plug
 			m_geo	=	_plug.core.get_geo ()
@@ -340,7 +340,7 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit
 			--- on créé  les 3 premiers points --------
 			local pt_accroche_1 		= 	_pts_extremite[1]
 			local pt_accroche_2 		= 	pt_accroche_1 + [0,0,m_plug.const_dalle_epaisseur]
-			local pt_accroche_3 		= 	pt_accroche_2 + [0,0,m_plug.etages_hauteur]			
+			local pt_accroche_3 		= 	pt_accroche_2 + [0,0, etage_ht ]			
 			local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 ) )
 			
 			

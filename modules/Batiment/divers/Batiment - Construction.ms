@@ -146,7 +146,11 @@ struct str_construction (
 		------------ Construction-------------------------
 	private
 		fn creer_proxy					&z =(
-			local hauteur_proxy	=		( m_plug.etages_nbre+ 1 ) 	* ( m_plug.etages_hauteur  + m_plug.const_dalle_epaisseur  ) + m_plug.const_dalle_epaisseur 
+			local ht_bat = m_plug.const_dalle_epaisseur 
+			for i = 0 to m_plug.etages_nbre do 
+				ht_bat += m_plug.core.get_etage_ht	i	+ m_plug.const_dalle_epaisseur  
+			
+			local hauteur_proxy	=		ht_bat 
 			local surface_points 	= m_plug.core.get_surface_points 	()
 			local faces 				= m_geo.facesContour	 	surface_points		z 		hauteur_proxy
 			m_geo.set_matID 		faces		#mur
@@ -169,8 +173,25 @@ struct str_construction (
 			local facades_total	= 	m_plug.core.get_facades ()			
 			local surface_points 	= m_plug.core.get_surface_points ()
 			
+			/* 
+			----- les étages-----------
+			local liste_etages_ht = #()
+			for 
+			m_plug.etages_min[ _index ]			=	_etages_min
+			m_plug.etages_max_use[ _index ]	=	_etages_max_use
+			m_plug.etages_max[ _index ]		=	_etages_max
+			m_plug.etages_hauteurs[ _index ]	=	_etages_hauteurs		
+			
+			 */
+			
 			---- boucle étages ---------------------
 			for n_etage = 0 to m_plug.etages_nbre do (
+				
+				
+				--- hauteur de l'étage -------------
+				local etage_ht = (m_plug.core.get_etage_ht 	n_etage )
+				
+				
 				
 				--- Creation du sol	-----------------------------
 				if m_plug.interieur_planchers do
@@ -204,7 +225,7 @@ struct str_construction (
 						
 					---- si on  a des facades on construit la sequence --------------------
 					if 	onA_uneFacade  then 
-						facades_pourCeMur[1].construire		m_plug 		#(pt_mur_1, pt_mur_2 )	onConstruit_gardeCorps:( n_etage!=0 )
+						facades_pourCeMur[1].construire		m_plug 		#(pt_mur_1, pt_mur_2 )	etage_ht:etage_ht		onConstruit_gardeCorps:( n_etage!=0 )
 					
 						
 					else (
@@ -212,7 +233,7 @@ struct str_construction (
 						
 						local pt_accroche_1 	= 	pt_mur_1 
 						local pt_accroche_2 	= 	pt_mur_1 			+ [0,0,	m_plug.const_dalle_epaisseur]
-						local pt_accroche_3 	= 	pt_accroche_2 	+ [0,0,m_plug.etages_hauteur]	
+						local pt_accroche_3 	= 	pt_accroche_2 	+ [0,0,  etage_ht ]	
 						
 						local ptsIDs_accroche 	= ( m_geo.points   #( pt_accroche_1 , pt_accroche_2 , pt_accroche_3 )	)
 						
@@ -224,7 +245,7 @@ struct str_construction (
 					
 				)
 				
-				z += m_plug.etages_hauteur 
+				z += etage_ht
 				
 				--- Creation du plafond, ------------------------
 				if m_plug.interieur_planchers do
@@ -291,10 +312,10 @@ struct str_construction (
 				)
 				
 				displayTempPrompt ("Bâtiment construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
+				debug "Batiment construit en "var:( (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 				
 			)
 			
-			debug "Batiment construit en "var:( (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 			redrawViews ()
 			
 		)

@@ -59,18 +59,8 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 			onConstruitLaDalle:
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 		
 -------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
-		local ep_dalle 			= ptr_plug.const_dalle_epaisseur
-		local ht_niveaux 		= ptr_plug.etages_hauteur
-		local longueur 			= ptr_composant.params.longueur
-		
--------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 		--- Result -------------
 		local pt_result_1, pt_result_2, pt_result_3
-		
-		--- Vecteurs ------------
-		local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
-		local vec_ht 				= [0,0,1] 		* 	ht_niveaux
-		local vec_longueur 	= norm_dir 		* 	longueur
 		
 		--- Points d'accroche ------------
 		local id_ptAccroche_1 	= pts_accroches[1]
@@ -82,6 +72,16 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 			onConstruitLaDalle:
 		local ptAccroche_3		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	)  --+ vec_prof
 		
 		
+		local ep_dalle 			= ptr_plug.const_dalle_epaisseur
+		local ht_niveaux 		= distance ptAccroche_2 	ptAccroche_3
+		local longueur 			= ptr_composant.params.longueur
+		
+		--- Vecteurs ------------
+		local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
+		local vec_ht 				= [0,0,1] 		* 	ht_niveaux
+		local vec_longueur 	= norm_dir 		* 	longueur
+		
+-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 		
 		---- LA DALLE  -----------------------------------------------------------------------			
 		-------	Creation des points 	--------
@@ -106,10 +106,10 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 			onConstruitLaDalle:
 		
 		---- LE MUR -----------------------------------------------------------------------			
 		-------	Creation des points 	--------
-		local pt_3 		= pt_3 +	vec_ht
+		local pt_4 		= pt_3 +	vec_ht
 		
 		--- creation des points --------------
-		local pts_pos 	= #( pt_3 )
+		local pts_pos 	= #( pt_4 )
 		local pts_ids 	= ptr_geo.points 	pts_pos		
 		
 		-------	Creation des faces 	--------

@@ -35,12 +35,6 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 		
 	-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
-		local ep_dalle 			= ptr_plug.const_dalle_epaisseur
-		local ht_niveaux 		= ptr_plug.etages_hauteur
-		local longueur 			= ptr_composant.params.longueur
-		
-		
-	-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 		--- Result -------------
 		local pt_result_1, pt_result_2, pt_result_3
 		
@@ -59,6 +53,12 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		local ptAccroche_2		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	) 
 		local ptAccroche_3		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	) 
 		
+		local ep_dalle 			= ptr_plug.const_dalle_epaisseur
+		local ht_niveaux 		= distance ptAccroche_2 ptAccroche_1
+		local longueur 			= ptr_composant.params.longueur
+		
+		
+	-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 		---- LA DALLE  -----------------------------------------------------------------------			
 		-------	Creation des points 	--------
 		local pt_2 		= ptAccroche_1		- 	vec_prof

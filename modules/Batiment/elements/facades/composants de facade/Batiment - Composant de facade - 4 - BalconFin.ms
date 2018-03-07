@@ -38,8 +38,20 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 		
 	-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
+	
+		--- Points d'accroche ------------
+		local id_ptAccroche_1 	= pts_accroches[1]
+		local id_ptAccroche_2 	= pts_accroches[2]
+		local id_ptAccroche_3 	= pts_accroches[3] 
+		
+		local ptAccroche_1		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	) 
+		local ptAccroche_2		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	) 
+		local ptAccroche_3		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	) 
+		
+	
+	
 		local ep_dalle 			= ptr_plug.const_dalle_epaisseur
-		local ht_niveaux 		= ptr_plug.etages_hauteur
+		local ht_niveaux 		= distance ptAccroche_2 	ptAccroche_3
 		local longueur 			= ptr_composant.params.longueur
 		
 		--- Result -------------
@@ -51,15 +63,6 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		local vec_longueur 	= norm_dir 	* 	longueur 		* 	-1
 		local vec_prof			= ( norm_dir * rotateZ ( matrix3 1 ) 90 ) 	*   compo_debut.params.profondeur 
 		local vec_balcon		= ( norm_dir * rotateZ ( matrix3 1 ) 90 ) 	*   -compo_debut.params.largeur 
-		
-		--- Points d'accroche ------------
-		local id_ptAccroche_1 	= pts_accroches[1]
-		local id_ptAccroche_2 	= pts_accroches[2]
-		local id_ptAccroche_3 	= pts_accroches[3] 
-		
-		local ptAccroche_1		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	) 
-		local ptAccroche_2		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	) 
-		local ptAccroche_3		=	( polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	) 
 		
 		
 				
