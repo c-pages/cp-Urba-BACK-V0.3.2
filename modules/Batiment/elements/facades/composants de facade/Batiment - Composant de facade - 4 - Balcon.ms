@@ -97,12 +97,6 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		--- Result -------------
 		local pt_result_1, pt_result_2, pt_result_3
 		
-		--- Vecteurs ------------
-		local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
-		local vec_ht 				= [0,0,1] 		* 	ht_niveaux
-		local vec_longueur 	= norm_dir 	* 	longueur
-		local vec_prof			= ( norm_dir * rotateZ ( matrix3 1 ) 90 ) *  this.params.profondeur 
-		
 		--- Points d'accroche ------------
 		local id_ptAccroche_1 	= pts_accroches[1]
 		local id_ptAccroche_2 	= pts_accroches[2]
@@ -116,6 +110,12 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		local ht_niveaux 		= distance ptAccroche_2 	ptAccroche_3
 		local longueur 			= ptr_composant.params.longueur
 		
+		
+		--- Vecteurs ------------
+		local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle
+		local vec_ht 				= [0,0,1] 		* 	ht_niveaux
+		local vec_longueur 	= norm_dir 	* 	longueur
+		local vec_prof			= ( norm_dir * rotateZ ( matrix3 1 ) 90 ) *  this.params.profondeur 
 		
 -------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 		---- LA DALLE  -----------------------------------------------------------------------			

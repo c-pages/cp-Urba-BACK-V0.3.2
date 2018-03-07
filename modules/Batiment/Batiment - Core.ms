@@ -31,12 +31,13 @@
 
 --- inculsion des fichiers externes	------------------------------
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Divers.ms"
+include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Viewport.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Construction.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager Surface.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Material.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager Parametres.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - presets.ms"
-
+ 
 
 
 
@@ -77,6 +78,7 @@ struct str_batiment_core (
 		-- materiaux ----------
 		mgr_mat	=str_mgr_material () ,
 		
+		mgr_VP 	= str_bat_VP () ,
 		
 	-------- Les managers des differents éléments du batiment ---------------
 		---- facades	----------
@@ -126,13 +128,18 @@ struct str_batiment_core (
 		),
 		fn preset_coller  =(
 			mgr_presets.coller	 	m_plug
-			charger ()
 			m_plug.actualiser_rollouts ()
 			actualiser ()
 		),
 		
 		
-		
+	---- viewport -------------------
+		fn vp_afficher_longueurs 		= mgr_VP.afficher_longueurs (),
+		fn vp_cacher_longueurs 		= mgr_VP.cacher_longueurs (),
+		fn vp_cacher_tout					=(
+			vp_cacher_longueurs ()
+			
+		),
 	---- Etages----------
 	public
 		fn ajouter_etage =(
@@ -403,13 +410,6 @@ struct str_batiment_core (
 		
 		
 		
-		
-	----- materiaux ---------
-		fn appliquer_mat = mgr_mat.appliquer_material  m_plug,
-		
-		
-		
-		
 	----- Surface ---------------------
 	public
 		fn get_surface_points				=	mgr_surface.get_points	(),
@@ -426,6 +426,13 @@ struct str_batiment_core (
 		),
 		
 		
+		
+	----- materiaux ---------
+		fn appliquer_mat = mgr_mat.appliquer_material  m_plug,
+		
+		
+		
+		
 	----- rollout	Editeur de  facades -----------------
 	public
 		fn facadeEditeur_ouvrir 				_index	=	(
@@ -440,7 +447,13 @@ struct str_batiment_core (
 		
 		
 		
-		
+	----- divers -------------
+		fn get_facade_enEdition =(
+			local result
+			if mgr_facades.dialog_estOuvert () do
+				result = ( mgr_facades.get_dialog()).m_facade_courante
+			result
+		),
 		
 		
 	----- Initialisation  -----------------------

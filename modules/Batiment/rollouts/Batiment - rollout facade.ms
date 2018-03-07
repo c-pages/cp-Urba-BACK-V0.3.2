@@ -51,6 +51,7 @@
 		spinner 'spn_etagesMax' "" pos:[172,49] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left		
 		
 		
+		
 			
 				
 				
@@ -60,21 +61,27 @@
 		checkbutton 'chk_longueur_min' "" pos:[82,64] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
 		label 'lbl_longueur' "Longueur:" pos:[17,65] width:52 height:15 align:#left
 					
-		dropdownList 'ddl_murs' "" pos:[82,79] width:154 height:21 items:#("Gouttereaux + Pignons", "Gouttereaux", "Pignons") selection:3 align:#left
+		dropdownList 'ddl_murs' "" pos:[82,79] width:154 height:21 selection:3 align:#left
+		
+		
+		checkbutton 'ckb_mur_nord' "Nord" pos:[82,100] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+		checkbutton 'ckb_mur_sud' "Sud" pos:[121,100] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+		checkbutton 'ckb_mur_est' "Est" pos:[159,100] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+		checkbutton 'ckb_mur_ouest' "Ouest" pos:[197,100] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
 		label 'lbl_appliquerA' "Murs:" pos:[17,83] width:32 height:15 align:#left
 					
 		checkbutton 'chk_etagesMax' "" pos:[159,49] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
 					
-		listbox 'lbx_sequence' "" pos:[90,168] width:135 height:10 align:#left
+		listbox 'lbx_sequence' "" pos:[90,183] width:135 height:10 align:#left
 					
-		label 'lbl23' "Disposition :" pos:[17,129] width:72 height:15 align:#left
+		label 'lbl23' "Disposition :" pos:[17,144] width:72 height:15 align:#left
 					
 		button 'btn_enregistrer' "S" pos:[224,9] width:19 height:19 toolTip:"Sauvegarder preset." align:#left
 		button 'btn_charger' "O" pos:[206,9] width:19 height:19 toolTip:"Ouvrir preset." align:#left
 					
-		button 'btn_monter' "/\\" pos:[226,169] width:16 height:16 toolTip:"Monter le composant." align:#left
-		button 'btn_descendre' "\/" pos:[226,184] width:16 height:16 toolTip:"Descendre le composant." align:#left
-		dropdownList 'ddl_mode' "" pos:[90,127] width:135 height:21   selection:3 align:#left
+		button 'btn_monter' "/\\" pos:[226,184] width:16 height:16 toolTip:"Monter le composant." align:#left
+		button 'btn_descendre' "\/" pos:[226,199] width:16 height:16 toolTip:"Descendre le composant." align:#left
+		dropdownList 'ddl_mode' "" pos:[90,142] width:135 height:21 selection:3 align:#left
 		checkbutton 'chk_etages' "" pos:[82,49] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
 					
 		label 'lbl95' "Etages:" pos:[17,50] width:43 height:15 align:#left
@@ -82,31 +89,31 @@
 		subRollout 'subroll_parametres' "Paramètres" pos:[259,16] width:210 height:287 align:#left
 		
 		
-		button 'btn_dupliquer_composant' "Dup." pos:[89,152] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
-		button 'btn_instancier_composant' "Inst." pos:[123,152] width:35 height:16 toolTip:"Créer une instance du composant sélectionné." align:#left
-		button 'btn_supprimer_composant' "Sup." pos:[191,152] width:35 height:16 toolTip:"Supprimer" align:#left
+		button 'btn_dupliquer_composant' "Dup." pos:[89,167] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
+		button 'btn_instancier_composant' "Inst." pos:[123,167] width:35 height:16 toolTip:"Créer une instance du composant sélectionné." align:#left
+		button 'btn_supprimer_composant' "Sup." pos:[191,167] width:35 height:16 toolTip:"Supprimer" align:#left
 					
-		button 'btn_ajouter_composant_1' "btn1" pos:[12,167] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_2' "btn2" pos:[12,182] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_3' "btn3" pos:[12,197] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_4' "btn4" pos:[12,212] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_5' "btn5" pos:[12,227] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_6' "btn6" pos:[12,242] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_7' "btn7" pos:[12,257] width:75 height:16 visible:false align:#left
-		button 'btn_ajouter_composant_8' "btn8" pos:[12,272] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_1' "btn1" pos:[12,182] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_2' "btn2" pos:[12,197] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_3' "btn3" pos:[12,212] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_4' "btn4" pos:[12,227] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_5' "btn5" pos:[12,242] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_6' "btn6" pos:[12,257] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_7' "btn7" pos:[12,272] width:75 height:16 visible:false align:#left
+		button 'btn_ajouter_composant_8' "btn8" pos:[12,287] width:75 height:16 visible:false align:#left
 					
-		button 'btn_valider' "Valider" pos:[5,318] width:105 height:30 toolTip:"Valider la façade" align:#left
+		button 'btn_valider' "Valider" pos:[5,333] width:105 height:30 toolTip:"Valider la façade" align:#left
 		button 'btn_annuler' "Annuler" pos:[605,318] width:105 height:30 toolTip:"Annuler les changements" align:#left
 					
 			
 			
 			
 			
-		GroupBox 'grp_global' "Appliqué à " pos:[6,33] width:238 height:75 align:#left
+		GroupBox 'grp_global' "Appliqué à " pos:[7,32] width:238 height:89 align:#left
 					
 					
 					
-		GroupBox 'grp_sequence' "Séquence" pos:[6,110] width:238 height:203 align:#left
+		GroupBox 'grp_sequence' "Séquence" pos:[7,124] width:238 height:203 align:#left
 		subRollout 'subroll_parametres_niv2' "Paramètres" pos:[493,16] width:210 height:287 align:#left
 		
 		
@@ -229,6 +236,7 @@
 				
 				
 				ddl_mode.items	=	m_facade_courante.params.get_modes_distribution ()
+				ddl_murs.items	=	m_facade_courante.params.get_modes_murs ()
 				
 				edt_nom_facade.text 			= m_facade_courante.nom
 				
@@ -249,9 +257,10 @@
 				spn_longueur_min.enabled 				= m_facade_courante.params.longueurMin_use	
 -- 				if not spn_longueur_min.indeterminate do
 				spn_longueur_min.range = [m_facade_courante.params.get_longueur (),1e+13,0] 
+				spn_longueur_max.range = [m_facade_courante.params.get_longueur (),1e+13,0] 
+				
 				if m_facade_courante.params.longueurMin_use	then (
 					spn_longueur_min.value				= m_facade_courante.params.longueurMin
-					
 				)
 				else
 					spn_longueur_min.value			= m_facade_courante.params.get_longueur ()
@@ -263,9 +272,19 @@
 				if not spn_longueur_max.indeterminate do
 					spn_longueur_max.value				= m_facade_courante.params.longueurMax
 				
+
+				
+				
+				ckb_mur_nord.checked				= m_facade_courante.params.murs_nord
+				ckb_mur_sud.checked				= m_facade_courante.params.murs_sud
+				ckb_mur_est.checked					= m_facade_courante.params.murs_est
+				ckb_mur_ouest.checked				= m_facade_courante.params.murs_ouest
+				
+				
 				
 				ddl_murs.selection 				= m_facade_courante.params.murs
 				ddl_mode.selection 				= m_facade_courante.params.mode
+			
 				
 				remplir_lbx_sequence ()
 				gerer_boutons_enabled ()
@@ -434,6 +453,7 @@
 					j += 1
 				)
 				
+				m_plug.core.VP_afficher_longueurs ()
 			)
 			fn set_facade		_facade 	=(
 				-- la facade courante	----
@@ -444,6 +464,9 @@
 					lbx_sequence.selection  = 1
 					m_composant_courant = m_facade_courante.params.sequence[ 	1 ]
 				)
+				
+				--- on passe en proxy ---------------
+				m_plug.core.actualiser ()
 				
 				actualiser ()
 			)
@@ -520,8 +543,19 @@
 							
 		
 		
+-- 		on roll_urba_editeurFacades open do			
+				
+				
+				
+				
+				
+				
 		on roll_urba_editeurFacades close do
 		(
+			m_plug.core.VP_cacher_longueurs ()
+			m_plug.core.facadeEditeur_fermer 	()
+			
+			
 					/*
 					if m_changement then  
 						if querybox "Enregistrer la façade ?" do (
@@ -530,6 +564,7 @@
 						)
 					
 					m_plug.actualiser_rollouts () */
+					m_plug.core.actualiser ()
 				)
 		on roll_urba_editeurFacades resized _taille 				do
 			redimensionnerFenetre 	_taille
@@ -583,12 +618,6 @@
 			m_changement = true
 					actualiser ()
 				)
-				
-				
-				
-				
-				
-				
 		on lbx_sequence selected arg do
 		(
 					m_composant_courant 		= m_facade_courante.params.sequence[ 	arg ]
@@ -684,16 +713,47 @@
 			)
 		on btn_valider pressed do
 		(
+			
+			m_plug.core.VP_cacher_longueurs ()
 					enregistrer ()
 			
 					m_plug.core.facadeEditeur_fermer 	()
-					m_plug.core.actualiser ()
 					m_plug.actualiser_rollouts ()
+		-- 					m_plug.core.actualiser ()
 				)
 		on btn_annuler pressed do
 		(
+			
+			m_plug.core.VP_cacher_longueurs ()
 							m_plug.core.facadeEditeur_fermer 	()
+		-- 					m_plug.core.actualiser ()
 						)
+						
+						
+		on ckb_mur_nord changed state do
+		(
+					m_facade_courante.params.murs_nord 	= 	state		
+			m_changement = true
+					actualiser ()
+				)
+		on ckb_mur_sud changed state do
+		(
+					m_facade_courante.params.murs_sud 	= 	state		
+			m_changement = true
+					actualiser ()
+				)
+		on ckb_mur_est changed state do
+		(
+					m_facade_courante.params.murs_est 	= 	state		
+			m_changement = true
+					actualiser ()
+				)
+		on ckb_mur_ouest changed state do
+		(
+					m_facade_courante.params.murs_ouest 	= 	state		
+			m_changement = true
+					actualiser ()
+				)
 	)
 		
 		
@@ -701,4 +761,44 @@
 	
 	roll_urba_editeurFacades
 	
+	
+	
+	
+	
+	
 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

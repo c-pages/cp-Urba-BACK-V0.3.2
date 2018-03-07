@@ -117,8 +117,26 @@ struct str_mgr_surfaces (
 		),	
 		fn get_axePrincipal 	= m_outils.get_axePrincipal_mtrx 		( get_points () ),
 		fn get_axeP_BB			= m_outils.get_axePrincipal_BB 		( get_points () )  ( get_axePrincipal () ),
-	
+		fn get_mur_cardinal   	_pt1	_pt2	 =(
+			local result 
+			local norm_mur = normalize	(	_pt2	 - _pt1 )
 		
+			local norm_OuestEst 	= [1,0,0]
+			if abs norm_mur.x > abs norm_mur.y then (
+				if norm_mur.x > 0 then
+						result = #sud
+				else
+						result = #nord
+			) else (
+				if norm_mur.Y > 0 then
+						result = #est
+				else
+						result = #ouest
+			)
+			
+		),
+		fn est_pignon 	_id			=
+			m_outils.estPignon 	( get_points () )		_id,
 		
 		--- Assigner nouveau shape  ---------------------
 		fn assigner 	_shape  =(

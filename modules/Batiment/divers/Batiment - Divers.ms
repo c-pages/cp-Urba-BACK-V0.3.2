@@ -491,14 +491,17 @@ struct str_shape_outils (
 		fn estPignon 	_pts		_id		=(
 			
 			local mtrx_AP	= get_axePrincipal_mtrx 	_pts
-			local j 			= boucler  _pts  (_id+1)
-			local vec 		= (_pts[j]-_pts[_id])
+			local j 				= boucler  _pts  (_id+1)
+			local vec 			= (_pts[j]-_pts[_id])
 			local orientation 	= get_axePrincipal_orientation		mtrx_AP		vec
 			
 			if orientation == #perpendiculaire 
 				then true 
 				else false
 		),
+	
+	
+		
 	private
 		fn intersection 	_pt_orig 	_pt_2 		_pt_seg_1 	_pt_seg_2  		 =(
 			local pt_result

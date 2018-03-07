@@ -296,8 +296,8 @@ struct str_construction (
 					---- On définie le Z initial 	----
 					local zCourant = -( m_plug.const_ssBassement_epaisseur + m_plug.const_dalle_epaisseur )  + m_plug.const_batiment_decallage
 					
-					
-					if not m_plug.affiche_asProxy then (
+					local mode_edition_facades = ( m_plug.core.get_facade_enEdition ()  ) != undefined
+					if not m_plug.affiche_asProxy and not  mode_edition_facades	then (
 						
 						---- ...  et on construit le batiment -----
 						creer_ssBassement 			&zCourant

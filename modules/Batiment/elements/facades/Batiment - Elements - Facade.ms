@@ -22,7 +22,12 @@ struct facade_params	(
 		
 		--- Limiteurs - Murs	---
 		murs						=	1,					---- ( 1:les deux	2:gouttereaux	3:pignons )	----
-		
+		murs_nord			=	false,
+		murs_sud				=	false,
+		murs_est				=	false,
+		murs_ouest			=	false,
+	
+	
 		--- Limiteurs - Etages	---
 		etagesMin_use		=	false,
 		etagesMin				= 	0,
@@ -41,11 +46,14 @@ struct facade_params	(
 		
 	private	
 		modes_distribution	=	#("Aligné à gauche", "Centré", "Aligné à droite", "Répartir"),
+		modes_murs 			=	#("Tous", "Gouttereaux", "Pignons"/* , "Gauche", "Droite", "Avant", "Arrière" */),
+		
 		
 		------ fonctions ----------------------------------
 	public
-			
-		fn get_modes_distribution = modes_distribution ,
+		
+		fn get_modes_distribution 	= modes_distribution ,
+		fn get_modes_murs 			= modes_murs,
 		
 		---- composants ------------
 		fn ajouter_composant 		_composant 	position:(sequence.count+1)  =(
@@ -107,6 +115,14 @@ struct facade_params	(
 				else	result += elem.get_longueur()
 				
 			)
+			result
+		),
+		fn get_cardinaux =(
+			local result = #()
+			if murs_nord 	do append result #nord
+			if murs_sud 		do append result #sud
+			if murs_est	 	do append result #est
+			if murs_ouest 	do append result #ouest
 			result
 		),
 		fn get_sequenceFacade		_plug 	_longueur_facade	=(
@@ -317,7 +333,31 @@ struct facade_params	(
 			)
 			
 			sequence_totale
+		),
+		
+		
+		
+		fn est_valide		_longueur_mur		_etage		_type_mur  	=(
+			local result_valid = true
+			
+			local lg_min_fcd = amax #(  longueurMin , get_longueur () )
+			
+			if _longueur_mur < lg_min_fcd do
+				result_valid = false				
+			if longueurMax_use and _longueur_mur > longueurMax do
+				result_valid = false
+			
+			if etagesMin_use and  _etage < etagesMin do
+				result_valid = false
+			if etagesMax_use and  _etage > etagesMax do
+				result_valid = false
+				
+			
+			result_valid
 		)
+		
+		
+		
 )
 
 

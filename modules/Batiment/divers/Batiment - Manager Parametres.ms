@@ -656,14 +656,14 @@ struct  str_manager_parametres (
 			)
 		),
 		fn fermer_dialog 			=(
-			if m_dialog != unsupplied do (
+-- 			if m_dialog != unsupplied do (
 				destroyDialog 	m_dialog
 				m_dialog_estOuvert = false
-			)
+-- 			)
 		),
 		fn	set_dialog_taille	_taille 	=	m_dialog_taille 	= _taille,
 		fn	set_dialog_pos		_pos 	=	m_dialog_pos 	= _pos,
-		
+		fn get_dialog  						= m_dialog,
 		
 		
 		
