@@ -12,11 +12,11 @@ compo_toolTip 	=	"Pour grouper des composant entre eux."
 
 
 ------ la fonction de construction	---------
-fn compo_fnConstruire  	_plug		pts_accroches		_normDir		 _composant		= ()
+fn compo_fnConstruire  	_plug		pts_accroches		= pts_accroches
 	
-
+	
 --- les rollout du composant	---------
-rollout compo_dialog "Groupe" width:180 height:70	(
+rollout compo_dialog "Groupe - fin" width:180 height:70	(
 	local m_rollPrt
 	local m_compo
 	local m_plug

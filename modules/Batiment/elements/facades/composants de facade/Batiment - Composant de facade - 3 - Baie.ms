@@ -156,8 +156,10 @@ rollout compo_dialog "Baie" width:433 height:747
 		m_compo.nom = txt
 		m_rollPrt.actualiser ()
 	)
-	on spn_longueur changed val 	do
+	on spn_longueur changed val 	do (
 		m_compo.params.longueur 					= val
+		m_rollPrt.actualiser 	sans_subRoll_1:true
+	)
 	on spn_hauteur changed val 	do
 		m_compo.params.hauteur 					= val
 	on spn_allege changed val 	do

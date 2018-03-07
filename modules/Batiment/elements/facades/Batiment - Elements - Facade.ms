@@ -40,11 +40,10 @@ struct facade_params	(
 		
 		
 	private	
-		modes_distribution	=	#("Centrer", "Répartir", "Répeter - Centrer", "Répeter - Répartir", "Répeter - Répartir éléments" ),
+		modes_distribution	=	#("Aligné à gauche", "Centré", "Aligné à droite", "Répartir"),
 		
 		------ fonctions ----------------------------------
 	public
--- 		fn set_plug			_plug				= m_plug = _plug,
 			
 		fn get_modes_distribution = modes_distribution ,
 		
@@ -87,131 +86,198 @@ struct facade_params	(
 		---- sequence	------------
 		fn get_longueur = (
 			local result = 0
-			for elem in sequence do 
-					result += elem.get_longueur()
+			local grp =#()
+			local grp_repet =0
+			local groupe_enFormation = false
+			
+			for elem in sequence do (
+				if elem.type == #groupe then (
+					groupe_enFormation = true
+					grp =#()
+					grp_repet = elem.params.repetitions
+					if grp_repet == 0 do grp_repet = 1
+				)
+				else if elem.type == #groupeFin then (
+					groupe_enFormation = false
+					local longueur_grp = 0
+					for elemGrp in grp do
+						longueur_grp += elemGrp.get_longueur()		
+					result += longueur_grp * grp_repet
+				) else	if groupe_enFormation then append grp elem
+				else	result += elem.get_longueur()
+				
+			)
 			result
 		),
 		fn get_sequenceFacade		_plug 	_longueur_facade	=(
 			
-			local	sequence_totale 			= #()
+										format "----------------- NOUVELLE SEQUENCE ----------\n" 
+			local	sequence_totale 		= #()
+			local longueur_sequence 	= get_longueur ()
 			
 			
-			local	nbr_espacemts				=	0
-			local	nbr_espacemts_sequence				=	0
-			local	nbr_repetitions				=	0
-			local	longueur_restant			=	0
-			local	longueur_espacement	=	0
-			local longueur_sequence 		= get_longueur		()	
 			
 			
 			--- le nombre l'element de la sequence à prendre en compte (pas les balcons) et espacments
 			local nbr_compos_aPrendreEnCompte	=	0
-			for  elem in sequence do (
-				if elem.type != #balcon	and elem.type != #balconFin do 
+			for  elem in sequence do 
+				if elem.type != #balcon	and elem.type != #balconFin and elem.type != #groupe	and elem.type != #groupeFin do 
 					nbr_compos_aPrendreEnCompte	+= 1	
--- 					if elem.type != #espacement do
--- 						nbr_espacemts_sequence += 1
-			)
+			
+			
+			
 			if longueur_sequence	== 0 or nbr_compos_aPrendreEnCompte == 0  then (
 				
 				sequence_totale 	= #( _plug.core.get_murPlein		longueur_facade )
 				
 			) else (
 				
-				--- le nombre l'element de la sequence à prendre en compte (pas les balcons) et espacments
-				local nbr_compos_aPrendreEnCompte	=	0
-				for  elem in sequence do (
-					if elem.type != #balcon	and elem.type != #balconFin do 
-						nbr_compos_aPrendreEnCompte	+= 1	
--- 					if elem.type != #espacement do
--- 						nbr_espacemts_sequence += 1
+				local result = 0
+				local grp =#()
+				
+				local grp_repet 		=0
+				local grp_longueur 	=0
+				local reste =#()
+				local reste_longueur 	=0
+				local groupe_enFormation = false
+				---- les infos du groupe	: repetition et longueur ---------------------
+				for elem in sequence do (
+					if elem.type == #groupe then (
+						groupe_enFormation = true
+						grp_repet = elem.params.repetitions
+					)
+					else if elem.type == #groupeFin then (
+						groupe_enFormation = false
+						grp_longueur = 0
+						for elemGrp in grp do
+							grp_longueur += elemGrp.get_longueur()					
+					) else	if groupe_enFormation then append grp elem		
+						else (
+							append reste elem		
+							reste_longueur +=	elem.get_longueur ()
+						)
 				)
+				
+				
+				-- si on a un groupe repet à 0 on clalcul combien de fois on repete le groupe -------------
+				if grp.count> 0 and grp_repet == 0 do 
+					grp_repet = floor ( (_longueur_facade - reste_longueur ) / grp_longueur )
+			
 				
 				--- la sequence à répartir	---------
 				local sequence_simple		= for compo in 	sequence collect compo
 				
 				-----	calcul de la longueur des espacements de la sequence	--------------------------------------
 				case mode of (
-					1:  (	--- centrer ----	
+					1:  	(	----- Aligner a gauche		----------
 						
-						nbr_repetitions				= 1
-						nbr_espacemts				=	2  + nbr_espacemts_sequence
-						longueur_restant 			= _longueur_facade - longueur_sequence
-						longueur_espacement 	= longueur_restant / nbr_espacemts  
+						longueur_restant 			=		_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )
+						longueur_espacement 	=		longueur_restant
+						local groupe_enFormation = false
 						
-						
-						--- création dela séquence	------------------
-						sequence_simple		= for compo in 	sequence collect compo
-						sequence_totale = #(_plug.core.get_murPlein	  longueur_espacement  )
-						local poser_esp_debut = false
-						for elem in	sequence_simple	do 	
-							append sequence_totale		elem
+						---- les infos du groupe	: repetition et longueur ---------------------
+						local i = 1
+						while i  <= sequence.count do (
+							local elem = sequence[i]
+							if elem.type == #groupe then (
+								for j= 1 to grp_repet do
+									for elemGrp in grp do 
+										append sequence_totale		elemGrp
+								i += grp.count
+							)
+							else 
+								append sequence_totale		elem
 							
+							i+= 1
+						)
 						append sequence_totale		(_plug.core.get_murPlein	  longueur_espacement)
 						
 						
+							
 					)		
-					2:  	(	--- repartir ----
-						nbr_repetitions				=  1		
-						nbr_espacemts				=	nbr_compos_aPrendreEnCompte + 1	
-						longueur_restant 			= _longueur_facade - longueur_sequence 
-						longueur_espacement 	= longueur_restant / nbr_espacemts  
+					2:  	(	----- centrer 	-----
 						
-						--- création dela séquence	------------------
-						sequence_totale = #(_plug.core.get_murPlein	  longueur_espacement  )
+						longueur_restant 			=		_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )
+						longueur_espacement 	=		longueur_restant /2
+						local groupe_enFormation = false
+						_plug.core.get_murPlein	  longueur_espacement
 						
-						local poser_esp_debut = false
-						for i = 1 to	sequence_simple.count	do 		(
-							local elem = 	sequence_simple[i]
-							
-							append sequence_totale		elem
-							
-							if poser_esp_debut do (								
-								append sequence_totale		(_plug.core.get_murPlein	  longueur_espacement)
-								poser_esp_debut = false
+						append sequence_totale		(_plug.core.get_murPlein	  longueur_espacement)
+						
+						---- les infos du groupe	: repetition et longueur ---------------------
+						local i = 1
+						while i  <= sequence.count do (
+							local elem = sequence[i]
+							if elem.type == #groupe then (
+								for j= 1 to grp_repet do
+									for elemGrp in grp do 
+										append sequence_totale		elemGrp
+								i += grp.count
 							)
+							else 
+								append sequence_totale		elem
 							
-							local elem_suivant	=	if i < sequence_simple.count	then sequence_simple[i + 1] else undefined
-							if elem_suivant != undefined do
-								if  elem_suivant.type == #balconFin do (
-									poser_esp_debut = true
-								)
-							
-							if not poser_esp_debut and elem.type != #balcon	and elem.type != #balconFin do 
-								append sequence_totale		(_plug.core.get_murPlein	  longueur_espacement)
+							i+= 1
 						)
-					)
-					3: 	(	--- repeter	-	centrer ----
 						
-						nbr_repetitions				= floor ( _longueur_facade / longueur_sequence )
-						nbr_espacemts				=	2	--	nbr_compos_aPrendreEnCompte + 1
-						longueur_restant 			= _longueur_facade - longueur_sequence * nbr_repetitions
+						append sequence_totale		(_plug.core.get_murPlein	  longueur_espacement)
+						
+					)
+					3: 	(	----- Aligner à droite -----
+						
+						longueur_restant 			=		_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )
+						longueur_espacement 	=		longueur_restant
+						local groupe_enFormation = false
+						
+						append sequence_totale		(_plug.core.get_murPlein	  longueur_espacement)
+						
+						---- les infos du groupe	: repetition et longueur ---------------------
+						local i = 1
+						while i  <= sequence.count do (
+							local elem = sequence[i]
+							if elem.type == #groupe then (
+								for j= 1 to grp_repet do
+									for elemGrp in grp do 
+										append sequence_totale		elemGrp
+								i += grp.count
+							)
+							else 
+								append sequence_totale		elem
+							
+							i+= 1
+						)
+						
+					)
+					4: 	(	----- repartir  -----
+						
+						nbr_espacemts		=	grp.count * grp_repet + reste.count + 1
+						
+						longueur_restant 			=		_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )
+						
 						longueur_espacement 	= longueur_restant / nbr_espacemts  
 
-						sequence_totale = #(_plug.core.get_murPlein	  longueur_espacement  )
-						-- les boucles de la facade simple	--------
-						for i = 1 to nbr_repetitions do (				
-							----- les repetitions de sequence ------------------
-							for compo	in	 sequence_simple	do 						
-								append sequence_totale	compo							
-						)
-						append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
-					)
-					4: 	(	--- repeter	-	repartir  ----
-						
-						nbr_repetitions				= floor ( _longueur_facade / longueur_sequence )
-						nbr_espacemts				=	nbr_repetitions + 1
-						longueur_restant 			= _longueur_facade - longueur_sequence * nbr_repetitions
-						longueur_espacement 	= longueur_restant / nbr_espacemts  
-
-						sequence_totale = #(_plug.core.get_murPlein	  longueur_espacement  )
-						-- les boucles de la facade simple	--------
-						for i = 1 to nbr_repetitions do (				
-							----- les repetitions de sequence ------------------
-							for compo	in	 sequence_simple	do 						
-								append sequence_totale	compo							
 							append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
+						
+						---- les infos du groupe	: repetition et longueur ---------------------
+						local i = 1
+						while i  <= sequence.count do (
+							local elem = sequence[i]
+							if elem.type == #groupe then (
+								for j= 1 to grp_repet do
+									for elemGrp in grp do ( 
+										append sequence_totale		elemGrp
+										append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
+									)
+								i += grp.count  + 1
+							)
+							else ( 
+										append sequence_totale		elem
+										append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
+									)
+							
+							i+= 1
 						)
+						
 					)
 				) -- fin case	-----------
 				

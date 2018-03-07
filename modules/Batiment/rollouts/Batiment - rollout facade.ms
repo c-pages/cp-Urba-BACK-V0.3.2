@@ -29,13 +29,13 @@
 			local m_ssComposant_courant
 			
 			local m_compoCourant_estDansBalcon = false
-			local m_compoCourant_estDansLoggia = false
+			local m_compoCourant_estDansGroupe = false
 			
 			--- rollout	---------	
 			local largeur_params		= 	234
 -- 			local largeur_min 			= 	490
 			local largeur_base 		= 250
-			
+			local groupe_existe = false
 			local hauteur_min 		= 	300
 			
 			--- images bouton fermer ---
@@ -52,7 +52,6 @@
 		
 		
 			
-				
 				
 				
 		spinner 'spn_longueur_min' "" pos:[95,64] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
@@ -129,26 +128,37 @@
 				--------- la sequence de composants --------
 				local itemsTmp 		= #()
 				local est_dansBalcon = false
-				local est_dansLoggia = false
+				local est_dansGroupe = false
+				
 				m_compoCourant_estDansBalcon = false
-				m_compoCourant_estDansLoggia = false
+				m_compoCourant_estDansGroupe = false
 				local tabulation		= "     "
 				local i = 1
 				for comp in m_facade_courante.params.sequence		do	(
-					local affichage 		= "       "
+					local affichage 		= "  "
 					
 					if comp.type == #balcon		do est_dansBalcon = true
-					if comp.type == #loggia		do est_dansLoggia = true
+					if comp.type == #groupe		do est_dansGroupe = groupe_existe = true
 					
-					if comp.type == #balcon	then affichage = "  _   "
-					else if  comp.type == #balconFin		then affichage = " |_   "
-					else if est_dansBalcon do affichage = " |         "
+					if comp.type == #groupe	 then affichage = "-------- "
+					else if est_dansGroupe do affichage +=  tabulation
 					
-					if est_dansLoggia do affichage += "|" + tabulation
+					if comp.type == #balcon	or  comp.type == #balconFin		then affichage += "  --- "
+					else if est_dansBalcon do affichage += " |     "
 					
 					-- le nom ---
 					affichage += comp.nom 
 					
+					if comp.type == #groupe	do (
+						if comp.params.repetitions  == 0 then
+							affichage += " - x Inf." 
+						else
+							affichage += " - x " + comp.params.repetitions as string
+						affichage += " --------------------"
+					)
+					if comp.type == #groupeFin		then 
+						affichage = "-------------------------------------------"
+						
 					-- quelques infos -----
 					if comp.params != undefined do
 						if comp.params.longueur != 0 do
@@ -158,11 +168,11 @@
 					append itemsTmp affichage
 					
 					if comp.type == #balconFin 	do est_dansBalcon = false
-					if comp.type == #loggiaFin 	do est_dansLoggia = false
+					if comp.type == #groupeFin 	do est_dansGroupe = false
 					
 					if i == lbx_sequence.selection do (
 						m_compoCourant_estDansBalcon = est_dansBalcon
-						m_compoCourant_estDansLoggia = est_dansLoggia
+						m_compoCourant_estDansGroupe = est_dansGroupe
 					)
 					
 					i += 1
@@ -179,9 +189,10 @@
 				btns_ajouter_composant[idBalcon].enabled = not m_compoCourant_estDansBalcon
 				
 				
--- 				--- bloquage du bouton loggia si on est deja dans un loggia -------------------			
--- 				local idLoggia = m_plug.core.get_composants_bouton_index 	#loggia 	
--- 				btns_ajouter_composant[ idLoggia ].enabled = not m_compoCourant_estDansLoggia
+				--- bloquage du bouton loggia si on est deja dans un loggia -------------------			
+				local idGroupe = m_plug.core.get_composants_bouton_index 	#groupe 
+				
+				btns_ajouter_composant[ idGroupe ].enabled = not groupe_existe
 				
 				btn_supprimer_composant.enabled 	= lbx_sequence.selection != 0 
 				btn_instancier_composant.enabled 		= lbx_sequence.selection != 0
@@ -213,7 +224,7 @@
 				
 			)
 			
-			fn actualiser 							=(
+			fn actualiser 					sans_subRoll_1:false		sans_subRoll_2:false	=(
 				debug "actualiser ()"
 				
 				
@@ -234,10 +245,17 @@
 					spn_etagesMax.value			 = m_facade_courante.params.etagesMax	
 				
 				chk_longueur_min.checked					= m_facade_courante.params.longueurMin_use
-				spn_longueur_min.indeterminate 		= not m_facade_courante.params.longueurMin_use	
+-- 				spn_longueur_min.indeterminate 		= not m_facade_courante.params.longueurMin_use	
 				spn_longueur_min.enabled 				= m_facade_courante.params.longueurMin_use	
-				if not spn_longueur_min.indeterminate do
+-- 				if not spn_longueur_min.indeterminate do
+				spn_longueur_min.range = [m_facade_courante.params.get_longueur (),1e+13,0] 
+				if m_facade_courante.params.longueurMin_use	then (
 					spn_longueur_min.value				= m_facade_courante.params.longueurMin
+					
+				)
+				else
+					spn_longueur_min.value			= m_facade_courante.params.get_longueur ()
+				
 				
 				chk_longueur_max.checked				= m_facade_courante.params.longueurMax_use
 				spn_longueur_max.indeterminate 		= not m_facade_courante.params.longueurMax_use	
@@ -252,23 +270,28 @@
 				remplir_lbx_sequence ()
 				gerer_boutons_enabled ()
 				
-				
+				if not sans_subRoll_1 do (
 				--- on retire tout les sous panneaux -------------------
 				for rollAVirer in subroll_parametres.rollouts do
 					removeSubRollout	subroll_parametres	rollAVirer
-				for rollAVirer in subroll_parametres_niv2.rollouts do
-					removeSubRollout	subroll_parametres_niv2	rollAVirer
 				
-				--- le subRollout des composants	PANNEAU 1 -------
-				if m_composant_courant != undefined do (
-					addSubRollout	subroll_parametres ( m_composant_courant.get_dialog () )
-					m_composant_courant.initialiser_dialog		m_plug			 	roll_parent:roll_urba_editeurFacades
+					--- le subRollout des composants	PANNEAU 1 -------
+					if m_composant_courant != undefined do (
+						addSubRollout	subroll_parametres ( m_composant_courant.get_dialog () )
+						m_composant_courant.initialiser_dialog		m_plug			 	roll_parent:roll_urba_editeurFacades
+					)
 				)
 				
-				--- le subRollout des composants	PANNEAU 2 -------
-				if m_ssComposant_courant != undefined do (
-					addSubRollout	subroll_parametres_niv2 ( m_ssComposant_courant.get_dialog () )
-					m_ssComposant_courant.initialiser_dialog		m_plug			 	roll_parent:roll_urba_editeurFacades
+				
+				if not sans_subRoll_2 do (
+					for rollAVirer in subroll_parametres_niv2.rollouts do
+						removeSubRollout	subroll_parametres_niv2	rollAVirer
+					
+					--- le subRollout des composants	PANNEAU 2 -------
+					if m_ssComposant_courant != undefined do (
+						addSubRollout	subroll_parametres_niv2 ( m_ssComposant_courant.get_dialog () )
+						m_ssComposant_courant.initialiser_dialog		m_plug			 	roll_parent:roll_urba_editeurFacades
+					)
 				)
 				
 -- 				mgr_facade.set_dialog_taille			_taille

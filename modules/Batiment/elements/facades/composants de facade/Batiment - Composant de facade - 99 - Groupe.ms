@@ -21,7 +21,7 @@ struct compo_params	(
 	
 	public	
 	fn	get_longueur =(
-		
+		longueur
 	)
 	
 )
@@ -52,17 +52,22 @@ rollout compo_dialog "Groupe" width:180 height:70	(
 		m_compo.nom = txt
 		m_rollPrt.actualiser ()
 	)
-	on spn_repetitions changed val 	do
+	on spn_repetitions changed val 	do (
 		m_compo.params.repetitions 					= val
+		m_rollPrt.actualiser sans_subRoll_1:true
+	)
 )
 
 
+------ la fonction de construction	---------
+fn compo_fnConstruire  	_plug		pts_accroches		= pts_accroches
+	
 
 ------------------CONSTANT ------------------------
 --- on importe le fichier mere des composants ----
 _str_contructeur = fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
-_str_contructeur 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire		invisible:true
+_str_contructeur 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(compo_params())	dialog:compo_dialog	fnConstruire:compo_fnConstruire	--	invisible:true
 
 	
 ) ----	FileIn ----
