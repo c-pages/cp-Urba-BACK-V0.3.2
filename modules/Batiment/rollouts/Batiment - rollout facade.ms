@@ -305,7 +305,7 @@
 					--- le subRollout des composants	PANNEAU 1 -------
 					if m_composant_courant != undefined do (
 						addSubRollout	subroll_parametres ( m_composant_courant.get_dialog () )
-						m_composant_courant.initialiser_dialog		m_plug			 	roll_parent:roll_urba_editeurFacades
+						m_composant_courant.initialiser_dialog		m_plug			 	roll_parent:roll_urba_editeurFacades  ptr_this:m_composant_courant
 					)
 				)
 				
@@ -364,73 +364,27 @@
 			)
 			fn redimensionnerFenetre 		_taille 	=(
 				
-	-- 			local largeur_min_ferme 	= 255
-	-- 			local largeur_min_ouvert 	= largeur_min_ferme + largeur_params			
-	-- 			local largeur_min 				= 	largeur_min_ouvert
-	-- 			local hauteur_min 			= 255
 				
 				local largeur_btn 		= 17
 				local largeur_bord 	= edt_nom_facade.pos.x
-				/* 
-				
-				if subroll_parametres_niv2.rollouts.count > 0 then
-					nrbe_subRoll = 2
-				else if subroll_parametres.rollouts.count > 0 then
-					nrbe_subRoll = 1
-				else
-					nrbe_subRoll = 0
-				local largeur_min 		= largeur_base + nrbe_subRoll * largeur_params
-				 */
-				
-				
--- 				if 	_taille.x < largeur_min do 
--- 					_taille.x =  largeur_min
+	
 				if 	_taille.y < hauteur_min do 
 					_taille.y =  hauteur_min
 				roll_urba_editeurFacades.width 		= _taille.x
 				roll_urba_editeurFacades.height 		= _taille.y
 				mgr_facade.set_dialog_taille		_taille
 				
-				lbx_sequence.height 		= _taille.y - ( lbx_sequence.pos.y + largeur_btn + 2 * largeur_bord  + 5)
-				grp_sequence.height 		= _taille.y - 150
+				lbx_sequence.height 		= _taille.y - ( lbx_sequence.pos.y + largeur_btn + 2 * largeur_bord  + 8 )
+				grp_sequence.height 		= _taille.y -  ( grp_sequence.pos.y + largeur_btn + 2 * largeur_bord  )
 				
 				grp_panneau1.height		= _taille.y - 3 * largeur_bord  	- 9
 				grp_panneau2.height		= grp_panneau1.height	
 				
 				
-				subroll_parametres.height			= grp_panneau1.height	  	- 19
+				subroll_parametres.height			= grp_panneau1.height	  	- 21
 				subroll_parametres_niv2.height	= subroll_parametres.height
 				
 				
-				
-				
-				
--- 				local largeur_panneau1 = _taille.x 	- 	nrbe_subRoll * largeur_params
--- 				
--- 				subroll_parametres.pos.x	=	largeur_panneau1 + 5
--- 				subroll_parametres_niv2.pos.x	=	subroll_parametres.pos.x + largeur_panneau1 + 10
-				
--- 				grp_global.width 	= 	largeur_panneau1 - ( 2* largeur_bord	   )
--- 				grp_sequence.width		= 	largeur_panneau1 - ( 2* largeur_bord	   )
-				
--- 				edt_nom_facade.width 	= 	largeur_panneau1 - ( 2* largeur_bord	+ 2 * largeur_btn   )
--- 				btn_enregistrer.pos.x 	= 	edt_nom_facade.width 	+  edt_nom_facade.pos.x
--- 				btn_charger.pos.x 			= 	largeur_btn 	+  btn_enregistrer.pos.x
-				
--- 				ddl_murs.width 			= 	ddl_mode.width  = 	largeur_panneau1  - ( ddl_murs.pos.x + largeur_bord )
--- 				lbx_sequence.width 		= ddl_murs.width 	 - largeur_btn
-				
-				
-				
--- 				btn_monter.pos.x								=	btn_descendre .pos.x		=	lbx_sequence.pos.x + lbx_sequence.width
--- 				btn_dupliquer_composant.pos.y 			= lbx_sequence.pos.y + lbx_sequence.height - 47
--- 				btn_instancier_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 32
--- 				btn_supprimer_composant.pos.y 		= lbx_sequence.pos.y + lbx_sequence.height - 17
-				
--- 				grp_prop.pos.x 					= ddl_murs.pos.x + ddl_murs.width + largeur_bord 
--- 				grp_prop.height 				= _taille.y - ( grp_prop.pos.y + largeur_bord )
--- 				subroll_parametres.pos.x 	= grp_prop.pos.x + 8
--- 				subroll_parametres.height 	= grp_prop.height - 23
 				
 				btn_valider.pos.y 		= _taille.y - 35
 				btn_annuler.pos.y 		=  _taille.y - 35
@@ -514,7 +468,7 @@
 				
 				remplir_lbx_sequence ()
 				lbx_sequence.selection += 1
-				gerer_boutons_enabled ()				
+				gerer_boutons_enabled ()
 				
 				
 				m_ssComposant_courant	= undefined
@@ -527,7 +481,7 @@
 				
 				m_composant_courant =  	m_facade_courante.params.instancier_composant	lbx_sequence.selection 
 				
-				m_composant_courant = composantDuplique
+-- 				m_composant_courant = composantDuplique
 				remplir_lbx_sequence ()
 				
 				lbx_sequence.selection += 1
@@ -647,13 +601,15 @@
 		on lbx_sequence selected arg do
 		(
 					m_composant_courant 		= m_facade_courante.params.sequence[ 	arg ]
+					debug "m_facade_courante.params.sequence" var:m_facade_courante.params.sequence
+					debug "m_composant_courant" var:m_composant_courant
 					m_ssComposant_courant	= undefined
 		-- 					for rollAVirer in subroll_parametres_niv2.rollouts do
 		-- 						removeSubRollout	subroll_parametres	rollAVirer
 					
 		-- 		m_changement = true
 					actualiser ()
-				redim_pour_parametres ()
+					redim_pour_parametres ()
 				)
 		on btn_monter pressed do
 		(

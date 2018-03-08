@@ -220,15 +220,13 @@ struct  str_manager_parametres (
 							local tab_temp = #()
 							for i = 1 to propVal.count do (
 								
+								-- on check si c'est l'instance d'un element deja present -----------
 								local	param_instance												
 								for param_present in tab_temp do 
 									if hasproperty	param_present	#id do
 										if param_present.id == propVal[i] do
-											param_instance = param_present
+											param_instance = param_present							
 								
--- 								debug "param_instance" var:param_instance
-								
-								-- on check si c'est l'instance d'un element deja present -----------
 								if param_instance != undefined then 
 									propVal[i]  = param_instance
 								else	(
@@ -468,25 +466,52 @@ struct  str_manager_parametres (
 			-- puis on duplique chaque prop de la structure -----------
 			for propnom in getpropNames _element do (				
 				local val_orig = getProperty  _element	propnom
-				
+				debug "classof val_orig" var:(classof val_orig)
 				--tout sauf les fonctions ----------
 				if classof val_orig != MAXScriptFunction do (				
 					local val_dup
 					
 					--- si on a un struct ------
 					if superclassOf val_orig == StructDef then (
-						val_dup = dupliquer_element  val_orig	enregistrer:enregistrer
-					
+-- 						debug "PAS tableau:	ON DUPLIQUE un truc" var:val_orig
+-- 						if propnom == #params then
+-- 							val_dup = dupliquer_paramsElem  val_orig
+-- 						else
+							val_dup = dupliquer_element  val_orig	enregistrer:enregistrer
 					-- sinon on regarde si on a un tableau
 					) else if  classof val_orig ==  array then (
-						
+						val_dup = #()
 						if val_orig.count> 0 then (
+							
 							--- si on a des struct, on les dupplique----------
-							if superclassOf val_orig[1] == StructDef then
-								val_dup = for valTab_orig in val_orig collect dupliquer_element  valTab_orig	enregistrer:enregistrer
+							if superclassOf val_orig[1] == StructDef then (
+								local elems_presents = # ()
+								for i = 1 to val_orig.count do (
+									-- on check si c'est l'instance d'un element deja present -----------
+									local	id_param_instance												
+									for j = 1 to elems_presents.count do (
+										local param_present = elems_presents[j]
+										if hasproperty	param_present	#id do
+											if param_present.id == val_orig[i].id do
+												id_param_instance = j							
+										)
+									if id_param_instance != undefined then (
+										debug "tableau:	ON DUPLIQUE UNE INSTANCE"
+-- 										debug "param_instance" var:param_instance
+-- 										debug "elems_presents" var:elems_presents
+										val_dup[i]  = val_dup[ id_param_instance ] 
+									)else (
+										debug "tableau:	ON DUPLIQUE UNE NON INSTANCE"
+										val_dup[i]  = dupliquer_element  val_orig[i]	enregistrer:enregistrer
+										append  elems_presents		val_orig[i]
+									)
+								)
+-- 								else	(
+									
+-- 								val_dup = for valTab_orig in val_orig collect dupliquer_element  valTab_orig	enregistrer:enregistrer
 								
 							--- sinon on les copie basiquement ----------
-							else	val_dup = for valTab_orig in val_orig collect copy  valTab_orig		
+							) else	val_dup = for valTab_orig in val_orig collect copy  valTab_orig		
 							
 						) else val_dup = #()
 					
@@ -494,6 +519,7 @@ struct  str_manager_parametres (
 					) else val_dup = copy val_orig
 					
 					setproperty	elem_dupl	propnom 	val_dup
+					
 				)	---	fin if not function	-------
 			)	---	fin for propNoms	---------
 			
@@ -502,8 +528,13 @@ struct  str_manager_parametres (
 			if hasproperty elem_dupl 	#generer_ID do
 				elem_dupl.generer_ID ()
 			
+			if hasproperty elem_dupl 	#nom do
+				elem_dupl.nom+= " (copie)"
+			
 			--- on  enregistre si besoin  ----------------
 			if enregistrer do m_core.enregistrer_element 	elem_dupl
+			
+			debug "elem_dupl" var:elem_dupl
 			
 			elem_dupl
 			

@@ -61,15 +61,20 @@ struct 	str_composant_generique	 (
 		
 		--- Initialisations -----------------------
 		fn set_typeClasse	_type_classe	= m_type_classe = _type_classe,
-		fn initialiser_dialog 	 	_plug  roll_parent:		=(
+		fn initialiser_dialog 	 	_plug  roll_parent:		ptr_this:		=(
+				m_dialog = copy m_dialog
 			if ( a_desParametres () )  do (
 				if roll_parent != unsupplied do
 						m_dialog.m_rollPrt		= 	roll_parent
-				m_dialog.m_compo	=	this
+				if ptr_this  == unsupplied do
+					ptr_this = this
+				m_dialog.m_compo	=	ptr_this
+			format "######### m_dialog.m_compo : %\n" m_dialog.m_compo
 				m_dialog.m_plug		=	_plug
 				m_dialog.actualiser()
 			)
 		),
+		
 		fn generer_ID =(
 			id = "ID_" + get_typeClasse () + "_"
 			for i= 1 to 10 do id += ( random 0 9 ) as string	
