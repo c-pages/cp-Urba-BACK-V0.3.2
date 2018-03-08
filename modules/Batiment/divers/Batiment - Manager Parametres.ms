@@ -148,8 +148,8 @@ struct  str_manager_parametres (
 		
 		---  #PARAMS --------
 		fn enregistrer_paramsElem 	_params	=(			
-			debug " ********** 	enregistrer_paramsElem	*********"
-			debug "_params" var:_params
+-- 			debug " ********** 	enregistrer_paramsElem	*********"
+-- 			debug "_params" var:_params
 			local params_TMP = copy 	_params
 			
 			for prop_params_Nom in  ( getPropNames	_params ) do (
@@ -157,7 +157,7 @@ struct  str_manager_parametres (
 				local prop_value	= getProperty _params  prop_params_Nom
 				if classOf prop_value != MAXScriptFunction do (
 						
-			debug "prop_params_Nom" var:prop_params_Nom
+-- 			debug "prop_params_Nom" var:prop_params_Nom
 					case classOf prop_value	of (
 						Array:(
 								local tab_value =#()
@@ -169,7 +169,7 @@ struct  str_manager_parametres (
 										
 										for _struct in  prop_value do (
 											
-											debug "----------->	on enregistre un element d'un tableau de PARAMS" var:_params	
+-- 											debug "----------->	on enregistre un element d'un tableau de PARAMS" var:_params	
 											
 											-- on enregistre l'element sur le plug ------------
 											m_core.enregistrer_element 	_struct
@@ -206,14 +206,13 @@ struct  str_manager_parametres (
 		),
 		fn charger_paramsElem 		_value		_params	=(
 			
-					debug "------####################################################----->	charger_paramsElem" var:_value	
+-- 					debug "------####################################################----->	charger_paramsElem" var:_value	
 			if _params != undefined do (
 				local params_TMP 	= copy 	_params
 				mgr_datas.set_datas_string		_value		params_TMP
 				
 				for paramNom in getPropNames	params_TMP  do (
 					
--- 					debug "------########################################----->	paramNom" var:paramNom	
 					local propVal = getProperty params_TMP	paramNom
 					if classOf propVal != maxScriptfunction	do (
 						if classOf propVal == array then (
@@ -227,7 +226,7 @@ struct  str_manager_parametres (
 										if param_present.id == propVal[i] do
 											param_instance = param_present
 								
-								debug "param_instance" var:param_instance
+-- 								debug "param_instance" var:param_instance
 								
 								-- on check si c'est l'instance d'un element deja present -----------
 								if param_instance != undefined then 
@@ -269,8 +268,8 @@ struct  str_manager_parametres (
 	--- interface	 PARAMETRES du plugin	 --------
 	public	
 		fn enregistrer_parametres		_element		=(
-			debug "enregistrer_parametres"
-			debug "_element" var:_element
+-- 			debug "enregistrer_parametres"
+-- 			debug "_element" var:_element
 			local prop_element_Noms 	= getPropNames	_element
 			local elem_index 				= get_element_index		_element
 			
@@ -295,6 +294,7 @@ struct  str_manager_parametres (
 									for ss_elem in prop_element do (
 -- 										debug "val dans tableau à enregistrer" var:ss_elem
 										
+					debug " /!\ #########################		/!\    /!\  enregistrer_parametres (), qui ne devrait pas passer par là /!\   /!\  ###############"
 										append 	liste_ids	ss_elem.id
 										m_core.enregistrer_element  	ss_elem									
 									)
@@ -324,8 +324,8 @@ struct  str_manager_parametres (
 			)-- fin for
 		), 
 		fn charger_parametres 			_element		=(
-			debug "charger_parametres"
-			debug "_element" var:_element
+-- 			debug "charger_parametres"
+-- 			debug "_element" var:_element
 			local prop_element_Noms = getPropNames	_element
 			
 			--- si param deja present, on actualise -------------------
@@ -350,7 +350,7 @@ struct  str_manager_parametres (
 							MAXScriptFunction:()
 							Array: 		(
 								
-												debug "<<<<<<<<<<<<<<<<<<< ON CHARGE UN TABLEAU  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" 
+-- 												debug "<<<<<<<<<<<<<<<<<<< ON CHARGE UN TABLEAU  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" 
 								-- si on a une liste d'élément à nous	-------------
 								local tab_params	=		( mgr_datas.string_to_array	param_value )
 								
@@ -358,6 +358,7 @@ struct  str_manager_parametres (
 									if classOf	tab_params[1] == string do
 										if findString tab_params[1]	"ID_" != undefined do (
 											
+											debug " /!\ #########################		/!\    /!\  charger_parametres (), qui ne devrait pas passer par là /!\   /!\  ###############"
 											
 											param_value = #()
 											for elemID in tab_params do	(
@@ -369,7 +370,7 @@ struct  str_manager_parametres (
 														if param_present.id == elemID do
 															param_instance = param_present
 												
-												debug "param_instance" var:param_instance
+-- 												debug "param_instance" var:param_instance
 												
 												-- on check si c'est l'instance d'un element deja present -----------
 												if param_instance != undefined then 

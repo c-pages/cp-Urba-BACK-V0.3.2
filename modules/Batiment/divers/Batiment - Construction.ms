@@ -48,61 +48,7 @@ struct str_construction (
 	private
 		
 		------------ FILTRES-------------------------
-		fn filtrer_facades_parEtages   	_facades 		_etageCourant	 =(
-			
-			local facades_result =#()
-			
-			--- on filtre par etages ---------------
-			for facde in _facades 		 where facde.params.sequence.count >0 do (
-				if facde.params.etagesMin_use then (
-					if _etageCourant	>= facde.params.etagesMin  do (
-						if facde.params.etagesMax_use then (
-							if _etageCourant <= facde.params.etagesMax   do 	
-								append facades_result facde
-						)	else (
-							append facades_result facde
-						)
-					)
-				) else (
-					append facades_result facde
-				)
-			)
-			
-			facades_result
-		),
-		fn filtrer_facades_parMurs		_facades	_mur_longueur		_pts		_id_pt				=(
-			
-			local facades_result 		= #()
-			local est_pignon				= m_outils_shape.estPignon 	_pts		_id_pt
-			
-			---- si la sequence peut rentrer sur le segment de facade ------------
-			for facde in _facades /* where  	 facde.sequence.count >0  */do (
-				
-				if  facde.params.sequence.count >0  do (
-				if facde.params.get_longueur () < _mur_longueur do (
-					
-					---- si la facade est limité en longueur min -----
-					if not facde.params.longueurMin_use or facde.params.longueurMin_use	 and 	facde.params.longueurMin < _mur_longueur do (
-						
-						---- si la facade est limité en longueur max -----
-						if not facde.params.longueurMax_use or facde.params.longueurMax_use	 and 	facde.params.longueurMax > _mur_longueur do (
-							
-							---- si la facade est sur le bon type de mur -----
-							case  facde.params.murs of (
-								1: append facades_result facde
-								2: if not est_pignon do append facades_result facde
-								3: if est_pignon do append facades_result facde
-							)
-						)
-					)
-				)
-			)
-			)
-	
-			facades_result
-			
-		),
-		
+
 		fn filtrer_facades  	_facades  	_etageNum		_id_pt	=(
 			
 			local facades_result 		= #()
@@ -111,35 +57,10 @@ struct str_construction (
 					append facades_result  facde
 			facades_result
 		),
-		/* 
--- 		fn filtrer_facades		
-		fn choisir_parProbas		_liste	 = (
-			local result 	
-			
-			local probaTotal = 0
-			for elem in _liste do 
-				probaTotal += elem.probabilite
-			local tirage = random  1.  probaTotal
-			local trouve = false
-			local id = 1
-			local probacourant = 0
-			if _liste.count > 0 do (
-				while not trouve and probacourant <= probaTotal	do (
-					probacourant += _liste[id].probabilite
-					if tirage < probacourant do (
-						trouve = true
-						result = _liste[id]
-					)
-					id += 1
-				)
-			)
-			result
-		),
-		*/
+		
 		
 		---- elements simples-------------------
-	private
-	
+	private	
 		fn creer_murPlein		_longueur	 =(
 			local nvComposant	 				= 	m_plug.core.get_murPlein _longueur
 			nvComposant
@@ -182,16 +103,6 @@ struct str_construction (
 			local facades_total	= 	m_plug.core.get_facades ()			
 			local surface_points 	= m_plug.core.get_surface_points ()
 			
-			/* 
-			----- les étages-----------
-			local liste_etages_ht = #()
-			for 
-			m_plug.etages_min[ _index ]			=	_etages_min
-			m_plug.etages_max_use[ _index ]	=	_etages_max_use
-			m_plug.etages_max[ _index ]		=	_etages_max
-			m_plug.etages_hauteurs[ _index ]	=	_etages_hauteurs		
-			
-			 */
 			
 			---- boucle étages ---------------------
 			for n_etage = 0 to m_plug.etages_nbre do (
@@ -205,11 +116,6 @@ struct str_construction (
 				--- Creation du sol	-----------------------------
 				if m_plug.interieur_planchers do
 					creer_dalle	( z + m_plug.const_dalle_epaisseur )  matID:#int_sol
-				
-				
-				--- on regarde si on a des facades pour cet étage	---------------
--- 				local facades_etages 	= 	filtrer_facades_parEtages		facades_total 		n_etage
--- 				local onA_uneFacade 	= 	facades_etages.count > 0
 				
 				---- on fait le tour des murs 	---------------------
 				for id_pt = 1 to surface_points.count do	 (

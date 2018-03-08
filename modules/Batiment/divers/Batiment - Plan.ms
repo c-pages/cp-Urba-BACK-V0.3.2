@@ -19,6 +19,7 @@
 			
 			------------ Fonctions ----------------------------------------------------------------------------------
 		public
+			--- creation -----------
 			fn creerFrom_2vecs_et_1Point	_vec1 	_vec2  	_point	=(
 				
 	-- 			debug "creerFrom_2vecs_et_1Point"
@@ -38,6 +39,8 @@
 	-- 			debug "c" var:c
 	-- 			debug "d" var:d
 			),
+			
+			
 			fn projeter_point_verticalement 		_pt 	=(
 	-- 			debug "projeter_point_verticalement"
 				local result = copy _pt
@@ -59,7 +62,7 @@
 				ptResult
 				
 			),
-			fn coupe_segment	_segPt1		_segPt2			=(
+			fn coupe_segment		_segPt1		_segPt2			=(
 				
 				local pointIntersect = get_intersection_segment 	_segPt1		_segPt2 		
 				-- debug-------
