@@ -466,7 +466,7 @@ struct  str_manager_parametres (
 			-- puis on duplique chaque prop de la structure -----------
 			for propnom in getpropNames _element do (				
 				local val_orig = getProperty  _element	propnom
-				debug "classof val_orig" var:(classof val_orig)
+-- 				debug "classof val_orig" var:(classof val_orig)
 				--tout sauf les fonctions ----------
 				if classof val_orig != MAXScriptFunction do (				
 					local val_dup
@@ -496,12 +496,12 @@ struct  str_manager_parametres (
 												id_param_instance = j							
 										)
 									if id_param_instance != undefined then (
-										debug "tableau:	ON DUPLIQUE UNE INSTANCE"
+-- 										debug "tableau:	ON DUPLIQUE UNE INSTANCE"
 -- 										debug "param_instance" var:param_instance
 -- 										debug "elems_presents" var:elems_presents
 										val_dup[i]  = val_dup[ id_param_instance ] 
 									)else (
-										debug "tableau:	ON DUPLIQUE UNE NON INSTANCE"
+-- 										debug "tableau:	ON DUPLIQUE UNE NON INSTANCE"
 										val_dup[i]  = dupliquer_element  val_orig[i]	enregistrer:enregistrer
 										append  elems_presents		val_orig[i]
 									)
@@ -534,7 +534,7 @@ struct  str_manager_parametres (
 			--- on  enregistre si besoin  ----------------
 			if enregistrer do m_core.enregistrer_element 	elem_dupl
 			
-			debug "elem_dupl" var:elem_dupl
+-- 			debug "elem_dupl" var:elem_dupl
 			
 			elem_dupl
 			

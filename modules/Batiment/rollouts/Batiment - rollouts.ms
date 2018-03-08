@@ -66,7 +66,7 @@ rollout roll_global "Global" width:162 height:341
 	fn shape_filt 		obj = superclassof obj == shape
 	
 	--- Surface ------
-	pickbutton 'btn_pick_surface' "Pick shape" pos:[10,14] width:150 height:18 filter:shape_filt toolTip:"Le shape à utiliser comme surface de base pour la création du bâtiment." autoDisplay:true align:#left
+	pickbutton 'btn_pick_surface' "Pick shape" pos:[10,14] width:150 height:18 filter:shape_filt	 toolTip:"Le shape à utiliser comme surface de base pour la création du bâtiment." autoDisplay:true align:#left
 	GroupBox 'grp_surface' "Surface :" pos:[4,0] width:162 height:38 align:#left
 
 	--- Global ------
@@ -76,7 +76,7 @@ rollout roll_global "Global" width:162 height:341
 -- 	button 'btn_rotation' "+90" pos:[137,87] width:24 height:16 align:#left
 	label 'lbl_nbre' "Nbre. d'étages:" pos:[10,56] width:79 height:15 align:#left
 	spinner 'spn_nbres' "" pos:[88,55] width:72 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	spinner 'spn_hauteur' "" pos:[88,71] width:72 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	spinner 'spn_hauteur' "" pos:[88,71] width:57 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
 	label 'lbl_hauteur' "Htr. des étages:" pos:[10,72] width:76 height:15 align:#left
 	
 	
@@ -94,8 +94,10 @@ rollout roll_global "Global" width:162 height:341
 	dropdownList 'ddl_toiture' "" pos:[10,232] width:123 height:21 align:#left
 	
 	--- Interieur  -----
-	GroupBox 'grp_interieur' "Interieur :" pos:[3,259] width:162 height:40 align:#left enabled:false
-	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 align:#left	enabled:false
+	GroupBox 'grp_interieur' "Interieur :" pos:[3,259] width:162 height:40 enabled:false align:#left
+	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 enabled:false align:#left
+	
+	button 'btn_editer_etages' "+" pos:[143,72] width:16 height:16 align:#left
 	
 	fn actualiser =(
 		
@@ -120,33 +122,38 @@ rollout roll_global "Global" width:162 height:341
 
 
 
-	on roll_global open do			actualiser ()
 		
+			
+			
+		
+		
+	on roll_global open do
+		actualiser ()
 	on roll_global close do
 	(
--- 				core.fermer_toutes_fenetres query:true
+	-- 				core.fermer_toutes_fenetres query:true
 			)
-			
-			
 	on btn_pick_surface picked _shape do
 		core.assigner_surface 		$		_shape
 	on spn_nbres changed val do
 		core.actualiser ()
 	on spn_hauteur changed val do
 		core.actualiser ()
-	on lbx_facades selected val do	(
-			if core.facadeEditeur_estOuvert () do (
--- 				local index_facade_ouverte = ( core.get_mgr_facades () ).get_index_facadeOuverte ()
--- 				if lbx_facades.selection != index_facade_ouverte do
-					core.facadeEditeur_ouvrir	 	lbx_facades.selection
+	on lbx_facades selected val do
+	(
+				if core.facadeEditeur_estOuvert () do (
+	-- 				local index_facade_ouverte = ( core.get_mgr_facades () ).get_index_facadeOuverte ()
+	-- 				if lbx_facades.selection != index_facade_ouverte do
+						core.facadeEditeur_ouvrir	 	lbx_facades.selection
+				)
+				actualiser ()
 			)
-			actualiser ()
-		)
-	on lbx_facades doubleClicked arg do (
-			if not core.facadeEditeur_estOuvert () do (
-					core.facadeEditeur_ouvrir	 	lbx_facades.selection
+	on lbx_facades doubleClicked arg do
+	(
+				if not core.facadeEditeur_estOuvert () do (
+						core.facadeEditeur_ouvrir	 	lbx_facades.selection
+				)
 			)
-		)
 	on btn_dupliquer_facade pressed do
 	(
 			core.dupliquer_facade		lbx_facades.selection 
@@ -184,118 +191,19 @@ rollout roll_global "Global" width:162 height:341
 			local toiture = core.get_toiture ()
 			local toit_dialog = mgr_toiture.ouvrir_dialog	()
 		toit_dialog.set_toiture 	toiture
--- 			dialog.initialiser 	$	toiture 
+	-- 			dialog.initialiser 	$	toiture 
 		)
-	on ddl_toiture selected _val do 	(
-			local toiture = core.creer_toiture 	_val
-			actualiser ()
-		)
-		
-		
-	on chk_planchers changed state do 
-			core.actualiser ()
-)
-rollout roll_etages "Etages" width:162 height:152
-(
-	listbox 'lbx_etages' "" pos:[10,18] width:150 height:4 align:#left
-	button 'btn_ajouter_etages' "+" pos:[10,2] width:16 height:16 align:#left
-	
-	button 'btn_supprimer_etages' "-" pos:[26,2] width:16 height:16 align:#left
-	spinner 'spn_etageMin' "" pos:[68,80] width:40 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	label 'lbl_etage' "Etages :" pos:[10,77] width:50 height:19 align:#left
-	spinner 'spn_etageMax' "" pos:[120,80] width:40 height:16 range:[0,1e+13,0] type:#integer align:#left
-	label 'lbl_hauteur' "Hauteur :" pos:[10,95] width:80 height:22 align:#left
-	checkbutton 'ckb_etageMax' ">" pos:[107,80] width:16 height:16 align:#left
-	spinner 'spn_hauteur' "" pos:[88,96] width:72 height:16 range:[0,1e+13,0] type:#worldunits align:#left
-	
-	
-	fn actualiser = (
-		local liste_affichage = #()
-		for i = 1 to etages_min.count do (
-			local affichage = ""
-			affichage+= etages_min[i] as string  
-			if etages_max_use[i] do 
-				affichage+= " ---> " + etages_max[i] as string  
-				
-			affichage+= " : " + etages_hauteurs[i] as string  + "cm."
-			
-			append liste_affichage affichage
-		)
-		
-		lbx_etages.items = liste_affichage
-		
-		local enable_prop =  lbx_etages.selection != 0
-		btn_supprimer_etages.enabled = enable_prop
-		spn_etageMin.enabled = enable_prop
-		lbl_etage.enabled = enable_prop
-		spn_etageMax.enabled = enable_prop
-		lbl_hauteur.enabled = enable_prop
-		ckb_etageMax.enabled = enable_prop
-		spn_hauteur.enabled = enable_prop
-		
-		
-		if enable_prop do (
-			local index = lbx_etages.selection 
-			spn_etageMin.value				=	etages_min[ index ] 
-			ckb_etageMax.checked 			= etages_max_use[ index ] 
-			if  ckb_etageMax.checked then 
-				spn_etageMax.value				=	etages_max[ index ] 
-			else
-				spn_etageMax.indeterminate	=	not ckb_etageMax.checked
-			
-			spn_hauteur.value					=	etages_hauteurs[ index ] 
-			
-		)
-		
-		
-	)
-	
-	
-	fn set_etage = (
-		core.set_etage		lbx_etages.selection 		\
-														spn_etageMin.value		\
-														ckb_etageMax.checked		\
-														spn_etageMax.value		\
-														spn_hauteur.value	 	
-		actualiser ()
-	)
-	
-	on roll_etages open do
-		actualiser ()
-	on lbx_etages selected _val do
+	on ddl_toiture selected _val do
 	(
-			actualiser ()
-		)
-	on btn_ajouter_etages pressed do
+				local toiture = core.creer_toiture 	_val
+				actualiser ()
+			)
+	on chk_planchers changed state do
+		core.actualiser ()
+	on btn_editer_etages pressed do
 	(
-			core.ajouter_etage ()
-			actualiser ()
-		)
-	on btn_supprimer_etages pressed do
-	(
-			core.supprimer_etage lbx_etages.selection 
-			actualiser ()
-		)
-	on spn_etageMin changed val do (
-		
-		if val >= spn_etageMax.value do
-			spn_etageMax.value = val+1
-		
-		set_etage	()
-		
-	)
-	on spn_etageMax changed val do (
-		
-		if val <= spn_etageMin.value do
-			spn_etageMin.value = val-1
-		
-		set_etage	()
-		
-	)
-	on ckb_etageMax changed state do
-		set_etage	()
-	on spn_hauteur changed val do
-		set_etage	()
+				core.etagesEditeur_ouvrir ()
+			)
 )
 rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
 	
@@ -466,7 +374,6 @@ rollout roll_aPropos 			"A propos" 	rolledUp:false	(
 	HyperLink 'hpl2' "GitHub" pos:[127,17] address:"https://github.com/c-pages/cp-Urba-Cleanage" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
 	label 'lbl6' "2017" pos:[5,17] align:#left
 )
-
 
 
 

@@ -96,6 +96,9 @@ struct str_batiment_core (
 		--- surface -----
 		mgr_surface				= str_mgr_surfaces (),
 		
+		---- dialogs secondaires ----
+		m_etagesEditeur_dialog = fileIn "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout Etages.ms",
+		
 	-------- FONCTIONS	--------------------------------------------------------------------------------------------------------
 -- private
 		
@@ -160,7 +163,8 @@ struct str_batiment_core (
 			m_plug.etages_min[ _index ]			=	_etages_min
 			m_plug.etages_max_use[ _index ]	=	_etages_max_use
 			m_plug.etages_max[ _index ]		=	_etages_max
-			m_plug.etages_hauteurs[ _index ]	=	_etages_hauteurs			
+			m_plug.etages_hauteurs[ _index ]	=	_etages_hauteurs
+			actualiser ()
 		),
 		
 		fn get_etage_ht			_num_etage	=(
@@ -535,13 +539,17 @@ struct str_batiment_core (
 			mgr_facades.fermer_dialog 	()
 			
 			if bat_a_reconstruire do actualiser ()
-			
+			VP_cacher_longueurs ()
 		),		
 		fn facadeEditeur_estOuvert 					= mgr_facades.dialog_estOuvert (),
 		fn set_facadeEditeur_position		_pos 	= mgr_facades.set_dialog_pos  	_pos,
 		
-		
-		
+		--- editeur etages---------
+		fn		etagesEditeur_ouvrir = (
+			createDialog		m_etagesEditeur_dialog
+			m_etagesEditeur_dialog.initialiser  m_plug 
+			m_etagesEditeur_dialog.actualiser ()
+		),
 		
 	----- Initialisation  -----------------------
 	private
