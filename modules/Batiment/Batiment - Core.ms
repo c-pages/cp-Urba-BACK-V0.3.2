@@ -544,6 +544,34 @@ struct str_batiment_core (
 		
 		
 	----- Initialisation  -----------------------
+	private
+		fn initialiser_pre_post_rendu =(
+			
+			---- PRERENDU	-----------
+			callbacks.removescripts 	id:	#urbaBat_preRenderProxy
+			global batiments_asProxy =#()
+			local		txt_pre ="with redraw off (\n"
+			txt_pre +="	for bat in objects where classof bat == Urba_Batiment do (\n"
+			txt_pre +="		if 	bat.affiche_asProxy  do (\n"
+			txt_pre +="			bat.affiche_asProxy = false\n"
+			txt_pre +="			bat.core.actualiser ()\n"
+			txt_pre +="			append	batiments_asProxy		bat\n"
+			txt_pre +="	)	\n	)	\n )	\n	"
+			callbacks.addscript 	#preRender 	txt_pre 		id:#urbaBat_preRenderProxy
+
+
+
+			---- post rendu	-----------
+			callbacks.removescripts 	id:#urbaBat_postRenderProxy
+			local		txt_post ="	for bat in batiments_asProxy do (\n"
+			txt_post +="			bat.affiche_asProxy = true\n"
+			txt_post +="			bat.core.actualiser ()\n"
+			txt_post +="		)\n"
+			callbacks.addscript 	#postRender 	txt_post 		id:#urbaBat_postRenderProxy
+
+
+		),
+	public
 		fn initialiser 		_plug		= (
 			
 			debug "initialiser"

@@ -163,10 +163,6 @@
 					affichage += comp.nom 
 					
 					
-					-- on check si c'est l'instance d'un element deja present -----------
-					if param_instance != undefined then 
-					
-					
 					
 					if comp.type == #groupe	do (
 						if comp.params.repetitions  == 0 then
