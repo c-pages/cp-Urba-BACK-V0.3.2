@@ -52,6 +52,7 @@
 		
 		
 		
+		
 			
 				
 				
@@ -64,10 +65,10 @@
 		dropdownList 'ddl_murs' "" pos:[82,79] width:154 height:21 selection:3 align:#left
 		
 		
-		checkbutton 'ckb_mur_nord' "Nord" pos:[82,100] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-		checkbutton 'ckb_mur_sud' "Sud" pos:[121,100] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-		checkbutton 'ckb_mur_est' "Est" pos:[159,100] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-		checkbutton 'ckb_mur_ouest' "Ouest" pos:[197,100] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+		checkbutton 'ckb_mur_nord' "Nord" pos:[82,98] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+		checkbutton 'ckb_mur_sud' "Sud" pos:[121,98] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+		checkbutton 'ckb_mur_est' "Est" pos:[159,98] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+		checkbutton 'ckb_mur_ouest' "Ouest" pos:[197,98] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
 		label 'lbl_appliquerA' "Murs:" pos:[17,83] width:32 height:15 align:#left
 					
 		checkbutton 'chk_etagesMax' "" pos:[159,49] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
@@ -130,6 +131,11 @@
 			
 			
 			------------  Fonctions	----------------------------------------------------------------------------------
+			
+			
+			fn on_a_change_un_truc = 	m_changement 				= true
+				
+			
 			fn  remplir_lbx_sequence 	=(
 				
 				--------- la sequence de composants --------
@@ -155,6 +161,12 @@
 					
 					-- le nom ---
 					affichage += comp.nom 
+					
+					
+					-- on check si c'est l'instance d'un element deja present -----------
+					if param_instance != undefined then 
+					
+					
 					
 					if comp.type == #groupe	do (
 						if comp.params.repetitions  == 0 then
@@ -454,6 +466,7 @@
 				)
 				
 				m_plug.core.VP_afficher_longueurs ()
+				redrawViews ()
 			)
 			fn set_facade		_facade 	=(
 				-- la facade courante	----
@@ -464,6 +477,7 @@
 					lbx_sequence.selection  = 1
 					m_composant_courant = m_facade_courante.params.sequence[ 	1 ]
 				)
+				m_changement = false
 				
 				--- on passe en proxy ---------------
 				m_plug.core.actualiser ()
@@ -526,14 +540,13 @@
 				
 				actualiser ()
 			)
-			fn enregistrer =(
+			/* fn enregistrer =(
 				
 				local		mgr_facade		=	m_plug.core.get_mgr_facades ()
 				mgr_facade.enregistrer_parametres	m_facade_courante
 				m_changement 				= false
 				
-			)
-			
+			) */
 			
 			
 			
@@ -550,21 +563,14 @@
 				
 				
 				
+						
+						
 		on roll_urba_editeurFacades close do
 		(
-			m_plug.core.VP_cacher_longueurs ()
 			m_plug.core.facadeEditeur_fermer 	()
+			m_plug.core.VP_cacher_longueurs ()
 			
 			
-					/*
-					if m_changement then  
-						if querybox "Enregistrer la façade ?" do (
-							enregistrer ()
-							m_plug.core.actualiser ()
-						)
-					
-					m_plug.actualiser_rollouts () */
-					m_plug.core.actualiser ()
 				)
 		on roll_urba_editeurFacades resized _taille 				do
 			redimensionnerFenetre 	_taille
@@ -611,6 +617,30 @@
 		(
 					m_facade_courante.params.murs 	= 	sel
 			m_changement = true
+				)
+		on ckb_mur_nord changed state do
+		(
+					m_facade_courante.params.murs_nord 	= 	state		
+			m_changement = true
+					actualiser ()
+				)
+		on ckb_mur_sud changed state do
+		(
+					m_facade_courante.params.murs_sud 	= 	state		
+			m_changement = true
+					actualiser ()
+				)
+		on ckb_mur_est changed state do
+		(
+					m_facade_courante.params.murs_est 	= 	state		
+			m_changement = true
+					actualiser ()
+				)
+		on ckb_mur_ouest changed state do
+		(
+					m_facade_courante.params.murs_ouest 	= 	state		
+			m_changement = true
+					actualiser ()
 				)
 		on chk_etagesMax changed state do
 		(
@@ -714,46 +744,25 @@
 		on btn_valider pressed do
 		(
 			
-			m_plug.core.VP_cacher_longueurs ()
-					enregistrer ()
+			m_plug.core.VP_cacher_longueurs 	()
+			m_plug.core.enregistrer_element	m_facade_courante
+			m_changement = false
+			m_plug.actualiser_rollouts ()
 			
-					m_plug.core.facadeEditeur_fermer 	()
-					m_plug.actualiser_rollouts ()
-		-- 					m_plug.core.actualiser ()
-				)
+			m_plug.core.demander_reconstruire 	()
+			m_plug.core.facadeEditeur_fermer 		()
+			
+		)
 		on btn_annuler pressed do
 		(
 			
-			m_plug.core.VP_cacher_longueurs ()
-							m_plug.core.facadeEditeur_fermer 	()
-		-- 					m_plug.core.actualiser ()
-						)
-						
-						
-		on ckb_mur_nord changed state do
-		(
-					m_facade_courante.params.murs_nord 	= 	state		
-			m_changement = true
-					actualiser ()
-				)
-		on ckb_mur_sud changed state do
-		(
-					m_facade_courante.params.murs_sud 	= 	state		
-			m_changement = true
-					actualiser ()
-				)
-		on ckb_mur_est changed state do
-		(
-					m_facade_courante.params.murs_est 	= 	state		
-			m_changement = true
-					actualiser ()
-				)
-		on ckb_mur_ouest changed state do
-		(
-					m_facade_courante.params.murs_ouest 	= 	state		
-			m_changement = true
-					actualiser ()
-				)
+			m_plug.core.VP_cacher_longueurs 		()
+			
+			m_plug.core.demander_reconstruire 	()			
+			m_changement = false
+			m_plug.core.facadeEditeur_fermer 		()
+			
+		)
 	)
 		
 		
@@ -767,7 +776,6 @@
 	
 	
 )
-
 
 
 

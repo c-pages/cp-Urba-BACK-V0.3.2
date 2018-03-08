@@ -14,7 +14,8 @@ struct  str_manager_parametres (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug = false,
+-- 		m_debug = false,
+		m_debug = true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:"urba | str_manager_parametres_univ"	catch (),
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	
@@ -212,16 +213,41 @@ struct  str_manager_parametres (
 				
 				for paramNom in getPropNames	params_TMP  do (
 					
-					debug "------########################################----->	paramNom" var:paramNom	
+-- 					debug "------########################################----->	paramNom" var:paramNom	
 					local propVal = getProperty params_TMP	paramNom
 					if classOf propVal != maxScriptfunction	do (
 						if classOf propVal == array then (
+							
+							local tab_temp = #()
 							for i = 1 to propVal.count do (
-								local env_elem = m_core.get_element_parID 	propVal[i]
-								if env_elem != undefined do propVal[i] = env_elem
+								
+								local	param_instance												
+								for param_present in tab_temp do 
+									if hasproperty	param_present	#id do
+										if param_present.id == propVal[i] do
+											param_instance = param_present
+								
+								debug "param_instance" var:param_instance
+								
+								-- on check si c'est l'instance d'un element deja present -----------
+								if param_instance != undefined then 
+									propVal[i]  = param_instance
+								else	(
+								
+								
+									local env_elem = m_core.get_element_parID 	propVal[i]
+									if env_elem != undefined do (
+										
+										appendIfUnique	 tab_temp  env_elem
+										
+										propVal[i] = env_elem
+										
+										
+									)
+								)
 							)
 						) else (
-						debug "------####################################----->	propVal" var:propVal	
+-- 						debug "------####################################----->	propVal" var:propVal	
 								local env_elem = m_core.get_element_parID 	propVal
 -- 						debug "------####################################----->	env_elem" var:env_elem	
 								if env_elem != undefined do propVal = env_elem
@@ -324,12 +350,14 @@ struct  str_manager_parametres (
 							MAXScriptFunction:()
 							Array: 		(
 								
+												debug "<<<<<<<<<<<<<<<<<<< ON CHARGE UN TABLEAU  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" 
 								-- si on a une liste d'élément à nous	-------------
 								local tab_params	=		( mgr_datas.string_to_array	param_value )
 								
 								if tab_params.count > 0 then (
 									if classOf	tab_params[1] == string do
 										if findString tab_params[1]	"ID_" != undefined do (
+											
 											
 											param_value = #()
 											for elemID in tab_params do	(

@@ -21,7 +21,6 @@ struct compo_params	(
 
 --- les rollout du composant	---------
 rollout compo_dialog "Mur plein" width:180 height:70	(
-	
 	local m_rollPrt
 	local m_compo
 	local m_plug
@@ -39,10 +38,12 @@ rollout compo_dialog "Mur plein" width:180 height:70	(
 	on spn_longueur changed val do (
 		m_compo.params.longueur = val
 		m_rollPrt.actualiser 	sans_subRoll_1:true
+		m_rollPrt.on_a_change_un_truc ()
 	)
 	on edt_nom	 entered txt 	do	(
 		m_compo.nom = txt
-		m_rollPrt.actualiser 	sans_subRoll_1:true
+		m_rollPrt.actualiser 	sans_subRoll_1:true		
+		m_rollPrt.on_a_change_un_truc ()
 	)
 	
 )
@@ -51,7 +52,7 @@ rollout compo_dialog "Mur plein" width:180 height:70	(
 --- la fonction de construction	---------
 fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 			onConstruitLaDalle:true		this:	= (
 	
-		
+	
 	
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
@@ -102,7 +103,7 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 			onConstruitLaDalle:
 		pt_result_1 = pts_ids[1]
 		pt_result_2 = pts_ids[2]
 		
-		
+		appe
 		
 		---- LE MUR -----------------------------------------------------------------------			
 		-------	Creation des points 	--------

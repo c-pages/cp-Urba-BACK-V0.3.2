@@ -102,6 +102,15 @@ struct str_construction (
 			facades_result
 			
 		),
+		
+		fn filtrer_facades  	_facades  	_etageNum		_id_pt	=(
+			
+			local facades_result 		= #()
+			for facde in _facades  do 
+				if 	m_plug.core.est_valide		facde			_etageNum		_id_pt  do
+					append facades_result  facde
+			facades_result
+		),
 		/* 
 -- 		fn filtrer_facades		
 		fn choisir_parProbas		_liste	 = (
@@ -152,11 +161,11 @@ struct str_construction (
 			
 			local hauteur_proxy	=		ht_bat 
 			local surface_points 	= m_plug.core.get_surface_points 	()
-			local faces 				= m_geo.facesContour	 	surface_points		z 		hauteur_proxy
-			m_geo.set_matID 		faces		#mur
+			local faces 				= m_geo.facesContour	 	surface_points		z 		hauteur_proxy matID:#mur
+			
 			
 			z += hauteur_proxy
-			creer_dalle	( z ) -- matID:#int_sol
+			creer_dalle	( z )  matID:#mur
 			
 		),
 		fn creer_ssBassement  		&z	=(
@@ -199,8 +208,8 @@ struct str_construction (
 				
 				
 				--- on regarde si on a des facades pour cet étage	---------------
-				local facades_etages 	= 	filtrer_facades_parEtages		facades_total 		n_etage
-				local onA_uneFacade 	= 	facades_etages.count > 0
+-- 				local facades_etages 	= 	filtrer_facades_parEtages		facades_total 		n_etage
+-- 				local onA_uneFacade 	= 	facades_etages.count > 0
 				
 				---- on fait le tour des murs 	---------------------
 				for id_pt = 1 to surface_points.count do	 (
@@ -215,13 +224,12 @@ struct str_construction (
 					local	mur_norm 			= normalize ( pt_mur_2 -	pt_mur_1 )
 					
 					---  on regarde si on a des facades pour ce mur ---------------
-					local facades_pourCeMur		=	filtrer_facades_parMurs		facades_etages		mur_longueur	surface_points		id_pt
-					
-					if facades_pourCeMur.count > 0 	then	(
-							if facades_pourCeMur[1] != undefined then
-								onA_uneFacade = true
-							else	onA_uneFacade = false
-						) else	onA_uneFacade = false
+					local facades_pourCeMur		=	 filtrer_facades  		facades_total  	n_etage		id_pt	
+-- 					filtrer_facades_parMurs		facades_etages		mur_longueur	surface_points		id_pt
+-- 					
+					local 	onA_uneFacade = true
+					if facades_pourCeMur.count == 0 	do
+						onA_uneFacade = false
 						
 					---- si on  a des facades on construit la sequence --------------------
 					if 	onA_uneFacade  then 

@@ -190,11 +190,12 @@ struct	str_OSM_point	(
 	private
 		rayonMax = 6378137.0	as double,
 		rayonMin = 6356752.3142	as double,
-	
+		
+		coef_correction_echelle = 1.271505947323704,
 	
 	private
 		fn mercX	_longitude =(
-			( degToRad  _longitude ) * rayonMax
+			( degToRad  _longitude ) * rayonMax	*coef_correction_echelle
 		),
 		fn mercY	_latitude	=(
 			if _latitude > 89.5 		do	_latitude = 89.5
@@ -213,7 +214,7 @@ struct	str_OSM_point	(
 			
 			local 	ts = tan (.5 * ( PI * 0.5 - phi))/con
 			local 	result = 0 - rayonMax * log ts
-			
+			result *= 	coef_correction_echelle
 			result
 			
 		),

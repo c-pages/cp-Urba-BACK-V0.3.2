@@ -51,10 +51,12 @@ rollout compo_dialog "Groupe" width:180 height:70	(
 	(
 		m_compo.nom = txt
 		m_rollPrt.actualiser ()
+		m_rollPrt.on_a_change_un_truc ()
 	)
 	on spn_repetitions changed val 	do (
 		m_compo.params.repetitions 					= val
 		m_rollPrt.actualiser sans_subRoll_1:true
+		m_rollPrt.on_a_change_un_truc ()
 	)
 )
 

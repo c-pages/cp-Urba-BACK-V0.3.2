@@ -44,12 +44,16 @@ rollout menuis_dialog "Espacement" (
 		)
 		
 		
-		on spn_hauteur changed val do	
-			m_compo.params.hauteur		 = val
+		on spn_hauteur changed val do	 (
+			m_compo.params.hauteur		 = val			
+			m_rollPrt.on_a_change_un_truc ()
+		)
 		
 		
-		on ddl_ouverture selected val do	
+		on ddl_ouverture selected val do	(
 			m_compo.params.ouverture_sens		 = val
+			m_rollPrt.on_a_change_un_truc ()
+		)
 )
 
 

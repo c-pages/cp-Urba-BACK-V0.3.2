@@ -63,6 +63,8 @@ struct str_batiment_core (
 	---- pointeur  vers le plugin --------------------
 		m_plug,	
 		
+		bat_a_reconstruire = false,
+		
 	--------  managers divers ---------------
 		---- convertisseur Parametres to String  -------------
 		mgr_datas 				= str_datasToString 	m_prt:this,
@@ -110,7 +112,7 @@ struct str_batiment_core (
 			
 			---- on consrtuit ----
 			mgr_construction.actualiser ()
-			
+			bat_a_reconstruire = false
 		),		
 		
 	----- Presets -----------------------
@@ -215,6 +217,66 @@ struct str_batiment_core (
 			local murTemp = mgr_facCompos.creer_element  idConstructeur:#mur
 			murTemp.params.longueur 	=	_longueur
 			murTemp
+		),
+		
+		
+		fn est_valide		_fcd			_etage		_idPtMur  	=(
+			
+			
+			local pts_surface 	= mgr_surface.get_points ()		
+			local pt_1 = pts_surface[_idPtMur]
+			local pt_2 = if _idPtMur == pts_surface.count then pts_surface[1] else pts_surface[_idPtMur+1]			
+			local result_valid 		= true
+			
+			--- sequence------------
+			if _fcd.params.get_longueur ()  == 0	do
+				result_valid = false
+			
+			
+			--- longueur ------------
+			local longueur_mur 	= distance		pt_1 	pt_2
+			local lg_min_fcd 		= amax #(  _fcd.params.longueurMin , _fcd.params.get_longueur () )
+			if longueur_mur < lg_min_fcd do
+				result_valid = false
+			if _fcd.params.longueurMax_use and longueur_mur > _fcd.params.longueurMax do
+				result_valid = false
+			
+			
+			---- etages -------------
+			if _fcd.params.etagesMin_use and  _etage < _fcd.params.etagesMin do
+				result_valid = false
+			if _fcd.params.etagesMax_use and  _etage > _fcd.params.etagesMax do
+				result_valid = false
+			
+			
+			---- cardinaux	-------------
+			local murs_cardinal = _fcd.params.get_cardinaux ()
+			if murs_cardinal.count != 0 do (
+				local mur_actuel_cardinal = mgr_surface.get_mur_cardinal		pt_1  	pt_2
+				if findItem  	murs_cardinal	mur_actuel_cardinal == 0 do
+					result_valid = false
+			)
+			
+			
+			-----  pignons  -------------
+			if _fcd.params.murs != 1 do (
+				local mur_estPignon =  mgr_surface.est_pignon  	_idPtMur
+				if mur_estPignon and _fcd.params.murs == 2 do
+					result_valid  = false
+				
+				if not mur_estPignon and _fcd.params.murs == 3 do
+					result_valid  = false
+			)
+			
+			
+			result_valid
+		),
+		
+		fn get_facade_enEdition =(
+			local result
+			if mgr_facades.dialog_estOuvert () do
+				result = ( mgr_facades.get_dialog()).m_facade_courante
+			result
 		),
 		
 		
@@ -435,25 +497,50 @@ struct str_batiment_core (
 		
 	----- rollout	Editeur de  facades -----------------
 	public
-		fn facadeEditeur_ouvrir 				_index	=	(
-			local dialg_facades	=	mgr_facades.ouvrir_dialog 		()
-			local facade_aOuvrir 	= get_facade_parIndex  		_index
-			dialg_facades.set_facade	facade_aOuvrir			
+		fn demander_reconstruire = bat_a_reconstruire = true,
+		fn demander_enregistrement_facade =(
+			local result = queryBox  "Enregistrer la façade ?"
+			if  result do (
+				enregistrer_element 		( get_facade_enEdition () )
+				demander_reconstruire 	()
+			)
+			result
 		),
-		fn facadeEditeur_fermer 						=	mgr_facades.fermer_dialog 	(),		
+		fn facadeEditeur_ouvrir 				_index	=	(
+			local dialg_facades
+			local demande_enr
+			debug "FERMER"
+			if not mgr_facades.dialog_estOuvert () then (
+			debug "est a ouvrir"
+				dialg_facades	=	mgr_facades.ouvrir_dialog 		()
+			) else (
+			debug "est deja ouvert"
+				dialg_facades 	= mgr_facades.get_dialog 			()
+			debug "m_changement" var:dialg_facades.m_changement
+				if dialg_facades.m_changement  do
+					demander_enregistrement_facade ()
+			)
+-- 			if demande_enr != #cancel do (
+				local facade_aOuvrir 	= get_facade_parIndex  		_index
+				dialg_facades.set_facade	facade_aOuvrir		
+				redrawViews ()
+-- 			)
+		),
+		fn facadeEditeur_fermer 						=	(
+			
+			dialg_facades 	= mgr_facades.get_dialog 			()
+			if dialg_facades.m_changement  do 
+				demander_enregistrement_facade ()
+			
+			mgr_facades.fermer_dialog 	()
+			
+			if bat_a_reconstruire do actualiser ()
+			
+		),		
 		fn facadeEditeur_estOuvert 					= mgr_facades.dialog_estOuvert (),
 		fn set_facadeEditeur_position		_pos 	= mgr_facades.set_dialog_pos  	_pos,
 		
 		
-		
-		
-	----- divers -------------
-		fn get_facade_enEdition =(
-			local result
-			if mgr_facades.dialog_estOuvert () do
-				result = ( mgr_facades.get_dialog()).m_facade_courante
-			result
-		),
 		
 		
 	----- Initialisation  -----------------------
