@@ -24,7 +24,16 @@ rollout compo_dialog "Balcon fin" width:180 height:70	(
 --- les parametres du composant	---------
 struct compo_params	(
 	longueur = 0,
-	profondeur	= 100
+	profondeur	= 100,
+	private
+		longueur_etirer =0,
+	public
+		fn set_longueur_etirer 	_lg = longueur_etirer = _lg,
+		fn get_longueur_etirer = (
+			local result = longueur_etirer
+-- 			longueur_etirer = 0
+			result
+		)
 )
 
 
@@ -124,7 +133,22 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		ptr_geo.face 		#( pts_dessus_ids[4], 	pts_dessus_ids[3], pts_dessus_ids[2], pts_dessus_ids[1])		  matID:#mur
 		
 		
-		---face du dessous ---
+		---face du plafond ---
+		-------	Creation des points 	--------
+		local pt_plafond_1 		= pt_sol_1 +	vec_ht		--	- vec_ep_dalle
+		local pt_plafond_2 		= pt_sol_2 +	vec_ht		--	- vec_ep_dalle
+		local pt_plafond_3 		= pt_sol_3 +	vec_ht		--	- vec_ep_dalle
+		local pt_plafond_4		= pt_sol_4 +	vec_ht		--	- vec_ep_dalle
+		
+		--- creation des points --------------
+		local pts_pos 	= #( pt_plafond_1, pt_plafond_2, pt_plafond_3, pt_plafond_4 )
+		local pts_dessous_ids 	= ptr_geo.points 	pts_pos		
+		
+		-------	Creation des faces 	--------
+		ptr_geo.face 		#( pts_dessous_ids[1], 	pts_dessous_ids[2], pts_dessous_ids[3], pts_dessous_ids[4])		  matID:#mur
+		
+		
+		---face de devant ---
 		-------	Creation des points 	--------
 		local pt_dessous_1 		= pt_sol_1 	- vec_ep_dalle
 		local pt_dessous_2 		= pt_sol_2 	- vec_ep_dalle
@@ -135,11 +159,6 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		local pts_pos 	= #( pt_dessous_1, pt_dessous_2, pt_dessous_3, pt_dessous_4 )
 		local pts_dessous_ids 	= ptr_geo.points 	pts_pos		
 		
-		-------	Creation des faces 	--------
-		ptr_geo.face 		#( pts_dessous_ids[1], 	pts_dessous_ids[2], pts_dessous_ids[3], pts_dessous_ids[4])		  matID:#mur
-		
-		
-		---face de devant ---
 		-------	Creation des faces 	--------
 		ptr_geo.face 		#( pts_dessus_ids[2], 	pts_dessous_ids[2], pts_dessous_ids[3], pts_dessus_ids[3])		  matID:#mur
 		

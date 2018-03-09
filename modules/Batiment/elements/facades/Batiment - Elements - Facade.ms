@@ -132,16 +132,72 @@ struct facade_params	(
 			local longueur_sequence 	= get_longueur ()
 			
 			
+			local grp 		=#()
+			
+			local grp_repet 		=0
+			local grp_longueur 	=0
+			local reste 				=#()
+			local reste_longueur 	=0
+			local groupe_enFormation = false
+			
+			--- les infos du groupe	: repetition et longueur ---------------------
+			for elem in sequence do (
+				if elem.type == #groupe then (
+					groupe_enFormation = true
+					grp_repet = elem.params.repetitions
+				)
+				else if elem.type == #groupeFin then (
+					groupe_enFormation = false
+					grp_longueur = 0
+					for elemGrp in grp do
+						grp_longueur += elemGrp.get_longueur()					
+				) else	
+					if groupe_enFormation then 
+						append grp elem		
+					else (
+						append reste elem		
+						reste_longueur +=	elem.get_longueur ()
+					)
+			)
+			-- si on a un groupe repet à 0 on clalcul combien de fois on repete le groupe -------------
+			if grp.count> 0 and grp_repet == 0 do 
+				grp_repet = floor ( (_longueur_facade - reste_longueur ) / grp_longueur )
+			
+			
 			
 			
 			--- le nombre l'element de la sequence à prendre en compte (pas les balcons) et espacments
 			local nbr_compos_aPrendreEnCompte	=	0
-			for  elem in sequence do 
-				if elem.type != #balcon	and elem.type != #balconFin and elem.type != #groupe	and elem.type != #groupeFin do 
-					nbr_compos_aPrendreEnCompte	+= 1	
+			local i = 1
+			while i  <= sequence.count do (
+				local elem = sequence[i]
+				if elem.type == #groupe then (
+					for j= 1 to grp_repet do
+						for elemGrp in grp do ( 
+							if elemGrp.type != #balcon	and elemGrp.type != #balconFin and elemGrp.type != #groupe	and elemGrp.type != #groupeFin do 
+								nbr_compos_aPrendreEnCompte	+= 1	
+						)
+					i += grp.count  + 1
+				)else ( 
+							if elem.type != #balcon	and elem.type != #balconFin and elem.type != #groupe	and elem.type != #groupeFin do 
+								nbr_compos_aPrendreEnCompte	+= 1	
+						)
+				
+				i+= 1
+			)
 			
 			
-			
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
 			if longueur_sequence	== 0 or nbr_compos_aPrendreEnCompte == 0  then (
 				
 				sequence_totale 	= #( _plug.core.get_murPlein		longueur_facade )
@@ -149,38 +205,8 @@ struct facade_params	(
 			) else (
 				
 				local result 	= 0
-				local grp 		=#()
-				
-				local grp_repet 		=0
-				local grp_longueur 	=0
-				local reste 				=#()
-				local reste_longueur 	=0
-				local groupe_enFormation = false
-				
-				---- les infos du groupe	: repetition et longueur ---------------------
-				for elem in sequence do (
-					if elem.type == #groupe then (
-						groupe_enFormation = true
-						grp_repet = elem.params.repetitions
-					)
-					else if elem.type == #groupeFin then (
-						groupe_enFormation = false
-						grp_longueur = 0
-						for elemGrp in grp do
-							grp_longueur += elemGrp.get_longueur()					
-					) else	
-						if groupe_enFormation then 
-							append grp elem		
-						else (
-							append reste elem		
-							reste_longueur +=	elem.get_longueur ()
-						)
-				)
 				
 				
-				-- si on a un groupe repet à 0 on clalcul combien de fois on repete le groupe -------------
-				if grp.count> 0 and grp_repet == 0 do 
-					grp_repet = floor ( (_longueur_facade - reste_longueur ) / grp_longueur )
 			
 				
 				--- la sequence à répartir	---------
@@ -222,7 +248,7 @@ struct facade_params	(
 					)
 					2: 	(	----- Etirer  -----
 						
-						nbr_espacemts				=	grp.count * grp_repet + reste.count 						
+						nbr_espacemts				=	nbr_compos_aPrendreEnCompte	--	grp.count * grp_repet + reste.count 						
 						longueur_restant 			=		_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )						
 						longueur_espacement 	= longueur_restant / nbr_espacemts  
 						

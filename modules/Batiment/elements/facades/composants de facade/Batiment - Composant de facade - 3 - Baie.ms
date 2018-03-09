@@ -386,15 +386,17 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		local onCreer_menuiserie_si_sequenceVide = false
 		
 		-------	  MENUISERIE -	CADRE 	---------------------------------------------------------------------------------------------------------------		
+		
+		
 		--- menuiserie du haut	------------
 		local ptTmp				=	pts_baie[2] -  vec_men_ht
 		local vecTMP_long 	= (pts_baie[3] - pts_baie[2] ) 
-		if onCreer_menuiserie_si_sequenceVide do
+		if sequence.count == 0 and 	onCreer_menuiserie_si_sequenceVide or sequence.count != 0 do
 			ptr_geo.tube		ptTmp		vecTMP_long		vec_men_ht				   vec_men_ep			matID:#menuiserie 
 		
 		--- menuiserie de gauche	------------
 		local vecTMP_ht 	= ( pts_baie[2] - pts_baie[1] )	- vec_men_ht		
-		if onCreer_menuiserie_si_sequenceVide do
+		if sequence.count == 0 and 	onCreer_menuiserie_si_sequenceVide or sequence.count != 0 do
 			ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg      vec_men_ep				matID:#menuiserie --	flip:true
 		
 		

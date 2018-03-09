@@ -18,7 +18,16 @@ struct compo_params	(
 	longueur 		= 0,
 	largeur			= 100,
 	profondeur	= 100,
-	gardeCorps	= undefined
+	gardeCorps	= undefined,
+	private
+		longueur_etirer =0,
+	public
+		fn set_longueur_etirer 	_lg = longueur_etirer = _lg,
+		fn get_longueur_etirer = (
+			local result = longueur_etirer
+-- 			longueur_etirer = 0
+			result
+		)
 	
 )
 
