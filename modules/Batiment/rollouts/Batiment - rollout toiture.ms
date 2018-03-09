@@ -4,7 +4,7 @@
 	
 	
 
-rollout roll_urba_editeurToiture "Urba - Editeur de toiture" width:256 height:294
+rollout roll_urba_editeurToiture "Urba - Editeur de toiture" width:453 height:294
 (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
@@ -28,11 +28,13 @@ rollout roll_urba_editeurToiture "Urba - Editeur de toiture" width:256 height:29
 		
 		------------  UI	----------------------------------------------------------------------------------		
 		
-		edittext 'edt_nom_toiture' "" pos:[7,12] width:200 height:16 align:#left
-		button 'btn_enregistrer' "S" pos:[224,11] width:19 height:19 toolTip:"Sauvegarder preset." align:#left
-		button 'btn_charger' "O" pos:[206,11] width:19 height:19 toolTip:"Ouvrir preset." align:#left
-		subRollout 'subroll_parametres' "Parametres" pos:[24,63] width:210 height:208 align:#left
-		GroupBox 'grp_prop' "Propriétés" pos:[12,45] width:232 height:238 align:#left
+	edittext 'edt_nom_toiture' "" pos:[7,12] width:200 height:16 align:#left
+	button 'btn_enregistrer' "S" pos:[224,11] width:19 height:19 toolTip:"Sauvegarder preset." align:#left
+	button 'btn_charger' "O" pos:[206,11] width:19 height:19 toolTip:"Ouvrir preset." align:#left
+	subRollout 'subroll_parametres' "Parametres" pos:[24,63] width:210 height:208 align:#left
+	GroupBox 'grp_prop' "Propriétés" pos:[12,45] width:232 height:238 align:#left
+	listBox 'lbx4_elements' "" pos:[260,65] width:171 height:16 align:#left
+	button 'btn_ajouter_element' "+" pos:[261,46] width:18 height:18 align:#left
 		
 		------------  Fonctions	----------------------------------------------------------------------------------
 		
@@ -73,6 +75,7 @@ rollout roll_urba_editeurToiture "Urba - Editeur de toiture" width:256 height:29
 	----------------- Evenements ------------------------------------------------------------------------
 	
 	
+	button 'btn16' "-" pos:[278,46] width:18 height:18 align:#left
 )
 	
 	

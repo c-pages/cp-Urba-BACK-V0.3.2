@@ -15,7 +15,8 @@ toiture_toolTip =	"..."
 
 --- les parametres du composant	---------
 struct toiture_params	(
-	acrotere_ht = 50.
+	acrotere_ht = 50.,
+	elements =#()
 )
 --- les rollout du composant	---------
 rollout toiture_dialog "Toiture plate" width:180 height:70	(

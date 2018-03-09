@@ -31,6 +31,7 @@
 
 --- inculsion des fichiers externes	------------------------------
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Divers.ms"
+include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager de Trimesh.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Viewport.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Construction.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager Surface.ms"
@@ -77,10 +78,12 @@ struct str_batiment_core (
 		--- construction de la geometrie  -------------------
 		mgr_construction		= str_construction 	(),
 		
-		-- materiaux ----------
-		mgr_mat	=str_mgr_material () ,
+		mgr_trimesh 			= str_mgr_trimesh(),
 		
-		mgr_VP 	= str_bat_VP () ,
+		-- materiaux ----------
+		mgr_mat					= str_mgr_material () ,
+		
+		mgr_VP 					= str_bat_VP () ,
 		
 	-------- Les managers des differents éléments du batiment ---------------
 		---- facades	----------
