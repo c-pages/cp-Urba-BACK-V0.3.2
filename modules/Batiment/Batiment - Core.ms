@@ -94,7 +94,7 @@ struct str_batiment_core (
 		
 		---- toiture	----------
 		mgr_toiture 				= str_manager_parametres (),
-		mgr_toitElements,
+		mgr_toitElements		= str_manager_parametres (),
 		
 		--- surface -----
 		mgr_surface				= str_mgr_surfaces (),
@@ -199,6 +199,7 @@ struct str_batiment_core (
 		fn get_mgr_composants 	= mgr_facCompos,
 		fn get_mgr_facMenuiseries	= mgr_facMenuiseries,
 		fn get_mgr_toiture	 		= mgr_toiture,
+		fn get_mgr_toitElement		= mgr_toitElements,
 		
 		fn get_mgrDatas 				= mgr_datas,
 		fn get_mgrPresets 			= mgr_presets,
@@ -424,11 +425,8 @@ struct str_batiment_core (
 	---- universel ---------------
 		fn get_manager_parElement 	_element =(
 			
--- 			debug "##### get_manager_parElement ##### "
--- 			debug "##### hasProperty 	_element	#get_typeClasse ##### " var:(hasProperty 	_element	#get_typeClasse)
-			
-			
 			local mgr
+			
 			if hasProperty 	_element	#get_typeClasse do (
 				case ( _element.get_typeClasse 	() ) of (
 						"toiture":			mgr = mgr_toiture
@@ -436,6 +434,7 @@ struct str_batiment_core (
 						"facCompos": 	mgr = mgr_facCompos
 						"facMenuis":		mgr = mgr_facMenuiseries
 						"gardeCorps":	mgr = mgr_gardeCorps
+						"toitElements":	mgr = mgr_toitElements
 				)
 			)  
 			mgr
@@ -471,10 +470,42 @@ struct str_batiment_core (
 			else if mgr_gardeCorps.get_element_parID	 		_idUnique != undefined then
 				elem	=	mgr_gardeCorps.get_element_parID	 	_idUnique
 			
+			--- on cherche dans les elements de toiture	 -----------
+			else if mgr_toitElements.get_element_parID	 		_idUnique != undefined then
+				elem	=	mgr_toitElements.get_element_parID	 	_idUnique
+			
 			elem
+			
 		),
-		
-		
+		fn get_menu_contructeur	_type =(
+			local menuTmp
+			case _type of (
+				#toiture:			menuTmp = mgr_toiture.get_menu_constructeurs ()
+				#facades: 			menuTmp = mgr_facades.get_menu_constructeurs ()
+				#facCompos: 	menuTmp = mgr_facCompos.get_menu_constructeurs ()
+				#facMenuis:		menuTmp = mgr_facMenuiseries.get_menu_constructeurs ()
+				#gardeCorps:	menuTmp = mgr_gardeCorps.get_menu_constructeurs ()
+				#toitElements:	menuTmp = mgr_toitElements.get_menu_constructeurs ()
+			)
+			menuTmp
+		),
+		fn creer_element	_type =(
+			local nv_element
+			case _type of (
+				#toiture:			nv_element = mgr_toiture.creer_element ()
+				#facades: 			nv_element = mgr_facades.creer_element ()
+				#facCompos: 	nv_element = mgr_facCompos.creer_element ()
+				#facMenuis:		nv_element = mgr_facMenuiseries.creer_element ()
+				#gardeCorps:	nv_element = mgr_gardeCorps.creer_element ()
+				#toitElements:	(
+					nv_element = mgr_toitElements.creer_element 	enregistrer:true
+					local toiture = get_toiture ()
+					append 	toiture.params.elements		nv_element
+					m_etagesEditeur_dialog.actualiser ()
+				)
+			)
+			nv_element
+		),
 		
 		
 		
@@ -615,6 +646,11 @@ struct str_batiment_core (
 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\"  )					\
 														fichier_dialog:				( "Batiment - rollout toiture.ms" )		\
 														typeParametre:				"toiture" 
+			
+			mgr_toitElements.initialiser 	plug:m_plug					\
+														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\composants toiture\\"  )					\
+														typeParametre:				"toitElements" 
+-- 														fichier_dialog:				( "Batiment - rollout toiture.ms" )		\
 			
 		)
 		

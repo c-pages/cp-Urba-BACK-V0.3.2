@@ -136,6 +136,16 @@ parameters params_gardeCorps 		(
 	
 )
 
+parameters params_toitElements		(
+	
+	---- Parametres -----------------------------------
+	toitElements_id 				type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	toitElements_nom 				type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	toitElements_type 				type:#stringTab 	tabSize:0  		tabSizeVariable:true
+	toitElements_params			type:#stringTab		tabSize:0 			tabSizeVariable:true	
+	
+)
+
 parameters params_toiture 							(
 	
 	toiture_type					type:#string 		default:"sans"		animatable:false		invisibleInTV:true

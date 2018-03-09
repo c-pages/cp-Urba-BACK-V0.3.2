@@ -34,7 +34,7 @@ rollout compo_dialog "Groupe - fin" width:180 height:70	(
 --- on importe le fichier mere des composants ----
 _str_contructeur = fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
-_str_contructeur 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:undefined/* (compo_params()) */	dialog:compo_dialog	fnConstruire:compo_fnConstruire	--	invisible:true
+_str_contructeur 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:undefined/* (compo_params()) */	dialog:compo_dialog	fnConstruire:compo_fnConstruire		invisible:true
 
 	
 ) ----	FileIn ----

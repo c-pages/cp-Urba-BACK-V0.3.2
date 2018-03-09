@@ -622,7 +622,7 @@ struct  str_manager_parametres (
 			)
 			if index_result != 0 do
 				result = get_element_parIndex 	index_result
--- 			debug "get_element_parID	--------->	result" var:result
+			
 			result
 		),
 		fn get_elements =(
@@ -695,7 +695,24 @@ struct  str_manager_parametres (
 		),
 		
 		
-		
+		-----rc menu ---------
+		fn get_menu_constructeurs = (		
+			debug "m_constructeursBase" var:m_constructeursBase
+			local txt_menu = "rcMenu nvMenu	(\n"
+			--- les boutons ----------
+			for constr in m_constructeursBase where not constr.invisible do 
+				txt_menu += "menuItem '" + constr.nom + "' \""+ constr.nom + "\"\n"
+			
+			--- les fonctions ------------
+			for constr in m_constructeursBase where not constr.invisible do 
+				txt_menu += "on '" + constr.nom + "' picked do $.core.creer_element #" + m_prefix_nomParametres  + "\n"
+			
+			txt_menu += ")"
+			debug "txt_menu" var:txt_menu
+			local menu = execute txt_menu
+			popUpMenu 	menu
+-- 			txt_menu
+		),
 		
 		
 		

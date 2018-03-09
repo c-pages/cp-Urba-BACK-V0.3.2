@@ -36,6 +36,8 @@ rollout roll_urba_editeurToiture "Urba - Editeur de toiture" width:453 height:29
 	listBox 'lbx4_elements' "" pos:[260,65] width:171 height:16 align:#left
 	button 'btn_ajouter_element' "+" pos:[261,46] width:18 height:18 align:#left
 		
+	
+	button 'btn16' "-" pos:[278,46] width:18 height:18 align:#left
 		------------  Fonctions	----------------------------------------------------------------------------------
 		
 		fn actualiser 							=(
@@ -74,8 +76,11 @@ rollout roll_urba_editeurToiture "Urba - Editeur de toiture" width:453 height:29
 		
 	----------------- Evenements ------------------------------------------------------------------------
 	
-	
-	button 'btn16' "-" pos:[278,46] width:18 height:18 align:#left
+		
+		on btn_ajouter_element pressed do (
+			format "popo\n"
+			m_plug.core.get_menu_contructeur  #toitElements
+		)
 )
 	
 	
