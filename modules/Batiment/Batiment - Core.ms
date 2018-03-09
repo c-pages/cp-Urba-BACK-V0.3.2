@@ -300,10 +300,10 @@ struct str_batiment_core (
 			if _facade.params.sequence[_index].type == #balcon  		do supprimer_balconFin 		= true
 			if _facade.params.sequence[_index].type == #balconFin  	do supprimer_balconDebut 	= true
 			
-			local supprimer_loggiaFin 		= false
-			local supprimer_loggiaDebut		= false
-			if _facade.params.sequence[_index].type == #loggia  		do supprimer_loggiaFin 		= true
-			if _facade.params.sequence[_index].type == #loggiaFin  	do supprimer_loggiaDebut 	= true
+			local supprimer_groupeFin 		= false
+			local supprimer_groupeDebut		= false
+			if _facade.params.sequence[_index].type == #groupe  		do supprimer_groupeFin 		= true
+			if _facade.params.sequence[_index].type == #groupeFin  	do supprimer_groupeDebut 	= true
 				
 			_facade.params.supprimer_composant 		_index
 			
@@ -331,20 +331,20 @@ struct str_batiment_core (
 			)
 			
 			--- les loggia -----------------
-			if supprimer_loggiaFin do (
+			if supprimer_groupeFin do (
 				local i = _index  
 				while i <= _facade.params.sequence.count do (
-					if _facade.params.sequence[i].type == #loggiaFin do (
+					if _facade.params.sequence[i].type == #groupeFin do (
 						_facade.params.supprimer_composant 		i
 						i  = _facade.params.sequence.count + 1
 					)
 					i += 1
 				)
 			)
-			if supprimer_loggiaDebut do (
+			if supprimer_groupeDebut do (
 				local i = _index  - 1
 				while i > 0 do (
-					if _facade.params.sequence[i].type == #loggia do (
+					if _facade.params.sequence[i].type == #groupe do (
 						_facade.params.supprimer_composant 		i
 						i  = 0
 					)

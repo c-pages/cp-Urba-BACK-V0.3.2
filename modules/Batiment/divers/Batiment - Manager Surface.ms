@@ -26,7 +26,7 @@ struct str_mgr_surfaces (
 		
 	---- FONCTIONS ----------------------------------------------------------------
 	private
-		
+		 
 	--- Aquisition shape ---------------------
 		fn scanner_points 	_shape	=(
 			
@@ -137,6 +137,13 @@ struct str_mgr_surfaces (
 		),
 		fn est_pignon 	_id			=
 			m_outils.estPignon 	( get_points () )		_id,
+		
+		
+		
+		
+		
+		
+		
 		
 		--- Assigner nouveau shape  ---------------------
 		fn assigner 	_shape  =(

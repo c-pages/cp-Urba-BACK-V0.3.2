@@ -15,8 +15,17 @@ compo_toolTip =	"Ajouter un mur plein de longueur fixe."
 
 --- les parametres du composant	---------
 struct compo_params	(
-	longueur = 100.
+	longueur = 100.,
 	
+	private
+		longueur_etirer =0,
+	public
+		fn set_longueur_etirer 	_lg = longueur_etirer = _lg,
+		fn get_longueur_etirer = (
+			local result = longueur_etirer
+-- 			longueur_etirer = 0
+			result
+		)
 )
 
 --- les rollout du composant	---------
@@ -75,7 +84,7 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 			onConstruitLaDalle:
 		
 		local ep_dalle 			= ptr_plug.const_dalle_epaisseur
 		local ht_niveaux 		= distance ptAccroche_2 	ptAccroche_3
-		local longueur 			= ptr_composant.params.longueur
+		local longueur 			= ptr_composant.params.longueur + ( ptr_composant.params.get_longueur_etirer () )
 		
 		--- Vecteurs ------------
 		local vec_ep_dalle 	= [0,0,1] 		* 	ep_dalle

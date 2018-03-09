@@ -9,5 +9,5 @@ Générateur de bâtiments paramétriques et de bout de ville.
   * Toitures à x pans (pente de toit pour chaque mur).
   * integration des éléments de toitures (local tech, cheminet, lucarnes, ....)
 * Verifier optimisation : 'orthonormer' déconne des fois.
-* gestion des splines  avec 2 shapes pour creation patio
+* gestion des splines  avec 2 shapes : trou pour creation patio
 * Version simplifié de l'interface ?

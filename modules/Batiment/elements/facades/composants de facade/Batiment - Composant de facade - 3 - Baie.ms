@@ -26,8 +26,17 @@ struct compo_params	(
 		
 		--- Volets	-------------
 		volet								= 1,			----	1:Aucun		2:roulants		3:battants	----------
-		volet_double					= false			----	pour les 'Battants' 	----------
+		volet_double					= false,			----	pour les 'Battants' 	----------
 		
+	private
+		longueur_etirer =0,
+	public
+		fn set_longueur_etirer 	_lg = longueur_etirer = _lg,
+		fn get_longueur_etirer = (
+			local result = longueur_etirer
+-- 			longueur_etirer = 0
+			result
+		)
 )
 
 --- les rollout du composant	---------
@@ -255,7 +264,8 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		
 		
 		local	etage_hauteur				=	distance ptAccroche_2 	ptAccroche_3
-		local longueur						= ptr_params.longueur
+		local longueur						= ptr_params.longueur	+ ptr_params.get_longueur_etirer ()
+		
 		local allege_hauteur 		 		= ptr_params.allege_hauteur
 		local hauteur						= if ptr_params.hauteur == 0 	then	etage_hauteur --	- decalage_epaisseur
 																									else 	ptr_params.hauteur --+ allege_hauteur

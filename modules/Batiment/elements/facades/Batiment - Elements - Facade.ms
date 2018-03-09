@@ -45,7 +45,7 @@ struct facade_params	(
 		
 		
 	private	
-		modes_distribution	=	#("Répartir", "Aligné à gauche", "Centré", "Aligné à droite"),
+		modes_distribution	=	#("Répartir", "Etirer", "Aligné à gauche", "Centré", "Aligné à droite"),
 		modes_murs 			=	#("Tous", "Gouttereaux", "Pignons"/* , "Gauche", "Droite", "Avant", "Arrière" */),
 		
 		
@@ -148,14 +148,15 @@ struct facade_params	(
 				
 			) else (
 				
-				local result = 0
-				local grp =#()
+				local result 	= 0
+				local grp 		=#()
 				
 				local grp_repet 		=0
 				local grp_longueur 	=0
-				local reste =#()
+				local reste 				=#()
 				local reste_longueur 	=0
 				local groupe_enFormation = false
+				
 				---- les infos du groupe	: repetition et longueur ---------------------
 				for elem in sequence do (
 					if elem.type == #groupe then (
@@ -167,7 +168,9 @@ struct facade_params	(
 						grp_longueur = 0
 						for elemGrp in grp do
 							grp_longueur += elemGrp.get_longueur()					
-					) else	if groupe_enFormation then append grp elem		
+					) else	
+						if groupe_enFormation then 
+							append grp elem		
 						else (
 							append reste elem		
 							reste_longueur +=	elem.get_longueur ()
@@ -187,7 +190,8 @@ struct facade_params	(
 				case mode of (
 					1: 	(	----- repartir  -----
 						
-						nbr_espacemts		=	grp.count * grp_repet + reste.count + 1
+						
+						nbr_espacemts				=	grp.count * grp_repet + reste.count + 1
 						
 						longueur_restant 			=		_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )
 						
@@ -216,7 +220,36 @@ struct facade_params	(
 						)
 						
 					)
-					2:  	(	----- Aligner a gauche		----------
+					2: 	(	----- Etirer  -----
+						
+						nbr_espacemts				=	grp.count * grp_repet + reste.count 						
+						longueur_restant 			=		_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )						
+						longueur_espacement 	= longueur_restant / nbr_espacemts  
+						
+						
+						---- les infos du groupe	: repetition et longueur ---------------------
+						local i = 1
+						while i  <= sequence.count do (
+							local elem = sequence[i]
+							if elem.type == #groupe then (
+								for j= 1 to grp_repet do
+									for elemGrp in grp do ( 
+										elemGrp.params.set_longueur_etirer		longueur_espacement
+										append sequence_totale		elemGrp
+-- 										append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
+									)
+								i += grp.count  + 1
+							)
+							else ( 
+										elem.params.set_longueur_etirer		longueur_espacement
+										append sequence_totale		elem
+-- 										append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
+									)
+							
+							i+= 1
+						)
+					)
+					3:  	(	----- Aligner a gauche		----------
 						
 						longueur_restant 			=		_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )
 						longueur_espacement 	=		longueur_restant
@@ -242,7 +275,7 @@ struct facade_params	(
 						
 							
 					)		
-					3:  	(	----- centrer 	-----
+					4:  	(	----- centrer 	-----
 						
 						longueur_restant 			=		_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )
 						longueur_espacement 	=		longueur_restant /2
@@ -270,7 +303,7 @@ struct facade_params	(
 						append sequence_totale		(_plug.core.get_murPlein	  longueur_espacement)
 						
 					)
-					4: 	(	----- Aligner à droite -----
+					5: 	(	----- Aligner à droite -----
 						
 						longueur_restant 			=		_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )
 						longueur_espacement 	=		longueur_restant

@@ -21,7 +21,7 @@ fn encart  _pts 	_dist	=(
 
 		local crossProd 	= cross (  pt_concerne - pt1 ) ( pt2 - pt1 )
 		local sensDot 		= dot crossProd  [0,0,1]
-		local sens = if sensDot > 0 then 1 else -1
+		local sens = if sensDot > 0 then -1 else 1
 		local		norm_dir = norm_vec_1 + norm_vec_2
 		
 		

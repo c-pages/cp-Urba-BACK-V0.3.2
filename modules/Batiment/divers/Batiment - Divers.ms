@@ -430,7 +430,11 @@ struct str_shape_outils (
 				append result _pts[i]
 			result
 		),
+	
+	----- divers
 		
+
+
 	-----------------  Axe Principale ----------------------
 	public
 		fn get_axePrincipal_mtrx				_pts  					=(

@@ -64,10 +64,28 @@ struct str_construction (
 			local nvComposant	 				= 	m_plug.core.get_murPlein _longueur
 			nvComposant
 		),
-		fn creer_dalle	z 	matID:#int_sol		flipNormal:false	=(
+		fn creer_dalle	z 	matID:#int_sol		flipNormal:false		encart:	=(
 			local surface_points 	= m_plug.core.get_surface_points ()
 			for pt in surface_points do pt.z = z
-			local face = m_geo.face		surface_points 	matID:matID    flipNormal:flipNormal
+			
+			local pts_dalle = #()
+			if encart != unsupplied then (
+				for i = 1 to surface_points.count do (
+					local j = if i == surface_points.count then 1 else i + 1
+					local k = if i == 1 then surface_points.count else i - 1
+					
+					local pt 				= 		surface_points[i]
+					local	pt_suivant 	=  	surface_points[j]
+					local	pt_precedant =  	surface_points[k]
+					
+					local pt_encart 		= m_geo.encart 		pt	(pt_suivant - pt )  	(pt_precedant - pt ) 		encart
+					append pts_dalle  pt_encart
+				)
+				
+			) else pts_dalle = surface_points
+			
+			
+			local face = m_geo.face		pts_dalle 	matID:matID    flipNormal:flipNormal
 			
 			face
 		),
@@ -114,7 +132,7 @@ struct str_construction (
 				
 				--- Creation du sol	-----------------------------
 				if m_plug.interieur_planchers do
-					creer_dalle	( z + m_plug.const_dalle_epaisseur )  matID:#int_sol
+					creer_dalle	( z + m_plug.const_dalle_epaisseur )  matID:#int_sol		encart:m_plug.const_murExt_epaisseur	
 				
 				---- on fait le tour des murs 	---------------------
 				for id_pt = 1 to surface_points.count do	 (

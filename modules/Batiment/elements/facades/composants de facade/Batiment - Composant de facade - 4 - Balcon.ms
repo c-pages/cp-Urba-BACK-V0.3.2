@@ -19,6 +19,7 @@ struct compo_params	(
 	largeur			= 100,
 	profondeur	= 100,
 	gardeCorps	= undefined
+	
 )
 
 
