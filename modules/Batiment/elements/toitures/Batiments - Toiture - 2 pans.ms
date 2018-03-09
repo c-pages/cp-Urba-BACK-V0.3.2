@@ -176,23 +176,11 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		
 		local mtrx_axeP_temp = copy mtrx_axeP
 		mtrx_axeP_temp.translation = [0,0,0]
-		/* 
-		decallage_largeur = toiture_decal_larg
-		if abs decallage_largeur > largeur/ 2 do (
-			if decallage_largeur <0 then 	
-				decallage_largeur = - largeur/ 2 + 50
-			else
-				decallage_largeur =  largeur/ 2  - 50
-		) */
-		/* 
-		this.params.decalage_largeur = decallage_largeur
-		mgr_toiture.enregistrer_parametres ()
-		( this.get_dialog () ).actualiser () 
-		*/
+
+
 		
 		local vec_decall_larg 	= [toiture_decal_larg,0, 0]  * mtrx_axeP_temp 
--- 		pt_debug = point name:"popo" transform:mtrx_axeP axistripod:true size:200
--- 		pt_debug.pos = vec_decall_larg 
+		
 		local nvlsFaces 				= #()
 		
 -------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------

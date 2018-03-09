@@ -48,7 +48,6 @@ struct str_construction (
 	private
 		
 		------------ FILTRES-------------------------
-
 		fn filtrer_facades  	_facades  	_etageNum		_id_pt	=(
 			
 			local facades_result 		= #()

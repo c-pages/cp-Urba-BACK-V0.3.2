@@ -77,7 +77,7 @@ rollout roll_global "Global" width:162 height:341
 	label 'lbl_nbre' "Nbre. d'étages:" pos:[10,56] width:79 height:15 align:#left
 	spinner 'spn_nbres' "" pos:[88,55] width:72 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
 	spinner 'spn_hauteur' "" pos:[88,71] width:57 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
-	label 'lbl_hauteur' "Htr. des étages:" pos:[10,72] width:76 height:15 align:#left
+	label 'lbl_hauteur' "Hauteur :" pos:[10,72] width:76 height:15 align:#left
 	
 	
 	--- Facades -----
@@ -94,10 +94,10 @@ rollout roll_global "Global" width:162 height:341
 	dropdownList 'ddl_toiture' "" pos:[10,232] width:123 height:21 align:#left
 	
 	--- Interieur  -----
-	GroupBox 'grp_interieur' "Interieur :" pos:[3,259] width:162 height:40 enabled:false align:#left
-	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 enabled:false align:#left
+	GroupBox 'grp_interieur' "Interieur :" pos:[3,259] width:162 height:40 align:#left 	--enabled:false 
+	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 align:#left 	--enabled:false 
 	
-	button 'btn_editer_etages' "+" pos:[143,72] width:16 height:16 align:#left
+	button 'btn_editer_etages' "E." pos:[143,72] width:16 height:16 align:#left
 	
 	fn actualiser =(
 		
