@@ -203,6 +203,7 @@ struct str_batiment_core (
 		
 		fn get_mgrDatas 				= mgr_datas,
 		fn get_mgrPresets 			= mgr_presets,
+		fn get_mgr_trimesh 			= mgr_trimesh,
 		
 		fn get_construction			= mgr_construction,
 		fn get_geo						= mgr_construction.m_geo,
@@ -489,25 +490,26 @@ struct str_batiment_core (
 			)
 			menuTmp
 		),
-		fn creer_element	_type =(
+		fn creer_element	_type 	idConstructeur:	=(
 			local nv_element
 			case _type of (
 				#toiture:			nv_element = mgr_toiture.creer_element ()
 				#facades: 			nv_element = mgr_facades.creer_element ()
 				#facCompos: 	nv_element = mgr_facCompos.creer_element ()
 				#facMenuis:		nv_element = mgr_facMenuiseries.creer_element ()
-				#gardeCorps:	nv_element = mgr_gardeCorps.creer_element ()
+				#gardeCorps:	nv_element = mgr_gardeCorps.creer_element 	()
 				#toitElements:	(
-					nv_element = mgr_toitElements.creer_element 	enregistrer:true
+					nv_element = mgr_toitElements.creer_element 	idConstructeur:idConstructeur
 					local toiture = get_toiture ()
 					append 	toiture.params.elements		nv_element
-					m_etagesEditeur_dialog.actualiser ()
+					enregistrer_element	toiture
+					(mgr_toiture.get_dialog()).actualiser ()
 				)
 			)
 			nv_element
 		),
 		
-		
+	
 		
 		
 	----- Surface ---------------------
@@ -579,7 +581,7 @@ struct str_batiment_core (
 		fn set_facadeEditeur_position		_pos 	= mgr_facades.set_dialog_pos  	_pos,
 		
 		--- editeur etages---------
-		fn		etagesEditeur_ouvrir = (
+		fn etagesEditeur_ouvrir = (
 			createDialog		m_etagesEditeur_dialog
 			m_etagesEditeur_dialog.initialiser  m_plug 
 			m_etagesEditeur_dialog.actualiser ()

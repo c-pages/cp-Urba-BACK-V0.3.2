@@ -10,13 +10,12 @@ struct str_datasToString (
 	
 	public
 		m_prt,
-		
+	
 	private
-		separateur_params 			="§",
+		separateur_params 			= "§",
 		separateur_mutation 			= "¨",
 		separateur_mutationTab 	= "£",
 		separateur_items 				= "^",
-	
 	
 	public
 		fn array_to_string		_tab	=(
@@ -24,14 +23,16 @@ struct str_datasToString (
 			for item in _tab do (
 				debug "array_to_string" var:(classof item)
 				case classof item  of (
-					string:	tabString += item 		as string + separateur_items
+					
+					string:		tabString += item 	as string + separateur_items
 					Integer:	tabString += item 	as string + separateur_items
-					Float:	tabString += item 		as string + separateur_items
-					Point3:	tabString += item 		as string + separateur_items
-					Array:	tabString += item 		as string + separateur_items
+					Float:		tabString += item 	as string + separateur_items
+					Point3:		tabString += item 	as string + separateur_items
+					Array:		tabString += item 	as string + separateur_items
 					
 					---- les reste doit etre nos struct a nous ... -------
-					default:	tabString += item 	as string + separateur_items
+					default:		tabString += item 	as string + separateur_items
+					
 				)
 			)
 			tabString
@@ -157,7 +158,7 @@ struct str_datasToString (
 							if dataTab[2] != undefined do  (							
 								local data 		
 								if execute dataTab[2]	 != undefined then
-									data = execute dataTab[2]	
+									try data = execute dataTab[2]	catch data = dataTab[2]	
 								else
 									data = dataTab[2]	
 								
@@ -436,7 +437,19 @@ struct str_shape_outils (
 
 
 	-----------------  Axe Principale ----------------------
-	public
+	public/* 
+		fn get_axePrincipal_mtrx_CORRECT				_pts  					=(
+			
+			local ptsEdgeLePlusLong 	= edge_lePlusGrand	_pts
+			
+			local axeVecteur_x 		= 	normalize (ptsEdgeLePlusLong[2] - ptsEdgeLePlusLong[1])			
+			local axeVecteur_y		= 	axeVecteur_x 	* rotateZ ( matrix3 1 ) 90		
+			local axeVecteur_z		= 	[0,0,1]
+			
+			local axeMtrx			= matrix3 axeVecteur_x 	axeVecteur_y		 axeVecteur_z	 [0,0,0]
+			
+			axeMtrx
+		), */
 		fn get_axePrincipal_mtrx				_pts  					=(
 			
 			local ptsEdgeLePlusLong 	= edge_lePlusGrand	_pts

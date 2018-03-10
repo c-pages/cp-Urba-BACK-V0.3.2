@@ -65,7 +65,7 @@ fn menuis_fnConstruire  	_plug	_pt_origine		norm_dir:		dist_hauteur:	ptr_baie:		
 			
 		-------------  constantes 			-----------------------------------------------------------------------------------------------------------------
 			local 	norm_dir				=	norm_dir
-			local		baie_longueur		=	this.longueur
+			local		baie_longueur		=	this.params.longueur
 			local		baie_hauteur			=	dist_hauteur
 			local		baie_profondeur		=	_plug.const_murExt_epaisseur
 			

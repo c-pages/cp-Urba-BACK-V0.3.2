@@ -64,6 +64,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		local faceBase 	= ptr_geo.face		pts_accroches						matID:1
 		ptr_geo.set_matID 	faceBase	#mur 
 		
+		
 		--- l'acrotere --------
 		ptr_geo.biseauter	faceBase 	0		 -ep_murExt
 		ptr_geo.set_matID 	faceBase	#graviers 
@@ -78,6 +79,30 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		ptr_geo.biseauter	faceAExtruder 	0		ep_couvertine
 		ptr_geo.extruder 	faceAExtruder 			ep_couvertine
 		
+			
+		---- les elements -----------
+		if  this.params.elements.count > 0 do (
+			local face_center = polyop.getFaceCenter  	ptr_plug.delegate  faceBase
+			local faceNormal = polyop.getFaceNormal  	ptr_plug.delegate  faceBase
+			
+			local mgr_surface	= _plug.core.get_mgr_surface ()
+			
+			local mtrx_principale 	= rotateYMatrix -90  * rotateXMatrix -90  * mgr_surface.get_axePrincipal ()
+-- 			format  "mtrx_principale.translationpart :%\n" mtrx_principale.translationpart
+			
+			
+			local transf_insertion		=	mtrx_principale * ( transMatrix face_center )
+			
+			
+-- 			point pos:face_center name:"pointpoint" size:500
+-- 			local transf_insertion		=	( MatrixfromNormal  face_center ) -- + axe_principale
+			
+-- 			local transf_insertion 	= 		(matrix3 1 ) * axe_principale		--	/*  face_center * */ (matrix3 1 ) --axe_principale
+			
+			
+			for elem in this.params.elements do
+				elem.construire	 	ptr_plug			surface_points  	transformation:transf_insertion
+		)
 		/* 
 		
 		local faceToitsSurface = m_outils_poly.etendreFaces  	m_plug.delegate 	#(_face)

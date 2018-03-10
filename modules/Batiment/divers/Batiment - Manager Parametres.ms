@@ -14,8 +14,8 @@ struct  str_manager_parametres (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	private
--- 		m_debug = false,
-		m_debug = true,
+		m_debug = false,
+-- 		m_debug = true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:"urba | str_manager_parametres_univ"	catch (),
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	
@@ -57,7 +57,8 @@ struct  str_manager_parametres (
 		---- FONCTIONS --------------------------------------------------------------------------------------------------------------
 		
 		---- Constructeur	---------------------------------------------------
-	private
+-- 	private
+	public
 		fn a_constructeurs = (
 			local result = m_dossier_constructeurs != undefined 
 			result
@@ -417,38 +418,42 @@ struct  str_manager_parametres (
 		
 		---- Creation/Suppression etc. ---------------------------------------------------
 		fn appliquer_type  	_element	_type	=(
+			debug "appliquer_type"
 			-- si on a un type et non pas un index	de constructeur -------------
 				if classof 	_type == name or classof _type == string	do
-					_type = get_constructeur_index		_type			
+					_type = get_constructeur_index		_type		
+			debug "_type"	var:_type
 				if _type != 0 do
 					m_constructeursBase[ _type ].initialiser		_element
 				
 				_element
 		),
 		fn creer_element			idUnique:		idConstructeur:		enregistrer:false	/* plug: */		=(
--- 			debug "creer_element"
+			debug "creer_element"
 			----------------- Structure d'un élément	------------------------------------------
+			debug "idConstructeur" var:idConstructeur
+			debug "idConstructeur" var:idConstructeur
+			
 			m_classeBase	=	fileIn	 m_fichier_classeBase			
 			nvl_element 		= m_classeBase 	()
 			nvl_element.set_typeClasse  	m_prefix_nomParametres
+			
+			debug "creer_element -- 1 ---> nvl_element" var:nvl_element
 			
 			----- si constructeur --------
 			if idConstructeur != unsupplied do 
 				appliquer_type  	nvl_element	idConstructeur
 			
+			debug "creer_element -- 2 ---> nvl_element" var:nvl_element
+			
 			--- id Unique -----------
 			if idUnique != unsupplied do 
 				nvl_element.id = idUnique	
 			
--- 			--- reference au plug --------
--- 			if plug != unsupplied do 	
--- 				nvl_element.params.set_plug plug
 			
+			debug "creer_element -- 3 ---> nvl_element" var:nvl_element
 			
--- 			---	la reference au manager	--------------
--- 			nvl_element.set_manager 	this
-			
-			-- si besoin on enregistre direct sur le plug -----
+			-- si demandé on enregistre direct sur le plug -----
 			if enregistrer do enregistrer_parametres	nvl_element
 			
 			nvl_element
@@ -705,7 +710,7 @@ struct  str_manager_parametres (
 			
 			--- les fonctions ------------
 			for constr in m_constructeursBase where not constr.invisible do 
-				txt_menu += "on '" + constr.nom + "' picked do $.core.creer_element #" + m_prefix_nomParametres  + "\n"
+				txt_menu += "on '" + constr.nom + "' picked do $.core.creer_element #" + m_prefix_nomParametres  + " idConstructeur:#" + constr.type as string + "\n"
 			
 			txt_menu += ")"
 			debug "txt_menu" var:txt_menu

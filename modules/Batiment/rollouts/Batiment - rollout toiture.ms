@@ -33,7 +33,7 @@ rollout roll_urba_editeurToiture "Urba - Editeur de toiture" width:453 height:29
 	button 'btn_charger' "O" pos:[206,11] width:19 height:19 toolTip:"Ouvrir preset." align:#left
 	subRollout 'subroll_parametres' "Parametres" pos:[24,63] width:210 height:208 align:#left
 	GroupBox 'grp_prop' "Propriétés" pos:[12,45] width:232 height:238 align:#left
-	listBox 'lbx4_elements' "" pos:[260,65] width:171 height:16 align:#left
+	listBox 'lbx_elements' "" pos:[260,65] width:171 height:16 align:#left
 	button 'btn_ajouter_element' "+" pos:[261,46] width:18 height:18 align:#left
 		
 	
@@ -51,8 +51,10 @@ rollout roll_urba_editeurToiture "Urba - Editeur de toiture" width:453 height:29
 				addSubRollout	subroll_parametres 	toiture_subRoll
 				toiture_subRoll.mgr_toiture = m_plug.core.get_mgr_toiture ()
 				m_toiture.initialiser_dialog	 		m_plug  
-				
-			) 
+			)
+			
+			local elementsNoms = for elem in m_toiture.params.elements collect elem.nom
+			lbx_elements.items = elementsNoms
 		)
 		fn redimensionnerFenetre 		_taille 	=(
 		

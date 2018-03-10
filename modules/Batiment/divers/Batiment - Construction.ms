@@ -190,12 +190,14 @@ struct str_construction (
 		),
 		fn creer_toiture					&z =(
 			
+			--- la toiture en elle meme ---------------
 			local surface_points 				= m_plug.core.get_surface_points ()
 			for pt in surface_points do
 				pt.z = z
 			
 			local toiture				=	m_plug.core.get_toiture ()
 			toiture.construire	 	m_plug			surface_points	--	normDir_axeprincipal
+			
 		),		
 		
 		

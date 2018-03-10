@@ -69,7 +69,7 @@ struct 	str_composant_generique	 (
 				if ptr_this  == unsupplied do
 					ptr_this = this
 				m_dialog.m_compo	=	ptr_this
-			format "######### m_dialog.m_compo : %\n" m_dialog.m_compo
+-- 			format "######### m_dialog.m_compo : %\n" m_dialog.m_compo
 				m_dialog.m_plug		=	_plug
 				m_dialog.actualiser()
 			)
@@ -100,6 +100,7 @@ struct 	str_composant_generique	 (
 													ptr_baie:				\
 													compo_debut:	\
 													etage_ht:			\
+													transformation:	\
 													onConstruit_gardeCorps:		= 
 		
 				fnVirt_construire			 _plug		pts	\
@@ -111,6 +112,7 @@ struct 	str_composant_generique	 (
 													this:this	\
 													compo_debut:compo_debut	\
 													etage_ht:etage_ht			\
+													transformation:transformation	\
 													onConstruit_gardeCorps:onConstruit_gardeCorps	
 		
 ) ---- fin composant -------------------------------
