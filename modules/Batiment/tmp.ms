@@ -6,10 +6,13 @@ axeP = ($Urba_Batiment001.core.get_mgr_surface () ).get_axePrincipal ()
  ss = ($.core.get_mgr_surface () ).creer_shape()
  select ss
  
-  ($Urba_Batiment001.core.get_mgr_surface () ).est_pignon 12
+  ($Urba_Batiment001.core.get_mgr_surface () ).est_pignon 13
   
   pts =  ($Urba_Batiment001.core.get_mgr_surface () ).get_points ()  
- ($Urba_Batiment001.core.get_mgr_surface () ).m_outils. chercher_alignements	pts		1		20
+   ($Urba_Batiment001.core.get_mgr_surface () ).m_outils.orthonormer 		pts 100
+   
+   
+--  ($Urba_Batiment001.core.get_mgr_surface () ).m_outils. chercher_alignements	pts		1		20
 
 axeP 		$.pos 		
  

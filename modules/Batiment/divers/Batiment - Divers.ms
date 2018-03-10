@@ -680,7 +680,7 @@ struct str_poly_outils (
 struct str_shape_outils (
 
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-	m_debug = false,
+	m_debug = true,
 	m_dbgPrefix ="urba | str_shape_outils",
 	fn debug 	_txt  var:	 param:    =(
 		try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
@@ -1235,62 +1235,141 @@ struct str_shape_outils (
 		
 	-----------------  Optimisations ----------------------
 	public
-		/* 
+		
 		fn orthonormer 		&_pts	_seuil  =(
 			
-			debug "orthonormer"
 			
 			local mtrx_AP	= get_axePrincipal_mtrx 	_pts
-			local pt_result 	= deepcopy _pts
+			local pts_result 	= deepcopy _pts
+			
 			local grps_de_points = #()
 			
 			--- on fait les groupes de point à aligner -----------
-			for i = 1 to pt_result.count  do (
+			local i = 1
+			while i <= _pts.count do (
 				
-				local groupe = #()
+				local pt_courant = _pts[i]
+				
+				local groupe = #(i)
+				
+				local pt_courant_estPignon = estPignon	 _pts	  i  
+				local onChangeDePoint = true
+				local i_aTester = i+ 1
+				
+				while  onChangeDePoint do (
+					if i_aTester >  _pts.count  then i_aTester = 1 
+					if estPignon	 _pts	  i_aTester  ==   pt_courant_estPignon
+						then (
+							append groupe  i_aTester
+						) else
+							onChangeDePoint = false
+						
+					i_aTester += 1
+				)
+				i += groupe.count
 				
 				
+				-- on checked les doublons premier-drenier-------------
+				if i > _pts.count and grps_de_points.count > 1 do (
+					local present  = false
+					for pt_test_id in groupe do (
+						if findItem grps_de_points[1]  pt_test_id != 0 do
+							present = true
+					)
+					if present do (
+						for pt_tmp_id in grps_de_points[1]  do
+							appendIfUnique	 groupe  pt_tmp_id
+						deleteItem grps_de_points 1
+					)
+				)
 				
--- 			
--- 				if i > _pts.count do i = mod _pts.count  i
--- 				local j = i + 1
--- 				if j > _pts.count do j = mod _pts.count  j
--- 				local pt = _pts[i]	* inverse  mtrx_AP 
--- 				local pt_suivant = _pts[j] *  inverse mtrx_AP 
--- 				local vec_moyenne 
--- 				
--- 				if   estPignon _pts  i  then (
--- 					local moyenneX = ( pt_suivant.x - pt.x ) /2					
--- 					vec_moyenne = [moyenneX,0,0] * _seuil / 100
--- 				) else  (
--- 					local moyenneY = ( pt_suivant.y - pt.y ) /2
--- 					vec_moyenne = [0,moyenneY,0] * _seuil / 100
--- 				) 
--- 				
--- 				pt 			= _pts[i]	* inverse  mtrx_AP  + vec_moyenne 
--- 				pt_suivant 	= _pts[j]	* inverse  mtrx_AP  - vec_moyenne 
--- 				
--- 				pt_result[i] = pt *   mtrx_AP 
--- 				pt_result[j] = pt_suivant  *   mtrx_AP  
+				append grps_de_points  groupe
 				
--- 				_pts[i] = pt *   mtrx_AP 
--- 				_pts[j] = pt_suivant  *   mtrx_AP 
+				
 			)
-			_pts = pt_result
-		),*/
+			
+			for grp in grps_de_points do (
+				
+				-- on cherche la position moyenne du groupe de points -------
+				local position_moyenne = 0
+				
+				for  i = 1 to grp.count do (
+					local idPt  			= grp[i ]
+					local pt 				= _pts[idPt]				* inverse  mtrx_AP 
+					if   estPignon _pts  idPt  then (
+						position_moyenne += ( /* pt_suivant.x -  */pt.x ) /( grp.count + 1 )
+					)else (
+						position_moyenne += ( /* pt_suivant.y -  */pt.y ) /( grp.count + 1 )
+					)
+				)
+				
+				local idPt  			= grp[ grp.count ]
+				local idPt_suivant 	= idPt + 1
+				if idPt_suivant > _pts.count do idPt_suivant = 1
+				local pt_suivant 	= _pts[idPt_suivant]	*  inverse mtrx_AP 
+				if   estPignon _pts  idPt  then (
+					position_moyenne += ( pt_suivant.x ) /( grp.count + 1 )
+				)else (
+					position_moyenne += ( pt_suivant.y ) /( grp.count + 1 )
+				)
+				
+				
+				-- on bouge les points	-------
+				
+				for  i = 1 to grp.count do (
+					
+					local idPt  			= grp[i ]
+					local	pt 				= pts_result[idPt]				*	inverse  mtrx_AP  	
+					
+					if   estPignon _pts  idPt  then (
+-- 						pts_result[idPt] 				= ( pt 				+ [position_moyenne - pt.x , 0,0 ] 		* _seuil/100			) *   mtrx_AP 
+						pts_result[idPt] 				= ( pt 				) 
+						pts_result[idPt].x += ( position_moyenne - pt.x ) 	* _seuil/100		
+						
+					)else (
+-- 						pts_result[idPt] 				= ( pt 				- [0,position_moyenne - pt.y , 0 ] 		* _seuil/100			) *   mtrx_AP 
+						pts_result[idPt] 				= ( pt 				) 
+						pts_result[idPt].y += ( position_moyenne - pt.y ) 	* _seuil/100		
+					)
+					pts_result[idPt] *= mtrx_AP
+				)
+				local idPt  			= grp[ grp.count ]
+				local idPt_suivant = idPt + 1
+				if idPt_suivant > _pts.count do idPt_suivant = 1
+				local	pt_suivant 				= pts_result[idPt_suivant]				*	inverse  mtrx_AP  	
+				pts_result[idPt_suivant] 	= ( pt_suivant ) 
+				if   estPignon _pts  idPt  then (
+						pts_result[idPt_suivant].x += ( position_moyenne - pt_suivant.x ) 	* _seuil/100		
+				)else(
+						pts_result[idPt_suivant].y += ( position_moyenne - pt_suivant.y ) 	* _seuil/100		
+				)
+				pts_result[idPt_suivant] *= mtrx_AP
+				
+			)
+			
+			_pts = pts_result
+			
+		),
 		
+		
+		
+		/* 
 		fn orthonormer 		&_pts	_seuil  =(
-			debug "orthonormer"
+			debug "orthonormer" 
 			local mtrx_AP = get_axePrincipal_mtrx 	_pts
 			local pt_result = deepcopy _pts
 			for i = 1 to _pts.count + 1  do (
-				
-				if i > _pts.count do i = mod _pts.count  i
+				if i > _pts.count do i = mod  i _pts.count
 				local j = i + 1
-				if j > _pts.count do j = mod _pts.count  j
+				if j > _pts.count do j = mod j _pts.count 
 				local pt = _pts[i]	* inverse  mtrx_AP 
 				local pt_suivant = _pts[j] *  inverse mtrx_AP 
 				local vec_moyenne 
+				
+				debug "-----	i" var:i
+				debug "-----	j" var:j
+				debug "	estPignon _pts  i " var:(estPignon _pts  i  )
+				
 				
 				if   estPignon _pts  i  then (
 					local moyenneX = ( pt_suivant.x - pt.x ) /2					
@@ -1300,7 +1379,7 @@ struct str_shape_outils (
 					vec_moyenne = [0,moyenneY,0] * _seuil / 100
 				) 
 				
-				pt 			= _pts[i]	* inverse  mtrx_AP  + vec_moyenne 
+				pt 				= _pts[i]	* inverse  mtrx_AP  + vec_moyenne 
 				pt_suivant 	= _pts[j]	* inverse  mtrx_AP  - vec_moyenne 
 				
 				pt_result[i] = pt *   mtrx_AP 
@@ -1309,7 +1388,8 @@ struct str_shape_outils (
 -- 				_pts[j] = pt_suivant  *   mtrx_AP 
 			)
 			_pts = pt_result
-		),
+		),*/
+		
 		 
 		fn souder 				&_pts	_seuil  =(
 			debug "souder"
