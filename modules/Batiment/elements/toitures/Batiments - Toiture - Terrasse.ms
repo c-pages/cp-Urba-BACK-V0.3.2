@@ -87,11 +87,11 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 			
 			local mgr_surface	= _plug.core.get_mgr_surface ()
 			
-			local mtrx_principale 	= rotateYMatrix -90  * rotateXMatrix -90  * mgr_surface.get_axePrincipal ()
+			local mtrx_principale 	= mgr_surface.get_axePrincipal ()
 -- 			format  "mtrx_principale.translationpart :%\n" mtrx_principale.translationpart
 			
 			
-			local transf_insertion		=	mtrx_principale * ( transMatrix face_center )
+			local transf_insertion		=	mtrx_principale * ( transMatrix face_center )  
 			
 			
 -- 			point pos:face_center name:"pointpoint" size:500

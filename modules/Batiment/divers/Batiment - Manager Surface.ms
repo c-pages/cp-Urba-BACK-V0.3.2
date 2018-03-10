@@ -19,7 +19,7 @@ struct str_mgr_surfaces (
 	public
 		m_plug,			---- le plugin: 'this' -----
 		
-	private
+-- 	private
 		
 		m_outils					= str_shape_outils (),
 		
@@ -144,6 +144,15 @@ struct str_mgr_surfaces (
 		
 		
 		
+		fn creer_shape 	 = (
+			ss = SplineShape pos:(get_points () ) [1]
+		  addNewSpline ss
+			for pt in (get_points () ) do
+			addKnot ss 1 #corner #line pt
+			
+		  updateShape ss
+			ss
+		),
 		
 		
 		

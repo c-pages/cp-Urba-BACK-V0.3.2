@@ -22,9 +22,10 @@ struct compo_params	(
 	verts_Arriere 	= #{1, 38..42, 45..46, 49..50, 53..54, 57..58, 61..62, 65..66},
 	verts_haut 		= #{41..68},
 	
-	longueur 	= 150,
-	largeur 		= 250,
-	hauteur 	= 230
+	longueur 	= 250,
+	largeur 		= 350,
+	hauteur 	= 230,
+	rotation 	= 90
 	
 )
 
@@ -44,7 +45,8 @@ rollout compo_dialog "Baie" width:433 height:747
 fn compo_fnConstruire  		_plug		pts_accroches		 this: 	transformation:	= (
 	local mgr_trimesh = _plug.core.get_mgr_trimesh ()
 	
-	mgr_trimesh.creer_objet		this.params		node_dest:_plug 		transformation:transformation
+	local relative_transfrom = rotateZMatrix 	this.params.rotation * transformation
+	mgr_trimesh.creer_objet		this.params		node_dest:_plug 		transformation:relative_transfrom
 	
 )
 	
