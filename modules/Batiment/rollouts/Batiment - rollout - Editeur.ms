@@ -1,157 +1,358 @@
 --Destroy the dialog if it is already open 
-try(destroyDialog rollout_Urb_Bat_editeur)catch()
+-- try(destroyDialog rollout_Urb_Bat_editeur)catch()
 
+(  --- fin FileIn ----------
 
-rollout sub01 "Général" width:255 height:427
+rollout sub_general "" width:255 height:556
 (
-	edittext 'edt1' "" pos:[5,3] width:222 height:16 align:#left
-	button 'btn9' "+" pos:[227,3] width:18 height:18 align:#left
-
+	local m_rolloutP
+	local m_plug
+	local m_core
+	
+	local m_bat
+	
 	--- Global ------
-	GroupBox 'grp_global' "Etages :" pos:[10,20] width:235 height:199 align:#left
--- 	spinner 'spn_rotation_axeP' "" pos:[88,87] width:48 height:16 range:[-360,360,0] type:#float scale:1 align:#left
--- 	label 'lbl_axeP' "Orientation:" pos:[10,87] width:59 height:15 align:#left
--- 	button 'btn_rotation' "+90" pos:[137,87] width:24 height:16 align:#left
-	label 'lbl_nbre' "Nbre. d'étages:" pos:[27,39] width:92 height:15 align:#left
-	spinner 'spn_nbres' "" pos:[160,38] width:72 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	spinner 'spn_hauteur' "" pos:[160,54] width:72 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
-	label 'lbl_hauteur' "Hauteur :" pos:[27,55] width:76 height:15 align:#left
+	GroupBox 'grp_etages' "Etages :" pos:[10,-4] width:235 height:199 align:#left	
 	
-	---- particuliers ---
-	listbox 'lbx_etages_particuliers' "" pos:[33,104] width:185 height:4 align:#left
-	button 'btn_ajouter_etages_particuliers' "+" pos:[32,87] width:16 height:16 align:#left
 	
-	button 'btn_supprimer_etages_particuliers' "-" pos:[48,87] width:16 height:16 align:#left
-	spinner 'spn_etageMin_particuliers' "" pos:[127,165] width:40 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	label 'lbl_etage_particuliers' "Etages :" pos:[35,162] width:50 height:19 align:#left
-	spinner 'spn_etageMax_particuliers' "" pos:[179,165] width:40 height:16 range:[0,1e+13,0] type:#integer align:#left
-	label 'lbl_hauteur_particuliers' "Hauteur :" pos:[35,180] width:55 height:22 align:#left
-	checkbutton 'ckb_etageMax_particuliers' ">" pos:[166,165] width:16 height:16 align:#left
-	spinner 'spn_hauteur_particuliers' "" pos:[127,181] width:92 height:16 range:[0,1e+13,0] type:#worldunits align:#left
+	label 'lbl_nbre' "Nbre. d'étages:" pos:[27,15] width:92 height:15 align:#left
+	spinner 'spn_nbres' "" pos:[160,14] width:72 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+	label 'lbl_hauteur' "Hauteur :" pos:[27,31] width:76 height:15 align:#left
+	spinner 'spn_hauteur' "" pos:[160,29] width:72 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
 	
-	label 'lbl16' "Décallage (Z):" pos:[27,240] width:92 height:18 align:#left
-	spinner 'spn20' "" pos:[160,240] width:72 height:16 range:[-1e+13,1e+13,0] type:#worldunits scale:1 align:#left
+	--- etages specifiques -----------
+	GroupBox 'grp_etages_specifiques' "Etages spécifiques" pos:[20,48] width:215 height:135 align:#left
+	button 'btn_etages_nouveau' "Nouv." pos:[30,64] width:35 height:16 toolTip:"Ajouter	étages spécifiques" align:#left
+	button 'btn_etages_supprimer' "Sup." pos:[171,63] width:35 height:16 toolTip:"Supprimer étages spécifiques" align:#left	
+	
+	listbox 'lbx_etages_specifiques' "" pos:[30,80] width:177 height:4 align:#left
+	
+	label 'lbl_etage_specifiques' "Etages :" pos:[35,138] width:50 height:19 align:#left
+	spinner 'spn_etageMin_specifiques' "" pos:[117,141] width:40 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+	label 'lbl_hauteur_specifiques' "Hauteur :" pos:[35,156] width:55 height:22 align:#left
+	spinner 'spn_etageMax_specifiques' "" pos:[169,141] width:40 height:16 range:[0,1e+13,0] type:#integer align:#left
+	checkbutton 'ckb_etageMax_specifiques' ">" pos:[156,141] width:16 height:16 align:#left
+	spinner 'spn_hauteur_specifiques' "" pos:[117,157] width:92 height:16 range:[0,1e+13,0] type:#worldunits align:#left
+	
+	---- Divers ------
+	GroupBox 'grp_divers' "Divers" pos:[10,199] width:235 height:60 align:#left
+	label 'lbl_decallageZ' "Décallage (Z):" pos:[27,216] width:92 height:18 align:#left
+	spinner 'spn_decallageZ' "" pos:[160,216] width:72 height:16 range:[-1e+13,1e+13,0] type:#worldunits scale:1 align:#left
+	checkbox 'chk_interieur' "Cloisons intèrieures" pos:[26,235] width:141 height:16 align:#left
+	
+	
+	
+	
+	--- rollout------------------
+	fn actualiser =(
+		
+		m_bat			= m_rolloutP.m_batiment
+		
+		-------- global ------------------------
+		spn_nbres.value		=	m_bat.etages_nbre		
+		spn_hauteur.value		=	m_bat.etages_hauteur_global
+		
+		
+		-------- etages spécifiques --------------
+		--- affichage dans la liste-
+		local liste_affichage = #()
+		for i = 1 to m_bat.etages_min.count do (
+			local affichage = ""
+			affichage+= m_bat.etages_min[i] as string  
+			if m_bat.etages_max_use[i] do 
+				affichage+= " ---> " + m_bat.etages_max[i] as string 				
+			affichage+= " : " + m_bat.etages_hauteurs[i] as string  + "cm."			
+			append liste_affichage affichage
+		)
+		lbx_etages_specifiques.items = liste_affichage
+		
+		--- les boutons ------------
+		local enable_prop =  lbx_etages_specifiques.selection != 0
+		btn_etages_supprimer.enabled 	= enable_prop
+		
+		spn_etageMin_specifiques.enabled 	= enable_prop
+		lbl_etage_specifiques.enabled 		= enable_prop
+		spn_etageMax_specifiques.enabled	= enable_prop
+		lbl_hauteur_specifiques.enabled		= enable_prop
+		ckb_etageMax_specifiques.enabled	= enable_prop
+		spn_hauteur_specifiques.enabled 	= enable_prop
+		
+		if enable_prop do (
+			local index = lbx_etages_specifiques.selection 
+			spn_etageMin_specifiques.value					=	m_bat.etages_min[ index ] 
+			ckb_etageMax_specifiques.checked 			= m_bat.etages_max_use[ index ] 
+			spn_etageMax_specifiques.indeterminate	=	not ckb_etageMax_specifiques.checked
+			spn_etageMax_specifiques.enabled				=	ckb_etageMax_specifiques.checked
+			if  ckb_etageMax_specifiques.checked do 
+				spn_etageMax_specifiques.value				=	m_bat.etages_max[ index ] 
+			
+			spn_hauteur_specifiques.value					=	m_bat.etages_hauteurs[ index ] 
+			
+			spn_etageMax_specifiques.range.x = spn_etageMin_specifiques.value		
+		)
+		
+		
+	)
+	
+	fn initialiser  _roll_edit =(
+		m_rolloutP 	= _roll_edit
+		m_plug			= m_rolloutP.m_plug
+		m_core			= m_rolloutP.m_core
+		
+		spn_etageMax_specifiques.range.x = 0
+	)
+		
+		
+		
+		
+	---- donnees -----------------	
+	fn set_etage = (
+		m_bat.set_etage		lbx_etages_specifiques.selection 		\
+										spn_etageMin_specifiques.value		\
+										ckb_etageMax_specifiques.checked		\
+										spn_etageMax_specifiques.value		\
+										spn_hauteur_specifiques.value
+		m_rolloutP.changer_un_truc ()
+		actualiser ()
+	)
+		
+		
+	
+	
+	
+	
+	
+	on spn_nbres changed val do
+(
+		m_bat.etages_nbre		= val
+		m_rolloutP.changer_un_truc ()
+	)
+	on spn_hauteur changed val do
+(
+		m_bat.etages_hauteur_global		= val
+		m_rolloutP.changer_un_truc ()
+	)
+	on btn_etages_nouveau pressed do
+	(
+			m_bat.ajouter_etage ()		
+			m_rolloutP.changer_un_truc ()
+			lbx_etages_specifiques.selection += 1
+			actualiser ()
+		)
+	on btn_etages_supprimer pressed do (
+		if lbx_etages_specifiques.selection > 0 do (
+			m_bat.supprimer_etage		lbx_etages_specifiques.selection
+			m_rolloutP.changer_un_truc ()
+			if lbx_etages_specifiques.selection > lbx_etages_specifiques.items.count do
+				lbx_etages_specifiques.selection = lbx_etages_specifiques.items.count 
+			actualiser ()
+		)
+	)
+	on lbx_etages_specifiques selected val do
+		actualiser ()
+	
+	on spn_etageMin_specifiques changed val do
+	(
+	 		set_etage ()
+		)
+	on spn_etageMax_specifiques changed val do
+	(
+	 		set_etage ()
+		)
+	on ckb_etageMax_specifiques changed state do
+	(
+	 		set_etage ()
+		)
+	on spn_hauteur_specifiques changed val do
+	(
+	 		set_etage ()
+		)
+		
+	on spn_decallageZ changed val do
+	(
+		m_bat.decallage_z = val
+		m_rolloutP.changer_un_truc ()
+		
+		)
+	on chk_interieur changed state do
+	(
+		m_bat.interieur_use = state
+		m_rolloutP.changer_un_truc ()
+		)
+		
+) ---- fin rollout general ------
 
-	checkbox 'chk2' "Cloisons intèrieures" pos:[26,259] width:141 height:16 align:#left
-	GroupBox 'grp38' "Divers" pos:[10,223] width:235 height:60 align:#left
-	GroupBox 'grp42' "Variations" pos:[20,72] width:213 height:135 align:#left
-)
-
-
-
-
-
-
-rollout sub02 "Façades" width:255 height:352
+rollout sub_facades "" width:594 height:789
 (
 
 
+	local m_rolloutP
+	local m_core
+	local m_plug
+
+	local 	m_bat
 	
-	edittext 'edt1' "" pos:[5,3] width:222 height:16 align:#left
-	button 'btn9' "+" pos:[227,3] width:18 height:18 align:#left
+	edittext 'edt1' "" pos:[13,132] width:207 height:16 align:#left
+	button 'btn9' "" pos:[222,132] width:16 height:16 align:#left
 	
-	spinner 'spn_etages' "" pos:[95,49] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	spinner 'spn_etagesMax' "" pos:[172,49] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left		
+	spinner 'spn_etages' "" pos:[86,166] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+	spinner 'spn_etagesMax' "" pos:[163,166] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left		
 		
-		
-		
-		
-		
-		
-		
-		
-			
-	GroupBox 'grp_global' "Appliqué à " pos:[10,32] width:235 height:89 align:#left
+	GroupBox 'grp_global' "Contraintes" pos:[14,149] width:223 height:89 align:#left
 					
 		
-		
-			
 				
 				
-	spinner 'spn_longueur_min' "" pos:[95,64] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
-	spinner 'spn_longueur_max' "" pos:[172,64] width:63 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
-	checkbutton 'chk_longueur_max' "" pos:[159,64] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
-	checkbutton 'chk_longueur_min' "" pos:[82,64] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-	label 'lbl_longueur' "Longueur:" pos:[20,65] width:52 height:15 align:#left
+	spinner 'spn_longueur_min' "" pos:[86,181] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	spinner 'spn_longueur_max' "" pos:[163,181] width:63 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	checkbutton 'chk_longueur_max' "" pos:[150,181] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
+	checkbutton 'chk_longueur_min' "" pos:[73,181] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+	label 'lbl_longueur' "Long.:" pos:[22,182] width:52 height:15 align:#left
 					
 		
-	checkbutton 'ckb_mur_nord' "Nord" pos:[82,98] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-	checkbutton 'ckb_mur_sud' "Sud" pos:[121,98] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-	checkbutton 'ckb_mur_est' "Est" pos:[159,98] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-	checkbutton 'ckb_mur_ouest' "Ouest" pos:[197,98] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-	label 'lbl_appliquerA' "Murs:" pos:[20,81] width:32 height:15 align:#left
+	checkbutton 'ckb_mur_nord' "Nord" pos:[73,215] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+	checkbutton 'ckb_mur_sud' "Sud" pos:[112,215] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+	checkbutton 'ckb_mur_est' "Est" pos:[150,215] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+	checkbutton 'ckb_mur_ouest' "Ouest" pos:[188,215] width:40 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+	label 'lbl_appliquerA' "Murs:" pos:[22,198] width:32 height:15 align:#left
 					
-	dropdownList 'ddl_murs' "" pos:[82,79] width:154 height:21 selection:3 align:#left
+	dropdownList 'ddl_murs' "" pos:[73,196] width:154 height:21 selection:3 align:#left
 		
-	checkbutton 'chk_etagesMax' "" pos:[159,49] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
-	label 'lbl30' "Etages :" pos:[20,49] width:52 height:15 align:#left
+	checkbutton 'chk_etagesMax' "" pos:[150,166] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
+	label 'lbl30' "Etages :" pos:[22,166] width:52 height:15 align:#left
 	
-	checkbutton 'chk_etages' "" pos:[82,49] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
+	checkbutton 'chk_etages' "" pos:[73,166] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
 	
 	
 					
-	GroupBox 'grp_sequence' "Séquence" pos:[10,125] width:235 height:217 align:#left
+	GroupBox 'grp_sequence' "Séquence" pos:[14,239] width:223 height:204 align:#left
 		
-	button 'btn_monter' "/\\" pos:[222,162] width:16 height:16 toolTip:"Monter le composant." align:#left
-	button 'btn_descendre' "\/" pos:[222,177] width:16 height:16 toolTip:"Descendre le composant." align:#left
-		
-		
-		
-	button 'btn_dupliquer_composant' "Dup." pos:[54,146] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
-	button 'btn_instancier_composant' "Inst." pos:[88,146] width:35 height:16 toolTip:"Créer une instance du composant sélectionné." align:#left
-	button 'btn_supprimer_composant' "Sup." pos:[182,145] width:35 height:16 toolTip:"Supprimer" align:#left
+	button 'btn_monter' "/\\" pos:[213,276] width:16 height:16 toolTip:"Monter le composant." align:#left
+	button 'btn_descendre' "\/" pos:[213,291] width:16 height:16 toolTip:"Descendre le composant." align:#left
 		
 		
-	listbox 'lbx_sequence' "" pos:[20,162] width:200 height:12 align:#left
+		
+	button 'btn_dupliquer_composant' "Dup." pos:[58,260] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
+	button 'btn_instancier_composant' "Inst." pos:[92,260] width:35 height:16 toolTip:"Créer une instance du composant sélectionné." align:#left
+	button 'btn_supprimer_composant' "Sup." pos:[173,260] width:35 height:16 toolTip:"Supprimer" align:#left
+		
+		
+	listbox 'lbx_sequence' "" pos:[24,276] width:187 height:12 align:#left
 		
 		
 		
 	
 	
+	button 'btn29' "Nouv." pos:[24,260] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
+	button 'btn15' "/\\" pos:[229,18] width:16 height:16 toolTip:"Monter le composant." align:#left
+	button 'btn16' "\/" pos:[229,33] width:16 height:16 toolTip:"Descendre le composant." align:#left
+	button 'btn17' "Dup." pos:[44,-1] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
+	button 'btn18' "Sup." pos:[193,-1] width:35 height:16 toolTip:"Supprimer" align:#left
+	listbox 'lbx3' "" pos:[10,16] width:218 height:7 align:#left
+	button 'btn19' "Nouv." pos:[10,-1] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
+	checkbutton 'ckb26' "D" pos:[229,95] width:16 height:16 highlightColor:(color 255 255 0) align:#left
+	GroupBox 'grp35' "Paramètres" pos:[8,114] width:235 height:337 align:#left
+	
+	
+	fn actualiser =(
+		
+		m_bat			= m_rolloutP.m_batiment
+		
+	)
+	
+	
+	fn initialiser  _roll_edit =(
+		m_rolloutP 	= _roll_edit
+		m_plug			= m_rolloutP.m_plug
+		m_core			= m_rolloutP.m_core
+	)
+	
+	
+	/* 
+	fn changer_taille_rollout 	_taille	=(
+		sub02.height = _taille.y - 40
+		lbx_sequence.height = sub02.height - lbx_sequence.pos.y - 20
+		
+	)
+	  */
 	
 	
 	
-	
-	button 'btn29' "Nouv." pos:[20,146] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
 )
-
-rollout sub03 "Toiture" width:557 height:427
+rollout sub_toiture "" width:557 height:427
 (
 
+	local m_rolloutP
+	local m_core
+	local m_plug
+	local 	m_bat
 	
-	edittext 'edt1' "" pos:[5,3] width:222 height:16 align:#left
-	button 'btn9' "+" pos:[227,3] width:18 height:18 align:#left
-	label 'lbl_appliquerA' "Type :" pos:[10,24] width:32 height:15 align:#left
+	edittext 'edt1' "" pos:[5,-1] width:222 height:16 align:#left
+	button 'btn9' "+" pos:[227,-1] width:18 height:18 align:#left
+	label 'lbl_appliquerA' "Type :" pos:[10,20] width:32 height:15 align:#left
 					
-	dropdownList 'ddl_murs' "" pos:[75,22] width:170 height:21 selection:3 align:#left
+	dropdownList 'ddl_murs' "" pos:[75,18] width:170 height:21 selection:3 align:#left
 	
-	subRollout 'subroll_parametres' "Parametres" pos:[20,66] width:205 height:209 align:#left
-	GroupBox 'grp_prop' "Propriétés" pos:[10,48] width:235 height:238 align:#left
+	subRollout 'subroll_parametres' "Parametres" pos:[20,62] width:205 height:209 align:#left
+	GroupBox 'grp_prop' "Propriétés" pos:[10,44] width:235 height:238 align:#left
+	
+	
+	
+	fn actualiser =(
+		
+		m_bat			= m_rolloutP.m_batiment
+		
+	)
+	
+
+	fn initialiser  _roll_edit =(
+		m_rolloutP 	= _roll_edit
+		m_plug			= m_rolloutP.m_plug
+		m_core			= m_rolloutP.m_core
+	)
+	/* 
+	fn changer_taille_rollout 	_taille	=(
+		
+	) */
+	 
 		
 )
-rollout sub04 "Interieur" width:255 height:427
+rollout sub_materiaux "" width:255 height:427
 (
 
 
+	local m_rolloutP
+	local m_core
+	local m_plug
 	
-	edittext 'edt1' "" pos:[5,3] width:222 height:16 align:#left
-	button 'btn9' "+" pos:[227,3] width:18 height:18 align:#left
+	edittext 'edt1' "" pos:[5,0] width:222 height:16 align:#left
+	button 'btn9' "+" pos:[227,0] width:18 height:18 align:#left
+	
+	
+	
+	fn actualiser =(
+		
+		m_bat			= m_rolloutP.m_batiment
+		
+	)
+	
+	fn initialiser  _roll_edit =(
+		m_rolloutP 	= _roll_edit
+		m_plug			= m_rolloutP.m_plug
+		m_core			= m_rolloutP.m_core
+	)
+	
 	--- Global ------
-	GroupBox 'grp_global' "Murs :" pos:[10,56] width:235 height:245 align:#left
-
-)
-rollout sub05 "Matériaux" width:255 height:427
-(
-
-
+-- 	GroupBox 'grp_global' "Murs :" pos:[10,56] width:235 height:245 align:#left
 	
-	edittext 'edt1' "" pos:[5,3] width:222 height:16 align:#left
-	button 'btn9' "+" pos:[227,3] width:18 height:18 align:#left
-	--- Global ------
-	GroupBox 'grp_global' "Murs :" pos:[10,56] width:235 height:245 align:#left
+	/* 
+	
+	fn changer_taille_rollout 	_taille	=(
+		
+	)
+	  */
 
 )
-
 
 
 
@@ -163,134 +364,146 @@ rollout sub05 "Matériaux" width:255 height:427
 
 
 --Create a rollout
-rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:329 height:502
+rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 (
-	--Add a dot net tab control
-	dotNetControl 'tabs' "system.windows.forms.tabControl" pos:[10,7] width:308 height:25 align:#left 
- 
- 
- 
- 
- 
- 
-	--Add a sub rollout.
-	subRollout 'subRoll' "Sub" pos:[40,43] width:278 height:407 align:#left
+	--- parametres generaux -----
+	local m_plug
+	local m_core
+	local sub				------ le sous_rollout du tab actif
 	
-	--Function to show all properties, methods and events for any dotNet object
-	fn showProps obj=
-	(
-		clearListener()
-		format "Properties:\n"
-		showProperties obj
-		format "\nMethods:\n"
-		showMethods obj
-		format "\nEvents:\n"
-		showEvents obj
+	--- les element manipulés ----------------
+	local m_batiment
+	local m_facade_courante
+	local m_facCompo_courant
+	local m_toiture
+	
+	--- parametres fenetre ---------
+	local largeur_base 		= 290
+	local largeur_panneau 	= 215
+	local nbr_panneau 		= 0
+	
+	--- pour changement efectués ou non ----
+	local m_changement = false
+	
+	dotNetControl 'tabs' "system.windows.forms.tabControl" pos:[10,32] width:270 height:25 align:#left
+	button 'btn_valider' "Valider" pos:[10,483] width:96 height:35 align:#left	
+	button 'btn_annuler' "Annuler" pos:[187,483] width:96 height:35 align:#left
+	button 'btn13' "Maj" pos:[10,3] width:28 height:18 enabled:true align:#left
+	checkbutton 'ckb4' "Surf" pos:[253,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left
+	checkbutton 'ckb5' "Etg." pos:[226,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left
+	checkbutton 'ckb6' "Fcd." pos:[199,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left
+	progressBar 'pb1' "ProgressBar" pos:[10,24] width:270 height:6 align:#left
+	
+	checkbutton 'ckb87' "Auto" pos:[37,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left
+	
+ 
+ 
+	subRollout 'subRoll' "Sub" pos:[10,56] width:270 height:407 align:#left
+	
+	subRollout 'subroll_Params_1' "Paramètres" pos:[289,56] width:210 height:407 align:#left
+	subRollout 'subroll_Params_2' "Paramètres" pos:[508,56] width:210 height:407 align:#left
+	
+	-- actualisations ------
+	fn actualiser =(
+		if sub != undefined do 
+			sub.actualiser ()
+	)
+	fn actualiser_nrbre_panneaux 	=(
+		if nbr_panneau > 2 do nbr_panneau = 2
+		if nbr_panneau < 0 do nbr_panneau = 0
+		rollout_Urb_Bat_editeur.width = largeur_base + nbr_panneau * largeur_panneau
+	)
+	fn actualiser_taille_rollout 	taille:( getdialogSize rollout_Urb_Bat_editeur )  =(
+		
+		actualiser_nrbre_panneaux ()
+		
+		btn_valider.pos.y 		= taille.y - 45
+		btn_annuler.pos.y 		= taille.y - 45
+		btn_annuler.pos.y 		= taille.y - 45
+		subRoll.height 			= taille.y - subRoll.pos.y - 55
+		
+-- 		subRoll.rollouts[1].changer_taille_rollout 	_taille 
+		
 	)
 	
+	
+	---- changements ----------
+	fn changer_un_truc 		= m_changement = true
+	fn onA_changer_unTruc =	m_changement
+	fn reset_changement 	=	m_changement = false
+
 	--Add rollouts to the subRollout based on which tab is currently selected. 
-	fn addTabRollout index=
-	(
+	fn ouvrir_tab index	=	(
 		--Remove any existing rollouts first. 
  		for x in subRoll.rollouts do removeSubRollout subRoll x
 		
 		sub=case index of
 		(
-			default:
-			(
-				sub01
-				
-			)
-			1:
-			(
-				sub02
-			)
-			2:
-			(
-				sub03
-			)
-			3:
-			(
-				sub04
-			)
-			4:
-			(
-				sub05
-			)
+			default:	sub_general
+			1:			sub_facades
+			2:			sub_toiture
+			3:			sub_materiaux
 		)
 		addSubRollout subRoll sub
+		sub.initialiser  rollout_Urb_Bat_editeur
+		sub.actualiser ()
 	)
 	
 	--Tab initilization function.
 	fn initTabs tab labels:#() =
 	(
-		--Clear any existing tabs incase we do an update of them at some point. 
-		tab.tabPages.clear()
-		--Set the size mode so that we can control their width. 
-		tab.sizeMode=tab.sizeMode.fixed
-		--Set the width of every tab.
+		
+		tab.tabPages.clear()		
+		tab.sizeMode=tab.sizeMode.fixed		
 		tab.itemSize=dotnetObject "System.Drawing.Size" ((tab.width/( labels.count /* - 1 */ ) ) - 5)   23
-		--Loop through all the labels that we pass to the function and add a tab by the same name. 
+		
  		for x in labels do tab.tabPages.add x
 	)
 	
-	--When the mouse button is released on a tab get the selected tab and pass it to our addTabRollout function. 
-	button 'btn10' "Valider" pos:[10,456] width:96 height:35 align:#left
-	
-	--When the rollout opens initilize the tab control
-	button 'btn_annuler' "Annuler" pos:[222,456] width:96 height:35 align:#left
-	button 'btn13' "Maj" pos:[10,43] width:28 height:28 enabled:true align:#left
-	checkbutton 'ckb4' "Surf" pos:[10,170] width:28 height:28 highlightColor:(color 255 255 0) align:#left
-	checkbutton 'ckb5' "Etg." pos:[10,116] width:28 height:28 highlightColor:(color 255 255 0) align:#left
-	checkbutton 'ckb6' "Fcd." pos:[10,143] width:28 height:28 highlightColor:(color 255 255 0) align:#left
-	progressBar 'pb1' "ProgressBar" pos:[10,35] width:308 height:6 align:#left
-	
-	checkbutton 'ckb87' "Auto" pos:[10,70] width:28 height:28 highlightColor:(color 255 255 0) align:#left
-	on rollout_Urb_Bat_editeur open do
-	(
-	-- 		showProps tabs
+	fn set_batiment 	_bat = (
+		m_batiment = _bat
+-- 		actualiser ()
+	)
+	fn initialiser _plug 		=(
 		
+		---- pointeurs -------
+		m_plug = _plug
+		m_core = _plug.core
+		
+		--- rollout ----------
+		actualiser_nrbre_panneaux ()		
 		initTabs tabs labels:#("Général", "Façades", "Toiture", "Materiaux")
-		addTabRollout 0
 	)
-	on tabs mouseUp senderArg arg do
-	(
-	-- 		showProps arg
-		addTabRollout senderArg.SelectedIndex
+	
+	
+	
+	
+	
+	on rollout_Urb_Bat_editeur open do	actualiser_taille_rollout ()
+	on rollout_Urb_Bat_editeur resized _taille do		actualiser_taille_rollout  taille:_taille
+	
+	on tabs mouseUp senderArg arg do		ouvrir_tab 	senderArg.SelectedIndex
+	
+	on btn_valider pressed do (
+		m_core.vider_parametres ()
+		m_batiment.enregistrer  m_plug
+		m_core.editeur_fermer ()
+		)
+	on btn_annuler pressed do	(
+		
+		local confirmation_fermer = true
+		if m_changement do
+			confirmation_fermer = queryBox  "Quitter sans enregistrer les modifications ?"
+		if confirmation_fermer do (
+			m_core.editeur_fermer ()
+			reset_changement ()
+		)
 	)
+	
 )
---Create the dialog
--- createDialog rollout_Urb_Bat_editeur
-
-
-createDialog 	rollout_Urb_Bat_editeur		style:				#(#style_resizing, #style_titlebar, #style_border, #style_sysmenu) 	\
-														lockWidth:			true
 
 
 
+rollout_Urb_Bat_editeur
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+) --- fin FileIn --

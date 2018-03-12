@@ -258,7 +258,6 @@ struct  str_manager_parametres (
 		),
 		fn dupliquer_paramsElem 	_params	=(
 	
-	
 		),
 		
 		
@@ -269,7 +268,7 @@ struct  str_manager_parametres (
 		fn enregistrer_parametres		_element		=(
 -- 			debug "enregistrer_parametres"
 -- 			debug "_element" var:_element
-			local prop_element_Noms 	= getPropNames	_element
+			local prop_element_Noms 	= getPropNames			_element
 			local elem_index 				= get_element_index		_element
 			
 			

@@ -32,6 +32,7 @@ include "$userScripts\\cp-Urba\\modules\\Batiment\\divers\\Batiment - Parametres
 -------------------------------------------------------------------------------------------------------------------------------------------------
 --------------- ROLLOUT  --------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------
+/* 
 rollout roll_presets 			"Presets" 		rolledUp:true		(
 	
 	
@@ -58,17 +59,28 @@ rollout roll_presets 			"Presets" 		rolledUp:true		(
 	on btn_charger pressed do
 		core.preset_charger ()
 	
-) -- fin rllout presets -
-rollout roll_global "Global" width:162 height:341
+) -- fin rllout presets -*
+ */
+rollout roll_global "Global" width:195 height:341
 (
 	
 	
 	fn shape_filt 		obj = superclassof obj == shape
 	
+	
+	button 'btn_enregistrer' "Enregistrer" pos:[88,19] width:77 height:20 align:#left		
+		
+		
+		
+	button 'btn_charger' "Charger" pos:[13,19] width:76 height:20 enabled:true align:#left
+	button 'btn_coller' "Coller" pos:[88,37] width:77 height:20 align:#left
+	button 'btn_copier' "Copier" pos:[13,38] width:76 height:20 align:#left
+	
 	--- Surface ------
-	pickbutton 'btn_pick_surface' "Pick shape" pos:[10,14] width:150 height:18 filter:shape_filt	 toolTip:"Le shape à utiliser comme surface de base pour la création du bâtiment." autoDisplay:true align:#left
-	GroupBox 'grp_surface' "Surface :" pos:[4,0] width:162 height:38 align:#left
-
+	pickbutton 'btn_pick_surface' "Pick shape" pos:[13,78] width:152 height:20 filter:shape_filt toolTip:"Le shape à utiliser comme surface de base pour la création du bâtiment." autoDisplay:true align:#left
+	GroupBox 'grp_surface' "Surface :" pos:[8,64] width:162 height:38 align:#left
+	
+/* 
 	--- Global ------
 	GroupBox 'grp_global' "Etages :" pos:[4,40] width:162 height:51 align:#left
 -- 	spinner 'spn_rotation_axeP' "" pos:[88,87] width:48 height:16 range:[-360,360,0] type:#float scale:1 align:#left
@@ -76,30 +88,30 @@ rollout roll_global "Global" width:162 height:341
 -- 	button 'btn_rotation' "+90" pos:[137,87] width:24 height:16 align:#left
 	label 'lbl_nbre' "Nbre. d'étages:" pos:[10,56] width:79 height:15 align:#left
 	spinner 'spn_nbres' "" pos:[88,55] width:72 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	spinner 'spn_hauteur' "" pos:[88,71] width:57 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	spinner 'spn_hauteur' "" pos:[88,71] width:72 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
 	label 'lbl_hauteur' "Hauteur :" pos:[10,72] width:76 height:15 align:#left
-/* 	
+	 */
 	
 	--- Facades -----
-	GroupBox 'grp_facades' "Façades :" pos:[4,94] width:162 height:121 align:#left
-	listbox 'lbx_facades' "" pos:[10,125] width:150 height:6 align:#left
-	button 'btn_dupliquer_facade' "Dup." pos:[40,108] width:28 height:16 align:#left
-	button 'btn_ajouterFacade' "+" pos:[10,108] width:16 height:16 align:#left
-	button 'btn_supprimerFacade' "-" pos:[25,108] width:16 height:16 align:#left
-	checkbutton 'btn_editer_facade' "Edit" pos:[133,108] width:28 height:16 align:#left
 	
 	--- Toitures -----
-	GroupBox 'grp14' "Toiture :" pos:[3,217] width:162 height:40 align:#left
-	button 'btn_editer_toiture' "Edit" pos:[133,232] width:28 height:19 align:#left
-	dropdownList 'ddl_toiture' "" pos:[10,232] width:123 height:21 align:#left
 	
 	--- Interieur  -----
-	GroupBox 'grp_interieur' "Interieur :" pos:[3,259] width:162 height:40 align:#left 	--enabled:false 
-	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 align:#left 	--enabled:false 
+ 	--enabled:false 
+ 	--enabled:false 
 	
-	button 'btn_editer_etages' "E." pos:[143,72] width:16 height:16 align:#left
-	 */
+-- 	button 'btn_editer_etages' "E." pos:[143,72] width:16 height:16 align:#left
+	checkbutton 'ckb_editeur' "Edition" pos:[8,108] width:162 height:30 highlightColor:(color 255 255 0) align:#left 
+ 
+ 
+	GroupBox 'grp63' "Presets :" pos:[8,1] width:162 height:60 align:#left
+ 
+ 
+	
 	fn actualiser =(
+		
+		btn_coller.enabled 			= urba_clipboard_batiment != ""
+		ckb_editeur.checked 	= core.editeur_estOuvert ()
 		/* 
 		lbx_facades.items 						=  facades_nom as array
 		
@@ -133,77 +145,28 @@ rollout roll_global "Global" width:162 height:341
 	(
 	-- 				core.fermer_toutes_fenetres query:true
 			)
+	on btn_enregistrer pressed do
+		core.preset_enregistrer ()
+	on btn_charger pressed do
+		core.preset_charger ()
+	on btn_coller pressed do
+	(
+			core.preset_coller ()
+				actualiser()
+			)
+	on btn_copier pressed do
+	(
+			core.preset_copier ()
+				actualiser()
+			)
 	on btn_pick_surface picked _shape do
 		core.assigner_surface 		$		_shape
-	on spn_nbres changed val do
-		core.actualiser ()
-	on spn_hauteur changed val do
-		core.actualiser ()
-	on lbx_facades selected val do
-	(
-				if core.facadeEditeur_estOuvert () do (
-	-- 				local index_facade_ouverte = ( core.get_mgr_facades () ).get_index_facadeOuverte ()
-	-- 				if lbx_facades.selection != index_facade_ouverte do
-						core.facadeEditeur_ouvrir	 	lbx_facades.selection
-				)
-				actualiser ()
-			)
-	on lbx_facades doubleClicked arg do
-	(
-				if not core.facadeEditeur_estOuvert () do (
-						core.facadeEditeur_ouvrir	 	lbx_facades.selection
-				)
-			)
-	on btn_dupliquer_facade pressed do
-	(
-			core.dupliquer_facade		lbx_facades.selection 
-			actualiser ()
+	on ckb_editeur changed state do	(
+		case state of (
+			true:		core.editeur_ouvrir ()
+			false:	core.editeur_fermer ()
 		)
-	on btn_ajouterFacade pressed do
-	(
-				core.creer_facade ()
-				actualiser ()
-				lbx_facades.selection = lbx_facades.items.count
-				
-				core.facadeEditeur_ouvrir	 	lbx_facades.selection
-			)
-	on btn_supprimerFacade pressed do
-	(		
-			local confirmation 			= querybox ( "Supprimer "  + lbx_facades.items [lbx_facades.selection ] + " ?" )
-			if confirmation do (
-				core.supprimer_facade		lbx_facades.selection
-				lbx_facades.selection  -= 1
-				core.facadeEditeur_fermer ()
-				actualiser ()
-			)
-		)
-	on btn_editer_facade changed state  do
-	(
-			case state of (
-				true:		core.facadeEditeur_ouvrir	 	lbx_facades.selection
-				false:	core.facadeEditeur_fermer ()
-			)
-			actualiser ()
-		)
-	on btn_editer_toiture pressed do
-	(
-			local mgr_toiture = core.get_mgr_toiture()
-			local toiture = core.get_toiture ()
-			local toit_dialog = mgr_toiture.ouvrir_dialog	()
-		toit_dialog.set_toiture 	toiture
-	-- 			dialog.initialiser 	$	toiture 
-		)
-	on ddl_toiture selected _val do
-	(
-				local toiture = core.creer_toiture 	_val
-				actualiser ()
-			)
-	on chk_planchers changed state do
-		core.actualiser ()
-	on btn_editer_etages pressed do
-	(
-				core.etagesEditeur_ouvrir ()
-			)
+	)
 )
 rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
 	
@@ -265,25 +228,26 @@ rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
 	
 )
 
-rollout roll_aleatoire "Aléatoire" 	rolledUp:true		
+rollout roll_aleatoire "Aléatoire" width:162 height:237
 (
-	GroupBox 'grp_ouvrants' "Ouverture fenetres" pos:[6,5] width:162 height:71 align:#left
-	label 'lbl_ouvrt_proba' "Probabilité (%):" pos:[15,22] width:80 height:13 align:#left
-	spinner 'spn_ouvrt_proba' "" pos:[88,22] width:72 height:16 range:[0,100,0] scale:1 align:#left
-	label 'lbl_ouvrt_max' "Maximum (%):" pos:[15,52] width:80 height:13 align:#left
-	spinner 'spn_ouvrt_max' "" pos:[88,52] width:72 height:16 range:[0,100,0] scale:1 align:#left
-	label 'lbl_ouvrt_min' "Minimum (%):" pos:[15,37] width:80 height:13 align:#left
-	spinner 'spn_ouvrt_min' "" pos:[88,37] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	GroupBox 'grp_ouvrants' "Ouverture fenetres" pos:[6,28] width:162 height:71 align:#left
+	label 'lbl_ouvrt_proba' "Probabilité (%):" pos:[15,45] width:69 height:13 align:#left
+	spinner 'spn_ouvrt_proba' "" pos:[88,45] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	label 'lbl_ouvrt_max' "Maximum (%):" pos:[15,75] width:67 height:13 align:#left
+	spinner 'spn_ouvrt_max' "" pos:[88,75] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	label 'lbl_ouvrt_min' "Minimum (%):" pos:[15,60] width:65 height:13 align:#left
+	spinner 'spn_ouvrt_min' "" pos:[88,60] width:72 height:16 range:[0,100,0] scale:1 align:#left
 	
-	GroupBox 'grp_volet' "Fermeture volets" pos:[6,80] width:162 height:71 align:#left
-	label 'lbl_volet_proba' "Probabilité (%):" pos:[16,97] width:80 height:13 align:#left
-	spinner 'spn_volet_proba' "" pos:[88,97] width:72 height:16 range:[0,100,0] scale:1 align:#left
-	label 'lbl_volet_max' "Maximum (%):" pos:[16,127] width:80 height:13 align:#left
-	spinner 'spn_volet_max' "" pos:[88,127] width:72 height:16 range:[0,100,0] scale:1 align:#left
-	label 'lbl_volet_min' "Minimum (%):" pos:[16,112] width:80 height:13 align:#left
-	spinner 'spn_volet_min' "" pos:[88,112] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	GroupBox 'grp_volet' "Fermeture volets" pos:[6,103] width:162 height:71 align:#left
+	label 'lbl_volet_proba' "Probabilité (%):" pos:[16,120] width:68 height:13 align:#left
+	spinner 'spn_volet_proba' "" pos:[88,120] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	label 'lbl_volet_max' "Maximum (%):" pos:[16,150] width:67 height:13 align:#left
+	spinner 'spn_volet_max' "" pos:[88,150] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	label 'lbl_volet_min' "Minimum (%):" pos:[16,135] width:68 height:13 align:#left
+	spinner 'spn_volet_min' "" pos:[88,135] width:72 height:16 range:[0,100,0] scale:1 align:#left
+	label 'lbl60' "Seed :" pos:[11,7] width:57 height:13 align:#left
+	spinner 'spn72' "" pos:[83,7] width:72 height:16 range:[0,100,0] scale:1 align:#left
 )
-
 
 /* 
 rollout roll_viewport "Viewport" width:162 height:204
@@ -313,25 +277,14 @@ rollout roll_viewport "Viewport" width:162 height:204
 	on ckb_proxy changed state 		do
 		core.actualiser ()		
 	
-)
 
- */
-
-
+) */
 rollout roll_aPropos 			"A propos" 	rolledUp:false	(
-	label 'lbl_axeP' "Urba | V0.1  |" pos:[5,2]  align:#left
+	label 'lbl_axeP' "Urba | V0.12  |" pos:[5,2]  align:#left
 	HyperLink 'hpl1' "Christophe Pagès" pos:[76,2] address:"http://c-pages.fr" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
 	HyperLink 'hpl2' "GitHub" pos:[127,17] address:"https://github.com/c-pages/cp-Urba-Cleanage" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
 	label 'lbl6' "2017" pos:[5,17] align:#left
 )
-
-
-
-
-
-
-
-
 
 
 

@@ -26,8 +26,6 @@
 	
 ########################################################################################################################*/
 
-
-
 -------------------------------------------------------------------------------------------------------------------------------------------------
 --------------- PARAMETRES  ---------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,14 +35,18 @@ parameters params_global 						rollout:roll_global		(
 	surface_node					type:#node 								 	ui:btn_pick_surface		animatable:false		invisibleInTV:true
 	
 	------- Etages			------------------
-	etages_nbre					type: #integer			default:1			ui:spn_nbres			animatable:false		invisibleInTV:true
-	etages_hauteur_global	type: #float 				default:250.		ui:spn_hauteur		animatable:false		invisibleInTV:true
+	etages_nbre					type: #integer			default:1			/* ui:spn_nbres	 */		animatable:false		invisibleInTV:true
+	etages_hauteur_global	type: #float 				default:250.		/* ui:spn_hauteur	 */	animatable:false		invisibleInTV:true
 	
 	etages_min					type:#intTab 			tabSize:0  		tabSizeVariable:true
 	etages_max_use			type:#boolTab	 		tabSize:0  		tabSizeVariable:true
 	etages_max					type:#intTab		 		tabSize:0  		tabSizeVariable:true
 	etages_hauteurs			type:#floatTab	 		tabSize:0  		tabSizeVariable:true
-
+	
+	---- Divers --------
+	decallage_z					type:#float	 			default:0.			animatable:false		invisibleInTV:true
+	
+	
 )
 parameters params_constantes 							(
 	
@@ -83,17 +85,17 @@ parameters params_optimSurface				rollout:roll_optimSurface	(
 	optim_aligner_seuil			type:#float				default:50.			ui:spn_aligner		animatable:false		invisibleInTV:true
 	
 )
-parameters params_viewport					rollout:roll_viewport	(
+parameters params_viewport				/* 	rollout:roll_viewport	 */(
 	--- proxy_mode	-----
-	affiche_asProxy				type:#boolean			default:false	ui:ckb_proxy			animatable:false		invisibleInTV:true
+	affiche_asProxy				type:#boolean			default:false	/* ui:ckb_proxy	 */		animatable:false		invisibleInTV:true
 	
 	------- AFFICHAGE 		 ------------------
-	affiche_axe					type:#boolean			default:false	ui:ckb_axe				animatable:false		invisibleInTV:true
-	affiche_surface				type:#boolean			default:false	ui:ckb_surface			animatable:false		invisibleInTV:true
-	affiche_gouttereaux		type:#boolean			default:false	ui:ckb_gouttereaux	animatable:false		invisibleInTV:true
-	affiche_pignons				type:#boolean			default:false	ui:ckb_pignons			animatable:false		invisibleInTV:true
-	affiche_ssSurfaces			type:#boolean			default:false	ui:ckb_ssSurfaces		animatable:false		invisibleInTV:true	
-	affiche_geometrie			type:#boolean			default:false	ui:ckb_geometrie		animatable:false		invisibleInTV:true
+	affiche_axe					type:#boolean			default:false	/* ui:ckb_axe */				animatable:false		invisibleInTV:true
+	affiche_surface				type:#boolean			default:false	/* ui:ckb_surface	 */		animatable:false		invisibleInTV:true
+	affiche_gouttereaux		type:#boolean			default:false	/* ui:ckb_gouttereaux */	animatable:false		invisibleInTV:true
+	affiche_pignons				type:#boolean			default:false	/* ui:ckb_pignons		 */	animatable:false		invisibleInTV:true
+	affiche_ssSurfaces			type:#boolean			default:false	/* ui:ckb_ssSurfaces */		animatable:false		invisibleInTV:true	
+	affiche_geometrie			type:#boolean			default:false	/* ui:ckb_geometrie	 */	animatable:false		invisibleInTV:true
 	
 )
 
@@ -154,7 +156,7 @@ parameters params_toiture 							(
 )
 
 parameters params_interieur				rollout:roll_global					(
-	interieur_planchers		type:#boolean			default:false	ui:chk_planchers		animatable:false		invisibleInTV:true
+	interieur_planchers		type:#boolean			default:false	/* 	ui:chk_planchers	 */	animatable:false		invisibleInTV:true
 	
 )
 

@@ -91,22 +91,93 @@ struct 	str_bat_VP 		(
 			gw.updateScreen() 
 		),
 
+		fn fn_afficher_facades =(
+			
+			gw.setTransform (matrix3 1)
+			
+			
+			if selection.count == 1 and classof $ == Urba_Batiment do (
+				local bat 				= $
+				local fcd				= bat.core.get_facade_enEdition 	()
+				local surface_pts 	= 	bat.core.get_surface_points		()
+				
+					for ptID = 1 to surface_pts.count do (
+						
+						local ptID_suivant = ptID + 1
+						if ptID_suivant > surface_pts.count do ptID_suivant = 1
+							
+						local vec_sousBassmt	=	[0,0,1] * bat.const_ssBassement_epaisseur
+						local vec_dalle				=	[0,0,1] * bat.const_dalle_epaisseur
+						local vec_decallage		=	[0,0,1] * 300
+	
+						local pt 						= surface_pts[ptID] *  bat.transform 
+						local pt_suivant 			= surface_pts[ptID_suivant] *  bat.transform  
+						local longueur_facade 	= ( (floor ( ( distance pt pt_suivant ) * 10 ) ) / 10 )
+						local txt_affichage 		= "  " + longueur_facade as string + " cm"
+						
+						local col_valid 			= yellow
+						local col_nonValid 	= [ 100, 100 , 100 ]
+						local col_divers 		= white
+						
+						--- les etages	----------------
+						if  fcd != undefined  and  longueur_valid do (
+							local z = 0
+							for etageNum = 0 to bat.etages_nbre do (
+								
+								local etage_valid	=		bat.core.est_valide		fcd			etageNum		ptID 
+								local etage_ht 		= bat.core.get_etage_ht	 	etageNum	 + bat.const_dalle_epaisseur
+								
+
+								if etage_valid do (
+									gw.setColor	#line		col_valid
+									local ecart 		= 10
+									local norm_dir 	= normalize ( pt_suivant - pt )
+									local pt_1 		=  pt + [0,0,z] 				+ 	norm_dir * ecart	+ [0,0,ecart]
+									local pt_2 		=  pt_suivant + [0,0,z]	- 	norm_dir * ecart	+ [0,0,ecart]
+									local pt_3 		=  pt_2 + [0,0,etage_ht - 2*ecart ] 
+									local pt_4 		=  pt_1 + [0,0,etage_ht - 2*ecart ] 
+									gw.polyline #( pt_1, pt_2, pt_3, pt_4		)	true 
+									
+-- 									local pt_centre = ( pt_1 + pt_2 + pt_3 + pt_4 ) / 4
+-- 									gw.text 	pt_centre		( etageNum as string )  	color:col_valid
+									
+								)
+								
+								
+								z+= etage_ht
+							)
+							
+						)
+					
+					)
+			)
+			gw.updateScreen() 
+		),
+
 	public
-		fn cacher_longueurs	=(
+		fn longueurs		state =(
 			unregisterRedrawViewsCallback 	urba_fn_afficher_longueurs
+			case state of (
+				on:	registerRedrawViewsCallback 		urba_fn_afficher_longueurs 	
+				off:	unregisterRedrawViewsCallback 	urba_fn_afficher_longueurs
+			)
 			redrawviews ()
 		),
 
-		fn afficher_longueurs			=(
-			cacher_longueurs()
-			
-			registerRedrawViewsCallback 		urba_fn_afficher_longueurs 	
-			completeRedraw() 
+		fn etages		state =(
+			unregisterRedrawViewsCallback 	urba_fn_afficher_facades
+			case state of (
+				on:	registerRedrawViewsCallback 		urba_fn_afficher_facades 	
+				off:	unregisterRedrawViewsCallback 	urba_fn_afficher_facades
+			)
+			redrawviews ()
 		),
+		
 		on create do (
 			format "initialiser\n"
-			global 	urba_fn_afficher_longueurs  = fn_afficher_longueurs
-			format "> urba_fn_afficher_longueurs : %\n" urba_fn_afficher_longueurs
+			global 	urba_fn_afficher_longueurs  	= fn_afficher_longueurs
+			global 	urba_fn_afficher_facades  		= fn_afficher_facades
+-- 			format "> urba_fn_afficher_longueurs : %\n" urba_fn_afficher_longueurs
 		)
 	
 )

@@ -30,6 +30,7 @@
 
 
 --- inculsion des fichiers externes	------------------------------
+include	 "$userScripts\cp-Urba\modules\Batiment\\elements\\Batiment - Batiment virtuel.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Divers.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager de Trimesh.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Viewport.ms"
@@ -100,7 +101,8 @@ struct str_batiment_core (
 		mgr_surface				= str_mgr_surfaces (),
 		
 		---- dialogs secondaires ----
-		m_etagesEditeur_dialog = fileIn "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout Etages.ms",
+		m_editeur_dialog = fileIn "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout - Editeur.ms",
+		m_editeur_ouvert = false,
 		
 	-------- FONCTIONS	--------------------------------------------------------------------------------------------------------
 -- private
@@ -109,6 +111,19 @@ struct str_batiment_core (
 		
 		
 	-------- INTERFACE	--------------------------------------------------------------------------------------------------------
+	
+	public 
+	
+		fn vider_parametres =(
+			
+			-- on vide tout les tableaux pour éviter les elements inutiles
+			for paramNom in getpropNames m_plug do (
+				local param = getproperty m_plug paramNom
+				if classof param == arrayParameter do
+					setproperty m_plug paramNom #()
+			)
+			
+		),
 	----- Actualiser  -----------------------
 	public
 		fn actualiser =(
@@ -148,6 +163,18 @@ struct str_batiment_core (
 			vp_cacher_longueurs ()
 			
 		),
+		
+		
+		fn get_batiment =(
+			local nvBat = str_batVirt ()
+			nvBat.charger 	m_plug
+			nvBat
+		),
+		
+		
+		
+		
+		
 	---- Etages----------
 	public
 		fn ajouter_etage =(
@@ -190,6 +217,7 @@ struct str_batiment_core (
 			)
 			result
 		),
+		
 		
 		
 	---- managers et autres ----------
@@ -546,6 +574,75 @@ struct str_batiment_core (
 			)
 			result
 		),
+		
+		fn editeur_ouvrir 					=	(
+			--- on ouvre la fenetre ----------
+			m_editeur_ouvert = true
+			createDialog 	m_editeur_dialog	style:				#(#style_resizing, #style_toolwindow, #style_border /*,  #style_sysmenu*/) 	\
+															lockWidth:			true
+			
+			
+			-- oninitialise le rollout -
+			m_editeur_dialog.initialiser 	m_plug
+			
+			--- le batiment virtuel---------
+			local bat_courant = get_batiment ()
+			m_editeur_dialog.set_batiment	bat_courant
+			
+			m_editeur_dialog.ouvrir_tab 0
+			m_editeur_dialog.actualiser ()
+			
+			bat_courant
+			
+			
+			/* 
+			local dialg_facades
+			local demande_enr
+			debug "FERMER"
+			if not mgr_facades.dialog_estOuvert () then (
+			debug "est a ouvrir"
+				dialg_facades	=	mgr_facades.ouvrir_dialog 		()
+			) else (
+			debug "est deja ouvert"
+				dialg_facades 	= mgr_facades.get_dialog 			()
+			debug "m_changement" var:dialg_facades.m_changement
+				if dialg_facades.m_changement  do
+					demander_enregistrement_facade ()
+			)
+-- 			if demande_enr != #cancel do (
+				local facade_aOuvrir 	= get_facade_parIndex  		_index
+				dialg_facades.set_facade	facade_aOuvrir		
+				redrawViews ()
+-- 			) */
+		),
+		fn editeur_fermer 						=	(
+			m_editeur_ouvert = false
+			destroyDialog m_editeur_dialog
+			m_plug.actualiser_rollouts()
+			
+			/* 
+			dialg_facades 	= mgr_facades.get_dialog 			()
+			if dialg_facades.m_changement  do 
+				demander_enregistrement_facade ()
+			
+			mgr_facades.fermer_dialog 	()
+			
+			if bat_a_reconstruire do actualiser ()
+			VP_cacher_longueurs ()
+			 */
+		),
+		fn editeur_estOuvert 					= m_editeur_ouvert,
+		
+	/* 	fn facadeEditeur_estOuvert 					= m_editeur_ouvert,
+		fn set_facadeEditeur_position		_pos 	= mgr_facades.set_dialog_pos  	_pos,
+		
+		--- editeur etages---------
+		fn etagesEditeur_ouvrir = (
+			createDialog		m_etagesEditeur_dialog
+			m_etagesEditeur_dialog.initialiser  m_plug 
+			m_etagesEditeur_dialog.actualiser ()
+		), */
+		/* 
 		fn facadeEditeur_ouvrir 				_index	=	(
 			local dialg_facades
 			local demande_enr
@@ -585,7 +682,7 @@ struct str_batiment_core (
 			createDialog		m_etagesEditeur_dialog
 			m_etagesEditeur_dialog.initialiser  m_plug 
 			m_etagesEditeur_dialog.actualiser ()
-		),
+		), */
 		
 	----- Initialisation  -----------------------
 	private
