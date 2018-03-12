@@ -3,6 +3,8 @@
 
 (  --- fin FileIn ----------
 
+
+	
 rollout sub_general "" width:255 height:556
 (
 	local m_rolloutP
@@ -108,9 +110,9 @@ rollout sub_general "" width:255 height:556
 	---- donnees -----------------	
 	fn set_etage = (
 		m_bat.set_etage		lbx_etages_specifiques.selection 		\
-										spn_etageMin_specifiques.value		\
+										spn_etageMin_specifiques.value			\
 										ckb_etageMax_specifiques.checked		\
-										spn_etageMax_specifiques.value		\
+										spn_etageMax_specifiques.value			\
 										spn_hauteur_specifiques.value
 		m_rolloutP.changer_un_truc ()
 		actualiser ()
@@ -122,18 +124,15 @@ rollout sub_general "" width:255 height:556
 	
 	
 	
-	on spn_nbres changed val do
-(
+	on spn_nbres changed val do (
 		m_bat.etages_nbre		= val
 		m_rolloutP.changer_un_truc ()
 	)
-	on spn_hauteur changed val do
-(
+	on spn_hauteur changed val do (
 		m_bat.etages_hauteur_global		= val
 		m_rolloutP.changer_un_truc ()
 	)
-	on btn_etages_nouveau pressed do
-	(
+	on btn_etages_nouveau pressed do	(
 			m_bat.ajouter_etage ()		
 			m_rolloutP.changer_un_truc ()
 			lbx_etages_specifiques.selection += 1
@@ -148,34 +147,18 @@ rollout sub_general "" width:255 height:556
 			actualiser ()
 		)
 	)
-	on lbx_etages_specifiques selected val do
-		actualiser ()
+	on lbx_etages_specifiques 			selected 	val 		do	actualiser ()
 	
-	on spn_etageMin_specifiques changed val do
-	(
-	 		set_etage ()
-		)
-	on spn_etageMax_specifiques changed val do
-	(
-	 		set_etage ()
-		)
-	on ckb_etageMax_specifiques changed state do
-	(
-	 		set_etage ()
-		)
-	on spn_hauteur_specifiques changed val do
-	(
-	 		set_etage ()
-		)
+	on spn_etageMin_specifiques 	changed 	val 		do 	set_etage ()
+	on spn_etageMax_specifiques 	changed 	val 		do	set_etage ()
+	on ckb_etageMax_specifiques 	changed 	state 	do	set_etage ()
+	on spn_hauteur_specifiques 		changed 	val 		do 	set_etage ()
 		
-	on spn_decallageZ changed val do
-	(
+	on spn_decallageZ changed val do	(
 		m_bat.decallage_z = val
-		m_rolloutP.changer_un_truc ()
-		
+		m_rolloutP.changer_un_truc ()		
 		)
-	on chk_interieur changed state do
-	(
+	on chk_interieur changed state do	(
 		m_bat.interieur_use = state
 		m_rolloutP.changer_un_truc ()
 		)
@@ -385,24 +368,32 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 	--- pour changement efectués ou non ----
 	local m_changement = false
 	
+	local 	mgr_VP 					= fileIn	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Viewport.ms"
+	
 	dotNetControl 'tabs' "system.windows.forms.tabControl" pos:[10,32] width:270 height:25 align:#left
 	button 'btn_valider' "Valider" pos:[10,483] width:96 height:35 align:#left	
 	button 'btn_annuler' "Annuler" pos:[187,483] width:96 height:35 align:#left
 	button 'btn13' "Maj" pos:[10,3] width:28 height:18 enabled:true align:#left
-	checkbutton 'ckb4' "Surf" pos:[253,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left
-	checkbutton 'ckb5' "Etg." pos:[226,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left
-	checkbutton 'ckb6' "Fcd." pos:[199,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left
-	progressBar 'pb1' "ProgressBar" pos:[10,24] width:270 height:6 align:#left
+	checkbutton 'ckb_dist' "Dist" pos:[253,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left	toolitip:"Affiche les longueur des murs."
+	checkbutton 'ckb_facades' "Fcd." pos:[226,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left	toolitip:"Affiche les étages."
+	checkbutton 'ckb_etages' "Etg." pos:[199,3] width:28 height:18 highlightColor:blue align:#left	toolitip:"Affiche les façades."
+	progressBar 'pb_construction' "ProgressBar" pos:[10,24] width:270 height:6 align:#left
 	
 	checkbutton 'ckb87' "Auto" pos:[37,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left
 	
- 
- 
 	subRollout 'subRoll' "Sub" pos:[10,56] width:270 height:407 align:#left
 	
 	subRollout 'subroll_Params_1' "Paramètres" pos:[289,56] width:210 height:407 align:#left
 	subRollout 'subroll_Params_2' "Paramètres" pos:[508,56] width:210 height:407 align:#left
 	
+	--- viewport ---
+	/* 
+	fn vp_desactiver				=(
+	)
+	fn vp_activer 		=(
+		
+	) */
+		
 	-- actualisations ------
 	fn actualiser =(
 		if sub != undefined do 
@@ -425,6 +416,19 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 -- 		subRoll.rollouts[1].changer_taille_rollout 	_taille 
 		
 	)
+	fn actualiser_VP =(
+		mgr_VP.longueurs		ckb_dist.checked
+		mgr_VP.facades			ckb_facades.checked
+		mgr_VP.etages			ckb_etages.checked
+		
+		m_core.m_edit_affiche_dist 		= ckb_dist.checked
+		m_core.m_edit_affiche_fcd 		= ckb_facades.checked
+		m_core.m_edit_affiche_etages	= ckb_etages.checked
+	)
+	
+	fn set_progressBar_construction  _val =
+		pb_construction.value = _val
+	
 	
 	
 	---- changements ----------
@@ -462,7 +466,7 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 	
 	fn set_batiment 	_bat = (
 		m_batiment = _bat
--- 		actualiser ()
+		actualiser_VP ()
 	)
 	fn initialiser _plug 		=(
 		
@@ -473,8 +477,54 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 		--- rollout ----------
 		actualiser_nrbre_panneaux ()		
 		initTabs tabs labels:#("Général", "Façades", "Toiture", "Materiaux")
+		
+		ckb_dist.checked	 		= m_core.m_edit_affiche_dist
+		ckb_facades.checked	 	= m_core.m_edit_affiche_fcd
+		ckb_etages.checked	 	= m_core.m_edit_affiche_etages
 	)
 	
+	
+	fn fermer = (
+		
+			mgr_VP.desactiver_tout ()
+		
+		local confirmation_fermer = true
+		if m_changement do
+			confirmation_fermer = queryBox  "Quitter sans enregistrer les modifications ?"
+		if confirmation_fermer do (
+			m_core.editeur_fermer ()
+			reset_changement ()
+			
+		)
+	)
+	fn valider =(
+		
+		mgr_VP.desactiver_tout ()
+		
+		m_core.vider_parametres ()
+		m_batiment.enregistrer  m_plug
+		m_core.editeur_fermer ()
+		
+		m_core.actualiser ()
+	)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	on  	ckb_dist changed state do
+		actualiser_VP ()
+	on  	ckb_etages changed state do
+		actualiser_VP ()
+	on  	ckb_facades changed state do
+		actualiser_VP ()
 	
 	
 	
@@ -484,21 +534,10 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 	
 	on tabs mouseUp senderArg arg do		ouvrir_tab 	senderArg.SelectedIndex
 	
-	on btn_valider pressed do (
-		m_core.vider_parametres ()
-		m_batiment.enregistrer  m_plug
-		m_core.editeur_fermer ()
-		)
-	on btn_annuler pressed do	(
-		
-		local confirmation_fermer = true
-		if m_changement do
-			confirmation_fermer = queryBox  "Quitter sans enregistrer les modifications ?"
-		if confirmation_fermer do (
-			m_core.editeur_fermer ()
-			reset_changement ()
-		)
-	)
+	on btn_valider pressed do  valider ()
+	on btn_annuler pressed do	
+		fermer ()
+	
 	
 )
 

@@ -164,7 +164,7 @@ rollout roll_global "Global" width:195 height:341
 	on ckb_editeur changed state do	(
 		case state of (
 			true:		core.editeur_ouvrir ()
-			false:	core.editeur_fermer ()
+			false:	(core.get_editeur_dialog ()).fermer ()
 		)
 	)
 )

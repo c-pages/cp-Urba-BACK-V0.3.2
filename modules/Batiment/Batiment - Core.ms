@@ -33,7 +33,6 @@
 include	 "$userScripts\cp-Urba\modules\Batiment\\elements\\Batiment - Batiment virtuel.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Divers.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager de Trimesh.ms"
-include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Viewport.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Construction.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Manager Surface.ms"
 include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Material.ms"
@@ -84,7 +83,6 @@ struct str_batiment_core (
 		-- materiaux ----------
 		mgr_mat					= str_mgr_material () ,
 		
-		mgr_VP 					= str_bat_VP () ,
 		
 	-------- Les managers des differents éléments du batiment ---------------
 		---- facades	----------
@@ -103,6 +101,14 @@ struct str_batiment_core (
 		---- dialogs secondaires ----
 		m_editeur_dialog = fileIn "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout - Editeur.ms",
 		m_editeur_ouvert = false,
+		
+		m_bat_edition = undefined ,
+		
+	public
+		m_edit_affiche_dist 		= true,
+		m_edit_affiche_fcd 		= true,
+		m_edit_affiche_etages 	= true,
+-- 		
 		
 	-------- FONCTIONS	--------------------------------------------------------------------------------------------------------
 -- private
@@ -157,12 +163,9 @@ struct str_batiment_core (
 		
 		
 	---- viewport -------------------
-		fn vp_afficher_longueurs 		= mgr_VP.afficher_longueurs (),
-		fn vp_cacher_longueurs 		= mgr_VP.cacher_longueurs (),
-		fn vp_cacher_tout					=(
-			vp_cacher_longueurs ()
-			
-		),
+	/* 	fn vp_afficher_longueurs 	= mgr_VP.afficher_longueurs (),
+		fn vp_cacher_longueurs 	= mgr_VP.cacher_longueurs (),
+	 */
 		
 		
 		fn get_batiment =(
@@ -170,7 +173,7 @@ struct str_batiment_core (
 			nvBat.charger 	m_plug
 			nvBat
 		),
-		
+		fn get_bat_edition = m_bat_edition ,
 		
 		
 		
@@ -311,8 +314,8 @@ struct str_batiment_core (
 		
 		fn get_facade_enEdition =(
 			local result
-			if mgr_facades.dialog_estOuvert () do
-				result = ( mgr_facades.get_dialog()).m_facade_courante
+			if m_editeur_ouvert do
+				result = m_editeur_dialog.m_facade_courante
 			result
 		),
 		
@@ -565,124 +568,35 @@ struct str_batiment_core (
 		
 	----- rollout	Editeur de  facades -----------------
 	public
-		fn demander_reconstruire = bat_a_reconstruire = true,
-		fn demander_enregistrement_facade =(
-			local result = queryBox  "Enregistrer la façade ?"
-			if  result do (
-				enregistrer_element 		( get_facade_enEdition () )
-				demander_reconstruire 	()
-			)
-			result
-		),
-		
 		fn editeur_ouvrir 					=	(
 			--- on ouvre la fenetre ----------
 			m_editeur_ouvert = true
 			createDialog 	m_editeur_dialog	style:				#(#style_resizing, #style_toolwindow, #style_border /*,  #style_sysmenu*/) 	\
 															lockWidth:			true
 			
-			
 			-- oninitialise le rollout -
 			m_editeur_dialog.initialiser 	m_plug
 			
 			--- le batiment virtuel---------
-			local bat_courant = get_batiment ()
-			m_editeur_dialog.set_batiment	bat_courant
+			m_bat_edition = get_batiment ()
+			m_editeur_dialog.set_batiment	m_bat_edition
 			
 			m_editeur_dialog.ouvrir_tab 0
 			m_editeur_dialog.actualiser ()
 			
-			bat_courant
+			m_bat_edition
 			
-			
-			/* 
-			local dialg_facades
-			local demande_enr
-			debug "FERMER"
-			if not mgr_facades.dialog_estOuvert () then (
-			debug "est a ouvrir"
-				dialg_facades	=	mgr_facades.ouvrir_dialog 		()
-			) else (
-			debug "est deja ouvert"
-				dialg_facades 	= mgr_facades.get_dialog 			()
-			debug "m_changement" var:dialg_facades.m_changement
-				if dialg_facades.m_changement  do
-					demander_enregistrement_facade ()
-			)
--- 			if demande_enr != #cancel do (
-				local facade_aOuvrir 	= get_facade_parIndex  		_index
-				dialg_facades.set_facade	facade_aOuvrir		
-				redrawViews ()
--- 			) */
 		),
 		fn editeur_fermer 						=	(
-			m_editeur_ouvert = false
+			m_editeur_ouvert 	= false
+			m_bat_edition 		= undefined
 			destroyDialog m_editeur_dialog
 			m_plug.actualiser_rollouts()
 			
-			/* 
-			dialg_facades 	= mgr_facades.get_dialog 			()
-			if dialg_facades.m_changement  do 
-				demander_enregistrement_facade ()
-			
-			mgr_facades.fermer_dialog 	()
-			
-			if bat_a_reconstruire do actualiser ()
-			VP_cacher_longueurs ()
-			 */
 		),
 		fn editeur_estOuvert 					= m_editeur_ouvert,
-		
-	/* 	fn facadeEditeur_estOuvert 					= m_editeur_ouvert,
-		fn set_facadeEditeur_position		_pos 	= mgr_facades.set_dialog_pos  	_pos,
-		
-		--- editeur etages---------
-		fn etagesEditeur_ouvrir = (
-			createDialog		m_etagesEditeur_dialog
-			m_etagesEditeur_dialog.initialiser  m_plug 
-			m_etagesEditeur_dialog.actualiser ()
-		), */
-		/* 
-		fn facadeEditeur_ouvrir 				_index	=	(
-			local dialg_facades
-			local demande_enr
-			debug "FERMER"
-			if not mgr_facades.dialog_estOuvert () then (
-			debug "est a ouvrir"
-				dialg_facades	=	mgr_facades.ouvrir_dialog 		()
-			) else (
-			debug "est deja ouvert"
-				dialg_facades 	= mgr_facades.get_dialog 			()
-			debug "m_changement" var:dialg_facades.m_changement
-				if dialg_facades.m_changement  do
-					demander_enregistrement_facade ()
-			)
--- 			if demande_enr != #cancel do (
-				local facade_aOuvrir 	= get_facade_parIndex  		_index
-				dialg_facades.set_facade	facade_aOuvrir		
-				redrawViews ()
--- 			)
-		),
-		fn facadeEditeur_fermer 						=	(
+		fn get_editeur_dialog 				= m_editeur_dialog,
 			
-			dialg_facades 	= mgr_facades.get_dialog 			()
-			if dialg_facades.m_changement  do 
-				demander_enregistrement_facade ()
-			
-			mgr_facades.fermer_dialog 	()
-			
-			if bat_a_reconstruire do actualiser ()
-			VP_cacher_longueurs ()
-		),		
-		fn facadeEditeur_estOuvert 					= mgr_facades.dialog_estOuvert (),
-		fn set_facadeEditeur_position		_pos 	= mgr_facades.set_dialog_pos  	_pos,
-		
-		--- editeur etages---------
-		fn etagesEditeur_ouvrir = (
-			createDialog		m_etagesEditeur_dialog
-			m_etagesEditeur_dialog.initialiser  m_plug 
-			m_etagesEditeur_dialog.actualiser ()
-		), */
 		
 	----- Initialisation  -----------------------
 	private

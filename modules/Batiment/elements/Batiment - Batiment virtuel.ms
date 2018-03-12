@@ -33,11 +33,11 @@ struct str_batVirt (
 			append 	etages_max_use	false
 			append 	etages_max			1
 			append 	etages_hauteurs	250.
-			format "***  ajouter_etage  **************** \n"
-			format "***  etages_min : %\n" etages_min
-			format "***  etages_max_use : %\n" etages_max_use
-			format "***  etages_max : %\n" etages_max
-			format "***  etages_hauteurs : %\n" etages_hauteurs
+-- 			format "***  ajouter_etage  **************** \n"
+-- 			format "***  etages_min : %\n" etages_min
+-- 			format "***  etages_max_use : %\n" etages_max_use
+-- 			format "***  etages_max : %\n" etages_max
+-- 			format "***  etages_hauteurs : %\n" etages_hauteurs
 		),
 		fn supprimer_etage 		_index	=(
 			deleteItem 	etages_min			_index
@@ -50,14 +50,33 @@ struct str_batVirt (
 			etages_max_use[ _index ]	=	_etages_max_use
 			etages_max[ _index ]		=	_etages_max
 			etages_hauteurs[ _index ]	=	_etages_hauteurs
-			format "***  set_etage  **************** \n"
-			format "***  etages_min : %\n" etages_min
-			format "***  etages_max_use : %\n" etages_max_use
-			format "***  etages_max : %\n" etages_max
-			format "***  etages_hauteurs : %\n" etages_hauteurs
+-- 			format "***  set_etage  **************** \n"
+-- 			format "***  etages_min : %\n" etages_min
+-- 			format "***  etages_max_use : %\n" etages_max_use
+-- 			format "***  etages_max : %\n" etages_max
+-- 			format "***  etages_hauteurs : %\n" etages_hauteurs
 		),
 		
-		
+		fn get_etage_ht 	_num_etage =(
+			local result	=	etages_hauteur_global
+			local i =1
+			local trouve = false
+			while i <= etages_min.count and not trouve	do (
+				if _num_etage == etages_min[i] then (
+					result = etages_hauteurs[ i ]	
+					trouve = true
+				) else 	if _num_etage > etages_min[i] and etages_max_use[i] do (
+					
+					if   _num_etage <= etages_max[i] do (
+						result = etages_hauteurs[ i ]	
+						trouve = true
+					)
+					
+				)
+				i+= 1
+			)
+			result
+		),
 		
 		
 	---- données -------
@@ -79,11 +98,11 @@ struct str_batVirt (
 		),
 		fn enregistrer 	_node	=(
 			
-			format "-----  enregistrer -------\n"
-			format "-----  etages_min : %\n" etages_min
-			format "-----  etages_max_use : %\n" etages_max_use
-			format "-----  etages_max : %\n" etages_max
-			format "-----  etages_hauteurs : %\n" etages_hauteurs
+-- 			format "-----  enregistrer -------\n"
+-- 			format "-----  etages_min : %\n" etages_min
+-- 			format "-----  etages_max_use : %\n" etages_max_use
+-- 			format "-----  etages_max : %\n" etages_max
+-- 			format "-----  etages_hauteurs : %\n" etages_hauteurs
 			
 			_node.etages_nbre					=	etages_nbre
 			_node.etages_hauteur_global		= etages_hauteur_global
