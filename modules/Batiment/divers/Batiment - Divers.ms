@@ -352,7 +352,7 @@ struct str_poly_outils (
 			polyop.setFaceSelection  _node 	_faces
 			_node.EditablePoly.GrowSelection ()
 			local facesEtendus	=  polyop.getFaceSelection  _node 
-			format "facesEtendus : %\n" facesEtendus
+-- 			format "facesEtendus : %\n" facesEtendus
 			polyop.setFaceSelection  _node  selectBack
 			facesEtendus
 		),
@@ -375,11 +375,11 @@ struct str_poly_outils (
 				append _facesDuBas _faceDuBas
 			)
 			
-			format "Faces du bas : %\n" _facesDuBas
+-- 			format "Faces du bas : %\n" _facesDuBas
 			polyop.setFaceSelection  _node 	_selectBack
 			
-			for _face in _facesDuBas do
-				format "face : %  centre Z : % \n" 	_face	( outils.centreDeLaFace	_node	_face )
+-- 			for _face in _facesDuBas do
+-- 				format "face : %  centre Z : % \n" 	_face	( outils.centreDeLaFace	_node	_face )
 			
 			
 			_facesDuBas
@@ -399,7 +399,7 @@ struct str_poly_outils (
 				append _facesDuBas _faceDuBas
 			)
 			
-			format "Faces du bas : %\n" _facesDuBas
+-- 			format "Faces du bas : %\n" _facesDuBas
 			_facesDuBas
 		),
 		
@@ -659,13 +659,13 @@ struct str_poly_outils (
 				if ptsResult.count != 0 do (
 					for IDpt in ptsResult do  (
 						centre += _node.verts[ IDpt ].position
-						format "_node.verts[ IDpt ].position : %\n" _node.verts[ IDpt ].position
+-- 						format "_node.verts[ IDpt ].position : %\n" _node.verts[ IDpt ].position
 					)
 					centre = centre / ptsResult.count
 	-- 				format "	=>	centre : %\n" centre
 				)
-						format "face : %\n" 	_face
-				format "	=>	centre : %\n" centre
+-- 						format "face : %\n" 	_face
+-- 				format "	=>	centre : %\n" centre
 				
 				centre
 			)
@@ -680,7 +680,8 @@ struct str_poly_outils (
 struct str_shape_outils (
 
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-	m_debug = true,
+-- 	m_debug = true,
+	m_debug = false,
 	m_dbgPrefix ="urba | str_shape_outils",
 	fn debug 	_txt  var:	 param:    =(
 		try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix

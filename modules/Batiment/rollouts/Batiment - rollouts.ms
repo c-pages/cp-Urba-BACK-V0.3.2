@@ -78,7 +78,7 @@ rollout roll_global "Global" width:162 height:341
 	spinner 'spn_nbres' "" pos:[88,55] width:72 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
 	spinner 'spn_hauteur' "" pos:[88,71] width:57 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
 	label 'lbl_hauteur' "Hauteur :" pos:[10,72] width:76 height:15 align:#left
-	
+/* 	
 	
 	--- Facades -----
 	GroupBox 'grp_facades' "Façades :" pos:[4,94] width:162 height:121 align:#left
@@ -98,9 +98,9 @@ rollout roll_global "Global" width:162 height:341
 	checkbox 'chk_planchers' "Planchers" pos:[10,278] width:60 height:12 align:#left 	--enabled:false 
 	
 	button 'btn_editer_etages' "E." pos:[143,72] width:16 height:16 align:#left
-	
+	 */
 	fn actualiser =(
-		
+		/* 
 		lbx_facades.items 						=  facades_nom as array
 		
 		btn_supprimerFacade.enabled	=	lbx_facades.selection != 0 
@@ -112,7 +112,7 @@ rollout roll_global "Global" width:162 height:341
 		
 		ddl_toiture.items						=	core.get_toiture_constructeursNoms ()		
 		ddl_toiture.selection 					= 	core.get_toiture_index ()
-		
+		 */
 	)
 	
 	
@@ -285,7 +285,7 @@ rollout roll_aleatoire "Aléatoire" 	rolledUp:true
 )
 
 
-
+/* 
 rollout roll_viewport "Viewport" width:162 height:204
 (
 	label 'lbl16' "Surface:" pos:[5,90] width:43 height:14 align:#left
@@ -313,61 +313,11 @@ rollout roll_viewport "Viewport" width:162 height:204
 	on ckb_proxy changed state 		do
 		core.actualiser ()		
 	
-	/* --------------------  CLEANAGE --------------------
-	
-	fn actualiser =(
-		
-		ckb_axe.enabled 					= a_un_surface
-		ckb_surface.enabled 				= a_un_surface
-		ckb_pignons.enabled 			= a_un_surface
-		ckb_gouttereaux.enabled 		= a_un_surface
-		ckb_geometrie.enabled 			= a_un_surface
-		grp30.enabled 			= a_un_surface
-		
-		lbl16.enabled 			= a_un_surface
-		lbl_surface.enabled 			= a_un_surface
-		lbl1_surfacePts.enabled 			= a_un_surface
-		lbl_surfacePts_val.enabled 			= a_un_surface
-		lbl1_surfacePts_opt.enabled 			= a_un_surface
-		lbl_surfacePts_opt_val.enabled 			= a_un_surface
-		if a_un_surface do (
-			lbl_surface.text = ( surface / 10000 ) as string + " m²"
-			lbl_surfacePts_val.text = surface_original.count as string + " pts."
-			lbl_surfacePts_opt_val.text = surface_courant.count as string + " pts."
-		)
-	)
-	
-	
-	
-	
--- 		on ckb_longueurSegts 	changed state 		do	VP_toggle ()
-	
-	
-	on roll_infos open do
-		actualiser ()
-	on roll_infos close do
-	(
-			cache_geometrie = false 
-			actualiser_cacherGeo ()
-		)
-	on ckb_axe changed state 		do
-		VP_toggle ()
-	on ckb_surface changed state 		do
-		VP_toggle ()
-	on ckb_pignons changed state 		do
-	(
-			VP_toggle ()
-			actualiser ()
-		)
-	on ckb_gouttereaux changed state 		do
-	(
-			VP_toggle ()
-			actualiser ()
-		)
-	on ckb_geometrie changed state 		do
-		actualiser_cacherGeo ()
-*/ --------------------  CLEANAGE --------------------
 )
+
+ */
+
+
 rollout roll_aPropos 			"A propos" 	rolledUp:false	(
 	label 'lbl_axeP' "Urba | V0.1  |" pos:[5,2]  align:#left
 	HyperLink 'hpl1' "Christophe Pagès" pos:[76,2] address:"http://c-pages.fr" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
