@@ -133,7 +133,7 @@
 			------------  Fonctions	----------------------------------------------------------------------------------
 			
 			
-			fn on_a_change_un_truc = 	m_changement 				= true
+			fn changer_un_truc = 	m_changement 				= true
 				
 			
 			fn  remplir_lbx_sequence 	=(
@@ -298,9 +298,9 @@
 				gerer_boutons_enabled ()
 				
 				if not sans_subRoll_1 do (
-				--- on retire tout les sous panneaux -------------------
-				for rollAVirer in subroll_parametres.rollouts do
-					removeSubRollout	subroll_parametres	rollAVirer
+					--- on retire tout les sous panneaux -------------------
+					for rollAVirer in subroll_parametres.rollouts do
+						removeSubRollout	subroll_parametres	rollAVirer
 				
 					--- le subRollout des composants	PANNEAU 1 -------
 					if m_composant_courant != undefined do (

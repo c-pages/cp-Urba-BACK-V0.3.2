@@ -243,7 +243,7 @@ struct str_construction (
 		),
 		fn actualiser 	 	bat_edition:	proxy:false	=(
 			
-			debug "actualiser"
+-- 			debug "actualiser"
 			
 			--- on vide la geametrie ------------
 			m_geo.vider ()
@@ -258,7 +258,6 @@ struct str_construction (
 				-- on desactive l'undo pour aller plus vite ---------------
 				undo off (
 					
-					local chrono_debut = timeStamp ()
 					
 					local bat
 					if bat_edition!= unsupplied then 
@@ -275,8 +274,9 @@ struct str_construction (
 					
 					if bat_edition != unsupplied then (
 						
-						debug "Construction MODE EDITION"
-						debug "bat_edition" var:bat_edition
+-- 						debug "Construction MODE EDITION"
+-- 						debug "bat_edition" var:bat_edition
+						
 						if proxy then
 							creer_bat_modeEdition 		&zCourant		bat_edition
 						else (
@@ -288,11 +288,16 @@ struct str_construction (
 							
 					) else if not m_plug.affiche_asProxy 	then (
 						
+						local chrono_debut = timeStamp ()
+						
 						---- ...  et on construit le batiment -----
 						creer_ssBassement 			&zCourant
 						creer_etages						&zCourant
 						creer_toiture						&zCourant
 					
+						displayTempPrompt ("Bâtiment construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
+						ecrire "Batiment construit en "var:( (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
+						
 					) else (
 						---- ...  et on construit le proxy -----
 						creer_ssBassement 			&zCourant
@@ -300,8 +305,6 @@ struct str_construction (
 					)
 				)
 				
-				displayTempPrompt ("Bâtiment construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
-				debug "Batiment construit en "var:( (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 				
 			)
 			

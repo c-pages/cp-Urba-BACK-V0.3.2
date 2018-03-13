@@ -60,13 +60,13 @@ rollout menuis_dialog "Menuiserie" width:221 height:119
 	
 	on spn_longueur changed val do(
 		m_compo.params.longueur = val
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 )
 	
 		on ddl_type selected _val do		(
 			m_plug.core.appliquer_menuiserie_type		m_compo	_val
 			actualiser ()
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 			m_rollPrt.actualiser ()
 		)
 )

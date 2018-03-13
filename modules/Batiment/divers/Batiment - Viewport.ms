@@ -11,10 +11,14 @@ struct 	str_bat_VP 		(
 				
 				local bat 				= nd.core.get_bat_edition ()
 				
+				if bat != undefined do (
 				local fcd				= nd.core.get_facade_enEdition 	()
+				
 				local surface_pts 	= 	nd.core.get_surface_points		()
 				
-					for ptID = 1 to surface_pts.count do (
+					local ptID = 0 
+					while ptID <  surface_pts.count do (
+						ptID += 1
 						
 						local ptID_suivant = ptID + 1
 						if ptID_suivant > surface_pts.count do ptID_suivant = 1
@@ -36,6 +40,7 @@ struct 	str_bat_VP 		(
 						local color_affichage 	 = col_divers
 						local longueur_valid = true
 						if fcd != undefined do			(
+							
 							local lg_min_fcd = amax #(  fcd.params.longueurMin , fcd.params.get_longueur () )
 							
 							if longueur_facade < lg_min_fcd do
@@ -60,39 +65,12 @@ struct 	str_bat_VP 		(
 						gw.Marker pt_milieu_facade		#smallCircle   color:color_affichage
 						gw.text 	( pt_milieu_facade	 /* - [0,0,100] */ )	txt_affichage  	color:color_affichage
 						
-						--- les etages	----------------
-						if  fcd != undefined  and  longueur_valid do (
-							local z = 0
-							for etageNum = 0 to bat.etages_nbre do (
-								
-								local etage_valid	=		bat.core.est_valide		fcd			etageNum		ptID 
-								local etage_ht 		= bat.core.get_etage_ht	 	etageNum	 + bat.const_dalle_epaisseur
-								
-
-								if etage_valid do (
-									gw.setColor	#line		col_valid
-									local ecart 		= 10
-									local norm_dir 	= normalize ( pt_suivant - pt )
-									local pt_1 		=  pt + [0,0,z] 				+ 	norm_dir * ecart	+ [0,0,ecart]
-									local pt_2 		=  pt_suivant + [0,0,z]	- 	norm_dir * ecart	+ [0,0,ecart]
-									local pt_3 		=  pt_2 + [0,0,etage_ht - 2*ecart ] 
-									local pt_4 		=  pt_1 + [0,0,etage_ht - 2*ecart ] 
-									gw.polyline #( pt_1, pt_2, pt_3, pt_4		)	true 
-									
--- 									local pt_centre = ( pt_1 + pt_2 + pt_3 + pt_4 ) / 4
--- 									gw.text 	pt_centre		( etageNum as string )  	color:col_valid
-									
-								)
-								
-								
-								z+= etage_ht
-							)
-							
-						)
 					
 					)
+				
+				)
+				gw.updateScreen() 
 			)
-			gw.updateScreen() 
 		),
 
 		fn fn_afficher_facades =(
@@ -101,61 +79,95 @@ struct 	str_bat_VP 		(
 			
 			
 			if selection.count == 1 and classof $ == Urba_Batiment do (
-				local bat 				= $
-				local fcd				= bat.core.get_facade_enEdition 	()
-				local surface_pts 	= 	bat.core.get_surface_points		()
+				local nd	 = $
 				
-					for ptID = 1 to surface_pts.count do (
-						
+				local bat 				= nd.core.get_bat_edition ()
+				
+
+				if bat != undefined do (
+-- 					est_valide		_fcd			_etage		_idPtMur  
+					local fcd_courante				= nd.core.get_facade_enEdition 	()
+					
+					
+					--- par point de la surface -----------
+					local surface_pts 	= 	nd.core.get_surface_points		()
+					local ptID = 0 
+					while ptID <  surface_pts.count do (
+						ptID += 1
 						local ptID_suivant = ptID + 1
 						if ptID_suivant > surface_pts.count do ptID_suivant = 1
 							
-						local vec_sousBassmt	=	[0,0,1] * bat.const_ssBassement_epaisseur
-						local vec_dalle				=	[0,0,1] * bat.const_dalle_epaisseur
+						local vec_sousBassmt	=	[0,0,1] * nd.const_ssBassement_epaisseur
+						local vec_dalle				=	[0,0,1] * nd.const_dalle_epaisseur
 						local vec_decallage		=	[0,0,1] * 300
 	
-						local pt 						= surface_pts[ptID] *  bat.transform 
-						local pt_suivant 			= surface_pts[ptID_suivant] *  bat.transform  
+						local pt 						= surface_pts[ptID] *  nd.transform 
+						local pt_suivant 			= surface_pts[ptID_suivant] *  nd.transform  
 						local longueur_facade 	= ( (floor ( ( distance pt pt_suivant ) * 10 ) ) / 10 )
-						local txt_affichage 		= "  " + longueur_facade as string + " cm"
+-- 						local txt_affichage 		= "  " + longueur_facade as string + " cm"
 						
 						local col_valid 			= yellow
 						local col_nonValid 	= [ 100, 100 , 100 ]
 						local col_divers 		= white
 						
-						--- les etages	----------------
-						if  fcd != undefined  and  longueur_valid do (
-							local z = 0
-							for etageNum = 0 to bat.etages_nbre do (
+						---- les longueurs------
+						local color_affichage 	 = col_divers
+						
+						
+						---- par  etages ----------
+						local z = bat.decallage_z
+						local etageNum = 0 
+						while etageNum <= bat.etages_nbre do (
+							
+							--- on check les facades ---------------------
+							local id_fcd = 1
+							local fcd_valid 		= undefined
+							while id_fcd <= bat.facades.count and fcd_valid == undefined do (
 								
-								local etage_valid	=		bat.core.est_valide		fcd			etageNum		ptID 
-								local etage_ht 		= bat.core.get_etage_ht	 	etageNum	 + bat.const_dalle_epaisseur
+								local fcd = bat.facades [ id_fcd]
 								
-
-								if etage_valid do (
-									gw.setColor	#line		col_valid
-									local ecart 		= 10
-									local norm_dir 	= normalize ( pt_suivant - pt )
-									local pt_1 		=  pt + [0,0,z] 				+ 	norm_dir * ecart	+ [0,0,ecart]
-									local pt_2 		=  pt_suivant + [0,0,z]	- 	norm_dir * ecart	+ [0,0,ecart]
-									local pt_3 		=  pt_2 + [0,0,etage_ht - 2*ecart ] 
-									local pt_4 		=  pt_1 + [0,0,etage_ht - 2*ecart ] 
-									gw.polyline #( pt_1, pt_2, pt_3, pt_4		)	true 
-									
--- 									local pt_centre = ( pt_1 + pt_2 + pt_3 + pt_4 ) / 4
--- 									gw.text 	pt_centre		( etageNum as string )  	color:col_valid
-									
-								)
+								-- valider etage --------------
+								local etage_est_valid	=		nd.core.est_valide		fcd			etageNum		ptID  
+								if etage_est_valid  do 
+										fcd_valid = fcd
 								
 								
-								z+= etage_ht
+								id_fcd += 1 
 							)
 							
-						)
-					
-					)
-			)
-			gw.updateScreen() 
+							
+							
+							local etage_ht 		= 		bat.get_etage_ht	 	etageNum	 + nd.const_dalle_epaisseur
+							local color_facde = if fcd_valid != fcd_courante then gray else col_valid
+							
+							if fcd_valid != undefined do (
+								
+								
+								gw.setColor	#line		color_facde
+								local ecart 		= 20
+								local norm_dir 	= normalize ( pt_suivant - pt )
+								local pt_1 		=  pt + [0,0,z] 				+ 	norm_dir * ecart	+ [0,0,ecart]
+								local pt_2 		=  pt_suivant + [0,0,z]	- 	norm_dir * ecart	+ [0,0,ecart]
+								local pt_3 		=  pt_2 + [0,0,etage_ht - 2*ecart ] 
+								local pt_4 		=  pt_1 + [0,0,etage_ht - 2*ecart ] 
+								gw.polyline #( pt_1, pt_2, pt_3, pt_4	)	true 
+								
+								
+								
+								local txt_facade = "(" + (findItem bat.facades	fcd_valid ) as string + ")"
+								gw.text 	( (pt_1 + pt_2 + pt_3 + pt_4 ) / 4)	txt_facade  	color:color_facde
+							)
+							
+							
+							z+= etage_ht
+							etageNum += 1
+							
+						) --- fin etages --------
+						
+					) -- fin par point
+					gw.updateScreen() 
+				)
+			) 
 		),
 
 		fn fn_afficher_etages =(
@@ -164,7 +176,6 @@ struct 	str_bat_VP 		(
 			
 			
 			if selection.count == 1 and classof $ == Urba_Batiment do (
-				
 				local nd	 = $
 				
 				local bat 				= nd.core.get_bat_edition ()
@@ -173,36 +184,41 @@ struct 	str_bat_VP 		(
 				local surface_pts 	= 	nd.core.get_surface_points		()
 				
 				
-				
-				local z = bat.decallage_z
-				for etageNum = 0 to bat.etages_nbre do (
+				if bat != undefined do (
+					local z = bat.decallage_z
+					local etageNum = 0 
+					while etageNum <=  bat.etages_nbre  do (
+						
+						local etage_ht 		= bat.get_etage_ht	 	etageNum	 + nd.const_dalle_epaisseur
+						local pts_etage =#()
+						for ptID = 1 to surface_pts.count do (
+							local pt 						= surface_pts[ptID] *  nd.transform 
+							pt.z = z
+							append pts_etage pt
+						)
+						z+= etage_ht
+						gw.setColor	#line		yellow
+						gw.polyline pts_etage	true 
+						gw.text 	( pts_etage[1] + [0,0,	( bat.get_etage_ht	 	etageNum	 )/2 ] )  	( "   " + etageNum as string + "     ht: " + ( bat.get_etage_ht	 	etageNum	 ) as string + " cm.")  	color:yellow
 					
-					local etage_ht 		= bat.get_etage_ht	 	etageNum	 + nd.const_dalle_epaisseur
+						etageNum += 1
+					)
+					
+					local etage_ht 		= bat.get_etage_ht	 	bat.etages_nbre 	 + nd.const_dalle_epaisseur
 					local pts_etage =#()
-					for ptID = 1 to surface_pts.count do (
+					local ptID = 0 
+					while ptID <  surface_pts.count do (
+						ptID += 1
 						local pt 						= surface_pts[ptID] *  nd.transform 
 						pt.z = z
 						append pts_etage pt
 					)
-					z+= etage_ht
 					gw.setColor	#line		yellow
-					gw.polyline pts_etage	true 
-					gw.text 	( pts_etage[1] + [0,0,	( bat.get_etage_ht	 	etageNum	 )/2 ] )  	( "   " + etageNum as string + "     ht: " + ( bat.get_etage_ht	 	etageNum	 ) as string + " cm.")  	color:yellow
-				
+					gw.polyline pts_etage	true
+					
+					gw.updateScreen() 
 				)
-				
-				local etage_ht 		= bat.get_etage_ht	 	bat.etages_nbre 	 + nd.const_dalle_epaisseur
-				local pts_etage =#()
-				for ptID = 1 to surface_pts.count do (
-					local pt 						= surface_pts[ptID] *  nd.transform 
-					pt.z = z
-					append pts_etage pt
-				)
-				gw.setColor	#line		yellow
-				gw.polyline pts_etage	true
-				
 			)
-			gw.updateScreen() 
 		),
 		
 	public
@@ -238,7 +254,7 @@ struct 	str_bat_VP 		(
 		),
 		
 		on create do (
-			format "initialiser\n"
+-- 			format "initialiser\n"
 			global 	urba_fn_afficher_longueurs  	= fn_afficher_longueurs
 			global 	urba_fn_afficher_facades  		= fn_afficher_facades
 			global 	urba_fn_afficher_etages  		= fn_afficher_etages

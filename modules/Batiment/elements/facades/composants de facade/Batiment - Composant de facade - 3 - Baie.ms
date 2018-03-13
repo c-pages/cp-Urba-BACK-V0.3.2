@@ -158,46 +158,45 @@ rollout compo_dialog "Baie" width:433 height:747
 	
 		
 	
-	
 		
 	on edt_nom entered txt 	do
 	(
 		m_compo.nom = txt
-		m_rollPrt.actualiser ()
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.actualiser  	sans_params_1:true
+		m_rollPrt.changer_un_truc ()
 	)
 	on spn_longueur changed val 	do (
 		m_compo.params.longueur 					= val
-		m_rollPrt.actualiser 	sans_subRoll_1:true
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.actualiser 	sans_params_1:true
+		m_rollPrt.changer_un_truc ()
 	)
 	on spn_hauteur changed val 	do (
 		m_compo.params.hauteur 					= val
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 	)
 	on spn_allege changed val 	do (
 		m_compo.params.allege_hauteur 	= val
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 	)
 	on spn_profondeur changed val 	do (
 		m_compo.params.profondeur	= val
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 	)
 	on lbx_traverses selected _index do
 		actualiser ()
 	on btn_ajouter_traverse pressed do (
 		ajouter_traverse	()
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 	)
 	on btn_supprimer_traverse pressed do (
 		supprimer_traverse	()
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 	)
 	on spn_traverse_ht changed val 	do
 	(
 					m_compo.params.traverses[ lbx_traverses.selection ] = val
 					actualiser ()
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 	
 				)
 	on lbx_sequence doubleClicked arg do (
@@ -215,7 +214,7 @@ rollout compo_dialog "Baie" width:433 height:747
 		 	local	nv_menuis = m_plug.core.creer_menuiserie		m_compo			 lbx_sequence.selection 	
 			m_rollPrt.set_ssComposant		nv_menuis	
 			actualiser () 
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 			lbx_sequence.selection 	+= 1
 		)
 	on btn_editer_element pressed do
@@ -227,7 +226,7 @@ rollout compo_dialog "Baie" width:433 height:747
 			
 	on chk_tablette changed state do (
 		m_compo.params.tablette = state
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 	)
 )
 	

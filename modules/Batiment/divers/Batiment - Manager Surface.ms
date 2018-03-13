@@ -5,6 +5,7 @@
 struct str_mgr_surfaces (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+-- 	m_debug = true,
 	m_debug = false,
 	m_dbgPrefix ="urba | str_surfaces",
 	fn debug 	_txt  var:	 param:    =(
@@ -26,7 +27,10 @@ struct str_mgr_surfaces (
 		
 	---- FONCTIONS ----------------------------------------------------------------
 	private
-		 
+		m_points =#(),
+	
+	
+	
 	--- Aquisition shape ---------------------
 		fn scanner_points 	_shape	=(
 			
@@ -88,12 +92,36 @@ struct str_mgr_surfaces (
 	--- Actualisation ---------------------
 		fn actualiser  =(
 			
+			debug "actualiser"
+			
+			local pts_surface 
+			m_points = #()
+			if m_plug.surface_node != undefined do (
+				
+				--- on scanne les points ---- 
+				pts_surface = 	scanner_points		m_plug.surface_node		
+				
+				--- on gere les OPTIMISATIONS  ----
+				if m_plug.optim_souder			do	m_outils.souder				&pts_surface		m_plug.optim_souder_seuil
+				if m_plug.optim_orthonormer	do	m_outils.orthonormer		&pts_surface		m_plug.optim_ortho_seuil
+				if m_plug.optim_aplanir			do	m_outils.aplanir				&pts_surface		m_plug.optim_aplanir_seuil
+				if m_plug.optim_aligner			do	m_outils.aligner				&pts_surface		m_plug.optim_aligner_seuil
+				if m_plug.optim_projeter		do	m_outils.projeter			&pts_surface
+				
+				m_points = pts_surface
+				
+			)
+			
+			debug "m_points" var:m_points
+			
 		),
 		
 		
 	--- Accession ---------------------
 		fn get_points =(
-			
+			debug "get_points"
+			debug "m_points" var:m_points
+			/* 
 			debug "actualiser"
 			
 			local pts_surface 
@@ -112,7 +140,9 @@ struct str_mgr_surfaces (
 				
 			)
 			
-			pts_surface
+			pts_surface 
+			*/
+			deepcopy  m_points
 
 		),	
 		

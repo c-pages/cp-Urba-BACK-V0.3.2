@@ -66,7 +66,7 @@ struct str_batiment_core (
 		
 		bat_a_reconstruire = false,
 		
-	--------  managers divers ---------------
+	--------  managers divers ---------------------------------------------------------
 		---- convertisseur Parametres to String  -------------
 		mgr_datas 				= str_datasToString 	m_prt:this,
 		
@@ -99,12 +99,16 @@ struct str_batiment_core (
 		mgr_surface				= str_mgr_surfaces (),
 		
 		---- dialogs secondaires ----
-		m_editeur_dialog = fileIn "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout - Editeur.ms",
-		m_editeur_ouvert = false,
+		m_editeur_dialog 	= fileIn "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout - Editeur.ms",
+		m_editeur_ouvert 	= false,
+		m_editeur_pos		=[300,100],
+		m_editeur_taille	= [290,630],
 		
+		--- le batiment en edition ----
 		m_bat_edition = undefined ,
 		
 	public
+		m_edit_tab					= 0,
 		m_edit_affiche_dist 		= true,
 		m_edit_affiche_fcd 		= true,
 		m_edit_affiche_etages 	= true,
@@ -249,12 +253,12 @@ struct str_batiment_core (
 		fn get_facade_parID			_idUnique		=	mgr_facades.get_element_parID			_idUnique,
 		fn get_facades										=	mgr_facades.get_elements (),
 		
-		fn creer_facade 								=		mgr_facades.creer_element 	idConstructeur:#facade 	enregistrer:true		/* plug:m_plug */,
+		fn creer_facade 				enregistrer:true				=		mgr_facades.creer_element 	idConstructeur:#facade 	enregistrer:enregistrer,
 		fn supprimer_facade		_facade		= (
 			mgr_facades.supprimer_element		_facade
 			actualiser ()
 		),
-		fn dupliquer_facade		_facade	 	=		mgr_facades.dupliquer_element 	_facade  enregistrer:true,
+		fn dupliquer_facade		_facade	  enregistrer:false	=		mgr_facades.dupliquer_element 	_facade  enregistrer:enregistrer,
 		fn get_murPlein  			_longueur 	= (
 			local murTemp = mgr_facCompos.creer_element  idConstructeur:#mur
 			murTemp.params.longueur 	=	_longueur
@@ -269,6 +273,7 @@ struct str_batiment_core (
 			local pt_1 = pts_surface[_idPtMur]
 			local pt_2 = if _idPtMur == pts_surface.count then pts_surface[1] else pts_surface[_idPtMur+1]			
 			local result_valid 		= true
+			
 			
 			--- sequence------------
 			if _fcd.params.get_longueur ()  == 0	do
@@ -302,6 +307,7 @@ struct str_batiment_core (
 			
 			-----  pignons  -------------
 			if _fcd.params.murs != 1 do (
+				
 				local mur_estPignon =  mgr_surface.est_pignon  	_idPtMur
 				if mur_estPignon and _fcd.params.murs == 2 do
 					result_valid  = false
@@ -317,7 +323,7 @@ struct str_batiment_core (
 		fn get_facade_enEdition =(
 			local result
 			if m_editeur_ouvert do
-				result = m_editeur_dialog.m_facade_courante
+				result = m_editeur_dialog.get_facade_courante ()
 			result
 		),
 		
@@ -396,8 +402,9 @@ struct str_batiment_core (
 			if position == unsupplied  do position = _facade.params.sequence.count
 				
 			local nv_composant 		= mgr_facCompos.creer_element 		idConstructeur:_IDconstructeurCompo
-			local insertIndex 	= position
-			insertItem 	nv_composant		_facade.params.sequence 			insertIndex
+-- 			local insertIndex 	= position
+			if position == 0 do position = 1
+			insertItem 	nv_composant		_facade.params.sequence 			position
 			
 			--- gestion Bacon ----------
 			if nv_composant.type == #balcon do  (
@@ -407,7 +414,7 @@ struct str_batiment_core (
 			
 			--- gestion Loggia ----------
 			if nv_composant.type == #groupe do  (
-				local composant_fin = 	mgr_facCompos.creer_element 		idConstructeur:#groupeFin  position:(position+1)
+				local composant_fin = 	mgr_facCompos.creer_element 		idConstructeur:#groupeFin  	position:(position+1)
 				insertItem 	composant_fin		_facade.params.sequence 			(position+1)
 			)
 			
@@ -528,8 +535,15 @@ struct str_batiment_core (
 			case _type of (
 				#toiture:			nv_element = mgr_toiture.creer_element ()
 				#facades: 			nv_element = mgr_facades.creer_element ()
-				#facCompos: 	nv_element = mgr_facCompos.creer_element ()
-				#facMenuis:		nv_element = mgr_facMenuiseries.creer_element ()
+				#facCompos: 	(
+					local fcd_courante 	= get_facade_enEdition ()
+					nv_element 				= creer_composant		fcd_courante		idConstructeur		position:( m_editeur_dialog.get_compos_pos () + 1 )
+					
+					m_editeur_dialog.sub.actualiser ()
+				)
+				#facMenuis:		(
+					nv_element = mgr_facMenuiseries.creer_element  ()
+				)
 				#gardeCorps:	nv_element = mgr_gardeCorps.creer_element 	()
 				#toitElements:	(
 					nv_element = mgr_toitElements.creer_element 	idConstructeur:idConstructeur
@@ -574,6 +588,9 @@ struct str_batiment_core (
 			--- on ouvre la fenetre ----------
 			m_editeur_ouvert = true
 			createDialog 	m_editeur_dialog	style:				#(#style_resizing, #style_toolwindow, #style_border /*,  #style_sysmenu*/) 	\
+															pos:m_editeur_pos		\
+															width:m_editeur_taille.x		\
+															height:m_editeur_taille.y		\
 															lockWidth:			true
 			
 			-- on initialise le rollout -
@@ -583,7 +600,7 @@ struct str_batiment_core (
 			m_bat_edition = get_batiment ()
 			m_editeur_dialog.set_batiment	m_bat_edition
 			
-			m_editeur_dialog.ouvrir_tab 0
+			m_editeur_dialog.ouvrir_tab 	m_edit_tab
 			m_editeur_dialog.actualiser ()
 			
 			
@@ -600,8 +617,9 @@ struct str_batiment_core (
 			
 		),
 		fn editeur_estOuvert 					= m_editeur_ouvert,
+		fn editeur_set_pos 		_pos 	= m_editeur_pos 		= _pos,
+		fn editeur_set_taille		_taille 	= m_editeur_taille 	= _taille,
 		fn get_editeur_dialog 				= m_editeur_dialog,
-			
 		
 	----- Initialisation  -----------------------
 	private

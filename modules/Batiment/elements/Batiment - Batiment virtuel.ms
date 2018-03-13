@@ -63,8 +63,8 @@ struct str_batVirt (
 			local trouve = false
 			while i <= etages_min.count and not trouve	do (
 				if _num_etage == etages_min[i] then (
-					result = etages_hauteurs[ i ]	
-					trouve = true
+					result		= etages_hauteurs[ i ]	
+					trouve		= true
 				) else 	if _num_etage > etages_min[i] and etages_max_use[i] do (
 					
 					if   _num_etage <= etages_max[i] do (

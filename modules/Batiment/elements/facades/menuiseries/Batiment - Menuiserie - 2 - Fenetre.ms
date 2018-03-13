@@ -51,17 +51,17 @@ rollout menuis_dialog "Paramètres" width:180 height:130
 		
 		on spn_hauteur changed val do	(
 			m_compo.params.hauteur		 = val
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 		)
 		
 		on spn_allege_vitree changed val do	(
 			m_compo.params.allege_vitree_ht		 = val
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 		)
 		
 		on ddl_ouverture selected val do	(
 			m_compo.params.ouverture_sens		 = val
-		m_rollPrt.on_a_change_un_truc ()
+		m_rollPrt.changer_un_truc ()
 		)
 )
 
