@@ -106,7 +106,9 @@ struct str_construction (
 			creer_dalle	( z )  matID:#mur
 			
 		),
-		fn creer_ssBassement  		&z	=(
+		fn creer_ssBassement  		&z	bat_edition:		=(
+			
+			if bat_edition!= unsupplied then ()
 			
 			local surface_points 	= m_plug.core.get_surface_points 	()
 			local faces = m_geo.facesContour	 	surface_points		z 		m_plug.const_ssBassement_epaisseur
@@ -114,24 +116,30 @@ struct str_construction (
 			z += m_plug.const_ssBassement_epaisseur
 			
 		),
-		fn creer_etages 				&z	=(
+		fn creer_etages 				&z	bat_edition:		=(
 			
-			local z_initial 			= copy z
-			local facades_total	= 	m_plug.core.get_facades ()			
+			local bat
+			if bat_edition!= unsupplied then 
+				bat = bat_edition
+			else
+				bat =m_plug
+			
 			local surface_points 	= m_plug.core.get_surface_points ()
+			local z_initial 			= copy z
+			local facades_total	= 	bat.get_facades ()
 			
 			
 			---- boucle étages ---------------------
-			for n_etage = 0 to m_plug.etages_nbre do (
+			for n_etage = 0 to bat.etages_nbre do (
 				
 				
 				--- hauteur de l'étage -------------
-				local etage_ht = (m_plug.core.get_etage_ht 	n_etage )
+				local etage_ht = (bat.get_etage_ht 	n_etage )
 				
 				
 				
 				--- Creation du sol	-----------------------------
-				if m_plug.interieur_planchers do
+				if bat.interieur_use	 do
 					creer_dalle	( z + m_plug.const_dalle_epaisseur )  matID:#int_sol		encart:m_plug.const_murExt_epaisseur	
 				
 				---- on fait le tour des murs 	---------------------
@@ -179,7 +187,7 @@ struct str_construction (
 				z += etage_ht
 				
 				--- Creation du plafond, ------------------------
-				if m_plug.interieur_planchers do
+				if bat.interieur_use do
 					creer_dalle	( z + m_plug.const_dalle_epaisseur )  matID:#int_plafond   flipNormal:true
 				
 				
@@ -188,26 +196,52 @@ struct str_construction (
 			) --- fin boucle etages -------------
 			
 		),
-		fn creer_toiture					&z =(
+		fn creer_toiture					&z 	bat_edition:		=(
+			
+			local bat
+			if bat_edition!= unsupplied then 
+				bat = bat_edition
+			else
+				bat =m_plug
+			
 			
 			--- la toiture en elle meme ---------------
 			local surface_points 				= m_plug.core.get_surface_points ()
 			for pt in surface_points do
 				pt.z = z
 			
-			local toiture				=	m_plug.core.get_toiture ()
+			local toiture				=	bat.get_toiture ()
 			toiture.construire	 	m_plug			surface_points	--	normDir_axeprincipal
 			
 		),		
 		
-		
+		fn creer_bat_modeEdition  &z 	bat =(
+			
+			local surface_points 	= m_plug.core.get_surface_points 	()
+			local ht_bat = m_plug.const_dalle_epaisseur 
+			
+			local faces = m_geo.facesContour	 	surface_points		z 		m_plug.const_ssBassement_epaisseur
+			m_geo.set_matID 		faces		#mur
+			z += m_plug.const_ssBassement_epaisseur
+			
+			
+			for i = 0 to bat.etages_nbre do 
+				ht_bat += bat.get_etage_ht	i	+ m_plug.const_dalle_epaisseur  
+			
+			local hauteur_proxy	=		ht_bat 
+			local faces 				= m_geo.facesContour	 	surface_points		z 		hauteur_proxy matID:#mur
+			
+			
+			z += hauteur_proxy
+			creer_dalle	( z )  matID:#mur
+		),
 		--------- INTERFACE --------------------------------------------------------------------
 	public
 		fn initialiser 	_plug =(
 			m_plug = _plug
 			m_geo.initialiser	_plug			
 		),
-		fn actualiser 	 =(
+		fn actualiser 	 	bat_edition:	proxy:false	=(
 			
 			debug "actualiser"
 			
@@ -226,11 +260,33 @@ struct str_construction (
 					
 					local chrono_debut = timeStamp ()
 					
-					---- On définie le Z initial 	----
-					local zCourant = -( m_plug.const_ssBassement_epaisseur + m_plug.const_dalle_epaisseur )  + m_plug.const_batiment_decallage
+					local bat
+					if bat_edition!= unsupplied then 
+						bat = bat_edition
+					else
+						bat =m_plug
 					
-					local mode_edition_facades = ( m_plug.core.get_facade_enEdition ()  ) != undefined
-					if not m_plug.affiche_asProxy and not  mode_edition_facades	then (
+					
+					---- On définie le Z initial 	----
+					local zCourant = -( m_plug.const_ssBassement_epaisseur + m_plug.const_dalle_epaisseur )  + bat.decallage_z
+					
+-- 					local mode_edition_facades = ( m_plug.core.get_facade_enEdition ()  ) != undefined
+					
+					
+					if bat_edition != unsupplied then (
+						
+						debug "Construction MODE EDITION"
+						debug "bat_edition" var:bat_edition
+						if proxy then
+							creer_bat_modeEdition 		&zCourant		bat_edition
+						else (
+							---- ...  et on construit le batiment -----
+							creer_ssBassement 			&zCourant		bat_edition:bat_edition
+							creer_etages						&zCourant		bat_edition:bat_edition
+							creer_toiture						&zCourant		bat_edition:bat_edition
+						)
+							
+					) else if not m_plug.affiche_asProxy 	then (
 						
 						---- ...  et on construit le batiment -----
 						creer_ssBassement 			&zCourant

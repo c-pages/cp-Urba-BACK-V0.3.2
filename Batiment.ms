@@ -95,9 +95,12 @@ extends:Editable_poly replaceUI:true version:0
 	
 
 	---- Divers	---------
-	fn assigner_shape 		_nodeTHIS		_shape 		=(
-		core.assigner_surface 	_nodeTHIS		_shape 		
-	)
+	fn assigner_shape 		_nodeTHIS		_shape 		=	core.assigner_surface 	_nodeTHIS		_shape 		
+	
+	fn get_facades 							= core.get_facades ()
+	fn	get_etage_ht		_etageNum 	= core.get_etage_ht _etageNum
+	
+	fn get_toiture 							= core.get_toiture ()
 	
 	
 	

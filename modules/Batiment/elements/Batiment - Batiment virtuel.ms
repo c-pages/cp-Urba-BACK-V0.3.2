@@ -77,7 +77,8 @@ struct str_batVirt (
 			)
 			result
 		),
-		
+		fn get_toiture = toiture,
+		fn get_facades = facades,
 		
 	---- données -------
 	public
@@ -94,6 +95,9 @@ struct str_batVirt (
 			facades							=	_node.core.get_facades ()
 			
 			toiture 							= _node.core.get_toiture ()
+			
+			decallage_z 					= copy	_node.decallage_z
+			interieur_use					= copy	_node.interieur_use
 			
 		),
 		fn enregistrer 	_node	=(
@@ -113,8 +117,11 @@ struct str_batVirt (
 			_node.etages_hauteurs				= etages_hauteurs
 			
 			for fcd in facades do _node.core.enregistrer_element	fcd
-				
+			
 			_node.core.enregistrer_element	toiture			
+			
+			_node.decallage_z 		=	decallage_z 
+			_node.interieur_use		=	interieur_use
 			
 		)
 	

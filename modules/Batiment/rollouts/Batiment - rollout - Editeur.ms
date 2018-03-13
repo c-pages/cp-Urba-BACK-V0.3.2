@@ -370,18 +370,23 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 	
 	local 	mgr_VP 					= fileIn	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Viewport.ms"
 	
-	dotNetControl 'tabs' "system.windows.forms.tabControl" pos:[10,32] width:270 height:25 align:#left
+	dotNetControl 'tabs' "system.windows.forms.tabControl" pos:[10,22] width:270 height:25 align:#left
 	button 'btn_valider' "Valider" pos:[10,483] width:96 height:35 align:#left	
+	
+	
 	button 'btn_annuler' "Annuler" pos:[187,483] width:96 height:35 align:#left
-	button 'btn13' "Maj" pos:[10,3] width:28 height:18 enabled:true align:#left
-	checkbutton 'ckb_dist' "Dist" pos:[253,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left	toolitip:"Affiche les longueur des murs."
-	checkbutton 'ckb_facades' "Fcd." pos:[226,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left	toolitip:"Affiche les étages."
-	checkbutton 'ckb_etages' "Etg." pos:[199,3] width:28 height:18 highlightColor:blue align:#left	toolitip:"Affiche les façades."
-	progressBar 'pb_construction' "ProgressBar" pos:[10,24] width:270 height:6 align:#left
+	button 'btn_maj' "Maj" pos:[10,3] width:28 height:18 enabled:true align:#left
 	
-	checkbutton 'ckb87' "Auto" pos:[37,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left
+	checkbutton 'ckb_proxy' "Prxy" pos:[64,3] width:28 height:18 enabled:true highlightColor:(color 255 255 0) align:#left
+	checkbutton 'ckb_maj_auto' "Auto" pos:[37,3] width:28 height:18 highlightColor:(color 255 255 0) align:#left
 	
-	subRollout 'subRoll' "Sub" pos:[10,56] width:270 height:407 align:#left
+	checkbutton 'ckb_dist' "Dist" pos:[253,3] width:28 height:18 highlightColor:(color 255 255 0) toolitip:"Affiche les longueur des murs." align:#left
+	checkbutton 'ckb_facades' "Fcd." pos:[226,3] width:28 height:18 highlightColor:(color 255 255 0) toolitip:"Affiche les étages." align:#left
+	checkbutton 'ckb_etages' "Etg." pos:[199,3] width:28 height:18 highlightColor:(color 255 255 0)  toolitip:"Affiche les façades." align:#left
+-- 	progressBar 'pb_construction' "ProgressBar" pos:[10,24] width:270 height:6 align:#left
+	
+	
+	subRollout 'subRoll' "Sub" pos:[10,46] width:270 height:407 align:#left
 	
 	subRollout 'subroll_Params_1' "Paramètres" pos:[289,56] width:210 height:407 align:#left
 	subRollout 'subroll_Params_2' "Paramètres" pos:[508,56] width:210 height:407 align:#left
@@ -417,6 +422,7 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 		
 	)
 	fn actualiser_VP =(
+		
 		mgr_VP.longueurs		ckb_dist.checked
 		mgr_VP.facades			ckb_facades.checked
 		mgr_VP.etages			ckb_etages.checked
@@ -424,15 +430,26 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 		m_core.m_edit_affiche_dist 		= ckb_dist.checked
 		m_core.m_edit_affiche_fcd 		= ckb_facades.checked
 		m_core.m_edit_affiche_etages	= ckb_etages.checked
+		
+		
+	)	
+	fn actualiser_geo =(
+		
+		m_core.actualiser 						bat_edition:m_batiment		proxy:ckb_proxy.checked 
+		
+		m_core.m_edit_maj_auto 			= ckb_maj_auto.checked
+		m_core.m_edit_proxy				=	ckb_proxy.checked	
+		
 	)
-	
-	fn set_progressBar_construction  _val =
-		pb_construction.value = _val
 	
 	
 	
 	---- changements ----------
-	fn changer_un_truc 		= m_changement = true
+	fn changer_un_truc 		=  (
+		m_changement = true
+		if ckb_maj_auto.checked do 
+			actualiser_geo()
+	)
 	fn onA_changer_unTruc =	m_changement
 	fn reset_changement 	=	m_changement = false
 
@@ -466,6 +483,7 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 	
 	fn set_batiment 	_bat = (
 		m_batiment = _bat
+		actualiser_geo ()
 		actualiser_VP ()
 	)
 	fn initialiser _plug 		=(
@@ -481,12 +499,17 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 		ckb_dist.checked	 		= m_core.m_edit_affiche_dist
 		ckb_facades.checked	 	= m_core.m_edit_affiche_fcd
 		ckb_etages.checked	 	= m_core.m_edit_affiche_etages
+		
+		ckb_maj_auto.checked	= m_core.m_edit_maj_auto
+		ckb_proxy.checked	 		= m_core.m_edit_proxy
+		
+		
 	)
 	
 	
 	fn fermer = (
 		
-			mgr_VP.desactiver_tout ()
+		mgr_VP.desactiver_tout ()
 		
 		local confirmation_fermer = true
 		if m_changement do
@@ -494,6 +517,8 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 		if confirmation_fermer do (
 			m_core.editeur_fermer ()
 			reset_changement ()
+			
+			m_core.actualiser ()
 			
 		)
 	)
@@ -519,30 +544,41 @@ rollout rollout_Urb_Bat_editeur "Urb - Bat - Editeur" width:290 height:600
 	
 	
 	
-	on  	ckb_dist changed state do
-		actualiser_VP ()
-	on  	ckb_etages changed state do
-		actualiser_VP ()
-	on  	ckb_facades changed state do
-		actualiser_VP ()
 	
 	
 	
 	
-	on rollout_Urb_Bat_editeur open do	actualiser_taille_rollout ()
-	on rollout_Urb_Bat_editeur resized _taille do		actualiser_taille_rollout  taille:_taille
 	
-	on tabs mouseUp senderArg arg do		ouvrir_tab 	senderArg.SelectedIndex
 	
-	on btn_valider pressed do  valider ()
-	on btn_annuler pressed do	
+	
+	
+		
+	
+	
+	on rollout_Urb_Bat_editeur open do
+		actualiser_taille_rollout ()
+	on rollout_Urb_Bat_editeur resized _taille do
+		actualiser_taille_rollout  taille:_taille
+	on tabs mouseUp senderArg arg do
+		ouvrir_tab 	senderArg.SelectedIndex
+	on btn_valider pressed do
+		valider ()
+	on btn_annuler pressed do
 		fermer ()
-	
-	
+	on btn_maj pressed do
+		actualiser_geo ()
+	on ckb_proxy changed state do
+		actualiser_geo ()
+	on ckb_maj_auto changed state do
+		actualiser_geo ()
+	on ckb_dist changed state do
+		actualiser_VP ()
+	on ckb_facades changed state do
+		actualiser_VP ()
+	on ckb_etages changed state do
+		actualiser_VP ()
 )
-
-
 
 rollout_Urb_Bat_editeur
 
-) --- fin FileIn --
+) --- fin FileIn 

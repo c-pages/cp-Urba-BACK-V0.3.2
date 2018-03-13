@@ -108,6 +108,8 @@ struct str_batiment_core (
 		m_edit_affiche_dist 		= true,
 		m_edit_affiche_fcd 		= true,
 		m_edit_affiche_etages 	= true,
+		m_edit_maj_auto 			= true,
+		m_edit_proxy				= true,
 -- 		
 		
 	-------- FONCTIONS	--------------------------------------------------------------------------------------------------------
@@ -132,13 +134,13 @@ struct str_batiment_core (
 		),
 	----- Actualiser  -----------------------
 	public
-		fn actualiser =(
+		fn actualiser 		bat_edition:		proxy:false	=(
 			
 			---- on actualise la surface ----
 			mgr_surface.actualiser ()
 			
 			---- on consrtuit ----
-			mgr_construction.actualiser ()
+			mgr_construction.actualiser   bat_edition:bat_edition  proxy:proxy
 			bat_a_reconstruire = false
 		),		
 		
@@ -574,7 +576,7 @@ struct str_batiment_core (
 			createDialog 	m_editeur_dialog	style:				#(#style_resizing, #style_toolwindow, #style_border /*,  #style_sysmenu*/) 	\
 															lockWidth:			true
 			
-			-- oninitialise le rollout -
+			-- on initialise le rollout -
 			m_editeur_dialog.initialiser 	m_plug
 			
 			--- le batiment virtuel---------
@@ -583,6 +585,9 @@ struct str_batiment_core (
 			
 			m_editeur_dialog.ouvrir_tab 0
 			m_editeur_dialog.actualiser ()
+			
+			
+-- 			actualiser 		bat_edition:m_bat_edition
 			
 			m_bat_edition
 			

@@ -156,7 +156,7 @@ parameters params_toiture 							(
 )
 
 parameters params_interieur				rollout:roll_global					(
-	interieur_planchers		type:#boolean			default:false	/* 	ui:chk_planchers	 */	animatable:false		invisibleInTV:true
+	interieur_use			type:#boolean			default:false	/* 	ui:chk_planchers	 */	animatable:false		invisibleInTV:true
 	
 )
 
