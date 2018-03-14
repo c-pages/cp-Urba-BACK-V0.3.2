@@ -14,8 +14,8 @@ struct  str_manager_parametres (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug = false,
--- 		m_debug = true,
+-- 		m_debug = false,
+		m_debug = true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:"urba | str_manager_parametres_univ"	catch (),
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	
@@ -292,7 +292,7 @@ struct  str_manager_parametres (
 									for ss_elem in prop_element do (
 -- 										debug "val dans tableau à enregistrer" var:ss_elem
 										
-					debug " /!\ #########################		/!\    /!\  enregistrer_parametres (), qui ne devrait pas passer par là /!\   /!\  ###############"
+					-- debug " /!\ #########################		/!\    /!\  enregistrer_parametres (), qui ne devrait pas passer par là /!\   /!\  ###############"
 										append 	liste_ids	ss_elem.id
 										m_core.enregistrer_element  	ss_elem									
 									)
@@ -356,7 +356,7 @@ struct  str_manager_parametres (
 									if classOf	tab_params[1] == string do
 										if findString tab_params[1]	"ID_" != undefined do (
 											
-											debug " /!\ #########################		/!\    /!\  charger_parametres (), qui ne devrait pas passer par là /!\   /!\  ###############"
+											-- debug " /!\ #########################		/!\    /!\  charger_parametres (), qui ne devrait pas passer par là /!\   /!\  ###############"
 											
 											param_value = #()
 											for elemID in tab_params do	(
@@ -417,40 +417,40 @@ struct  str_manager_parametres (
 		
 		---- Creation/Suppression etc. ---------------------------------------------------
 		fn appliquer_type  	_element	_type	=(
-			debug "appliquer_type"
+			-- debug "appliquer_type"
 			-- si on a un type et non pas un index	de constructeur -------------
 				if classof 	_type == name or classof _type == string	do
 					_type = get_constructeur_index		_type		
-			debug "_type"	var:_type
+			-- debug "_type"	var:_type
 				if _type != 0 do
 					m_constructeursBase[ _type ].initialiser		_element
 				
 				_element
 		),
 		fn creer_element			idUnique:		idConstructeur:		enregistrer:false	/* plug: */		=(
-			debug "creer_element"
+			-- debug "creer_element"
 			----------------- Structure d'un élément	------------------------------------------
-			debug "idConstructeur" var:idConstructeur
-			debug "idConstructeur" var:idConstructeur
+			-- debug "idConstructeur" var:idConstructeur
+			-- debug "idConstructeur" var:idConstructeur
 			
 			m_classeBase	=	fileIn	 m_fichier_classeBase			
 			nvl_element 		= m_classeBase 	()
 			nvl_element.set_typeClasse  	m_prefix_nomParametres
 			
-			debug "creer_element -- 1 ---> nvl_element" var:nvl_element
+			-- debug "creer_element -- 1 ---> nvl_element" var:nvl_element
 			
 			----- si constructeur --------
 			if idConstructeur != unsupplied do 
 				appliquer_type  	nvl_element	idConstructeur
 			
-			debug "creer_element -- 2 ---> nvl_element" var:nvl_element
+			-- debug "creer_element -- 2 ---> nvl_element" var:nvl_element
 			
 			--- id Unique -----------
 			if idUnique != unsupplied do 
 				nvl_element.id = idUnique	
 			
 			
-			debug "creer_element -- 3 ---> nvl_element" var:nvl_element
+			-- debug "creer_element -- 3 ---> nvl_element" var:nvl_element
 			
 			-- si demandé on enregistre direct sur le plug -----
 			if enregistrer do enregistrer_parametres	nvl_element
@@ -544,14 +544,14 @@ struct  str_manager_parametres (
 			
 		),
 		fn supprimer_element 		_element	=(
-			debug"supprimer_element"
-			debug"_element -1-"	var:_element
+			-- debug"supprimer_element"
+			-- debug"_element -1-"	var:_element
 			--- si on a recuperer un index à la place de l'element lui-meme, on va chercher l'élément ---------------------------
 			if classof  _element == integer then
 				_element = this.get_element_parIndex  	_element
 -- 			else if classof  _element == string or classof  _element == name then
 				
-			debug"_element -2-"	var:_element
+			-- debug"_element -2-"	var:_element
 			
 			local prop_element_Noms = getPropNames	_element
 			
@@ -574,7 +574,7 @@ struct  str_manager_parametres (
 					-- si c'est un tableau de parametres ( donc s'il exite une liste d'IDs )-------------
 					if hasproperty	m_plug	  ( m_prefix_nomParametres + "_id" ) do (
 						
-						debug "prop_element_Nom" var:prop_element_Nom
+						-- debug "prop_element_Nom" var:prop_element_Nom
 						
 						local param_nom 		= m_prefix_nomParametres + "_" + prop_element_Nom					
 						local param_value		= getProperty	m_plug		param_nom
@@ -702,10 +702,12 @@ struct  str_manager_parametres (
 		-----rc menu ---------
 		fn get_menu_constructeurs = (		
 			debug "m_constructeursBase" var:m_constructeursBase
+			
 			local txt_menu = "rcMenu nvMenu	(\n"
+			
 			--- les boutons ----------
 			for constr in m_constructeursBase where not constr.invisible do 
-				txt_menu += "menuItem '" + constr.nom + "' \""+ constr.nom + "\"\n"
+				txt_menu += "menuItem '" + constr.nom + "' \""+ constr.nom + "\" enabled:" +constr.enabled as string + "\n"
 			
 			--- les fonctions ------------
 			for constr in m_constructeursBase where not constr.invisible do 

@@ -159,8 +159,22 @@ extends:Editable_poly replaceUI:true version:0
 	
 	
 	--------------- INTERFACE  ----------------------------------------------------------------------------------------------------------------------	
+	
+	
+	fn activer_ecouteur_selection	=	(
+		
+		debug "activer ecouteur selection"
+		
+		when select 	this  changes  id:#Urba_bat_selection  obj  do (
+			format "obj.isSelected :%\n"  obj.isSelected
+			if not obj.isSelected do
+				if obj.core.editeur_estOuvert do m_editeur_dialog.fermer ()
+			
+		)
+	)
 	---Initialisations / Actualisations ------
 	fn initialiser 	doLogo:false	=(		
+		activer_ecouteur_selection ()
 		core.initialiser 		this
 	)
 	fn actualiser 		=(		
@@ -183,7 +197,7 @@ extends:Editable_poly replaceUI:true version:0
 	
 	--------------- CREATION  ----------------------------------------------------------------------------------------------------------------------	
 	tool create (
-		on mousePoint click do	(	
+		on mousePoint click do	(
 			nodeTM.translation = worldPoint
 			core.actualiser ()
 			

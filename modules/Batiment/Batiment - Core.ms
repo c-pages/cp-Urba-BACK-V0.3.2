@@ -107,11 +107,18 @@ struct str_batiment_core (
 		--- le batiment en edition ----
 		m_bat_edition = undefined ,
 		
+		--- ecouteurs ---------
+		m_ecouteur_selection,
+		
+		
+		
 	public
 		m_edit_tab					= 0,
-		m_edit_affiche_dist 		= true,
+		
+		m_edit_affiche_dist 		= false,
 		m_edit_affiche_fcd 		= true,
-		m_edit_affiche_etages 	= true,
+		m_edit_affiche_etages 	= false,
+		
 		m_edit_maj_auto 			= true,
 		m_edit_proxy				= true,
 -- 		
@@ -455,7 +462,7 @@ struct str_batiment_core (
 		fn get_toiture_index 						=	mgr_toiture.get_constructeur_index 	(get_toiture ()).type,
 		fn get_toiture_constructeursNoms 	= 	for constr in ( mgr_toiture.get_constructeurs () ) collect constr.nom ,
 
-		fn creer_toiture				_indexConstr				= (
+		fn creer_toiture		_indexConstr		= (
 			mgr_toiture.creer_element 		idConstructeur:_indexConstr 	enregistrer:true
 			actualiser ()
 		),
@@ -530,6 +537,45 @@ struct str_batiment_core (
 			)
 			menuTmp
 		),
+		fn set_menu_enabled 	_type   _idConstructeur  _state		=(
+			local constructeurs
+			local index_menu
+			case _type of (
+				#toiture:			(
+					constructeurs		= mgr_toiture.get_constructeurs ()
+					index_menu 		= mgr_toiture.get_constructeur_index 		_idConstructeur
+					constructeurs[ index_menu ].enabled = _state
+					)
+				#facades: 			(
+					constructeurs		= mgr_facades.get_constructeurs ()
+					index_menu 		= mgr_facades.get_constructeur_index 		_idConstructeur
+					constructeurs[ index_menu ].enabled = _state
+					)
+				#facCompos: 	(
+					constructeurs		= mgr_facCompos.get_constructeurs ()
+					index_menu 		= mgr_facCompos.get_constructeur_index 		_idConstructeur
+					constructeurs[ index_menu ].enabled = _state
+					)
+				#facMenuis:		(
+					constructeurs		= mgr_facMenuiseries.get_constructeurs ()
+					index_menu 		= mgr_facMenuiseries.get_constructeur_index 		_idConstructeur
+					constructeurs[ index_menu ].enabled = _state
+					)
+				#gardeCorps:	(
+					constructeurs		= mgr_gardeCorps.get_constructeurs ()
+					index_menu 		= mgr_gardeCorps.get_constructeur_index 		_idConstructeur
+					constructeurs[ index_menu ].enabled = _state
+					)
+				#toitElements:	(
+					constructeurs		= mgr_toitElements.get_constructeurs ()
+					index_menu 		= mgr_toitElements.get_constructeur_index 		_idConstructeur
+					constructeurs[ index_menu ].enabled = _state
+					)
+			)
+			menuTmp
+		),
+		
+		
 		fn creer_element	_type 	idConstructeur:	=(
 			local nv_element
 			case _type of (
@@ -537,20 +583,40 @@ struct str_batiment_core (
 				#facades: 			nv_element = mgr_facades.creer_element ()
 				#facCompos: 	(
 					local fcd_courante 	= get_facade_enEdition ()
-					nv_element 				= creer_composant		fcd_courante		idConstructeur		position:( m_editeur_dialog.get_compos_pos () + 1 )
 					
+					nv_element 				= creer_composant		fcd_courante		idConstructeur		position:( m_editeur_dialog.get_compos_selection () + 1 )
+					
+					m_editeur_dialog.sub.remplir_lbx_sequence ()
+					m_editeur_dialog.sub.lbx_sequence.selection += 1 
 					m_editeur_dialog.sub.actualiser ()
+					m_editeur_dialog.changer_un_truc	() 
 				)
 				#facMenuis:		(
-					nv_element = mgr_facMenuiseries.creer_element  ()
+					
+					nv_element = mgr_facMenuiseries.creer_element  idConstructeur:idConstructeur
+					local compo = m_editeur_dialog.get_composant ()
+					append compo.params.sequence		nv_element
+					
+					m_editeur_dialog.set_param_2		nv_element	
+-- 					m_editeur_dialog.sub.actualiser ()
+					
+					local subroll = m_editeur_dialog.subroll_Params_1.rollouts[1]
+					subroll.actualiser ()
+					subroll.lbx_sequence.selection += 1 
+					m_editeur_dialog.changer_un_truc	() 
+-- 					subroll.actualiser ()
+					
 				)
 				#gardeCorps:	nv_element = mgr_gardeCorps.creer_element 	()
 				#toitElements:	(
+					
 					nv_element = mgr_toitElements.creer_element 	idConstructeur:idConstructeur
 					local toiture = get_toiture ()
 					append 	toiture.params.elements		nv_element
 					enregistrer_element	toiture
 					(mgr_toiture.get_dialog()).actualiser ()
+					m_editeur_dialog.changer_un_truc	() 
+					
 				)
 			)
 			nv_element
@@ -649,6 +715,7 @@ struct str_batiment_core (
 
 
 		),
+			
 	public
 		fn initialiser 		_plug		= (
 			
@@ -656,14 +723,17 @@ struct str_batiment_core (
 			
 			m_plug = 	_plug
 			
+-- 			activer_ecouteur_selection ()
+			
+			
 			---- initialisation des managers -----
 			mgr_surface.initialiser			m_plug
 			mgr_construction.initialiser		m_plug			
 			
 			mgr_facades.initialiser 			plug:m_plug					\
 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\" )					\
-														fichier_dialog:				( "Batiment - rollout facade.ms" )		\
 														typeParametre:				"facades"
+-- 														fichier_dialog:				( "Batiment - rollout facade.ms" )		\
 			
 			mgr_facCompos.initialiser 		plug:m_plug					\
 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\composants de facade\\" )					\
@@ -671,8 +741,8 @@ struct str_batiment_core (
 			
 			mgr_facMenuiseries.initialiser plug:m_plug					\
 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\menuiseries\\" )					\
-														fichier_dialog:				( "Batiment - rollout menuiserie.ms" )		\
 														typeParametre:				"facMenuis"
+-- 														fichier_dialog:				( "Batiment - rollout menuiserie.ms" )		\
 			
 			mgr_gardeCorps.initialiser 		plug:m_plug					\
 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\garde-corps\\" )					\
@@ -680,8 +750,8 @@ struct str_batiment_core (
 			
 			mgr_toiture.initialiser 			plug:m_plug					\
 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\"  )					\
-														fichier_dialog:				( "Batiment - rollout toiture.ms" )		\
 														typeParametre:				"toiture" 
+-- 														fichier_dialog:				( "Batiment - rollout toiture.ms" )		\
 			
 			mgr_toitElements.initialiser 	plug:m_plug					\
 														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\composants toiture\\"  )					\

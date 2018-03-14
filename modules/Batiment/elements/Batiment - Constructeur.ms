@@ -22,6 +22,7 @@
 			fnConstruire,
 			
 			invisible = false,
+			enabled = true,
 			
 		public
 			fn est_editable = not invisible and params != undefined ,

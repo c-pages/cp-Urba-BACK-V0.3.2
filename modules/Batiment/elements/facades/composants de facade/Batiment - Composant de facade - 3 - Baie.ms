@@ -46,8 +46,8 @@ rollout compo_dialog "Baie" width:433 height:747
 	local	 m_plug
 	local m_compo
 	local m_dialog_menuiserie	
-		
-		---- golbal --------------
+	
+	---- golbal --------------
 	edittext 'edt_nom' "" pos:[3,3] width:187 height:16 align:#left
 	label 'lbl19' "Longeur:" pos:[15,36] width:49 height:13 align:#left
 	spinner 'spn_longueur' "" pos:[116,36] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
@@ -58,36 +58,31 @@ rollout compo_dialog "Baie" width:433 height:747
 	spinner 'spn_allege' "" pos:[116,81] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
 	label 'lbl29' "Profondeur:" pos:[15,66] width:59 height:13 align:#left
 	spinner 'spn_profondeur' "" pos:[116,66] width:70 height:16 range:[-5,100000,0] type:#worldunits scale:1 align:#left
-			
-			---- traverses --------
-	GroupBox 'grp_traverses' "Traverses horizontales" pos:[16,218] width:165 height:104 align:#left
-	listbox 'lbx_traverses' "" pos:[24,253] width:150 height:3 align:#left
-	button 'btn_ajouter_traverse' "+" pos:[24,233] width:18 height:18 align:#left
-	button 'btn_supprimer_traverse' "-" pos:[41,233] width:18 height:18 align:#left
-	label 'lbl_traverses_ht' "Hauteur:" pos:[24,300] width:49 height:13 align:#left
-	spinner 'spn_traverse_ht' "" pos:[105,299] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
-		
-		---- sequence --------
-	GroupBox 'grp_sequence' "Séquence" pos:[16,130] width:165 height:86 align:#left
-	listbox 'lbx_sequence' "" pos:[24,166] width:150 height:3 align:#left
-	button 'btn_ajouter_element' "+" pos:[24,147] width:18 height:18 align:#left
-	button 'btn_supprimer_element' "-" pos:[41,147] width:18 height:18 align:#left
-	button 'btn_dupliquer_element' "Dup." pos:[58,147] width:35 height:18 toolTip:"Dupliquer l'élément" align:#left
-	-- 	button 'btn_instancier_element' "Inst." pos:[83,232] width:35 height:18 align:#left
-	button 'btn_editer_element' "Edit." pos:[138,147] width:35 height:18 align:#left
-			
-			---- volet --------
-	GroupBox 'grp_volet' "Volets" pos:[5,350] width:187 height:50 align:#left
-	dropdownList 'ddl_volet' "" pos:[17,368] width:161 height:21 items:#("Aucun", "Roulant", "Battant simple", "Battant double") align:#left
-		
 	
-	button 'btn_sequence_monter' "/\\" pos:[104,147] width:18 height:18 toolTip:"Monter l'élément" align:#left
-	button 'btn_sequence_descendre' "\/" pos:[121,147] width:18 height:18 toolTip:"Descendre l'élément" align:#left
-	GroupBox 'grp_menuis' "Menuiseries" pos:[6,113] width:187 height:233 align:#left
+	---- traverses --------
+	GroupBox 'grp_traverses' "Traverses horizontales" pos:[13,212] width:173 height:104 align:#left
+	listbox 'lbx_traverses' "" pos:[21,247] width:158 height:3 align:#left
+	button 'btn_ajouter_traverse' "Nouv." pos:[21,229] width:35 height:18 align:#left
+	button 'btn_supprimer_traverse' "Supp." pos:[142,229] width:35 height:18 align:#left
+	label 'lbl_traverses_ht' "Hauteur:" pos:[21,294] width:49 height:13 align:#left
+	spinner 'spn_traverse_ht' "" pos:[109,293] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
 	
-	 	
-		
-	checkbox 'chk_tablette' "Tablette" pos:[18,326] width:163 height:15 align:#left
+	---- sequence --------
+	GroupBox 'grp_sequence' "Séquence" pos:[13,124] width:173 height:86 align:#left
+	listbox 'lbx_sequence' "" pos:[21,160] width:142 height:3 align:#left
+	button 'btn_ajouter_element' "Nouv." pos:[21,141] width:35 height:18 align:#left
+	button 'btn_supprimer_element' "Supp." pos:[127,141] width:35 height:18 align:#left
+	button 'btn_dupliquer_element' "Dup." pos:[55,141] width:35 height:18 toolTip:"Dupliquer l'élément" align:#left
+	
+	---- volet --------
+	GroupBox 'grp_volet' "Volets" pos:[5,344] width:187 height:50 align:#left
+	dropdownList 'ddl_volet' "" pos:[17,362] width:161 height:21 items:#("Aucun", "Roulant", "Battant simple", "Battant double") align:#left
+	
+	button 'btn_sequence_monter' "/\\" pos:[164,159] width:16 height:16 toolTip:"Monter l'élément" align:#left
+	button 'btn_sequence_descendre' "\/" pos:[164,174] width:16 height:16 toolTip:"Descendre l'élément" align:#left
+	GroupBox 'grp_menuis' "Menuiseries" pos:[6,107] width:187 height:233 align:#left
+	
+	checkbox 'chk_tablette' "Tablette" pos:[18,320] width:163 height:15 align:#left
 		
 		
 		
@@ -147,92 +142,102 @@ rollout compo_dialog "Baie" width:433 height:747
 			lbx_traverses.selection -= 1
 			actualiser	()
 		)
-		fn editer_element = (
+		/* fn editer_element = (
 -- 			m_dialog_menuiserie = ( m_plug.core.get_mgr_facMenuiseries () ).ouvrir_dialog ()	
 	-- 		createDialog	m_dialog_menuiserie	
 			local menuis = m_compo.params.sequence[ lbx_sequence.selection ]
 			m_rollPrt.set_ssComposant		menuis
 -- 			format "menuis :%\n" menuis
-		)
+		) */
 		
+		
+		
+		
+		
+/* 	on lbx_sequence doubleClicked arg do (
+-- 		editer_element ()
+		m_rollPrt.redim_pour_parametres ()
+	) */
 	
-		
 	
-		
+	
+	
 	on edt_nom entered txt 	do
 	(
 		m_compo.nom = txt
 		m_rollPrt.actualiser  	sans_params_1:true
 		m_rollPrt.changer_un_truc ()
 	)
-	on spn_longueur changed val 	do (
-		m_compo.params.longueur 					= val
-		m_rollPrt.actualiser 	sans_params_1:true
-		m_rollPrt.changer_un_truc ()
-	)
-	on spn_hauteur changed val 	do (
-		m_compo.params.hauteur 					= val
-		m_rollPrt.changer_un_truc ()
-	)
-	on spn_allege changed val 	do (
-		m_compo.params.allege_hauteur 	= val
-		m_rollPrt.changer_un_truc ()
-	)
-	on spn_profondeur changed val 	do (
-		m_compo.params.profondeur	= val
-		m_rollPrt.changer_un_truc ()
-	)
+	on spn_longueur changed val 	do
+	(
+			m_compo.params.longueur 					= val
+			m_rollPrt.actualiser 	sans_params_1:true
+			m_rollPrt.changer_un_truc ()
+		)
+	on spn_hauteur changed val 	do
+	(
+			m_compo.params.hauteur 					= val
+			m_rollPrt.changer_un_truc ()
+		)
+	on spn_allege changed val 	do
+	(
+			m_compo.params.allege_hauteur 	= val
+			m_rollPrt.changer_un_truc ()
+		)
+	on spn_profondeur changed val 	do
+	(
+			m_compo.params.profondeur	= val
+			m_rollPrt.changer_un_truc ()
+		)
 	on lbx_traverses selected _index do
 		actualiser ()
-	on btn_ajouter_traverse pressed do (
-		ajouter_traverse	()
-		m_rollPrt.changer_un_truc ()
-	)
-	on btn_supprimer_traverse pressed do (
-		supprimer_traverse	()
-		m_rollPrt.changer_un_truc ()
-	)
+	on btn_ajouter_traverse pressed do
+	(
+			ajouter_traverse	()
+			m_rollPrt.changer_un_truc ()
+		)
+	on btn_supprimer_traverse pressed do
+	(
+			supprimer_traverse	()
+			m_rollPrt.changer_un_truc ()
+		)
 	on spn_traverse_ht changed val 	do
 	(
-					m_compo.params.traverses[ lbx_traverses.selection ] = val
-					actualiser ()
+		m_compo.params.traverses[ lbx_traverses.selection ] = val
+		actualiser ()
 		m_rollPrt.changer_un_truc ()
-	
-				)
-	on lbx_sequence doubleClicked arg do (
-		editer_element ()
-		m_rollPrt.redim_pour_parametres ()
 	)
-	
-	on lbx_sequence selected _index  do (
-		editer_element ()
-		m_rollPrt.redim_pour_parametres ()
-	)
-	
+	on lbx_sequence selected _index  do
+	(
+			subCompo = m_compo.params.sequence[ _index ] 
+			m_rollPrt.set_param_2		subCompo	
+	-- 		m_rollPrt.redim_pour_parametres ()
+		)
 	on btn_ajouter_element pressed do
 	( 
-		 	local	nv_menuis = m_plug.core.creer_menuiserie		m_compo			 lbx_sequence.selection 	
-			m_rollPrt.set_ssComposant		nv_menuis	
-			actualiser () 
+		
+		m_plug.core.get_menu_contructeur #facMenuis
+		/* 
+		local	nv_menuis = m_plug.core.creer_menuiserie		m_compo			 lbx_sequence.selection 	
+		m_rollPrt.set_param_2		nv_menuis	
+		actualiser () 
 		m_rollPrt.changer_un_truc ()
-			lbx_sequence.selection 	+= 1
-		)
-	on btn_editer_element pressed do
-		editer_element ()
-	on ddl_volet selected _index  	do	(
-				m_compo.params.volet = _index
-				actualiser ()
-			)
-			
-	on chk_tablette changed state do (
-		m_compo.params.tablette = state
-		m_rollPrt.changer_un_truc ()
+		lbx_sequence.selection 	+= 1 */
 	)
+	on ddl_volet selected _index  	do
+	(
+			m_compo.params.volet = _index
+			actualiser ()
+		)
+	on chk_tablette changed state do
+	(
+			m_compo.params.tablette = state
+			m_rollPrt.changer_un_truc ()
+		)
 )
 	
 ------ la fonction de construction	---------
 fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruitLaDalle:false	= ( 
-	
 	
 		--- Result -------------
 		local pt_result_1, pt_result_2, pt_result_3
@@ -259,8 +264,6 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		local ptAccroche_1		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_1	
 		local ptAccroche_2		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_2	
 		local ptAccroche_3		=	polyop.getVert 	ptr_plug.delegate		id_ptAccroche_3	
-		
-		
 		
 		local	etage_hauteur				=	distance ptAccroche_2 	ptAccroche_3
 		local longueur						= ptr_params.longueur	+ ptr_params.get_longueur_etirer ()
@@ -527,6 +530,5 @@ _str_contructeur  	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(
 ) ----	FileIn ----
 
 
-	
 	
 	
