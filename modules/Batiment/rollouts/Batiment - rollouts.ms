@@ -228,7 +228,7 @@ rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
 	
 )
 
-rollout roll_aleatoire "Aléatoire" width:162 height:237
+rollout roll_aleatoire "Hasard" width:162 height:237	rolledUp:true		
 (
 	GroupBox 'grp_ouvrants' "Ouverture fenetres" pos:[6,28] width:162 height:71 align:#left
 	label 'lbl_ouvrt_proba' "Probabilité (%):" pos:[15,45] width:69 height:13 align:#left

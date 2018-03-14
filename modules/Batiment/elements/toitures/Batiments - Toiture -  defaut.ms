@@ -12,6 +12,16 @@
 toiture_nom 	= "- Sans -"	
 toiture_type	=	#sans
 
+--- les rollout du composant	---------
+rollout toiture_dialog "Sans" width:180 height:70	(
+	local m_plug
+	local m_compo
+	local m_rollPrt
+	
+	fn actualiser =(
+	)
+	
+)
 --- la fonction de construction	---------
 fn toiture_fnConstruire  	_plug		pts_accroches		 		= (
 		
@@ -30,7 +40,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 		= (
 --- on importe le fichier mere des composants ----
 _str_contructeur = fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
-_str_contructeur  	nom:toiture_nom	type:toiture_type	params:undefined	dialog:undefined	fnConstruire:toiture_fnConstruire
+_str_contructeur  	nom:toiture_nom	type:toiture_type	params:undefined	dialog:toiture_dialog	fnConstruire:toiture_fnConstruire	
 
 	
 	

@@ -25,7 +25,7 @@ rollout toiture_dialog "Toiture - 1 pan" width:180 height:115
 (
 	local m_plug
 	local m_compo
-	local mgr_toiture
+	local m_rollPrt
 	
 	label 'lbl_pente' "Pente (°):" pos:[9,10] width:61 height:13 align:#left
 	spinner 'spn_pente' "" pos:[92,9] width:70 height:16 range:[0.001,70,0] type:#float scale:1 align:#left
@@ -50,32 +50,27 @@ rollout toiture_dialog "Toiture - 1 pan" width:180 height:115
 	on spn_pente changed val do
 	(
 			m_compo.params.pente		= val
-			mgr_toiture.enregistrer_parametres 	m_compo
-			m_plug.core.actualiser ()
+		m_rollPrt.changer_un_truc ()
 		)
 	on spn_decallage changed val do
 	(
 			m_compo.params.decalage_hauteur		= val
-			mgr_toiture.enregistrer_parametres 	m_compo
-			m_plug.core.actualiser ()
+		m_rollPrt.changer_un_truc ()
 		)
 	on spn_orientation changed val do
 	(
 			m_compo.params.orientation		= val
-			mgr_toiture.enregistrer_parametres 	m_compo
-			m_plug.core.actualiser ()
+		m_rollPrt.changer_un_truc ()
 		)
 	on spn_debord changed val do
 	(
 			m_compo.params.debord		= val
-			mgr_toiture.enregistrer_parametres 	m_compo
-			m_plug.core.actualiser ()
+		m_rollPrt.changer_un_truc ()
 		)
 	on spn14 changed val do
 	(
 			m_compo.params.epaisseur		= val
-			mgr_toiture.enregistrer_parametres 	m_compo
-			m_plug.core.actualiser ()
+		m_rollPrt.changer_un_truc ()
 		)
 )
 --- la fonction de construction	---------
@@ -96,12 +91,19 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 	
 		local	 mtrx_axeP	=	mgr_surface.get_axePrincipal ()
 		local	 BB_axeP		=	mgr_surface.get_axeP_BB ()
+		
+		format "BB_axeP : %\n"  BB_axeP
+		format "toiture_pente : %\n"  toiture_pente
+		
 		rotateZ 		mtrx_axeP		toiture_orient	
 		translate 	mtrx_axeP		BB_axeP[1]
 	
 		local diag_axeP		=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
-		local largeur 		=	diag_axeP.x
-		local longeur 		= 	diag_axeP.z
+		format "diag_axeP : %\n"  diag_axeP
+		local largeur 		=	diag_axeP.y
+		local longeur 		= 	diag_axeP.x
+		format "largeur : %\n"  largeur
+		format "longeur : %\n"  longeur
 		local hauteur 		= largeur * tan 		toiture_pente
 		local z 					= pts_accroches[1].z
 		
@@ -111,8 +113,8 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		--- gestion de l'angle de la pente .... ----
 		
 		local pt_0 = (  [0,0,0]  *  mtrx_axeP )
-		local pt_1 = (  [0,0,longeur]  *  mtrx_axeP )
-		local pt_2 = (  [largeur ,hauteur,0]  *  mtrx_axeP )
+		local pt_1 = (  [longeur,0,0]  *  mtrx_axeP )
+		local pt_2 = (  [0,largeur ,hauteur]  *  mtrx_axeP )
 		
 		local vec1 = pt_1 - pt_0
 		local vec2 = pt_2 - pt_0

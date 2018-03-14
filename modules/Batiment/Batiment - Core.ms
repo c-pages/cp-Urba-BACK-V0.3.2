@@ -463,8 +463,9 @@ struct str_batiment_core (
 		fn get_toiture_constructeursNoms 	= 	for constr in ( mgr_toiture.get_constructeurs () ) collect constr.nom ,
 
 		fn creer_toiture		_indexConstr		= (
-			mgr_toiture.creer_element 		idConstructeur:_indexConstr 	enregistrer:true
-			actualiser ()
+			local nvlToiture = mgr_toiture.creer_element 		idConstructeur:_indexConstr 	enregistrer:false
+-- 			actualiser ()
+			nvlToiture
 		),
 		
 		

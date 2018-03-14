@@ -79,6 +79,12 @@ struct str_batVirt (
 		),
 		fn get_toiture = toiture,
 		fn get_facades = facades,
+		fn 	get_toiture_index		m_core	=	(
+			local mgr_toiture = m_core.get_mgr_toiture ()
+			mgr_toiture.get_constructeur_index 	toiture.type
+		),
+		
+		
 		
 	---- données -------
 	public
@@ -95,6 +101,7 @@ struct str_batVirt (
 			facades							=	_node.core.get_facades ()
 			
 			toiture 							= _node.core.get_toiture ()
+-- 			format "toiture charger : %\n"  toiture
 			
 			decallage_z 					= copy	_node.decallage_z
 			interieur_use					= copy	_node.interieur_use

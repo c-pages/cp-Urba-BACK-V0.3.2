@@ -29,7 +29,7 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 (
 	local m_plug
 	local m_compo
-	local mgr_toiture
+	local m_rollPrt
 	
 	label 'lbl_pente' "Pente (°):" pos:[9,10] width:61 height:13 align:#left
 	spinner 'spn_pente' "" pos:[92,9] width:70 height:16 range:[0.001,70,0] type:#float scale:1 align:#left
@@ -57,14 +57,12 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 	on spn_pente changed val do
 	(
 			m_compo.params.pente		= val
-			mgr_toiture.enregistrer_parametres 	m_compo
-			m_plug.core.actualiser ()
+		m_rollPrt.changer_un_truc ()
 		)
 	on spn_decallage changed val do
 	(
 			m_compo.params.decalage_hauteur		= val
-			mgr_toiture.enregistrer_parametres 	m_compo
-			m_plug.core.actualiser ()
+		m_rollPrt.changer_un_truc ()
 		)
 	on spn_orientation changed val do
 	(
@@ -92,22 +90,19 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 			
 			
 			
-		
+			
 			m_compo.params.orientation		= val
-			mgr_toiture.enregistrer_parametres 	m_compo
-			m_plug.core.actualiser ()
+			m_rollPrt.changer_un_truc ()
 		)
 	on spn_debord changed val do
 	(
 			m_compo.params.debord		= val
-			mgr_toiture.enregistrer_parametres 	m_compo
-			m_plug.core.actualiser ()
+			m_rollPrt.changer_un_truc ()
 		)
 	on spn_epaisseur changed val do
 	(
 			m_compo.params.epaisseur		= val
-			mgr_toiture.enregistrer_parametres 	m_compo
-			m_plug.core.actualiser ()
+			m_rollPrt.changer_un_truc ()
 		)
 	on spn_decallage_larg changed val do
 	(
@@ -136,9 +131,10 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 			
 			m_compo.params.decalage_largeur		= decallage_largeur
 			spn_decallage_larg.value = decallage_largeur
-			mgr_toiture.enregistrer_parametres 	m_compo
+			
+			m_rollPrt.changer_un_truc ()
 			actualiser ()
-			m_plug.core.actualiser ()
+			
 		)
 )
 --- la fonction de construction	---------

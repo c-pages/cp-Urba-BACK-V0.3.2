@@ -160,7 +160,7 @@ extends:Editable_poly replaceUI:true version:0
 	
 	--------------- INTERFACE  ----------------------------------------------------------------------------------------------------------------------	
 	
-	
+	/* 
 	fn activer_ecouteur_selection	=	(
 		
 		debug "activer ecouteur selection"
@@ -171,10 +171,10 @@ extends:Editable_poly replaceUI:true version:0
 				if obj.core.editeur_estOuvert do m_editeur_dialog.fermer ()
 			
 		)
-	)
+	) */
 	---Initialisations / Actualisations ------
 	fn initialiser 	doLogo:false	=(		
-		activer_ecouteur_selection ()
+-- 		activer_ecouteur_selection ()
 		core.initialiser 		this
 	)
 	fn actualiser 		=(		
