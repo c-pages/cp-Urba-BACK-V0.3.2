@@ -758,7 +758,7 @@ struct  str_manager_parametres (
 							fichier_dialog:				\
 							typeParametre:			=(
 			
-			debug "initialiser ()"
+-- 			debug "initialiser ()"
 			
 			m_plug 							=	plug
 			m_core 							=	m_plug.core

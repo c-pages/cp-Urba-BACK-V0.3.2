@@ -211,22 +211,22 @@ extends:Editable_poly replaceUI:true version:0
 	
 	--------------- EVENEMENTS  ----------------------------------------------------------------------------------------------------------------------	
 	on load 						do 	(
-		debug "load du plugin" 
+-- 		debug "load du plugin" 
 		
 
 
 		initialiser ()
 	)
 	on clone 	_original 	do (
-		debug "clone du plugin" 		
+-- 		debug "clone du plugin" 		
 		initialiser ()		
 	)
 	on create do (
-		debug "creation du plugin"	
+-- 		debug "creation du plugin"	
 		initialiser ()
 	)
 	on update do	(
-		debug "update du plugin"		
+-- 		debug "update du plugin"		
 -- 		initialiser ()		
 	)
 	

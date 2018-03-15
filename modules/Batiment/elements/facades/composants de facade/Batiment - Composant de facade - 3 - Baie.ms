@@ -63,17 +63,17 @@ rollout compo_dialog "Baie" width:433 height:747
 	---- traverses --------
 	GroupBox 'grp_traverses' "Traverses horizontales" pos:[13,227] width:173 height:104 align:#left
 	listbox 'lbx_traverses' "" pos:[21,262] width:158 height:3 align:#left
-	button 'btn_ajouter_traverse' "Nouv." pos:[21,244] width:35 height:18 align:#left
-	button 'btn_supprimer_traverse' "Supp." pos:[142,244] width:35 height:18 align:#left
+	button 'btn_ajouter_traverse' "Nouv." pos:[21,246] width:35 height:16 align:#left
+	button 'btn_supprimer_traverse' "Supp." pos:[142,246] width:35 height:16 align:#left
 	label 'lbl_traverses_ht' "Hauteur:" pos:[21,309] width:49 height:13 align:#left
 	spinner 'spn_traverse_ht' "" pos:[109,308] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
 	
 	---- sequence --------
 	GroupBox 'grp_sequence' "Séquence" pos:[13,139] width:173 height:86 align:#left
 	listbox 'lbx_sequence' "" pos:[21,175] width:142 height:3 align:#left
-	button 'btn_ajouter_element' "Nouv." pos:[21,156] width:35 height:18 align:#left
-	button 'btn_supprimer_element' "Supp." pos:[127,156] width:35 height:18 align:#left
-	button 'btn_dupliquer_element' "Dup." pos:[55,156] width:35 height:18 toolTip:"Dupliquer l'élément" align:#left
+	button 'btn_ajouter_element' "Nouv." pos:[21,158] width:35 height:16 align:#left
+	button 'btn_supprimer_element' "Supp." pos:[127,158] width:35 height:16 align:#left
+	button 'btn_dupliquer_element' "Dup." pos:[55,158] width:35 height:16 toolTip:"Dupliquer l'élément" align:#left
 	
 	---- volet --------
 	GroupBox 'grp_volet' "Volets" pos:[5,359] width:187 height:50 align:#left
@@ -278,12 +278,12 @@ rollout compo_dialog "Baie" width:433 height:747
 			m_rollPrt.changer_un_truc ()
 		)
 	on chk_etirable changed state do
-(
-	
-		m_compo.params.etirable = state
-		m_rollPrt.actualiser 	sans_params_1:true
-		m_rollPrt.changer_un_truc ()
-	)
+	(
+		
+			m_compo.params.etirable = state
+			m_rollPrt.actualiser 	sans_params_1:true
+			m_rollPrt.changer_un_truc ()
+		)
 )
 	
 
@@ -596,5 +596,4 @@ _str_contructeur  	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:(
 ) ----	FileIn ----
 
 
-	
 	

@@ -85,9 +85,9 @@ parameters params_optimSurface				rollout:roll_optimSurface	(
 	optim_aligner_seuil			type:#float				default:50.			ui:spn_aligner		animatable:false		invisibleInTV:true
 	
 )
-parameters params_viewport				/* 	rollout:roll_viewport	 */(
+parameters params_viewport				rollout:roll_global	(
 	--- proxy_mode	-----
-	affiche_asProxy				type:#boolean			default:false	/* ui:ckb_proxy	 */		animatable:false		invisibleInTV:true
+	affiche_asProxy				type:#boolean			default:false	 ui:ckb_proxy	 	animatable:false		invisibleInTV:true
 	
 	------- AFFICHAGE 		 ------------------
 	affiche_axe					type:#boolean			default:false	/* ui:ckb_axe */				animatable:false		invisibleInTV:true

@@ -281,7 +281,7 @@ struct	str_geometrie	(
 		
 	------ Initialisation de la structure ------------
 		fn initialiser _plug =(
-			debug "initialiser"
+-- 			debug "initialiser"
 			m_plug= _plug
 		)
 		

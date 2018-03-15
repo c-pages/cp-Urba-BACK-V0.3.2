@@ -20,10 +20,10 @@ struct toiture_params	(
 
 
 --- les rollout du composant	---------
-rollout toiture_dialog "Sans" width:180 height:70	(
+rollout toiture_dialog "Paramètres"  width:180 height:70	(
 	local m_plug
 	local m_compo
-	local m_rollPrt
+	local m_rolloutP
 	
 	fn actualiser =(
 	)

@@ -62,24 +62,48 @@ struct toiture_params	(
 					
 )
 --- les rollout du composant	---------
-rollout toiture_dialog "Toiture plate" width:180 height:70	(
+rollout toiture_dialog "Paramètres" width:230 height:374
+(
 	local m_plug
 	local m_compo
-	local m_rollPrt
+	local m_rolloutP
 	
-	label 'lbl_htAcrotere' "Ht. acrotère:" pos:[9,10] width:61 height:13 align:#left
-	spinner 'spn_htAcrotere' "" pos:[92,9] width:70 height:16 range:[0,100000,0] type:#float scale:1 align:#left
+	label 'lbl_htAcrotere' "Ht. acrotère:" pos:[5,-1] width:61 height:13 align:#left
+	spinner 'spn_htAcrotere' "" pos:[148,-1] width:70 height:16 range:[0,100000,0] type:#float scale:1 align:#left
+	
+	
+	listbox 'lbx_elements' "" pos:[9,50] width:201 height:4 align:#left
+	button 'btn_elements_nouveau' "Nouv." pos:[9,34] width:35 height:16 align:#left
+	button 'btn_elements_supprimer' "Supp." pos:[176,34] width:35 height:16 align:#left
+	GroupBox 'grp17' "Elements" pos:[2,16] width:219 height:97 align:#left
+	
 	
 	fn actualiser =(
-		spn_htAcrotere.value 	= 	m_compo.params.acrotere_ht
+		
+		lbx_elements.items 						= for elem in m_compo.params.elements collect elem.nom		
+		spn_htAcrotere.value 					= 	m_compo.params.acrotere_ht
+		btn_elements_supprimer.enabled 	= lbx_elements.selection != 0
+		
 	)
 
-	on spn_htAcrotere changed val do (
-		m_compo.params.acrotere_ht		= val
-		m_rollPrt.changer_un_truc ()
+	
+	on spn_htAcrotere changed val do
+	(
+			m_compo.params.acrotere_ht		= val
+			m_rolloutP.changer_un_truc ()
+		)
+	on lbx_elements selected _index do
+		actualiser ()
+	on btn_elements_nouveau pressed do
+	(
+			m_plug.core.get_menu_contructeur  #toitElements
+		)
+	on btn_elements_supprimer pressed do
+	(
+		deleteItem 		m_compo.params.elements		lbx_elements.selection
+		actualiser ()
+		m_rolloutP.changer_un_truc ()
 	)
-	
-	
 )
 --- la fonction de construction	---------
 fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
@@ -136,12 +160,6 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 			local transf_insertion		=	mtrx_principale * ( transMatrix face_center )  
 			
 			
--- 			point pos:face_center name:"pointpoint" size:500
--- 			local transf_insertion		=	( MatrixfromNormal  face_center ) -- + axe_principale
-			
--- 			local transf_insertion 	= 		(matrix3 1 ) * axe_principale		--	/*  face_center * */ (matrix3 1 ) --axe_principale
-			
-			
 			for elem in this.params.elements do
 				elem.construire	 	ptr_plug			surface_points  	transformation:transf_insertion
 		)
@@ -179,8 +197,6 @@ _str_contructeur 	tooltip:toiture_tooltip		nom:toiture_nom	type:toiture_type	par
 ) ----	FileIn ----
 
 
-	
-	
 	
 	
 	

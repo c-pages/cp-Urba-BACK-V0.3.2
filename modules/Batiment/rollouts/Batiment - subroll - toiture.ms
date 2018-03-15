@@ -13,9 +13,7 @@ rollout sub_toiture "" width:557 height:427
 					
 	dropdownList 'ddl_toiture' "" pos:[75,18] width:170 height:21 selection:3 align:#left
 	
-	subRollout 'subroll_parametres' "Parametres" pos:[20,62] width:205 height:209 align:#left
-	GroupBox 'grp_prop' "Propriétés" pos:[10,44] width:235 height:238 align:#left
-	
+	subRollout 'subroll_parametres' "Parametres" pos:[10,41] width:235 height:209 align:#left
 	
 	
 	fn actualiser =(
@@ -24,13 +22,13 @@ rollout sub_toiture "" width:557 height:427
 		local index_toiture 	= m_bat.get_toiture_index		m_core	
 		ddl_toiture.selection 	= 	index_toiture
 		
-		local dialog_toiture = m_bat.toiture.get_dialog ()
-		
+		local dialog_toiture = m_bat.toiture.get_dialog ()		
 		for x in subroll_parametres.rollouts do removeSubRollout subroll_parametres x
 		addSubRollout subroll_parametres 	dialog_toiture
 		
 		dialog_toiture.m_compo		= m_bat.toiture		
-		dialog_toiture.m_rollPrt		= m_rolloutP
+		dialog_toiture.m_rolloutP	= m_rolloutP
+		dialog_toiture.m_plug		= m_plug
 		dialog_toiture.actualiser ()
 		
 -- 		btn_editer_toiture.enabled = mgr_toiture.a_desParametres		()
@@ -54,21 +52,20 @@ rollout sub_toiture "" width:557 height:427
 		
 	) */
 	 
-	on ddl_toiture selected 	_val do (
-		
-		
-		local nvl_toiture 			=	m_core.creer_toiture		_val
-		
-		
-		m_bat.toiture = nvl_toiture
-		
-		actualiser ()
-	)
+	on ddl_toiture selected _val do
+	(
+			
+			
+			local nvl_toiture 			=	m_core.creer_toiture		_val
+			
+			
+			m_bat.toiture = nvl_toiture
+			
+			m_rolloutP.changer_un_truc ()
+			
+			actualiser ()
+		)
 )
-
-
-
-
 
 
 

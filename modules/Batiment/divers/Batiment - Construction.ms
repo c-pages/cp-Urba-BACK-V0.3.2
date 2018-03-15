@@ -10,7 +10,8 @@ include	 "$userScripts\cp-Urba\modules\Batiment\\divers\\Batiment - Geometrie.ms
 struct str_construction (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-		m_debug = true,
+-- 		m_debug = true,
+		m_debug = false,
 		m_dbgPrefix ="urba | str_construction",
 		fn debug 	_txt  var:	 param:    =(
 			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
@@ -296,7 +297,7 @@ struct str_construction (
 						creer_toiture						&zCourant
 					
 						displayTempPrompt ("Bâtiment construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
-						ecrire "Batiment construit en "var:( (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
+-- 						debug "Batiment construit en "var:( (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 						
 					) else (
 						---- ...  et on construit le proxy -----

@@ -169,7 +169,7 @@ struct facade_params	(
 						for elemGrp in grp do ( 
 							if elemGrp.type != #balcon	and elemGrp.type != #balconFin and elemGrp.type != #groupe	and elemGrp.type != #groupeFin do (
 								nbr_compos_aPrendreEnCompte	+= 1	
-								if elem.params.etirable do nbr_compos_etirables	+=1
+								if elemGrp.params.etirable do nbr_compos_etirables	+=1
 							)
 						)
 					i += grp.count  + 1

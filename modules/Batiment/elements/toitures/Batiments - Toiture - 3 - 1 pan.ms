@@ -98,24 +98,24 @@ struct toiture_params	(
 	
 )
 --- les rollout du composant	---------
-rollout toiture_dialog "Toiture - 1 pan" width:180 height:115
+rollout toiture_dialog "Paramètres"  width:215 height:115
 (
 	local m_plug
 	local m_compo
-	local m_rollPrt
+	local m_rolloutP
 	
 	label 'lbl_pente' "Pente (°):" pos:[9,10] width:61 height:13 align:#left
-	spinner 'spn_pente' "" pos:[92,9] width:70 height:16 range:[0.001,70,0] type:#float scale:1 align:#left
+	spinner 'spn_pente' "" pos:[133,9] width:70 height:16 range:[0.001,70,0] type:#float scale:1 align:#left
 	label 'lbl_decallage' "Décallage (z)" pos:[9,26] width:63 height:13 align:#left
-	spinner 'spn_decallage' "" pos:[92,25] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
+	spinner 'spn_decallage' "" pos:[133,25] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
 	label 'lbl_orientation' "Orientation (°):" pos:[9,42] width:70 height:13 align:#left
-	spinner 'spn_orientation' "" pos:[92,41] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
+	spinner 'spn_orientation' "" pos:[133,41] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
 	
 	
 	label 'lbl_debord' "Debord" pos:[9,58] width:63 height:13 align:#left
-	spinner 'spn_debord' "" pos:[92,57] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
+	spinner 'spn_debord' "" pos:[133,57] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
 	label 'lbl_epaisseur' "Epaisseur" pos:[9,74] width:70 height:13 align:#left
-	spinner 'spn14' "" pos:[92,73] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
+	spinner 'spn14' "" pos:[133,73] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
 	
 	
 	
@@ -127,27 +127,27 @@ rollout toiture_dialog "Toiture - 1 pan" width:180 height:115
 	on spn_pente changed val do
 	(
 			m_compo.params.pente		= val
-		m_rollPrt.changer_un_truc ()
+		m_rolloutP.changer_un_truc ()
 		)
 	on spn_decallage changed val do
 	(
 			m_compo.params.decalage_hauteur		= val
-		m_rollPrt.changer_un_truc ()
+		m_rolloutP.changer_un_truc ()
 		)
 	on spn_orientation changed val do
 	(
 			m_compo.params.orientation		= val
-		m_rollPrt.changer_un_truc ()
+		m_rolloutP.changer_un_truc ()
 		)
 	on spn_debord changed val do
 	(
 			m_compo.params.debord		= val
-		m_rollPrt.changer_un_truc ()
+		m_rolloutP.changer_un_truc ()
 		)
 	on spn14 changed val do
 	(
 			m_compo.params.epaisseur		= val
-		m_rollPrt.changer_un_truc ()
+		m_rolloutP.changer_un_truc ()
 		)
 )
 --- la fonction de construction	---------

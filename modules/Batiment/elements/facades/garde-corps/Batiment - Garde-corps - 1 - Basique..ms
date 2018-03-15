@@ -17,7 +17,7 @@ struct gardeCorps_params (
 
 ------ la fonction de construction	---------
 fn gardeCorps_fnConstruire  	_plug		_pts		/* norm_dir:	 */	 this:		onConstruitLaDalle:false	 = (
-			format "CONSTRUCTION DU GARDE-CORPS\n"
+-- 			format "CONSTRUCTION DU GARDE-CORPS\n"
 			
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug

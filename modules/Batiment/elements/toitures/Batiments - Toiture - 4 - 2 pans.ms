@@ -26,11 +26,11 @@ struct toiture_params	(
 )
 
 --- les rollout du composant	---------
-rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
+rollout toiture_dialog "Paramètres"  width:180 height:128
 (
 	local m_plug
 	local m_compo
-	local m_rollPrt
+	local m_rolloutP
 	local m_core
 	
 	label 'lbl_pente' "Pente (°):" pos:[9,10] width:61 height:13 align:#left
@@ -47,7 +47,7 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 	spinner 'spn_decallage_larg' "" pos:[92,41] width:70 height:16 range:[-10000,10000,0] type:#worldunits scale:1 align:#left
 	
 	fn actualiser =(
-		m_core = m_rollPrt.m_core
+		m_core = m_rolloutP.m_core
 		
 		spn_pente.value 			= 	m_compo.params.pente
 		spn_orientation.value 	= 	m_compo.params.orientation
@@ -61,29 +61,29 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 	on spn_pente changed val do
 	(
 			m_compo.params.pente		= val
-		m_rollPrt.changer_un_truc ()
+		m_rolloutP.changer_un_truc ()
 		)
 	on spn_decallage changed val do
 	(
 			m_compo.params.decalage_hauteur		= val
-		m_rollPrt.changer_un_truc ()
+		m_rolloutP.changer_un_truc ()
 		)
 	on spn_orientation changed val do
 	(
 		
 			
 			m_compo.params.orientation		= val
-			m_rollPrt.changer_un_truc ()
+			m_rolloutP.changer_un_truc ()
 		)
 	on spn_debord changed val do
 	(
 			m_compo.params.debord		= val
-			m_rollPrt.changer_un_truc ()
+			m_rolloutP.changer_un_truc ()
 		)
 	on spn_epaisseur changed val do
 	(
 			m_compo.params.epaisseur		= val
-			m_rollPrt.changer_un_truc ()
+			m_rolloutP.changer_un_truc ()
 		)
 	on spn_decallage_larg changed val do
 	(
@@ -94,7 +94,7 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 			m_compo.params.decalage_largeur		= decallage_largeur
 -- 			spn_decallage_larg.value = decallage_largeur
 			
-			m_rollPrt.changer_un_truc ()
+			m_rolloutP.changer_un_truc ()
 			actualiser ()
 			
 		)
@@ -136,7 +136,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 -- 		pt_3 		= point size:1000 transform:mtrx_axeP   name:"PT3"
 		
 		
-		local diag_axeP	=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
+		local diag_axeP		=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
 		local largeur 		=	diag_axeP.x
 		local longeur 		= 	diag_axeP.y
 		local hauteur 		= largeur * tan 		toiture_pente

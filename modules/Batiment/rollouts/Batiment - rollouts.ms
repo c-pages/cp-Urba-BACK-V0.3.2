@@ -72,6 +72,7 @@ rollout roll_global "Global" width:195 height:341
 		
 		
 		
+		
 	button 'btn_charger' "Charger" pos:[13,19] width:76 height:20 enabled:true align:#left
 	button 'btn_coller' "Coller" pos:[88,37] width:77 height:20 align:#left
 	button 'btn_copier' "Copier" pos:[13,38] width:76 height:20 align:#left
@@ -79,6 +80,15 @@ rollout roll_global "Global" width:195 height:341
 	--- Surface ------
 	pickbutton 'btn_pick_surface' "Pick shape" pos:[13,78] width:152 height:20 filter:shape_filt toolTip:"Le shape à utiliser comme surface de base pour la création du bâtiment." autoDisplay:true align:#left
 	GroupBox 'grp_surface' "Surface :" pos:[8,64] width:162 height:38 align:#left
+	
+	checkbutton 'ckb_editeur' "Edition" pos:[8,108] width:162 height:30 highlightColor:(color 255 255 0) align:#left 
+ 
+ 
+ 
+	GroupBox 'grp63' "Presets :" pos:[8,1] width:162 height:60 align:#left
+	checkbox 'ckb_proxy' "Affichage simplifier" pos:[10,147] width:161 height:31 align:#left
+ 
+ 
 	
 /* 
 	--- Global ------
@@ -101,13 +111,6 @@ rollout roll_global "Global" width:195 height:341
  	--enabled:false 
 	
 -- 	button 'btn_editer_etages' "E." pos:[143,72] width:16 height:16 align:#left
-	checkbutton 'ckb_editeur' "Edition" pos:[8,108] width:162 height:30 highlightColor:(color 255 255 0) align:#left 
- 
- 
-	GroupBox 'grp63' "Presets :" pos:[8,1] width:162 height:60 align:#left
- 
- 
-	
 	fn actualiser =(
 		
 		btn_coller.enabled 			= urba_clipboard_batiment != ""
@@ -161,12 +164,15 @@ rollout roll_global "Global" width:195 height:341
 			)
 	on btn_pick_surface picked _shape do
 		core.assigner_surface 		$		_shape
-	on ckb_editeur changed state do	(
-		case state of (
-			true:		core.editeur_ouvrir ()
-			false:	(core.get_editeur_dialog ()).fermer ()
+	on ckb_editeur changed state do
+	(
+			case state of (
+				true:		core.editeur_ouvrir ()
+				false:	(core.get_editeur_dialog ()).fermer ()
+			)
 		)
-	)
+	on ckb_proxy changed state do core.actualiser ()
+		
 )
 rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
 	
@@ -285,7 +291,6 @@ rollout roll_aPropos 			"A propos" 	rolledUp:false	(
 	HyperLink 'hpl2' "GitHub" pos:[127,17] address:"https://github.com/c-pages/cp-Urba-Cleanage" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
 	label 'lbl6' "2017" pos:[5,17] align:#left
 )
-
 
 
 

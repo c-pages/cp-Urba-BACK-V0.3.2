@@ -612,12 +612,16 @@ struct str_batiment_core (
 				)
 				#gardeCorps:	nv_element = mgr_gardeCorps.creer_element 	()
 				#toitElements:	(
-					
+					local subroll = m_editeur_dialog.sub.subroll_parametres.rollouts[1]
+					local selec = subroll.lbx_elements.selection
 					nv_element = mgr_toitElements.creer_element 	idConstructeur:idConstructeur
-					local toiture = get_toiture ()
+					local toiture = m_editeur_dialog.m_batiment.toiture
 					append 	toiture.params.elements		nv_element
-					enregistrer_element	toiture
-					(mgr_toiture.get_dialog()).actualiser ()
+-- 					enregistrer_element	toiture
+					
+-- 					(mgr_toiture.get_dialog()).actualiser ()
+					subroll.actualiser ()
+					subroll.lbx_elements.selection = selec + 1
 					m_editeur_dialog.changer_un_truc	() 
 					
 				)
@@ -626,14 +630,14 @@ struct str_batiment_core (
 		),
 		
 	
-		
+	
 		
 	----- Surface ---------------------
 	public
 		fn get_surface_points				=	mgr_surface.get_points	(),
 		fn assigner_surface 		_nodeTHIS		_shape 		=(
-			
-			 mgr_mat.appliquer_material  		_nodeTHIS
+			if _nodeTHIS.material == undefined do
+				mgr_mat.appliquer_material  		_nodeTHIS
 			
 			_nodeTHIS.transform = _shape.transform
 			mgr_surface.assigner		_shape
@@ -698,6 +702,7 @@ struct str_batiment_core (
 			callbacks.removescripts 	id:	#urbaBat_preRenderProxy
 			global batiments_asProxy =#()
 			local		txt_pre ="with redraw off (\n"
+-- 			txt_pre +="			format \"Ecouteur PRE rendu\\n\"\n"
 			txt_pre +="	for bat in objects where classof bat == Urba_Batiment do (\n"
 			txt_pre +="		if 	bat.affiche_asProxy  do (\n"
 			txt_pre +="			bat.affiche_asProxy = false\n"
@@ -722,12 +727,12 @@ struct str_batiment_core (
 	public
 		fn initialiser 		_plug		= (
 			
-			debug "initialiser"
+-- 			debug "initialiser"
 			
 			m_plug = 	_plug
 			
 -- 			activer_ecouteur_selection ()
-			
+			initialiser_pre_post_rendu ()
 			
 			---- initialisation des managers -----
 			mgr_surface.initialiser			m_plug
