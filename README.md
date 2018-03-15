@@ -1,17 +1,20 @@
-# cp-Urba
-Générateur de bâtiments paramétriques et de bout de ville.
+# cp-Urba - Batiment V0.20
+Plugin 3DSmax - Bâtiments paramétriques.
+
+Refonte de l'interface, on passe maintenant dans un _'mode édition'_ pour modifier le bâtiment.
 
 ### TODO
-* Façades:
-  * Répartirion des éléments de façade le long des mur : mode 'étirer' ( agrandit chaque élément proportionnelement pour ne laisser aucun 'espacement'.
-* Toitures :
+* **Toitures** :
+  * Refaire complètement les toitures à pentes.
   * Construction à revoir pour meilleur gestion des débords.
   * Toitures à x pans (pente de toit pour chaque mur).
   * integration des éléments de toitures (local tech, cheminet, lucarnes, ....)  ---> ébauche réalisée
-* gestion des splines  avec 2 shapes : trou pour creation patio
-* Version simplifié de l'interface ?
-
-
-
-## Realisé :
-* OK	Verifier optimisation : 'orthonormer' déconne des fois.
+* **Facades** :
+  * Extrusions de la dalle pour débords et du mur.
+  * Gestion des angles pour continuité des balcons ou des débords.
+  * Intégration des Volets.
+  * Gestion du hasard pour ouverture Volets et Fenêtres.
+* **Surface** :
+  * Prise en compte des splines  avec shapes 'à trous' : pour creation de patios.
+* On pourra peut être cleanner un peu l'interface entre rollouts et reste du plug.
+* Continuer le débogage.
