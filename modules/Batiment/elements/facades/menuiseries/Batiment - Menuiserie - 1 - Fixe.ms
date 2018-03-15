@@ -26,21 +26,15 @@ rollout menuis_dialog "Menuiserie" width:221 height:119
 	local m_compo
 	local m_rollPrt		
 		
-	GroupBox 'grp1' "Global" pos:[6,7] width:187 height:70 align:#left
 			
-	dropdownList 'ddl_type' "" pos:[67,27] width:111 height:21 align:#left
-	label 'lbl51' "Type :" pos:[15,29] width:49 height:15 align:#left
 			
 		
 			---- golbal --------------
-	label 'lbl_longueur' "Longueur:" pos:[15,54] width:63 height:13 align:#left
-	spinner 'spn_longueur' "" pos:[106,54] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+	label 'lbl_longueur' "Longueur:" pos:[15,2] width:63 height:13 align:#left
+	spinner 'spn_longueur' "" pos:[106,2] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
 		
 		
 		fn actualiser =(
-			ddl_type.items 	= m_plug.core.get_menuiserie_constructeursNoms ()
-			local menuis_types 			= m_plug.core.get_menuiserie_constructeursTypes ()
-			ddl_type.selection 				= findItem  menuis_types		m_compo.type  
 			
 			if m_compo != undefined do
 				spn_longueur.value = m_compo.params.longueur
@@ -53,24 +47,16 @@ rollout menuis_dialog "Menuiserie" width:221 height:119
 		
 		fn initialiser _plug = (
 			m_plug = _plug
-			
-				
 		)
 
 	
-	on spn_longueur changed val do(
-		m_compo.params.longueur = val
-		m_rollPrt.changer_un_truc ()
-)
 	
-		on ddl_type selected _val do		(
-			m_plug.core.appliquer_menuiserie_type		m_compo	_val
-			actualiser ()
-		m_rollPrt.changer_un_truc ()
-			m_rollPrt.actualiser ()
-		)
+	on spn_longueur changed val do
+	(
+			m_compo.params.longueur = val
+			m_rollPrt.changer_un_truc ()
+	)
 )
-
 ------ la fonction de construction	---------
 fn menuis_fnConstruire  	_plug	_pt_origine		norm_dir:		dist_hauteur:	ptr_baie:		 this:		= (
 	
@@ -136,7 +122,6 @@ _str_contructeur 	tooltip:menuis_tooltip		nom:menuis_nom	type:menuis_type	params
 
 	
 ) ----	FileIn ----
-	
 	
 	
 	

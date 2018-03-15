@@ -15,24 +15,27 @@ menuis_toolTip 	=	""
 --- les parametres du composant	---------
 struct menuis_params	(
 	longueur = 0,
-	hauteur					=	0,
+	hauteur					=	210,
 	ouverture_sens 		= 1
 )
 
 --- les rollout du composant	---------
-rollout menuis_dialog "Espacement" (
+rollout menuis_dialog "Porte" width:162 height:63
+(
 	
-			local m_plug		
-			local m_compo
-		local m_rollPrt		
+	local m_plug		
+	local m_compo
+	local m_rollPrt		
 	
 	
 			---- golbal --------------
-		label 'lbl_hauteur' "Hauteur : " pos:[6,5] width:75 height:13 align:#left
-		spinner 'spn_hauteur' "" pos:[99,5] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
-		label 'lbl_ouverture' "Ouverture :" pos:[6,38] width:67 height:13 align:#left
-		dropdownList 'ddl_ouverture' "" pos:[68,36] width:100 height:21 items:#("Auto", "Droite", "Gauche") align:#left
+	label 'lbl_hauteur' "Hauteur : " pos:[5,5] width:75 height:13 align:#left
+	spinner 'spn_hauteur' "" pos:[100,5] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+	label 'lbl_ouverture' "Ouverture :" pos:[6,40] width:58 height:13 align:#left
+	dropdownList 'ddl_ouverture' "" pos:[68,38] width:100 height:21 items:#("Auto", "Droite", "Gauche") align:#left
 			
+	label 'lbl_longueur' "Longueur:" pos:[5,21] width:63 height:13 align:#left
+	spinner 'spn_longueur' "" pos:[100,21] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
 		fn actualiser =(
 			spn_hauteur.value 		= m_compo.params.hauteur			
 			ddl_ouverture.selection	=	m_compo.params.ouverture_sens
@@ -44,19 +47,24 @@ rollout menuis_dialog "Espacement" (
 		)
 		
 		
-		on spn_hauteur changed val do	 (
-			m_compo.params.hauteur		 = val			
-			m_rollPrt.on_a_change_un_truc ()
-		)
 		
 		
-		on ddl_ouverture selected val do	(
-			m_compo.params.ouverture_sens		 = val
-			m_rollPrt.on_a_change_un_truc ()
-		)
+	on spn_hauteur changed val do
+	(
+				m_compo.params.hauteur		 = val			
+				m_rollPrt.on_a_change_un_truc ()
+			)
+	on ddl_ouverture selected val do
+	(
+				m_compo.params.ouverture_sens		 = val
+				m_rollPrt.on_a_change_un_truc ()
+			)
+	on spn_longueur changed val do
+	(
+			m_compo.params.longueur = val
+			m_rollPrt.changer_un_truc ()
+	)
 )
-
-
 ------ la fonction de construction	---------
 fn menuis_fnConstruire  	_plug	_pt_origine		norm_dir:		dist_hauteur:	ptr_baie:		 this:		= (
 	
@@ -139,8 +147,6 @@ _str_contructeur 	tooltip:menuis_tooltip		nom:menuis_nom	type:menuis_type	params
 
 	
 ) ----	FileIn ----
-	
-	
 	
 	
 	

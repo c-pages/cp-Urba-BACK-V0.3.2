@@ -583,16 +583,20 @@ struct str_batiment_core (
 				#toiture:			nv_element = mgr_toiture.creer_element ()
 				#facades: 			nv_element = mgr_facades.creer_element ()
 				#facCompos: 	(
+					
+					local selec = 	m_editeur_dialog.sub.lbx_sequence.selection 
 					local fcd_courante 	= get_facade_enEdition ()
 					
 					nv_element 				= creer_composant		fcd_courante		idConstructeur		position:( m_editeur_dialog.get_compos_selection () + 1 )
-					
-					m_editeur_dialog.sub.remplir_lbx_sequence ()
-					m_editeur_dialog.sub.lbx_sequence.selection += 1 
+-- 					m_editeur_dialog.sub.m_composant_courant = nv_element
+					m_editeur_dialog.sub.remplir_lbx_sequence()
+					m_editeur_dialog.sub.lbx_sequence.selection = selec + 1 
 					m_editeur_dialog.sub.actualiser ()
 					m_editeur_dialog.changer_un_truc	() 
 				)
 				#facMenuis:		(
+					local subroll = m_editeur_dialog.subroll_Params_1.rollouts[1]
+					local selec = 	subroll.lbx_sequence.selection
 					
 					nv_element = mgr_facMenuiseries.creer_element  idConstructeur:idConstructeur
 					local compo = m_editeur_dialog.get_composant ()
@@ -601,12 +605,10 @@ struct str_batiment_core (
 					m_editeur_dialog.set_param_2		nv_element	
 -- 					m_editeur_dialog.sub.actualiser ()
 					
-					local subroll = m_editeur_dialog.subroll_Params_1.rollouts[1]
 					subroll.actualiser ()
-					subroll.lbx_sequence.selection += 1 
+					subroll.lbx_sequence.selection = selec + 1 
 					m_editeur_dialog.changer_un_truc	() 
--- 					subroll.actualiser ()
-					
+-- 					debug "subroll.lbx_sequence.selection" var:subroll.lbx_sequence.selection
 				)
 				#gardeCorps:	nv_element = mgr_gardeCorps.creer_element 	()
 				#toitElements:	(

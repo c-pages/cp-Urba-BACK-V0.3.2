@@ -12,6 +12,13 @@
 toiture_nom 	= "- Sans -"	
 toiture_type	=	#sans
 
+--- les parametres du composant	---------
+struct toiture_params	(
+	fn VP_afficher 	nd	surface_pts	z	=()
+)
+
+
+
 --- les rollout du composant	---------
 rollout toiture_dialog "Sans" width:180 height:70	(
 	local m_plug
@@ -40,7 +47,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 		= (
 --- on importe le fichier mere des composants ----
 _str_contructeur = fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
-_str_contructeur  	nom:toiture_nom	type:toiture_type	params:undefined	dialog:toiture_dialog	fnConstruire:toiture_fnConstruire	
+_str_contructeur  	nom:toiture_nom	type:toiture_type	params:(toiture_params() )	dialog:toiture_dialog	fnConstruire:toiture_fnConstruire	
 
 	
 	

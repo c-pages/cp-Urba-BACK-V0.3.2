@@ -20,7 +20,8 @@ struct toiture_params	(
 	orientation				=	0,
 	
 	debord					= 15.,
-	epaisseur 				= 15
+	epaisseur 				= 15,
+	fn VP_afficher 	nd	surface_pts	z	=()
 	
 )
 
@@ -30,6 +31,7 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 	local m_plug
 	local m_compo
 	local m_rollPrt
+	local m_core
 	
 	label 'lbl_pente' "Pente (°):" pos:[9,10] width:61 height:13 align:#left
 	spinner 'spn_pente' "" pos:[92,9] width:70 height:16 range:[0.001,70,0] type:#float scale:1 align:#left
@@ -45,6 +47,8 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 	spinner 'spn_decallage_larg' "" pos:[92,41] width:70 height:16 range:[-10000,10000,0] type:#worldunits scale:1 align:#left
 	
 	fn actualiser =(
+		m_core = m_rollPrt.m_core
+		
 		spn_pente.value 			= 	m_compo.params.pente
 		spn_orientation.value 	= 	m_compo.params.orientation
 		spn_decallage.value 		= 	m_compo.params.decalage_hauteur
@@ -67,29 +71,6 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 	on spn_orientation changed val do
 	(
 		
-		--- limiter le décalage -------------
-			local mgr_surface  		= 	m_plug.core.get_mgr_surface ()
-			local toiture_orient		= m_compo.params.orientation
-			local	 mtrx_axeP			=	mgr_surface.get_axePrincipal ()
-			local	 BB_axeP				=	mgr_surface.get_axeP_BB ()
-			rotateZ 		mtrx_axeP		toiture_orient	
-			translate 	mtrx_axeP		BB_axeP[1]
-			mtrx_axeP.translation 	= [0,0,0]
-		
-			local diag_axeP	=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
-			local largeur 		=	diag_axeP.x
-			
-			mtrx_axeP.translation = [0,0,0]
-			decallage_largeur = val
-			if abs decallage_largeur > largeur/ 2 do (
-				if decallage_largeur <0 then 	
-					decallage_largeur = - largeur/ 2 + 5
-				else
-					decallage_largeur =  largeur/ 2  - 5
-			)
-			
-			
-			
 			
 			m_compo.params.orientation		= val
 			m_rollPrt.changer_un_truc ()
@@ -107,30 +88,11 @@ rollout toiture_dialog "Toiture - 2 pans" width:180 height:128
 	on spn_decallage_larg changed val do
 	(
 		--- limiter le décalage -------------
-			local mgr_surface  		= 	m_plug.core.get_mgr_surface ()
-			local toiture_orient		= m_compo.params.orientation
-			local	 mtrx_axeP			=	mgr_surface.get_axePrincipal ()
-			local	 BB_axeP				=	mgr_surface.get_axeP_BB ()
-			rotateZ 		mtrx_axeP		toiture_orient	
-			translate 	mtrx_axeP		BB_axeP[1]
-			mtrx_axeP.translation 	= [0,0,0]
+			local decallage_largeur = val
 		
-			local diag_axeP	=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
-			local largeur 		=	diag_axeP.x
-			
-			mtrx_axeP.translation = [0,0,0]
-			decallage_largeur = val
-			if abs decallage_largeur > largeur/ 2 do (
-				if decallage_largeur <0 then 	
-					decallage_largeur = - largeur/ 2 + 5
-				else
-					decallage_largeur =  largeur/ 2  - 5
-			)
-			
-			
 			
 			m_compo.params.decalage_largeur		= decallage_largeur
-			spn_decallage_larg.value = decallage_largeur
+-- 			spn_decallage_larg.value = decallage_largeur
 			
 			m_rollPrt.changer_un_truc ()
 			actualiser ()
@@ -161,12 +123,22 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 	
 		local	 mtrx_axeP	=	mgr_surface.get_axePrincipal ()
 		local	 BB_axeP		=	mgr_surface.get_axeP_BB ()
+		
+-- 		pt_1 		= point size:1000 transform:mtrx_axeP name:"PT1"
+
+		
 		rotateZ 		mtrx_axeP		toiture_orient	
-		translate 	mtrx_axeP		BB_axeP[1]
+		
+-- 		pt_2 		= point size:1000 transform:mtrx_axeP   name:"PT2"
+		
+		translate 	mtrx_axeP		( BB_axeP[1] )
 	
+-- 		pt_3 		= point size:1000 transform:mtrx_axeP   name:"PT3"
+		
+		
 		local diag_axeP	=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
 		local largeur 		=	diag_axeP.x
-		local longeur 		= 	diag_axeP.z
+		local longeur 		= 	diag_axeP.y
 		local hauteur 		= largeur * tan 		toiture_pente
 		local z 					= pts_accroches[1].z
 		
@@ -175,7 +147,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 
 
 		
-		local vec_decall_larg 	= [toiture_decal_larg,0, 0]  * mtrx_axeP_temp 
+		local vec_decall_larg 	= [0, toiture_decal_larg   , 0]  * mtrx_axeP_temp 
 		
 		local nvlsFaces 				= #()
 		
@@ -183,8 +155,8 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		--- gestion de l'angle de la pente .... ----
 		--- Plan de la Pente 1  ----
 		local pt_P1_0 = (  [0,0,0]  *  mtrx_axeP 						+ vec_decall_larg )
-		local pt_P1_1 = (  [0,0,longeur]  *  mtrx_axeP 				+ vec_decall_larg )
-		local pt_P1_2 = (  [largeur ,hauteur,0]  *  mtrx_axeP 	+ vec_decall_larg )	
+		local pt_P1_1 = (  [longeur,0,0]  *  mtrx_axeP 				+ vec_decall_larg )
+		local pt_P1_2 = (  [0,largeur ,hauteur]  *  mtrx_axeP 	+ vec_decall_larg )	
 	
 		local vecP1_1 = pt_P1_1 - pt_P1_0
 		local vecP1_2 = pt_P1_2 - pt_P1_0
@@ -196,10 +168,10 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 	
 	
 	
-		--- Plan de la Pente 1  ----
-		local pt_P2_0 = (  [largeur,0,longeur]  *  mtrx_axeP  	+ vec_decall_larg )	
-		local pt_P2_1 = (  [largeur,0,0]  *  mtrx_axeP  				+ vec_decall_larg )	
-		local pt_P2_2 = (  [0 ,hauteur,longeur]  *  mtrx_axeP 	+ vec_decall_larg )	
+		--- Plan de la Pente 2  ----
+		local pt_P2_0 = (  [longeur, largeur,0]  *  mtrx_axeP  	+ vec_decall_larg )	
+		local pt_P2_1 = (  [0,largeur,0]  *  mtrx_axeP  				+ vec_decall_larg )	
+		local pt_P2_2 = (  [longeur,0 ,hauteur]  *  mtrx_axeP 	+ vec_decall_larg )	
 	
 		local vecP2_1 = pt_P2_1 - pt_P2_0
 		local vecP2_2 = pt_P2_2 - pt_P2_0
@@ -209,9 +181,9 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		local plan_pente2 = ptr_geo.get_plan_2vecs_1Point			vecP2_1		vecP2_2		pt_Origine
 	
 		--- Plan verticale faitage ------
-		local pt_F_0 = (  [largeur /2 ,0,0]  *  mtrx_axeP 	+ vec_decall_larg )
-		local pt_F_1 = (  [largeur /2 ,0,longeur]  *  mtrx_axeP 	+ vec_decall_larg )
-		local pt_F_2	=	pt_F_0 + [0,0,100]					+ vec_decall_larg 
+		local pt_F_0 = (  [0, largeur /2 ,0]  *  mtrx_axeP 	+ vec_decall_larg )
+		local pt_F_1 = (  [longeur , largeur /2 ,0] *  mtrx_axeP 	+ vec_decall_larg )
+		local pt_F_2	=	pt_F_0 + [0,0, 100]					+ vec_decall_larg 
 		
 		local vec_F_1 = pt_F_1 - pt_F_0
 		local vec_F_2 = pt_F_2 - pt_F_0				
@@ -330,7 +302,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		
 		-- souder les points --
 		local vertsASouder =#()
-		for IDFace in nvlsFaces do (
+		for IDFace in nvlsFaces where IDFace != undefined do (
 			local vertsFace = polyop.getFaceVerts ptr_plug.delegate	 IDFace
 			for vert in vertsFace do 
 				appendIfUnique  vertsASouder 	vert

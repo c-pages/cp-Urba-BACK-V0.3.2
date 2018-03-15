@@ -23,7 +23,7 @@ rollout sub_facades "" width:594 height:789
 	button 'btn_facade_dupliquer' "Dup." pos:[44,-1] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
 	button 'btn_facade_supprimer' "Sup." pos:[193,-1] width:35 height:16 toolTip:"Supprimer" align:#left
 	listbox 'lbx_facades' "" pos:[10,16] width:218 height:7 align:#left
-	button 'btn_facade' "Nouv." pos:[10,-1] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
+	button 'btn_facade_nouveau' "Nouv." pos:[10,-1] width:35 height:16 toolTip:"Dupliquer le composant sélectionné." align:#left
 	checkbutton 'ckb_facades_details' "D" pos:[229,95] width:16 height:16 highlightColor:(color 255 255 0) align:#left
 	
 	edittext 'edt_facade_nom' "" pos:[13,132] width:207 height:16 align:#left
@@ -94,54 +94,56 @@ rollout sub_facades "" width:594 height:789
 		m_sequence_a_un_Groupe = false
 		local tabulation		= "     "
 		local i = 1
-		for comp in m_facade_courante.params.sequence		do	(
-			local affichage 		= "  "
-			
-			if comp.type == #balcon		do est_dansBalcon = true
-			if comp.type == #groupe		do est_dansGroupe = groupe_existe = true
-			
-			if comp.type == #groupe	 or comp.type == #groupeFin	then (
-				affichage = "------------- "
-				m_sequence_a_un_Groupe = true
-			) else if est_dansGroupe do affichage +=  tabulation
-			
-			if comp.type == #balcon	or  comp.type == #balconFin		then affichage += "  --- "
-			else if est_dansBalcon and not comp.type == #groupe	and not comp.type == #groupeFin	  do affichage += " |     "
-			
-			-- le nom ---
-			affichage += comp.nom 
-			
-			
-			
-			if comp.type == #groupe	do (
-				if comp.params.repetitions  == 0 then
-					affichage += " - x Inf." 
-				else
-					affichage += " - x " + comp.params.repetitions as string
-				affichage += " --------------------"
-			)
-			if comp.type == #groupeFin		then 
-				affichage += " groupe fin -------------------------------------------"
+		
+		if m_facade_courante != undefined do
+			for comp in m_facade_courante.params.sequence		do	(
+				local affichage 		= "  "
 				
-			-- quelques infos -----
-			if comp.params != undefined do
-				if comp.params.longueur != 0 do
-					affichage += " - " + comp.params.longueur as string + " cm." 
-			
-			
-			append itemsTmp affichage
-			
-			if comp.type == #balconFin 	do est_dansBalcon = false
-			if comp.type == #groupeFin 	do est_dansGroupe = false
-			
--- 			if i == lbx_sequence.selection do (
-			if comp == m_composant_courant do (
-				m_compoCourant_estDansBalcon = est_dansBalcon
-				m_compoCourant_estDansGroupe = est_dansGroupe
+				if comp.type == #balcon		do est_dansBalcon = true
+				if comp.type == #groupe		do est_dansGroupe = groupe_existe = true
+				
+				if comp.type == #groupe	 or comp.type == #groupeFin	then (
+					affichage = "------------- "
+					m_sequence_a_un_Groupe = true
+				) else if est_dansGroupe do affichage +=  tabulation
+				
+				if comp.type == #balcon	or  comp.type == #balconFin		then affichage += "  --- "
+				else if est_dansBalcon and not comp.type == #groupe	and not comp.type == #groupeFin	  do affichage += " |     "
+				
+				-- le nom ---
+				affichage += comp.nom 
+				
+				
+				
+				if comp.type == #groupe	do (
+					if comp.params.repetitions  == 0 then
+						affichage += " - x Inf." 
+					else
+						affichage += " - x " + comp.params.repetitions as string
+					affichage += " --------------------"
+				)
+				if comp.type == #groupeFin		then 
+					affichage += " groupe fin -------------------------------------------"
+					
+				-- quelques infos -----
+				if comp.params != undefined do
+					if comp.params.longueur != 0 do
+						affichage += " - " + comp.params.longueur as string + " cm." 
+				
+				
+				append itemsTmp affichage
+				
+				if comp.type == #balconFin 	do est_dansBalcon = false
+				if comp.type == #groupeFin 	do est_dansGroupe = false
+				
+	-- 			if i == lbx_sequence.selection do (
+				if comp == m_composant_courant do (
+					m_compoCourant_estDansBalcon = est_dansBalcon
+					m_compoCourant_estDansGroupe = est_dansGroupe
+				)
+				
+				i += 1
 			)
-			
-			i += 1
-		)
 		lbx_sequence.items =  itemsTmp
 		
 		
@@ -150,24 +152,10 @@ rollout sub_facades "" width:594 height:789
 	
 	fn gerer_boutons_enabled 	=(
 		
-		
-		
-		
-		
 		btn_facade_dupliquer.enabled 	= lbx_facades.selection != 0
 		btn_facade_supprimer.enabled 	= lbx_facades.selection != 0
 		btn_facade_monter.enabled 	 	= lbx_facades.selection > 1
 		btn_facade_descendre.enabled 	= lbx_facades.selection != 0 and lbx_facades.selection != lbx_facades.items.count
-		
--- 		--- bloquage du bouton Balcon si on est deja dans un balcon -------------------
--- 		local idBalcon = ( m_plug.core.get_mgr_composants() ).get_constructeur_index #Balcon 
--- 		btns_ajouter_composant[idBalcon].enabled = not m_compoCourant_estDansBalcon
-		
-		
--- 		--- bloquage du bouton loggia si on est deja dans un loggia -------------------			
--- 		local idGroupe = m_plug.core.get_composants_bouton_index 	#groupe 
--- 		
--- 		btns_ajouter_composant[ idGroupe ].enabled = not groupe_existe
 		
 		btn_compo_dupliquer.enabled 	= lbx_sequence.selection != 0 
 		btn_compo_instancier.enabled 	= lbx_sequence.selection != 0
@@ -190,9 +178,6 @@ rollout sub_facades "" width:594 height:789
 					btnMonter_enabled = false
 				)
 			)
-			
-			
-			
 		)
 		btn_compo_monter.enabled 		= btnMonter_enabled
 		
@@ -314,30 +299,30 @@ rollout sub_facades "" width:594 height:789
 			ddl_contrainte_mode.selection 				= m_facade_courante.params.mode
 			
 			
-			
-			if m_facade_courante != undefined do
-				remplir_lbx_sequence ()
-			
-			if m_facade_courante != undefined and m_facade_courante.params.sequence.count > 0 do (
-				local index_selec = lbx_sequence.selection
-				if  index_selec  == 0 do  index_selec  = 1
-				m_composant_courant	= m_facade_courante.params.sequence [ index_selec ]
-			)
--- 			format "m_composant_courant :%\n" m_composant_courant
-		
-			--- les panneaux parametres ----------
-			if not sans_params_1 do (
-				
-				--- on remplie les sous panneaux -------------------
-				if  m_composant_courant != undefined  then
-					m_rolloutP.set_param_1  	( m_composant_courant )
-				else
-					m_rolloutP.set_param_1   undefined
-			)
-			
-			
-			
 		)
+		
+-- 		if m_facade_courante != undefined do
+		remplir_lbx_sequence ()
+		
+		if m_facade_courante != undefined and m_facade_courante.params.sequence.count > 0 do (
+			local index_selec = lbx_sequence.selection
+			if  index_selec  == 0 do  index_selec  = 1
+			m_composant_courant	= m_facade_courante.params.sequence [ index_selec ]
+		)
+-- 			format "m_composant_courant :%\n" m_composant_courant
+	
+		--- les panneaux parametres ----------
+		if not sans_params_1 do (
+			
+			--- on remplie les sous panneaux -------------------
+			if  m_composant_courant != undefined  then
+				m_rolloutP.set_param_1  	( m_composant_courant )
+			else
+				m_rolloutP.set_param_1   undefined
+		)
+		
+		
+		
 		
 		gerer_boutons_enabled ()
 		
@@ -405,7 +390,6 @@ rollout sub_facades "" width:594 height:789
 	
 	on btn_compo_nouveau pressed do (
 		m_core.get_menu_contructeur	#facCompos
-		m_rolloutP.changer_un_truc 		()
 	)
 	
 	
@@ -432,29 +416,28 @@ rollout sub_facades "" width:594 height:789
 	
 	
 	on btn_compo_instancier pressed do (
-				
-				
-				m_composant_courant =  	m_facade_courante.params.instancier_composant	lbx_sequence.selection 
-				
-				remplir_lbx_sequence ()
-				
-				lbx_sequence.selection += 1
-				gerer_boutons_enabled ()				
-				
-				m_ssComposant_courant	= undefined
-				
-				m_rolloutP.changer_un_truc 		()
-				actualiser ()
-	
-	
+		
+		m_composant_courant =  	m_facade_courante.params.instancier_composant	lbx_sequence.selection 
+		
+		remplir_lbx_sequence ()
+		
+		lbx_sequence.selection += 1
+		gerer_boutons_enabled ()				
+		
+		m_ssComposant_courant	= undefined
+		
+		m_rolloutP.changer_un_truc 		()
+		actualiser ()
+		
 	)
 	
 	
 	on btn_compo_supprimer pressed do (
-	
-			if queryBox "Supprimer le composant" do (
+			format "btn_compo_supprimer ---> lbx_sequence.selection :%\n" lbx_sequence.selection
+			if queryBox ( "Supprimer le composant: " + m_composant_courant.nom ) do (
 				m_plug.core.supprimer_composant 	m_facade_courante		lbx_sequence.selection
 				m_ssComposant_courant	= undefined
+				lbx_sequence.selection -= 1
 				actualiser ()
 				m_rolloutP.changer_un_truc 		()
 			)
@@ -602,20 +585,7 @@ rollout sub_facades "" width:594 height:789
 						insertItem 	balcon_debt				sequenceTmp		id_dest_balcon_dbt
 						
 					)
-					
-						/* local compo_suivant = sequenceTmp[ index + 1 ]
-						if compo_suivant.type == #groupe do (
-							local i = index + 2 
-							local trouve = false
-							while i <= sequenceTmp.count and not trouve do (
-								if sequenceTmp[ i ].type == #groupeFin do (
-									bouge_index = i
-									trouve = true
-								)
-								i  += 1
-							)
-						) */
-					)
+				)
 				
 				
 				deleteItem 	sequenceTmp		index
@@ -699,13 +669,15 @@ rollout sub_facades "" width:594 height:789
 			m_rolloutP.changer_un_truc 		()
 		)
 	)
-	on btn_facade pressed do
+	on btn_facade_nouveau 	pressed do
 	(
+		local selec = 	lbx_facades.selection 
 		local nvlFacade = m_core.creer_facade 				enregistrer:false
 		append m_bat.facades	nvlFacade
 		nvlFacade.nom += " " + m_bat.facades.count as string
 		m_facade_courante = nvlFacade
 		actualiser ()
+		lbx_facades.selection = selec + 1
 		m_rolloutP.changer_un_truc 		()
 	)
 	on edt_facade_nom entered text do

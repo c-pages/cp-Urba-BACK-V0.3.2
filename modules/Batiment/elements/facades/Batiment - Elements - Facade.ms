@@ -82,14 +82,7 @@ struct facade_params	(
 		
 		
 		
-		
-		/* 
-		
-		fn creer_murPlein		_longueur	 =(
-			local nvComposant	 				= 	m_plug.core.get_murPlein		_longueur
-			nvComposant
-		), */
-		
+				
 		
 		---- sequence	------------
 		fn get_longueur = (
@@ -127,7 +120,6 @@ struct facade_params	(
 		),
 		fn get_sequenceFacade		_plug 	_longueur_facade	=(
 			
--- 										format "----------------- NOUVELLE SEQUENCE ----------\n" 
 			local	sequence_totale 		= #()
 			local longueur_sequence 	= get_longueur ()
 			
@@ -168,19 +160,24 @@ struct facade_params	(
 			
 			--- le nombre l'element de la sequence à prendre en compte (pas les balcons) et espacments
 			local nbr_compos_aPrendreEnCompte	=	0
+			local nbr_compos_etirables				=	0
 			local i = 1
 			while i  <= sequence.count do (
 				local elem = sequence[i]
 				if elem.type == #groupe then (
 					for j= 1 to grp_repet do
 						for elemGrp in grp do ( 
-							if elemGrp.type != #balcon	and elemGrp.type != #balconFin and elemGrp.type != #groupe	and elemGrp.type != #groupeFin do 
+							if elemGrp.type != #balcon	and elemGrp.type != #balconFin and elemGrp.type != #groupe	and elemGrp.type != #groupeFin do (
 								nbr_compos_aPrendreEnCompte	+= 1	
+								if elem.params.etirable do nbr_compos_etirables	+=1
+							)
 						)
 					i += grp.count  + 1
-				)else ( 
-							if elem.type != #balcon	and elem.type != #balconFin and elem.type != #groupe	and elem.type != #groupeFin do 
+				) else ( 
+							if elem.type != #balcon	and elem.type != #balconFin and elem.type != #groupe	and elem.type != #groupeFin do (
 								nbr_compos_aPrendreEnCompte	+= 1	
+								if elem.params.etirable do nbr_compos_etirables	+=1
+							)
 						)
 				
 				i+= 1
@@ -211,6 +208,11 @@ struct facade_params	(
 				
 				--- la sequence à répartir	---------
 				local sequence_simple		= for compo in 	sequence collect compo
+				
+				
+				--- on transforme le mode etirer en centrer si on a aucun element etirable  --------
+				if mode == 2 and nbr_compos_etirables == 0 do
+					mode = 4
 				
 				-----	calcul de la longueur des espacements de la sequence	--------------------------------------
 				case mode of (
@@ -248,8 +250,8 @@ struct facade_params	(
 					)
 					2: 	(	----- Etirer  -----
 						
-						nbr_espacemts				=	nbr_compos_aPrendreEnCompte	--	grp.count * grp_repet + reste.count 						
-						longueur_restant 			=		_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )						
+						nbr_espacemts				=	nbr_compos_etirables	--	nbr_compos_aPrendreEnCompte	--	grp.count * grp_repet + reste.count 						
+						longueur_restant 			=	_longueur_facade - ( grp_repet * grp_longueur + reste_longueur )						
 						longueur_espacement 	= longueur_restant / nbr_espacemts  
 						
 						
@@ -260,14 +262,16 @@ struct facade_params	(
 							if elem.type == #groupe then (
 								for j= 1 to grp_repet do
 									for elemGrp in grp do ( 
-										elemGrp.params.set_longueur_etirer		longueur_espacement
+										if elemGrp.params.etirable  do
+											elemGrp.params.set_longueur_etirer		longueur_espacement
 										append sequence_totale		elemGrp
 -- 										append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
 									)
 								i += grp.count  + 1
 							)
 							else ( 
-										elem.params.set_longueur_etirer		longueur_espacement
+										if elem.params.etirable  do
+											elem.params.set_longueur_etirer		longueur_espacement
 										append sequence_totale		elem
 -- 										append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
 									)

@@ -29,13 +29,13 @@ rollout menuis_dialog "Paramètres" width:180 height:130
 		local m_rollPrt		
 		
 		---- golbal --------------
-		label 'lbl_hauteur' "Hauteur : " pos:[6,5] width:75 height:13 align:#left
-		spinner 'spn_hauteur' "" pos:[99,5] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
-		label 'lbl_ouverture' "Ouverture :" pos:[6,38] width:67 height:13 align:#left
-		dropdownList 'ddl_ouverture' "" pos:[68,36] width:100 height:21 items:#("Auto", "Droite", "Gauche") align:#left
+	label 'lbl_hauteur' "Hauteur : " pos:[6,5] width:75 height:13 align:#left
+	spinner 'spn_hauteur' "" pos:[99,5] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+	label 'lbl_ouverture' "Ouverture :" pos:[6,38] width:57 height:13 align:#left
+	dropdownList 'ddl_ouverture' "" pos:[68,36] width:100 height:21 items:#("Auto", "Droite", "Gauche") align:#left
 			
-		label 'lbl3' "Allège vitrée" pos:[6,20] width:75 height:13 align:#left
-		spinner 'spn_allege_vitree' "" pos:[99,20] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+	label 'lbl3' "Allège vitrée" pos:[6,20] width:75 height:13 align:#left
+	spinner 'spn_allege_vitree' "" pos:[99,20] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
 		
 		fn actualiser =(
 			spn_hauteur.value 		= m_compo.params.hauteur			
@@ -49,22 +49,24 @@ rollout menuis_dialog "Paramètres" width:180 height:130
 		)
 		
 		
-		on spn_hauteur changed val do	(
-			m_compo.params.hauteur		 = val
-		m_rollPrt.changer_un_truc ()
-		)
 		
-		on spn_allege_vitree changed val do	(
-			m_compo.params.allege_vitree_ht		 = val
-		m_rollPrt.changer_un_truc ()
-		)
 		
-		on ddl_ouverture selected val do	(
-			m_compo.params.ouverture_sens		 = val
-		m_rollPrt.changer_un_truc ()
-		)
+	on spn_hauteur changed val do
+	(
+				m_compo.params.hauteur		 = val
+			m_rollPrt.changer_un_truc ()
+			)
+	on ddl_ouverture selected val do
+	(
+				m_compo.params.ouverture_sens		 = val
+			m_rollPrt.changer_un_truc ()
+			)
+	on spn_allege_vitree changed val do
+	(
+				m_compo.params.allege_vitree_ht		 = val
+			m_rollPrt.changer_un_truc ()
+			)
 )
-
 
 ------ la fonction de construction	---------
 fn menuis_fnConstruire  	_plug				 _pt_origine			norm_dir:			dist_hauteur:	ptr_baie:		 this:		= (

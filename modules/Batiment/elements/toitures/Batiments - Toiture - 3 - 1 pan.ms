@@ -18,7 +18,84 @@ struct toiture_params	(
 	decalage_hauteur 	= 20,
 	orientation				=	0,
 	debord					= 50.,
-	epaisseur 				= 15
+	epaisseur 				= 15,
+	
+	fn VP_afficher 	nd	surface_pts	z	=(
+		
+-------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
+		local ptr_plug				= 	nd
+		local mgr_surface  		= 	nd.core.get_mgr_surface ()
+		local ptr_geo 				= 	nd.core.get_geo ()
+		
+-------------  PARAMETRES 	 et constantes		-----------------------------------------------------------------------------------------------------------------
+		local toiture_pente 		= pente
+		local toiture_hauteur		= decalage_hauteur
+		local toiture_orient		= orientation
+		local toiture_debord		= debord
+		local toiture_epaisseur	= epaisseur
+	
+		local	 mtrx_axeP	=	mgr_surface.get_axePrincipal ()
+		local	 BB_axeP		=	mgr_surface.get_axeP_BB ()
+		
+		rotateZ 		mtrx_axeP		toiture_orient	
+		translate 	mtrx_axeP		BB_axeP[1]
+	
+		local diag_axeP		=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
+		local largeur 		=	diag_axeP.y
+		local longeur 		= 	diag_axeP.x
+		local hauteur 		= largeur * tan 		toiture_pente
+-- 		local z 					= surface_pts[1].z
+		
+		local nvlsFaces 		= #()
+		
+-------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
+		--- gestion de l'angle de la pente .... ----
+		
+		local pt_0 = (  [0,0,0]  *  mtrx_axeP )
+		local pt_1 = (  [longeur,0,0]  *  mtrx_axeP )
+		local pt_2 = (  [0,largeur ,hauteur]  *  mtrx_axeP )
+		
+		local vec1 = pt_1 - pt_0
+		local vec2 = pt_2 - pt_0
+		
+		local pt_Origine = pt_0
+		pt_Origine.z =  z + toiture_hauteur
+		
+		local plan_pente = ptr_geo.get_plan_2vecs_1Point		vec1		vec2		pt_Origine
+		
+		local pointsPente = #()
+		local pointsMurs   =#()
+		for i = 1 to  surface_pts.count do (
+			
+			local j = i+1
+			if j >  surface_pts.count  do j = 1
+			
+			--- point Mur ----
+			local pt 			= 	surface_pts[i]	
+			pt.z = z
+			append pointsMurs  pt		
+			
+			local pt_result = plan_pente.projeter_point_verticalement 	pt
+			
+			append pointsPente  ( pt_result * nd.transform )
+			
+		)
+		
+		---- on recalle les points sur Z----
+		local recalleZ = 0
+		for pt in pointsPente do (
+			local ecart = abs ( (z + toiture_hauteur) - pt.z )
+			if pt.z < z + toiture_hauteur and recalleZ < ecart do				
+				recalleZ = ecart
+		)
+		for pt in pointsPente do pt.z += recalleZ
+		
+		gw.setColor	#line		yellow
+		gw.polyline pointsPente	true
+		
+		
+	)
+	
 )
 --- les rollout du composant	---------
 rollout toiture_dialog "Toiture - 1 pan" width:180 height:115
@@ -92,18 +169,12 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		local	 mtrx_axeP	=	mgr_surface.get_axePrincipal ()
 		local	 BB_axeP		=	mgr_surface.get_axeP_BB ()
 		
-		format "BB_axeP : %\n"  BB_axeP
-		format "toiture_pente : %\n"  toiture_pente
-		
 		rotateZ 		mtrx_axeP		toiture_orient	
 		translate 	mtrx_axeP		BB_axeP[1]
 	
 		local diag_axeP		=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
-		format "diag_axeP : %\n"  diag_axeP
 		local largeur 		=	diag_axeP.y
 		local longeur 		= 	diag_axeP.x
-		format "largeur : %\n"  largeur
-		format "longeur : %\n"  longeur
 		local hauteur 		= largeur * tan 		toiture_pente
 		local z 					= pts_accroches[1].z
 		

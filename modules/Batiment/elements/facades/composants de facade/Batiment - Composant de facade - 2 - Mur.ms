@@ -15,7 +15,8 @@ compo_toolTip =	"Ajouter un mur plein de longueur fixe."
 
 --- les parametres du composant	---------
 struct compo_params	(
-	longueur = 100.,
+	longueur 	= 100.,
+	etirable		=	true,
 	
 	private
 		longueur_etirer =0,
@@ -29,34 +30,44 @@ struct compo_params	(
 )
 
 --- les rollout du composant	---------
-rollout compo_dialog "Mur plein" width:180 height:70	(
+rollout compo_dialog "Mur plein" width:180 height:87
+(
 	local m_rollPrt
 	local m_compo
 	local m_plug
 	
 	edittext 'edt_nom' "" pos:[7,3] width:166 height:16 align:#left
-	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:37 align:#left
+	GroupBox 'grp1' "Générale" pos:[6,21] width:167 height:56 align:#left
 	label 'lbl19' "Longeur:" pos:[13,37] width:49 height:13 align:#left
 	spinner 'spn_longueur' "" pos:[96,36] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
 	
+	checkbox 'chk_etirable' "Etirable" pos:[12,54] width:146 height:15 align:#left
 	fn actualiser =(
 		spn_longueur.value 	= 	m_compo.params.longueur
+			chk_etirable.checked		= m_compo.params.etirable
 		edt_nom.text 			=	m_compo.nom
 	)
 
-	on spn_longueur changed val do (
-		m_compo.params.longueur = val
+	
+	on edt_nom entered txt 	do
+	(
+			m_compo.nom = txt
+			m_rollPrt.actualiser 	sans_params_1:true		
+			m_rollPrt.changer_un_truc ()
+		)
+	on spn_longueur changed val do
+	(
+			m_compo.params.longueur = val
+			m_rollPrt.actualiser 	sans_params_1:true
+			m_rollPrt.changer_un_truc ()
+		)
+	on chk_etirable changed state do
+(
+		m_compo.params.etirable = state
 		m_rollPrt.actualiser 	sans_params_1:true
 		m_rollPrt.changer_un_truc ()
 	)
-	on edt_nom	 entered txt 	do	(
-		m_compo.nom = txt
-		m_rollPrt.actualiser 	sans_params_1:true		
-		m_rollPrt.changer_un_truc ()
-	)
-	
 )
-
 
 --- la fonction de construction	---------
 fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 			onConstruitLaDalle:true		this:	= (
@@ -160,7 +171,6 @@ _str_contructeur 	tooltip:compo_tooltip		nom:compo_nom	type:compo_type	params:( 
 ) ----	FileIn ----
 
 
-	
 	
 	
 	

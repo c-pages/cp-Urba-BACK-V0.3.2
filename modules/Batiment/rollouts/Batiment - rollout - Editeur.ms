@@ -66,13 +66,6 @@
 		subRollout 'subroll_Params_1' "Paramètres" pos:[290,46] width:210 height:407 align:#left
 		subRollout 'subroll_Params_2' "Paramètres" pos:[508,46] width:210 height:407 align:#left
 		
-		--- viewport ---
-		/* 
-		fn vp_desactiver				=(
-		)
-		fn vp_activer 		=(
-			
-		) */
 			
 		-- actualisations ------
 		fn actualiser 	sans_params_1:false		=(
@@ -211,8 +204,8 @@
 		
 		
 		fn get_compos_selection 	= (
-			format "sub.lbx_sequence : %\n" sub.lbx_sequence.items
-			format "sub.lbx_sequence.selection : %\n" sub.lbx_sequence.selection
+-- 			format "sub.lbx_sequence : %\n" sub.lbx_sequence.items
+-- 			format "sub.lbx_sequence.selection : %\n" sub.lbx_sequence.selection
 			sub.lbx_sequence.selection
 			
 		)
@@ -239,26 +232,9 @@
 			ckb_maj_auto.checked	= m_core.m_edit_maj_auto
 			ckb_proxy.checked	 		= m_core.m_edit_proxy
 			
-			
 		)
 		
 		
-		fn fermer = (
-			
-			
-			local confirmation_fermer = true
-			if m_changement do
-				confirmation_fermer = queryBox  "Quitter sans enregistrer les modifications ?"
-			if confirmation_fermer do (
-				
-				mgr_VP.desactiver_tout ()
-				m_core.editeur_fermer ()
-				reset_changement ()
-				
-				m_core.actualiser ()
-				
-			)
-		)
 		fn valider =(
 			
 			mgr_VP.desactiver_tout ()
@@ -268,6 +244,27 @@
 			m_core.editeur_fermer ()
 			
 			m_core.actualiser ()
+			
+		)
+		fn fermer = (
+			
+			
+			local confirmation_fermer = #yes
+			if m_changement do
+				confirmation_fermer = yesNoCancelBox  "Voulez-vous enregistrer les modifications apprtés au batiment ?"
+			case confirmation_fermer of (
+				#yes:  valider () 
+				#no:  (
+					
+					-- on ferme ---
+					reset_changement ()
+					mgr_VP.desactiver_tout ()
+					m_core.editeur_fermer ()					
+					m_core.actualiser ()
+					
+				) 
+				#cancel:  () 
+			)			
 		)
 		
 		
@@ -292,7 +289,7 @@
 			
 		
 		
-		
+		 
 		
 		
 		on rollout_Urb_Bat_editeur open do
@@ -316,24 +313,26 @@
 		
 		
 		on ckb_dist changed state do (
-			
-			ckb_facades.checked	 	= not state
-			ckb_etages.checked	 	= not state
+-- 			if state do 
+			ckb_facades.checked	 	= false
+			ckb_etages.checked	 	= false
 			
 			actualiser_VP ()
 			
 		)
 		on ckb_facades changed state do (
 			
-			ckb_dist.checked	 		= not state
-			ckb_etages.checked	 	= not state
+			ckb_dist.checked	 		= false
+-- 			ckb_facades.checked	 	= true
+			ckb_etages.checked	 	= false
 			
 			actualiser_VP ()
 		)
 		on ckb_etages changed state do (
 			
-			ckb_dist.checked	 		= not state
-			ckb_facades.checked	 	= not state
+			ckb_dist.checked	 		= false
+			ckb_facades.checked	 	= false
+-- 			ckb_etages.checked	 	= true
 			
 			actualiser_VP ()
 			

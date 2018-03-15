@@ -146,9 +146,9 @@ struct str_mgr_surfaces (
 
 		),	
 		
-		
+		/* 
 		fn get_axePrincipal_CORRECT = m_outils.get_axePrincipal_mtrx_CORRECT 		( get_points () ),
-		
+		 */
 		fn get_axePrincipal 	= m_outils.get_axePrincipal_mtrx 		( get_points () ),
 		fn get_axeP_BB			= m_outils.get_axePrincipal_BB 		( get_points () )  ( get_axePrincipal () ),
 		fn get_mur_cardinal   	_pt1	_pt2	 =(

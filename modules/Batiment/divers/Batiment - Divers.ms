@@ -833,19 +833,7 @@ struct str_shape_outils (
 
 
 	-----------------  Axe Principale ----------------------
-	public/* 
-		fn get_axePrincipal_mtrx_CORRECT				_pts  					=(
-			
-			local ptsEdgeLePlusLong 	= edge_lePlusGrand	_pts
-			
-			local axeVecteur_x 		= 	normalize (ptsEdgeLePlusLong[2] - ptsEdgeLePlusLong[1])			
-			local axeVecteur_y		= 	axeVecteur_x 	* rotateZ ( matrix3 1 ) 90		
-			local axeVecteur_z		= 	[0,0,1]
-			
-			local axeMtrx			= matrix3 axeVecteur_x 	axeVecteur_y		 axeVecteur_z	 [0,0,0]
-			
-			axeMtrx
-		), */
+	public
 		fn get_axePrincipal_mtrx				_pts  					=(
 			
 			local ptsEdgeLePlusLong 	= edge_lePlusGrand	_pts
@@ -856,23 +844,7 @@ struct str_shape_outils (
 			
 			local axeMtrx			= matrix3 axeVecteur_x 	axeVecteur_y		 axeVecteur_z	 [0,0,0]
 			
-			/* 
-			local ptsEdgeLePlusLong 	= edge_lePlusGrand	_pts
-			
-			local axeVecteur 		= 	normalize (ptsEdgeLePlusLong[2] - ptsEdgeLePlusLong[1])
-			local axeMtrx				=  ( matrixFromNormal		axeVecteur )
-			
-			if axeMtrx.row1	==	[0,0,-1]  then 				
-				axeMtrx =  (rotateYMatrix 180) *(rotateXMatrix 180) *  (rotateZMatrix -90) * axeMtrx
-			 else if axeMtrx.row1	==	[0,0,1] do
-				axeMtrx =  (rotateYMatrix 180)  *(rotateXMatrix 180)  * (rotateZMatrix 90) * axeMtrx
-			 */
 			axeMtrx
-		),
-		fn get_axePrincipal_mtrx_CORRECT 	_pts  					=(
-			
-			point size:250  axistripod:on cross:off Box:off centermarker:off transform:( get_axePrincipal_mtrx 	_pts )
-			
 		),
 			
 		fn get_axePrincipal_BB					_pts  	_mtrxAxe  	=(

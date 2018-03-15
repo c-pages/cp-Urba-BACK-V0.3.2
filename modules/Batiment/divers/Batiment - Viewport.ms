@@ -170,6 +170,9 @@ struct 	str_bat_VP 		(
 			) 
 		),
 
+		fn fn_afficher_toiture =(
+			
+		),
 		fn fn_afficher_etages =(
 -- 			gw.wTransPoint 
 			gw.setTransform (matrix3 1)
@@ -185,6 +188,8 @@ struct 	str_bat_VP 		(
 				
 				
 				if bat != undefined do (
+					
+					---- les etages -------------------------
 					local z = bat.decallage_z
 					local etageNum = 0 
 					while etageNum <=  bat.etages_nbre  do (
@@ -215,6 +220,60 @@ struct 	str_bat_VP 		(
 					)
 					gw.setColor	#line		yellow
 					gw.polyline pts_etage	true
+					
+					
+-- 					format "bat.toiture.type : %\n" bat.toiture.type
+					---- les etages -------------------------
+-- 					if bat.toiture.type == #terrasse do (
+-- 						z+= bat.toiture.params.acrotere_ht
+						bat.toiture.params.VP_afficher 	nd	surface_pts	z	
+-- 					)
+						/* 
+						
+						
+						local etage_ht 		= bat.get_etage_ht	 	bat.etages_nbre 	 + nd.const_dalle_epaisseur
+						local pts_etage =#()
+						local ptID = 0 
+						while ptID <  surface_pts.count do (
+							ptID += 1
+							local pt 						= surface_pts[ptID] *  nd.transform 
+							pt.z = z
+							append pts_etage pt
+						)
+						gw.setColor	#line		yellow
+						gw.polyline pts_etage	true
+						
+						
+						
+						local ptID = 0 
+						while ptID <  surface_pts.count do (
+							ptID_precedant = ptID
+							if ptID_precedant == 0  do ptID_precedant = surface_pts.count
+							ptID += 1
+							ptID_suivant = ptID + 1
+							if ptID_suivant > surface_pts.count do ptID_suivant = 1
+							
+							
+							
+							local pt_precedant		= surface_pts[ptID_precedant] *  nd.transform 
+							local pt 						= surface_pts[ptID] *  nd.transform 
+							local pt_suivant			= surface_pts[ptID_suivant] *  nd.transform 
+
+							pt.z = pt_precedant.z = pt_suivant.z = z
+							
+							local pt_encart = (nd.core.get_geo() ).encart 		pt				(pt_suivant - pt )	( pt_precedant - pt )  30	
+							append pts_etage pt_encart
+						)
+						
+						
+						gw.setColor	#line		yellow
+						gw.polyline pts_etage	true 
+					)
+					*/
+					
+-- 					fn_afficher_toiture ()
+					
+					
 					
 					gw.updateScreen() 
 				)

@@ -15,6 +15,7 @@ struct compo_params	(
 		
 		--- global	-------------
 		longueur						= 100,
+		etirable							=	true,
 		hauteur							= 210,
 		profondeur					= 20,		
 		allege_hauteur 		 		= 100,
@@ -51,38 +52,40 @@ rollout compo_dialog "Baie" width:433 height:747
 	edittext 'edt_nom' "" pos:[3,3] width:187 height:16 align:#left
 	label 'lbl19' "Longeur:" pos:[15,36] width:49 height:13 align:#left
 	spinner 'spn_longueur' "" pos:[116,36] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
-	label 'lbl21' "Hauteur:" pos:[15,51] width:49 height:13 align:#left
-	spinner 'spn_hauteur' "" pos:[116,51] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
-	GroupBox 'grp1' "Global" pos:[6,21] width:187 height:83 align:#left
-	label 'lbl24' "Allège pleine :" pos:[15,81] width:77 height:13 align:#left
-	spinner 'spn_allege' "" pos:[116,81] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
-	label 'lbl29' "Profondeur:" pos:[15,66] width:59 height:13 align:#left
-	spinner 'spn_profondeur' "" pos:[116,66] width:70 height:16 range:[-5,100000,0] type:#worldunits scale:1 align:#left
+	label 'lbl21' "Hauteur:" pos:[15,66] width:49 height:13 align:#left
+	spinner 'spn_hauteur' "" pos:[116,66] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+	GroupBox 'grp1' "Global" pos:[6,21] width:187 height:101 align:#left
+	label 'lbl24' "Allège pleine :" pos:[15,96] width:77 height:13 align:#left
+	spinner 'spn_allege' "" pos:[116,96] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+	label 'lbl29' "Profondeur:" pos:[15,81] width:59 height:13 align:#left
+	spinner 'spn_profondeur' "" pos:[116,81] width:70 height:16 range:[-5,100000,0] type:#worldunits scale:1 align:#left
 	
 	---- traverses --------
-	GroupBox 'grp_traverses' "Traverses horizontales" pos:[13,212] width:173 height:104 align:#left
-	listbox 'lbx_traverses' "" pos:[21,247] width:158 height:3 align:#left
-	button 'btn_ajouter_traverse' "Nouv." pos:[21,229] width:35 height:18 align:#left
-	button 'btn_supprimer_traverse' "Supp." pos:[142,229] width:35 height:18 align:#left
-	label 'lbl_traverses_ht' "Hauteur:" pos:[21,294] width:49 height:13 align:#left
-	spinner 'spn_traverse_ht' "" pos:[109,293] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
+	GroupBox 'grp_traverses' "Traverses horizontales" pos:[13,227] width:173 height:104 align:#left
+	listbox 'lbx_traverses' "" pos:[21,262] width:158 height:3 align:#left
+	button 'btn_ajouter_traverse' "Nouv." pos:[21,244] width:35 height:18 align:#left
+	button 'btn_supprimer_traverse' "Supp." pos:[142,244] width:35 height:18 align:#left
+	label 'lbl_traverses_ht' "Hauteur:" pos:[21,309] width:49 height:13 align:#left
+	spinner 'spn_traverse_ht' "" pos:[109,308] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
 	
 	---- sequence --------
-	GroupBox 'grp_sequence' "Séquence" pos:[13,124] width:173 height:86 align:#left
-	listbox 'lbx_sequence' "" pos:[21,160] width:142 height:3 align:#left
-	button 'btn_ajouter_element' "Nouv." pos:[21,141] width:35 height:18 align:#left
-	button 'btn_supprimer_element' "Supp." pos:[127,141] width:35 height:18 align:#left
-	button 'btn_dupliquer_element' "Dup." pos:[55,141] width:35 height:18 toolTip:"Dupliquer l'élément" align:#left
+	GroupBox 'grp_sequence' "Séquence" pos:[13,139] width:173 height:86 align:#left
+	listbox 'lbx_sequence' "" pos:[21,175] width:142 height:3 align:#left
+	button 'btn_ajouter_element' "Nouv." pos:[21,156] width:35 height:18 align:#left
+	button 'btn_supprimer_element' "Supp." pos:[127,156] width:35 height:18 align:#left
+	button 'btn_dupliquer_element' "Dup." pos:[55,156] width:35 height:18 toolTip:"Dupliquer l'élément" align:#left
 	
 	---- volet --------
-	GroupBox 'grp_volet' "Volets" pos:[5,344] width:187 height:50 align:#left
-	dropdownList 'ddl_volet' "" pos:[17,362] width:161 height:21 items:#("Aucun", "Roulant", "Battant simple", "Battant double") align:#left
+	GroupBox 'grp_volet' "Volets" pos:[5,359] width:187 height:50 align:#left
+	dropdownList 'ddl_volet' "" pos:[17,377] width:161 height:21 items:#("Aucun", "Roulant", "Battant simple", "Battant double") align:#left
 	
-	button 'btn_sequence_monter' "/\\" pos:[164,159] width:16 height:16 toolTip:"Monter l'élément" align:#left
-	button 'btn_sequence_descendre' "\/" pos:[164,174] width:16 height:16 toolTip:"Descendre l'élément" align:#left
-	GroupBox 'grp_menuis' "Menuiseries" pos:[6,107] width:187 height:233 align:#left
+	button 'btn_sequence_monter' "/\\" pos:[164,174] width:16 height:16 toolTip:"Monter l'élément" align:#left
+	button 'btn_sequence_descendre' "\/" pos:[164,189] width:16 height:16 toolTip:"Descendre l'élément" align:#left
+	GroupBox 'grp_menuis' "Menuiseries" pos:[6,122] width:187 height:233 align:#left
 	
-	checkbox 'chk_tablette' "Tablette" pos:[18,320] width:163 height:15 align:#left
+	checkbox 'chk_tablette' "Tablette" pos:[18,335] width:163 height:15 align:#left
+		
+	checkbox 'chk_etirable' "Etirable" pos:[14,52] width:98 height:15 align:#left
 		
 		
 		
@@ -90,6 +93,7 @@ rollout compo_dialog "Baie" width:433 height:747
 			
 			--- global ------
 			spn_longueur.value 		= m_compo.params.longueur
+			chk_etirable.checked		= m_compo.params.etirable
 			edt_nom.text 				=	m_compo.nom
 			spn_profondeur.value 	=	m_compo.params.profondeur	
 			spn_hauteur.value 		= m_compo.params.hauteur
@@ -106,23 +110,22 @@ rollout compo_dialog "Baie" width:433 height:747
 			spn_traverse_ht.Indeterminate		= not traverse_edition
 			if traverse_edition do spn_traverse_ht.value = m_compo.params.traverses [ lbx_traverses.selection ]
 			
-			---- creation du menu ------------
--- 			local constructeurs_noms = m_plug.core.get_menuiserie_constructeursNoms ()
-			
 			--- sequence -----------
 			lbx_sequence.items		=	for element in m_compo.params.sequence collect ( element.nom )
--- 			if lbx_sequence.selection == 0 and lbx_sequence.items.count > 0 do
--- 				lbx_sequence.selection = 1
+			if lbx_sequence.selection == 0 and lbx_sequence.items.count > 0 do
+				lbx_sequence.selection = 1
+			
 			local sequence_edition	= lbx_sequence.selection != 0
 			btn_supprimer_element.enabled	= sequence_edition
 			btn_dupliquer_element.enabled	= sequence_edition
--- 			btn_instancier_element.enabled	= sequence_edition
--- 			btn_editer_element.enabled		= sequence_edition
 			
-			chk_tablette.enabled = m_compo.params.tablette
+			chk_tablette.checked = m_compo.params.tablette
 			
 			--- volet -----------
 			ddl_volet.selection 	= m_compo.params.volet 
+			
+			
+			
 			
 		) -- fin actualiser -------
 		
@@ -142,26 +145,23 @@ rollout compo_dialog "Baie" width:433 height:747
 			lbx_traverses.selection -= 1
 			actualiser	()
 		)
-		/* fn editer_element = (
--- 			m_dialog_menuiserie = ( m_plug.core.get_mgr_facMenuiseries () ).ouvrir_dialog ()	
-	-- 		createDialog	m_dialog_menuiserie	
-			local menuis = m_compo.params.sequence[ lbx_sequence.selection ]
-			m_rollPrt.set_ssComposant		menuis
--- 			format "menuis :%\n" menuis
-		) */
 		
-		
-		
-		
-		
-/* 	on lbx_sequence doubleClicked arg do (
--- 		editer_element ()
-		m_rollPrt.redim_pour_parametres ()
-	) */
 	
 	
 	
 	
+		
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		
 	on edt_nom entered txt 	do
 	(
 		m_compo.nom = txt
@@ -211,33 +211,99 @@ rollout compo_dialog "Baie" width:433 height:747
 	(
 			subCompo = m_compo.params.sequence[ _index ] 
 			m_rollPrt.set_param_2		subCompo	
-	-- 		m_rollPrt.redim_pour_parametres ()
+		
 		)
 	on btn_ajouter_element pressed do
 	( 
 		
 		m_plug.core.get_menu_contructeur #facMenuis
-		/* 
-		local	nv_menuis = m_plug.core.creer_menuiserie		m_compo			 lbx_sequence.selection 	
-		m_rollPrt.set_param_2		nv_menuis	
-		actualiser () 
-		m_rollPrt.changer_un_truc ()
-		lbx_sequence.selection 	+= 1 */
+		
 	)
+	on btn_supprimer_element pressed do
+	( 
+			
+			
+			deleteItem 	m_compo.params.sequence		lbx_sequence.selection
+			
+			lbx_sequence.selection 	-= 1 
+			
+			actualiser () 
+			m_rollPrt.changer_un_truc ()
+		)
+	on btn_dupliquer_element pressed do
+	(
+			
+		)
 	on ddl_volet selected _index  	do
 	(
 			m_compo.params.volet = _index
 			actualiser ()
+		)
+	on btn_sequence_monter pressed do
+	(
+			
+				
+				if lbx_sequence.selection > 1 do (
+					local index = lbx_sequence.selection 
+					local item = m_compo.params.sequence[ lbx_sequence.selection  ]
+					
+					--- on bouge le compo -----------
+					deleteItem 	m_compo.params.sequence		 index
+					insertItem 	item			m_compo.params.sequence			(index - 1)
+					lbx_sequence.selection  = index - 1
+					m_rollPrt.changer_un_truc ()
+					actualiser ()
+				)
+		)
+	on btn_sequence_descendre pressed do
+	(
+			
+				
+				if lbx_sequence.selection <  lbx_sequence.items.count  do (
+					
+					local index = lbx_sequence.selection 
+					local item = m_compo.params.sequence[ lbx_sequence.selection  ]
+					
+					--- on bouge le compo -----------
+					deleteItem 	m_compo.params.sequence		 index
+					insertItem 	item			m_compo.params.sequence			(index + 1)
+					lbx_sequence.selection  = index + 1
+					m_rollPrt.changer_un_truc ()
+					actualiser ()
+				)
 		)
 	on chk_tablette changed state do
 	(
 			m_compo.params.tablette = state
 			m_rollPrt.changer_un_truc ()
 		)
+	on chk_etirable changed state do
+(
+	
+		m_compo.params.etirable = state
+		m_rollPrt.actualiser 	sans_params_1:true
+		m_rollPrt.changer_un_truc ()
+	)
 )
 	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ------ la fonction de construction	---------
-fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruitLaDalle:false	= ( 
+fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruitLaDalle:false	= (
 	
 		--- Result -------------
 		local pt_result_1, pt_result_2, pt_result_3
@@ -385,7 +451,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		
 		
 		
-		local onCreer_menuiserie_si_sequenceVide = false
+		local onCreer_menuiserie_si_sequenceVide = true
 		
 		-------	  MENUISERIE -	CADRE 	---------------------------------------------------------------------------------------------------------------		
 		

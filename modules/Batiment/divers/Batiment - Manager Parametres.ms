@@ -701,7 +701,7 @@ struct  str_manager_parametres (
 		
 		-----rc menu ---------
 		fn get_menu_constructeurs = (		
-			debug "m_constructeursBase" var:m_constructeursBase
+-- 			debug "m_constructeursBase" var:m_constructeursBase
 			
 			local txt_menu = "rcMenu nvMenu	(\n"
 			
@@ -714,7 +714,7 @@ struct  str_manager_parametres (
 				txt_menu += "on '" + constr.nom + "' picked do $.core.creer_element #" + m_prefix_nomParametres  + " idConstructeur:#" + constr.type as string + "\n"
 			
 			txt_menu += ")"
-			debug "txt_menu" var:txt_menu
+-- 			debug "txt_menu" var:txt_menu
 			local menu = execute txt_menu
 			popUpMenu 	menu
 -- 			txt_menu

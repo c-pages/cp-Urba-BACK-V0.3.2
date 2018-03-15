@@ -16,6 +16,7 @@ compo_toolTip =	""
 --- les parametres du composant	---------
 struct compo_params	(
 	longueur 		= 0,
+	etirable			=	false,
 	largeur			= 100,
 	profondeur	= 100,
 	gardeCorps	= undefined,

@@ -23,7 +23,8 @@ rollout compo_dialog "Balcon fin" width:180 height:70	(
 
 --- les parametres du composant	---------
 struct compo_params	(
-	longueur = 0,
+	longueur 		= 0,
+	etirable			=	false,
 	profondeur	= 100,
 	private
 		longueur_etirer =0,

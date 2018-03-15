@@ -22,9 +22,13 @@ struct	str_geometrie	(
 			result
 		),
 		fn set_matID _faces	_matID =(
-			if classof _faces 	!= array 		do _faces 		= #( _faces)
-			if classof _matID 	== name		do _matID 	= get_id_materialType  _matID
-			polyop.setFaceMatID m_plug.delegate 	_faces 	 _matID			
+			if _faces != undefined and _matID != undefined do 	(
+				if classof _faces 	!= array 		do _faces 		= #( _faces)
+					if classof _matID 	== name		do _matID 	= get_id_materialType  _matID
+				for fc in _faces where fc != undefined do
+					polyop.setFaceMatID m_plug.delegate 	fc  	 _matID		
+				
+			)
 		),
 		
 	----- vider la geometrie ----------------
