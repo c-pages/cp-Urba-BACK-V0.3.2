@@ -1,4 +1,4 @@
-# cp-Urba - Batiment V0.2.0
+# CP - Batiment V0.2.1
 Plugin 3DSmax - Bâtiments paramétriques.
 
 ### Réalisations pour la version V0.2.0 :
