@@ -121,29 +121,38 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		local toiture_debord		= this.params.debord
 		local toiture_epaisseur	= this.params.epaisseur
 	
-		local	 mtrx_axeP	=	mgr_surface.get_axePrincipal ()
-		local	 BB_axeP		=	mgr_surface.get_axeP_BB ()
+		local	 mtrx_axeP			=	mgr_surface.get_axePrincipal ()
+		local	 BB_axeP				=	mgr_surface.get_axeP_BB ()
 		
--- 		pt_1 		= point size:1000 transform:mtrx_axeP name:"PT1"
+-- 		pt_1 		= point size:1500 transform:mtrx_axeP 	pos:BB_axeP[1]	name:"PT_BB1"   centermarker:off axistripod:OFF cross:on Box:off wirecolor:blue
+-- 		pt_1 		= point size:1500 transform:mtrx_axeP 	pos:BB_axeP[2]	name:"PT_BB2"   centermarker:off axistripod:OFF cross:on Box:off wirecolor:blue
+
+-- 		pt_1 		= point size:1000 transform:mtrx_axeP 	name:"PT1"   centermarker:off axistripod:on cross:off Box:off wirecolor:yellow
 
 		
 		rotateZ 		mtrx_axeP		toiture_orient	
 		
+-- 		pt_1 		= point size:700 transform:mtrx_axeP 	name:"PT2"   centermarker:off axistripod:on cross:off Box:off wirecolor:blue
 -- 		pt_2 		= point size:1000 transform:mtrx_axeP   name:"PT2"
 		
-		translate 	mtrx_axeP		( BB_axeP[1] )
+-- 		translate 	mtrx_axeP		( BB_axeP[1] )
+		translate 	mtrx_axeP		( BB_axeP[1]/2 )
+-- 		translate 	mtrx_axeP		( -BB_axeP[2]/2 )
 	
+-- 		pt_1 		= point size:500 transform:mtrx_axeP 	name:"PT2"   centermarker:off axistripod:on cross:off Box:off wirecolor:red
+			
+-- 		mtrx_axeP.translationPart = 
 -- 		pt_3 		= point size:1000 transform:mtrx_axeP   name:"PT3"
 		
 		
 		local diag_axeP		=	(BB_axeP[2] * inverse mtrx_axeP) - (BB_axeP[1]  * inverse mtrx_axeP)
-		local largeur 		=	diag_axeP.x
-		local longeur 		= 	diag_axeP.y
+		local longeur		=	diag_axeP.x
+		local  largeur 		= 	diag_axeP.y
 		local hauteur 		= largeur * tan 		toiture_pente
 		local z 					= pts_accroches[1].z
 		
 		local mtrx_axeP_temp = copy mtrx_axeP
-		mtrx_axeP_temp.translation = [0,0,0]
+-- 		mtrx_axeP_temp.translation = [0,0,0]
 
 
 		
@@ -154,9 +163,9 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 -------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
 		--- gestion de l'angle de la pente .... ----
 		--- Plan de la Pente 1  ----
-		local pt_P1_0 = (  [0,0,0]  *  mtrx_axeP 						+ vec_decall_larg )
-		local pt_P1_1 = (  [longeur,0,0]  *  mtrx_axeP 				+ vec_decall_larg )
-		local pt_P1_2 = (  [0,largeur ,hauteur]  *  mtrx_axeP 	+ vec_decall_larg )	
+		local pt_P1_0 = (  [0,0,0]  *  mtrx_axeP_temp 						+ vec_decall_larg )
+		local pt_P1_1 = (  [longeur,0,0]  *  mtrx_axeP_temp 			+ vec_decall_larg )
+		local pt_P1_2 = (  [0,largeur ,hauteur]  *  mtrx_axeP_temp 	+ vec_decall_larg )	
 	
 		local vecP1_1 = pt_P1_1 - pt_P1_0
 		local vecP1_2 = pt_P1_2 - pt_P1_0
@@ -169,9 +178,9 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 	
 	
 		--- Plan de la Pente 2  ----
-		local pt_P2_0 = (  [longeur, largeur,0]  *  mtrx_axeP  	+ vec_decall_larg )	
-		local pt_P2_1 = (  [0,largeur,0]  *  mtrx_axeP  				+ vec_decall_larg )	
-		local pt_P2_2 = (  [longeur,0 ,hauteur]  *  mtrx_axeP 	+ vec_decall_larg )	
+		local pt_P2_0 = (  [longeur, largeur,0]  *  mtrx_axeP_temp  	+ vec_decall_larg )	
+		local pt_P2_1 = (  [0,largeur,0]  *  mtrx_axeP_temp  				+ vec_decall_larg )	
+		local pt_P2_2 = (  [longeur,0 ,hauteur]  *  mtrx_axeP_temp 	+ vec_decall_larg )	
 	
 		local vecP2_1 = pt_P2_1 - pt_P2_0
 		local vecP2_2 = pt_P2_2 - pt_P2_0
@@ -181,9 +190,9 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		local plan_pente2 = ptr_geo.get_plan_2vecs_1Point			vecP2_1		vecP2_2		pt_Origine
 	
 		--- Plan verticale faitage ------
-		local pt_F_0 = (  [0, largeur /2 ,0]  *  mtrx_axeP 	+ vec_decall_larg )
-		local pt_F_1 = (  [longeur , largeur /2 ,0] *  mtrx_axeP 	+ vec_decall_larg )
-		local pt_F_2	=	pt_F_0 + [0,0, 100]					+ vec_decall_larg 
+		local pt_F_0 = (  [0, largeur /2 ,0]  *  mtrx_axeP_temp 	+ vec_decall_larg )
+		local pt_F_1 = (  [longeur , largeur /2 ,0] *  mtrx_axeP_temp 	+ vec_decall_larg )
+		local pt_F_2	=	pt_F_0 + [0,0, 100]	*  mtrx_axeP_temp 				+ vec_decall_larg 
 		
 		local vec_F_1 = pt_F_1 - pt_F_0
 		local vec_F_2 = pt_F_2 - pt_F_0				
@@ -316,6 +325,9 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 
 		ptr_geo.biseauter	facesDessus 	0.0 	toiture_debord
 		ptr_geo.extruder	facesDessus 	toiture_epaisseur
+		
+		
+		
 )
 
 

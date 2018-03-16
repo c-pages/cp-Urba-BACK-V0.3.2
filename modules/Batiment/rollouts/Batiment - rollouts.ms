@@ -86,7 +86,7 @@ rollout roll_global "Global" width:195 height:341
  
  
 	GroupBox 'grp63' "Presets :" pos:[8,1] width:162 height:60 align:#left
-	checkbox 'ckb_proxy' "Affichage simplifier" pos:[10,147] width:161 height:31 align:#left
+	checkbox 'ckb_proxy' "Affichage simplifié" pos:[10,147] width:161 height:31 align:#left
  
  
 	

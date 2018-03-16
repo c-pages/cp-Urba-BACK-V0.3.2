@@ -181,8 +181,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		local nvlsFaces 		= #()
 		
 -------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
-		--- gestion de l'angle de la pente .... ----
-		
+		--- gestion de l'angle de la pente .... ----		
 		local pt_0 = (  [0,0,0]  *  mtrx_axeP )
 		local pt_1 = (  [longeur,0,0]  *  mtrx_axeP )
 		local pt_2 = (  [0,largeur ,hauteur]  *  mtrx_axeP )

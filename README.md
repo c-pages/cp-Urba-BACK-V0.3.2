@@ -8,7 +8,7 @@ Plugin 3DSmax - Bâtiments paramétriques.
 - [x] Gestion d'un mode proxy (un écouteur créer le modéle complet avant le rendu et repasse en proxy aprés).
 - [x] Un groupe peut être créé dans une séquence de façade pour répétition d'un 'motif'.
 - [x] Les composants peuvent être instanciés.
-
+- [x] Corrections toitures à 2 pans.
 ### Todo :
 * **Surface** :
   - [ ] Division de la surface en quadrilataires simples pour : 
@@ -22,22 +22,24 @@ Plugin 3DSmax - Bâtiments paramétriques.
   - [ ] Intégration des Volets.
   - [ ] Gestion du hasard pour ouverture Volets et Fenêtres.
   - [ ] Autres gardes-corps ( Verre, ... ).
-  - [ ] Créer un copier-coller/instancier avec le clique droit pour les composants de façade.
+  - [ ] Créer un _copier-coller/instancier_ avec le clique droit pour les composants de façade.
   - [ ] Passer en multilistBox la sequence de composant de façade pour manipuler plusieurs composants à la fois.
   - [ ] A voir: création de facade-rideau.
   - [ ] Création de poteaux (rond ou rectangle) avec facade en retrait (ex: façon galerie couverte en RdC (cf Marseille pouillon).
   - [ ] Peut être intégrer un composant 'Modele' permettant à l'utilisateur d'intégrer n'importe quel objet à lui à la façade.
+  - [ ] Dans le _'mode édition'_: intégrer une prévisualisation des composant dans le viewport (ajouter dans chaque fichiers composant une fonction VP).
 * **Toitures** :
   - [ ] Refaire complètement les toitures à pentes.
   - [ ] Construction à revoir pour meilleur gestion et pour meilleur controle des géométrie (ex: débords créés géométriquement et non avec l'opération extrude de Max).
   - [ ] Toitures à x pans (pente de toit pour chaque mur).
   - [ ] Intégrer les gouttières aux toitures à pans.
   - [ ] integration des éléments de toitures
-    * - [x] locale technique
+    * - [x] locale technique (fonctionne, mais reste in interfacer at à bien gérer le placement)
     * - [ ] cheminet
     * - [ ] lucarnes
     * - [ ] ...
 * **Construction** :
+  - [ ] Voir si on peut stocker les points et facase de chaque éléments pour ne mettre à jour que les points et faces nécéssaires (ex: mettre à jour seulement le toi sans refaire tout le batiment) 
   - [ ] Optimiser la construction (par exemple en listant et _copiant_ les éléments répétitifs).
 * **Matériaux** :
   - [ ] S'occuper du menu des materiaux.
