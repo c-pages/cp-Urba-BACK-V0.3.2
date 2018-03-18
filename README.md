@@ -11,7 +11,7 @@ Plugin 3DSmax - Bâtiments paramétriques.
 - [x] Corrections toitures à 2 pans.
 ### Todo :
 * **Surface** :
-  - [ ] Division de la surface en quadrilataires simples pour : 
+  - [ ] Division de la surface en quadrilataires simples pour :
     * - [ ] Répartition des éléments de toitures.
 	* - [ ] Création de _'sous-surface'_ pour gérer des différences de niveaux ou de toiture, etc.
 	* - [ ] Trouver le chemin du faîtage par exemple (en suivant le centre des _'diagonales'_).
@@ -39,7 +39,7 @@ Plugin 3DSmax - Bâtiments paramétriques.
     * - [ ] lucarnes
     * - [ ] ...
 * **Construction** :
-  - [ ] Voir si on peut stocker les points et facase de chaque éléments pour ne mettre à jour que les points et faces nécéssaires (ex: mettre à jour seulement le toi sans refaire tout le batiment) 
+  - [ ] Voir si on peut stocker les points et facase de chaque éléments pour ne mettre à jour que les points et faces nécéssaires (ex: mettre à jour seulement le toi sans refaire tout le batiment)
   - [ ] Optimiser la construction (par exemple en listant et _copiant_ les éléments répétitifs).
 * **Matériaux** :
   - [ ] S'occuper du menu des materiaux.
@@ -49,11 +49,13 @@ Avec un vitrage transparant on pourrait:
   - [ ] Création de cloisin interieures (cf. division de la surface)
   - [ ] Rideaux
 * **Divers** :
-  - [ ] Création d'outils de manipulation de batiment en groupe (une version simplifier du générateur de bout de ville):  
+  - [ ] Création d'outils de manipulation de batiment en groupe (une version simplifier du générateur de bout de ville):
     * - [ ] Appliquer un style à plusieur batiments séléctionnés.
     * - [ ] Variations de paramètre de manière aléatoire (pente de toit, variance de materiaux, décallage ouvertures,...
-  
-  
-  
+
+
+
 * On pourra peut être cleanner un peu l'interface entre rollouts et reste du plug.
 * Continuer le débogage.
+
+## divers
