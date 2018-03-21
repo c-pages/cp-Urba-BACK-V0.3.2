@@ -162,6 +162,8 @@ parameters params_interieur				rollout:roll_global					(
 
 parameters params_aleatoire				rollout:roll_aleatoire					(
 	
+	alea_seed								type:#integer				default:12345			ui:spn_seed	animatable:false		invisibleInTV:true
+	
 	alea_ouvrant_ouvert_proba	type:#float				default:0.			ui:spn_ouvrt_proba	animatable:false		invisibleInTV:true
 	alea_ouvrant_ouvert_min		type:#float				default:0.			ui:spn_ouvrt_min		animatable:false		invisibleInTV:true
 	alea_ouvrant_ouvert_max		type:#float				default:0.			ui:spn_ouvrt_max		animatable:false		invisibleInTV:true

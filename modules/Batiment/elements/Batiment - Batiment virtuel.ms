@@ -109,7 +109,7 @@ struct str_batVirt (
 		),
 		fn enregistrer 	_node	=(
 			
--- 			format "-----  enregistrer -------\n"
+			format "-----  enregistrer -------\n"
 -- 			format "-----  etages_min : %\n" etages_min
 -- 			format "-----  etages_max_use : %\n" etages_max_use
 -- 			format "-----  etages_max : %\n" etages_max
@@ -124,6 +124,8 @@ struct str_batVirt (
 			_node.etages_hauteurs				= etages_hauteurs
 			
 			for fcd in facades do _node.core.enregistrer_element	fcd
+			
+			format "-----  facades : %\n" facades
 			
 			_node.core.enregistrer_element	toiture			
 			

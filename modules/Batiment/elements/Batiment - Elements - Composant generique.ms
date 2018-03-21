@@ -76,7 +76,9 @@ struct 	str_composant_generique	 (
 		),
 		
 		fn generer_ID =(
+			format "generer_ID\n"
 			id = "ID_" + get_typeClasse () + "_"
+			seed ( timeStamp () )
 			for i= 1 to 10 do id += ( random 0 9 ) as string	
 		),
 		fn initialiser 		_type	_nom 	=(
@@ -101,6 +103,7 @@ struct 	str_composant_generique	 (
 													compo_debut:	\
 													etage_ht:			\
 													transformation:	\
+													inverse_ouverture:	\
 													onConstruit_gardeCorps:		= 
 		
 				fnVirt_construire			 _plug		pts	\
@@ -113,6 +116,7 @@ struct 	str_composant_generique	 (
 													compo_debut:compo_debut	\
 													etage_ht:etage_ht			\
 													transformation:transformation	\
+													inverse_ouverture:inverse_ouverture	\
 													onConstruit_gardeCorps:onConstruit_gardeCorps	
 		
 ) ---- fin composant -------------------------------

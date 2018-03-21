@@ -249,6 +249,9 @@ struct str_construction (
 			--- on vide la geametrie ------------
 			m_geo.vider ()
 			
+			seed m_plug.alea_seed
+			
+			
 			--- si on a pas de surface on dessine le logo ------------
 			if m_plug.surface_node == undefined then 				
 				m_geo.face		logo

@@ -11,16 +11,19 @@ Plugin 3DSmax - Bâtiments paramétriques.
 - [x] Corrections toitures à 2 pans.
 ### Todo :
 * **Surface** :
-  - [ ] Division de la surface en quadrilataires simples pour :
+  - [x] Division de la surface en quadrilataires simples pour :
     * - [ ] Répartition des éléments de toitures.
 	* - [ ] Création de _'sous-surface'_ pour gérer des différences de niveaux ou de toiture, etc.
 	* - [ ] Trouver le chemin du faîtage par exemple (en suivant le centre des _'diagonales'_).
   - [ ] Prise en compte des splines avec shapes _'à trous'_ : pour creation de patios.
+  - [ ] Alignement sur un terrain
 * **Facades** :
   - [ ] Extrusions de la dalle pour débords et du mur.
   - [ ] Gestion des angles pour continuité des balcons ou des débords.
+  - [x] Gestion du hasard pour ouverture Fenêtres.
+  - [ ] Ajouter interface aux fenetre, porte et volet pour choisir entre : _ouvert_, _fermer_ et _hasard_.
   - [ ] Intégration des Volets.
-  - [ ] Gestion du hasard pour ouverture Volets et Fenêtres.
+  - [ ] Gestion du hasard pour ouverture Volets.
   - [ ] Autres gardes-corps ( Verre, ... ).
   - [ ] Créer un _copier-coller/instancier_ avec le clique droit pour les composants de façade.
   - [ ] Passer en multilistBox la sequence de composant de façade pour manipuler plusieurs composants à la fois.

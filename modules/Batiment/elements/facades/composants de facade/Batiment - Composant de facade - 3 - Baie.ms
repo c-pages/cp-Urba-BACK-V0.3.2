@@ -318,7 +318,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		local menuis_largeur				=	ptr_plug.const_menuiseries_largeur
 		local menuis_epaisseur			=	ptr_plug.const_menuiseries_epaisseur
 		local menuis_allege_ht			=	ptr_plug.const_menuiseries_allege_ht
-		local menuis_trav_ht				=	ptr_plug.const_menuiseries_trav_ht
+		local menuis_trav_ht			=	ptr_plug.const_menuiseries_trav_ht
 	
 	-------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
 	
@@ -368,11 +368,11 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		
 		local vec_vitrage_ep			=	norm_prof		*	vitrage_ep
 		
-		local vec_tab_ht		= 	[0,0,1] 			* tablette_hauteur
+		local vec_tab_ht			= 	[0,0,1] 			* tablette_hauteur
 		local vec_tab_deb		= -norm_prof 	* tablette_debord
-		local vec_tab_cote	= norm_dir 		* tablette_cote	
+		local vec_tab_cote		= norm_dir 		* tablette_cote	
 
-		
+
 		
 		
 		
@@ -511,6 +511,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 			-- on construit la sequence	--------------------
 			local pt_menuis = pts_baie[1]  + vec_men_lrg 
 			local vec_menDivVert_ht 	= ( pts_baie[2] - pts_baie[1] )	- vec_men_ht  			
+			local menuis_precedant
 			for i = 1 to sequence.count	do (
 				local		menuis = sequence[i]
 				
@@ -524,13 +525,29 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 				
 				
 				-- on construit la menuiserie --------
-				menuis.construire		_plug	pt_menuis		 		norm_dir:norm_dir		dist_hauteur:baie_hauteur		ptr_baie:this
-			
+				local inverse_ouverture
+				if menuis_precedant != undefined and menuis_precedant.type == menuis.type then
+					inverse_ouverture = true
+				else 
+					inverse_ouverture = false
+				
+-- 				format "menuis.type :%\n" menuis.type
+-- 				format "inverse_ouverture :%\n" inverse_ouverture
+				
+				menuis.construire		_plug	pt_menuis		 		norm_dir:norm_dir		dist_hauteur:baie_hauteur		ptr_baie:this 	 inverse_ouverture:inverse_ouverture
+				menuis_precedant = menuis
 				
 				pt_menuis += norm_dir * menuis.params.longueur + norm_dir * menuis_largeur
-				
+				local on_construitLaMenuiserieVerticale = true
+				if i < sequence.count do (
+					menuis_suivant = sequence[i+1]
+					if menuis.type == #fenetre and menuis_suivant.type ==#fenetre do (
+						on_construitLaMenuiserieVerticale = false
+					)
+				)
 				--- on construit la menuiserie verticale -----------
-				ptr_geo.tube		pt_menuis		vec_menDivVert_ht		-vec_men_lrg      vec_men_ep		matID:#menuiserie
+				if on_construitLaMenuiserieVerticale do
+					ptr_geo.tube		pt_menuis		vec_menDivVert_ht		-vec_men_lrg      vec_men_ep		matID:#menuiserie
 				
 				-- si on a changé la longueur de la menuiserie on reset ------
 				if menuis_aReseter do menuis.params.longueur = 0

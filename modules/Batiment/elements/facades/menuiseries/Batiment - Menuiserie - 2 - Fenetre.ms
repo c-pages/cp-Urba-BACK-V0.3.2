@@ -69,7 +69,7 @@ rollout menuis_dialog "Paramètres" width:180 height:130
 )
 
 ------ la fonction de construction	---------
-fn menuis_fnConstruire  	_plug				 _pt_origine			norm_dir:			dist_hauteur:	ptr_baie:		 this:		= (
+fn menuis_fnConstruire  	_plug				 _pt_origine			norm_dir:			dist_hauteur:	ptr_baie:		 this:		inverse_ouverture:false 	= (
 	
 	--------------------------  PARAMETRES 			-----------------------------------------------------------------------------------------------------------------
 			local ptr_geo = _plug.core.get_geo ()
@@ -96,21 +96,53 @@ fn menuis_fnConstruire  	_plug				 _pt_origine			norm_dir:			dist_hauteur:	ptr_b
 			local traverses					=	ptr_baie.params.traverses
 			
 			
+			--- gestion du hazard -------
+			local test_ouvertureFenetre = random 0 100 <  _plug.alea_ouvrant_ouvert_proba
+			local mtrx_rotationHasard 
+			if  test_ouvertureFenetre then (
+				local sens_ouvertue  = if not inverse_ouverture then 1 else -1
+				local angleMin 		= sens_ouvertue * 90. * _plug.alea_ouvrant_ouvert_min/100
+				local angleMax 		= sens_ouvertue * 90. * _plug.alea_ouvrant_ouvert_max/100
+					
+				mtrx_rotationHasard 	= rotateZMatrix  	( random angleMin angleMax )
+-- 				local vecBougeCentre 	= 
+-- 				translate mtrx_rotationHasard
+				
+			)	else
+				mtrx_rotationHasard = matrix3 1
+			
+			
+			
+-- 			mtrx_rotationHasard.translation = 
+-- 			format "mtrx_rotationHasard : %\n" mtrx_rotationHasard
+			
+			
+			
 		-------------  vecteurs directeurs  		-----------------------------------------------------------------------------------------------------------------
 			local norm_prof				= norm_dir 		*	rotateZ ( matrix3 1 ) 90		
 			
-			local vec_longueur 		= norm_dir 		*	fenetre_longeur
+			local vec_longueur 			= norm_dir 		*	fenetre_longeur
 			local vec_baie_ht	 		= [0,0,1]  		*	baie_hauteur
-			local vec_fenetre_ht		=	[0,0,1]			*	fenetre_hauteur
 			
-			local vec_men_ep			=	norm_prof		*	menuis_epaisseur
+			local vec_men_ep			=	norm_prof	*	menuis_epaisseur
 			local vec_men_lrg			=	norm_dir		*	menuis_largeur
-			local vec_men_ht			=	[0,0,1] 			*	menuis_largeur
+			local vec_men_ht			=	[0,0,1] 		*	menuis_largeur
 			local vec_men_nu			=  norm_prof 	*	menuis_nu
+			
+			
+			local vec_fen_ht			=	[0,0,1]			*	fenetre_hauteur
+			local vec_fen_long		=	( vec_longueur + vec_men_lrg/2 )	*	mtrx_rotationHasard
+			local vec_fen_ep			=	vec_men_ep		*	mtrx_rotationHasard
+			local vec_fen_lrg			=	vec_men_lrg		*	mtrx_rotationHasard
+-- 			local vec_fen_ht			=	vec_men_ht
+			
+			
+			
+			
 			
 			local vec_allege_ht		= 	[0,0,1] 			*	allege_ht
 			
-			local vec_vitrage_ep		=	norm_prof		*	vitrage_epaisseur		
+			local vec_vitrage_ep		=	norm_prof		*	vitrage_epaisseur		 *	mtrx_rotationHasard
 			local vec_murEp			=	norm_prof 	*	_plug.const_murExt_epaisseur
 			
 			
@@ -122,7 +154,10 @@ fn menuis_fnConstruire  	_plug				 _pt_origine			norm_dir:			dist_hauteur:	ptr_b
 		
 		-------------   menuiserie du bas		-----------------------------------------------------------------------------------------------------------------
 			local ptTmp				=	_pt_origine 	--	+ vec_allege_ht
-			ptr_geo.tube		ptTmp		vec_longueur		vec_men_ht				   vec_men_ep			matID:#menuiserie 
+			if inverse_ouverture then
+				ptr_geo.tube		(ptTmp-	vec_men_lrg)	(vec_longueur	 + vec_men_lrg )	vec_men_ht				   vec_men_ep			matID:#menuiserie 
+			else 
+				ptr_geo.tube		ptTmp		vec_longueur		vec_men_ht				   vec_men_ep			matID:#menuiserie 
 			
 			
 		-------------   allege	vitrée 		-----------------------------------------------------------------------------------------------------------------
@@ -139,38 +174,84 @@ fn menuis_fnConstruire  	_plug				 _pt_origine			norm_dir:			dist_hauteur:	ptr_b
 			
 			
 		-------------   fenetre				-----------------------------------------------------------------------------------------------------------------
-			-------------   menuiserie bas		-----------------------------------
-			local ptFen1				=	_pt_origine + vec_allege_ht +  vec_men_ht + vec_men_ep/2
-			ptr_geo.tube		ptFen1		vec_longueur		vec_men_ht				   vec_men_ep			matID:#menuiserie
+			
+-- 				format "inverse_ouverture :%\n" inverse_ouverture
+			--- Sens ouverture normal ---------------
+			if not inverse_ouverture then (
+				
+				-------------   menuiserie bas		-----------------------------------
+				local ptFen1				=	_pt_origine + vec_allege_ht +  vec_men_ht + vec_men_ep/2
+				ptr_geo.tube		ptFen1		vec_fen_long		vec_men_ht				   vec_fen_ep			matID:#menuiserie
 
-			-------------   menuiserie haut		-----------------------------------
-			local ptFen2				=	ptFen1 + vec_fenetre_ht	- 3*vec_men_ht		--	_pt_origine + vec_fenetre_ht -   vec_men_ht + vec_men_ep/2
-			ptr_geo.tube		ptFen2		vec_longueur		vec_men_ht				   vec_men_ep			matID:#menuiserie
+				-------------   menuiserie haut		-----------------------------------
+				local ptFen2				=	ptFen1 + vec_fen_ht	- 3*vec_men_ht		--	_pt_origine + vec_fen_ht -   vec_men_ht + vec_men_ep/2
+				ptr_geo.tube		ptFen2		vec_fen_long		vec_men_ht				   vec_fen_ep			matID:#menuiserie
+				
+				-------------   menuiserie gauche		-----------------------------------
+				local ptFen3				=	ptFen1 + vec_men_ht
+				local vec_fen_htTMP	=	(vec_fen_ht  - 4*vec_men_ht ) 
+				ptr_geo.tube		ptFen3		vec_fen_htTMP 		vec_fen_lrg      vec_fen_ep		matID:#menuiserie
+				
+				-------------   menuiserie droite		-----------------------------------
+				local ptFen4				=	ptFen3 + vec_fen_long -  vec_fen_lrg
+				ptr_geo.tube		ptFen4			vec_fen_htTMP	vec_fen_lrg      vec_fen_ep		matID:#menuiserie
+				
+				--- vitrage	------------
+				local ptTmp					=	ptFen1 + vec_fen_lrg + vec_men_ht + vec_fen_ep/2 + vec_vitrage_ep/2
+				local vecTMP_htVitr		=  vec_fen_htTMP
+				ptr_geo.tube		ptTmp		vecTMP_htVitr		( vec_fen_long - 2*vec_fen_lrg )			-vec_vitrage_ep				matID:#vitrage 
+				
+				
+				
+			--- Sens ouverture inverse  ---------------
+			) else(
+				
+				-------------   menuiserie bas		-----------------------------------
+				local ptFen1				=	_pt_origine + vec_fen_long + vec_allege_ht +  vec_men_ht + vec_men_ep/2			
+				local vecBougeCentre 	= ( ptFen1 + vec_fen_long ) - ( ptFen1 + vec_longueur ) + vec_fen_long
+
+				ptFen1 -= vecBougeCentre
+				ptr_geo.tube		ptFen1		vec_fen_long		vec_men_ht				   vec_fen_ep			matID:#menuiserie
+
+				-------------   menuiserie haut		-----------------------------------
+				local ptFen2				=	ptFen1 + vec_fen_ht	- 3*vec_men_ht		--	_pt_origine + vec_fen_ht -   vec_men_ht + vec_men_ep/2
+-- 				ptFen2 -= vecBougeCentre
+				ptr_geo.tube		ptFen2		vec_fen_long		vec_men_ht				   vec_fen_ep			matID:#menuiserie
+				
+				-------------   menuiserie gauche		-----------------------------------
+				local ptFen3				=	ptFen1 + vec_men_ht
+-- 				ptFen3 -= vecBougeCentre
+				local vec_fen_htTMP	=	(vec_fen_ht  - 4*vec_men_ht ) 
+				ptr_geo.tube		ptFen3		vec_fen_htTMP 		vec_fen_lrg      vec_fen_ep		matID:#menuiserie
+				
+				-------------   menuiserie droite		-----------------------------------
+				local ptFen4				=	ptFen3 + vec_fen_long -  vec_fen_lrg
+-- 				ptFen4 -= vecBougeCentre
+				ptr_geo.tube		ptFen4			vec_fen_htTMP	vec_fen_lrg      vec_fen_ep		matID:#menuiserie
+				
+				--- vitrage	------------
+				local ptTmp					=	ptFen1 + vec_fen_lrg + vec_men_ht + vec_fen_ep/2 + vec_vitrage_ep/2
+-- 				ptTmp -= vecBougeCentre
+				local vecTMP_htVitr		=  vec_fen_htTMP
+				ptr_geo.tube		ptTmp		vecTMP_htVitr		( vec_fen_long - 2*vec_fen_lrg )			-vec_vitrage_ep				matID:#vitrage 
+			)
 			
-			-------------   menuiserie gauche		-----------------------------------
-			local ptFen3				=	ptFen1 + vec_men_ht
-			local vec_fen_htTMP	=	(vec_fenetre_ht  - 4*vec_men_ht ) 
-			ptr_geo.tube		ptFen3		vec_fen_htTMP 		vec_men_lrg      vec_men_ep		matID:#menuiserie
 			
-			-------------   menuiserie droite		-----------------------------------
-			local ptFen4				=	ptFen3 + vec_longueur -  vec_men_lrg
-			ptr_geo.tube		ptFen4			vec_fen_htTMP	vec_men_lrg      vec_men_ep		matID:#menuiserie
 			
-			--- vitrage	------------
-			local ptTmp					=	ptFen1 + vec_men_lrg + vec_men_ht + vec_men_ep/2 + vec_vitrage_ep/2
-			local vecTMP_htVitr		=  vec_fen_htTMP
-			ptr_geo.tube		ptTmp		vecTMP_htVitr		( vec_longueur - 2*vec_men_lrg )			-vec_vitrage_ep				matID:#vitrage 
 			
-		
+			
+			
+			
+			
 		-------------   Imposte vitrée				-----------------------------------------------------------------------------------------------------------------
 			if (	fenetre_hauteur < baie_hauteur ) do (
 				-----	menuiserie	-------------
-				local ptImposte1				=	_pt_origine + vec_allege_ht + vec_fenetre_ht - vec_men_ht
+				local ptImposte1				=	_pt_origine + vec_allege_ht + vec_fen_ht - vec_men_ht
 				ptr_geo.tube		ptImposte1		vec_longueur		vec_men_ht				   vec_men_ep			matID:#menuiserie
 				
 				--- vitrage	------------
 				local ptTmp					=	ptImposte1  + vec_men_ht + vec_men_ep/2 + vec_vitrage_ep/2
-				local vecTMP_htVitr		=  vec_baie_ht - vec_allege_ht - vec_fenetre_ht - vec_men_ht
+				local vecTMP_htVitr		=  vec_baie_ht - vec_allege_ht - vec_fen_ht - vec_men_ht
 				ptr_geo.tube		ptTmp		vecTMP_htVitr		vec_longueur 			-vec_vitrage_ep				matID:#vitrage 
 				
 			)

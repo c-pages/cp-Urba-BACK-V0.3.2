@@ -532,8 +532,8 @@ struct  str_manager_parametres (
 			if hasproperty elem_dupl 	#generer_ID do
 				elem_dupl.generer_ID ()
 			
-			if hasproperty elem_dupl 	#nom do
-				elem_dupl.nom+= " (copie)"
+-- 			if hasproperty elem_dupl 	#nom do
+-- 				elem_dupl.nom+= " (copie)"
 			
 			--- on  enregistre si besoin  ----------------
 			if enregistrer do m_core.enregistrer_element 	elem_dupl

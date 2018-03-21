@@ -268,9 +268,8 @@ struct facade_params	(
 -- 										append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
 									)
 								i += grp.count  + 1
-							)
-							else ( 
-										if elem.params.etirable  do
+							)	else ( 
+										if  elem.params != undefined and elem.params.etirable  do
 											elem.params.set_longueur_etirer		longueur_espacement
 										append sequence_totale		elem
 -- 										append sequence_totale	(  _plug.core.get_murPlein	  longueur_espacement )
