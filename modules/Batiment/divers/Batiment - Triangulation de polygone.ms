@@ -194,7 +194,7 @@ pt2 	= $point002.pos
 pt3	= $point004.pos
 pt_atester	= $point003.pos
  */
-shp = $Line008
+shp = $
 points =#()
 for i = 1 to numknots shp 1 do
 		append points (getKnotPoint shp 1 i )

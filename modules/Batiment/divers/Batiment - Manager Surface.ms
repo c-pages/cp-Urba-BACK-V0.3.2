@@ -46,7 +46,7 @@ struct str_mgr_surfaces (
 			
 			--- on fait tourner les spline dans le meme sens ----
 			if not m_outils.est_sensPositif 	ptsSurface 	 do
-				trace_absolu = m_outils.changer_sens		ptsSurface
+				ptsSurface = m_outils.changer_sens		ptsSurface
 			
 			ptsSurface
 			
@@ -55,12 +55,12 @@ struct str_mgr_surfaces (
 			
 			local id_premiertraceFerme 	= 0
 			local b_result 						= true
-			
+			/* 
 			--- on ne prend que des splineShape -----
 			if classOf _shape !=	line	 do(
 				messagebox "Attention ! Le shape piqué doit être une Line."
 				b_result = false
-			) 
+			)  */
 			
 			--- on ne prend que la premiere spline fermée -----
 			if b_result and numSplines _shape > 1 do (

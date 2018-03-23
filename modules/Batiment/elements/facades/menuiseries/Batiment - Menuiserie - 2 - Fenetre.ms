@@ -21,7 +21,7 @@ struct menuis_params	(
 )
 
 --- les rollout du composant	---------
-rollout menuis_dialog "Paramètres" width:180 height:130
+rollout menuis_dialog "Fenêtre" width:180 height:130
 (
 	
 		local m_plug		
@@ -29,14 +29,18 @@ rollout menuis_dialog "Paramètres" width:180 height:130
 		local m_rollPrt		
 		
 		---- golbal --------------
-	label 'lbl_hauteur' "Hauteur : " pos:[6,5] width:75 height:13 align:#left
-	spinner 'spn_hauteur' "" pos:[99,5] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
-	label 'lbl_ouverture' "Ouverture :" pos:[6,38] width:57 height:13 align:#left
-	dropdownList 'ddl_ouverture' "" pos:[68,36] width:100 height:21 items:#("Auto", "Droite", "Gauche") align:#left
-			
-	label 'lbl3' "Allège vitrée" pos:[6,20] width:75 height:13 align:#left
-	spinner 'spn_allege_vitree' "" pos:[99,20] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+		label 'lbl_longueur' "Longueur:" pos:[6,-1] width:63 height:13 align:#left
+		spinner 'spn_longueur' "" pos:[99,-1] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
 		
+		label 'lbl_hauteur' "Hauteur : " pos:[6,14] width:75 height:13 align:#left
+		spinner 'spn_hauteur' "" pos:[99,14] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+		label 'lbl_ouverture' "Ouverture :" pos:[6,47] width:57 height:13 align:#left
+		dropdownList 'ddl_ouverture' "" pos:[68,45] width:100 height:21 items:#("Auto", "Droite", "Gauche") align:#left
+		
+		label 'lbl3' "Allège vitrée" pos:[6,29] width:75 height:13 align:#left
+		spinner 'spn_allege_vitree' "" pos:[99,29] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+		
+	
 		fn actualiser =(
 			spn_hauteur.value 		= m_compo.params.hauteur			
 			spn_allege_vitree.value 	= m_compo.params.allege_vitree_ht
@@ -66,6 +70,11 @@ rollout menuis_dialog "Paramètres" width:180 height:130
 				m_compo.params.allege_vitree_ht		 = val
 			m_rollPrt.changer_un_truc ()
 			)
+	on spn_longueur changed val do
+	(
+			m_compo.params.longueur = val
+			m_rollPrt.changer_un_truc ()
+	)
 )
 
 ------ la fonction de construction	---------
@@ -266,7 +275,6 @@ _str_contructeur 	tooltip:menuis_tooltip		nom:menuis_nom	type:menuis_type	params
 
 	
 ) ----	FileIn ----
-	
 	
 	
 	

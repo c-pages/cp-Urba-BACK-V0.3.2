@@ -68,25 +68,26 @@ rollout roll_global "Global" width:195 height:341
 	fn shape_filt 		obj = superclassof obj == shape
 
 
-	button 'btn_enregistrer' "Enregistrer" pos:[88,19] width:77 height:20 align:#left
+	button 'btn_enregistrer' "Enregistrer" pos:[88,19] width:77 height:16 align:#left
 
 
 
 
-	button 'btn_charger' "Charger" pos:[13,19] width:76 height:20 enabled:true align:#left
-	button 'btn_coller' "Coller" pos:[88,37] width:77 height:20 align:#left
-	button 'btn_copier' "Copier" pos:[13,38] width:76 height:20 align:#left
+	button 'btn_charger' "Charger" pos:[13,19] width:76 height:16 enabled:true align:#left
+	button 'btn_coller' "Coller" pos:[88,34] width:77 height:16 align:#left
+	button 'btn_copier' "Copier" pos:[13,34] width:76 height:16 align:#left
 
 	--- Surface ------
-	pickbutton 'btn_pick_surface' "Pick shape" pos:[13,78] width:152 height:20 filter:shape_filt toolTip:"Le shape à utiliser comme surface de base pour la création du bâtiment." autoDisplay:true align:#left
-	GroupBox 'grp_surface' "Surface :" pos:[8,64] width:162 height:38 align:#left
+	pickbutton 'btn_pick_surface' "Pick shape" pos:[13,70] width:152 height:16 filter:shape_filt toolTip:"Le shape à utiliser comme surface de base pour la création du bâtiment." autoDisplay:true align:#left
+	GroupBox 'grp_surface' "Surface :" pos:[8,56] width:162 height:35 align:#left
 
-	checkbutton 'ckb_editeur' "Edition" pos:[8,108] width:162 height:30  align:#left -- highlightColor:(color 255 255 0)
+	checkbutton 'ckb_editeur' "Edition" pos:[8,94] width:50 height:50 align:#left -- highlightColor:(color 255 255 0)
+ -- highlightColor:(color 255 255 0)
 
 
 
-	GroupBox 'grp63' "Presets :" pos:[8,1] width:162 height:60 align:#left
-	checkbox 'ckb_proxy' "Affichage simplifié" pos:[10,147] width:161 height:31 align:#left
+	GroupBox 'grp63' "Presets :" pos:[8,1] width:162 height:54 align:#left
+	checkbox 'ckb_proxy' "Affichage simplifié" pos:[10,147] width:161 height:19 align:#left
 
 
 
@@ -142,11 +143,12 @@ rollout roll_global "Global" width:195 height:341
 
 
 
+
 	on roll_global open do
 		actualiser ()
 	on roll_global close do
 	(
-	-- 				core.fermer_toutes_fenetres query:true
+	 				core.editeur_demander_fermeture()
 			)
 	on btn_enregistrer pressed do
 		core.preset_enregistrer ()
@@ -171,8 +173,8 @@ rollout roll_global "Global" width:195 height:341
 				false:	(core.get_editeur_dialog ()).fermer ()
 			)
 		)
-	on ckb_proxy changed state do core.actualiser ()
-
+	on ckb_proxy changed state do
+		core.actualiser ()
 )
 rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
 
@@ -273,7 +275,7 @@ rollout roll_aleatoire "Hasard" width:162 height:237
 (
 	core.actualiser ()
 	)
-	on spn_volet_min entered text do
+	on spn_volet_min  changed val  do
 (
 	core.actualiser ()
 	)

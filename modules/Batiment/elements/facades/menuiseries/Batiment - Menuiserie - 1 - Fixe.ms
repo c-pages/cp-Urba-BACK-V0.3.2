@@ -19,15 +19,15 @@ struct menuis_params	(
 )
 
 --- les rollout du composant	---------
-rollout menuis_dialog "Menuiserie" width:221 height:119
+rollout menuis_dialog "Fixe" width:221 height:119
 (
 	
 	local m_plug		
 	local m_compo
 	local m_rollPrt		
 		
-			
-			
+		
+		
 		
 			---- golbal --------------
 	label 'lbl_longueur' "Longueur:" pos:[15,2] width:63 height:13 align:#left

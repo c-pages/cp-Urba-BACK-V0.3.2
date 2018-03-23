@@ -22,9 +22,10 @@ Plugin 3DSmax - Bâtiments paramétriques.
   - [ ] Gestion des angles pour continuité des balcons ou des débords.
   - [x] Gestion du hasard pour ouverture Fenêtres.
   - [ ] Ajouter interface aux fenetre, porte et volet pour choisir entre : _ouvert_, _fermer_ et _hasard_.
-  - [ ] Intégration des Volets.
-  - [ ] Gestion du hasard pour ouverture Volets.
-  - [ ] Autres gardes-corps ( Verre, ... ).
+  - [x] Intégration des Volets roulants.
+  - [x] Gestion du hasard pour ouverture Volets.
+  - [ ] creer les autres types de volets (battant, store banne ?)
+  - [ ] creer les autres types de gardes-corps ( Verre, ... ).
   - [ ] Créer un _copier-coller/instancier_ avec le clique droit pour les composants de façade.
   - [ ] Passer en multilistBox la sequence de composant de façade pour manipuler plusieurs composants à la fois.
   - [ ] A voir: création de facade-rideau.

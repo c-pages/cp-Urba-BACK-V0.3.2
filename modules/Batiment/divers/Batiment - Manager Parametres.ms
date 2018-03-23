@@ -619,10 +619,12 @@ struct  str_manager_parametres (
 			
 			local result
 			local index_result = 0
-			local params_ids 			= getProperty	m_plug	  ( m_prefix_nomParametres + "_id" )
--- 			debug "params_ids" var:params_ids
-			for i = 1 to params_ids.count do (
-				if params_ids[i] == _idUnique do index_result = i
+			if  hasProperty	m_plug	  ( m_prefix_nomParametres + "_id" ) do (
+				local params_ids 			= getProperty	m_plug	  ( m_prefix_nomParametres + "_id" )
+	-- 			debug "params_ids" var:params_ids
+				for i = 1 to params_ids.count do (
+					if params_ids[i] == _idUnique do index_result = i
+				)
 			)
 			if index_result != 0 do
 				result = get_element_parIndex 	index_result

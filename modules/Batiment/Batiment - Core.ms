@@ -85,15 +85,18 @@ struct str_batiment_core (
 		
 		
 	-------- Les managers des differents éléments du batiment ---------------
+		mgrs							=#(),		---- tableau de tout les managers
+		
 		---- facades	----------
 		mgr_facades 				= str_manager_parametres (),
-		mgr_facCompos 		= str_manager_parametres (),
-		mgr_facMenuiseries	= str_manager_parametres (),
-		mgr_gardeCorps		= str_manager_parametres (),
+		mgr_facCompos 			= str_manager_parametres (),
+		mgr_facMenuiseries		= str_manager_parametres (),
+		mgr_gardeCorps			= str_manager_parametres (),
+		mgr_facVolets				= str_manager_parametres (),
 		
 		---- toiture	----------
 		mgr_toiture 				= str_manager_parametres (),
-		mgr_toitElements		= str_manager_parametres (),
+		mgr_toitElements			= str_manager_parametres (),
 		
 		--- surface -----
 		mgr_surface				= str_mgr_surfaces (),
@@ -472,22 +475,32 @@ struct str_batiment_core (
 		
 		
 	---- universel ---------------
-		fn get_manager_parElement 	_element =(
-			
+	private
+		fn get_manager		_type =(
 			local mgr
-			
-			if hasProperty 	_element	#get_typeClasse do (
-				case ( _element.get_typeClasse 	() ) of (
-						"toiture":			mgr = mgr_toiture
-						"facades": 		mgr = mgr_facades
-						"facCompos": 	mgr = mgr_facCompos
-						"facMenuis":		mgr = mgr_facMenuiseries
-						"gardeCorps":	mgr = mgr_gardeCorps
-						"toitElements":	mgr = mgr_toitElements
-				)
-			)  
+			if classof _type == string do _type = _type as name
+			case _type of (
+				#toiture:		mgr = mgr_toiture
+				#facades: 		mgr = mgr_facades
+				#facCompos: 	mgr = mgr_facCompos
+				#facMenuis:	mgr = mgr_facMenuiseries
+				#facVolets:		mgr = mgr_facVolets
+				#gardeCorps:	mgr = mgr_gardeCorps
+				#toitElements:	mgr = mgr_toitElements
+			)
 			mgr
 		),
+		fn get_manager_parElement 	_element =(			
+			local mgr			
+			if hasProperty 	_element	#get_typeClasse do (
+				local type = _element.get_typeClasse 	()
+				mgr = get_manager 	type
+			)
+			mgr
+		),
+		
+		
+	public
 		fn enregistrer_element	_element =(
 -- 			debug "##### CORE ##### enregistrer_element"
 			local mgr = 		get_manager_parElement	_element
@@ -503,92 +516,46 @@ struct str_batiment_core (
 		fn get_element_parID	_idUnique =(
 			
 			local elem
-			--- on cherche dans les facades -----------
-			if mgr_facades.get_element_parID	 	_idUnique != undefined then
-				elem	=	mgr_facades.get_element_parID	 	_idUnique
-			
-			--- on cherche dans les composants -----------
-			else if mgr_facCompos.get_element_parID	 		_idUnique != undefined then
-				elem	=	mgr_facCompos.get_element_parID	 	_idUnique
-			
-			--- on cherche dans les menuiseries	 -----------
-			else if mgr_facMenuiseries.get_element_parID	 		_idUnique != undefined then
-				elem	=	mgr_facMenuiseries.get_element_parID	 	_idUnique
-			
-			--- on cherche dans les gadres corps	 -----------
-			else if mgr_gardeCorps.get_element_parID	 		_idUnique != undefined then
-				elem	=	mgr_gardeCorps.get_element_parID	 	_idUnique
-			
-			--- on cherche dans les elements de toiture	 -----------
-			else if mgr_toitElements.get_element_parID	 		_idUnique != undefined then
-				elem	=	mgr_toitElements.get_element_parID	 	_idUnique
-			
+			local i = 1
+			local trouve = false
+			while i <= mgrs.count and not trouve do (
+				local mgr = mgrs[i]
+				if mgr.get_element_parID	 	_idUnique != undefined do(
+					elem	=	mgr.get_element_parID	 	_idUnique
+					trouve = true
+				)
+				i+=1
+			)
 			elem
 			
 		),
+		fn get_constructeurs 	_type =(
+			local mgr = get_manager  _type
+			mgr.get_constructeurs()
+		),
 		fn get_menu_contructeur	_type =(
-			local menuTmp
-			case _type of (
-				#toiture:			menuTmp = mgr_toiture.get_menu_constructeurs ()
-				#facades: 			menuTmp = mgr_facades.get_menu_constructeurs ()
-				#facCompos: 	menuTmp = mgr_facCompos.get_menu_constructeurs ()
-				#facMenuis:		menuTmp = mgr_facMenuiseries.get_menu_constructeurs ()
-				#gardeCorps:	menuTmp = mgr_gardeCorps.get_menu_constructeurs ()
-				#toitElements:	menuTmp = mgr_toitElements.get_menu_constructeurs ()
-			)
-			menuTmp
+			local mgr = get_manager  _type
+			mgr.get_menu_constructeurs ()
 		),
 		fn set_menu_enabled 	_type   _idConstructeur  _state		=(
-			local constructeurs
-			local index_menu
-			case _type of (
-				#toiture:			(
-					constructeurs		= mgr_toiture.get_constructeurs ()
-					index_menu 		= mgr_toiture.get_constructeur_index 		_idConstructeur
-					constructeurs[ index_menu ].enabled = _state
-					)
-				#facades: 			(
-					constructeurs		= mgr_facades.get_constructeurs ()
-					index_menu 		= mgr_facades.get_constructeur_index 		_idConstructeur
-					constructeurs[ index_menu ].enabled = _state
-					)
-				#facCompos: 	(
-					constructeurs		= mgr_facCompos.get_constructeurs ()
-					index_menu 		= mgr_facCompos.get_constructeur_index 		_idConstructeur
-					constructeurs[ index_menu ].enabled = _state
-					)
-				#facMenuis:		(
-					constructeurs		= mgr_facMenuiseries.get_constructeurs ()
-					index_menu 		= mgr_facMenuiseries.get_constructeur_index 		_idConstructeur
-					constructeurs[ index_menu ].enabled = _state
-					)
-				#gardeCorps:	(
-					constructeurs		= mgr_gardeCorps.get_constructeurs ()
-					index_menu 		= mgr_gardeCorps.get_constructeur_index 		_idConstructeur
-					constructeurs[ index_menu ].enabled = _state
-					)
-				#toitElements:	(
-					constructeurs		= mgr_toitElements.get_constructeurs ()
-					index_menu 		= mgr_toitElements.get_constructeur_index 		_idConstructeur
-					constructeurs[ index_menu ].enabled = _state
-					)
-			)
-			menuTmp
+			local mgr 					= get_manager  _type
+			local constructeurs		= mgr.get_constructeurs()
+			local index_menu			= mgr.get_constructeur_index 		_idConstructeur
+			constructeurs[ index_menu ].enabled = _state
 		),
 		
 		
-		fn creer_element	_type 	idConstructeur:	=(
+		fn creer_element		_type 	idConstructeur:	=(
+			local mgr = get_manager  _type
 			local nv_element
 			case _type of (
-				#toiture:			nv_element = mgr_toiture.creer_element ()
-				#facades: 			nv_element = mgr_facades.creer_element ()
+				default:		nv_element = mgr.creer_element	idConstructeur:idConstructeur
 				#facCompos: 	(
 					
 					local selec = 	m_editeur_dialog.sub.lbx_sequence.selection 
 					local fcd_courante 	= get_facade_enEdition ()
 					
 					nv_element 				= creer_composant		fcd_courante		idConstructeur		position:( m_editeur_dialog.get_compos_selection () + 1 )
--- 					m_editeur_dialog.sub.m_composant_courant = nv_element
 					m_editeur_dialog.sub.remplir_lbx_sequence()
 					m_editeur_dialog.sub.lbx_sequence.selection = selec + 1 
 					m_editeur_dialog.sub.actualiser ()
@@ -598,28 +565,23 @@ struct str_batiment_core (
 					local subroll = m_editeur_dialog.subroll_Params_1.rollouts[1]
 					local selec = 	subroll.lbx_sequence.selection
 					
-					nv_element = mgr_facMenuiseries.creer_element  idConstructeur:idConstructeur
+					nv_element = mgr.creer_element  idConstructeur:idConstructeur
 					local compo = m_editeur_dialog.get_composant ()
 					append compo.params.sequence		nv_element
 					
-					m_editeur_dialog.set_param_2		nv_element	
--- 					m_editeur_dialog.sub.actualiser ()
-					
+					m_editeur_dialog.set_param_2		nv_element						
 					subroll.actualiser ()
 					subroll.lbx_sequence.selection = selec + 1 
 					m_editeur_dialog.changer_un_truc	() 
--- 					debug "subroll.lbx_sequence.selection" var:subroll.lbx_sequence.selection
 				)
-				#gardeCorps:	nv_element = mgr_gardeCorps.creer_element 	()
 				#toitElements:	(
 					local subroll = m_editeur_dialog.sub.subroll_parametres.rollouts[1]
 					local selec = subroll.lbx_elements.selection
-					nv_element = mgr_toitElements.creer_element 	idConstructeur:idConstructeur
+					
+					nv_element = mgr.creer_element 	idConstructeur:idConstructeur
 					local toiture = m_editeur_dialog.m_batiment.toiture
 					append 	toiture.params.elements		nv_element
--- 					enregistrer_element	toiture
 					
--- 					(mgr_toiture.get_dialog()).actualiser ()
 					subroll.actualiser ()
 					subroll.lbx_elements.selection = selec + 1
 					m_editeur_dialog.changer_un_truc	() 
@@ -634,6 +596,7 @@ struct str_batiment_core (
 		
 	----- Surface ---------------------
 	public
+		fn get_axePrincipal					=	mgr_surface.get_axePrincipal	(),
 		fn get_surface_points				=	mgr_surface.get_points	(),
 		fn assigner_surface 		_nodeTHIS		_shape 		=(
 			if _nodeTHIS.material == undefined do
@@ -687,7 +650,11 @@ struct str_batiment_core (
 			m_bat_edition 		= undefined
 			destroyDialog m_editeur_dialog
 			m_plug.actualiser_rollouts()
-			
+		),
+		
+		fn editeur_demander_fermeture =(
+			if m_editeur_ouvert do
+				m_editeur_dialog.fermer ()
 		),
 		fn editeur_estOuvert 					= m_editeur_ouvert,
 		fn editeur_set_pos 		_pos 	= m_editeur_pos 		= _pos,
@@ -739,32 +706,34 @@ struct str_batiment_core (
 			mgr_construction.initialiser		m_plug			
 			
 			mgr_facades.initialiser 			plug:m_plug					\
-														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\" )					\
-														typeParametre:				"facades"
--- 														fichier_dialog:				( "Batiment - rollout facade.ms" )		\
+													dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\" )					\
+													typeParametre:				"facades"
 			
 			mgr_facCompos.initialiser 		plug:m_plug					\
-														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\composants de facade\\" )					\
-														typeParametre:				"facCompos"
+													dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\composants de facade\\" )					\
+													typeParametre:				"facCompos"
 			
-			mgr_facMenuiseries.initialiser plug:m_plug					\
-														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\menuiseries\\" )					\
-														typeParametre:				"facMenuis"
--- 														fichier_dialog:				( "Batiment - rollout menuiserie.ms" )		\
+			mgr_facMenuiseries.initialiser	 plug:m_plug					\
+													dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\menuiseries\\" )					\
+													typeParametre:				"facMenuis"
 			
+			mgr_facVolets.initialiser 		plug:m_plug					\
+													dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\volets\\" )					\
+													typeParametre:				"facVolets"
+														
 			mgr_gardeCorps.initialiser 		plug:m_plug					\
-														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\garde-corps\\" )					\
-														typeParametre:				"gardeCorps"
+													dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\modules\Batiment\elements\\facades\\garde-corps\\" )					\
+													typeParametre:				"gardeCorps"
 			
 			mgr_toiture.initialiser 			plug:m_plug					\
-														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\"  )					\
-														typeParametre:				"toiture" 
--- 														fichier_dialog:				( "Batiment - rollout toiture.ms" )		\
+													dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\"  )					\
+													typeParametre:				"toiture" 
 			
 			mgr_toitElements.initialiser 	plug:m_plug					\
-														dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\composants toiture\\"  )					\
-														typeParametre:				"toitElements" 
--- 														fichier_dialog:				( "Batiment - rollout toiture.ms" )		\
+													dossier_constructeurs:	( getdir #userScripts + "\cp-Urba\\modules\\Batiment\\elements\\toitures\\composants toiture\\"  )					\
+													typeParametre:				"toitElements" 
+			
+			mgrs	=#( mgr_facades, mgr_facCompos, mgr_facMenuiseries, mgr_facVolets, mgr_gardeCorps, mgr_toiture, mgr_toitElements )
 			
 		)
 		

@@ -236,6 +236,20 @@ struct str_construction (
 			z += hauteur_proxy
 			creer_dalle	( z )  matID:#mur
 		),
+		
+		
+		
+		----------- UVWmap------------------
+		fn appliquerMapping =(
+			
+			--- Mapping de maniere global, TODO:generer par  composants---
+			local matrxMapping = matrix3 1 	--
+			local axeP_mtrx = m_plug.core.get_axePrincipal ()
+			rotateZ matrxMapping  (- (quatToEuler2  axeP_mtrx.rotationpart).z )
+			polyop.applyUVWMap 	m_plug.delegate  #box	 tm:matrxMapping  channel:1
+			
+		),
+		
 		--------- INTERFACE --------------------------------------------------------------------
 	public
 		fn initialiser 	_plug =(
@@ -307,6 +321,9 @@ struct str_construction (
 						creer_ssBassement 			&zCourant
 						creer_proxy 						&zCourant
 					)
+					
+					appliquerMapping ()
+					
 				)
 				
 				

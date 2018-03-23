@@ -26,8 +26,8 @@ struct compo_params	(
 		tablette							=	true,
 		
 		--- Volets	-------------
-		volet								= 1,			----	1:Aucun		2:roulants		3:battants	----------
-		volet_double					= false,			----	pour les 'Battants' 	----------
+		volet								= undefined,			----		----------
+	
 		
 	private
 		longueur_etirer =0,
@@ -44,7 +44,7 @@ struct compo_params	(
 rollout compo_dialog "Baie" width:433 height:747
 (
 	local m_rollPrt
-	local	 m_plug
+	local	m_plug
 	local m_compo
 	local m_dialog_menuiserie	
 	
@@ -122,7 +122,25 @@ rollout compo_dialog "Baie" width:433 height:747
 			chk_tablette.checked = m_compo.params.tablette
 			
 			--- volet -----------
-			ddl_volet.selection 	= m_compo.params.volet 
+			local volets_noms = #("-aucun-")
+			for constr in m_plug.core.get_constructeurs #facVolets do
+				append volets_noms  constr.nom			
+			ddl_volet.items = for voletNom in volets_noms collect voletNom
+			
+			if m_compo.params.volet == undefined then
+				ddl_volet.selection = 1
+			else 
+				ddl_volet.selection = ( findItem volets_noms 	m_compo.params.volet.nom )
+-- 				
+-- 			format "volets_noms ---> %\n"  volets_noms
+-- 			if m_compo.params.volet != undefined then (
+-- 				format "m_compo.params.volet.nom  ---> %\n"  m_compo.params.volet.nom 
+-- 			format " findItem volets_noms 	 ---> %\n"  ( findItem volets_noms 	m_compo.params.volet.nom )
+-- 			
+-- 			)
+-- 			insertItem "-aucun-"  ddl_volet.items  1
+-- 			if m_compo.params.volet 
+-- 			ddl_volet.selection 	= m_compo.params.volet 
 			
 			
 			
@@ -234,9 +252,18 @@ rollout compo_dialog "Baie" width:433 height:747
 	(
 			
 		)
-	on ddl_volet selected _index  	do
+	on ddl_volet 	selected 	_index  	do
 	(
-			m_compo.params.volet = _index
+			if _index == 1 then 
+				m_compo.params.volet  = undefined
+			else (
+				local constrs 		= m_plug.core.get_constructeurs 	#facVolets
+	-- 		format "m_plug.core.get_constructeurs 	#facVolets ---> %\n"  (m_plug.core.get_constructeurs 	#facVolets)
+				local nv_volet 	= m_plug.core.creer_element 		#facVolets		idConstructeur:constrs[_index - 1 ].type
+	-- 		format "nv_volet ---> %\n"  nv_volet
+				m_compo.params.volet  = nv_volet
+			)
+			m_rollPrt.changer_un_truc ()
 			actualiser ()
 		)
 	on btn_sequence_monter pressed do
@@ -349,6 +376,8 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		local		tablette_debord			= 5
 		local		tablette_cote				= 5
 		
+		local volet_empriseVert  = if ptr_params.volet != undefined 	then  ( ptr_params.volet.params.get_emprise_verticale() )
+																					else 0
 	-------------  VECTEURS DIRECTEURS  		-----------------------------------------------------------------------------------------------------------------
 		local norm_prof			= norm_dir 	* rotateZ ( matrix3 1 ) 90		
 		
@@ -358,6 +387,9 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		local vec_ht 				= 	[0,0,1] 		*	hauteur				
 		local vec_longueur 	= norm_dir 	*	longueur
 		local vec_murEp		=	norm_prof *	ptr_plug.const_murExt_epaisseur
+		
+		local vec_volet_empriseVert  =  [0,0,1] * volet_empriseVert
+		
 		
 		local vec_men_nu				=  norm_prof 	*	profondeur
 		local vec_men_ep				=	norm_prof		*	menuis_epaisseur
@@ -371,8 +403,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		local vec_tab_ht			= 	[0,0,1] 			* tablette_hauteur
 		local vec_tab_deb		= -norm_prof 	* tablette_debord
 		local vec_tab_cote		= norm_dir 		* tablette_cote	
-
-
+		
 		
 		
 		
@@ -432,7 +463,6 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		--- Result -------------
 		pt_result_3 		= pts_ids[6]
 		
-		
 		----- pour plus loin dans le code ...  le raccord avec les menuiseries, -----
 		local pts_baie	= #( pt_3+ vec_men_nu, pt_4+ vec_men_nu, pt_5+ vec_men_nu, pt_2 + vec_men_nu)
 		
@@ -457,15 +487,17 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		
 		
 		--- menuiserie du haut	------------
-		local ptTmp				=	pts_baie[2] -  vec_men_ht
+		local pt_menuiserie_ht				=	pts_baie[2] -  vec_men_ht - vec_volet_empriseVert
 		local vecTMP_long 	= (pts_baie[3] - pts_baie[2] ) 
 		if sequence.count == 0 and 	onCreer_menuiserie_si_sequenceVide or sequence.count != 0 do
-			ptr_geo.tube		ptTmp		vecTMP_long		vec_men_ht				   vec_men_ep			matID:#menuiserie 
+			ptr_geo.tube		pt_menuiserie_ht		vecTMP_long		vec_men_ht				   vec_men_ep			matID:#menuiserie 
+		
+		local pt_pourVolet = pt_menuiserie_ht + vec_men_ht
 		
 		--- menuiserie de gauche	------------
-		local vecTMP_ht 	= ( pts_baie[2] - pts_baie[1] )	- vec_men_ht		
+		local vecTMP_ht 	= ( pts_baie[2] - pts_baie[1] )	- vec_men_ht		 - vec_volet_empriseVert
 		if sequence.count == 0 and 	onCreer_menuiserie_si_sequenceVide or sequence.count != 0 do
-			ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg      vec_men_ep				matID:#menuiserie --	flip:true
+			ptr_geo.tube		pt_menuiserie_ht		-vecTMP_ht		vec_men_lrg      vec_men_ep				matID:#menuiserie --	flip:true
 		
 		
 		
@@ -478,13 +510,14 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 			ptr_geo.tube		ptTmp		vecTMP_longBas		-vec_men_ht		vec_men_ep				matID:#menuiserie 
 			
 			--- menuiserie de droite	------------
-			local ptTmp			=	pts_baie[3]  -  vec_men_lrg - vec_men_ht
+			local ptTmp			=	pts_baie[3]  -  vec_men_lrg - vec_men_ht  - vec_volet_empriseVert
 			ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg		vec_men_ep				matID:#menuiserie 	
 			
 			--- vitrage	------------
 			local ptTmp					=	pts_baie[1]  +  vec_men_lrg + vec_men_ht + ( (vec_men_ep - vec_vitrage_ep )/ 2 )
-			local vecTMP_htVitr		= vecTMP_ht 	- 	vec_men_ht
+			local vecTMP_htVitr		= vecTMP_ht 	- 	vec_men_ht 
 			ptr_geo.tube		ptTmp		vecTMP_htVitr		vecTMP_longBas	vec_vitrage_ep				matID:#vitrage 
+			
 		)  else  (
 		
 			
@@ -508,9 +541,9 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 			
 			
 		---- CONSTRUCTION	---------------
-			-- on construit la sequence	--------------------
+			-- on construit la sequence  des menuiseries	--------------------
 			local pt_menuis = pts_baie[1]  + vec_men_lrg 
-			local vec_menDivVert_ht 	= ( pts_baie[2] - pts_baie[1] )	- vec_men_ht  			
+			local vec_menDivVert_ht 	= ( pts_baie[2] - pts_baie[1] )	- vec_men_ht  	- vec_volet_empriseVert	
 			local menuis_precedant
 			for i = 1 to sequence.count	do (
 				local		menuis = sequence[i]
@@ -534,7 +567,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 -- 				format "menuis.type :%\n" menuis.type
 -- 				format "inverse_ouverture :%\n" inverse_ouverture
 				
-				menuis.construire		_plug	pt_menuis		 		norm_dir:norm_dir		dist_hauteur:baie_hauteur		ptr_baie:this 	 inverse_ouverture:inverse_ouverture
+				menuis.construire		_plug		pt_menuis		 		norm_dir:norm_dir		dist_hauteur:(baie_hauteur - volet_empriseVert )		ptr_baie:this 	 inverse_ouverture:inverse_ouverture
 				menuis_precedant = menuis
 				
 				pt_menuis += norm_dir * menuis.params.longueur + norm_dir * menuis_largeur
@@ -555,7 +588,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 			)
 			
 		) --- fin else sequence
-	
+		
 		
 		
 		-------	  TABLETTE 	---------------------------------------------------------------------------------------------------------------			
@@ -587,6 +620,17 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 			local nvlFace = ptr_geo.face 		#(	pts_ids[2], 		pts_ids[6], 		pts_ids[7], 		pts_ids[3] )		 	matID:#menuiserie	
 			
 		)
+		
+		
+		
+		if ptr_params.volet != undefined do  (
+			ptr_params.volet.params.longueur 		= longueur
+			ptr_params.volet.construire		_plug			pt_pourVolet		 		norm_dir:norm_dir		dist_hauteur:(baie_hauteur )	
+			ptr_params.volet.params.longueur 		= 0
+			
+		)
+		
+		
 		
 		
 		---- Result final -----------------------------------------------------------------------

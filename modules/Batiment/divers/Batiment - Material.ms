@@ -10,7 +10,7 @@ struct str_mgr_material (
 			local materials 			= #()
 			for   i = 1 to matIDs_noms.count	 do(
 				local matID_nom	=	matIDs_noms[i]
-				format  "matID_nom : %\n" matID_nom
+-- 				format  "matID_nom : %\n" matID_nom
 				case matID_nom of (
 					#menuiserie :(
 						local val_color 		= color 120 120 120 
