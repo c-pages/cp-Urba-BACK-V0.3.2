@@ -176,33 +176,38 @@ struct	str_geometrie	(
 		fn get_vertex  _idPt =(
 			polyop.getVert 	m_plug.delegate		_idPt
 		),
+		
+		
+		
+		
+		
+		
 	--- operations -------------
 		
-		fn encart 		_pt	_vec1 	_vec2	_dist	=(
-				
-			local pt_concerne 		= _pt
-			local pt1 					= _pt + _vec1
-			local pt2 					= _pt + _vec2
+		fn get_normal_bisectionOriente_2vecteurs 		_vec1 	_vec2		=(
 			
-			local		vec1 = pt1 - pt_concerne
-			local		vec2 = pt2 - pt_concerne
-			
-			local norm_vec_1 = (normalize vec1)
-			local norm_vec_2 = (normalize vec2)
-			local dotPt 	=	dot  norm_vec_1  norm_vec_2
-			local acosPt 	= acos  dotPt
-			local asinPt 	= asin  dotPt
-			
-
-			local crossProd 	= cross (  pt_concerne - pt1 ) ( pt2 - pt1 )
+			local norm_vec_1 = (normalize _vec1)
+			local norm_vec_2 = (normalize _vec2)			
+			local crossProd 	= cross _vec1 	_vec2
 			local sensDot 		= dot crossProd  [0,0,1]
-			local sens = if sensDot > 0 then -1 else 1
-			local		norm_dir = norm_vec_1 + norm_vec_2
+			local sens 			= if sensDot > 0 then -1 else 1
 			
+			local	norm_dir 		= ( norm_vec_1 + norm_vec_2 ) * sens
 			
-			local 	result = pt_concerne + norm_dir* _dist * sens
-		
+			norm_dir
+			
+		),
+		fn encart 		_pt	_vec1 	_vec2	_dist	=(
+			
+			local pt_concerne 	= _pt			
+			local	vec1 				= pt1 - pt_concerne
+			local	vec2 				= pt2 - pt_concerne			
+			local	norm_dir 			= get_normal_bisectionOriente_2vecteurs 	vec1 	vec2
+			
+			local result	 			= pt_concerne + norm_dir* _dist 
+			
 			result
+			
 		),
 
 		

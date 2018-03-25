@@ -465,23 +465,25 @@ struct  str_manager_parametres (
 				_element = this.get_element_parIndex  _element
 			
 			-- on opie la structure basiquement ------
-			local elem_dupl = copy _element
+			
+			local elem_dupl = creer_element			idConstructeur:_element.type	 --copy _element
 			
 			-- puis on duplique chaque prop de la structure -----------
 			for propnom in getpropNames _element do (				
 				local val_orig = getProperty  _element	propnom
 -- 				debug "classof val_orig" var:(classof val_orig)
 				--tout sauf les fonctions ----------
-				if classof val_orig != MAXScriptFunction do (				
+				if classof val_orig != MAXScriptFunction/*  */	do (				
 					local val_dup
 					
 					--- si on a un struct ------
-					if superclassOf val_orig == StructDef then (
+					if superclassOf val_orig == StructDef  and propnom !=#params then (
 -- 						debug "PAS tableau:	ON DUPLIQUE un truc" var:val_orig
 -- 						if propnom == #params then
 -- 							val_dup = dupliquer_paramsElem  val_orig
 -- 						else
 							val_dup = dupliquer_element  val_orig	enregistrer:enregistrer
+						
 					-- sinon on regarde si on a un tableau
 					) else if  classof val_orig ==  array then (
 						val_dup = #()
@@ -489,6 +491,7 @@ struct  str_manager_parametres (
 							
 							--- si on a des struct, on les dupplique----------
 							if superclassOf val_orig[1] == StructDef then (
+								
 								local elems_presents = # ()
 								for i = 1 to val_orig.count do (
 									-- on check si c'est l'instance d'un element deja present -----------
@@ -498,7 +501,7 @@ struct  str_manager_parametres (
 										if hasproperty	param_present	#id do
 											if param_present.id == val_orig[i].id do
 												id_param_instance = j							
-										)
+									)
 									if id_param_instance != undefined then (
 -- 										debug "tableau:	ON DUPLIQUE UNE INSTANCE"
 -- 										debug "param_instance" var:param_instance
@@ -522,6 +525,7 @@ struct  str_manager_parametres (
 					---- sinon on a une valeur de base -------
 					) else val_dup = copy val_orig
 					
+					debug "val_dup" var:val_dup
 					setproperty	elem_dupl	propnom 	val_dup
 					
 				)	---	fin if not function	-------

@@ -376,8 +376,16 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		local		tablette_debord			= 5
 		local		tablette_cote				= 5
 		
-		local volet_empriseVert  = if ptr_params.volet != undefined 	then  ( ptr_params.volet.params.get_emprise_verticale() )
-																					else 0
+		
+		
+		---- on gere le volet -----
+		-- un reset pour mise a jour ------------
+		if ptr_params.volet != undefined  and superclassof ptr_params.volet  !=	StructDef do
+			ptr_params.volet = undefined
+		
+		local volet_empriseVert  = if ptr_params.volet != undefined 	 then  ( ptr_params.volet.params.get_emprise_verticale() )
+																							else 0
+		
 	-------------  VECTEURS DIRECTEURS  		-----------------------------------------------------------------------------------------------------------------
 		local norm_prof			= norm_dir 	* rotateZ ( matrix3 1 ) 90		
 		

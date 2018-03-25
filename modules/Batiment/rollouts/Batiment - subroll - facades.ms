@@ -150,6 +150,18 @@ rollout sub_facades "" width:594 height:789
 		
 	)
 	
+	fn remplir_lbx_facades =(
+		
+		lbx_facades.items = #()
+		facade_affiche  = #()
+		local i = 1
+		for fcd in m_bat.facades do (
+			append facade_affiche ( "(" + i as string + ")  " + fcd.nom)
+			i += 1
+		)
+		lbx_facades.items = facade_affiche
+	)
+	
 	fn gerer_boutons_enabled 	=(
 		
 		btn_facade_dupliquer.enabled 	= lbx_facades.selection != 0
@@ -219,16 +231,8 @@ rollout sub_facades "" width:594 height:789
 		m_bat							= m_rolloutP.m_batiment
 
 
+		remplir_lbx_facades ()
 
-
-		lbx_facades.items = #()
-		facade_affiche  = #()
-		local i = 1
-		for fcd in m_bat.facades do (
-			append facade_affiche ( "(" + i as string + ")  " + fcd.nom)
-			i += 1
-		)
-		lbx_facades.items = facade_affiche
 		
 		
 		m_facade_courante 		= undefined
@@ -644,12 +648,16 @@ rollout sub_facades "" width:594 height:789
 		if lbx_facades.items.count > 0 and lbx_facades.selection == 0 do
 			lbx_facades.selection = 1
 		if lbx_facades.selection != 0 do (
+			local id_selec_back = lbx_facades.selection
 			local nvlle_fcd = m_core.dupliquer_facade		m_facade_courante
 			insertItem  	nvlle_fcd	m_bat.facades		lbx_facades.selection
-			
+			m_facade_courante = nvlle_fcd
 			m_rolloutP.changer_un_truc 		()
+			
+			remplir_lbx_facades ()
+			
+			lbx_facades.selection = id_selec_back + 1
 			actualiser ()
-			lbx_facades.selection += 1
 		)
 	)
 	on btn_facade_supprimer pressed do

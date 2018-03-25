@@ -263,8 +263,6 @@ struct str_construction (
 			--- on vide la geametrie ------------
 			m_geo.vider ()
 			
-			seed m_plug.alea_seed
-			
 			
 			--- si on a pas de surface on dessine le logo ------------
 			if m_plug.surface_node == undefined then 				
@@ -290,6 +288,8 @@ struct str_construction (
 -- 					local mode_edition_facades = ( m_plug.core.get_facade_enEdition ()  ) != undefined
 					
 					
+					seed m_plug.alea_seed
+			
 					if bat_edition != unsupplied then (
 						
 -- 						debug "Construction MODE EDITION"

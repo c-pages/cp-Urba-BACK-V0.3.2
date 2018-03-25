@@ -120,7 +120,7 @@ struct str_batVirt (
 			
 			_node.etages_min 					= for val in etages_min	collect val
 			_node.etages_max_use				= etages_max_use
-			_node.etages_max						= etages_max
+			_node.etages_max					= etages_max
 			_node.etages_hauteurs				= etages_hauteurs
 			
 			for fcd in facades do _node.core.enregistrer_element	fcd

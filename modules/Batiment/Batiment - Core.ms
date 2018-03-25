@@ -184,6 +184,7 @@ struct str_batiment_core (
 	 */
 		
 		
+	---- Batiment -------------------
 		fn get_batiment =(
 			local nvBat = str_batVirt ()
 			nvBat.charger 	m_plug
@@ -436,7 +437,7 @@ struct str_batiment_core (
 		
 		
 	
-		
+		 
 		
 		
 		

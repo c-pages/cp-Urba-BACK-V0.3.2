@@ -258,7 +258,7 @@
 				local pt_du_plan 		= projeter_point_verticalement 	_pos
 				local matrx_transf 	= matrixFromNormal  normal
 				local plan  				= plane transform:matrx_transf length:1000 width:1000
-				plan.pos 					= pt_du_plan
+				plan.pos 				= pt_du_plan
 				select plan
 			)
 			

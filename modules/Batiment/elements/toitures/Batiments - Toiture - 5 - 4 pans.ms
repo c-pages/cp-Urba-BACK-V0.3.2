@@ -12,12 +12,12 @@ toiture_toolTip 	=	"..."
 
 --- les parametres du composant	---------
 struct toiture_params	(
-	pente 					= 	15,
+	pente 					= 	35,
 	
 	decalage_hauteur 	= 	0.,
 	decalage_largeur 	= 	0.,
 	
-	orientation				=	0,
+-- 	orientation				=	0,
 	
 	debord					= 15.,
 	epaisseur 				= 15,
@@ -37,8 +37,8 @@ rollout toiture_dialog "Paramètres"  width:180 height:128
 	spinner 'spn_pente' "" pos:[92,9] width:70 height:16 range:[0.001,70,0] type:#float scale:1 align:#left
 	label 'lbl_decallage' "Décallage (Z)" pos:[9,26] width:63 height:13 align:#left
 	spinner 'spn_decallage' "" pos:[92,25] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
-	label 'lbl_orientation' "Orientation (°):" pos:[9,56] width:70 height:13 align:#left
-	spinner 'spn_orientation' "" pos:[92,55] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
+-- 	label 'lbl_orientation' "Orientation (°):" pos:[9,56] width:70 height:13 align:#left
+-- 	spinner 'spn_orientation' "" pos:[92,55] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
 	label 'lbl_debord' "Débord" pos:[9,72] width:70 height:13 align:#left
 	spinner 'spn_debord' "" pos:[92,71] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
 	label 'lbl9' "Epaisseur" pos:[9,89] width:70 height:13 align:#left
@@ -50,7 +50,7 @@ rollout toiture_dialog "Paramètres"  width:180 height:128
 		m_core = m_rolloutP.m_core
 		
 		spn_pente.value 			= 	m_compo.params.pente
-		spn_orientation.value 	= 	m_compo.params.orientation
+-- 		spn_orientation.value 	= 	m_compo.params.orientation
 		spn_decallage.value 		= 	m_compo.params.decalage_hauteur
 		spn_debord.value 			= 	m_compo.params.debord
 		spn_epaisseur.value 		= 	m_compo.params.epaisseur
@@ -114,14 +114,14 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 	
 		
 -------------  PARAMETRES 	 et constantes		-----------------------------------------------------------------------------------------------------------------
-		local toiture_pente 		= this.params.pente
-		local toiture_decal_ht	= this.params.decalage_hauteur
+		local toiture_pente 			= this.params.pente
+		local toiture_decal_ht		= this.params.decalage_hauteur
 		local toiture_decal_larg	= this.params.decalage_largeur
-		local toiture_orient		= this.params.orientation
-		local toiture_debord		= this.params.debord
-		local toiture_epaisseur	= this.params.epaisseur
+-- 		local toiture_orient			= this.params.orientation
+		local toiture_debord			= this.params.debord
+		local toiture_epaisseur		= this.params.epaisseur
 	
-		local	 mtrx_axeP			=	mgr_surface.get_axePrincipal ()
+		local	 mtrx_axeP				=	mgr_surface.get_axePrincipal ()
 		local	 BB_axeP				=	mgr_surface.get_axeP_BB ()
 		
 -- 		pt_1 		= point size:1500 transform:mtrx_axeP 	pos:BB_axeP[1]	name:"PT_BB1"   centermarker:off axistripod:OFF cross:on Box:off wirecolor:blue
@@ -130,7 +130,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 -- 		pt_1 		= point size:1000 transform:mtrx_axeP 	name:"PT1"   centermarker:off axistripod:on cross:off Box:off wirecolor:yellow
 
 		
-		rotateZ 		mtrx_axeP		toiture_orient	
+-- 		rotateZ 		mtrx_axeP		toiture_orient	
 		
 -- 		pt_1 		= point size:700 transform:mtrx_axeP 	name:"PT2"   centermarker:off axistripod:on cross:off Box:off wirecolor:blue
 -- 		pt_2 		= point size:1000 transform:mtrx_axeP   name:"PT2"
@@ -152,10 +152,30 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		local z 					= pts_accroches[1].z
 		
 		local mtrx_axeP_temp = copy mtrx_axeP
+		
+		
+		
+		
+		
+		
+		
+		
+		for i = 1 to  pts_accroches.count do (
+			
+			local j = i+1
+			if j >  pts_accroches.count  do j = 1
+			
+			local vec_htDuMur 		= pts_accroches[j] -  pts_accroches[i]
+			local vec_penteDuToit 	= normalize ( vec_htDuMur) 	* rotateZ ( matrix3 1 ) 90		+ [0,0,1] *  tan 		toiture_pente
+			local nvPlan 			= ptr_geo.get_plan_2vecs_1Point	vec_htDuMur   vec_penteDuToit   pts_accroches[i]
+			nvPlan.representer_plan  ( (pts_accroches[j] +  pts_accroches[i] ) / 2 )
+			 
+		)
+		
 -- 		mtrx_axeP_temp.translation = [0,0,0]
 
 
-		
+		/* 
 		local vec_decall_larg 	= [0, toiture_decal_larg   , 0]  * mtrx_axeP_temp 
 		
 		local nvlsFaces 				= #()
@@ -325,7 +345,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 
 		ptr_geo.biseauter	facesDessus 	0.0 	toiture_debord
 		ptr_geo.extruder	facesDessus 	toiture_epaisseur
-		
+		 */
 		
 		
 )

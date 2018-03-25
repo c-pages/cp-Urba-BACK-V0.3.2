@@ -113,8 +113,7 @@ fn compo_fnConstruire  	_plug		pt_haut		norm_dir:		 		dist_hauteur:				onConstru
 		local pts_caisse_devant	 = ptr_geo.points 	#(pt_5,  pt_6)	
 		
 		-------	Creation de face 	--------
-		ptr_geo.face 		pts_caisse_ids 		matid:#menuiserie 
-		
+		ptr_geo.face 		pts_caisse_ids 		matid:#menuiserie 		
 		ptr_geo.face 		#( pts_caisse_devant[1] ,  pts_caisse_devant[2]	, pts_caisse_ids[3], pts_caisse_ids[4])	matid:#menuiserie 
 		
 		
@@ -125,7 +124,8 @@ fn compo_fnConstruire  	_plug		pt_haut		norm_dir:		 		dist_hauteur:				onConstru
 		local pt_volet_3 = pt_volet_2	- vec_clos_volet
 		local pt_volet_4 = pt_volet_3	- vec_longueur
 		
-		ptr_geo.face 	#(pt_volet_1,  pt_volet_2, pt_volet_3, pt_volet_4 )			matid:#menuiserie 
+		ptr_geo.face 	#(pt_volet_1, pt_volet_4, pt_volet_3,  pt_volet_2 )			matid:#volet 
+		
 		
 		
 		----- les rails ------------

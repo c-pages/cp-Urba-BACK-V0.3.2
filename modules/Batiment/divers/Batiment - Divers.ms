@@ -104,9 +104,11 @@ struct str_datasToString (
 				for datas in datasTab do (
 					local dataTab		= filterString datas 	separateur_mutation
 					local propNom 	= dataTab[1]
-							debug "<<<<<<< propNom >>>>>>>" var:propNom
-					local typeProp 	= classof ( getProperty _element propNom  )
-							debug "<<<<<<< typeProp >>>>>>>" var:typeProp
+					debug "<<<<<<< propNom >>>>>>>" var:propNom
+					local typeProp 	
+					if  hasProperty _element propNom do
+						typeProp 	= classof ( getProperty _element propNom  )
+					debug "<<<<<<< typeProp >>>>>>>" var:typeProp
 					case typeProp of (
 						--- les trucs qu'on zappe ------
 						MAXScriptFunction:	()
@@ -155,21 +157,22 @@ struct str_datasToString (
 								setProperty _element propNom data
 								debug "data" var:data 
 							*/
-							if dataTab[2] != undefined do  (							
-								local data 		
-								if execute dataTab[2]	 != undefined then
-									try data = execute dataTab[2]	catch data = dataTab[2]	
-								else
-									data = dataTab[2]	
-								
-								if	data== "undefined" then
-									data = undefined
-								
-								setProperty _element propNom data
-								debug "data" var:data
-							)						
-						)
-					)
+							if  hasProperty _element propNom do
+								if dataTab[2] != undefined do  (						
+									local data 		
+									if execute dataTab[2]	 != undefined then
+										try data = execute dataTab[2]	catch data = dataTab[2]	
+									else
+										data = dataTab[2]	
+									
+									if	data== "undefined" then
+										data = undefined
+									
+									setProperty _element propNom data
+									debug "data" var:data
+								)						
+						) -- fin default 
+					) --- fin case ----------
 				)
 			)
 			_element = undefined

@@ -17,6 +17,11 @@ struct str_mgr_material (
 						local variante 		= 40
 						append materials    ( CoronaMtl name:matID_nom  colorDiffuse:val_color  levelReflect:.9   reflectGlossiness:.8 )
 					)
+					#volet :(
+						local val_color 		= color 120 120 120 
+						local variante 		= 40
+						append materials    ( CoronaMtl name:matID_nom  colorDiffuse:val_color  levelReflect:.5   reflectGlossiness:.8 )
+					)
 					#vitrage :(
 						local val_color 		= color 0 0 0 
 						local variante 		= 40
