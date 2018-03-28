@@ -133,6 +133,7 @@ struct  str_squelettisation (
 		
 		precision 		= 1,		--	<<------ en cm ?!?
 		decallageHT 	= 1,
+		compteur_de_passes = 0,
 	
 -- 	private
 	public
@@ -302,14 +303,16 @@ struct  str_squelettisation (
 			debug "----- pts -----" var:pts
 			
 -- 			
--- 			/******* PROVISOIRE ********/
+					
+			/******* PROVISOIRE ********/
 -- 			ss = SplineShape pos:pts[1]
 -- 			addNewSpline ss
--- 			for pt in pts do
+			for pt in pts do
+				point size:20 centermarker:off axistripod:off cross:on Box:off pos:pt
 -- 				addKnot ss 1 #corner #line pt
 -- 			close  ss 1 
 -- 			updateShape ss
--- 			/******* PROVISOIRE ********/
+			/******* PROVISOIRE ********/
 -- 			
 			
 			------ Analyse initiale ------------------------------------------------
@@ -326,6 +329,18 @@ struct  str_squelettisation (
 				)
 			)
 
+					
+					/******* PROVISOIRE ********/
+					for pan_pts in pans_points do (
+						ss = SplineShape pos:pan_pts[1] wirecolor:green name:("Face exe: " + compteur_de_passes as string )
+						addNewSpline ss
+						for pt in pan_pts do
+							addKnot ss 1 #corner #line pt
+						close  ss 1 
+						updateShape ss
+					)
+					/******* PROVISOIRE ********/
+						
 -- 			debug "pans_points" var:pans_points
 
 			------ Calculs préliminaires  ------------------------------------------------
@@ -375,15 +390,17 @@ struct  str_squelettisation (
 -- 			debug "(1 / ( tan (angles_poly[i]/2) ))" var:(1 / ( tan (angles_poly[i]/2) ))
 -- 			debug "(1 / ( tan (angles_poly[j]/2) ))" var:(1 / ( tan (angles_poly[j]/2) ))
 -- 			debug "seg_dist" var:seg_dist
-				if seg_dist_min == 0 then (
-					seg_dist_min 	= seg_dist
-					ids_pt_evt 			= #(i)
-				) else if seg_dist > 0 do (
-					if seg_dist_min > seg_dist then (
+				if seg_dist > 0 do (
+					if seg_dist_min == 0 then (
 						seg_dist_min 	= seg_dist
-						ids_pt_evt 			=#(i)
-					) else if seg_dist_min == seg_dist do 
-						append ids_pt_evt 	i
+						ids_pt_evt 			= #(i)
+					) else if seg_dist > 0 do (
+						if seg_dist_min > seg_dist then (
+							seg_dist_min 	= seg_dist
+							ids_pt_evt 			=#(i)
+						) else if seg_dist_min == seg_dist do 
+							append ids_pt_evt 	i
+					)
 				)
 			) -- fin du for -----
 			
@@ -402,15 +419,15 @@ struct  str_squelettisation (
 				
 				-- la position du point fusionné -----------
 				local vec_seg_avt		=	pts[id_evt_avt] 	- pts[id_evt] 
-				local vec_seg_aprs	=	pts[id_evt_aprs] 	- pts[id_evt]
-				local normal_diag		=	normals_bisecs_poly[id_evt]
+				local vec_seg_aprs		=	pts[id_evt_aprs] 	- pts[id_evt]
+				local normal_diag			=	normals_bisecs_poly[id_evt]
 				local dist_depuis_pt 	= seg_dist_min / sin ( angles_poly[id_evt] / 2 )
-				local pos_evt 			= pts[id_evt] + normal_diag * dist_depuis_pt
+				local pos_evt 				= pts[id_evt] + normal_diag * dist_depuis_pt
 				
 				--- la creation de l'evenement -----------
 				local nv_evt 	= str_squel_evnt_segment 	id_pt_evnt:id_evt	\
-																					pos_pt_evnt:pos_evt \
-																					seg_dist_min:seg_dist_min
+																			pos_pt_evnt:pos_evt \
+																			seg_dist_min:seg_dist_min
 				append evts_segments 	nv_evt
 			)
 			
@@ -431,6 +448,8 @@ struct  str_squelettisation (
 			
 			while not on_a_un_evenement  and not on_a_fini	and dist_parcourue < 5000 do (
 				
+				compteur_de_passes += 1 
+				
 				-----  on stock la position actuel de chaque point du polygone (pts_pos_back) ------
 				local pts_pos_back 	= deepCopy pts_retrecissement
 				local pts_pos_dest 	= #()
@@ -445,9 +464,9 @@ struct  str_squelettisation (
 					
 					local pt 		= pts_retrecissement[id_pt]
 					local pt_avt	= pts_retrecissement[id_pt_avt]
-					local pt_aprs = pts_retrecissement[id_pt_aprs]
+					local pt_aprs 	= pts_retrecissement[id_pt_aprs]
 					
-					local vec_avt	= pts[id_pt_avt] 	- pts[id_pt] 
+					local vec_avt		= pts[id_pt_avt] 	- pts[id_pt] 
 					local vec_aprs 	= pts[id_pt_aprs] - pts[id_pt] 
 					
 					----	on trouve la position de destination de chaque point du polygone après rétrécissement (pts_pos_dest).
@@ -462,7 +481,7 @@ struct  str_squelettisation (
 				)
 -- 					
 				/******* PROVISOIRE ********/
-				ss = SplineShape pos:pts_retrecissement[1]
+				ss = SplineShape pos:pts_retrecissement[1] name:("Passe: " + compteur_de_passes as string )  wirecolor:blue
 				addNewSpline ss
 				for pt in pts_retrecissement do
 					addKnot ss 1 #corner #line pt
@@ -523,7 +542,7 @@ struct  str_squelettisation (
 				---- on controle les evenements ------------------------------------------------------------------------
 				------   Les 'Evnmts de Segment' -------------------------		
 				local ids_evts_a_retirer =#()
-				for i=1 to evts_segments.count do (
+				for i=1 to evts_segments.count where pts_retrecissement.count > 2   do (
 					
 					local evt = evts_segments[i]
 					
@@ -535,6 +554,18 @@ struct  str_squelettisation (
 						--- on declanche l'evenement ----------
 						on_a_un_evenement = true
 						debug "########## 'Evnmts de Segment' ##########"
+						debug "compteur_de_passes" var:compteur_de_passes
+						
+						/******* PROVISOIRE ********/
+						for pan_pts in pans_points do (
+							ss = SplineShape pos:pan_pts[1] wirecolor:red name:("Face passe: " + compteur_de_passes as string )
+							addNewSpline ss
+							for pt in pan_pts do
+								addKnot ss 1 #corner #line pt
+							close  ss 1 
+							updateShape ss
+						)
+						/******* PROVISOIRE ********/
 						
 						-- les ids des points concernés -----------
 						local id_pt_evnt 			= evt.id_pt_evnt
@@ -542,12 +573,17 @@ struct  str_squelettisation (
 						local id_pt_aprs_evnt	= if id_pt_evnt == pts_retrecissement.count then 1 else id_pt_evnt + 1
 						local pos_pt_evnt			=	pts_retrecissement[id_pt_evnt]
 						
+						debug "id_pt_evnt" var:id_pt_evnt
+						
 						append ids_evts_a_retirer		i 
 						
 						
 		                ----   On met à jour les faces des segmets concernés ---------
+-- 						
 						append 		pans_points[id_pt_evnt]				pos_pt_evnt
-						insertItem 	pos_pt_evnt								pans_points[id_pt_avt_evnt]	1
+-- 						insertItem 	pos_pt_evnt								pans_points[id_pt_avt_evnt]	1
+-- 						append 		pans_points[id_pt_avt_evnt]			pos_pt_evnt	
+						insertItem 	pos_pt_evnt	pans_points[id_pt_avt_evnt]		 1									
 						append  	pans_points[id_pt_aprs_evnt]		pos_pt_evnt
 						
 						
@@ -562,10 +598,20 @@ struct  str_squelettisation (
 						addmodifier ss  ( edit_poly() )
 						/******* PROVISOIRE ********/
 						
+-- 						/******* PROVISOIRE ********/
+-- 						for pan_pts in pans_points do (
+-- 							ss = SplineShape pos:pan_pts[1] wirecolor:yellow name:("Evt SEG passe: " + compteur_de_passes as string )
+-- 							addNewSpline ss
+-- 							for pt in pan_pts do
+-- 								addKnot ss 1 #corner #line pt
+-- 							close  ss 1 
+-- 							updateShape ss
+-- 						)
+-- 						/******* PROVISOIRE ********/
 						
 		                ----   On retire le point source de l'évènement (id_pt_evnt) de la liste des points du polygone (pts_poly) et de la liste des faces à créer (pans_points).
 						deleteItem pts_retrecissement  	id_pt_evnt
-						deleteItem pans_points 			 	id_pt_evnt
+						deleteItem pans_points 				id_pt_evnt
 						
 						----   On met à jour les index des points des evenement restant à traiter (on retire 1 aux points étant après (id_pt_evnt)).
 						for j = i+1 to evts_segments.count do (
@@ -580,28 +626,8 @@ struct  str_squelettisation (
 						
 						
 						
-						if pts_retrecissement.count > 2  then (
--- 							on_a_fini = true
--- 							
--- 							creer_squelette 	pts_retrecissement 	pans_points:pans_points
-
-						) else (
+						if pts_retrecissement.count <= 2  then (
 							on_a_fini = true
-							  ----   On créé les faces formée par nos points (pans_points[id_pt_evnt])
-							/******* PROVISOIRE ********/
-							
-							for pan_pts in pans_points do (
-								ss = SplineShape pos:pan_pts[1]
-								addNewSpline ss
-								for pt in pan_pts do
-									addKnot ss 1 #corner #line pt
-								close  ss 1 
-								updateShape ss
-								addmodifier ss  ( edit_poly() )
-							)
-							
-							/******* PROVISOIRE ********/
-								
 						)
 						
 						
@@ -625,13 +651,25 @@ struct  str_squelettisation (
 				
 				
 				------   Les 'Evnmts  Division' -------------------------		
-				for i=1 to evts_divisions.count do (
+				for i=1 to evts_divisions.count  do (
 					
 					local evt = evts_divisions[i]
 					
 					-- on gere les points créés ---------------
 					debug "########## 'Evnmts de Division' ##########"
 					
+					/******* PROVISOIRE ********/
+					for pan_pts in pans_points do (
+						ss = SplineShape pos:pan_pts[1] wirecolor:red name:("Face passe: " + compteur_de_passes as string )
+						addNewSpline ss
+						for pt in pan_pts do
+							addKnot ss 1 #corner #line pt
+						close  ss 1 
+						updateShape ss
+					)
+					/******* PROVISOIRE ********/
+						
+						
 					local id_pt_intersec 			= evt.id_pt_intersec
 					local id_pt_intersec_svt 	= id_pt_intersec + 1
 					if id_pt_intersec_svt > pts_retrecissement.count do id_pt_intersec_svt = 1
@@ -646,25 +684,29 @@ struct  str_squelettisation (
 					
 					local nv_pt = copy pts_retrecissement[id_pt_evnt]		
 -- 					point pos:nv_pt  color:blue
-					append 		pans_points[id_pt_evnt]							nv_pt
+					/* append 		pans_points[id_pt_evnt]							nv_pt
 					insertItem 	nv_pt													pans_points[id_pt_evnt_avnt]		1
-					insertItem 	nv_pt 													pans_points[id_pt_intersec]	 		1
+					insertItem 	nv_pt 													pans_points[id_pt_intersec]	 		1 */
 -- 					append		pans_points[id_pt_intersec_svt]					nv_pt			 
-					
-					
 					
 					----	 On construit 2 polygones :    #( id_pt_intersec+1 -> id_pt_evnt )
 					----                                 			 #( id_pt_evnt       -> id_pt_intersec )
+					--- copy des tableaux ------
+					local pans_pts_copy1 	= deepcopy pans_points
+					local pts_copy1 			= deepcopy pts_retrecissement
+					local pans_pts_copy2 	= deepcopy pans_points
+					local pts_copy2 			= deepcopy pts_retrecissement
 					
 					--- Poly 1 -----
 					local poly_1 = #()
 					local faces_poly_1 = #()
 					local id_pt = id_pt_intersec_svt
 					local trouve = false
+					
 					while not trouve do (						
 						
-						append poly_1 				pts_retrecissement[id_pt]
-						append faces_poly_1		pans_points[id_pt]
+						append poly_1 				pts_copy1[id_pt]
+						append faces_poly_1		pans_pts_copy1[id_pt]
 						
 						if id_pt == id_pt_evnt do trouve= true
 						
@@ -672,6 +714,10 @@ struct  str_squelettisation (
 						if id_pt > pts_retrecissement.count do id_pt = 1
 						
 					)
+					faces_poly_1[faces_poly_1.count] 			= ( deepCopy pans_pts_copy1)[id_pt_intersec]
+					if faces_poly_1.count > 1 do
+						insertItem 	nv_pt	faces_poly_1[faces_poly_1.count - 1 ] 		1
+-- 					insertItem 	nv_pt	faces_poly_1[faces_poly_1.count]		1
 					
 					--- Poly 2 -----
 					local poly_2 = #()
@@ -680,40 +726,57 @@ struct  str_squelettisation (
 					local trouve = false
 					while not trouve do (								
 						
-						append poly_2 				pts_retrecissement[id_pt]
-						append faces_poly_2		pans_points[id_pt]
+						append poly_2 				pts_copy2[id_pt]
+						append faces_poly_2		pans_pts_copy2[id_pt]
 						
 						if id_pt == id_pt_intersec do trouve= true
 						
 						id_pt += 1
 						if id_pt > pts_retrecissement.count do id_pt = 1
 					)
+-- 					faces_poly_2[1] = faces_poly_1[faces_poly_1.count]
+-- 					insertItem 	nv_pt	faces_poly_2[1]		1
+					append 		faces_poly_2[1]		nv_pt
+					insertItem 	nv_pt	faces_poly_2[faces_poly_2.count]		1
+-- 					append 				nv_pt
 					
 					
 					on_a_fini = true
 					
+-- 					
+-- 					insertItem 	nv_pt													pans_points[id_pt_evnt_avnt]		1
+-- 					insertItem 	nv_pt 													pans_points[id_pt_intersec]	 		1
 					
+-- 					/******* PROVISOIRE ********/
+-- 					for pan_pts in pans_points do (
+-- 						ss = SplineShape pos:pan_pts[1] wirecolor:yellow name:("Face à la passe: " + compteur_de_passes as string )
+-- 						addNewSpline ss
+-- 						for pt in pan_pts do
+-- 							addKnot ss 1 #corner #line pt
+-- 						close  ss 1 
+-- 						updateShape ss
+-- 					)
 					
-					
-					/******* PROVISOIRE ********/
-					debug "poly_1" var:poly_1
-					ss = SplineShape pos:poly_1[1]
-					addNewSpline ss
-					for pt in poly_1 do
-						addKnot ss 1 #corner #line pt
-					close  ss 1 
-					updateShape ss
-					
-					debug "poly_2" var:poly_2
-					ss = SplineShape pos:poly_2[1]
-					addNewSpline ss
-					for pt in poly_2 do
-						addKnot ss 1 #corner #line pt
-					close  ss 1 
-					updateShape ss
-					/******* PROVISOIRE ********/
-					
+-- 					/******* PROVISOIRE ********/
+-- 					debug "poly_1" var:poly_1
+-- 					ss = SplineShape pos:poly_1[1]
+-- 					addNewSpline ss
+-- 					for pt in poly_1 do
+-- 						addKnot ss 1 #corner #line pt
+-- 					close  ss 1 
+-- 					updateShape ss
+-- 					
+-- 					debug "poly_2" var:poly_2
+-- 					ss = SplineShape pos:poly_2[1]
+-- 					addNewSpline ss
+-- 					for pt in poly_2 do
+-- 						addKnot ss 1 #corner #line pt
+-- 					close  ss 1 
+-- 					updateShape ss
+-- 					/******* PROVISOIRE ********/
+					local compteur_de_passes_back 	= compteur_de_passes
 					creer_squelette 	poly_1 		pans_points:faces_poly_1
+					compteur_de_passes 					= compteur_de_passes_back
 					creer_squelette 	poly_2 		pans_points:faces_poly_2
 -- 					
 					
@@ -734,15 +797,29 @@ struct  str_squelettisation (
 				
 				if evts_segments.count == 0 and not on_a_fini do (
 					on_a_fini = true
-					if pts_retrecissement.count > 3 do
+					if pts_retrecissement.count > 2 do
 						creer_squelette 	pts_retrecissement 	pans_points:pans_points
 				)
+				
+					/******* PROVISOIRE ********/
+			
+				if on_a_fini do (
+					/******* PROVISOIRE ********/
+					for pan_pts in pans_points do (
+						ss = SplineShape pos:pan_pts[1]
+						addNewSpline ss
+						for pt in pan_pts do
+							addKnot ss 1 #corner #line pt
+						close  ss 1 
+						updateShape ss
+						addmodifier ss  ( edit_poly() )
+					)
 					
-				
-				
+					/******* PROVISOIRE ********/
+				)
 				
 				dist_parcourue += indant_distance
-				
+					
 			) ------ fin du while retrécissement ------------------------------
 			
 
@@ -750,7 +827,10 @@ struct  str_squelettisation (
 	
 		
 	public
-		fn exe 		pts 	pans_points:		= creer_squelette 	pts 	pans_points:pans_points
+		fn exe 		pts 	pans_points:		= (
+			compteur_de_passes = 0
+			creer_squelette 	pts 	pans_points:pans_points
+		)
 
 )   --  fin structure -------------------------------
 
@@ -782,7 +862,7 @@ squel = str_squelettisation ()
 -- 	point pos:pt_intersc size:50
 
 
-shp = $Line002
+shp = $Line003
 pts = for i = 1 to numknots shp collect getKnotPoint  shp 1 i 
 squel.exe	 pts
 
