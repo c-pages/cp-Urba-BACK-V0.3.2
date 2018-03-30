@@ -105,7 +105,7 @@ global remplirTexte, debuger, ecrire
 --------------- le plug in ---------
 plugin helper 	Urba_terrain_mgr
 name:"Terrain mgr"
-classID:#(358117,287595)
+classID:#(519845,146284)
 category:"CP | Urba"
 invisible:true
 extends:point 

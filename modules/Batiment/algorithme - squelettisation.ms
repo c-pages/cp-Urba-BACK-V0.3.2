@@ -170,7 +170,7 @@ struct  str_squelettisation (
 			norm_dir
 			
 		),
-		fn get_intersection_vecteurs		vec1_pt_1   vec1_pt_2		vec2_pt_1	vec2_pt_2 =(
+		fn get_intersection_droites		vec1_pt_1   vec1_pt_2		vec2_pt_1	vec2_pt_2 =(
 			
 			local pt_intersec
 			
@@ -199,11 +199,38 @@ struct  str_squelettisation (
 			
 		),
 		
+		fn get_intersection_vecteurs		vec1_pt_1   vec1_pt_2		vec2_pt_1	vec2_pt_2 =(
+			
+				debug "##### get_intersection_vecteurs #####"
+			local pt_intersec
+			
+			local vec_1 = vec1_pt_2 - vec1_pt_1
+			local vec_2 = vec2_pt_2 - vec2_pt_1
+			
+			
+			if vec_1.x*vec_2.y-vec_1.y*vec_2.x == 0 then (
+-- 				debug "##### PARALLELES #####"
+			) else (
+				
+				local coef_vec2 = -(-vec_1.x*vec1_pt_1.y+vec_1.x*vec2_pt_1.y+vec_1.y*vec1_pt_1.x-vec_1.y*vec2_pt_1.x)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+				local coef_vec1 = -(vec1_pt_1.x*vec_2.y-vec2_pt_1.x*vec_2.y-vec_2.x*vec1_pt_1.y+vec_2.x*vec2_pt_1.y)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+
+				
+				if coef_vec1 > 0 and coef_vec1 < 1 and coef_vec2 > 0 and coef_vec2 <1 do
+					pt_intersec	= vec2_pt_1 + coef_vec2*vec_2
+				
+			)
+			
+			pt_intersec
+			
+		),
+		
+		
 		fn get_intersection_demiDroite_segment		pt_demiDrt_orig	pt_demiDrt_direction  	seg_pt_1  seg_pt_2 =(
 			
 			local result
 			
-			local pt_intersection 		=  get_intersection_vecteurs		pt_demiDrt_orig   pt_demiDrt_direction		seg_pt_1	seg_pt_2 
+			local pt_intersection 		=  get_intersection_droites		pt_demiDrt_orig   pt_demiDrt_direction		seg_pt_1	seg_pt_2 
 			if pt_intersection != undefined do (
 				
 				local vec_intersection 		= pt_intersection 			- pt_demiDrt_orig
@@ -246,7 +273,7 @@ struct  str_squelettisation (
 		
 		fn get_intersection_demiDroite_segment		pt_orig_demiDrt	direction_demiDrt  	seg_pt_1  seg_pt_2 =(
 			
--- 		fn get_intersection_vecteurs		vec1_pt_1   vec1_pt_2		vec2_pt_1	vec2_pt_2 =(
+-- 		fn get_intersection_droites		vec1_pt_1   vec1_pt_2		vec2_pt_1	vec2_pt_2 =(
 			
 			local vec1_pt_1 = pt_orig_demiDrt
 			local vec1_pt_2 = pt_orig_demiDrt + direction_demiDrt

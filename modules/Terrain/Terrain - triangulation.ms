@@ -23,7 +23,7 @@
 		),
 
 		--- si un point est dans un triangle	-------------
-		fn est_dansTriangle	_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester =(
+		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester =(
 			if point_est_aGaucheDuSegment  _pt_tri_1 	_pt_tri_2 	_pt_aTester and point_est_aGaucheDuSegment  _pt_tri_2 	_pt_tri_3 	_pt_aTester  and point_est_aGaucheDuSegment  _pt_tri_3 	_pt_tri_1 	_pt_aTester then
 				true
 			else false
@@ -85,21 +85,19 @@
 
 		------- le fonction principale du decoupage ---------------------
 		--- renvois le tableau des triangles decoupés -------
-		fn trianguler  _pts =(
-			
-			format" ######### trianguler ###### pts:%\n"  _pts
+		fn executer  _pts =(
 			
 			local pts_poly 			= deepcopy _pts
 			
 			local result_triangles	= #()
 			
-			--------------- tant qu'il reste plus de trois point dans le polygone ------------------
+			--------------- tant qu'il reste plus de trois point dans le polygone ------------------			
 			while pts_poly.count >= 3 do (
 				
 				
 				-- on commence avec le point le plus a gauche du polygone--
 				local id_pt_aTester 	= point_lePlusAGauche  pts_poly		
-					format "--------------  id_pt_aTester --> :%  ------------------------\n"  id_pt_aTester
+				
 				-- le point d'avant ---
 				local id_pt_avant 	= if id_pt_aTester == 1 	then	pts_poly.count 
 																				else	id_pt_aTester - 1		
@@ -109,7 +107,6 @@
 				--- Le triangle à tester ---
 				local triangle_aTester = #(pts_poly[id_pt_avant], pts_poly[id_pt_aTester], pts_poly[id_pt_apres])
 				
-				format "triangle_aTester --> :(%, %, %)\n"  id_pt_avant  id_pt_aTester  id_pt_apres
 				
 				----- Puis on cherche parmis les points restants du polygone ceux qui seraient à l'interieur du trangle ----		
 				local ids_pts_dansTriangle =#()		
@@ -117,11 +114,8 @@
 					local pt_atester 				= pts_poly[i]
 					local pt_dansTriangle 		= est_dansTriangle 	triangle_aTester[1]	 triangle_aTester[2]	 triangle_aTester[3]	  pt_atester
 					
--- 					format "	i:%	pt_dansTriangle :%\n"  i  pt_dansTriangle
-					
 					if pt_dansTriangle do append ids_pts_dansTriangle  i
 				)
-				format "		ids_pts_dansTriangle --> :%\n"  ids_pts_dansTriangle
 				
 				if ids_pts_dansTriangle.count > 0 then (
 					
@@ -133,37 +127,28 @@
 					local IDpt_diagonal = 	point_lePlusLoinDuSegment  	pts_dansTriangle		triangle_aTester[3]		triangle_aTester[1]
 					local IDpt_decoupe = ids_pts_dansTriangle[IDpt_diagonal ]
 					
-					format "			IDpt_decoupe --> :%\n"  IDpt_decoupe
-					format "			id_pt_aTester --> :%\n"  id_pt_aTester
-					
 					-- on decoupe le polygone en 2 avec la digonale entre ce dernier point et le point à tester --
 					--- premier polygone découpé -------
 					local IDsPts_poly1  = #(IDpt_decoupe)
 					local pts_poly1  = #()
 					local  i = boucler  pts_poly  (id_pt_aTester ) 
 					while i 	!= IDpt_decoupe  do (
-						format "				creation du poly 1 : i: --> :%\n"  i
 						append IDsPts_poly1		 i 
 						i = boucler 	pts_poly		(i+1) 	
 					)				
 					pts_poly1 = for idPt in IDsPts_poly1 collect pts_poly[idPt]
-					format "			---->	IDsPts_poly1 --> :%\n"  IDsPts_poly1
-					
 					--- second polygone découpé -------
 					local IDsPts_poly2  = #(id_pt_aTester)
 					local pts_poly2  = #()
 					local  i = boucler  pts_poly  (IDpt_decoupe ) 
 					while i 	!= id_pt_aTester   do (
-						format "			creation du poly 2 : i: --> :%\n"  i
 						append IDsPts_poly2		 i 
 						i = boucler 	pts_poly		(i+1) 	
 					)				
 					pts_poly2 = for idPt in IDsPts_poly2 collect pts_poly[idPt]
-					format "			---->	IDsPts_poly2 --> :%\n"  IDsPts_poly2
-					
 
-					result_triangles += trianguler  pts_poly1
-					result_triangles += trianguler  pts_poly2
+					result_triangles += executer  pts_poly1
+					result_triangles += executer  pts_poly2
 					
 					
 					-- on vide les points de poly car on a lancé la fonction recursivement sur les deux poly trouvés, et on veut sortir de la boucle----
@@ -182,48 +167,12 @@
 			
 		) --- fin fonction decoupage polygone ----------
 
+		
+		
+		
+		
+		
 	) --- fin structure triangulation
 
 	
 	
-	
-mgr_triangulation = str_triangulation_shape()
-	/* 
-pt1 	= $point001.pos
-pt2 	= $point002.pos
-pt3	= $point004.pos
-pt_atester	= $point003.pos
- */
-shp = $
-points =#()
-for i = 1 to numknots shp 1 do
-		append points (getKnotPoint shp 1 i )
- 
--- point_lePlusAGauche points
---  clearlistener ()
--- IDpt_lePlusLoin = point_lePlusLoinDuSegment  points  pt1  pt_atester
--- point box:on axistripod:off centerMark:off cross:off  isSelected:true pos:points[IDpt_lePlusLoin]
-
--- mgr_triangulation.est_dansTriangle  points[3]  points[1]  points[2]    points[5]
-
-
-
-
-clearSelection ()
-
-triangles =	mgr_triangulation. trianguler   points
-for tri in triangles do (
-	sp = splineShape pos:tri[1]
-	addnewSpline sp
-	addKnot sp  1  #corner #line tri[1]
-	addKnot sp  1  #corner #line tri[2]
-	addKnot sp  1  #corner #line tri[3]
-	close sp 1
-updateShape sp
-	selectmore sp
-)
- 
--- point_lePlusLoinDuSegment
--- point_parRapportA_segment  pt1 pt2 	pt3
--- est_dansTriangle pt1 pt2 pt3 pt_atester
-
