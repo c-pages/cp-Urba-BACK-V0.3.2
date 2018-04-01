@@ -50,14 +50,14 @@ version:0
 		
 		fn get_BB_shape =(
 			local result #([0,0,0],[0,0,0])
-			local pts_shape = #()
+			local pts_contour = #()
 			for i = 1 to numSplines  this.terrain_shape do 
-				append pts_shape ( for j= 1 to numKnots 	this.terrain_shape collect getKnotPoint this.terrain_shape i j )
+				append pts_contour ( for j= 1 to numKnots 	this.terrain_shape collect getKnotPoint this.terrain_shape i j )
 			
 			local minX = minY 	= minZ =1e10
 			local maxX = maxY 	= maxZ = -1e10
 			
-			for pts_face in pts_shape do 
+			for pts_face in pts_contour do 
 				for pt in pts_face do (
 					if pt.x < minX 		do minX = pt.x 
 					if pt.y < minY 	do minY = pt.y
@@ -115,13 +115,13 @@ version:0
 			local survol = false
 			
 			--- on chope les points ----------------
-			local pts_shape = #()
+			local pts_contour = #()
 			for i = 1 to numSplines  this.terrain_shape do 
-				append pts_shape ( for j= 1 to numKnots 	this.terrain_shape collect getKnotPoint this.terrain_shape i j )
+				append pts_contour ( for j= 1 to numKnots 	this.terrain_shape collect getKnotPoint this.terrain_shape i j )
 			
 			--- creation des triangles -----------
 			local triangles_shape = #()
-			for pts_spline in pts_shape do (
+			for pts_spline in pts_contour do (
 				local spline_tri = trianguler.executer		pts_spline
 				for tri in spline_tri do
 					append triangles_shape 	tri
@@ -154,19 +154,19 @@ version:0
 			if this.terrain_shape != undefined do (
 				
 				--- on chope les points ----------------
-				local pts_shape = #()
+				local pts_contour = #()
 				for i = 1 to numSplines  this.terrain_shape do 
-					append pts_shape ( for j= 1 to numKnots 	this.terrain_shape collect getKnotPoint this.terrain_shape i j )
+					append pts_contour ( for j= 1 to numKnots 	this.terrain_shape collect getKnotPoint this.terrain_shape i j )
 				
 				
 				
-				--- on  calcul notre region d'intervention -----------
-				local precision = terrain_precision
-				local bb_shape 			= get_BB_shape  ()
-				local index_x				=	floor ( bb_shape[1].x / precision )
-				local index_y				=	floor ( bb_shape[1].y / precision )
-				local index_x_max		=	floor ( bb_shape[2].x / precision )
-				local index_y_max		=	floor ( bb_shape[2].y / precision )
+				--- parametre quadrillage	-----------
+				local precision 			= terrain_precision
+				local BB_contour 		= get_BB_shape  ()
+				local index_x				=	floor ( BB_contour[1].x / precision )
+				local index_y				=	floor ( BB_contour[1].y / precision )
+				local index_x_max		=	floor ( BB_contour[2].x / precision )
+				local index_y_max		=	floor ( BB_contour[2].y / precision )
 				
 				
 				
@@ -175,18 +175,23 @@ version:0
 				
 				--- on parcours toutes les cases ----------------
 				while index_y <= index_y_max do (
-					
-					index_x				=	floor ( bb_shape[1].x / precision )
-					
+					index_x				=	floor ( BB_contour[1].x / precision )
 					while index_x <= index_x_max do (
 						
+						debug "-------CASE ------"
+						debug "-------X ------" var:index_x
+						debug "-------Y ------" var:index_y
+						
+						------ les point de la case -------------------------------
 						local pts_case 	  = #()
 						append pts_case		[index_x * 	precision, index_y * 	precision, 0 ]
-						append pts_case		[( index_x + 1 ) * 	precision , index_y * 	precision, 0 ]
-						append pts_case		[( index_x + 1 ) * 	precision , ( index_y + 1 ) * 	precision , 0 ]
 						append pts_case		[index_x * 	precision , ( index_y + 1 ) * 	precision , 0 ]
+						append pts_case		[( index_x + 1 ) * 	precision , ( index_y + 1 ) * 	precision , 0 ]
+						append pts_case		[( index_x + 1 ) * 	precision , index_y * 	precision, 0 ]
 						
-						--- on verifie qu'on survol le shape ---------------
+						
+						
+						----- on regarde si les points de la case survolent le shape ---------------
 						local on_survol = false
 						for pt_case in pts_case do 							
 							if survol_contour 	pt_case do 
@@ -194,23 +199,31 @@ version:0
 						
 						
 						
-						-- on regarde si les edges se coupent -----
-						local case_sur_shape = false
+						
+						
+						----------- on cherche les INTERSECTIONS potentielles entre les edges de la case et les edges du contour -----------------
+						local caseEtContour_seCoupent = false
+						local intersections_carre_contour = #()
+						
+						--- une intersection -------
 						struct str_intersection (
 							pos,
-							id_case,
-							id_pt_shape,
-							id_spline_shape
+							id_pt_case,
+							id_pt_contour,
+							id_spline_contour
 						)
-						local intersections_carre_shape = #()
+						
+						--- pour chaque point de la case -----
 						for i_pt_case = 1 to pts_case.count do (
 							
-							local pt_case = pts_case[i_pt_case]
-							local j_pt_case = if i_pt_case == pts_case.count  then 1 else i_pt_case + 1
-							local pt_case_suivant = pts_case[j_pt_case]
+							--- les points ----
+							local pt_case 				= pts_case[i_pt_case]
+							local j_pt_case 			= if i_pt_case == pts_case.count  then 1 else i_pt_case + 1
+							local pt_case_suivant 	= pts_case[j_pt_case]
 							
-							for i_pts_spline = 1 to pts_shape.count do (
-								local pts_spline = pts_shape[i_pts_spline]
+							--- pour chaque point du contour ----
+							for i_pts_spline = 1 to pts_contour.count do (
+								local pts_spline = pts_contour[i_pts_spline]
 								
 								for i_shp = 1 to pts_spline.count do (
 									local pt_shp = pts_spline[i_shp]
@@ -220,8 +233,8 @@ version:0
 									local intersection = get_intersection_vecteurs	 pt_case 	pt_case_suivant		pt_shp		pt_shp_suivant
 									
 									if intersection != undefined 	do (
-										case_sur_shape = true
-										append 	intersections_carre_shape 		( str_intersection pos:intersection	id_case:i_pt_case		id_pt_shape:i_shp 	id_spline_shape:i_pts_spline 	)
+										caseEtContour_seCoupent = true
+										append 	intersections_carre_contour 		( str_intersection pos:intersection	id_pt_case:i_pt_case		id_pt_contour:i_shp 	id_spline_contour:i_pts_spline 	)
 									)
 										
 								)
@@ -229,7 +242,8 @@ version:0
 						)
 						
 						
-						--- on le plaque au relief ----------
+						
+						--- on le projete sur le relief ----------
 						for pt in pts_case do (
 							local pt_projection = projectionZ 	pt	
 							if pt_projection != undefined do 
@@ -238,51 +252,49 @@ version:0
 						
 						
 						
+						debug "on_survol" var:on_survol
+						debug "caseEtContour_seCoupent" var:caseEtContour_seCoupent
+						debug "intersections_carre_contour" var:intersections_carre_contour
+						
 						----- creation des faces --------------------------------------
+						--- si la case survol le contour -----
 						if  on_survol do (
-							if not case_sur_shape then (
+							--- si les edges de la case ne coupent pas le contour, alors on a une case pleine --------------
+							if not caseEtContour_seCoupent then (
 								--- on dessine un carrée plein -----------
 								geo.face	pts_case
-								
+							
+							--- sinon,si les edges de la case coupent le contour, on doit faire la découpe ------------
 							) else (
 								
-								--- on dessine un bout de carrée -----------
-								local pts_face = #()
+								debug "---	on doit faire la découpe ---"
 								
-								-- on cherche la premiere intersection ------------
-								/* local id_pt_case = 1
-								local intersec_1 = intersections_carre_shape[1]
-								local pt_courant = pt_initial  =  intersec_1
-								append pts_face  pt_courant
+								-- On part du premier point de la case --------------------
+								local pts_face_aConstruire 	=	#()
 								
-								
-								local id_pt_shape 			= intersec_1.id_pt_shape
-								local id_spline_shape 	= intersec_1.id_spline_shape
-								local id_pt_shape_svnt = if id_pt_shape == pts_shape[id_spline_shape].count  then 1 else id_pt_shape + 1
-								
-								local pt_shape 				= pts_shape[id_spline_shape][id_pt_shape]
-								local pt_shape_svnt		= pts_shape[id_spline_shape][id_pt_shape_svnt]
-								*/
-								
-								local pts_face_result 		=#()
-								local i_spline_shape			=	1
-								local shps_aSuivre			=	#( pts_case , pts_shape[i_spline_shape])
-								local i_shape_aSuivre		=	1
-								local sens 						= 1
-								local shp_courant 			=	shps_aSuivre[i_shape_aSuivre]
+								local sens 							= 	1
+								local shp_courant 				=	pts_case
+								local shp_courant_spline		=	1
+								local shp_courant_type		=	#case
 								local i_courant 					= 1
-								local pt_courant 				=	shp_courant[ i_courant ]
-								local est_dansLeContour	= if survol_contour pt_courant then true else false
+								local pt_courant 					=	shp_courant[ i_courant ]
+								local est_dansLeContour		= 	if survol_contour pt_courant then true else false
+								
+								-- si le premier point survol le contour, on l'ajoute aux point de construction ---------
+								if est_dansLeContour do 			append pts_face_aConstruire 	pt_courant
 								
 								
-								if est_dansLeContour do 
-									append pts_face_result 	pt_courant
 								
+								------------------ on parcours les points pour construire la face -----------------------------
 								local pt_initial	= pt_courant
-								
+								local compteur_secours = 0
 								-----   tant que le point_courant est different du point initiale -----------
-								while pt_courant != pt_initial or pts_face_result.count <= 1 do (
+								while ( pt_courant != pt_initial or pts_face_aConstruire.count <= 1 ) and compteur_secours < 50 do (
+									compteur_secours += 1
 									
+									debug "pt_courant" var:pt_courant
+									debug "----->	compteur_secours " var:compteur_secours
+												debug "----->	shp_courant_type" var:shp_courant_type
 									
 									--- le point suivant ------------
 									i_suivant = i_courant + 1
@@ -290,69 +302,107 @@ version:0
 									local pt_suivant 		=	shp_courant[ i_suivant ]
 									
 									
+									
 									-- on cherche le point suivant : intersection ou point suivant  ? --------	
 									local on_a_une_intersection = false
-									for intersec in intersections_carre_shape do (
-										case i_shape_aSuivre of (
-											1: ( --- Carrée ------------------
-												if i_courant	==	intersec.i_pt_case	then (
+									local id_intersec = 1
+									while id_intersec	<=  intersections_carre_contour.count and not on_a_une_intersection do (
+										
+										local intersec = intersections_carre_contour[id_intersec]
+										--- en fonction du shape que l'on est en train de suivre -------------
+										case shp_courant_type of (
+											
+											#case: ( --- la CASE ------------------
+												---- on regarde si on trouve l'id courante de la case dans les intersections -------
+												if i_courant	==	intersec.id_pt_case	then (
 													
-													on_a_une_intersection = true
-													
-													if 	point_est_aGaucheDuSegment		pt_courant	pt_suivant	shps_aSuivre[intersec.id_spline_shape][intersec.id_pt_shape] 	then (
+												debug "INTERSECTION" var:intersec
+													--- on regarde dans quel sens va le contour pour savoir dans quelle sens aller ----
+													if 	point_est_aGaucheDuSegment		pt_courant	pt_suivant		pts_contour[ intersec.id_spline_contour ][intersec.id_pt_contour] 	then (
 														sens 					= 1
-														i_courant				=	intersec.id_pt_shape
-														i_spline_shape		=	intersec.id_spline_shape
-														
+														i_courant			=	intersec.id_pt_contour
 													) else (
 														sens 					= -1
-														i_courant 				= if i_courant > shps_aSuivre[intersec.id_spline_shape].count	then 1 else	intersec.id_pt_shape + 1
-														i_spline_shape		=	intersec.id_spline_shape
+														i_courant 			= if i_courant > shp_courant.count	then 1 else	intersec.id_pt_contour + 1
 													)
 													
-													shps_aSuivre[2] = pts_shape[i_spline_shape]
-													
-													pt_courant 		=	intersec.pos													
-													append pts_face_result 	pt_courant
+													--- on change de shape courant -----------
+													on_a_une_intersection	= true
+													shp_courant_spline		= intersec.id_spline_contour
+													shp_courant 				= pts_contour[ shp_courant_spline ]
+													shp_courant_type		=	#contour
+													pt_courant 				=	intersec.pos													
+													append pts_face_aConstruire 	pt_courant
+													debug " APPEND -> pts_face_aConstruire" var:pts_face_aConstruire
 									
-													i_shape_aSuivre = 2
 												)
-											)
-											2: ( --- contour  ------------------
-												if i_courant	==	intersec.id_pt_shape and  i_shape_aSuivre	== intersec.id_spline_shape then (
-													
-													on_a_une_intersection = true
+											) --- fin la case ------------------
+											
+											#contour: ( --- le CONTOUR  ------------------
 												
-													pt_courant 		=	intersec.pos
-													append pts_face_result 	pt_courant
+												---- on regarde si on trouve l'id courante et l'id du spline du contour	dans les intersections -------
+												if i_courant	==	intersec.id_pt_contour and  shp_courant_spline	== intersec.id_spline_contour then (
 													
+													debug "INTERSECTION" var:intersec
 													
-													i_shape_aSuivre = 1
-											)
+													--- on change de shape courant -----------
+													sens 							= 1
+													i_courant					= intersec.id_pt_case
+													on_a_une_intersection 	= true
+													shp_courant_spline		= 1
+													shp_courant 				= pts_case
+													shp_courant_type		=	#case
+													pt_courant 				=	intersec.pos
+													append pts_face_aConstruire 	pt_courant
+													debug " APPEND -> pts_face_aConstruire" var:pts_face_aConstruire
+													
+												)
+											) --- fin contour ----
+											
+										)	--- fin case type shape courant ----------------------
+										
+										---- si on a pas d'intersection, on ajoute le point suivant ----------
+										if not on_a_une_intersection do (
+											i_courant 		=	i_suivant
+											pt_courant 	=	pt_suivant
+											append pts_face_aConstruire 	pt_courant
+											debug " APPEND point suivant -> pts_face_aConstruire" var:pts_face_aConstruire
 										)
+										
+										debug "----->	pts_face_aConstruire " var:pts_face_aConstruire
+										
+										id_intersec += 1
+									) --- fin for intersections ------------
+									
+									---- Construction de la face ------------------
+									if pts_face_aConstruire.count > 2 do	(		
+										debug "----->	CONSTRUCTION: " var:pts_face_aConstruire				
+										--- on le projete sur le relief ----------
+										for pt in pts_face_aConstruire do (
+											local pt_projection = projectionZ 	pt	
+											if pt_projection != undefined do 
+												pt.z =	pt_projection.pos.z
+										) 
+										geo.face	pts_face_aConstruire
+										
+									pts_face_aConstruire = #()
 									)
 									
-									if not on_a_une_intersection do (
-										pt_courant 		=	pt_suivant
-										append pts_face_result 	pt_courant
-										i_courant = i_suivant
-									)
 									
-									if pts_face_result.count > 2 do
-										geo.face	pts_face_result
-									
-								)
-							)
-						)
+								) ---- fin while parcours les points pour creer face découpée  -----------
+							) ---- fin creation d'une face découpée ---
+							
+						) --- fin survol ----------
 						
 						index_x += 1
-					)
+					) ---- fin les cases sur X ---
 					index_y += 1
-				)
+				) ---- fin les cases sur Y ---
 				
-			)
-		)
-	)
+			) -- fin on a un contour -----
+			
+		) --- fin Fonction construire ---------------------
+	
 
 		fn actualiser =(
 
