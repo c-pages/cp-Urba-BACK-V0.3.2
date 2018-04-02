@@ -1,7 +1,11 @@
-# CP - Batiment V0.2.1
-Plugin 3DSmax - Bâtiments paramétriques.
+# CP - Urba V0.2.2
+Plugin 3DSmax.
+Bâtiments paramétriques et Terrains parametriques pour realisation rues, trottoire, gazon etc.
 
-### Réalisations pour la version V0.2.0 :
+## version V0.2.2 :
+- [x] intégration du _Terrain paramétrique_: Un objet qui utilise sa liste de splines pour créer une 'grille', d'une dimension gérable, qu'il projete sur les reliefs de sa liste.
+
+## version V0.2.0 :
 - [x] Simplification des éléments du batiment, un systeme de constructeur va chercher les fichiers des éléments pour remplir le plug  -> souplesse accrue.
 - [x] Refonte de l'interface, on passe maintenant dans un _'mode édition'_ pour modifier le bâtiment.
 - [x] Système d'affichage d'information dans le viewport dans le _'mode édition'_ pour un retour rapide des modifs du batiment.
@@ -9,7 +13,11 @@ Plugin 3DSmax - Bâtiments paramétriques.
 - [x] Un groupe peut être créé dans une séquence de façade pour répétition d'un 'motif'.
 - [x] Les composants peuvent être instanciés.
 - [x] Corrections toitures à 2 pans.
+
 ### Todo :
+* **Terrain** :
+- [ ] Inverser le poly resultat, c'est à dire utiliser les contours pour creuser le cadre former par le ou les reliefs. pour pouvoir avec la meme spline creer la route ou l'inverse c'est a dire les trottoires.
+
 * **Surface** :
   - [x] Division de la surface en quadrilataires simples pour :
     * - [ ] Répartition des éléments de toitures.
