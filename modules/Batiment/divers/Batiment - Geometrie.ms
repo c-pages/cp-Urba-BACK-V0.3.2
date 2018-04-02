@@ -71,7 +71,7 @@ struct	str_geometrie	(
 			)
 			result
 		),
-		fn face		_liste_pts						matID:1		flipNormal:false	cible:m_plug.delegate 		=(
+		fn face		_liste_pts						matID:1		flipNormal:false	cible:m_plug.delegate 		smGrp:		=(
 			
 			local pts = deepCopy _liste_pts
 			
@@ -92,6 +92,9 @@ struct	str_geometrie	(
 			local result = polyop.createPolygon cible  pts
 			set_matID 	result	matID  cible:cible
 			
+			--- smoothing group^------------
+			if smGrp != unsupplied do 
+				polyop.setFaceSmoothGroup cible	 result	  smGrp
 			
 -- 			-- si on doit inverser les points pour fliper la face ---------
 -- 			if flipNormal do fliperNormal	result

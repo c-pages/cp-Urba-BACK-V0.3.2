@@ -2,7 +2,7 @@
 
 plugin geometry  Urba_terrain
 name:"Terrain"
-classID:#(354345,456434)
+classID:#(782875,485874)
 category:"CP | Urba"
 invisible:false
 extends:editable_poly 
@@ -19,7 +19,7 @@ version:0
 
 
 
-		include	 "$userScripts\\cp-Urba\\modules\\Terrain\\Terrain - node - core.ms" 
+		include	 "$userScripts\\cp-Urba\\modules\\Terrain\\Terrain - core.ms" 
 
 		local	core	=	str_terrain_node_core ()
 		

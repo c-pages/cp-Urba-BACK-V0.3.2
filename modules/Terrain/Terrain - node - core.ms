@@ -1,7 +1,6 @@
 
 
 
-include	 "$userScripts\\cp-Urba\\modules\\Terrain\\Terrain - triangulation.ms" 
 include	 "$userScripts\\cp-Urba\\modules\\Batiment\\divers\\Batiment - Geometrie.ms"
 include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - shape.ms" 
 
@@ -17,7 +16,6 @@ struct	str_terrain_node_core	(
 		m_core,
 		
 		mgr_geo				= 	str_geometrie 		(),
-		mgr_trianguler 	= 	str_triangulation_shape (),
 		mgr_shapes		= 	str_terrain_outils_shape (),
 		mgr_datas			=	str_datasToString (),
 		
