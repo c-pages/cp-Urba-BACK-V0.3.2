@@ -73,21 +73,23 @@ struct	str_geometrie	(
 		),
 		fn face		_liste_pts						matID:1		flipNormal:false	cible:m_plug.delegate 		=(
 			
+			local pts = deepCopy _liste_pts
+			
 			--- si on a liste de point3 on créé les points d'abord
-			for i = 1 to _liste_pts.count do
-				if classof 	_liste_pts[i]	== Point3 do
-					_liste_pts[i] = ( points		#(_liste_pts[i]) 	cible:cible	)[1]
+			for i = 1 to pts.count do
+				if classof 	pts[i]	== Point3 do
+					pts[i] = ( points		#(pts[i]) 	cible:cible	)[1]
 			
 			-- si on doit inverser les points pour fliper la face ---------
 			if flipNormal do (				
 				local result =#()
-				for i= _liste_pts.count to 1 by -1 do 
-					append result 	_liste_pts[i]
-				_liste_pts =  result
+				for i= pts.count to 1 by -1 do 
+					append result 	pts[i]
+				pts =  result
 			)
 
 			-- on crer la face ----
-			local result = polyop.createPolygon cible  _liste_pts
+			local result = polyop.createPolygon cible  pts
 			set_matID 	result	matID  cible:cible
 			
 			

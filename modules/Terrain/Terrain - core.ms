@@ -17,19 +17,22 @@ struct str_urba_terrain_core (
 	private
 		m_plug,
 		m_editeur_rollout ,
-		callbackItem,
+-- 		callbackItem,
 -- 		m_editeur_rollout_ouvert = false,
 	
 		
 	private
 		fn creer_terrain = (
 			
--- 			debug "-------	Creation du modele	--------"
+			debug "-------	Creation du modele	--------"
 			
+			debug "-------	m_plug.cadre_shape	" var:m_plug.cadre_shape	
 			local nv_terrain 	= Urba_terrain ()			
-			nv_terrain.terrain_shape 		= m_plug.cadre_shape			
-			nv_terrain.terrain_precision 	= 	m_plug.relief_precision
-			nv_terrain.terrain_relief			=	m_plug.relief_node
+			nv_terrain.set_contour	 	m_plug.cadre_shape	
+			
+-- 			nv_terrain.contour_node 		=  m_plug.cadre_shape			
+			nv_terrain.grille_largeur		 	= 	m_plug.relief_precision
+			nv_terrain.relief_node			=	m_plug.relief_node
 			nv_terrain.actualiser ()
 			
 		),
@@ -69,7 +72,7 @@ struct str_urba_terrain_core (
 		
 		fn initialiser _plug =(
 			m_plug = _plug
-			
+			/* 
 			fn CallbackFn1 ev nds = (
 			if classof  ( GetAnimByHandle nds[1] ) != Urba_terrain_mgr and classof  ( GetAnimByHandle nds[1] ) != Urba_terrain  do
 				for nd_id in nds do (
@@ -86,7 +89,7 @@ struct str_urba_terrain_core (
 				callbackItem = undefined
 				gc light:true
 				callbackItem = NodeEventCallback 	mouseup:true 	geometryChanged:CallbackFn1
-				
+				 */
 				
 			--editeur_rollout_ouvrir()
 		)
