@@ -9,9 +9,13 @@ include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - sh
 
 struct	str_terrain_node_core	(
 		
-		------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		fn debug 	_txt  var:	 param:    =	try if true  do ::debuger 	_txt	prefix:"urba | str_terrain_node_core"	  	var:var	 param:param		catch (),
-		------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
+		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	
+	
+	
 	private
 		m_plug,
 		m_core,
@@ -108,26 +112,6 @@ struct	str_terrain_node_core	(
 		),
 		
 		
-	/* 	
-		fn projeter_pts	_pts		=(
-			
-			debug "projeter_pts"
-			
-			local pts_result=#()
-			for pt in  _pts do (
-				local maxZ = -1e+10
-				for relief in m_plug.reliefs_nodes do (
-					local pt_prj	= projectionZ 	pt		relief
-					if pt_prj.z > maxZ do (
-						maxZ 	=	pt_prj.z
-						pt.z 		= 	maxZ
-					)
-				)
-				append pts_result 	( copy pt )
-			)
-			pts_result
-		), */
-		
 		
 		
 		fn quadriller  		 = (
@@ -191,9 +175,24 @@ struct	str_terrain_node_core	(
 			
 				debug "construire"
 				
+				
 				--- on créé une face par spline ------------
 				for pts_spline_contour in m_contour_points do
 					mgr_geo.face 	pts_spline_contour	smGrp:1
+				
+				/* 
+				--- on créé une spline par splines de contours ------------
+				local sp = splineShape 	isSelected:off
+				for pts_spline_contour in m_contour_points do (
+					addnewSpline sp
+					
+					for pt in spl do
+						addknot sp 1 #corner #curve  pt
+					close sp 1
+				)
+				updateShape sp
+				
+				 */
 				
 				--- on quadrille   ------------
 				quadriller ()
