@@ -1,4 +1,7 @@
 
+
+
+
 struct str_terrain_booleen		(
 	
 	
@@ -203,9 +206,127 @@ struct str_terrain_booleen		(
 
 		
 		
+		fn get_BB_shape		_pts_shp 	=(
+			local result #([0,0,0],[0,0,0])
+			
+			
+			local minX = minY 	= minZ =1e10
+			local maxX = maxY 	= maxZ = -1e10
+			
+			for pt in _pts_shp do (
+				if pt.x < minX 		do minX = pt.x 
+				if pt.y < minY 	do minY = pt.y
+				if pt.z < minZ 		do minZ = pt.z 
+				if pt.x > maxX 	do maxX = pt.x 
+				if pt.y > maxY 	do maxY = pt.y 
+				if pt.z > maxZ 	do maxZ = pt.z 
+			)
+			
+			#([minX,minY,minZ],[maxX,maxY,maxZ])
+			
+		),
+		
+		fn get_aire_BB  _pts_shp =(
+			local BB 		= get_BB_shape		_pts_shp
+			(BB[2].x - BB[1].x) * (BB[2].y - BB[1].y)
+		),
+		
+		fn get_lePlusGros_shape	_pts_shps =(
+			local aireMax = 0
+			local id_result = 0
+			for i = 1 to _pts_shps.count do (
+				local pts_shp = _pts_shps[i]
+				local aire = get_aire_BB 	pts_shp
+				if aire> aireMax do (
+					id_result = i
+					aireMax = aire
+				)
+			)
+			id_result
+		),
+		
+		fn get_lePlusPetit_shape	_pts_shps =(
+			local aireMin = 1e+20
+			local id_result = 0
+			for i = 1 to _pts_shps.count do (
+				local pts_shp = _pts_shps[i]
+				local aire = get_aire_BB 	pts_shp
+				if aire< aireMin do (
+					id_result = i
+					aireMin = aire
+				)
+			)
+			id_result
+		),
+		
+		--- Renvois la distance la plus courte entre les points des deux shapes ----------
+		fn get_distance_shapes  _pts_shp1  _pts_shp2 =(
+			
+			struct	str_dist_shapes	(
+				id_pt_shp1	=	0,
+				id_pt_shp2	=	0,
+				distance		= 1e+10
+			)
+			
+			
+			local id_pt_connexion_1	=	0
+			local id_pt_connexion_2	=	0 
+			local dist_min					= 1e+10
+			local result 
+			
+			for id_pt1 = 1 to  _pts_shp1.count do (
+				local pt1	=	_pts_shp1[ id_pt1 ]
+				for id_pt2 = 1 to  _pts_shp2.count do (
+					local pt2			=	_pts_shp2[ id_pt2 ]
+					local dist_test	=	distance	pt1 pt2
+					if dist_test < dist_min do (
+						dist_min = dist_test
+						id_pt_connexion_1	=	id_pt1
+						id_pt_connexion_2	=	id_pt2
+						result = str_dist_shapes  id_pt_shp1:id_pt1	id_pt_shp2:id_pt2	distance:dist_test
+					)				
+				)
+			)
+			
+			result
+			
+		),
+		
+		
+		fn get_shape_lePlusProche	_pts_shp1		_pts_shps_aTester 		=(
+			
+			
+			struct	str_shape_lePlusProche	(
+				id_shp 		= 	0,
+				id_pt_shp1	=	0,
+				id_pt_shp2	=	0
+			)
+			
+			local dist_min	= 1e+10
+			local result = str_shape_lePlusProche ()
+			
+			local pts_shp1	= _pts_shp1
+			
+			for  i = 1 to _pts_shps_aTester.count do (
+				local pts_shp2	= _pts_shps_aTester[ i ]
+				
+				local dist_test = get_distance_shapes 	pts_shp1  	pts_shp2
+				if dist_test.distance < dist_min do (
+					dist_min = dist_test.distance					
+					result.id_shp 		= 	i
+					result.id_pt_shp1	=	dist_test.id_pt_shp1
+					result.id_pt_shp2	=	dist_test.id_pt_shp2
+				)
+			)
+				
+			result
+		),
+		
 		
 		------- savoir si un shapes est ' l'interieur d'un autre (trou boolean), se croisent ou à l'exterieur ---------
 		fn get_positionRelative_shapes 		_pts_shp1		_pts_shp_aTester 	=(
+			
+-- 			debug "get_positionRelative_shapes"
 			
 			struct	str_intersection	(
 				pos,
@@ -214,7 +335,7 @@ struct str_terrain_booleen		(
 			)
 			
 			
-			local result = #exterieur		---- #exterieur,  #interieur, ou #intersection --------------
+			local result = #exterieur		---- #exterieur,  #interieur, #intersection, ou	 #aCoté	 --------------
 			local intersections =#()
 			
 			---- on regadre si les edges se coupent --- si oui --->  #intersection -----------------			
@@ -244,49 +365,329 @@ struct str_terrain_booleen		(
 				
 			else (
 				---- s'il ne se croisent pas alors ils sont tout à l'interieur ou à l'extierieur l'un de l'autre -------------------------
+				
+-- 				debug "_pts_shp1" var:_pts_shp1
+-- 				debug "_pts_shp_aTester" var:_pts_shp_aTester
+				
 				local pts_triangles_shp1 = trianguler	_pts_shp1
+				local pts_triangles_shp2 = trianguler	_pts_shp_aTester
+				
+-- 				debug "pts_triangles_shp1" var:pts_triangles_shp1
+-- 				debug "pts_triangles_shp2" var:pts_triangles_shp2
+					
+-- 				debug "survol  	_pts_shp_aTester[1]	pts_triangles_shp1	" var:( survol  	_pts_shp_aTester[1]	pts_triangles_shp1	 )
+-- 				debug "survol  	_pts_shp1[1]				pts_triangles_shp2	" var:( survol  	_pts_shp1[1]		pts_triangles_shp2	 )
 				
 				if survol  	_pts_shp_aTester[1]	pts_triangles_shp1	 then 
 					result = #interieur
-				else 
+				else if survol  	_pts_shp1[1]		pts_triangles_shp2	 then 
 					result = #exterieur
-				
+				else
+					result = #aCoté
+					
 			)
+			
+-- 			debug "position Relative" var:result
 			
 			result
 		),
 
-
-		fn get_shapes_pointsProche 		_pts_shp1		_pts_shp2 =(
-			
-			struct str_connexion (
-				id_pt_shp1	=	0,
-				id_pt_shp2	=	0
-			)
-			
-			
-			local id_pt_connexion_1	=	0
-			local id_pt_connexion_2	=	0 
-			local dist_min					= 1e+10
-			
-			for id_pt1 = 1 to  _pts_shp1.count do (
-				local pt1	=	_pts_shp1[ id_pt1 ]
-				for id_pt2 = 1 to  _pts_shp2.count do (
-					local pt2			=	_pts_shp2[ id_pt2 ]
-					local dist_test	=	distance	pt1 pt2
-					if dist_test < dist_min do (
-						dist_min = dist_test
-						id_pt_connexion_1	=	id_pt1
-						id_pt_connexion_2	=	id_pt2
-					)				
-				)
-			)
-			
+		
+		fn shape_estDans_shape		_shp_1  shp_test =(
+			if _shp_1.count == 0 then 			
+				true
+			else 	if get_positionRelative_shapes  _shp_1	shp_test  == #interieur then 
+				true
+			else 
+				false
 		),
 
-
-		fn fusionner_pts_booleen		_pts_shp1		_pts_shp2 =(
+		
+		fn get_id_shp_enfant_proche 		_shp_1  	shps_tests 	=(
 			
+			local result = 0
+			if _shp_1.count != 0 then (
+				--- on cherches les shapes qui sont à l'interieur -------
+				local shps_interieur =#()
+				for shp in shps_tests do
+					if shape_estDans_shape	 _shp_1 		shp do
+						append shps_interieur	shp
+				
+				--- si on a des shapes à l'interieur ---------------
+				--- parmis ceux à l'interieur on prend le plus proche ---------------------------
+				if shps_interieur.count > 0 do 
+					result 	= 	( get_shape_lePlusProche 		_shp_1	shps_interieur ).id_shp
+					
+			) else result = 1
+			
+			result
+		),
+		
+		
+		
+		
+		fn 	creer_noeud 	pts: 	nom:	=(
+			
+			---- noeud de la hierarchie ----------
+			struct str_terrain_booleen_node (
+				
+					struct_prt ,
+					
+				
+				public
+					pts 			=	#(),
+					nom 			="",
+					dist_auParent = 0,
+					
+					parent,
+				public
+					enfants		=	#(),
+					
+					fn set_parent		_ndParent = (
+						if parent != undefined and parent  != _ndParent do
+							parent.retirer_enfant	this
+						parent  = _ndParent
+					),
+					fn ajouter_enfant 	_neudEnfant = (
+						
+						local	dist_au_nvl_enfant	 		= ( struct_prt.get_distance_shapes 	pts	_neudEnfant.pts ).distance
+						
+						_neudEnfant.dist_auParent 		= dist_au_nvl_enfant
+						
+						local id_cible = 0
+						local trouve = false
+						local i = 1
+						while i <= enfants.count and not trouve do (
+							local enfant = enfants[i]
+							if dist_au_nvl_enfant <	 enfant.dist_auParent do (
+								insertItem	enfant 	enfants	i
+								trouve = true
+							)
+							i += 1
+						)
+						if not trouve do
+							append enfants  _neudEnfant
+						
+						
+						_neudEnfant.set_parent  	this
+					),
+					fn retirer_enfant	_enfant =(
+						local id_enfant = findItem enfants	_enfant
+						if id_enfant != 0 do
+							deleteItem enfants id_enfant
+					),
+					fn set_pts  _pts= pts = _pts,
+					fn get_pts  = pts
+					
+			)--- fin du struct----
+			
+			
+			
+			local nv_noeud = str_terrain_booleen_node		struct_prt:this
+			if pts != unsupplied do nv_noeud.set_pts 	pts
+			if nom != unsupplied do nv_noeud.nom= nom
+			nv_noeud
+			
+		),
+		
+		
+		
+		fn get_ids_shapes_aLInterieur		_shp		_shps_aTester  =(
+			local ids_result =#()
+			for i = 1 to _shps_aTester.count do (
+				local shp_aTester = _shps_aTester[i]
+				if shape_estDans_shape 	_shp 	shp_aTester  do
+					append  ids_result		i
+			)
+			ids_result
+		),
+		
+		
+		m_tab_format_nd = "",
+		fn	format_noeud  _nd =(
+			local indent_prfix = "    "
+			format (  m_tab_format_nd + _nd.nom + "\n" )
+			if _nd.enfants.count >0 do
+				m_tab_format_nd += indent_prfix
+			for enft in _nd.enfants do 
+				format_noeud enft
+			
+			if _nd.enfants.count >0 do
+				m_tab_format_nd = substring m_tab_format_nd 1 (	m_tab_format_nd.count -	indent_prfix.count )
+			
+		),
+		
+		/* 
+		fn hierarchiser_noeud 		_noeudParent		_shps_aTraiter		=(
+			
+			--- tant qu'il y a des shapes à traiter -----------------
+			while _shps_aTraiter.count		> 0  do (
+				---	on cherche le plus petit shape ------
+				local id_petit_shp = get_lePlusPetit_shape 	_shps_aTraiter
+				
+				
+			)
+		),
+		
+		*/
+		
+		
+		
+		fn integrer_nd_dans_hierarchie		_nd_courant		_nd_aIntegrer 	=(
+			
+			debug "integrer_nd_dans_hierarchie"		
+			debug "nd_aIntegrer"			 var:_nd_aIntegrer.nom
+			
+			local integration_reussie = false			
+			
+			local est_dans_shape = shape_estDans_shape		_nd_courant.pts  	( _nd_aIntegrer.get_pts ())	
+			if est_dans_shape	then (
+				
+				integration_reussie = true
+				
+				---- les enfants -----
+				local integration_dans_enfant = false
+				debug "	--->	on est dans un enfant ?!?"			
+				for enfant in	_nd_courant.enfants  do (
+					
+						debug "		--->	enfant"		var:enfant.nom		
+					local integration = integrer_nd_dans_hierarchie  		enfant  		_nd_aIntegrer
+					if integration then  (
+						integration_dans_enfant = true
+						debug "		--->	OUI on est dans enfant!!!"		
+						debug "			--->	enfant"		var:enfant.nom
+						
+					) else
+							debug "		--->	NON"	
+				)
+				
+				if not integration_dans_enfant /* and _nd_courant.parent == undefined */   then (
+					
+					debug "	--->	on est parent d'un enfant ?!?"
+					local enfants_a_ajouter =#()
+					for enfant in	_nd_courant.enfants  do (
+						debug "		--->	enfant"		var:enfant.nom		
+						if shape_estDans_shape	( _nd_aIntegrer.get_pts () )	enfant.pts   then (	
+							debug "		--->	OUI on est parent!!!"	
+							append enfants_a_ajouter enfant
+-- 							debug "		--->	_nd_aIntegrer.enfants AVT"		var:_nd_aIntegrer.enfants.count
+-- 							debug "		--->	_nd_aIntegrer.enfants	APRES"		var:_nd_aIntegrer.enfants.count
+-- 							append	_nd_aIntegrer.enfants	enfant
+-- 							
+-- 							enfant.parent = _nd_aIntegrer
+							
+-- 							debug "		--->	_nd_aIntegrer"		var:_nd_aIntegrer
+							
+						) else
+							debug "		--->	NON"	
+					)
+					
+					for enfant in enfants_a_ajouter do
+							_nd_aIntegrer.ajouter_enfant 	enfant
+					
+					_nd_courant.ajouter_enfant 		_nd_aIntegrer
+				) 
+				
+				
+			) /*  else if _nd_courant.parent == undefined do (
+				
+				for enfant in	_nd_courant.enfants  do (
+					if shape_estDans_shape	( _nd_aIntegrer.get_pts () )	enfant.pts   do
+						_nd_aIntegrer.ajouter_enfant 	enfant
+				)
+				_nd_courant.ajouter_enfant 		_nd_aIntegrer
+			) */
+			
+			integration_reussie
+			
+		),
+		
+		
+		
+		fn hierarchiser_noeud 		_noeudParent		_shps_aTraiter		=(
+			
+				debug "hierarchiser_noeud" 
+			while _shps_aTraiter.count		> 0  do (
+				
+				
+				/* 
+				--- on cherche le plus gros shape ----------
+				local id_shp_lePlusGros 		=	get_lePlusGros_shape		_shps_aTraiter
+				local shp_lePlusGros 			= 	_shps_aTraiter[ id_shp_lePlusGros ]
+				local nd_lePlusGros				= creer_noeud 	pts:shp_lePlusGros
+				_noeudParent.ajouter_enfant		nd_lePlusGros
+				
+				--- on le retire des shapes à traiter---
+				deleteItem	_shps_aTraiter 	id_shp_lePlusGros
+				 */
+				
+				--- on cherche le shape à l'interieur et le plus proche ----------------------
+				local id_enfant = get_id_shp_enfant_proche 	( _noeudParent.get_pts() )  	_shps_aTraiter
+				
+				debug "id_enfant" var:id_enfant
+				
+				if id_enfant != 0 then (
+					
+					local shp_enfant 				= _shps_aTraiter[ id_enfant ] 
+					local nd_enfant					=	creer_noeud 	pts:shp_enfant
+					_noeudParent.ajouter_enfant		nd_enfant
+					deleteItem	_shps_aTraiter 		id_enfant
+					
+					local ids_shapes_aLInterieur	=	get_ids_shapes_aLInterieur 	shp_enfant 	 _shps_aTraiter
+					local shapes_aLInterieur		= 	for id in ids_shapes_aLInterieur collect _shps_aTraiter[ id ]
+					
+					
+					debug "ids_shapes_aLInterieur" var:ids_shapes_aLInterieur
+					debug "shapes_aLInterieur" var:shapes_aLInterieur
+-- 					if ids_shapes_aLInterieur.count >0 then (
+						-- on supprime les shapes à l'interieur de l'enfant  ---------
+					for i = ids_shapes_aLInterieur.count to 1 by -1 do 
+						deleteItem _shps_aTraiter		ids_shapes_aLInterieur[i]
+					
+					hierarchiser_noeud  	nd_enfant	shapes_aLInterieur
+-- 					) 
+					
+					
+				) 
+				
+			
+			)
+			
+				
+			_noeudParent
+			
+		),
+		
+		
+		
+		fn hierarchiser 		_pts_shapes		=(
+			
+			format"\n"
+			debug "hierarchiser" 
+			
+			local 	nd_root				=	creer_noeud 	nom:"root"	
+			local 	shps_aTraiter	=	deepCopy _pts_shapes
+			
+			
+			local i = 1
+			for shp in  	shps_aTraiter  do (
+-- 				format"\n-------------------- % ---------------------\n"	i
+				local nv_nd = 	creer_noeud 		pts:shp	nom:("noeud " + i as string )
+				integrer_nd_dans_hierarchie		nd_root		nv_nd
+-- 				debug "nd_root" var:nd_root --param:enfants
+				format_noeud		nd_root
+				i+=1
+			)
+			
+			nd_root
+		),
+		
+		
+		
+		
+		
+		fn fusionner_pts_booleen		_pts_shp1		_pts_shp2 =(
+			debug "fusionner_pts_booleen"
 			--- on cherche les deux points des shpes les plus proches pour les connecter --------------
 			
 			local id_pt_connexion_1	=	0
@@ -307,17 +708,19 @@ struct str_terrain_booleen		(
 			)
 			
 			---- les premier shape -----------
-			local pts_result = #( _pts_shp1[ id_pt_connexion_1 ] )
-			for i_compteur = 1 to  _pts_shp1.count do (
-				local id_pt = i_compteur + id_pt_connexion_1 
-				if id_pt > _pts_shp1.count do 
-					id_pt -= _pts_shp1.count 
-				local pt = _pts_shp1[id_pt]
-				append pts_result	pt
+			local pts_result = #()
+			if id_pt_connexion_1 != 0 do (
+				pts_result = #( _pts_shp1[ id_pt_connexion_1 ] )
+				for i_compteur = 1 to  _pts_shp1.count do (
+					local id_pt = i_compteur + id_pt_connexion_1 
+					if id_pt > _pts_shp1.count do 
+						id_pt -= _pts_shp1.count 
+					local pt = _pts_shp1[id_pt]
+					append pts_result	pt
+				)
 			)
 			
-			
-			---- les second shape -----------
+			---- les second shape, on l'ajoute a l'envers  -----------
 			for i_compteur =  _pts_shp2.count to 1 by -1 do (
 				local id_pt = i_compteur + id_pt_connexion_2 
 				if id_pt > _pts_shp2.count do 
@@ -325,30 +728,81 @@ struct str_terrain_booleen		(
 				local pt = _pts_shp2[id_pt]
 				append pts_result	pt
 			)
-			append 	pts_result	( _pts_shp2[ id_pt_connexion_2 ] )
+			if id_pt_connexion_2 != 0 do
+				append 	pts_result	( _pts_shp2[ id_pt_connexion_2 ] )
 			
 			
 			pts_result
 			
 		),
 	
+		
+		
+		
+		
+		
+		
+		fn creer_pts_pourFace		_noeud	=(
+			
+			debug "creer_pts_pourFace"
+			
+			local pts_result =#( )
+			local pts_noeud =_noeud.get_pts	()
+			for enfant in _noeud.enfants do (
+				pts_noeud = fusionner_pts_booleen  	pts_noeud		( enfant.get_pts() )
+				for petitEnfant in enfant.enfants do
+					pts_result += creer_pts_pourFace  petitEnfant
+			)
+			append pts_result 	pts_noeud
+			pts_result
+		),
+		
+		fn get_boleens_pts		_noeud_root	=(
+			
+			local pts_result =#()
+			debug "_noeud_root.enfants "var:_noeud_root.enfants.count
+			for enfant in _noeud_root.enfants do (
+				pts_result += creer_pts_pourFace  enfant
+			)
+			pts_result
+			
+		),
+		
+		
 	public
 		---- on entre une liste de listes de points  (nos differents shapes à analyser )------------
 		---- renvois une liste des points avec fusion des shapes à trous en une seule liste pour creéation de face troué ---------
-		fn analyser_booleens 	_shapes_pts_aAnalyser 	=(
+		fn analyser		 	_shapes_pts_aAnalyser 	=(
 			
 			---- on cherche les booleens --------------------
-			local pts_shps			=	 _shapes_pts_aAnalyser
-			local pts_booleen		= 	#()
+			local pts_shps			=	 deepCopy 		_shapes_pts_aAnalyser
 			local pts_shps_result 	=	#()
-			for i = 1 to pts_shps.count - 1 do (
-				local pts_shp1	= pts_shps[ i ]
-				for j = i+1 to pts_shps.count do (
-					local pts_shp2	= pts_shps[ j ]
-					local posRelative = get_positionRelative_shapes		pts_shp1  	pts_shp2
-					format "posRelative : %\n" posRelative
+			
+			while pts_shps.count > 1 do (
+				
+				local	shp_courant 					= 	pts_shps[1]
+				local shps_restant					=	for i = 2 to pts_shps.count collect pts_shps[i]
+				local shape_lePlusProche 			=	get_shape_lePlusProche	shp_courant	shps_restant
+				local shp_lePlusProche				=	shps_restant[ shape_lePlusProche.id_shp ]
+				local posRelative_auPlusProche 	= get_positionRelative_shapes		shp_courant  	shp_lePlusProche
+				case posRelative_auPlusProche of (
+					#interieur: 		(
+						pts_shps[1] = fusionner_pts_booleen		shp_courant		shp_lePlusProche
+						deleteItem pts_shps		( shape_lePlusProche.id_shp + 1 )
+					)
+					#exterieur: 	(
+						pts_shps[1] = fusionner_pts_booleen		shp_courant		shp_lePlusProche
+						deleteItem pts_shps		( shape_lePlusProche.id_shp + 1 )
+					)
+					default: 		(
+						debug "-*-*-*-*-*-*-*-*-*-"
+						append 		pts_shps_result  ( deepcopy pts_shps[1] )
+						deleteItem 	pts_shps		 1
+					)
 				)
 			)
+			append 		pts_shps_result  ( deepcopy pts_shps[1] )
+			pts_shps_result
 			
 			
 			
@@ -361,20 +815,46 @@ struct str_terrain_booleen		(
 ) --- fin struct booleen -----------------------------------
 
 
-
+---- init --------------
 clearlistener ()
 
-shp1 = $Line008
+shp1 = $Line007
+
+geo = str_geometrie ()
 booleen = str_terrain_booleen ()
+
 pts = #()
 for spl = 1 to Numsplines shp1 do 
 	append	pts	( for i = 1 to numknots	shp1 spl	collect getKnotPoint	shp1 spl i )
 
+-- shp2 = $Line009
+-- pts_1 =  for i = 1 to numknots	shp2 1	collect getKnotPoint	shp2 1 i 
+---- init --------------
 
-booleen.analyser_booleens	pts
+
+---- Action --------------
+nd_root 			= booleen.hierarchiser 				pts
+pts_pourFace 	= booleen.get_boleens_pts		nd_root
+
+---- Action --------------
+nd_root.enfants.count
+
+---- resultat --------------
+cible = $cible_poly
+geo.vider	cible:cible
+for pts_bool in pts_pourFace do
+	geo.face 	pts_bool	cible:cible
 
 
+-- booleen.format_noeud nd_root
+---- resultat --------------
 
+
+/* 
+pts_booleen	 = booleen.analyser	pts
+-- booleen.get_shape_lePlusProche	pts_1		pts
+
+ */
 
 
 /* 
@@ -382,12 +862,19 @@ pts_tri = booleen.trianguler	pts[1]
 
 
 
+shpTEST1 = $Shape010
+shpTEST2 = $Shape011
+
+pts_shpTEST1 =  for i = 1 to numknots	shpTEST1 	1	collect getKnotPoint	shpTEST1 1 i
+pts_shpTEST2 =  for i = 1 to numknots	shpTEST2 	1	collect getKnotPoint	shpTEST2 1 i
+booleen.shape_estDans_shape		pts_shpTEST1  	pts_shpTEST2 
+
 booleen.survol  	$point001.pos			pts_tri 
 
 
+geo = str_geometrie ()
 
-
-
+geo.face
 
 
 
