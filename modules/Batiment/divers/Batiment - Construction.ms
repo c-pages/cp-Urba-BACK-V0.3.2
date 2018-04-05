@@ -76,8 +76,8 @@ struct str_construction (
 					local k = if i == 1 then surface_points.count else i - 1
 					
 					local pt 				= 		surface_points[i]
-					local	pt_suivant 	=  	surface_points[j]
-					local	pt_precedant =  	surface_points[k]
+					local	pt_suivant 		=  	surface_points[j]
+					local	pt_precedant 	=  	surface_points[k]
 					
 					local pt_encart 		= m_geo.encart 		pt	(pt_suivant - pt )  	(pt_precedant - pt ) 		encart
 					append pts_dalle  pt_encart

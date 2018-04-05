@@ -181,7 +181,9 @@ struct str_datasToString (
 )
 
 struct	str_terrain_outils_shape (
-	
+		
+		precision_courbe 		= 50,			--- en cm. ----
+		
 	private
 		fn point_estAGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	=(
 			
@@ -316,7 +318,6 @@ struct	str_terrain_outils_shape (
 			
 			local result	=#()
 	
-			local precision_courbe 		= .1			--- en cm. ----
 			local dotmax_courbe 		= .999	--- en dot ?!?. ----
 			
 			m_pts_contour = #()
@@ -329,41 +330,44 @@ struct	str_terrain_outils_shape (
 				local pt_result 	= #()
 				for id_pt_contour	=	1	to pts_spline_contour.count do (
 					
-					local pt_contour  = getKnotPoint _shp 		id_spline_contour	 	id_pt_contour
+					local pt_contour  		= getKnotPoint _shp 		id_spline_contour	 	id_pt_contour
+					local id_pt_contour_svt = if id_pt_contour != pts_spline_contour.count then id_pt_contour + 1 else 1
+-- 					local pt_contour_svt  	= getKnotPoint _shp 		id_spline_contour	 	id_pt_contour_svt
 					
-					local type_knot 			= getKnotType 		_shp  id_spline_contour	 id_pt_contour
+					local pt_contour_type 			= getKnotType 		_shp  id_spline_contour	 id_pt_contour
+					local pt_contour_svt_type 	= getKnotType 		_shp  id_spline_contour	 id_pt_contour_svt
 					
-					
-					
-					----- Interpolation  - adaptif ----------------------------					
-					local longueur_segment 	= get_longueur_segment	_shp	id_spline_contour		id_pt_contour 
-					local pos_courbe 			= 0
-					local nbr_division 			= floor ( longueur_segment / precision_courbe)
-					local increment_courbe 	= 1 / nbr_division
-					
-					local tangent					=	normalize ( tangentBezier3D   _shp 	id_spline_contour 	id_pt_contour 		0 )
-					local tangent_derniere		= 	tangent
-					
-					append pt_result	( interpBezier3D 		_shp 	id_spline_contour 	id_pt_contour 		0 )
-					
-					while pos_courbe < 1 do (
+					if pt_contour_type != #corner or pt_contour_svt_type != #corner then (
 						
--- 							debug "---# pos_courbe # " var:pos_courbe
-						local pt_interpol 	= interpBezier3D 		_shp 	id_spline_contour 	id_pt_contour 		pos_courbe
-						tangent 				= normalize ( tangentBezier3D   _shp 	id_spline_contour 	id_pt_contour 		pos_courbe )
+						----- Interpolation  - adaptif ----------------------------					
+						local longueur_segment 	= get_longueur_segment	_shp	id_spline_contour		id_pt_contour 
+						local pos_courbe 			= 0
+						local nbr_division 			= floor ( longueur_segment / precision_courbe)
+						local increment_courbe 	= 1 / nbr_division
 						
--- 						debug "------------>	tangent  " var:tangent
-						local dot_tangents = dot tangent tangent_derniere
+						local tangent					=	normalize ( tangentBezier3D   _shp 	id_spline_contour 	id_pt_contour 		0 )
+						local tangent_derniere		= 	tangent
 						
--- 						debug "------------>	dot_tangents" var:dot_tangents
-						if dot_tangents <	dotmax_courbe do (
-							tangent_derniere = tangent
-							append pt_result	pt_interpol
-						)
-						pos_courbe	+= increment_courbe
+						append pt_result	( interpBezier3D 		_shp 	id_spline_contour 	id_pt_contour 		0 )
 						
-					)
+						while pos_courbe < 1 do (
 							
+	-- 							debug "---# pos_courbe # " var:pos_courbe
+							local pt_interpol 	= interpBezier3D 		_shp 	id_spline_contour 	id_pt_contour 		pos_courbe
+							tangent 				= normalize ( tangentBezier3D   _shp 	id_spline_contour 	id_pt_contour 		pos_courbe )
+							
+	-- 						debug "------------>	tangent  " var:tangent
+							local dot_tangents = dot tangent tangent_derniere
+							
+	-- 						debug "------------>	dot_tangents" var:dot_tangents
+							if dot_tangents <	dotmax_courbe do (
+								tangent_derniere = tangent
+								append pt_result	pt_interpol
+							)
+							pos_courbe	+= increment_courbe
+							
+						)
+					) else append pt_result	pt_contour
 -- 							)
 -- 					) ---- fin case type -------------------
 					
@@ -371,6 +375,11 @@ struct	str_terrain_outils_shape (
 				append result	pt_result
 			)
 			
+			
+			--- on recalle les points à la transform du shape ------------
+			for shp in result do
+				for pt in shp do
+					pt += [10000,0,0]	---inverse _shp.transform
 			
 			result
 		),
@@ -381,16 +390,21 @@ struct	str_terrain_outils_shape (
 		---- mutateur-------------------------------
 		fn get_pts_from_shape			_shp 	=	(
 			
+			debug "get_pts_from_shape"
+			debug "_shp" var:_shp
+			debug "_shp.transform" var:_shp.transform
+			
 			--- on créer les points à partir du shape	----------
 			local pts_result 	=  interpoler_shape				_shp
+			
 			
 			--- on supprime les points en ligne droite	----------
 			pts_result 			= nettoyer_points_inutiles  	pts_result
 			
--- 			--- on met les points dans l'ordre	----------
--- 			for pts_spline_result in pts_result do
--- 				if not est_sensPositif 	pts_spline_result 	 do
--- 					pts_spline_result = changer_sens		pts_spline_result
+			--- on met les points dans l'ordre	----------
+			for pts_spline_result in pts_result do
+				if not est_sensPositif 	pts_spline_result 	 do
+					pts_spline_result = changer_sens		pts_spline_result
 			
 			pts_result
 		)

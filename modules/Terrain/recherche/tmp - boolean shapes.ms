@@ -449,21 +449,25 @@ struct str_terrain_booleen		(
 						parent  = _ndParent
 					),
 					fn ajouter_enfant 	_neudEnfant = (
+						local distTest	=	struct_prt.get_distance_shapes 	pts	_neudEnfant.pts
 						
-						local	dist_au_nvl_enfant	 		= ( struct_prt.get_distance_shapes 	pts	_neudEnfant.pts ).distance
-						
-						_neudEnfant.dist_auParent 		= dist_au_nvl_enfant
-						
-						local id_cible = 0
 						local trouve = false
-						local i = 1
-						while i <= enfants.count and not trouve do (
-							local enfant = enfants[i]
-							if dist_au_nvl_enfant <	 enfant.dist_auParent do (
-								insertItem	enfant 	enfants	i
-								trouve = true
+						if distTest != undefined do (
+								
+							local	dist_au_nvl_enfant	 		= distTest.distance
+							
+							_neudEnfant.dist_auParent 		= dist_au_nvl_enfant
+							
+							local id_cible = 0
+							local i = 1
+							while i <= enfants.count and not trouve do (
+								local enfant = enfants[i]
+								if dist_au_nvl_enfant <	 enfant.dist_auParent do (
+									insertItem	_neudEnfant 	enfants	i
+									trouve = true
+								)
+								i += 1
 							)
-							i += 1
 						)
 						if not trouve do
 							append enfants  _neudEnfant
@@ -818,7 +822,7 @@ struct str_terrain_booleen		(
 ---- init --------------
 clearlistener ()
 
-shp1 = $Line007
+shp1 = $Line012
 
 geo = str_geometrie ()
 booleen = str_terrain_booleen ()

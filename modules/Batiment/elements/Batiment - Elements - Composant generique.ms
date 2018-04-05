@@ -79,7 +79,7 @@ struct 	str_composant_generique	 (
 			id = "ID_" + get_typeClasse () + "_"
 			seed ( timeStamp () )
 			for i= 1 to 10 do id += ( random 0 9 ) as string	
-			format "generer_ID : %\n" id
+-- 			format "generer_ID : %\n" id
 -- 			id += (timeStamp ()  ) as string	
 		),
 		fn initialiser 		_type	_nom 	=(

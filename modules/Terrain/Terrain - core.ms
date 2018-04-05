@@ -4,6 +4,7 @@
 -- include	 "$userScripts\\cp-Urba\\modules\\Terrain\\Terrain - triangulation.ms" 
 include	 "$userScripts\\cp-Urba\\modules\\Batiment\\divers\\Batiment - Geometrie.ms"
 include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - shape.ms" 
+include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - Outils - booleen shape.ms" 
 
 
 
@@ -24,6 +25,7 @@ struct	str_terrain_node_core	(
 -- 		mgr_trianguler 	= 	str_triangulation_shape (),
 		mgr_shapes		= 	str_terrain_outils_shape (),
 		mgr_datas			=	str_datasToString (),
+		mgr_booleen		=	str_terrain_booleen (),
 		
 		m_contour_points =#(),
 		
@@ -85,27 +87,19 @@ struct	str_terrain_node_core	(
 
 		fn projeter		=(
 			
-			debug "projeter"
 			
 			local ids_pts_total = #{1.. polyop.getNumVerts m_plug.delegate	}
 			local pts_total =#()
 			for id_pt in  ids_pts_total do (
 				local pt = polyop.getVert m_plug.delegate  id_pt
-				debug "---->	pt avt" var:pt
 				local maxZ = -1e+10
 				for relief in m_plug.reliefs_nodes do (
-					debug "	---->	relief" var:relief.name
 					pt_proj = projectionZ 	pt		relief
-					debug "	---->	maxZ" var:maxZ
-					debug "	---->	pt_proj.z" var:pt_proj.z
-					if pt_proj.z > maxZ do (
+					if pt_proj.z > maxZ do 
 						maxZ = pt_proj.z
-						debug "		----> Relief au dessus" var:relief.name
-						
-					)
 				)
 				pt.z = maxZ + m_plug.decallageZ
-				debug "---->	pt FIN" var:pt
+				
 				append pts_total pt
 			)
 			polyop.setVert m_plug.delegate	ids_pts_total 	pts_total
@@ -166,41 +160,44 @@ struct	str_terrain_node_core	(
 		), -- fin fonctoin
 	
 		
-		fn construire =(
+		fn construire = undo off with redraw off  (
 			
 			---- on vide ---------------
 			mgr_geo.vider ()
 			
 			if m_plug.reliefs_nodes.count > 0  and m_plug.contours_nodes.count > 0   do with redraw off (
 			
+				local chrono_debut = timeStamp ()
+				
+				
 				debug "construire"
 				
+				--- on recuprere le noeud root de la hierachie de booleens ----------------
+				local		nd_root 					= mgr_booleen.hierarchiser 			m_contour_points
+				local		pts_pret_pourFace 	= mgr_booleen.get_boleens_pts		nd_root
 				
-				--- on créé une face par spline ------------
-				for pts_spline_contour in m_contour_points do
+				--- on créé les faces  ------------
+				for pts_spline_contour in pts_pret_pourFace do
 					mgr_geo.face 	pts_spline_contour	smGrp:1
 				
-				/* 
-				--- on créé une spline par splines de contours ------------
-				local sp = splineShape 	isSelected:off
-				for pts_spline_contour in m_contour_points do (
-					addnewSpline sp
-					
-					for pt in spl do
-						addknot sp 1 #corner #curve  pt
-					close sp 1
-				)
-				updateShape sp
 				
-				 */
 				
+				local chrono_tmp= timeStamp ()
 				--- on quadrille   ------------
 				quadriller ()
+				debug ("Terrain : quadriller en " +  (  ((timeStamp ()) - chrono_tmp ) / 1000.0)	as string + "s." )
 				
 				--- on projete -------------------
+				local chrono_tmp= timeStamp ()
 				projeter	()
+				debug ("Terrain : projection en " +  (  ((timeStamp ()) - chrono_tmp ) / 1000.0)	as string + "s." )
+				
+				debug ("---> Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 			
+				displayTempPrompt ("Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
+				
 			)
+			
 			
 			redrawViews ()
 			
@@ -208,13 +205,14 @@ struct	str_terrain_node_core	(
 	
 		fn actualiser_contours =(
 			
+			local chrono_debut = timeStamp ()
 			
 			m_contour_points =#()
 			
 			---- maj des points -------------
 			
 			for 	contour_node in m_plug.contours_nodes do
-				m_contour_points	+= 	( mgr_shapes.get_pts_from_shape	contour_node )
+				m_contour_points	+= 	( mgr_shapes.get_pts_from_shape		contour_node )
 			
 			
 			local datas_pts_contour =#()
@@ -225,6 +223,7 @@ struct	str_terrain_node_core	(
 			--- on enregistre les points sur le node pour pas avoir a recalucler a chaque fois	------------------
 			m_plug.contour_pts	=	datas_pts_contour
 			
+			debug ("Terrain : Contours actualisé en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 		),
 		
 		
@@ -232,26 +231,38 @@ struct	str_terrain_node_core	(
 			
 			---   deformation geometrie des objets en reference ------------------
 			fn fct_ecouteur_terrain		 ev nds = (
-				
-				--- actualiser - shape ------
-				if superclassof ( GetAnimByHandle nds[1] )  == shape  do
-					for nd_id in nds do (
-						local nd = GetAnimByHandle nd_id
-						case classof  nd of (
-							Urba_terrain: nd.actualiser_contours ()
+				undo off with redraw off (
+					
+					--- actualiser - shape ------
+					if superclassof ( GetAnimByHandle nds[1] )  == shape  then (
+						format "nds : " 
+						for nd_id in nds do (
+							local nd = GetAnimByHandle nd_id
+							format " %, " nd.name
+							case classof  nd of (
+								Urba_terrain: nd.actualiser_contours ()
+							)
 						)
-					)
-				if classof  ( GetAnimByHandle nds[1] ) != Urba_terrain_mgr and classof  ( GetAnimByHandle nds[1] ) != Urba_terrain  do
-					for nd_id in nds do (
-						local nd = GetAnimByHandle nd_id
-						case classof  nd of (
-							Urba_terrain: nd.actualiser_reliefs ()
+						format "\n" 
+					) else 	if classof  ( GetAnimByHandle nds[1] ) != Urba_terrain_mgr and classof  ( GetAnimByHandle nds[1] ) != Urba_terrain  do (
+						format "nds : " 
+						for nd_id in nds do (
+							local nd = GetAnimByHandle nd_id
+							format " %, " nd.name
+							case classof  nd of (
+								Urba_terrain: nd.actualiser_reliefs ()
+							)
 						)
+						format "\n" 
 					)
+				)
+				redrawviews ()
 			)---- fin 	fct_ecouteur_terrain
+			
+			
 			m_ecouteur_terrain = undefined
 			gc light:true
-				m_ecouteur_terrain = NodeEventCallback 	mouseup:true 	geometryChanged:fct_ecouteur_terrain		topologyChanged:fct_ecouteur_terrain
+			m_ecouteur_terrain = NodeEventCallback 	mouseup:true 	geometryChanged:fct_ecouteur_terrain		topologyChanged:fct_ecouteur_terrain
 					
 				
 				

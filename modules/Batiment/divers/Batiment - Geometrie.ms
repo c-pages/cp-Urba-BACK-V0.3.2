@@ -71,7 +71,8 @@ struct	str_geometrie	(
 			)
 			result
 		),
-		fn face		_liste_pts						matID:1		flipNormal:false	cible:m_plug.delegate 		smGrp:		=(
+		fn face		_liste_pts						matID:1		flipNormal:false	smGrp:			cible: 	=(
+			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
 			
 			local pts = deepCopy _liste_pts
 			
@@ -103,7 +104,8 @@ struct	str_geometrie	(
 		),
 		
 	----- constructions élémentaires 2 ----------------
-		fn faceVerticale 	pt1 	pt2 		z 					ht:	cible:m_plug.delegate 			=(
+		fn faceVerticale 	pt1 	pt2 		z 					ht:		cible: 	=(
+			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
 		
 			local VERSION_BACK = true
 			
@@ -165,20 +167,26 @@ struct	str_geometrie	(
 	
 	
 	---- Operations diverses ------------
-		fn extruder 	_faces 	_hauteur	cible:m_plug.delegate 	=(
+		fn extruder 	_faces 	_hauteur	cible: 	=(
+			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
+			
+			
 			if classof _faces != array do _faces = #(_faces)
 			polyop.extrudeFaces  cible 	_faces 	_hauteur
 		),
-		fn biseauter	_faces 	_hauteur	_largeur 	cible:m_plug.delegate 	=(
+		fn biseauter	_faces 	_hauteur	_largeur 	cible: 	=(
+			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
 			if classof _faces != array do _faces = #(_faces)
 			polyop.bevelFaces cible 	_faces 	_hauteur 	_largeur			
 		),
-		fn souder	_pts 	cible:m_plug.delegate 	=(
+		fn souder	_pts 		cible: 	=(
+			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
 			polyop.weldVertsByThreshold cible 		( _pts as bitArray)
 		),
 		
 	--- accessions diverse -------
-		fn get_vertex  _idPt 	cible:m_plug.delegate 	=(
+		fn get_vertex  _idPt 		cible: 	=(
+			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
 			polyop.getVert 	cible		_idPt
 		),
 		
@@ -191,25 +199,24 @@ struct	str_geometrie	(
 		
 		fn get_normal_bisectionOriente_2vecteurs 		_vec1 	_vec2		=(
 			
-			local norm_vec_1 = (normalize _vec1)
-			local norm_vec_2 = (normalize _vec2)			
-			local crossProd 	= cross _vec1 	_vec2
-			local sensDot 		= dot crossProd  [0,0,1]
-			local sens 			= if sensDot > 0 then -1 else 1
+			local norm_vec_1 	= (normalize _vec1)
+			local norm_vec_2 	= (normalize _vec2)			
+			local crossProd 		= cross _vec1 	_vec2
+			local sensDot 			= dot crossProd  [0,0,1]
+			local sens 				= if sensDot > 0 then -1 else 1
 			
-			local	norm_dir 		= ( norm_vec_1 + norm_vec_2 ) * sens
-			
+			local	norm_dir 		=  normalize  ( norm_vec_1 + norm_vec_2 ) * sens			
 			norm_dir
 			
 		),
 		fn encart 		_pt	_vec1 	_vec2	_dist	=(
 			
 			local pt_concerne 	= _pt			
-			local	vec1 				= pt1 - pt_concerne
-			local	vec2 				= pt2 - pt_concerne			
-			local	norm_dir 			= get_normal_bisectionOriente_2vecteurs 	vec1 	vec2
+-- 			local	vec1 				= pt1 - pt_concerne
+-- 			local	vec2 				= pt2 - pt_concerne			
+			local	norm_dir 		= get_normal_bisectionOriente_2vecteurs 	_vec1 	_vec2
 			
-			local result	 			= pt_concerne + norm_dir* _dist 
+			local result	 			= pt_concerne - norm_dir* _dist 
 			
 			result
 			
@@ -229,7 +236,8 @@ struct	str_geometrie	(
 	----- ELEMENTS BASIQUES DE CONSTRUCTION 		----------------------
 		
 		---  Boite sans les faces dessus et dessus-------------------
-		fn allege 		_pt_A		_vec_long		_hauteur		_profondeur			matID:1 		cible:m_plug.delegate  =(
+		fn allege 		_pt_A		_vec_long		_hauteur		_profondeur			matID:1 			cible: 	=(
+			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
 			
 			--- les vecteurs -------------------------
 			local norm_prof = (normalize _vec_long ) 	* rotateZ ( matrix3 1 ) 90
@@ -261,7 +269,8 @@ struct	str_geometrie	(
 		
 		
 		---  Boite sans les faces dessus et dessus-------------------
-		fn tube 		_pt_A	_vec_ht		_vec_larg		_vec_ep		matID:1   		cible:m_plug.delegate 	=(
+		fn tube 		_pt_A	_vec_ht		_vec_larg		_vec_ep		matID:1   			cible: 	=(
+			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
 			
 			--- localiser les point dans l'espace	--------			
 			local pt_1			=	_pt_A
@@ -293,6 +302,8 @@ struct	str_geometrie	(
 		fn initialiser _plug =(
 -- 			debug "initialiser"
 			m_plug= _plug
+-- 			debug "m_plug" var:m_plug
+-- 			debug "m_plug.delegate" var:m_plug.delegate
 		)
 		
 ) --- fin GEo

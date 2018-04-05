@@ -26,17 +26,17 @@ toolTip:"DEBUG : recompile le plugin Urba | Batiments"
 		)
 		filein	 ( getdir #userStartupScripts + "\Batiment - Startup.ms" )
 		
-			nvBat = Urba_Batiment ()
+-- 			nvBat = Urba_Batiment ()
 -- 		try 
 -- 		cibleShape = $'OSM - Bâtiment - 022'
 -- 		cibleShape = $'OSM - Bâtiment - 208'
-		cibleShape = $'OSM - Bâtiment - 186'
-			if cibleShape != undefined do (
-				trace = cibleShape
-				nvBat.assigner_shape 		nvBat		trace
-			)
+-- 		cibleShape = $'OSM - Bâtiment - 186'
+-- 			if cibleShape != undefined do (
+-- 				trace = cibleShape
+-- 				nvBat.assigner_shape 		nvBat		trace
+-- 			)
 -- 			catch ()
-			select nvBat
+-- 			select nvBat
 -- 			nvBat.pos=[0,0,0]
 	-- 		::OSMImporter.ouvrir 	()		
 -- 		) catch ()
