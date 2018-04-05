@@ -182,6 +182,10 @@ struct str_datasToString (
 
 struct	str_terrain_outils_shape (
 		
+		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		fn debug 	_txt  var:	 param:    =	try if true  do ::debuger 	_txt	prefix:"urba | str_terrain_outils_shape"	  	var:var	 param:param		catch (),
+		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	
 		precision_courbe 		= 50,			--- en cm. ----
 		
 	private
@@ -239,7 +243,7 @@ struct	str_terrain_outils_shape (
 			result_id
 		),
 		fn est_sensPositif 					_pts 		=(
-			
+			debug "est_sensPositif"
 			local result 				= true
 			local id_pointHaut 	=  pointLePlusHautsurY  	_pts
 			
@@ -260,13 +264,16 @@ struct	str_terrain_outils_shape (
 			
 			if vec2.x > vec1.X do result = not result
 			
+			debug "est_sensPositif" var:result
+			
 			result
 			
 		),
 		fn changer_sens 					_pts 		=(
+			debug "changer_sens"
 			local result =#()
 			for i= _pts.count to 1 by -1 do 
-				append result _pts[i]
+				append result 	_pts[i]
 			result
 		),
 	
@@ -314,7 +321,7 @@ struct	str_terrain_outils_shape (
 			
 			pts_result
 		),
-		fn interpoler_shape 	_shp	=(
+		fn interpoler_shape 	_shp		=(
 			
 			local result	=#()
 	
@@ -372,6 +379,12 @@ struct	str_terrain_outils_shape (
 -- 					) ---- fin case type -------------------
 					
 				)
+				
+			--- on met les points dans l'ordre	----------
+				if not est_sensPositif 	pt_result 	 do
+					pt_result = changer_sens		pt_result
+				
+				
 				append result	pt_result
 			)
 			
@@ -388,23 +401,23 @@ struct	str_terrain_outils_shape (
 		
 	public
 		---- mutateur-------------------------------
-		fn get_pts_from_shape			_shp 	=	(
+		fn get_pts_from_shape			_shp 		transf: 	=	(
 			
 			debug "get_pts_from_shape"
 			debug "_shp" var:_shp
 			debug "_shp.transform" var:_shp.transform
 			
 			--- on créer les points à partir du shape	----------
-			local pts_result 	=  interpoler_shape				_shp
-			
+			local pts_result 	=  interpoler_shape				_shp	transf:transf
+			/* 
+			--- on met les points dans l'ordre	----------
+			for pts_spline_result in pts_result do
+				if not est_sensPositif 	pts_spline_result 	 do
+					pts_spline_result = changer_sens		pts_spline_result */
 			
 			--- on supprime les points en ligne droite	----------
 			pts_result 			= nettoyer_points_inutiles  	pts_result
 			
-			--- on met les points dans l'ordre	----------
-			for pts_spline_result in pts_result do
-				if not est_sensPositif 	pts_spline_result 	 do
-					pts_spline_result = changer_sens		pts_spline_result
 			
 			pts_result
 		)

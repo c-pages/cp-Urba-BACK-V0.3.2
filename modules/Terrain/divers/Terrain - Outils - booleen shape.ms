@@ -26,9 +26,12 @@ struct str_terrain_booleen		(
 
 		--- si un point est dans un triangle	-------------
 		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester =(
-			if point_est_aGaucheDuSegment  _pt_tri_1 	_pt_tri_2 	_pt_aTester and point_est_aGaucheDuSegment  _pt_tri_2 	_pt_tri_3 	_pt_aTester  and point_est_aGaucheDuSegment  _pt_tri_3 	_pt_tri_1 	_pt_aTester then
-				true
-			else false
+			if point_est_aGaucheDuSegment  _pt_tri_1 	_pt_tri_2 	_pt_aTester and point_est_aGaucheDuSegment  _pt_tri_2 	_pt_tri_3 	_pt_aTester  and point_est_aGaucheDuSegment  _pt_tri_3 	_pt_tri_1 	_pt_aTester then (
+-- 				if _pt_aTester == _pt_tri_1 or _pt_aTester == _pt_tri_2 or _pt_aTester == _pt_tri_3 then
+-- 					false
+-- 				else
+					true
+			) else false
 		),
 		
 		
@@ -79,7 +82,7 @@ struct str_terrain_booleen		(
 		---- renvois le point le plus éloigné du segment parmis la liste des 	'_pts'	 ---------
 		fn point_lePlusLoinDuSegment 			_pts			_pt_seg1		_pt_seg2 	=(
 			local result_index 	= 0
-			local dist_max 		= 0
+			local dist_max 		= -1e+10
 			for i = 1 to _pts.count do (
 				local pt = _pts[i]
 				local vec_1 = (_pt_seg2  -  _pt_seg1)
@@ -507,10 +510,10 @@ struct str_terrain_booleen		(
 		),
 		
 		
-		m_tab_format_nd = "",
+		m_tab_format_nd = "	|	",
 		fn	format_noeud  _nd =(
 			
-			local indent_prfix = "    "
+			local indent_prfix = "|    "
 			format (  m_tab_format_nd + _nd.nom + "\n" )
 			if _nd.enfants.count >0 do
 				m_tab_format_nd += indent_prfix
@@ -522,19 +525,6 @@ struct str_terrain_booleen		(
 			
 		),
 		
-		/* 
-		fn hierarchiser_noeud 		_noeudParent		_shps_aTraiter		=(
-			
-			--- tant qu'il y a des shapes à traiter -----------------
-			while _shps_aTraiter.count		> 0  do (
-				---	on cherche le plus petit shape ------
-				local id_petit_shp = get_lePlusPetit_shape 	_shps_aTraiter
-				
-				
-			)
-		),
-		
-		*/
 		
 		
 		
@@ -754,4 +744,6 @@ struct str_terrain_booleen		(
 	
 	
 ) --- fin struct booleen -----------------------------------
+
+
 

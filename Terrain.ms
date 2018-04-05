@@ -1,5 +1,15 @@
 
 
+---- ecouteurs terrain ------------------
+TERRAIN_ECOUTEUR_topo 		= undefined
+TERRAIN_ECOUTEUR_transf 	= undefined
+gc light:true
+global TERRAIN_ECOUTEUR_topo, TERRAIN_ECOUTEUR_transf
+---- ecouteurs terrain ------------------
+
+
+
+
 plugin geometry  Urba_terrain
 name:"Terrain"
 classID:#(528514,174852)
@@ -30,19 +40,23 @@ version:0
 		
 		fn actualiser =(
 			debug "actualiser"
+			core.actualiser_contours  transf:$.transform
 			core.construire ()
 		)
 		fn actualiser_reliefs =(
 			core.construire ()
 		)
 		fn actualiser_contours =(
-			core.actualiser_contours()
+			core.actualiser_contours  transf:$.transform
 			core.construire ()
 		)
 		fn initialiser =(
 			core.initialiser		this			
 		)
 		
+		
+		fn aCommeContour	_node 	=	findItem this.contours_nodes	_node != 0
+		fn aCommeRelief		_node 	=	findItem this.reliefs_nodes		_node != 0
 		
 		parameters main rollout:rollout_terrain		(
 			
@@ -56,9 +70,8 @@ version:0
 			
 			
 			---- 
-			contour_pts			type:#stringTab 	tabSize:0  		tabSizeVariable:true
-			
--- 			on contour_node set 	_node  do 	set_contour 	_node
+			contour_pts			type:#stringTab 			tabSize:0  		tabSizeVariable:true
+-- 			this_node 				type:#maxObjectTab 	tabSize:0 		tabSizeVariable:true
 			
 		)
 		rollout rollout_terrain "Terrain" width:162 height:455
@@ -83,11 +96,9 @@ version:0
 			label 'lbl4' "Décallage Z:" pos:[11,18] width:61 height:14 align:#left
 			button 'btn_actualiser' "Actualiser" pos:[7,296] width:68 height:27 align:#left
 			
-			
-			
 			fn actualiser =(
-				lbx_contours.items 	= for contour_node in contours_nodes collect contour_node.name
-				lbx_reliefs.items 		= for relief_node in reliefs_nodes collect relief_node.name
+				lbx_contours.items 	= for contour_node in contours_nodes collect if contour_node != undefined then  contour_node.name else "<deleted>"
+				lbx_reliefs.items 		= for relief_node in reliefs_nodes collect if relief_node != undefined then  relief_node.name else "<deleted>"
 				btn_supprimer_contour.enabled 	=	 lbx_contours.selection	!= 0 
 				btn_supprimer_relief.enabled 		=	 lbx_reliefs.selection	!= 0 
 			)
@@ -97,6 +108,8 @@ version:0
 			
 			on btn_contour_pick picked obj do
 			(
+				max modify mode
+				
 				if appendIfUnique contours_nodes obj do (
 					actualiser ()
 					lbx_contours.selection += 1
@@ -138,6 +151,8 @@ version:0
 			)
 			on btn_relief_pick picked obj do
 			(
+				max modify mode
+				
 				if appendIfUnique reliefs_nodes	 obj do (
 					actualiser ()
 					lbx_reliefs.selection += 1
@@ -181,7 +196,7 @@ version:0
 	--------------- CREATION  ----------------------------------------------------------------------------------------------------------------------
 	tool create (
 		on mousePoint click do	(
-			nodeTM.translation = worldPoint ---[0,0,0]	
+			nodeTM.translation = [0,0,0] ---	worldPoint
 			actualiser ()
 			
 			initialiser ()
@@ -195,16 +210,13 @@ version:0
 	--------------- EVENEMENTS  ----------------------------------------------------------------------------------------------------------------------
 	on load 						do 	(
 		debug "load du plugin"
-
-
-
 		initialiser ()
 	)
 	on clone 	_original 	do (
--- 		debug "clone du plugin"
 		initialiser ()
 	)
 	on create do (
+		
 		debug "creation du plugin"
 		initialiser ()
 	)
@@ -214,7 +226,6 @@ version:0
 	)
 
 )
-
 
 
 

@@ -21,16 +21,21 @@ struct	str_terrain_node_core	(
 		m_plug,
 		m_core,
 		
+	---- managers  ------------------
 		mgr_geo				= 	str_geometrie 		(),
 -- 		mgr_trianguler 	= 	str_triangulation_shape (),
 		mgr_shapes		= 	str_terrain_outils_shape (),
 		mgr_datas			=	str_datasToString (),
 		mgr_booleen		=	str_terrain_booleen (),
 		
+	----- les points stockés pour manip -----
 		m_contour_points =#(),
-		
+		/* 
+	---- ecouteurs ------------------
 		m_ecouteur_terrain,
-		
+		m_ecouteur_terrain_topo,
+		m_ecouteur_terrain_transfo,
+		 */
 	
 	
 	
@@ -86,7 +91,6 @@ struct	str_terrain_node_core	(
 		),
 
 		fn projeter		=(
-			
 			
 			local ids_pts_total = #{1.. polyop.getNumVerts m_plug.delegate	}
 			local pts_total =#()
@@ -160,7 +164,7 @@ struct	str_terrain_node_core	(
 		), -- fin fonctoin
 	
 		
-		fn construire = undo off with redraw off  (
+		fn construire 	= undo off with redraw off  (
 			
 			---- on vide ---------------
 			mgr_geo.vider ()
@@ -174,11 +178,25 @@ struct	str_terrain_node_core	(
 				
 				--- on recuprere le noeud root de la hierachie de booleens ----------------
 				local		nd_root 					= mgr_booleen.hierarchiser 			m_contour_points
+				
+-- 				mgr_booleen.format_noeud	nd_root
+				
 				local		pts_pret_pourFace 	= mgr_booleen.get_boleens_pts		nd_root
 				
+				
+-- 				debug "pts_pret_pourFace" var:pts_pret_pourFace
+				
 				--- on créé les faces  ------------
-				for pts_spline_contour in pts_pret_pourFace do
-					mgr_geo.face 	pts_spline_contour	smGrp:1
+				for pts_spline_contour in pts_pret_pourFace do (
+					local triangles = mgr_booleen.trianguler 	pts_spline_contour
+
+					for pts_tri in triangles do 
+						mgr_geo.face pts_tri	smGrp:1
+					
+					mgr_geo.souder_triangulation  ()
+					
+					
+				)
 				
 				
 				
@@ -203,16 +221,15 @@ struct	str_terrain_node_core	(
 			
 		),
 	
-		fn actualiser_contours =(
+		fn actualiser_contours 			=(
 			
 			local chrono_debut = timeStamp ()
 			
 			m_contour_points =#()
-			
 			---- maj des points -------------
 			
 			for 	contour_node in m_plug.contours_nodes do
-				m_contour_points	+= 	( mgr_shapes.get_pts_from_shape		contour_node )
+				m_contour_points	+= 	( mgr_shapes.get_pts_from_shape		contour_node  	)
 			
 			
 			local datas_pts_contour =#()
@@ -227,46 +244,87 @@ struct	str_terrain_node_core	(
 		),
 		
 		
-		fn ecouteurs_activer =(
+		fn activer_ecouteur 	=	if TERRAIN_ECOUTEUR == undefined do (
 			
+			
+			--  NODEEVENTCALLBACK--------
 			---   deformation geometrie des objets en reference ------------------
-			fn fct_ecouteur_terrain		 ev nds = (
+			fn fct_ecouteur_terrain_topo		 ev nds = (
+				
+-- 				format "### FCT_ECOUTEUR_TERRAIN   TOPO	###\n"
+-- 				format "	----> %\n" nds
+				
 				undo off with redraw off (
 					
-					--- actualiser - shape ------
-					if superclassof ( GetAnimByHandle nds[1] )  == shape  then (
-						format "nds : " 
+						--- les terrain de la scene ---------
+						local terrains = for obj in geometry where classof obj == Urba_terrain collect  obj
 						for nd_id in nds do (
 							local nd = GetAnimByHandle nd_id
-							format " %, " nd.name
-							case classof  nd of (
-								Urba_terrain: nd.actualiser_contours ()
-							)
+-- 							format "	----> NODE: %\n" nd.name
+-- 							format " %, " nd.name
+							case superclassof  nd of (
+								shape:			(
+-- 									format "		----> shape\n"
+									for terrain_nd in  terrains do
+										if terrain_nd.aCommeContour  nd do (
+-- 											format "		----> on a un CONTOUR dans l 'evenement !\n"
+											terrain_nd.actualiser_contours ()
+										)
+								)
+								geometryClass: (
+-- 									format "		----> geometry\n"
+									for terrain_nd in  terrains do
+										if terrain_nd.aCommeRelief  nd do (
+-- 											format "		----> on a un RELIEF dans l 'evenement !\n"
+											terrain_nd.actualiser_reliefs ()
+										)
+								)
+							) --- fin case ---------
 						)
-						format "\n" 
-					) else 	if classof  ( GetAnimByHandle nds[1] ) != Urba_terrain_mgr and classof  ( GetAnimByHandle nds[1] ) != Urba_terrain  do (
-						format "nds : " 
-						for nd_id in nds do (
-							local nd = GetAnimByHandle nd_id
-							format " %, " nd.name
-							case classof  nd of (
-								Urba_terrain: nd.actualiser_reliefs ()
-							)
-						)
-						format "\n" 
-					)
 				)
 				redrawviews ()
 			)---- fin 	fct_ecouteur_terrain
 			
+			fn fct_ecouteur_terrain_transf		 ev nds = (
+-- 				format "### FCT_ECOUTEUR_TERRAIN   TRANSFO	###\n"
+						local terrains = for obj in geometry where classof obj == Urba_terrain collect  obj
+				for nd_id in nds do (
+					local nd = GetAnimByHandle nd_id
+-- 					format "	----> NODE: %\n" nd.name
+-- 							format " %, " nd.name
+					case superclassof  nd of (
+						shape:			(
+-- 							format "		----> shape\n"
+							for terrain_nd in  terrains do
+								if terrain_nd.aCommeContour  nd do (
+-- 									format "		----> on a un CONTOUR dans l 'evenement !\n"
+									terrain_nd.actualiser_contours ()
+								)
+						)
+						geometryClass: (
+-- 							format "		----> geometry\n"
+							for terrain_nd in  terrains do
+								if terrain_nd.aCommeRelief  nd do (
+-- 									format "		----> on a un RELIEF dans l 'evenement !\n"
+									terrain_nd.actualiser_reliefs ()
+								)
+						)
+					) --- fin case ---------
+				)
+			)---- fin 	fct_ecouteur_terrain
 			
-			m_ecouteur_terrain = undefined
+			
+			
+			TERRAIN_ECOUTEUR_topo 		= undefined
+			TERRAIN_ECOUTEUR_transf 	= undefined
 			gc light:true
-			m_ecouteur_terrain = NodeEventCallback 	mouseup:true 	geometryChanged:fct_ecouteur_terrain		topologyChanged:fct_ecouteur_terrain
-					
-				
-				
+		
+			TERRAIN_ECOUTEUR_topo		= NodeEventCallback 	mouseup:true 												\
+																					geometryChanged:		fct_ecouteur_terrain_topo		\
+																					topologyChanged:		fct_ecouteur_terrain_topo		
 			
+			TERRAIN_ECOUTEUR_transf 	= NodeEventCallback	mouseup:true 												\
+																					controllerOtherEvent:	fct_ecouteur_terrain_transf		
 		),
 		
 		fn initialiser		_plug =(
@@ -277,7 +335,7 @@ struct	str_terrain_node_core	(
 			mgr_geo.m_plug 	= m_plug
 			
 			
-			ecouteurs_activer ()
+			activer_ecouteur ()
 			
 		)
 	

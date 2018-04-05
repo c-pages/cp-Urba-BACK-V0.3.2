@@ -223,8 +223,21 @@ struct	str_geometrie	(
 		),
 
 		
+		fn souder_triangulation  cible: = (
+			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
+			
+			--------  souder les points ---------
+			cible.weldThreshold = .1
+			polyop.weldVertsByThreshold cible  #{1..polyop.getNumVerts cible}
 
-		
+			--------  cleanner les edges  ---------
+			local open_segts	=	 polyop.getOpenEdges cible
+			local total_segts = #{1..polyop.getNumEdges cible}
+			local invis_segts = total_segts - open_segts			
+			polyOp.setEdgeSelection cible invis_segts
+			cible.remove selLevel:#edge
+			
+		),
 	--- plans ---------------
 		fn get_plan_2vecs_1Point	_vec1	_vec2		_pt_Origine =(
 			local nvPlan  = include		"$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Plan.ms"
