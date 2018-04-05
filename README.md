@@ -1,9 +1,17 @@
-# CP - Urba V0.2.2
-Plugin 3DSmax.
-Bâtiments paramétriques et Terrains parametriques pour realisation rues, trottoire, gazon etc.
+# CP - Urba V0.3.0
+Suite de plugin pour 3DSmax - en Maxscript.
+- __Batiment__
+- __Terrain__
+
+pour réalisation de bout de villes, rues, trottoire, gazon etc.
+
+## version V0.3.0 :
+- [x] Inverser le poly resultat, c'est à dire utiliser les contours pour creuser le cadre former par le ou les reliefs. pour pouvoir avec la meme spline creer la route ou l'inverse c'est a dire les trottoires.
+- [x] prendre en compte les trous dans les contours (boolean) (tracer une seule face suivant les contours et reliant chaque trou)
+- [x] ___Terrain___ : Version basique mais fonctionnelle.
 
 ## version V0.2.2 :
-- [x] intégration du _Terrain paramétrique_: Un objet qui utilise sa liste de splines pour créer une 'grille', d'une dimension gérable, qu'il projete sur les reliefs de sa liste.
+- [x] Mise en place de _Terrain_ : Un objet qui utilise sa liste de splines pour créer une 'grille', d'une dimension gérable, qu'il projete sur les reliefs de sa liste.
 
 ## version V0.2.0 :
 - [x] Simplification des éléments du batiment, un systeme de constructeur va chercher les fichiers des éléments pour remplir le plug  -> souplesse accrue.
@@ -16,7 +24,7 @@ Bâtiments paramétriques et Terrains parametriques pour realisation rues, trott
 
 ### Todo :
 * **Terrain** :
-- [ ] Inverser le poly resultat, c'est à dire utiliser les contours pour creuser le cadre former par le ou les reliefs. pour pouvoir avec la meme spline creer la route ou l'inverse c'est a dire les trottoires.
+
 
 * **Surface** :
   - [x] Division de la surface en quadrilataires simples pour :
@@ -69,5 +77,3 @@ Avec un vitrage transparant on pourrait:
 
 * On pourra peut être cleanner un peu l'interface entre rollouts et reste du plug.
 * Continuer le débogage.
-
-## divers
