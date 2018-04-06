@@ -5,36 +5,26 @@ Suite de plugin pour 3DSmax - en Maxscript.
 
 pour réalisation de bout de villes, rues, trottoire, gazon etc.
 
-## version V0.3.1 :
+----------
+
+
+### V0.3.1 :
 - [x] ___Terrain___ : Version basique mais fonctionnelle.
     - [x] Correction du problème avec la position du node qui devait être sur [0,0,0]. Maintenant le node peut etre placer n'importe ou dans la scène.
     - [x] Nettoyage du manager de shape : integration du le struct de _triangulation_ et _booleen_.
+    - [x] Création d'une géométrie un peu plus propre.
+    - [x] Le terrain se contruit maintenant même sans relief, il se place alors à la hauteur de l'objet.
 - [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes à _Batiment_ et _Terrain_.
 
 
+____________________________
 
 
-## version V0.3.0 :
-- [x] ___Terrain___ : Version basique mais fonctionnelle.
-    - [x] Inverser le poly resultat, c'est à dire utiliser les contours pour creuser le cadre former par le ou les reliefs. pour pouvoir avec la meme spline creer la route ou l'inverse c'est a dire les trottoires.
-    - [x] prendre en compte les trous dans les contours (boolean) (tracer une seule face suivant les contours et reliant chaque trou)
-
-## version V0.2.2 :
-- [x] Mise en place de _Terrain_ : Un objet qui utilise sa liste de splines pour créer une 'grille', d'une dimension gérable, qu'il projete sur les reliefs de sa liste.
-
-## version V0.2.0 :
-- [x] Simplification des éléments du batiment, un systeme de constructeur va chercher les fichiers des éléments pour remplir le plug  -> souplesse accrue.
-- [x] Refonte de l'interface, on passe maintenant dans un _'mode édition'_ pour modifier le bâtiment.
-- [x] Système d'affichage d'information dans le viewport dans le _'mode édition'_ pour un retour rapide des modifs du batiment.
-- [x] Gestion d'un mode proxy (un écouteur créer le modéle complet avant le rendu et repasse en proxy aprés).
-- [x] Un groupe peut être créé dans une séquence de façade pour répétition d'un 'motif'.
-- [x] Les composants peuvent être instanciés.
-- [x] Corrections toitures à 2 pans.
-
-### Todo :
+## __Todo__ :
 * **Terrain** :
 - [ ] Gérer un noise sur z avec une influence en lien avec la distance par rapport au bords ? ( ex:pour les terrains genre gazons) (un peu façon multiscatter).
 - [ ] Gérer une distance avec une influence en lien avec la distance par rapport au bord ? (genre effet _gonflé_).
+- [ ] Faire en sorte que les undos fonctionnent.
 
 * **Surface** :
   - [x] Division de la surface en quadrilataires simples pour :
@@ -87,3 +77,24 @@ Avec un vitrage transparant on pourrait:
 
 * On pourra peut être cleanner un peu l'interface entre rollouts et reste du plug.
 * Continuer le débogage.
+
+
+_____________________________
+## __Anciennes versions__
+### V0.3.0 :
+- [x] ___Terrain___ : Version basique mais fonctionnelle.
+    - [x] Inverser le poly resultat, c'est à dire utiliser les contours pour creuser le cadre former par le ou les reliefs. pour pouvoir avec la meme spline creer la route ou l'inverse c'est a dire les trottoires.
+    - [x] prendre en compte les trous dans les contours (boolean) (tracer une seule face suivant les contours et reliant chaque trou)
+
+### V0.2.2 :
+- [x] Mise en place de _Terrain_ : Un objet qui utilise sa liste de splines pour créer une 'grille', d'une dimension gérable, qu'il projete sur les reliefs de sa liste.
+
+### V0.2.0 :
+- [x] Simplification des éléments du batiment, un systeme de constructeur va chercher les fichiers des éléments pour remplir le plug  -> souplesse accrue.
+- [x] Refonte de l'interface, on passe maintenant dans un _'mode édition'_ pour modifier le bâtiment.
+- [x] Système d'affichage d'information dans le viewport dans le _'mode édition'_ pour un retour rapide des modifs du batiment.
+- [x] Gestion d'un mode proxy (un écouteur créer le modéle complet avant le rendu et repasse en proxy aprés).
+- [x] Un groupe peut être créé dans une séquence de façade pour répétition d'un 'motif'.
+- [x] Les composants peuvent être instanciés.
+- [x] Corrections toitures à 2 pans.
+____________________________

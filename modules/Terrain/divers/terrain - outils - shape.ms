@@ -4,9 +4,11 @@ include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - mgr - Datas to string.m
 struct	str_terrain_outils_shape (
 		
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		fn debug 	_txt  var:	 param:    =	try if true  do ::debuger 	_txt	prefix:"urba | str_terrain_outils_shape"	  	var:var	 param:param		catch (),
+		
+		m_debug	=	false,
+		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"urba | str_terrain_outils_shape"	  	var:var	 param:param		catch (),
 		m_tab_format_nd = "		",
-		fn	format_noeud  _nd =(			
+		fn	format_noeud  _nd = if m_debug do (			 
 			local indent_prfix = "|    "
 			format (  m_tab_format_nd + _nd.nom + "\n" )
 			if _nd.enfants.count >0 	do	m_tab_format_nd += indent_prfix

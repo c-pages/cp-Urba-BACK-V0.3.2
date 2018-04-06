@@ -21,12 +21,15 @@ struct	str_terrain_node_core	(
 		m_plug,
 		m_core,
 		
+		----- le logo -----------
+		m_logo = #(	[13765.1,-1907.73,0], [14840.2,-1907.73,0], [14840.2,-1837.5,0], [14738.9,-1837.5,0], [14598.5,-1590.46,0], [14478.1,-1802.27,0], 
+							[14331.9,-1545.08,0], [14292.4,-1614.6,0], [14173.3,-1405.04,0], [13927.4,-1837.5,0], [13765.1,-1837.5,0]),
+							
+
 	---- managers  ------------------
 		mgr_geo				= 	str_geometrie 		(),
--- 		mgr_trianguler 	= 	str_triangulation_shape (),
 		mgr_shapes		= 	str_terrain_outils_shape (),
 		mgr_datas			=	str_datasToString (),
--- 		mgr_booleen		=	str_terrain_booleen (),
 		
 	----- les points stockés pour manip -----
 		m_contour_points =#(),
@@ -46,7 +49,7 @@ struct	str_terrain_node_core	(
 	
 	
 	
-	
+	/* 
 	
 		fn get_contour_pts	= (
 			
@@ -55,19 +58,25 @@ struct	str_terrain_node_core	(
 					append result_pts		( mgr_datas.toArray	 datas_spline_contour )
 			
 			result_pts
+			
+			
 		),
 		
-		
+		*/
 		fn get_BB_contour 	=(
 			local result #([0,0,0],[0,0,0])
 			
-			local pts_contour = get_contour_pts ()
+			local pts_contour = deepCopy m_contour_points	---	get_contour_pts ()
 			
+			--- on replace dans 
 			local minX = minY 	= minZ =1e10
 			local maxX = maxY 	= maxZ = -1e10
 			
 			for pts_face in pts_contour do 
 				for pt in pts_face do (
+					
+					pt *= m_plug.transformation
+					
 					if pt.x < minX 		do minX = pt.x 
 					if pt.y < minY 	do minY = pt.y
 					if pt.z < minZ 		do minZ = pt.z 
@@ -75,6 +84,15 @@ struct	str_terrain_node_core	(
 					if pt.y > maxY 	do maxY = pt.y 
 					if pt.z > maxZ 	do maxZ = pt.z 
 				)
+			
+			------ debug ---------------------------
+-- 			try delete $min catch ()
+-- 			try delete $max catch ()
+-- 			point pos:[minX,minY,minZ] size:500 name:"min"
+-- 			point pos:[maxX,maxY,maxZ] size:500 name:"max"
+			------ debug ---------------------------
+			
+			
 			
 			#([minX,minY,minZ],[maxX,maxY,maxZ])
 			
@@ -95,33 +113,24 @@ struct	str_terrain_node_core	(
 			local ids_pts_total = #{1.. polyop.getNumVerts m_plug.delegate	}
 			local pts_total =#()
 			for id_pt in  ids_pts_total do (
-				local pt = ( polyop.getVert m_plug.delegate  id_pt ) 
+				local pt = ( polyop.getVert m_plug.delegate  id_pt )
+				pt.z = 0
 				local maxZ = -1e+10
 				for relief in m_plug.reliefs_nodes do (
 					pt_proj = projectionZ 	pt		relief
-					if pt_proj.z > maxZ do 
+					if pt_proj.z > maxZ do (
 						maxZ = pt_proj.z
+						pt.z = maxZ	- m_plug.transformation.translation.z	
+					)
 				)
+				pt.z = pt.z  + m_plug.decallageZ
 				---- la position sur Z  ----------
-				pt.z = maxZ + m_plug.decallageZ	- m_plug.transformation.translation.z	
 				
 				append pts_total pt
 				
 			)
 			polyop.setVert m_plug.delegate	ids_pts_total 	pts_total
 		),
-		
-		/* 
-		fn replacer		=(
-			
-			--- on annule la transformation de l'objet ----------------------
-			for i  in 1 to  m_contour_points.count do
-				for j in 1 to m_contour_points[i].count do 
-					m_contour_points[i][j] *= inverse	m_plug.transformation
-				
-			
-		),
-		 */
 		
 		fn quadriller  		 = (
 			
@@ -131,49 +140,171 @@ struct	str_terrain_node_core	(
 			
 			
 			--- BB ---
-			local BB = get_BB_contour ()
+			local BB 			= get_BB_contour ()
+			local pt_origine 	= BB[1] 	
+			local p_largeur 	= m_plug.grille_largeur
 			
-			local p_largeur = m_plug.grille_largeur
+			local plane_normal 			= Point3 1 0 0
+			local plane_center_abs 	= copy pt_origine --+ _node.pos
+			plane_center_abs.x 			= ( floor ( plane_center_abs.x / p_largeur ) ) * p_largeur 
+			plane_center_abs.y 			= ( floor ( plane_center_abs.y / p_largeur ) ) * p_largeur 
+			
+			debug "m_plug.transformation " var:m_plug.transformation 
+			
+			local mtrx_node			=	copy	m_plug.transformation
+			local mtrx_node_orient	=	copy mtrx_node
+			mtrx_node_orient.translation	=	[0,0,0]
 			
 			---- sur X ----------------------------------------------------------------------------------------
-			local plane_normal = Point3 1 0 0
-			local plane_center = BB[1]
+			local plane_normal 	= /* normalize */ (	( Point3 1 0 0 ) 	*  inverse	mtrx_node_orient )
+			local plane_center 	=	( copy  plane_center_abs	) 	*  inverse	mtrx_node
+			local vec_X			=	p_largeur * plane_normal	
+			local nbr_slice_X		= floor ( ( BB[2] - BB[1] ).x	/	 p_largeur ) + 1
 			
-			local plane_center_abs = plane_center --+ _node.pos
-			plane_center_abs.x = ( floor ( plane_center_abs.x / p_largeur ) ) * p_largeur 
-			plane_center_abs.y = ( floor ( plane_center_abs.y / p_largeur ) ) * p_largeur 			
-			plane_center.x = plane_center_abs.x + offset.x
-			plane_center.y = plane_center_abs.y  + offset.y
-			
-			while  plane_center.x < BB[2].x do (
+			for i in 1 to nbr_slice_X do (
 				local faces = #{1..polyop.getNumFaces m_plug.delegate	}
 				local rayon	=	ray plane_center	plane_normal
 				polyop.slice m_plug.delegate	 faces 	rayon
-				plane_center.x += p_largeur
+				
+				plane_center += vec_X
 			)
+			
 			
 			---- sur Y ----------------------------------------------------------------------------------------
-			local plane_normal = Point3 0 1 0
-			local plane_center = BB[1]
+			local plane_normal 	= /* normalize */ (	( Point3 0 1 0 ) 	*  inverse	mtrx_node_orient )
+			local plane_center 	=	( copy  plane_center_abs	) 	*  inverse	mtrx_node
+			local vec_Y			=	p_largeur * plane_normal	
+			local nbr_slice_Y		= floor ( ( BB[2] - BB[1] ).y	/	 p_largeur ) + 1
 			
-			local plane_center_abs = plane_center --+ _node.pos
-			plane_center_abs.x = ( floor ( plane_center_abs.x / p_largeur ) ) * p_largeur 
-			plane_center_abs.y = ( floor ( plane_center_abs.y / p_largeur ) ) * p_largeur 				
-			plane_center.x = plane_center_abs.x	+ offset.x
-			plane_center.y = plane_center_abs.y 	+ offset.y
-			
-			while  plane_center.y < BB[2].y do (
+			for i in 1 to nbr_slice_Y do (
 				local faces = #{1..polyop.getNumFaces m_plug.delegate	}
 				local rayon	=	ray plane_center	plane_normal
-				polyop.slice m_plug.delegate	 faces 	rayon
-				plane_center.y += p_largeur
+				polyop.slice m_plug.delegate	 faces 	rayon		
+				
+-- 				mgr_geo.souder_tout  ()
+				
+				plane_center += vec_Y
 			)
 			
 			
-			b_continue 
 			
+			
+			
+			--------  cleanner les edges  -------------------------------------------------
+			local grille_segts			=	 polyop.getEdgeSelection m_plug.delegate
+			local total_segts 		= #{1..polyop.getNumEdges m_plug.delegate}
+			local bordure_segts		=	polyop.getOpenEdges m_plug.delegate 
+			local invis_segts 			= total_segts - grille_segts - bordure_segts
+			polyOp.setEdgeSelection m_plug.delegate invis_segts
+
+			ids_pts_aVirer 			= polyop.getVertsUsingEdge m_plug.delegate invis_segts
+			for	id_pt_aVirer in 	ids_pts_aVirer do (				
+				local sgts_duPoint = polyop.getEdgesUsingVert    m_plug.delegate 	id_pt_aVirer
+				for id_sgt_duPoint in sgts_duPoint do 
+					if bordure_segts[ id_sgt_duPoint ] do 
+						ids_pts_aVirer[ id_pt_aVirer ] = false
+			)
+
+			polyOp.setVertSelection m_plug.delegate ids_pts_aVirer
+			m_plug.delegate.remove selLevel:#edge
+			m_plug.delegate.remove selLevel:#vertex
+ 
+			polyop.retriangulate m_plug.delegate	#{1..polyop.getNumFaces m_plug.delegate	}
+
 		), -- fin fonctoin
 	
+		
+		
+		
+		
+		
+		
+		
+		fn activer_ecouteur 	=	if TERRAIN_ECOUTEUR == undefined do (
+			
+			
+			--  NODEEVENTCALLBACK--------
+			---   deformation geometrie des objets en reference ------------------
+			fn fct_ecouteur_terrain_topo		 ev nds = (
+				
+				/* undo off  */with redraw off (
+					
+						--- les terrain de la scene ---------
+						local terrains = for obj in geometry where classof obj == Urba_terrain collect  obj
+						for nd_id in nds do (
+							local nd = GetAnimByHandle nd_id
+							case superclassof  nd of (
+								shape:			(
+									for terrain_nd in  terrains do
+										if terrain_nd.aCommeContour  nd do 
+											terrain_nd.actualiser_contours ()
+								)
+								geometryClass: (
+									for terrain_nd in  terrains do
+										if terrain_nd.aCommeRelief  nd do 
+											terrain_nd.actualiser_reliefs ()
+								)
+							) --- fin case ---------
+						)
+				)
+				redrawviews ()
+			)---- fin 	fct_ecouteur_terrain
+			
+			fn fct_ecouteur_terrain_transf		 ev nds = (
+				
+				
+				local terrains = for obj in geometry where classof obj == Urba_terrain collect  obj
+				for nd_id in nds do (
+					local nd = GetAnimByHandle nd_id
+					case superclassof  nd of (
+						shape:			(
+							for terrain_nd in  terrains do
+								if terrain_nd.aCommeContour  nd do
+									terrain_nd.actualiser_contours ()
+						)
+						geometryClass: (
+							for terrain_nd in  terrains do
+								if terrain_nd.aCommeRelief  nd do 
+									terrain_nd.actualiser_reliefs ()
+							
+							if classof nd == Urba_terrain do (
+								nd.set_transform 	nd.transform
+								
+								if nd.rotation 	!= (quat 0 0 0 1)	do
+									nd.rotation 	= (quat 0 0 0 1)
+								if nd.scale 		!= [1,1,1]	do
+									nd.scale 		= [1,1,1]
+								
+								nd.actualiser () 
+							)
+						)
+					) --- fin case ---------
+				)
+			)---- fin 	fct_ecouteur_terrain
+			
+			
+			
+			TERRAIN_ECOUTEUR_topo 		= undefined
+			TERRAIN_ECOUTEUR_transf 	= undefined
+			gc light:true
+		
+			TERRAIN_ECOUTEUR_topo		= NodeEventCallback 	mouseup:true 														\
+																					geometryChanged:		fct_ecouteur_terrain_topo		\
+																					topologyChanged:		fct_ecouteur_terrain_topo		
+			
+			TERRAIN_ECOUTEUR_transf 	= NodeEventCallback	mouseup:true 														\
+																					controllerOtherEvent:	fct_ecouteur_terrain_transf		
+		),
+		
+		
+		
+		
+		
+		
+		
+		
+		----------------------------- INTERFACE --------------------------------------
+	public
 		fn actualiser_contours 			=(
 			
 			local chrono_debut = timeStamp ()
@@ -204,7 +335,7 @@ struct	str_terrain_node_core	(
 			)
 		),
 		
-		fn construire 	= undo off with redraw off  (
+		fn construire 	= undo off  (
 			
 			---- on vide ---------------
 			mgr_geo.vider ()
@@ -212,7 +343,7 @@ struct	str_terrain_node_core	(
 			if m_contour_points.count == 0 do actualiser_contours ()
 				
 			
-			if m_plug.reliefs_nodes.count > 0  and m_plug.contours_nodes.count > 0   do with redraw off (
+			if /* m_plug.reliefs_nodes.count > 0  and  */m_plug.contours_nodes.count > 0   do with redraw off (
 			
 				local chrono_debut = timeStamp ()
 				
@@ -228,6 +359,16 @@ struct	str_terrain_node_core	(
 					
 				)
 				
+				/* 
+				--------  cleanner les edges  ---------
+				local grille_segts	=	 polyop.getEdgeSelection m_plug.delegate
+				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
+				local invis_segts = total_segts - grille_segts			
+				polyOp.setEdgeSelection m_plug.delegate invis_segts
+				m_plug.delegate.remove selLevel:#edge
+				
+			
+				 */
 				
 				local chrono_tmp= timeStamp ()
 				--- on quadrille   ------------
@@ -236,115 +377,57 @@ struct	str_terrain_node_core	(
 				
 				
 				
+				
+				
+				
+				
+				
+				
+				
+				
 				--- on projete -------------------
 				local chrono_tmp= timeStamp ()
 				projeter	()
 				debug ("Terrain : projection en " +  (  ((timeStamp ()) - chrono_tmp ) / 1000.0)	as string + "s." )
+				
+				polyop.retriangulate m_plug.delegate	#{1..polyop.getNumFaces m_plug.delegate	}
+				
+				
+				/* 
+				--------  cleanner les edges  ---------
+				local grille_segts	=	 polyop.getEdgeSelection m_plug.delegate
+				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
+				local invis_segts = total_segts - grille_segts			
+				polyOp.setEdgeSelection m_plug.delegate invis_segts
+				m_plug.delegate.remove selLevel:#edge
+				
+				--- on clean les triangles	-------------
+				local chrono_tmp= timeStamp ()				
+				--------  cleanner les edges  ---------
+				local slice_segts	=	 polyop.getEdgeSelection  m_plug.delegate
+				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
+				local invis_segts = total_segts - slice_segts			
+				polyOp.setEdgeSelection m_plug.delegate invis_segts
+				m_plug.delegate.remove selLevel:#edge
+	-- 			polyop.retriangulate $ #{1..744}
+			
+				
+				debug ("Terrain : retriangulate en " +  (  ((timeStamp ()) - chrono_tmp ) / 1000.0)	as string + "s." )
+				 */
 				
 				debug ("---> Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 			
 				displayTempPrompt ("Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
 				
 			)
-			
-			
+			/* 
+				polyop.retriangulate $	#{1..polyop.getNumFaces $	}	
+			 */
 			redrawViews ()
 			
 		),
 	
 		
-		
-		fn activer_ecouteur 	=	if TERRAIN_ECOUTEUR == undefined do (
-			
-			
-			--  NODEEVENTCALLBACK--------
-			---   deformation geometrie des objets en reference ------------------
-			fn fct_ecouteur_terrain_topo		 ev nds = (
-				
--- 				format "### FCT_ECOUTEUR_TERRAIN   TOPO	###\n"
--- 				format "	----> %\n" nds
-				
-				undo off with redraw off (
-					
-						--- les terrain de la scene ---------
-						local terrains = for obj in geometry where classof obj == Urba_terrain collect  obj
-						for nd_id in nds do (
-							local nd = GetAnimByHandle nd_id
--- 							format "	----> NODE: %\n" nd.name
--- 							format " %, " nd.name
-							case superclassof  nd of (
-								shape:			(
--- 									format "		----> shape\n"
-									for terrain_nd in  terrains do
-										if terrain_nd.aCommeContour  nd do (
--- 											format "		----> on a un CONTOUR dans l 'evenement !\n"
-											terrain_nd.actualiser_contours ()
-										)
-								)
-								geometryClass: (
--- 									format "		----> geometry\n"
-									for terrain_nd in  terrains do
-										if terrain_nd.aCommeRelief  nd do (
--- 											format "		----> on a un RELIEF dans l 'evenement !\n"
-											terrain_nd.actualiser_reliefs ()
-										)
-								)
-							) --- fin case ---------
-						)
-				)
-				redrawviews ()
-			)---- fin 	fct_ecouteur_terrain
-			
-			fn fct_ecouteur_terrain_transf		 ev nds = (
--- 				format "### FCT_ECOUTEUR_TERRAIN   TRANSFO	###\n"
-				local terrains = for obj in geometry where classof obj == Urba_terrain collect  obj
-				for nd_id in nds do (
-					local nd = GetAnimByHandle nd_id
--- 					format "	----> NODE: %\n" nd.name
--- 							format " %, " nd.name
-					case superclassof  nd of (
-						shape:			(
--- 							format "		----> shape\n"
-							for terrain_nd in  terrains do
-								if terrain_nd.aCommeContour  nd do (
--- 									format "		----> on a un CONTOUR dans l 'evenement !\n"
-									terrain_nd.actualiser_contours ()
-								)
-						)
-						geometryClass: (
--- 							format "		----> geometry\n"
-							for terrain_nd in  terrains do
-								if terrain_nd.aCommeRelief  nd do (
--- 									format "		----> on a un RELIEF dans l 'evenement !\n"
-									terrain_nd.actualiser_reliefs ()
-								)
-							
-							if classof nd == Urba_terrain do (
-								
--- 								format "		----> URBA_TERRAIN: % ---> \n" nd.transform
--- 								format "		----> Avt : %\n" nd.transform
-								nd.set_transform 	nd.transform
-								nd.actualiser () 
--- 								format "		----> Apres : %\n" nd.transform
-							)
-						)
-					) --- fin case ---------
-				)
-			)---- fin 	fct_ecouteur_terrain
-			
-			
-			
-			TERRAIN_ECOUTEUR_topo 		= undefined
-			TERRAIN_ECOUTEUR_transf 	= undefined
-			gc light:true
-		
-			TERRAIN_ECOUTEUR_topo		= NodeEventCallback 	mouseup:true 												\
-																					geometryChanged:		fct_ecouteur_terrain_topo		\
-																					topologyChanged:		fct_ecouteur_terrain_topo		
-			
-			TERRAIN_ECOUTEUR_transf 	= NodeEventCallback	mouseup:true 												\
-																					controllerOtherEvent:	fct_ecouteur_terrain_transf		
-		),
 		
 		fn initialiser		_plug =(
 			
