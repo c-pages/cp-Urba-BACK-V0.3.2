@@ -214,7 +214,15 @@ struct	str_terrain_node_core	(
 		), -- fin fonctoin
 	
 		
-		
+		fn appliquerMapping =(
+			
+			--- Mapping de maniere global, TODO:generer par  composants---
+			local matrxMapping = matrix3 1 	--
+-- 			local axeP_mtrx = m_plug.core.get_axePrincipal ()
+-- 			rotateZ matrxMapping  (- (quatToEuler2  axeP_mtrx.rotationpart).z )
+			polyop.applyUVWMap 	m_plug.delegate  #box	 tm:matrxMapping  channel:1
+			
+		),
 		
 		
 		
@@ -414,6 +422,7 @@ struct	str_terrain_node_core	(
 				
 				debug ("Terrain : retriangulate en " +  (  ((timeStamp ()) - chrono_tmp ) / 1000.0)	as string + "s." )
 				 */
+				appliquerMapping ()
 				
 				debug ("---> Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 			

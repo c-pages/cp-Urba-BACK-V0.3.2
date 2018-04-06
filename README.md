@@ -14,6 +14,7 @@ pour réalisation de bout de villes, rues, trottoire, gazon etc.
     - [x] Nettoyage du manager de shape : integration du le struct de _triangulation_ et _booleen_.
     - [x] Création d'une géométrie un peu plus propre.
     - [x] Le terrain se contruit maintenant même sans relief, il se place alors à la hauteur de l'objet.
+    - [x] Application d'un mapping Real-World-Scale.
 - [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes à _Batiment_ et _Terrain_.
 
 
@@ -24,7 +25,10 @@ ____________________________
 * **Terrain** :
 - [ ] Gérer un noise sur z avec une influence en lien avec la distance par rapport au bords ? ( ex:pour les terrains genre gazons) (un peu façon multiscatter).
 - [ ] Gérer une distance avec une influence en lien avec la distance par rapport au bord ? (genre effet _gonflé_).
+- [ ] Gérer les contours qui se croisent en addition booléènne ? (un mode soustraction implique un ordre : A - B != B - A mais A + B = B + A !).
 - [ ] Faire en sorte que les undos fonctionnent.
+- [ ] Pouvoir déplacer l'origine de la grille ?
+- [ ] Création d'une grille _'monde'_, donc avec l'option par objet de soit utiliser la grille _'monde'_, soit la grille perso.
 
 * **Surface** :
   - [x] Division de la surface en quadrilataires simples pour :
