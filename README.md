@@ -1,14 +1,23 @@
-# CP - Urba V0.3.0
+# CP - Urba V0.3.1
 Suite de plugin pour 3DSmax - en Maxscript.
 - __Batiment__
 - __Terrain__
 
 pour réalisation de bout de villes, rues, trottoire, gazon etc.
 
-## version V0.3.0 :
-- [x] Inverser le poly resultat, c'est à dire utiliser les contours pour creuser le cadre former par le ou les reliefs. pour pouvoir avec la meme spline creer la route ou l'inverse c'est a dire les trottoires.
-- [x] prendre en compte les trous dans les contours (boolean) (tracer une seule face suivant les contours et reliant chaque trou)
+## version V0.3.1 :
 - [x] ___Terrain___ : Version basique mais fonctionnelle.
+    - [x] Correction du problème avec la position du node qui devait être sur [0,0,0]. Maintenant le node peut etre placer n'importe ou dans la scène.
+    - [x] Nettoyage du manager de shape : integration du le struct de _triangulation_ et _booleen_.
+- [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes à _Batiment_ et _Terrain_.
+
+
+
+
+## version V0.3.0 :
+- [x] ___Terrain___ : Version basique mais fonctionnelle.
+    - [x] Inverser le poly resultat, c'est à dire utiliser les contours pour creuser le cadre former par le ou les reliefs. pour pouvoir avec la meme spline creer la route ou l'inverse c'est a dire les trottoires.
+    - [x] prendre en compte les trous dans les contours (boolean) (tracer une seule face suivant les contours et reliant chaque trou)
 
 ## version V0.2.2 :
 - [x] Mise en place de _Terrain_ : Un objet qui utilise sa liste de splines pour créer une 'grille', d'une dimension gérable, qu'il projete sur les reliefs de sa liste.
@@ -24,7 +33,8 @@ pour réalisation de bout de villes, rues, trottoire, gazon etc.
 
 ### Todo :
 * **Terrain** :
-
+- [ ] Gérer un noise sur z avec une influence en lien avec la distance par rapport au bords ? ( ex:pour les terrains genre gazons) (un peu façon multiscatter).
+- [ ] Gérer une distance avec une influence en lien avec la distance par rapport au bord ? (genre effet _gonflé_).
 
 * **Surface** :
   - [x] Division de la surface en quadrilataires simples pour :

@@ -57,6 +57,7 @@ version:0
 		
 		fn aCommeContour	_node 	=	findItem this.contours_nodes	_node != 0
 		fn aCommeRelief		_node 	=	findItem this.reliefs_nodes		_node != 0
+		fn set_transform 		_mtrx		=	this.transformation = _mtrx
 		
 		parameters main rollout:rollout_terrain		(
 			
@@ -69,9 +70,12 @@ version:0
 			decallageZ				type: #float	 	ui:spn_decallageZ 			default:0.		 	animatable:false		invisibleInTV:true
 			
 			
-			---- 
-			contour_pts			type:#stringTab 			tabSize:0  		tabSizeVariable:true
--- 			this_node 				type:#maxObjectTab 	tabSize:0 		tabSizeVariable:true
+			----  'private'	 ---------------
+			contour_pts			type:#stringTab 		tabSize:0  						tabSizeVariable:true
+			transformation			type: #matrix3	 	default:(matrix3 1 ) 		 	animatable:false		invisibleInTV:true
+			
+			
+			
 			
 		)
 		rollout rollout_terrain "Terrain" width:162 height:455
@@ -196,9 +200,9 @@ version:0
 	--------------- CREATION  ----------------------------------------------------------------------------------------------------------------------
 	tool create (
 		on mousePoint click do	(
-			nodeTM.translation = [0,0,0] ---	worldPoint
+			nodeTM.translation =	worldPoint--- [0,0,0] 
 			actualiser ()
-			
+			set_transform		nodeTM
 			initialiser ()
 			#stop
 		)

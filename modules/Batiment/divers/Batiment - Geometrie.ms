@@ -223,7 +223,7 @@ struct	str_geometrie	(
 		),
 
 		
-		fn souder_triangulation  cible: = (
+		fn souder_tout	  cible: = (
 			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
 			
 			--------  souder les points ---------
@@ -238,6 +238,7 @@ struct	str_geometrie	(
 			cible.remove selLevel:#edge
 			
 		),
+		
 	--- plans ---------------
 		fn get_plan_2vecs_1Point	_vec1	_vec2		_pt_Origine =(
 			local nvPlan  = include		"$userScripts\cp-Urba\modules\Batiment\divers\Batiment - Plan.ms"
