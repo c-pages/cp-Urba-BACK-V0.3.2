@@ -1,5 +1,5 @@
 # CP - Urba V0.3.1
-Suite de plugin pour 3DSmax - en Maxscript. Pour réalisation de bout de villes, bâtiments, rues, trottoire, gazon etc.
+Suite de plugin pour 3DSmax - en Maxscript. Pour réalisation de bout de villes, bâtiments, surfaces pour rues, trottoire, gazon etc.
 
 en cours de développement:
 
@@ -21,13 +21,13 @@ ___Terrain___ : Version basique mais fonctionnelle.
 - [x] Nettoyage du manager de shape : integration du struct de _triangulation_ et _booleen_.
 - [x] Création de la géométrie un peu plus propre.
 - [x] Création de la géométrie ENCORE plus propre, et optimisée.
-- [x] Le terrain se contruit maintenant même sans relief, il se place alors à la hauteur de l'objet.
-- [x] Pouvoir déplacer l'origine de la grille
-- [x] Création d'une grille 'monde', donc avec l'option par objet de soit utiliser la grille 'monde', soit la grille perso.
-- [x] super remise en forme des rollouts.
+- [x] Le terrain se construit maintenant même sans relief, il se place alors à la hauteur de l'objet.
+- [x] On peut mintenant déplacer l'origine de la grille
+- [x] Mise en place d'une grille 'monde', donc avec l'option par objet de soit utiliser la grille 'monde', soit la grille 'local'.
+- [x] Remise en forme des rollouts.
 
 __Général:__
-- [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes à _Batiment_ et _Terrain_.
+- [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes tout les modules.
 - [x] Mise en place  du rollout _"A propos'_ dans le dossier _'\commun\'_, utile pour plusieurs des modules.
 
 
@@ -35,13 +35,14 @@ ____________________________
 
 
 ## __Todo__ :
-* **Terrain** :
+#### **Terrain** :
 - [ ] Gérer un noise sur z avec une influence en lien avec la distance par rapport au bords ? ( ex:pour les terrains genre gazons) (un peu façon multiscatter).
 - [ ] Gérer une distance avec une influence en lien avec la distance par rapport au bord ? (genre effet _gonflé_).
 - [ ] Gérer les contours qui se croisent en addition booléènne ? (un mode soustraction implique un ordre : A - B != B - A mais A + B = B + A !).
 - [ ] Faire en sorte que les undos fonctionnent.
 - [ ] option pour créations des trous automatiquement quand superposition avec un _Bâtiment_.
 
+#### **Bâtiment** :
 * **Surface** :
   - [x] Division de la surface en quadrilataires simples pour :
     * - [ ] Répartition des éléments de toitures.
