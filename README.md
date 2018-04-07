@@ -16,12 +16,19 @@ en cours de développement:
 
 
 ### V0.3.1 :
-- [x] ___Terrain___ : Version basique mais fonctionnelle.
-    - [x] Correction du problème avec la position du node qui devait être sur [0,0,0]. Maintenant le node peut etre placer n'importe ou dans la scène.
-    - [x] Nettoyage du manager de shape : integration du le struct de _triangulation_ et _booleen_.
-    - [x] Création d'une géométrie un peu plus propre.
-    - [x] Le terrain se contruit maintenant même sans relief, il se place alors à la hauteur de l'objet.
+___Terrain___ : Version basique mais fonctionnelle.
+- [x] Correction du problème avec la position du node qui devait être sur [0,0,0]. Maintenant le node peut etre placer n'importe ou dans la scène.
+- [x] Nettoyage du manager de shape : integration du struct de _triangulation_ et _booleen_.
+- [x] Création de la géométrie un peu plus propre.
+- [x] Création de la géométrie ENCORE plus propre, et optimisée.
+- [x] Le terrain se contruit maintenant même sans relief, il se place alors à la hauteur de l'objet.
+- [x] Pouvoir déplacer l'origine de la grille
+- [x] Création d'une grille 'monde', donc avec l'option par objet de soit utiliser la grille 'monde', soit la grille perso.
+- [x] super remise en forme des rollouts.
+
+__Général:__
 - [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes à _Batiment_ et _Terrain_.
+- [x] Mise en place  du rollout _"A propos'_ dans le dossier _'\commun\'_, utile pour plusieurs des modules.
 
 
 ____________________________
@@ -33,8 +40,7 @@ ____________________________
 - [ ] Gérer une distance avec une influence en lien avec la distance par rapport au bord ? (genre effet _gonflé_).
 - [ ] Gérer les contours qui se croisent en addition booléènne ? (un mode soustraction implique un ordre : A - B != B - A mais A + B = B + A !).
 - [ ] Faire en sorte que les undos fonctionnent.
-- [ ] Pouvoir déplacer l'origine de la grille ?
-- [ ] Création d'une grille 'monde', donc avec l'option par objet de soit utiliser la grille 'monde', soit la grille perso.
+- [ ] option pour créations des trous automatiquement quand superposition avec un _Bâtiment_.
 
 * **Surface** :
   - [x] Division de la surface en quadrilataires simples pour :

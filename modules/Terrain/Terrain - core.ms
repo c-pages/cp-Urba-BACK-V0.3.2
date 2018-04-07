@@ -45,6 +45,160 @@ struct	str_terrain_node_core	(
 		
 	------------ Fonctions	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
+		
+		----------------- Ecouteurs	----------------------
+		fn activer_ecouteur 	=	if TERRAIN_ECOUTEUR == undefined do (
+			
+			
+			--  NODEEVENTCALLBACK--------
+			---   deformation geometrie des objets en reference ------------------
+			fn fct_ecouteur_terrain_topo		 ev nds = (
+				format "	###	EVT:	fct_ecouteur_terrain_topo\n"
+				
+				with redraw off (
+					
+					--- les terrain de la scene ---------
+					local terrains = for obj in geometry where classof obj.baseObject == Urba_terrain collect  obj
+					for nd_id in nds do (
+						local nd = GetAnimByHandle nd_id
+						case superclassof  nd of (
+							shape:			(
+								for terrain_nd in  terrains do
+									if terrain_nd.aCommeContour  nd do (
+										terrain_nd.core.set_etape_aActualiser 1
+										terrain_nd.actualiser ()
+									)
+							)
+							geometryClass: (
+								for terrain_nd in  terrains do
+									if terrain_nd.aCommeRelief  nd do ((
+										terrain_nd.core.set_etape_aActualiser	3
+										terrain_nd.actualiser ()
+									)
+								)
+							)
+						) --- fin case ---------
+					)
+				)
+				redrawviews ()
+			)---- fin 	fct_ecouteur_terrain
+			
+			fn fct_ecouteur_terrain_transf		 ev nds = (
+				format "	###	EVT:	fct_ecouteur_terrain_transf\n"
+				
+				local terrains = for obj in geometry where classof obj.baseObject == Urba_terrain collect  obj
+				for nd_id in nds do (
+					local nd = GetAnimByHandle nd_id
+					case superclassof  nd of (
+						shape:			(
+							for terrain_nd in  terrains do
+								if terrain_nd.aCommeContour  nd do  with redraw off (
+									terrain_nd.core.set_etape_aActualiser 1
+									terrain_nd.actualiser ()
+								)
+						)
+						geometryClass: (
+							for terrain_nd in  terrains do
+								if terrain_nd.aCommeRelief  nd do   with redraw off (
+									terrain_nd.core.set_etape_aActualiser 3
+									terrain_nd.actualiser ()
+								)
+							
+							if classof nd.baseObject == Urba_terrain do with redraw off (
+								
+								nd.set_transform 	nd.transform
+								
+								if nd.rotation 	!= (quat 0 0 0 1)	do
+									nd.rotation 	= (quat 0 0 0 1)
+								if nd.scale 		!= [1,1,1]	do
+									nd.scale 		= [1,1,1]
+								
+								nd.core.set_etape_aActualiser 4
+								nd.actualiser () 
+								
+							)
+						)
+					) --- fin case ---------
+				)
+			)---- fin 	fct_ecouteur_terrain
+			
+			fn fct_ecouteur_terrain_deleted		 ev nds = (
+				format "	###	EVT:	fct_ecouteur_terrain_deleted\n"
+				local terrains = for obj in geometry where classof obj.baseObject == Urba_terrain collect  obj
+				format "	###	EVT:	terrains: %\n" terrains
+				for terrain_nd in  terrains do (
+					local aActualiser = false
+					for contour_node in terrain_nd.contours_nodes do (
+						if isDeleted contour_node or contour_node == Undefined do (
+							
+							terrain_nd.core.set_etape_aActualiser 1
+							aActualiser = true
+						)
+					)
+					
+					if not aActualiser do
+						for relief_node in terrain_nd.reliefs_nodes do (
+							if isDeleted relief_node  or relief_node == Undefined do (
+								
+								terrain_nd.core.set_etape_aActualiser 3
+								aActualiser = true
+							)
+						)
+					
+					if aActualiser do (
+				format "	###	EVT	----> a actualiser !!\n"
+						terrain_nd.actualiser ()
+						
+					)
+				)
+				/* 
+				for nd_id in nds do (
+-- 				try (
+					local nd = GetAnimByHandle nd_id
+-- 					if not isdeleted nd  do (
+						
+-- 						format "	###	EVT:	fct_ecouteur_terrain_deleted\n"
+						
+						case superclassof  nd of (
+							shape:			(
+								for terrain_nd in  terrains do
+									if terrain_nd.aCommeContour  nd do  with redraw off (
+										terrain_nd.core.set_etape_aActualiser 1
+										terrain_nd.actualiser ()
+									)
+							)
+							geometryClass: (
+								for terrain_nd in  terrains do
+									if terrain_nd.aCommeRelief  nd do   with redraw off (
+										terrain_nd.core.set_etape_aActualiser 3
+										terrain_nd.actualiser ()
+									)
+							)
+						) --- fin case ---------
+-- 					)
+				)	-- catch () */
+			)---- fin 	fct_ecouteur_terrain
+			
+			
+			TERRAIN_ECOUTEUR_deleted	= undefined
+			TERRAIN_ECOUTEUR_topo 		= undefined
+			TERRAIN_ECOUTEUR_transf 	= undefined
+			gc light:true
+		
+			TERRAIN_ECOUTEUR_deleted	= NodeEventCallback 	mouseup:true 												\
+																					deleted:						fct_ecouteur_terrain_deleted
+			
+			TERRAIN_ECOUTEUR_topo		= NodeEventCallback 	mouseup:true 														\
+																					geometryChanged:		fct_ecouteur_terrain_topo		\
+																					topologyChanged:		fct_ecouteur_terrain_topo		
+			
+			TERRAIN_ECOUTEUR_transf 	= NodeEventCallback	mouseup:true 														\
+																					controllerOtherEvent:	fct_ecouteur_terrain_transf		
+		),
+		
+		
+		
+		
 		fn get_BB_contour 	=(
 -- 			debug "get_BB_contour"
 			
@@ -72,7 +226,7 @@ struct	str_terrain_node_core	(
 -- 			debug "get_BB_contour ?!?"
 			result = #([minX,minY,minZ],[maxX,maxY,maxZ])
 -- 				
-			debug "result ?!?" var:result
+-- 			debug "result ?!?" var:result
 			result
 		),
 		
@@ -94,7 +248,7 @@ struct	str_terrain_node_core	(
 				local pt = pts_result[i]
 				pt.z = 0
 				local maxZ = -1e+10
-				for relief in m_plug.reliefs_nodes do (
+				for relief in m_plug.reliefs_nodes where relief != undefined and not isdeleted relief do (
 					pt_proj = projectionZ 	pt		relief
 					if pt_proj.z > maxZ do (
 -- 				debug"	------> projection !!"
@@ -110,7 +264,7 @@ struct	str_terrain_node_core	(
 		),
 		fn quadriller_geometrie_base  		 = (
 			
-			debug "quadriller_geometrie_base"
+-- 			debug "quadriller_geometrie_base"
 			
 			local offset = [ -20,-20,0 ]
 			
@@ -119,14 +273,19 @@ struct	str_terrain_node_core	(
 			local pt_origine 	= BB[1] 
 			local p_largeur 	= if m_plug.grille_monde_use	then m_plug.grille_monde_resolution	else	 m_plug.grille_resolution
 			
-			debug "quadriller_geometrie_base ?!?!?!?"
+-- 			debug "quadriller_geometrie_base ?!?!?!?"
+			
+			local decallage_grille	 		=  if m_plug.grille_monde_use	then m_plug.grille_monde_position	else	 m_plug.grille_position
+			local vec_decallage_grille		= [0,0,0]
+			vec_decallage_grille.x			= 	mod decallage_grille.x	p_largeur 
+			vec_decallage_grille.y			= 	mod decallage_grille.y	p_largeur 
 			
 			local plane_normal 			= Point3 1 0 0
 			local plane_center_abs 	= copy pt_origine --+ _node.pos
 			plane_center_abs.x 			= ( floor ( plane_center_abs.x / p_largeur ) ) * p_largeur 
 			plane_center_abs.y 			= ( floor ( plane_center_abs.y / p_largeur ) ) * p_largeur 
 			
-			debug "m_plug.transformation " --var:m_plug.transformation 
+-- 			debug "m_plug.transformation " --var:m_plug.transformation 
 			
 			local mtrx_node			=	copy	m_plug.transformation
 			local mtrx_node_orient	=	copy mtrx_node
@@ -134,11 +293,12 @@ struct	str_terrain_node_core	(
 			
 			---- sur X ----------------------------------------------------------------------------------------
 			local plane_normal 	= /* normalize */ (	( Point3 1 0 0 ) 	*  inverse	mtrx_node_orient )
-			local plane_center 	=	( copy  plane_center_abs	) 	*  inverse	mtrx_node
+			local plane_center 	=	( (copy  plane_center_abs	) + vec_decallage_grille ) 	*  inverse	mtrx_node
 			local vec_X			=	p_largeur * plane_normal	
 			local nbr_slice_X		= floor ( ( BB[2] - BB[1] ).x	/	 p_largeur ) + 1
 			
 			for i in 1 to nbr_slice_X do (
+				
 				local faces = #{1..polyop.getNumFaces m_plug.delegate	}
 				local rayon	=	ray plane_center	plane_normal
 				polyop.slice m_plug.delegate	 faces 	rayon
@@ -149,7 +309,7 @@ struct	str_terrain_node_core	(
 			
 			---- sur Y ----------------------------------------------------------------------------------------
 			local plane_normal 	= /* normalize */ (	( Point3 0 1 0 ) 	*  inverse	mtrx_node_orient )
-			local plane_center 	=	( copy  plane_center_abs	) 	*  inverse	mtrx_node
+			local plane_center 	=	((copy  plane_center_abs	) + vec_decallage_grille ) 	*  inverse	mtrx_node
 			local vec_Y			=	p_largeur * plane_normal	
 			local nbr_slice_Y		= floor ( ( BB[2] - BB[1] ).y	/	 p_largeur ) + 1
 			
@@ -194,137 +354,64 @@ struct	str_terrain_node_core	(
 		
 		
 		
-		----------------- Ecouteurs	----------------------
-		fn activer_ecouteur 	=	if TERRAIN_ECOUTEUR == undefined do (
-			
-			
-			--  NODEEVENTCALLBACK--------
-			---   deformation geometrie des objets en reference ------------------
-			fn fct_ecouteur_terrain_topo		 ev nds = (
-				
-				/* undo off  */with redraw off (
-					
-						--- les terrain de la scene ---------
-						local terrains = for obj in geometry where classof obj.baseObject == Urba_terrain collect  obj
-						for nd_id in nds do (
-							local nd = GetAnimByHandle nd_id
-							case superclassof  nd of (
-								shape:			(
-									for terrain_nd in  terrains do
-										if terrain_nd.aCommeContour  nd do 
-											terrain_nd.actualiser_contours ()
-								)
-								geometryClass: (
-									for terrain_nd in  terrains do
-										if terrain_nd.aCommeRelief  nd do 
-											terrain_nd.actualiser_reliefs ()
-								)
-							) --- fin case ---------
-						)
-				)
-				redrawviews ()
-			)---- fin 	fct_ecouteur_terrain
-			
-			fn fct_ecouteur_terrain_transf		 ev nds = (
-				
-				
-				local terrains = for obj in geometry where classof obj.baseObject == Urba_terrain collect  obj
-				for nd_id in nds do (
-					local nd = GetAnimByHandle nd_id
-					case superclassof  nd of (
-						shape:			(
-							for terrain_nd in  terrains do
-								if terrain_nd.aCommeContour  nd do (
-									terrain_nd.core.set_etape_aActualiser 1
-									terrain_nd.actualiser ()
-								)
-						)
-						geometryClass: (
-							for terrain_nd in  terrains do
-								if terrain_nd.aCommeRelief  nd do  (
-									terrain_nd.core.set_etape_aActualiser 3
-									terrain_nd.actualiser ()
-								)
-							
-							if classof nd.baseObject == Urba_terrain do (
-								nd.set_transform 	nd.transform
-								
-								if nd.rotation 	!= (quat 0 0 0 1)	do
-									nd.rotation 	= (quat 0 0 0 1)
-								if nd.scale 		!= [1,1,1]	do
-									nd.scale 		= [1,1,1]
-								
-								nd.core.set_etape_aActualiser 4
-								
-								nd.actualiser () 
-							)
-						)
-					) --- fin case ---------
-				)
-			)---- fin 	fct_ecouteur_terrain
-			
-			
-			
-			TERRAIN_ECOUTEUR_topo 		= undefined
-			TERRAIN_ECOUTEUR_transf 	= undefined
-			gc light:true
-		
-			TERRAIN_ECOUTEUR_topo		= NodeEventCallback 	mouseup:true 														\
-																					geometryChanged:		fct_ecouteur_terrain_topo		\
-																					topologyChanged:		fct_ecouteur_terrain_topo		
-			
-			TERRAIN_ECOUTEUR_transf 	= NodeEventCallback	mouseup:true 														\
-																					controllerOtherEvent:	fct_ecouteur_terrain_transf		
-		),
-		
-		
-		
-		
-		
 		
 		
 		
 	
 		fn actualiser_pts_contours 		=(
+			debug "	(1-1)	actualiser_pts_contours"
 			---- maj des points -------------
 			m_pts_contours =#()			
+-- 			debug "	---->		m_plug.contours_nodes" var:m_plug.contours_nodes
 			if m_plug.contours_nodes.count > 0 do 
-				for 	contour_node in m_plug.contours_nodes do
+				for 	contour_node in m_plug.contours_nodes  where contour_node != undefined and not isdeleted contour_node do
 					m_pts_contours	+= 	( mgr_shapes.interpoler_pts_from_shape		contour_node  )
+-- 			debug "	---->		m_pts_contours" var:m_pts_contours
 		),
 		
-		fn actualiser_pts_faces =
-			m_pts_faces = mgr_shapes.creer_hierarchie_booleens	m_pts_contours,
+		fn actualiser_pts_faces =(
+			debug "	(1-2)	actualiser_pts_faces"
+			m_pts_faces = mgr_shapes.creer_hierarchie_booleens	m_pts_contours
+-- 			debug "	---->		m_pts_faces" var:m_pts_faces
+		),
 		
 		fn creer_geometrie_base = (
+			debug "	(2-1)	creer_geometrie_base"
 			for pts_shp in m_pts_faces do	mgr_geo.face	pts_shp smGrp:1
-			mgr_geo.souder_tout()
+			mgr_geo.souder_tout ()
 		),
 		
 		fn actualiser_pts_quadrillages =(
+			debug "	(2-2)	actualiser_pts_quadrillages"
 			quadriller_geometrie_base ()
 			m_pts_quadrillages = for i in 1 to polyop.getNumVerts  m_plug.delegate	collect	polyop.getVert  m_plug.delegate		i
 		),
 		
-		fn actualiser_pts_projections =
-			m_pts_projections  = projeter_sur_reliefs		m_pts_quadrillages,
+		fn actualiser_pts_projections =(
+			debug "	(3)		actualiser_pts_projections"
+			m_pts_projections  = projeter_sur_reliefs		m_pts_quadrillages
+		),
 		
-		fn realigner_auShapes	=
-			m_pts_aligner_auShapes = 	for i in 1 to m_pts_projections.count collect 	m_pts_projections[i] * inverse	m_plug.transformation,
+		fn realigner_auShapes	=(
+			debug "	(4)		realigner_auShapes"
+			m_pts_aligner_auShapes = 	for i in 1 to m_pts_projections.count collect 	m_pts_projections[i] * inverse	m_plug.transformation
+		),
 		
-		fn actualiser_pts_decallageZ =(			
+		fn actualiser_pts_decallageZ =(		
+			debug "	(5-1)	actualiser_pts_decallageZ"	
 			m_pts_decallageZ	=	deepcopy m_pts_aligner_auShapes			
 			m_pts_decallageZ.z += m_plug.hauteur
 		),
 		
-		fn bouger_geometries	=(
+		fn placer_pts_geometrie	=(
+			debug "	(5-2)	placer_pts_geometrie"	
 			
 			---- on bouge les vertex-----------
 -- 			debug "---- on bouge les vertex-----------"
 			local ids_pts_total = #{1..polyop.getNumVerts m_plug.delegate}
 			local pos_pts_final = deepcopy	m_pts_decallageZ
-			debug "	---->	ids_pts_total" var:ids_pts_total
-			debug "	---->	pos_pts_final" var:pos_pts_final
+-- 			debug "	---->	ids_pts_total" var:ids_pts_total
+-- 			debug "	---->	pos_pts_final" var:pos_pts_final
 			
 			polyop.setVert m_plug.delegate	ids_pts_total 	pos_pts_final			
 			polyop.retriangulate	m_plug.delegate #{1..polyop.getNumFaces m_plug.delegate}
@@ -343,6 +430,9 @@ struct	str_terrain_node_core	(
 		fn actualiser =(
 			debug "actualiser"
 			
+-- 			debug "	---->	etape_aActualiser" var:m_etape_aActualiser
+			
+			local chrono_debut = timeStamp ()
 			
 			---- si on a pas de shape,  on dessine le logo -----------
 			if m_plug.contours_nodes.count == 0 then (
@@ -392,11 +482,16 @@ struct	str_terrain_node_core	(
 				if etape <= 5 do (
 					actualiser_pts_decallageZ ()
 					
-					bouger_geometries ()
+					placer_pts_geometrie ()
 				)
 			)
 			
 			m_etape_aActualiser = 0
+			
+			debug ("---> Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
+		
+			displayTempPrompt ("Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
+			
 		),
 		
 		 /*

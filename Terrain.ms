@@ -1,10 +1,11 @@
 
 
 ---- ecouteurs terrain ------------------
+TERRAIN_ECOUTEUR_deleted	= undefined
 TERRAIN_ECOUTEUR_topo 		= undefined
 TERRAIN_ECOUTEUR_transf 	= undefined
 gc light:true
-global TERRAIN_ECOUTEUR_topo, TERRAIN_ECOUTEUR_transf
+global TERRAIN_ECOUTEUR_deleted, 		TERRAIN_ECOUTEUR_topo, 	TERRAIN_ECOUTEUR_transf
 ---- ecouteurs terrain ------------------
 
 

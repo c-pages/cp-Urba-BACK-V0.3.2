@@ -228,15 +228,10 @@ struct	str_geometrie	(
 			
 			--------  souder les points ---------
 			cible.weldThreshold = .1
-			polyop.weldVertsByThreshold cible  #{1..polyop.getNumVerts cible}
-/* 
-			--------  cleanner les edges  ---------
-			local open_segts	=	 polyop.getOpenEdges cible
-			local total_segts = #{1..polyop.getNumEdges cible}
-			local invis_segts = total_segts - open_segts			
-			polyOp.setEdgeSelection cible invis_segts
-			cible.remove selLevel:#edge
-			 */
+			
+			if polyop.getNumVerts cible > 0 do
+				polyop.weldVertsByThreshold cible  #{1..polyop.getNumVerts cible}
+			
 		),
 		
 	--- plans ---------------

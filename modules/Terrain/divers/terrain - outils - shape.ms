@@ -796,7 +796,7 @@ struct		str_terrain_outils_shape (
 	
 	
 		fn preparer_booleens 	_pts_shapes	=(
-			debug "preparer_booleens"
+-- 			debug "preparer_booleens"
 			local pts_shps = deepCopy _pts_shapes	
 			local pts_shps_result 	=	#()
 			
@@ -874,7 +874,7 @@ struct		str_terrain_outils_shape (
 			
 			local		pts_result	= get_pts_from_hierachie		nd_root
 			
-			format_noeud 	nd_root
+-- 			format_noeud 	nd_root
 			
 			pts_result
 		),
