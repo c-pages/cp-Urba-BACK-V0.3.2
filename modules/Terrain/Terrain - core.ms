@@ -332,13 +332,13 @@ struct	str_terrain_node_core	(
 				for i  in 1 to  m_contour_points.count do
 					for j in 1 to m_contour_points[i].count do 
 						m_contour_points[i][j] *= inverse	m_plug.transformation
-					
+					/* 
 				--- on enregistre les points sur le node pour pas avoir a recalucler a chaque fois	------------------
 				local datas_pts_contour =#()
 				for pts_spline_contour in m_contour_points do
 						append datas_pts_contour		( mgr_datas.toString	pts_spline_contour )	
 				m_plug.contour_pts	=	datas_pts_contour
-				
+				 */
 				debug ("Terrain : Contours actualisé en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 			)
 		),

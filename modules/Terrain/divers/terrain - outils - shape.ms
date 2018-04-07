@@ -800,7 +800,7 @@ struct		str_terrain_outils_shape (
 			local pts_shps = deepCopy _pts_shapes	
 			local pts_shps_result 	=	#()
 			
-			
+			/*  
 			---- on gere les addition de shape ----------------------
 			while pts_shps.count > 0 do (
 				local	shp_courant 					= 	pts_shps[1]
@@ -854,14 +854,14 @@ struct		str_terrain_outils_shape (
 -- 				select sp
 			)
 			---- DEBUG--------------
-			/*  
+			
 			*/
 			
 			
 			
 			
 			local 	nd_root			=	creer_noeud_hierarchie 	nom:"root"	
-			local 	shps_aTraiter	=	deepCopy pts_shps_result
+			local 	shps_aTraiter	=	deepCopy pts_shps
 			
 			local i = 1
 			for shp in  	shps_aTraiter  do (

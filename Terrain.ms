@@ -85,7 +85,7 @@ version:0
 			
 			
 			----  parametres perso  'private'	 ---------------
-			contour_pts			type:#stringTab 		tabSize:0  						tabSizeVariable:true
+-- 			contour_pts			type:#stringTab 		tabSize:0  						tabSizeVariable:true
 			transformation			type: #matrix3	 	default:(matrix3 1 ) 		 	animatable:false		invisibleInTV:true
 			
 		)
