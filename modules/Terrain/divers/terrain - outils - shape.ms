@@ -7,7 +7,7 @@ struct		str_terrain_outils_shape (
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		
 		m_debug	=	true,
-		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"urba | str_terrain_outils_shape"	  	var:var	 param:param		catch (),
+		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | shape"	  	var:var	 param:param		catch (),
 		m_tab_format_nd = "		",
 		fn	format_noeud  _nd = if m_debug do (			 
 			local indent_prfix = "|    "
@@ -300,7 +300,7 @@ struct		str_terrain_outils_shape (
 		
 		--- sens du shape ----------------------
 		fn est_sensPositif 					_pts 		=(
-			debug "est_sensPositif"
+-- 			debug "est_sensPositif"
 			local result 				= true
 			local id_pointHaut 	=  point_lePlusHautSurY  	_pts
 			
@@ -321,13 +321,13 @@ struct		str_terrain_outils_shape (
 			
 			if vec2.x > vec1.X do result = not result
 			
-			debug "est_sensPositif" var:result
+-- 			debug "est_sensPositif" var:result
 			
 			result
 			
 		),
 		fn changer_sens 					_pts 		=(
-			debug "changer_sens"
+-- 			debug "changer_sens"
 			local result =#()
 			for i= _pts.count to 1 by -1 do 
 				append result 	_pts[i]
@@ -867,12 +867,14 @@ struct		str_terrain_outils_shape (
 			for shp in  	shps_aTraiter  do (
 				local nv_nd = 	creer_noeud_hierarchie 		pts:shp	nom:("noeud " + i as string )
 				integrer_nd_dans_hierarchie		nd_root		nv_nd
-				format_noeud 	nd_root
+-- 				format_noeud 	nd_root
 				
 				i+=1
 			)
 			
 			local		pts_result	= get_pts_from_hierachie		nd_root
+			
+			format_noeud 	nd_root
 			
 			pts_result
 		),
@@ -1011,8 +1013,14 @@ struct		str_terrain_outils_shape (
 	------------------- INTERFACE -----------------------------------------------------------------------
 	public
 		
-		fn get_points_from_shape  	_shp=( 
-			interpoler_shape 		_shp
+		fn interpoler_pts_from_shape  	_shp=( 
+			
+			local pts_shps = interpoler_shape 		_shp
+			
+			--- on les plaque sur z=0 -----
+			for shp in pts_shps do	shp.z = 0
+			
+			pts_shps
 		),
 		
 		

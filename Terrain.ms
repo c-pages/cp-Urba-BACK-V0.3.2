@@ -23,7 +23,7 @@ version:0
 
 		------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 		fn debug 	_txt  var:	 param:    =	
-		try if true  do ::debuger 	_txt	prefix:"urba | Urba_terrain"	  	var:var	 param:param	
+		try if true  do ::debuger 	_txt	prefix:"Terrain		"	  	var:var	 param:param	
 		catch ()
 		------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 
@@ -48,12 +48,18 @@ version:0
 		
 		----  Mutations -----------------
 		fn ajouter_relief			_node 	aActualiser:true	=(
+			format "\n"
+			debug "		###	ajouter_relief	###"
+-- 			debug "aActualiser" var:aActualiser
 			if appendIfUnique this.reliefs_nodes	 _node and aActualiser do (
 				this.rollout_global.actualiser ()
 				actualiser ()
 			)
 		)
 		fn ajouter_contour		_node 	aActualiser:true	=(
+			format "\n"
+			debug "		###	ajouter_contour	###"
+-- 			debug "aActualiser" var:aActualiser
 			if appendIfUnique this.contours_nodes 	_node and aActualiser  do (
 				this.rollout_global.actualiser ()
 				actualiser ()
@@ -104,7 +110,7 @@ version:0
 		initialiser ()
 	)
 	on update do	(
-		debug "update du plugin"
+-- 		debug "update du plugin"
 -- 		initialiser ()
 	)
 

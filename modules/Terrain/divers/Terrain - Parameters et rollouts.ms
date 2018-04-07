@@ -22,7 +22,7 @@
 			----- Evenements ------------------------------------------------------------------------------------------------------------------------------
 			on contours_nodes 	set  val index 	do core.set_etape_aActualiser 1
 			on reliefs_nodes		set  val index 	do core.set_etape_aActualiser 3
-			on hauteur				set  val 			do core.set_etape_aActualiser 4
+			on hauteur				set  val 			do core.set_etape_aActualiser 5
 			
 		)
 		
@@ -69,7 +69,7 @@
 		)
 		
 	
-		rollout rollout_global "Global" width:180 height:539
+		rollout rollout_global  "Global" width:180 height:539
 		(
 			
 			fn shape_filt 		obj = superclassof 	obj == shape
@@ -91,15 +91,16 @@
 			
 			
 			fn actualiser =(
-			/* 	lbx_contours.items 	= for contour_node in contours_nodes collect if contour_node != undefined then  contour_node.name else "<deleted>"
+			 	lbx_contours.items 	= for contour_node in contours_nodes collect if contour_node != undefined then  contour_node.name else "<deleted>"
 				lbx_reliefs.items 		= for relief_node in reliefs_nodes collect if relief_node != undefined then  relief_node.name else "<deleted>"
 				btn_supprimer_contour.enabled 	=	 lbx_contours.selection	!= 0 
-				btn_supprimer_relief.enabled 		=	 lbx_reliefs.selection	!= 0  */
+				btn_supprimer_relief.enabled 		=	 lbx_reliefs.selection	!= 0  
 			)
 			
 			
 			
 			
+			on rollout_global open do actualiser ()
 			
 			on btn_contour_pick picked obj do
 			(
