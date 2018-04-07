@@ -22,31 +22,27 @@ struct	str_terrain_node_core	(
 		m_core,
 		
 		----- le logo -----------
-		m_logo = #(	[13765.1,-1907.73,0], [14840.2,-1907.73,0], [14840.2,-1837.5,0], [14738.9,-1837.5,0], [14598.5,-1590.46,0], [14478.1,-1802.27,0], 
-							[14331.9,-1545.08,0], [14292.4,-1614.6,0], [14173.3,-1405.04,0], [13927.4,-1837.5,0], [13765.1,-1837.5,0]),
-							
-
+		m_logo = #([-605.581,-231.857,0], [636.61,-231.857,0], [636.61,-86.025,0], [377.346,-86.025,0], [219.367,260.627,0], [65.4331,-77.1487,0], [-49.6755,175.43,0], [-83.7085,100.755,0], [-196.462,348.168,0], [-394.335,-86.025,0], [-605.581,-86.025,0]),
+		
+		
 	---- managers  ------------------
 		mgr_geo				= 	str_geometrie 		(),
 		mgr_shapes		= 	str_terrain_outils_shape (),
 		mgr_datas			=	str_datasToString (),
 		
 	----- les points stockés pour manip -----
-		m_contour_points =#(),
+		m_pts_contours	 		=	#(),		---- les listes de points issues des points des splines contours, cleannés et dans le bon sens. ------------
+		m_noeuds_booleens		=	#(),		---- la hierarchie booleenne de tout nos contours. ------------
+		m_pts_faces				=	#(),		---- les listes de points des faces de base. ------------
+		m_pts_quadrillages		=	#(),		---- les positions des points des faces une fois les quadrillage fait et cleanné .------------
+		m_pts_projections		=	#(),		---- les positions des points des faces une fois la projection faite, on peut donc changer facilement le decallage sur Z. ------------
+		
+		m_etape_aActualiser	=	0,
 		/* 
-	---- ecouteurs ------------------
-		m_ecouteur_terrain,
-		m_ecouteur_terrain_topo,
-		m_ecouteur_terrain_transfo,
-		 */
-	
-	
-	
-	
-	
-	public
-	
-	
+	----- 
+		*/
+		
+		
 	
 	
 	/* 
@@ -98,6 +94,8 @@ struct	str_terrain_node_core	(
 			
 		),
 		
+		
+		----------- geometrie	( à glisser dans la structure geometrie !!! ! ! ! ! ! ! !  )---------------------------------------------------
 		fn projectionZ	 pt 	_node_cible	=(
 			local result = 	 pt
 			if _node_cible != undefined do (
@@ -107,7 +105,6 @@ struct	str_terrain_node_core	(
 			)
 			result
 		),
-
 		fn projeter		=(
 			
 			local ids_pts_total = #{1.. polyop.getNumVerts m_plug.delegate	}
@@ -131,7 +128,6 @@ struct	str_terrain_node_core	(
 			)
 			polyop.setVert m_plug.delegate	ids_pts_total 	pts_total
 		),
-		
 		fn quadriller  		 = (
 			
 			debug "quadriller"
@@ -214,20 +210,12 @@ struct	str_terrain_node_core	(
 		), -- fin fonctoin
 	
 		
-		fn appliquerMapping =(
-			
-			--- Mapping de maniere global, TODO:generer par  composants---
-			local matrxMapping = matrix3 1 	--
--- 			local axeP_mtrx = m_plug.core.get_axePrincipal ()
--- 			rotateZ matrxMapping  (- (quatToEuler2  axeP_mtrx.rotationpart).z )
-			polyop.applyUVWMap 	m_plug.delegate  #box	 tm:matrxMapping  channel:1
-			
-		),
 		
 		
 		
 		
 		
+		----------------- Ecouteurs	----------------------
 		fn activer_ecouteur 	=	if TERRAIN_ECOUTEUR == undefined do (
 			
 			
@@ -311,8 +299,107 @@ struct	str_terrain_node_core	(
 		
 		
 		
-		----------------------------- INTERFACE --------------------------------------
+	
+		fn actualiser_pts_contours 		=(
+			debug "(1) actualiser_pts_contours"
+			---- maj des points -------------
+-- 			m_pts_contours =#()			
+-- 			if m_plug.contours_nodes.count > 0 do (
+-- 				for 	contour_node in m_plug.contours_nodes do
+-- 					m_pts_contours	+= 	( mgr_shapes.get_points_from_shape		contour_node  /* transformation:m_plug.transformation */	)
+-- 			m_pts_contours
+		),
+		
+		fn actualiser_noeuds_booleens	=(
+			debug "(1-1) actualiser_noeuds_booleens"
+-- 			m_noeuds_booleens = mgr_shapes.creer_hierarchie_booleens	m_pts_contours
+		),
+		
+		fn actualiser_pts_faces =(
+			debug "(1-2) actualiser_pts_faces"
+			
+		),
+		fn creer_geometrie_base = (
+			debug "creer_geometrie_base"
+			
+		),
+		
+		fn actualiser_pts_quadrillages =(
+			debug "(2) actualiser_pts_quadrillages"
+			
+		),
+		
+		fn actualiser_pts_projections =(
+			debug "(3) actualiser_pts_projections"
+			
+		),
+		
+		fn actualiser_pts_decallageZ =(
+			debug "(4) actualiser_pts_decallageZ"
+			
+		),
+		
+		
+		
+	----------------------------- INTERFACE --------------------------------------
 	public
+		fn set_etape_aActualiser	val	= (
+			debug "set_etape_aActualiser"
+			debug "val" var:val
+			if val > m_etape_aActualiser  do m_etape_aActualiser = val
+			debug "m_etape_aActualiser" var:m_etape_aActualiser
+		),
+		fn actualiser =(
+			debug "actualiser"
+			debug "m_etape_aActualiser" var:m_etape_aActualiser
+			
+			
+			---- soit on est vide de contours et on dessine le logo -----------
+			if m_pts_contours.count == 0 then (
+				
+				--- creation du logo ----
+				local pts_logo = copy m_logo
+-- 				for i = 1 to pts_logo.count do
+-- 					pts_logo[i] = pts_logo[i] * m_plug.transformation
+				
+				mgr_geo.face	m_logo
+				
+			---- soit on dessine le terrain -----------------------
+			) else (
+				
+				
+				---- On actualise seulement le necéssaire -----------------------------------------------
+				local etape = m_etape_aActualiser
+				
+				------ 	(1)	creer les pts contours de base -----------------------
+				------	et creer la hierachie des booleens ----------------------
+				------	et creer les points des faces de base -------------------
+				if etape <= 1 do (
+					actualiser_pts_contours ()
+					actualiser_noeuds_booleens ()
+					actualiser_pts_faces	()
+					
+					creer_geometrie_base ()
+				)
+				------	(2)	creer le quadrillage  ----------------------------------
+				if etape <= 2 do (
+					actualiser_pts_quadrillages ()
+				)
+				------	(3)	creer la projection  -----------------------------------
+				if etape <= 3 do (
+					actualiser_pts_projections ()
+				)
+				------	(4)	appliquer le decallage sur Z  --------------------------
+				if etape <= 4 do (
+					actualiser_pts_decallageZ ()
+				)
+				
+				
+				m_etape_aActualiser = 0
+			)
+		),
+		
+		 /*
 		fn actualiser_contours 			=(
 			
 			local chrono_debut = timeStamp ()
@@ -321,7 +408,7 @@ struct	str_terrain_node_core	(
 			m_contour_points =#()			
 			if m_plug.contours_nodes.count > 0 do (
 				for 	contour_node in m_plug.contours_nodes do
-					m_contour_points	+= 	( mgr_shapes.get_points_from_shape		contour_node  /* transformation:m_plug.transformation */	)
+					m_contour_points	+= 	( mgr_shapes.get_points_from_shape		contour_node  	)
 				
 				
 				---- on transforme nos points de contours en points pour création de face -------------
@@ -332,13 +419,13 @@ struct	str_terrain_node_core	(
 				for i  in 1 to  m_contour_points.count do
 					for j in 1 to m_contour_points[i].count do 
 						m_contour_points[i][j] *= inverse	m_plug.transformation
-					/* 
-				--- on enregistre les points sur le node pour pas avoir a recalucler a chaque fois	------------------
-				local datas_pts_contour =#()
-				for pts_spline_contour in m_contour_points do
-						append datas_pts_contour		( mgr_datas.toString	pts_spline_contour )	
-				m_plug.contour_pts	=	datas_pts_contour
-				 */
+					
+-- 				--- on enregistre les points sur le node pour pas avoir a recalucler a chaque fois	------------------
+-- 				local datas_pts_contour =#()
+-- 				for pts_spline_contour in m_contour_points do
+-- 						append datas_pts_contour		( mgr_datas.toString	pts_spline_contour )	
+-- 				m_plug.contour_pts	=	datas_pts_contour
+				
 				debug ("Terrain : Contours actualisé en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 			)
 		),
@@ -351,7 +438,7 @@ struct	str_terrain_node_core	(
 			if m_contour_points.count == 0 do actualiser_contours ()
 				
 			
-			if /* m_plug.reliefs_nodes.count > 0  and  */m_plug.contours_nodes.count > 0   do with redraw off (
+			if m_plug.contours_nodes.count > 0   do with redraw off (
 			
 				local chrono_debut = timeStamp ()
 				
@@ -367,16 +454,16 @@ struct	str_terrain_node_core	(
 					
 				)
 				
-				/* 
-				--------  cleanner les edges  ---------
-				local grille_segts	=	 polyop.getEdgeSelection m_plug.delegate
-				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
-				local invis_segts = total_segts - grille_segts			
-				polyOp.setEdgeSelection m_plug.delegate invis_segts
-				m_plug.delegate.remove selLevel:#edge
+				
+-- 				--------  cleanner les edges  ---------
+-- 				local grille_segts	=	 polyop.getEdgeSelection m_plug.delegate
+-- 				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
+-- 				local invis_segts = total_segts - grille_segts			
+-- 				polyOp.setEdgeSelection m_plug.delegate invis_segts
+-- 				m_plug.delegate.remove selLevel:#edge
 				
 			
-				 */
+				
 				
 				local chrono_tmp= timeStamp ()
 				--- on quadrille   ------------
@@ -401,42 +488,41 @@ struct	str_terrain_node_core	(
 				polyop.retriangulate m_plug.delegate	#{1..polyop.getNumFaces m_plug.delegate	}
 				
 				
-				/* 
-				--------  cleanner les edges  ---------
-				local grille_segts	=	 polyop.getEdgeSelection m_plug.delegate
-				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
-				local invis_segts = total_segts - grille_segts			
-				polyOp.setEdgeSelection m_plug.delegate invis_segts
-				m_plug.delegate.remove selLevel:#edge
 				
-				--- on clean les triangles	-------------
-				local chrono_tmp= timeStamp ()				
-				--------  cleanner les edges  ---------
-				local slice_segts	=	 polyop.getEdgeSelection  m_plug.delegate
-				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
-				local invis_segts = total_segts - slice_segts			
-				polyOp.setEdgeSelection m_plug.delegate invis_segts
-				m_plug.delegate.remove selLevel:#edge
-	-- 			polyop.retriangulate $ #{1..744}
-			
+-- 				--------  cleanner les edges  ---------
+-- 				local grille_segts	=	 polyop.getEdgeSelection m_plug.delegate
+-- 				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
+-- 				local invis_segts = total_segts - grille_segts			
+-- 				polyOp.setEdgeSelection m_plug.delegate invis_segts
+-- 				m_plug.delegate.remove selLevel:#edge
+-- 				
+-- 				--- on clean les triangles	-------------
+-- 				local chrono_tmp= timeStamp ()				
+-- 				--------  cleanner les edges  ---------
+-- 				local slice_segts	=	 polyop.getEdgeSelection  m_plug.delegate
+-- 				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
+-- 				local invis_segts = total_segts - slice_segts			
+-- 				polyOp.setEdgeSelection m_plug.delegate invis_segts
+-- 				m_plug.delegate.remove selLevel:#edge
+-- 	-- 			polyop.retriangulate $ #{1..744}
+-- 			
+-- 				
+-- 				debug ("Terrain : retriangulate en " +  (  ((timeStamp ()) - chrono_tmp ) / 1000.0)	as string + "s." )
 				
-				debug ("Terrain : retriangulate en " +  (  ((timeStamp ()) - chrono_tmp ) / 1000.0)	as string + "s." )
-				 */
-				appliquerMapping ()
 				
 				debug ("---> Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
 			
 				displayTempPrompt ("Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
 				
 			)
-			/* 
-				polyop.retriangulate $	#{1..polyop.getNumFaces $	}	
-			 */
+			
+-- 				polyop.retriangulate $	#{1..polyop.getNumFaces $	}	
+			
 			redrawViews ()
 			
 		),
 	
-		
+		 */
 		
 		fn initialiser		_plug =(
 			

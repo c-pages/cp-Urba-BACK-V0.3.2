@@ -1103,7 +1103,7 @@ struct		str_terrain_outils_shape (
 		
 		---- on entre une liste de listes de points  (nos differents shapes à analyser )------------
 		---- renvois une liste des points avec fusion des shapes à trous en une seule liste pour creéation de face troué ---------
-		fn preparer_points_pour_geometrie		 	_pts_shps 	=(
+		fn creer_hierarchie_booleens		 	_pts_shps 	=(
 			
 			---- on cherche les booleens --------------------
 			local pts_results 	=  preparer_booleens 	_pts_shps

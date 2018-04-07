@@ -60,7 +60,7 @@ rollout roll_presets 			"Presets" 		rolledUp:true		(
 		core.preset_charger ()
 
 ) -- fin rllout presets -*
- */
+*/
 rollout roll_global "Global" width:195 height:341
 (
 
@@ -315,9 +315,4 @@ rollout roll_viewport "Viewport" width:162 height:204
 
 
 ) */
-rollout roll_aPropos 			"A propos" 	rolledUp:false	(
-	label 'lbl_axeP' "Urba | V0.12  |" pos:[5,2]  align:#left
-	HyperLink 'hpl1' "Christophe Pagès" pos:[76,2] address:"http://c-pages.fr" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
-	HyperLink 'hpl2' "GitHub" pos:[127,17] address:"https://github.com/c-pages/cp-Urba-Cleanage" color:(color 200 200 127.5) hovercolor:(color 250 250 150) visitedcolor:(color 200 200 127.5) align:#left
-	label 'lbl6' "2017" pos:[5,17] align:#left
-)
+	

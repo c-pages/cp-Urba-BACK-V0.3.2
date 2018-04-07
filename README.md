@@ -1,9 +1,16 @@
 # CP - Urba V0.3.1
-Suite de plugin pour 3DSmax - en Maxscript.
-- __Batiment__
-- __Terrain__
+Suite de plugin pour 3DSmax - en Maxscript. Pour réalisation de bout de villes, bâtiments, rues, trottoire, gazon etc.
 
-pour réalisation de bout de villes, rues, trottoire, gazon etc.
+en cours de développement:
+
+- __Batiment__ : Objet paramétrique.
+- __Terrain__ : Objet paramétrique.
+- __OSM importer__ : Utilitaire
+
+à développer:
+- __Ville__ ou __quartier__ : Utilitaire (ou objet ?) permettant de générer automatiquement des quartiers entiers de batiments, en fonction de certaines contraintes (surface du shape, largeur, orientation ...), tel preset de batiment à utiliser ou pas ( 'garage',  'immeuble de bureau', 'pavillon brique normand', ...).
+
+
 
 ----------
 
@@ -14,7 +21,6 @@ pour réalisation de bout de villes, rues, trottoire, gazon etc.
     - [x] Nettoyage du manager de shape : integration du le struct de _triangulation_ et _booleen_.
     - [x] Création d'une géométrie un peu plus propre.
     - [x] Le terrain se contruit maintenant même sans relief, il se place alors à la hauteur de l'objet.
-    - [x] Application d'un mapping Real-World-Scale.
 - [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes à _Batiment_ et _Terrain_.
 
 
@@ -28,7 +34,7 @@ ____________________________
 - [ ] Gérer les contours qui se croisent en addition booléènne ? (un mode soustraction implique un ordre : A - B != B - A mais A + B = B + A !).
 - [ ] Faire en sorte que les undos fonctionnent.
 - [ ] Pouvoir déplacer l'origine de la grille ?
-- [ ] Création d'une grille _'monde'_, donc avec l'option par objet de soit utiliser la grille _'monde'_, soit la grille perso.
+- [ ] Création d'une grille 'monde', donc avec l'option par objet de soit utiliser la grille 'monde', soit la grille perso.
 
 * **Surface** :
   - [x] Division de la surface en quadrilataires simples pour :

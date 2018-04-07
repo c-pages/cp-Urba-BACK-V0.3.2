@@ -154,6 +154,7 @@ remap:#(#(#surface_node), #(#surface_node))
 	--------------- PARAMETRES  et ROLLOUTS ----------------------------------------------------------------------------------------------------------------------
 	local roll_global, roll_toiture, roll_facades 										----, roll_niveaux,  roll_presets,   roll_infos, roll_trace
 	include "$userScripts\\cp-Urba\\Modules\\Batiment\\rollouts\\Batiment - rollouts.ms"
+	include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - rollout - A propos.ms" 
 
 
 
