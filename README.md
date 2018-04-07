@@ -16,7 +16,7 @@ Suite de plugin pour 3DSmax - en Maxscript. Pour réalisation de bout de villes,
 
 
 ### V0.3.1 :
-##### __Terrain__ :
+#### __Terrain__ :
 Version basique mais fonctionnelle.
 - [x] Correction du problème avec la position du node qui devait être sur [0,0,0]. Maintenant le node peut etre placer n'importe ou dans la scène.
 - [x] Nettoyage du manager de shape : integration du struct de _triangulation_ et _booleen_.
@@ -27,7 +27,7 @@ Version basique mais fonctionnelle.
 - [x] Mise en place d'une grille 'monde', donc avec l'option par objet de soit utiliser la grille 'monde', soit la grille 'local'.
 - [x] Remise en forme des rollouts.
 
-##### __Général:__
+#### __Général:__
 - [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes tout les modules.
 - [x] Mise en place  du rollout _"A propos'_ dans le dossier _'\commun\'_, utile pour plusieurs des modules.
 
@@ -36,14 +36,14 @@ ____________________________
 
 
 ### ___Todo:___
-##### __Terrain__
+#### __Terrain__
 - [ ] Gérer un noise sur z avec une influence en lien avec la distance par rapport au bords ? ( ex:pour les terrains genre gazons) (un peu façon multiscatter).
 - [ ] Gérer une distance avec une influence en lien avec la distance par rapport au bord ? (genre effet _gonflé_).
 - [ ] Gérer les contours qui se croisent en addition booléènne ? (un mode soustraction implique un ordre : A - B != B - A mais A + B = B + A !).
 - [ ] Faire en sorte que les undos fonctionnent.
 - [ ] option pour créations des trous automatiquement quand superposition avec un _Bâtiment_.
 
-##### __Bâtiment__
+#### __Bâtiment__
 * **Surface**
   - [x] Division de la surface en quadrilataires simples pour :
     * - [ ] Répartition des éléments de toitures.
