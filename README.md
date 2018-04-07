@@ -1,13 +1,13 @@
 # CP - Urba V0.3.1
 Suite de plugin pour 3DSmax - en Maxscript. Pour réalisation de bout de villes, bâtiments, surfaces pour rues, trottoire, gazon etc.
 
-en cours de développement:
+###### En cours de développement :
 
 - __Batiment__ : Objet paramétrique.
 - __Terrain__ : Objet paramétrique.
 - __OSM importer__ : Utilitaire
 
-à développer:
+###### A développer :
 - __Ville__ ou __quartier__ : Utilitaire (ou objet ?) permettant de générer automatiquement des quartiers entiers de batiments, en fonction de certaines contraintes (surface du shape, largeur, orientation ...), tel preset de batiment à utiliser ou pas ( 'garage',  'immeuble de bureau', 'pavillon brique normand', ...).
 
 
@@ -16,7 +16,7 @@ en cours de développement:
 
 
 ### V0.3.1 :
-___Terrain___ : Version basique mais fonctionnelle.
+__Terrain__ : Version basique mais fonctionnelle.
 - [x] Correction du problème avec la position du node qui devait être sur [0,0,0]. Maintenant le node peut etre placer n'importe ou dans la scène.
 - [x] Nettoyage du manager de shape : integration du struct de _triangulation_ et _booleen_.
 - [x] Création de la géométrie un peu plus propre.
@@ -34,15 +34,15 @@ __Général:__
 ____________________________
 
 
-## __Todo__ :
-#### **Terrain** :
+### ___Todo:___
+##### **Terrain** :
 - [ ] Gérer un noise sur z avec une influence en lien avec la distance par rapport au bords ? ( ex:pour les terrains genre gazons) (un peu façon multiscatter).
 - [ ] Gérer une distance avec une influence en lien avec la distance par rapport au bord ? (genre effet _gonflé_).
 - [ ] Gérer les contours qui se croisent en addition booléènne ? (un mode soustraction implique un ordre : A - B != B - A mais A + B = B + A !).
 - [ ] Faire en sorte que les undos fonctionnent.
 - [ ] option pour créations des trous automatiquement quand superposition avec un _Bâtiment_.
 
-#### **Bâtiment** :
+##### **Bâtiment** :
 * **Surface** :
   - [x] Division de la surface en quadrilataires simples pour :
     * - [ ] Répartition des éléments de toitures.
@@ -97,7 +97,7 @@ Avec un vitrage transparant on pourrait:
 
 
 _____________________________
-## __Anciennes versions__
+### ___Anciennes versions:___
 ### V0.3.0 :
 - [x] ___Terrain___ : Version basique mais fonctionnelle.
     - [x] Inverser le poly resultat, c'est à dire utiliser les contours pour creuser le cadre former par le ou les reliefs. pour pouvoir avec la meme spline creer la route ou l'inverse c'est a dire les trottoires.
