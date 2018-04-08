@@ -373,7 +373,7 @@ struct	str_terrain_node_core	(
 			debug "	(1-2)	actualiser_pts_faces"
 			m_pts_faces = mgr_shapes.creer_hierarchie_booleens		m_pts_contours
 			
-			----- DEBUG-------------------
+			/* ----- DEBUG-------------------
 			sp = splineShape name:(Uniquename "m_pts_faces ")
 			for j in 1 to m_pts_faces.count do (
 				addnewSpline sp
@@ -383,7 +383,7 @@ struct	str_terrain_node_core	(
 				updateShape sp
 -- 				selectMore sp
 			)
-			----- DEBUG-------------------
+			----- DEBUG------------------- */
 			
 			
 -- 			debug "	---->		m_pts_faces" var:m_pts_faces
@@ -400,7 +400,7 @@ struct	str_terrain_node_core	(
 			for pts_shp in m_pts_faces do	
 				triangles += mgr_shapes.trianguler 	pts_shp
 			
-			----- DEBUG-------------------
+			/* ----- DEBUG-------------------
 			sp = splineShape name:(Uniquename "triangles ")
 			for j in 1 to triangles.count do (
 				addnewSpline sp
@@ -410,7 +410,7 @@ struct	str_terrain_node_core	(
 				updateShape sp
 -- 				selectMore sp
 			)
-			----- DEBUG-------------------
+			----- DEBUG------------------- */
 
 			for pts_tri in triangles do	mgr_geo.face	pts_tri 		smGrp:1
 			
