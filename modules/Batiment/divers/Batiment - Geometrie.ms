@@ -94,7 +94,7 @@ struct	str_geometrie	(
 			set_matID 	result	matID  cible:cible
 			
 			--- smoothing group^------------
-			if smGrp != unsupplied do 
+			if smGrp != unsupplied 	do	with undo off	  
 				polyop.setFaceSmoothGroup cible	 result	  smGrp
 			
 -- 			-- si on doit inverser les points pour fliper la face ---------

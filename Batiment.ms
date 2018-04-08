@@ -55,9 +55,11 @@ global urba_clipboard_batiment	=	""
 
 
 
-
 	fn remplirTexte  _txt  var:	 param:  prefix: = (
 
+local oldPrintAllElements = options.printAllElements
+options.PrintAllElements = true
+		
 		local result =""
 		global dbg_elemTmp
 		if prefix != unsupplied and prefix != undefined do (
@@ -92,6 +94,10 @@ global urba_clipboard_batiment	=	""
 				) else 	result += "undefined"
 			) else 	result += var as string
 		) else 	result += _txt
+		
+		
+	
+options.printAllElements = oldPrintAllElements
 		result
 	)
 

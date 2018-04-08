@@ -326,7 +326,7 @@ struct	str_terrain_node_core	(
 			
 			
 			
-			
+			 
 			--------  cleanner les edges  -------------------------------------------------
 			local grille_segts			=	 polyop.getEdgeSelection m_plug.delegate
 			local total_segts 		= #{1..polyop.getNumEdges m_plug.delegate}
@@ -345,8 +345,8 @@ struct	str_terrain_node_core	(
 			polyOp.setVertSelection m_plug.delegate ids_pts_aVirer
 			m_plug.delegate.remove selLevel:#edge
 			m_plug.delegate.remove selLevel:#vertex
- 
--- 			polyop.retriangulate m_plug.delegate	#{1..polyop.getNumFaces m_plug.delegate	}
+  
+			polyop.retriangulate m_plug.delegate	#{1..polyop.getNumFaces m_plug.delegate	}
  
 		), -- fin fonctoin
 	
@@ -371,14 +371,51 @@ struct	str_terrain_node_core	(
 		
 		fn actualiser_pts_faces =(
 			debug "	(1-2)	actualiser_pts_faces"
-			m_pts_faces = mgr_shapes.creer_hierarchie_booleens	m_pts_contours
+			m_pts_faces = mgr_shapes.creer_hierarchie_booleens		m_pts_contours
+			
+			----- DEBUG-------------------
+			sp = splineShape name:(Uniquename "m_pts_faces ")
+			for j in 1 to m_pts_faces.count do (
+				addnewSpline sp
+
+				for pt in m_pts_faces[j] do		addknot sp j #corner #curve  pt
+				close sp j
+				updateShape sp
+-- 				selectMore sp
+			)
+			----- DEBUG-------------------
+			
+			
 -- 			debug "	---->		m_pts_faces" var:m_pts_faces
 		),
 		
 		fn creer_geometrie_base = (
 			debug "	(2-1)	creer_geometrie_base"
-			for pts_shp in m_pts_faces do	mgr_geo.face	pts_shp smGrp:1
+
+-- 			for pts_shp in m_pts_faces do	mgr_geo.face	pts_shp smGrp:1
+			
+			--- version triangles ---------------
+			local triangles =#()
+			debug "	m_pts_faces" var:m_pts_faces
+			for pts_shp in m_pts_faces do	
+				triangles += mgr_shapes.trianguler 	pts_shp
+			
+			----- DEBUG-------------------
+			sp = splineShape name:(Uniquename "triangles ")
+			for j in 1 to triangles.count do (
+				addnewSpline sp
+
+				for pt in triangles[j] do		addknot sp j #corner #curve  pt
+				close sp j
+				updateShape sp
+-- 				selectMore sp
+			)
+			----- DEBUG-------------------
+
+			for pts_tri in triangles do	mgr_geo.face	pts_tri 		smGrp:1
+			
 			mgr_geo.souder_tout ()
+			
 		),
 		
 		fn actualiser_pts_quadrillages =(
@@ -449,175 +486,80 @@ struct	str_terrain_node_core	(
 				---- On actualise seulement le necéssaire -----------------------------------------------
 				local etape = m_etape_aActualiser
 				
+				
+				---- analyse des contours	-------------------
+				local chrono_temp = timeStamp ()
 				if etape <= 1 do (
-					
-					
 					------ 	(1-1)	creer les pts contours de base -----------------------
 					actualiser_pts_contours ()
 					------	(1-2)	et creer les points des faces de base -------------------
-					actualiser_pts_faces	()
-					
+					actualiser_pts_faces	()					
 				)
+				local chrono_1 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)	
+				
+				
 				
 				------	(2)	creer le quadrillage  ----------------------------------
+				local chrono_2_1 =0.
+				local chrono_2_2 =0.
 				if etape <= 2 do (
+					local chrono_temp = timeStamp ()
 					--- on vide la géométrie	-------------------
 					mgr_geo.vider ()
+					
 					------	(1-3)	pour enfin créer les faces de la géometrie de base. -------------------
 					creer_geometrie_base ()
-					actualiser_pts_quadrillages ()
+					
+					chrono_2_1	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)					
+					local chrono_temp = timeStamp ()
+					
+-- 					actualiser_pts_quadrillages ()
+					
+					chrono_2_2	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)
 				)
 				
 				------	(3)	creer la projection  -----------------------------------
+				local chrono_temp = timeStamp ()
 				if etape <= 3 do (
-					actualiser_pts_projections ()
+-- 					actualiser_pts_projections ()
 				)
+				local chrono_3 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)	
 				
+				
+				local chrono_temp = timeStamp ()
 				------	(4)	on se recalle sur les shapes  --------------------------
 				if etape <= 4 do (
-					realigner_auShapes ()
+-- 					realigner_auShapes ()
 				)
 				
 				------	(5)	appliquer le decallage sur Z  --------------------------
 				if etape <= 5 do (
-					actualiser_pts_decallageZ ()
-					
-					placer_pts_geometrie ()
+-- 					actualiser_pts_decallageZ ()
+-- 					
+-- 					placer_pts_geometrie ()
 				)
+				
+				
+				
+				debug ("----------------------------------------------------------------------------------------" )
+				debug ("---	(1)			Analyse des contours : 					" +  chrono_1	as string + " s." )
+				debug ("---	(2-1)		Construction de la géometrie de base : 	" +  chrono_2_1	as string + " s." )
+				debug ("---	(2-2)		Quadrillage : 							" +  chrono_2_2	as string + " s." )
+				debug ("---	(3)			Projection sur les reliefs : 			" +  chrono_3	as string + " s." )
+				debug ("---	(4 et 5)	Actualiser la position des points : 	" +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." )
+				
+				debug ("----------------------------------------------------------------------------------------" )
+				debug ("---				TERRAIN construit en : 					" +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + " s." )
+				
+				debug ("----------------------------------------------------------------------------------------" )
+			
+				displayTempPrompt ("Terrain construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + " s." ) 30000
+			
 			)
 			
 			m_etape_aActualiser = 0
 			
-			debug ("---> Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
-		
-			displayTempPrompt ("Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
-			
 		),
-		
-		 /*
-		fn actualiser_contours 			=(
-			
-			local chrono_debut = timeStamp ()
-			
-			---- maj des points -------------
-			m_contour_points =#()			
-			if m_plug.contours_nodes.count > 0 do (
-				for 	contour_node in m_plug.contours_nodes do
-					m_contour_points	+= 	( mgr_shapes.get_points_from_shape		contour_node  	)
-				
-				
-				---- on transforme nos points de contours en points pour création de face -------------
-				m_contour_points = mgr_shapes.preparer_points_pour_geometrie		m_contour_points
-				
-				
-				--- on annule la transformation de l'objet ----------------------
-				for i  in 1 to  m_contour_points.count do
-					for j in 1 to m_contour_points[i].count do 
-						m_contour_points[i][j] *= inverse	m_plug.transformation
-					
--- 				--- on enregistre les points sur le node pour pas avoir a recalucler a chaque fois	------------------
--- 				local datas_pts_contour =#()
--- 				for pts_spline_contour in m_contour_points do
--- 						append datas_pts_contour		( mgr_datas.toString	pts_spline_contour )	
--- 				m_plug.contour_pts	=	datas_pts_contour
-				
-				debug ("Terrain : Contours actualisé en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
-			)
-		),
-		
-		fn construire 	= undo off  (
-			
-			---- on vide ---------------
-			mgr_geo.vider ()
-			
-			if m_contour_points.count == 0 do actualiser_contours ()
-				
-			
-			if m_plug.contours_nodes.count > 0   do with redraw off (
-			
-				local chrono_debut = timeStamp ()
-					
-				debug "construire"
-				
-				--- on créé les faces  ------------
-				for pts_spline_contour in m_contour_points do (
-					local triangles = mgr_shapes.trianguler 	pts_spline_contour
-
-					for pts_tri in triangles do 	mgr_geo.face pts_tri	smGrp:1
-					
-					mgr_geo.souder_tout  ()
-					
-				)
-				
-				
--- 				--------  cleanner les edges  ---------
--- 				local grille_segts	=	 polyop.getEdgeSelection m_plug.delegate
--- 				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
--- 				local invis_segts = total_segts - grille_segts			
--- 				polyOp.setEdgeSelection m_plug.delegate invis_segts
--- 				m_plug.delegate.remove selLevel:#edge
-				
-			
-				
-				
-				local chrono_tmp= timeStamp ()
-				--- on quadrille   ------------
-				quadriller_geometrie_base ()
-				debug ("Terrain : quadriller_geometrie_base en " +  (  ((timeStamp ()) - chrono_tmp ) / 1000.0)	as string + "s." )
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				--- on projete -------------------
-				local chrono_tmp= timeStamp ()
-				projeter_sur_reliefs	()
-				debug ("Terrain : projection en " +  (  ((timeStamp ()) - chrono_tmp ) / 1000.0)	as string + "s." )
-				
-				polyop.retriangulate m_plug.delegate	#{1..polyop.getNumFaces m_plug.delegate	}
-				
-				
-				
--- 				--------  cleanner les edges  ---------
--- 				local grille_segts	=	 polyop.getEdgeSelection m_plug.delegate
--- 				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
--- 				local invis_segts = total_segts - grille_segts			
--- 				polyOp.setEdgeSelection m_plug.delegate invis_segts
--- 				m_plug.delegate.remove selLevel:#edge
--- 				
--- 				--- on clean les triangles	-------------
--- 				local chrono_tmp= timeStamp ()				
--- 				--------  cleanner les edges  ---------
--- 				local slice_segts	=	 polyop.getEdgeSelection  m_plug.delegate
--- 				local total_segts = #{1..polyop.getNumEdges m_plug.delegate}
--- 				local invis_segts = total_segts - slice_segts			
--- 				polyOp.setEdgeSelection m_plug.delegate invis_segts
--- 				m_plug.delegate.remove selLevel:#edge
--- 	-- 			polyop.retriangulate $ #{1..744}
--- 			
--- 				
--- 				debug ("Terrain : retriangulate en " +  (  ((timeStamp ()) - chrono_tmp ) / 1000.0)	as string + "s." )
-				
-				
-				debug ("---> Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." )
-			
-				displayTempPrompt ("Terrain : Construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + "s." ) 30000
-				
-			)
-			
--- 				polyop.retriangulate $	#{1..polyop.getNumFaces $	}	
-			
-			redrawViews ()
-			
-		),
-	
-		 */
 		
 		fn initialiser		_plug =(
 			
@@ -632,5 +574,23 @@ struct	str_terrain_node_core	(
 		)
 	
 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
