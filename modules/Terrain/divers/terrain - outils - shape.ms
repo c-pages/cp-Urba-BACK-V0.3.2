@@ -445,7 +445,7 @@ struct str_terrain_outils_shape (
 -- 					debug "ajouter_shape_aBooleen"
 			--- on cherche les points des shpes les plus proches pour les connecter --------------
 			local connexions	=	get_idsPts_connexion   	_pts_shp_booleen		_pts_shp_aAjouter 
-			debug"connexions" var:connexions
+-- 			debug"connexions" var:connexions
 			local connexion = connexions[1]
 			--- si on a plusieurs connexions ------------------
 			if connexions.count > 1 then (
@@ -456,7 +456,7 @@ struct str_terrain_outils_shape (
 				local angle_min 			= 1e+10
 				while connexions.count > 1 do (
 					
-					debug "	--->	connexion " var:connexions[1]
+-- 					debug "	--->	connexion " var:connexions[1]
 					
 					---- si on a des connexion vers le meme point ------------------
 					if id_pt_origine == connexions[2][2] then (
@@ -480,10 +480,10 @@ struct str_terrain_outils_shape (
 						
 						if pt_cnx1_svt == pt_cnx2_prcd then (
 							
-							debug "	--->	On utilise le suivant"
+-- 							debug "	--->	On utilise le suivant"
 							
 							local pt_est_aGauche 	= est_aGauche		pt_cnx1		pt_cnx1_svt		pt_origine	
-							debug "	--->	pt_est_aGauche" var:pt_est_aGauche
+-- 							debug "	--->	pt_est_aGauche" var:pt_est_aGauche
 							if pt_est_aGauche then 
 								connexion = deepcopy  connexions[1]
 							else 
@@ -492,10 +492,10 @@ struct str_terrain_outils_shape (
 							
 						) else (
 							
-							debug "	--->	On utilise le precedant"
+-- 							debug "	--->	On utilise le precedant"
 							
 							local pt_est_aGauche 	= est_aGauche		pt_cnx1_prcd		pt_cnx1		pt_origine	
-							debug "	--->	pt_est_aGauche" var:pt_est_aGauche
+-- 							debug "	--->	pt_est_aGauche" var:pt_est_aGauche
 							if pt_est_aGauche then 
 								connexion = deepcopy  connexions[1]
 							else 

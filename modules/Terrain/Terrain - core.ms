@@ -53,7 +53,7 @@ struct	str_terrain_node_core	(
 			--  NODEEVENTCALLBACK--------
 			---   deformation geometrie des objets en reference ------------------
 			fn fct_ecouteur_terrain_topo		 ev nds = (
-				format "	###	EVT:	fct_ecouteur_terrain_topo\n"
+-- 				format "	###	EVT:	fct_ecouteur_terrain_topo\n"
 				
 				with redraw off (
 					
@@ -84,7 +84,7 @@ struct	str_terrain_node_core	(
 			)---- fin 	fct_ecouteur_terrain
 			
 			fn fct_ecouteur_terrain_transf		 ev nds = (
-				format "	###	EVT:	fct_ecouteur_terrain_transf\n"
+-- 				format "	###	EVT:	fct_ecouteur_terrain_transf\n"
 				
 				local terrains = for obj in geometry where classof obj.baseObject == Urba_terrain collect  obj
 				for nd_id in nds do (
@@ -123,9 +123,9 @@ struct	str_terrain_node_core	(
 			)---- fin 	fct_ecouteur_terrain
 			
 			fn fct_ecouteur_terrain_deleted		 ev nds = (
-				format "	###	EVT:	fct_ecouteur_terrain_deleted\n"
+-- 				format "	###	EVT:	fct_ecouteur_terrain_deleted\n"
 				local terrains = for obj in geometry where classof obj.baseObject == Urba_terrain collect  obj
-				format "	###	EVT:	terrains: %\n" terrains
+-- 				format "	###	EVT:	terrains: %\n" terrains
 				for terrain_nd in  terrains do (
 					local aActualiser = false
 					for contour_node in terrain_nd.contours_nodes do (
@@ -146,7 +146,7 @@ struct	str_terrain_node_core	(
 						)
 					
 					if aActualiser do (
-				format "	###	EVT	----> a actualiser !!\n"
+-- 				format "	###	EVT	----> a actualiser !!\n"
 						terrain_nd.actualiser ()
 						
 					)
@@ -359,7 +359,7 @@ struct	str_terrain_node_core	(
 		
 	
 		fn actualiser_pts_contours 		=(
-			debug "	(1-1)	actualiser_pts_contours"
+-- 			debug "	(1-1)	actualiser_pts_contours"
 			---- maj des points -------------
 			m_pts_contours =#()			
 -- 			debug "	---->		m_plug.contours_nodes" var:m_plug.contours_nodes
@@ -370,7 +370,7 @@ struct	str_terrain_node_core	(
 		),
 		
 		fn actualiser_pts_faces =(
-			debug "	(1-2)	actualiser_pts_faces"
+-- 			debug "	(1-2)	actualiser_pts_faces"
 			m_pts_faces = mgr_shapes.creer_hierarchie_booleens		m_pts_contours
 			
 			/* ----- DEBUG-------------------
@@ -390,15 +390,17 @@ struct	str_terrain_node_core	(
 		),
 		
 		fn creer_geometrie_base = (
-			debug "	(2-1)	creer_geometrie_base"
+-- 			debug "	(2-1)	creer_geometrie_base"
 
+			--- version faces ---------------
 -- 			for pts_shp in m_pts_faces do	mgr_geo.face	pts_shp smGrp:1
 			
 			--- version triangles ---------------
 			local triangles =#()
-			debug "	m_pts_faces" var:m_pts_faces
+-- 			debug "m_pts_faces" var:m_pts_faces
 			for pts_shp in m_pts_faces do	
 				triangles += mgr_shapes.trianguler 	pts_shp
+			for pts_tri in triangles do	mgr_geo.face	pts_tri 		smGrp:1
 			
 			/* ----- DEBUG-------------------
 			sp = splineShape name:(Uniquename "triangles ")
@@ -412,36 +414,35 @@ struct	str_terrain_node_core	(
 			)
 			----- DEBUG------------------- */
 
-			for pts_tri in triangles do	mgr_geo.face	pts_tri 		smGrp:1
 			
 			mgr_geo.souder_tout ()
 			
 		),
 		
 		fn actualiser_pts_quadrillages =(
-			debug "	(2-2)	actualiser_pts_quadrillages"
+-- 			debug "	(2-2)	actualiser_pts_quadrillages"
 			quadriller_geometrie_base ()
 			m_pts_quadrillages = for i in 1 to polyop.getNumVerts  m_plug.delegate	collect	polyop.getVert  m_plug.delegate		i
 		),
 		
 		fn actualiser_pts_projections =(
-			debug "	(3)		actualiser_pts_projections"
+-- 			debug "	(3)		actualiser_pts_projections"
 			m_pts_projections  = projeter_sur_reliefs		m_pts_quadrillages
 		),
 		
 		fn realigner_auShapes	=(
-			debug "	(4)		realigner_auShapes"
+-- 			debug "	(4)		realigner_auShapes"
 			m_pts_aligner_auShapes = 	for i in 1 to m_pts_projections.count collect 	m_pts_projections[i] * inverse	m_plug.transformation
 		),
 		
 		fn actualiser_pts_decallageZ =(		
-			debug "	(5-1)	actualiser_pts_decallageZ"	
+-- 			debug "	(5-1)	actualiser_pts_decallageZ"	
 			m_pts_decallageZ	=	deepcopy m_pts_aligner_auShapes			
 			m_pts_decallageZ.z += m_plug.hauteur
 		),
 		
 		fn placer_pts_geometrie	=(
-			debug "	(5-2)	placer_pts_geometrie"	
+-- 			debug "	(5-2)	placer_pts_geometrie"	
 			
 			---- on bouge les vertex-----------
 -- 			debug "---- on bouge les vertex-----------"
@@ -457,10 +458,10 @@ struct	str_terrain_node_core	(
 	----------------------------- INTERFACE --------------------------------------
 	public
 		fn set_etape_aActualiser	val	= (
-			debug "set_etape_aActualiser"
+-- 			debug "set_etape_aActualiser"
 -- 			debug "val" var:val
 			if val < m_etape_aActualiser  or m_etape_aActualiser == 0 do m_etape_aActualiser = val
-			debug "m_etape_aActualiser" var:m_etape_aActualiser
+-- 			debug "m_etape_aActualiser" var:m_etape_aActualiser
 		),
 		
 		
@@ -469,11 +470,9 @@ struct	str_terrain_node_core	(
 			
 -- 			debug "	---->	etape_aActualiser" var:m_etape_aActualiser
 			
-			local chrono_debut = timeStamp ()
-			
 			---- si on a pas de shape,  on dessine le logo -----------
 			if m_plug.contours_nodes.count == 0 then (
-				debug "--- creation du logo ----"
+-- 				debug "--- creation du logo ----"
 				
 				--- creation du logo ----
 				mgr_geo.face	m_logo
@@ -481,27 +480,30 @@ struct	str_terrain_node_core	(
 			---- soit on dessine le terrain -----------------------
 			) else (
 				
-				debug "--- creation du terrain ----"
+-- 				debug "--- creation du terrain ----"
 				
 				---- On actualise seulement le necéssaire -----------------------------------------------
 				local etape = m_etape_aActualiser
 				
-				
+				local affichage_tpsVide = "-"
+				local chrono_debut = timeStamp ()
 				---- analyse des contours	-------------------
-				local chrono_temp = timeStamp ()
+			
+				local chrono_1		=	affichage_tpsVide
 				if etape <= 1 do (
+					local chrono_temp = timeStamp ()
 					------ 	(1-1)	creer les pts contours de base -----------------------
 					actualiser_pts_contours ()
 					------	(1-2)	et creer les points des faces de base -------------------
-					actualiser_pts_faces	()					
+					actualiser_pts_faces	()
+					chrono_1 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)
 				)
-				local chrono_1 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)	
 				
 				
 				
 				------	(2)	creer le quadrillage  ----------------------------------
-				local chrono_2_1 =0.
-				local chrono_2_2 =0.
+				local chrono_2_1 =affichage_tpsVide
+				local chrono_2_2 =affichage_tpsVide
 				if etape <= 2 do (
 					local chrono_temp = timeStamp ()
 					--- on vide la géométrie	-------------------
@@ -513,45 +515,45 @@ struct	str_terrain_node_core	(
 					chrono_2_1	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)					
 					local chrono_temp = timeStamp ()
 					
--- 					actualiser_pts_quadrillages ()
+					actualiser_pts_quadrillages ()
 					
 					chrono_2_2	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)
 				)
 				
 				------	(3)	creer la projection  -----------------------------------
-				local chrono_temp = timeStamp ()
+				local chrono_3 =affichage_tpsVide
 				if etape <= 3 do (
--- 					actualiser_pts_projections ()
+					local chrono_temp = timeStamp ()
+					actualiser_pts_projections ()
+					chrono_3 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)	
 				)
-				local chrono_3 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)	
 				
 				
 				local chrono_temp = timeStamp ()
 				------	(4)	on se recalle sur les shapes  --------------------------
 				if etape <= 4 do (
--- 					realigner_auShapes ()
+					realigner_auShapes ()
 				)
 				
 				------	(5)	appliquer le decallage sur Z  --------------------------
 				if etape <= 5 do (
--- 					actualiser_pts_decallageZ ()
+					actualiser_pts_decallageZ ()
 -- 					
--- 					placer_pts_geometrie ()
+					placer_pts_geometrie ()
 				)
 				
 				
-				
+				/* 
 				debug ("----------------------------------------------------------------------------------------" )
-				debug ("---	(1)			Analyse des contours : 					" +  chrono_1	as string + " s." )
-				debug ("---	(2-1)		Construction de la géometrie de base : 	" +  chrono_2_1	as string + " s." )
-				debug ("---	(2-2)		Quadrillage : 							" +  chrono_2_2	as string + " s." )
-				debug ("---	(3)			Projection sur les reliefs : 			" +  chrono_3	as string + " s." )
-				debug ("---	(4 et 5)	Actualiser la position des points : 	" +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." )
+				debug ("---	(1)			Analyse des contours : 					" +  chrono_1	as string  )
+				debug ("---	(2-1)		Construction de la géometrie de base : 	" +  chrono_2_1	as string  )
+				debug ("---	(2-2)		Quadrillage : 							" +  chrono_2_2	as string  )
+				debug ("---	(3)			Projection sur les reliefs : 			" +  chrono_3	as string  )
+				debug ("---	(4 et 5)	Actualiser la position des points : 	" +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string  )				
+				debug ("-------------------------------------------------------------------" )
+				 */
+				debug ("---				TERRAIN construit en : 					" +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string   + " s." )
 				
-				debug ("----------------------------------------------------------------------------------------" )
-				debug ("---				TERRAIN construit en : 					" +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + " s." )
-				
-				debug ("----------------------------------------------------------------------------------------" )
 			
 				displayTempPrompt ("Terrain construit en " +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string + " s." ) 30000
 			

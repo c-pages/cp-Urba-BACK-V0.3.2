@@ -21,11 +21,12 @@ Version basique mais fonctionnelle.
 - [x] Correction du problème avec la position du node qui devait être sur [0,0,0]. Maintenant le node peut etre placer n'importe ou dans la scène.
 - [x] Nettoyage du manager de shape : integration du struct de _triangulation_ et _booleen_.
 - [x] Création de la géométrie un peu plus propre.
-- [x] Création de la géométrie ENCORE plus propre, et optimisée.
 - [x] Le terrain se construit maintenant même sans relief, il se place alors à la hauteur de l'objet.
+- [x] Remise en forme des rollouts.
 - [x] On peut mintenant déplacer l'origine de la grille
 - [x] Mise en place d'une grille 'monde', donc avec l'option par objet de soit utiliser la grille 'monde', soit la grille 'local'.
-- [x] Remise en forme des rollouts.
+- [x] Création de la géométrie ENCORE plus propre, et optimisée.
+- [x] et une grosse correction de problème dans la création des suites de points des booléens.
 
 #### __Général:__
 - [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes tout les modules.
@@ -36,12 +37,15 @@ ____________________________
 
 
 ### ___Todo:___
+
+#### __OSM__
+- [ ] Revoir algorythme de convertion coordonées en plan.
 #### __Terrain__
 - [ ] Gérer un noise sur z avec une influence en lien avec la distance par rapport au bords ? ( ex:pour les terrains genre gazons) (un peu façon multiscatter).
 - [ ] Gérer une distance avec une influence en lien avec la distance par rapport au bord ? (genre effet _gonflé_).
 - [ ] Gérer les contours qui se croisent en addition booléènne ? (un mode soustraction implique un ordre : A - B != B - A mais A + B = B + A !).
 - [ ] Faire en sorte que les undos fonctionnent.
-- [ ] option pour créations des trous automatiquement quand superposition avec un _Bâtiment_.
+- [ ] option pour créations des trous automatiquement quand superposition avec un _Bâtiment_. Peut être sous forme d'une option dans les _Bâtiments_ de type 'Perforer les _Terrains_.', et du coup quand le _Terrain_ annalyse ses contours il y ajoute les surfaces des _Bâtiments_ 'perforants'.
 
 #### __Bâtiment__
 * **Surface**
