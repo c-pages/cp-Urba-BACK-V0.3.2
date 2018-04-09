@@ -51,7 +51,7 @@ ____________________________
 - [ ] Créer une possibilité de désactiver l'auto-update (elle serait alors seulement effectué au rendu ?).
 - [ ] un bouton ON/OFF pour activer le relief ?
 - [ ] Pensez à une grille mode Voronoi !?!?
-- [ ] un modes empreinte des reliefs ?!? Pour retracer les arrettes des reliefes sur le terrain et ainsi après la projection on au quelques chose de super précis niveaux decoupe du relief.
+- [ ] Un mode empreinte des reliefs ?!? Pour retracer les arêtes des reliefs sur le terrain et ainsi avoir après la projection on au quelques chose de super précis niveaux decoupe du relief.
 
 
 #### __Bâtiment__
