@@ -227,11 +227,11 @@ struct	str_geometrie	(
 			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
 			
 			--------  souder les points ---------
-			cible.weldThreshold = .1
-			
+			cible.weldThreshold = .1			
 			if polyop.getNumVerts cible > 0 do
 				polyop.weldVertsByThreshold cible  #{1..polyop.getNumVerts cible}
 			
+			polyop.retriangulate	cible #{1..polyop.getNumFaces cible}
 		),
 		
 	--- plans ---------------

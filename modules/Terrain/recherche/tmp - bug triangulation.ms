@@ -622,7 +622,6 @@ struct	str_tmp (	--	str_terrain_outils_shape (
 		
 		
 		
-		
 		------------------ hierarchie booleenne -----------------------------------
 		fn creer_noeud_hierarchie 	pts: 	nom:	=(
 			
@@ -1219,9 +1218,22 @@ struct	str_tmp (	--	str_terrain_outils_shape (
 			
 			pts_results
 			
-		)
+		),
 	
 		
+		fn BBs_seCroisent		_shp_1  	_shp_2	 =(
+			
+			local BB_1 = get_BB_shape	_shp_1
+			local BB_2 = get_BB_shape	_shp_2
+			
+			local result = true
+			if BB_1[1].x > BB_2[2].x  	do result = false
+			if BB_1[2].x < BB_2[1].x  	do result = false
+			
+			if BB_1[1].y > BB_2[2].y  	do result = false
+			if BB_1[2].y < BB_2[1].y  	do result = false
+			result
+		)
 			
 	
 )
@@ -1235,15 +1247,16 @@ pupu = str_tmp ()
 
 --  popo.est_aGauche		$Point001.pos	$Point002.pos	$Point003.pos
 
-/* 
-shp1 			= $Line012
+/*  */
+shp1 			= $Line001
 pts_1 	= for i in 1 to numknots shp1 collect getKnotPoint shp1 1  i
-shp2 			= $Line013
+shp2 			= $Line002
 pts_2		= for i in 1 to numknots shp2 collect getKnotPoint shp2 1  i
-pupu.get_idsPts_connexion   	pts_1		pts_2 
+pupu.BBs_seCroisent   	pts_1		pts_2 
 
- */
 
+ 
+/*
 shp_test = $Shape007
 pts_test = #()
 for i in 1 to numSplines shp_test do
@@ -1285,8 +1298,7 @@ for j in 1 to pts_pour_face.count do (
  
  
  
- 
-/*
+
 
 shp1 			= $Line007
 pts_atester 	= for i in 1 to numknots shp1 collect getKnotPoint shp1 1  i

@@ -76,7 +76,7 @@ version:0
 	--------------- Creation  ----------------------------------------------------------------------------------------------------------------------
 	tool create (
 		on mousePoint click do	(
-			nodeTM.translation =	mondePoint--- [0,0,0] 
+			nodeTM.translation =	worldPoint--- [0,0,0] 
 			set_transform		nodeTM
 			actualiser ()
 			initialiser ()

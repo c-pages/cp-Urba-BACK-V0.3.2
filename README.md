@@ -17,7 +17,7 @@ Suite de plugin pour 3DSmax - en Maxscript. Pour réalisation de bout de villes,
 
 ### V0.3.1 :
 #### __Terrain__ :
-Version basique mais fonctionnelle.
+
 - [x] Correction du problème avec la position du node qui devait être sur [0,0,0]. Maintenant le node peut etre placer n'importe ou dans la scène.
 - [x] Nettoyage du manager de shape : integration du struct de _triangulation_ et _booleen_.
 - [x] Création de la géométrie un peu plus propre.
@@ -27,6 +27,9 @@ Version basique mais fonctionnelle.
 - [x] Mise en place d'une grille 'monde', donc avec l'option par objet de soit utiliser la grille 'monde', soit la grille 'local'.
 - [x] Création de la géométrie ENCORE plus propre, et optimisée.
 - [x] et une grosse correction de problème dans la création des suites de points des booléens.
+- [x] Résoudre le problème des 'intersectRay' qui ne fonctionnent qu'avec des _editable_polys_.
+- [x] Résoudre le problème des projections sur reliefs, les hauteurs semblent differentes en fonction de la position de l'objet, ou un truc du genre..
+- [x] Un checker qui verifie quand il va y avoir beaucoup de faces apres une modif de resolution de la grille. Demande si on veut passer en mode proxy pour l'affichage et si on veut monter la limite de l'alerte pour le mode 'rendu/pasProxy'.
 
 #### __Général:__
 - [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes tout les modules.
@@ -36,16 +39,20 @@ Version basique mais fonctionnelle.
 ____________________________
 
 
-### ___Todo:___
+### Todo:
 
-#### __OSM__
-- [ ] Revoir algorythme de convertion coordonées en plan.
 #### __Terrain__
 - [ ] Gérer un noise sur z avec une influence en lien avec la distance par rapport au bords ? ( ex:pour les terrains genre gazons) (un peu façon multiscatter).
 - [ ] Gérer une distance avec une influence en lien avec la distance par rapport au bord ? (genre effet _gonflé_).
 - [ ] Gérer les contours qui se croisent en addition booléènne ? (un mode soustraction implique un ordre : A - B != B - A mais A + B = B + A !).
-- [ ] Faire en sorte que les undos fonctionnent.
-- [ ] option pour créations des trous automatiquement quand superposition avec un _Bâtiment_. Peut être sous forme d'une option dans les _Bâtiments_ de type 'Perforer les _Terrains_.', et du coup quand le _Terrain_ annalyse ses contours il y ajoute les surfaces des _Bâtiments_ 'perforants'.
+- [ ] Bien gérer les undos (pour les parametres de _Terrain_ et pour objet en reference dans _Terrain_).
+- [ ] Créations des trous automatiquement quand superposition avec un _Bâtiment_. Peut être sous forme d'une option dans les _Bâtiments_ de type 'Perforer les _Terrains_.', et du coup quand le _Terrain_ annalyse ses contours il y ajoute les surfaces des _Bâtiments_ 'perforants'.
+- [ ] Faire en sorte que s'ils sont en mode 'Logo' ils ne soit pas visible au rendu.
+- [ ] Créer une possibilité de désactiver l'auto-update (elle serait alors seulement effectué au rendu ?).
+- [ ] un bouton ON/OFF pour activer le relief ?
+- [ ] Pensez à une grille mode Voronoi !?!?
+- [ ] un modes empreinte des reliefs ?!? Pour retracer les arrettes des reliefes sur le terrain et ainsi après la projection on au quelques chose de super précis niveaux decoupe du relief.
+
 
 #### __Bâtiment__
 * **Surface**
@@ -91,18 +98,19 @@ Avec un vitrage transparant on pourrait:
   - [ ] Création de cloisin interieures (cf. division de la surface)
   - [ ] Rideaux
 * **Divers**
-  - [ ] Création d'outils de manipulation de batiment en groupe (une version simplifier du générateur de bout de ville):
+  - [ ] Création d'outils de manipulation de _Bâtiments_ en groupe (une version simplifier du générateur de bout de ville):
     * - [ ] Appliquer un style à plusieur batiments séléctionnés.
     * - [ ] Variations de paramètre de manière aléatoire (pente de toit, variance de materiaux, décallage ouvertures,...
+  - [ ] Faire en sorte que s'ils sont en mode 'Logo' ils ne soit pas visible au rendu.  
+  - [ ] On pourra peut être cleanner un peu l'interface entre rollouts et reste du plug.
+  - [ ] Continuer le débogage ...
 
 
-
-* On pourra peut être cleanner un peu l'interface entre rollouts et reste du plug.
-* Continuer le débogage.
-
+#### __OSM__
+ - [ ] Revoir algorythme de convertion coordonées en plan.
 
 _____________________________
-### ___Anciennes versions:___
+### Historique des versions:
 ### V0.3.0 :
 - [x] ___Terrain___ : Version basique mais fonctionnelle.
     - [x] Inverser le poly resultat, c'est à dire utiliser les contours pour creuser le cadre former par le ou les reliefs. pour pouvoir avec la meme spline creer la route ou l'inverse c'est a dire les trottoires.
