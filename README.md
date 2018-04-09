@@ -52,6 +52,7 @@ ____________________________
 - [ ] un bouton ON/OFF pour activer le relief ?
 - [ ] Pensez à une grille mode Voronoi !?!?
 - [ ] Un mode empreinte des reliefs ?!? Pour retracer les arêtes des reliefs sur le terrain et ainsi avoir, après projection, un resultat super précis niveaux decoupe du relief.
+- [ ] Empecher de s'auto selectionner quand on pick un relief !
 
 
 #### __Bâtiment__
