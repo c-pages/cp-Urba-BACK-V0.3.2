@@ -408,12 +408,12 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			)
 			
 			
-			local result = #aCoté		---- #exterieur,  #interieur, #intersection, ou	 #aCoté	 --------------
+			local result = #aCoté		---- #exterieur,  #interieur, #seCroisent, ou	 #aCoté	 --------------
 			local intersections =#()
 			
 			if  BBs_seCroisent 	_pts_shp1 		_pts_shp_aTester do (
 			
-				---- on regadre si les edges se coupent --- si oui --->  #intersection -----------------
+				---- on regadre si les edges se coupent --- si oui --->  #seCroisent -----------------
 				local se_coupent = false
 				local  i = 1
 				while i <= _pts_shp1.count and not se_coupent do (
@@ -441,7 +441,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				
 				---- si on a des intersections, alors ils se croisent ------------------------------------
 				if intersections.count > 0 then
-					result = #intersection				
+					result = #seCroisent				
 				else (
 					---- s'il ne se croisent pas alors ils sont tout à l'interieur ou à l'extierieur l'un de l'autre -------------------------
 					local pts_triangles_shp1 = this.trianguler	_pts_shp1
@@ -469,18 +469,20 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			else 
 				false
 		),
-	/* 	fn point_est_dansShape		_pt		_pts_shp 	=(
+		fn point_est_dansShape		_pt		_pts_shp 	=(		
+			local triangles	=	this.trianguler 	_pts_shp
 			
+			survol_triangles  	_pt		triangles			
+		), 
+		
+		
+		
+		
+		
+		
+		
+		fn get_idsPts_connexion   	_pts_shp1		_pts_shp2 	=(
 			
-		), */
-		
-		
-		
-		
-		
-		
-		
-		fn get_idsPts_connexion   	_pts_shp1		_pts_shp2 =(
 			local results = #()
 			
 			--- on cherche les points des shpes les plus proches pour les connecter --------------
@@ -746,7 +748,6 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					
 					if intersections.count > 0 then (
 						
-						format "	--->	intersection\n"
 						---- on prend la premiere intersection, la plus proche --------
 						local distMin =	1e+10
 						local intersection 
@@ -755,8 +756,6 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 								intersection = intersec
 								distMin = distance pt_courant intersec.pos
 							)
-						
--- 						point pos:intersection.pos name:"intersection" 
 						
 						--- on change de shape ----------------
 						
@@ -846,75 +845,312 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 		
 
 		-------		3 operations :	#addition ( A + B ), #soustraction ( A - B ) et #intersection ( A | B ).	---------------------------
-		fn operation_booleenne		operation			_shp_A 		_shp_B			 =(
-/* 				
-* 		on a 4 possibilités : 	---->	B et A sont à coté l'un de l'autre.		( A + B = A et B ).		---->	A absorbe totalement B.			
-* 																					( A - B = A ).				---->	B est un trou dans le vide.
-* 																					( A | B = 0 ).				---->	Il reste 0 shapes, pas d'intersection.
-* 			
-* 			
-* 								---->	B est entierement dans A.				( A + B = A ).				---->	A absorbe totalement B.			
-* 																					( A - B = B dans A ).		---->	B est un trou complet dans A
-* 																					( A | B = B ).				---->	Il ne reste que B. 
-* 		
-* 		
-*  								---->	A est entierement dans B.				( A + B = B ).				---->	B absorbe totalement A.			
-* 																					( A - B = 0 ).				---->	B fait disparaitre A => 0 shapes.
-* 																					( A | B = A ).				---->	Il ne reste que A.
-* 																			
-* 																			
-* 								---->	A et B se coupent. 						( A + B = A ).				---->	faire les tracés.
-* 																					( A - B = B dans A ).		---->	faire les tracés.
-* 																					( A | B = B ).				---->	faire les tracés.
-*/
+		fn operation_booleenne		operation			_nd_base 			_nd_operateur			 =(
+			
+			
+				struct	str_intersection	(
+					pos,
+					noeud,
+					id_pt_courant 	=	0,
+					id_pt_autre 	=	0
+				)
 			
 			
 			
 			debug "operation_booleenne"
-			debug "type"	var:operation_type
+			debug "type"	var:operation
 			
-			--- on renvois une liste de liste de points ---------
+
+			
+			--- on renvois une liste de liste de shapes ---------
 			local 	result_pts_shps = #()
 			
-			
-			
-			---- On regarde la position respective des shapes ----------------
-			---- B est entierement dans A ?	------
-			local pos_relative = get_positionRelative_shapes 	_shp_A 	_shp_B	
--- 				debug "pos_relative" var:pos_relative
-			
-			case pos_relative of (
-				------
-				#aCoté:	 	(			----> 	B et A sont à coté l'un de l'autre.		
-						debug "A et B sont à coté l'un de l'autre."					
-						case operation of (
-							#addition:	 		(
-								----- ( A + B = A et B ).		---->	A absorbe totalement B.
-								result_pts_shps 	=	_shp_A
-							)
-							#soustraction:	 		(
-								----- ( A - B = A ).				---->	B est un trou dans le vide.
-							)
-							#intersection:	 		(
-								----- ( A | B = 0 ).				---->	Il reste 0 shapes, pas d'intersection.
+			case operation of (
+				#addition:	 		(
+					
+					
+					--- les noeux en jeux	---------------------
+					local nd_operateur	=	_nd_operateur 													----	le noeud opérant	--------------
+					local nds_bases		=	#( _nd_base ) +	_nd_base.get_descendance ()		----	les noeuds auxquels on applique l'opération -----------
+					local nds_total			=	#( nd_operateur ) +	nds_bases
+					
+					
+					for nd in nds_total do (
+						--- on reset les marqueurs de suivie de traitement ----------------
+						nd.reset_aTraiter ()
+-- 						--- et on décoche les points qui sont dans un shape -------
+-- 						for i in 1 to nd.pts.count do (
+-- 							local pt = nd.pts[i]
+-- 							for nd_aTesterSurvol	in nds_total where nd_aTesterSurvol != nd do 
+-- 								if point_est_dansShape 	pt  	nd_aTesterSurvol.pts do
+-- 									nd.valider_aTraiter	i
+-- 						)
+					)
+					
+					
+										
+					
+					---- tant qu'il reste des points à traiter	--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+					local	il_reste_des_points 	=	true
+					local sauvetage 				=	0
+					local sauvetage_max 		= 200
+					while il_reste_des_points do (
+						
+								format "\n\n\n\n\n"
+								format "\n\n\n\n\n"
+								format "\n\n\n\n\n"
+						debug "------------------------------------------------- TANT QU'IL RESTE DES POINTS à TRAITER	--------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+						
+						local	id_pt_initial = 0
+						local	 nd_initial
+						local nds_aTester
+						
+						---- on actualise les conditions initiales 	---------------------------------------------------------------------------------
+						local id_ptOperateur_aTraiter	=	nd_operateur.get_nd_aTraiter ()
+						debug "---- nd_operateur.get_nd_aTraiter ()" var:(nd_operateur.get_nd_aTraiter ())
+						debug "---- id_ptOperateur_aTraiter" var:id_ptOperateur_aTraiter
+						
+						--- Si il reste des points à traiter dans l'operatuer, ou prend le premier	-----------
+						if id_ptOperateur_aTraiter != 0 then (
+							id_pt_initial 	=	id_ptOperateur_aTraiter
+							nd_initial 		= nd_operateur
+							
+									debug "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+							nds_aTester	=	nds_bases
+							
+						) else (
+							--- sinon on cherche parmis les bases 	---------							
+							nd_initial	=	undefined
+							local i = 1
+							while i <=  nds_bases.count	and nd_initial == undefined do (
+								local id_ptBase_aTraiter =   nds_bases[i].get_nd_aTraiter ()
+								if  id_ptBase_aTraiter != 0 do (
+									nd_initial 		= 	nds_bases[i]
+									id_pt_initial 	= 	id_ptBase_aTraiter
+									debug "#######################################################################################"
+									nds_aTester	=		#(nd_operateur)
+								)
+								i += 1
 							)
 						)
 						
-					) ---- fin #aCoté ----------------------------
+						debug "---- id_pt_initial" var:id_pt_initial
+						debug "---- nd_initial" var:nd_initial
+						
+						
+						
+						---- si on a toujours pas de points à traiter alors on ON SORT	---------------
+						if id_pt_initial == 0 do	(
+							il_reste_des_points = false
+							debug "ON SORT !!!!!!!"
+						)
+						
+						
+						local result_pts	=#()
 					
-				#interieur:	 (		---->	B est entierement dans A.
-						debug "B est entierement dans A."
-					) ---- fin #interieur ----------------------------
-				#exterieur:	(		---->	A est entierement dans B.
-						debug "A est entierement dans B."
-					) ---- fin #exterieuré ----------------------------
-				#intersection:	(		---->	A et B se coupent. 	
-						debug "A et B se coupent. "
-					) ---- fin #exterieuré ----------------------------
+						local nd_courant
+						local shp_courant
+						local id_pt_courant
+						local pt_courant
+						
+						if il_reste_des_points do (
+							
+							------------- on definie les elements courant -----------------------------------
+							nd_courant		=	nd_initial
+							shp_courant		=	nd_courant.pts
+							id_pt_courant	=	id_pt_initial
+							pt_courant		=	shp_courant[ id_pt_courant ]
+							append	result_pts		pt_courant
+							nd_courant.valider_aTraiter	id_pt_courant
+							
+							local sens				=	if nd_courant.est_enCreux () then -1 else 1
+							
+							
+							
+							
+							---- tant qu'on a pas fini la boucle	----------------------------------------------------------------------------------------------------------------
+							local on_a_fini_laBoucle = false
+							while not on_a_fini_laBoucle and 	il_reste_des_points 	do (
+								format "\n\n"
+								debug "------------------------------------------------- tant qu'on a pas fini la boucle	----------------------------------------------------------------------------------------------------------------"
+								
+								--- SAUVETAGE	----
+								sauvetage+= 1
+								if sauvetage > sauvetage_max do
+									il_reste_des_points = false
+								
+						
+								--- le point suivant	----
+								local id_pt_svnt	= boucler	shp_courant	 ( id_pt_courant + sens ) 
+								local pt_suivant	=	shp_courant[ id_pt_svnt ]
+								
+								debug "nd_courant" 		var:nd_courant.nom
+								debug "nds_aTester" 		var:nds_aTester		param:#nom
+								debug "id_pt_courant" 	var:id_pt_courant
+								debug "pt_courant" 		var:pt_courant
+								debug "->>>>>>> nds_total" var:nds_total		param:#nom
+								debug "->>>>>>> ids_pts_aTraiter" var:nds_total		param:#ids_pts_aTraiter
+								
+								debug "id_pt_svnt" var:id_pt_svnt
+								
+								debug "-------------------->	result_pts_shps		--->" var:result_pts_shps
+								debug "-------------------->	result_pts			--->" var:result_pts
+								
+								
+								------------------------ on teste les intersection avec les autres noeuds	------------------------------------------------
+								local intersections = #()
+								for nd in nds_aTester do (
+									--- on cherche si intersection avec l'autres shapes ----
+									for j = 1 to nd.pts.count do (
+										
+										local pt_autre			= 	nd.pts[ j ]
+										local j_svt				=	boucler 	nd.pts		( j + 1 )
+										local pt_autre_svt	= 	nd.pts[ j_svt ]
+										
+										local intersection = get_intersection_vecteurs		pt_courant   pt_suivant		pt_autre		pt_autre_svt 
+										if intersection != undefined and distance intersection 	pt_courant > .001 do
+											append intersections ( str_intersection 	noeud:nd			pos:intersection		id_pt_courant:id_pt_courant 		id_pt_autre:j 	)
+									)
+								)
+								
+								
+								
+								debug "---->	# intersections#" var:intersections
+								
+								------------------------   Soit on a pas d'intersection sur ce segment	----------------------------------------------------
+								if intersections.count ==	0	then (
+									
+									
+									
+									--- on passe au point suivant ----
+									id_pt_courant	=	id_pt_svnt
+									pt_courant		=	pt_suivant
+									
+									--- on valide le point courant si on est pas sur un point intersection ----
+									nd_courant.valider_aTraiter	id_pt_courant
+									
+									
+									--	on ajoute le point --
+									append result_pts 	( copy pt_courant )
+									
+								
+								------------------------   Soit on en a et on choisi la plus proche du pt courant	-------------------------------------------		
+								) else  (						
+									---- on prend la premiere intersection, la plus proche --------
+									local distMin =	1e+10
+									local intersection 
+									debug "intersections" var:intersections
+									for intersec in intersections do 
+										if distance pt_courant intersec.pos < distMin do (
+											intersection = intersec
+											distMin = distance pt_courant 	intersec.pos
+										)
+									
+									
+									debug "---->	# intersection #" var:intersection.pos
+									
+									--- on bascule sur l'autre shape 	-------------------------------------------------
+									local nd_intersec	=	intersection.noeud
+									/* 
+									---- le sens ---
+									if est_aGauche 	pt_courant 	pt_suivant 		nd_intersec.pts[ intersection.id_pt_autre ] 	then (
+										
+										debug "A GAUCHE"
+										sens = 1
+										if not 	nd_courant.est_enCreux() 	and 			nd_intersec.est_enCreux()  	do  	sens = -1
+										if  		nd_courant.est_enCreux() 	and not	nd_intersec.est_enCreux()  	do  	sens = -1
+										
+																							
+																							
+																							
+																							
+																							
+										
+									) else  (
+										
+										debug "A DROITE"
+										sens = 1 
+-- 										if not 	nd_courant.est_enCreux() 	and 			nd_intersec.est_enCreux()  	do  	sens = -1
+										if  		nd_courant.est_enCreux() 		then  	sens = -1
+										
+-- 										
+-- 										if nd_intersec.est_enCreux()  and  nd_courant.est_enCreux() 	then 	(
+-- 											debug "---->	PAS est_aGauche  et   est_enCreux"
+-- 											sens = 1
+-- 										)
+-- 																						else		(
+-- 											debug "---->	PAS est_aGauche  et PAS  est_enCreux"
+-- 																							sens = -1
+-- 																						) 
+									)
+									 */
+										debug "sens" var:sens
+										
+										
+										
+									--- on change de noeud courant	------
+									if nd_courant == 	nd_operateur then (
+										debug "	--->	on est sur l'operateur, on passe sur une base."
+										nd_courant		=	nd_intersec
+										nds_aTester	=	#( nd_operateur )
+									) else (
+										debug "	--->	on est sur une base, on bascule sur l'operateur."
+										nd_courant		=	nd_intersec
+										nds_aTester	=	nds_bases								
+									)
+									
+									sens = 1 
+-- 									if not 	nd_courant.est_enCreux() 	and 			nd_intersec.est_enCreux()  	do  	sens = -1
+									if  		nd_courant.est_enCreux() 	/* and not	nd_intersec.est_enCreux()  */ 	then  	sens = -1
+									
+									---- l'id du point courant  ---
+									id_pt_courant =  intersection.id_pt_autre 
+									if sens == -1 do id_pt_courant += 1
+									
+									--- les point et shape courants ------
+									shp_courant	=	nd_courant.pts
+									pt_courant = intersection.pos
+									
+									--	on ajoute le point --
+									append result_pts 	pt_courant
+									
+								)
+								
+-- 								debug "FIN DE BOUCLE #	nd_initial == nd_courant ?"	var:(nd_initial == nd_courant)
+-- 								debug "FIN DE BOUCLE #	nd_initial "	var:(nd_initial)
+-- 								debug "FIN DE BOUCLE #	nd_courant "	var:( nd_courant)
+-- 								
+-- 								debug "FIN DE BOUCLE #	id_pt_courant == id_pt_initial ?"	var:(id_pt_courant == id_pt_initial)
+-- 								debug "FIN DE BOUCLE #	id_pt_initial "	var:(id_pt_initial)
+-- 								debug "FIN DE BOUCLE #	id_pt_courant "	var:( id_pt_courant)
+								
+								
+								--- on gère la fin de la boucle -------------------------------------
+								if nd_initial == nd_courant  and id_pt_courant == id_pt_initial then (
+									on_a_fini_laBoucle = true
+								) 
+								
+							)	---- Fin -	tant qu'on a pas fini la boucle	------------------------------------------------------------------------------------------------------
+							
+							
+							
+							---- on ajoute le shape obtenu -----------------------------------
+							append 	result_pts_shps	result_pts
+							
+							debug "BOUCLE--->"
+						)	---- Fin -	il reste des points à traiter		--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+						
+					
+					)
+				)
+				#soustraction:	 		(
+				)
+				#intersection:	 		(
+				)
 			)
 			
+			result_pts_shps
 			
-		
 		),
 		
 		
@@ -923,30 +1159,62 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			
 			---- noeud de la hierarchie ----------
 			struct str_terrain_booleen_node (
-				
--- 					struct_prt ,
-					
-				
+				--------- membres ------------------------------------------------------------------
 				public
-					pts 			=	#(),
-					nom 			="",
-					dist_auParent = 0,
+					nom 				=	"",
+					pts 				=	#(),
 					
-					parent,
+					en_creux		=	false	,		---- si le noeud est en creu ou en plein
+					
+					
+					dist_auParent	=	0,
+					parent			=	undefined,
 				public
-					enfants		=	#(),
+					enfants			=	#(),
 					
-					fn set_parent		_ndParent = (
+					
+					ids_pts_aTraiter	=	#{},
+					
+				--------- Fonctions ------------------------------------------------------------------
+				public
+					fn reset_aTraiter	=(
+						ids_pts_aTraiter			=	#{1..pts.count}
+					),
+					fn get_nd_aTraiter	=( 
+						local id_aTraiter = 0
+						if ( ids_pts_aTraiter as array ).count > 0 do
+							id_aTraiter	=	( ids_pts_aTraiter as array )[1]
+						id_aTraiter
+					),
+					fn valider_aTraiter	_id =			ids_pts_aTraiter[_id] = false,
+					
+					
+					
+					
+					fn maj_enCreux			=(
+						if parent != undefined do
+							en_creux = not parent.en_creux
+						for enfant in enfants do
+							enfant.maj_enCreux ()
+					),
+					
+					fn est_enCreux	= en_creux,
+					
+					
+					fn set_parent			_ndParent 	= (
 						if parent != undefined and parent  != _ndParent do
 							parent.retirer_enfant	this
-						parent  = _ndParent
-					),
-					fn ajouter_enfant 	_neudEnfant 	distance_toParent	= (
-						local distTest	=	distance_toParent	--struct_prt.get_distance_shapes 	pts	_neudEnfant.pts
 						
+						parent  = _ndParent
+						maj_enCreux ()
+					),
+					fn ajouter_enfant 	_neudEnfant 	distance_toParent:	= (
+						
+						--- le placer dans l'ordre du plus proche au plus loin ---------------
+						local distTest	=	distance_toParent	--struct_prt.get_distance_shapes 	pts	_neudEnfant.pts
 						local trouve = false
-						if distTest != undefined do (
-								
+						if distTest != unsupplied do (
+							
 							local	dist_au_nvl_enfant	 		= distTest.distance
 							
 							_neudEnfant.dist_auParent 		= dist_au_nvl_enfant
@@ -968,14 +1236,29 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 						
 						_neudEnfant.set_parent  	this
 					),
-					fn retirer_enfant	_enfant =(
+					fn retirer_enfant		_enfant 		=(
 						local id_enfant = findItem enfants	_enfant
 						if id_enfant != 0 do
 							deleteItem enfants id_enfant
 					),
-					fn set_pts  _pts= pts = _pts,
-					fn get_pts  = pts
+					fn set_pts  			_pts			= pts = _pts,
 					
+					
+					fn get_pts  			= pts,
+					fn get_descendance	=(
+						local result = #()
+						for enfant in enfants do (
+							append result enfant
+							result		+=	enfant.get_descendance()
+						)
+						result
+					),
+					
+					fn supprimer			=(
+						if parent	!=	undefined do
+							parent.retirer_enfant	this
+					)
+				
 			)--- fin du struct----
 			
 		
@@ -994,38 +1277,217 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 		
 		
 		fn integrer_nd_dans_hierarchie		_nd_courant		_nd_aIntegrer 	=(
+/* 			
+* 										Positon relative A B.						Mode opération de B																	Resultat
+* 		on a 4 possibilités : 	---->	B et A sont à coté l'un de l'autre.		( A + B = A et B ).		---->	B est ajouter au niveau de A				----> 	A et B
+* 																					( A - B = A ).				---->	B est un trou dans le vide.				----> 	A
+* 																					( A | B = 0 ).				---->	Il reste 0 shapes, pas d'intersection.	----> 	-VIDE-
+* 			
+* 			
+* 								---->	B est entierement dans A.				( A + B = A ).				---->	A absorbe totalement B.					----> 	A
+* 																					( A - B = B dans A ).		---->	B est un trou complet dans A			----> 	B dans A
+* 																					( A | B = B ).				---->	Il ne reste que B. 						----> 	B
+* 		
+* 		
+*  								---->	A est entierement dans B.				( A + B = B ).				---->	B absorbe totalement A.					----> 	B
+* 																					( A - B = 0 ).				---->	B fait disparaitre A => 0 shapes.		----> 	-VIDE-
+* 																					( A | B = A ).				---->	Il ne reste que A.						----> 	A
+* 																			
+* 																			
+* 								---->	A et B se coupent. 						( A + B = A ).				---->	faire les tracés.							----> 	tracés
+* 																					( A - B = B dans A ).		---->	faire les tracés.							----> 	tracés
+* 																					( A | B = B ).				---->	faire les tracés.							----> 	tracés
+*/
+			local operation				=	_nd_aIntegrer.operation
+			local integration_reussie 	= false			
 			
-			local integration_reussie = false			
 			
-			/* 
-			
+			-------- en fonction de la position relative des shapes ------------------------------------------
 			local pos_relative = get_positionRelative_shapes 	_shp_A 	_shp_B	
--- 				debug "pos_relative" var:pos_relative
-			
 			case pos_relative of (
-				------
-				#aCoté:	 	(			----> 	B et A sont à coté l'un de l'autre.		
-						debug "A et B sont à coté l'un de l'autre."								
+				
+				#aCoté:	 	(			----> 	B et A sont à coté l'un de l'autre.	---------------------------------------------------------
+					debug "A et B sont à coté l'un de l'autre."
+					
+					
+					----------  en fonction du type d'opération -------------
+					case operation of (
+						
+								--------- 	B est ajouter au niveau de A				----> 	A et B			--------------------------------	
+								#addition:	 		(
+										
+										---- on regarde si un enfant du noeud courant	rentre dedans	-----------------
+										local enfants_a_ajouter =#()
+										for enfant in	_nd_courant.enfants  do (		
+											if shape_estDans_shape	( _nd_aIntegrer.get_pts () )	enfant.pts   then
+												append enfants_a_ajouter enfant
+										)
+										
+										---- ajoute tout les enfants du noeud courant qui rentre dans le noeud à integrer.	-----------------
+										for enfant in enfants_a_ajouter do (
+											local distance_toParent = get_distance_shapes 	_nd_courant.pts	enfant.pts
+											_nd_aIntegrer.ajouter_enfant 	enfant	distance_toParent:distance_toParent
+										)
+										
+										---- ajoute le noeud à integrer aux enfant du noeud courant.	-----------------
+										local distance_toParent = get_distance_shapes 	_nd_courant.pts	_nd_aIntegrer.pts
+										_nd_courant.ajouter_enfant 		_nd_aIntegrer	distance_toParent:distance_toParent
+										
+										--- fin du boulot -----------					
+										integration_reussie = true
+										
+								)
+								---------	B est un trou dans le vide.				----> 	A	--------------------------------	
+								#soustraction:	 		(
+									--- fin du boulot, B disparait, rien à faire  -----------		
+								)
+								---------	Il reste 0 shapes, pas d'intersection.	----> 	-VIDE-	--------------------------------	
+								#intersection:	 		(
+									---- on supprime le noeud courant ----------------
+									_nd_courant.supprimer ()
+								)
+						) --- fin case operation-	---------------------
+					
 					) ---- fin #aCoté ---------------------------------------------------------
-				#interieur:	 (			---->	B est entierement dans A.
+					
+					
+					
+				#interieur:	 (			---->	B est entierement dans A.			---------------------------------------------------------
 						debug "B est entierement dans A."
+						
+						----------  en fonction du type d'opération -------------
+						case operation of (
+								---------	A absorbe totalement B	----> 	A	--------------------------------	
+								#addition:	 		(
+									--- fin du boulot, B disparait, rien à faire  -----------
+									integration_reussie = true
+								)
+								---------	B est un trou complet dans A	----> 	B dans A	--------------------------------	
+								#soustraction:	 		(
+									
+										---- on essaye de l'integrer dans les enfants de A  -----
+										local integration_dans_enfant = false	
+										for enfant in	_nd_courant.enfants  do (
+											local integration = integrer_nd_dans_hierarchie  		enfant  		_nd_aIntegrer
+											if integration then  
+												integration_dans_enfant = true
+										)
+										
+										--- si il ne s'integre pas dans un enfant, on l'integre au neoud courant	----------------
+										if not integration_dans_enfant   do (
+											---- ajoute le noeud à integrer aux enfant du noeud courant.	-----------------
+											local distance_toParent = get_distance_shapes 	_nd_courant.pts	_nd_aIntegrer.pts
+											_nd_courant.ajouter_enfant 		_nd_aIntegrer	distance_toParent:distance_toParent
+										)
+										
+										integration_reussie = true
+								)
+								---------	Il ne reste que B. 	----> 	B	--------------------------------	
+								#intersection:	 		(
+									--- on copie les points de B dans A	------------------
+									_nd_courant.pts = 	_nd_aIntegrer.pts
+								)
+						) --- fin case operation-	---------------------
+/* 						
+						--- on va reussir à lintegrer ici -----------					
+						integration_reussie = true
+						
+						---- on regarde s'il s'integre dans un des enfants de A  -----
+						local integration_dans_enfant = false	
+						for enfant in	_nd_courant.enfants  do (
+							local integration = integrer_nd_dans_hierarchie  		enfant  		_nd_aIntegrer
+							if integration then  
+								integration_dans_enfant = true
+						)
+						
+						--- si il ne s'integre pas dans un enfant, on l'integre ici	----------------
+						if not integration_dans_enfant   do (
+							
+							---- on regarde si un enfant rentre dedans	-----------------
+							local enfants_a_ajouter =#()
+							for enfant in	_nd_courant.enfants  do (		
+								if shape_estDans_shape	( _nd_aIntegrer.get_pts () )	enfant.pts   then
+									append enfants_a_ajouter enfant
+							)
+							
+							---- ajoute tout les enfants du noeud courant qui rentre dans le noeud à integrer.	-----------------
+							for enfant in enfants_a_ajouter do (
+								local distance_toParent = get_distance_shapes 	_nd_courant.pts	enfant.pts
+								_nd_aIntegrer.ajouter_enfant 	enfant	distance_toParent
+							)
+							
+							---- ajoute le noeud à integrer aux enfant du noeud courant.	-----------------
+							local distance_toParent = get_distance_shapes 	_nd_courant.pts	_nd_aIntegrer.pts
+							_nd_courant.ajouter_enfant 		_nd_aIntegrer	distance_toParent
+						) */
+						
 					) ---- fin #interieur ---------------------------------------------------------
-				#exterieur:	(			---->	A est entierement dans B.
+					
+					
+					
+				#exterieur:	(			---->	A est entierement dans B			.---------------------------------------------------------
 						debug "A est entierement dans B."
-					) ---- fin #exterieuré ---------------------------------------------------------
-				#intersection:	(		---->	A et B se coupent. 	
+					
+						----------  en fonction du type d'opération -------------
+						case operation of (
+								---------	B absorbe totalement A.					----> 	B	--------------------------------	
+								#addition:	 		(
+									--- on copie les points de B dans A	------------------
+									_nd_courant.pts = 	_nd_aIntegrer.pts
+								)
+								---------	B fait disparaitre A => 0 shapes.		----> 	-VIDE-	--------------------------------	
+								#soustraction:	 		(
+									_nd_courant.supprimer ()
+								)
+								---------	Il ne reste que A.						----> 	A	--------------------------------	
+								#intersection:	 		(
+									--- fin du boulot, B disparait, rien à faire  -----------
+									integration_reussie = true									
+								)
+						) --- fin case operation-	---------------------
+					) ---- fin #exterieur ---------------------------------------------------------
+					
+					
+					
+				#seCroisent:	(		---->	A et B se coupent, on va avoir du decoupage à faire ! 					---------------------------------------------------------
 						debug "A et B se coupent. "
-					) ---- fin #exterieuré ---------------------------------------------------------
-			)
+					
+						----------  en fonction du type d'opération -------------
+						case operation of (
+								---------		--------------------------------	
+								#addition:	 		(
+									local shapes_result_nd_courant 	= 	operation_booleenne		#addition		_nd_courant		_nd_aIntegrer 
+									
+									
+									/* 
+									--- et on l'additionne au enfants	------------
+									local	shapes_result_nds_enfants = #()
+									for enfant in _nd_courant.enfants do
+										shapes_result_nds_enfants +=  */
+								)
+								---------		--------------------------------	
+								#soustraction:	 		(
+									
+									
+								)
+								---------		--------------------------------	
+								#intersection:	 		(
+									
+									
+								)
+						) --- fin case operation-	---------------------
+					) ---- fin #seCroisent ---------------------------------------------------------
+					
+			)	---	fin case position relative	------------------------------------
 				
 				
-				 */
 				
 				
 				
 				
 				
 				
+				/* 
 			local est_dans_shape 	= shape_estDans_shape		_nd_courant.pts  	( _nd_aIntegrer.get_pts ())	
 				
 			if est_dans_shape	then (
@@ -1059,7 +1521,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				) 
 				
 			) 
-			
+			 */
 			
 			integration_reussie
 			
@@ -1067,14 +1529,18 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 		
 	
 		fn preparer_booleens 	_pts_shapes	=(
-			local chrono_temp = timeStamp ()
+-- 			local chrono_temp = timeStamp ()
 			
 			debug "preparer_booleens"
+			
 			local pts_shps = deepCopy _pts_shapes	
 			local pts_shps_result 	=	#()
 			
-			
+			--- le noeud ROOT	-----------
 			local 	nd_root			=	creer_noeud_hierarchie 	nom:"root"	
+			nd_root.en_creux 		= true
+			
+			--- les shapes en jeux	-----------
 			local 	shps_aTraiter	=	deepCopy pts_shps
 			
 			local i = 1
@@ -1084,11 +1550,11 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				i+=1
 			)
 			
-			debug  ("	TIME:	preparer les booleens : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
-			local chrono_temp = timeStamp ()
+-- 			debug  ("	TIME:	preparer les booleens : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
+-- 			local chrono_temp = timeStamp ()
 			
 			local		pts_result	= get_pts_from_hierachie		nd_root
-			debug  ("	TIME:	transformer points depuis hierarchie : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
+-- 			debug  ("	TIME:	transformer points depuis hierarchie : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
 			
 -- 			format "------------final---------\n"
 -- 			format_noeud 	nd_root
@@ -1375,30 +1841,44 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 
 clearlistener ()
 
-shp_A = $Line001
-shp_B = $Line002
+shp_A = $LineA
+shp_B = $LineB
+shp_C = $LineC
+shp_D = $LineD
 
 
 
 
 pts_A = for i in 1 to numknots shp_A collect getknotPoint shp_A	1	i
 pts_B = for i in 1 to numknots shp_B collect  getknotPoint shp_B	1	i
-
+pts_C = for i in 1 to numknots shp_C collect getknotPoint shp_C	1	i
+pts_D = for i in 1 to numknots shp_D collect  getknotPoint shp_D	1	i
 
 mgr_tmp = str_temp()
+nd_A =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_A 	nom:"A"
+nd_B =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_B 	nom:"B"
+nd_C =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_C 	nom:"C"
+nd_D =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_D 	nom:"D"
 
-addition = mgr_tmp.operation_booleenne		#addition		pts_A	pts_B
+(nd_B.get_descendance () ).count
+
+nd_B.ajouter_enfant	nd_C
+nd_B.ajouter_enfant	nd_D
+
+
+addition = mgr_tmp.operation_booleenne		#addition				nd_B  nd_A
+addition.count
 
 -- (
+nd_C.est_enCreux()
 
-/* 
 format "\n------->	addition : %\n\n"	addition
 	
 	sp = splineShape name:"addition"
 for j in 1 to addition.count do (
 	addnewSpline sp
 
-		for pt in addition[j] do		addknot sp j #corner #curve  pt
+	for pt in addition[j] do		addknot sp j #corner #curve  pt
 	close sp j
 	updateShape sp
 	select sp
@@ -1406,7 +1886,7 @@ for j in 1 to addition.count do (
 -- )
 
 
- */
+ 
 
 
 
