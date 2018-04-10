@@ -566,6 +566,14 @@ struct	str_terrain_node_core	(
 				local chrono_1		=	affichage_tpsVide
 				local chrono_1_1		=	affichage_tpsVide
 				local chrono_1_2		=	affichage_tpsVide
+				
+				
+				--- on verifie si on doit changer l'etape ---------------------------
+				if 	m_pts_contours.count == 0 or m_pts_faces.count == 0 or m_pts_quadrillages.count == 0 do
+					etape = 1
+		
+		
+				
 				if etape <= 1 do (
 					local chrono_temp = timeStamp ()
 					local chrono_temp_2 = timeStamp ()

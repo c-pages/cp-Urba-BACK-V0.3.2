@@ -53,6 +53,8 @@ ____________________________
 - [ ] Pensez à une grille mode Voronoi !?!?
 - [ ] Un mode empreinte des reliefs ?!? Pour retracer les arêtes des reliefs sur le terrain et ainsi avoir, après projection, un resultat super précis niveaux decoupe du relief.
 - [ ] Empecher de s'auto selectionner quand on pick un relief !
+- [ ] si possible ? : quand une surface ne survol pas de relief, faire en sorte que'elle reste plus ou mons a niveau avec la plus proche sur un relief ?
+- [ ] Faire en sorte de pouvoir piquer des splines type 'rectangle', 'circle' ...
 
 
 #### __Bâtiment__

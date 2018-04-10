@@ -1,10 +1,10 @@
 
-struct	str_tmp ( 	---	str_terrain_outils_shape (
+struct 	str_temp	(	--struct str_terrain_outils_shape (
 		
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		
-		m_debug	=	false,
-		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"urba | str_terrain_outils_shape"	  	var:var	 param:param		catch (),
+	private
+		m_debug	=	true,
+		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | shape"	  	var:var	 param:param		catch (),
 		m_tab_format_nd = "		",
 		fn	format_noeud  _nd = if m_debug do (			 
 			local indent_prfix = "|    "
@@ -17,8 +17,8 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 		
 		precision_courbe 		= 50,			--- en cm. ----
 		
-	private
-	
+-- 	private
+	public --- DEBUG en est en private normalement ----
 		
 		fn comparer_tabs 	first 	second =
 		(
@@ -41,8 +41,8 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 	
 	
 	
-		--- Analyse position de points (survol etc..)		-------------
-		fn point_estAGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	=(
+		--- Analyse position de points (survol_triangles etc..)		-------------
+		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	=(
 			
 			local crossProd 	= cross (  _pt_seg_2 - _pt_seg_1 ) ( _pt_aTester - _pt_seg_1 )
 			local sensDot 		= dot crossProd  [0,0,1]
@@ -51,19 +51,32 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 			
 		),
 		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester =(
-			if point_estAGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester and point_estAGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester  and point_estAGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester then (
+			if est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester and est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester  and est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester then (
 -- 				if _pt_aTester == _pt_tri_1 or _pt_aTester == _pt_tri_2 or _pt_aTester == _pt_tri_3 then
 -- 					false
 -- 				else
 					true
 			) else false
 		),
-		fn survol  					_pt_aTester			_pts_triangles_shape 	=(
+		fn survol_triangles  					_pt_aTester			_pts_triangles_shape 	=(
 			local result = false
 			for pts_tri in _pts_triangles_shape do
 				if est_dansTriangle		pts_tri[1]	pts_tri[2]	pts_tri[3]	_pt_aTester do
 					result = true
 			result			
+		),
+		fn BBs_seCroisent		_shp_1  	_shp_2	 =(
+			
+			local BB_1 = get_BB_shape	_shp_1
+			local BB_2 = get_BB_shape	_shp_2
+			
+			local result = true
+			if BB_1[1].x > BB_2[2].x  	do result = false
+			if BB_1[2].x < BB_2[1].x  	do result = false
+			
+			if BB_1[1].y > BB_2[2].y  	do result = false
+			if BB_1[2].y < BB_2[1].y  	do result = false
+			result
 		),
 		
 		
@@ -82,10 +95,42 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 			
 		),
 		fn	get_angleVecteurs v1 v2 =(
-			result_angle = acos(dot (normalize v1) (normalize v2))
+-- 			debug "get_angleVecteurs"
+-- 			debug "dot (normalize v1) (normalize v2)" var:(dot (normalize v1) (normalize v2))
+			local result_angle
+-- 			if abs (dot (normalize v1) (normalize v2)) == 0 then 
+-- 				result_angle = 0
+-- 			else
+				result_angle = acos(dot (normalize v1) (normalize v2))
 -- 			format "angle entre vec :%\n" result_angle
 			result_angle
 		),
+		fn get_distance_point_segment		_pt		_seg_pt1	_seg_pt2 =(
+-- 			debug "			--->	get_distance_point_segment " var:#( _pt	,	_seg_pt1,	_seg_pt2 )
+			
+			local pt 			= _pt
+			local vec_1 		= (_seg_pt2  -  _seg_pt1)
+			local vec_2 		=  ( _pt  -  _seg_pt1)
+			
+			local angle_test 	= get_angleVecteurs    vec_1 vec_2
+-- 			debug "			--->	angle_test" var:angle_test
+			local longueur_hypo = length vec_2
+-- 			debug "			--->		longueur_hypo" var:longueur_hypo
+			local dist_result 	= abs ( longueur_hypo	* sin  angle_test )
+			dist_result
+			
+		),
+		fn get_aire_triangle	_pts_triangle =(
+-- 			debug "		--->	get_aire_triangle " var:_pts_triangle
+			local l 		= 	distance	_pts_triangle[1]	_pts_triangle[2]
+			local h		=	get_distance_point_segment  _pts_triangle[3]	_pts_triangle[1]	_pts_triangle[2]
+-- 			debug "		--->	L" var:l
+-- 			debug "		--->	h" var:h
+			local aire 	= l * h / 2
+-- 			debug "		--->	aire " var:aire
+			aire
+		),
+		
 		fn get_intersection_vecteurs		vec1_pt_1   vec1_pt_2		vec2_pt_1	vec2_pt_2 =(
 			
 			local pt_intersec			
@@ -128,16 +173,23 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 			)
 			
 			index
-		),		
+		),	
 		fn point_lePlusLoinDuSegment 			_pts			_pt_seg1		_pt_seg2 	=(
+			
 			local result_index 	= 0
 			local dist_max 		= -1e+10
 			for i = 1 to _pts.count do (
-				local pt = _pts[i]
-				local vec_1 = (_pt_seg2  -  _pt_seg1)
-				local vec_2 =  ( pt  -  _pt_seg1)
-				local angle_test = get_angleVecteurs    vec_1 vec_2
-				local dist_test = ( dot  vec_1  vec_2 ) * sin angle_test
+				/* 
+				local pt 			= _pts[i]
+				local vec_1 		= (_pt_seg2  -  _pt_seg1)
+				local vec_2 		=  ( pt  -  _pt_seg1)
+				
+				local angle_test 	= get_angleVecteurs    vec_1 vec_2
+				
+				local dist_test 	= abs ( ( dot  vec_1  vec_2 ) * tan  angle_test ) */
+				
+				local dist_test  = get_distance_point_segment  	_pts[i]			_pt_seg1		_pt_seg2
+				
 				if dist_test > dist_max do (
 					dist_max 		= dist_test
 					result_index 	= i
@@ -145,6 +197,10 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 			)
 			result_index
 		),
+		
+		
+		
+		
 		
 		--- shapes ------------
 		fn get_BB_shape		_pts_shp 	=(
@@ -229,7 +285,6 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 		),
 		fn get_shape_lePlusProche	_pts_shp1		_pts_shps_aTester 		=(
 			
-			
 			struct	str_shape_lePlusProche	(
 				id_shp 		= 	0,
 				id_pt_shp1	=	0,
@@ -265,7 +320,7 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 					if shape_estDans_shape	 _shp_1 		shp do
 						append shps_interieur	shp
 				
-				--- si on a des shapes à l'interieur ---------------
+-- 				--- si on a des shapes à l'interieur ---------------
 				--- parmis ceux à l'interieur on prend le plus proche ---------------------------
 				if shps_interieur.count > 0 do 
 					result 	= 	( get_shape_lePlusProche 		_shp_1	shps_interieur ).id_shp
@@ -283,10 +338,19 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 			)
 			ids_result
 		),
+		fn get_aire_shape	_pts_shp	 =(
+			local triangles_duShape 	= 	this.trianguler 	_pts_shp
+			local result_aire 				=	0
+			for tri in triangles_duShape do result_aire +=	get_aire_triangle	tri
+-- 			debug "	--->	get_aire_shape " var:result_aire
+			result_aire
+		),
+		
+		
 		
 		--- sens du shape ----------------------
 		fn est_sensPositif 					_pts 		=(
-			debug "est_sensPositif"
+-- 			debug "est_sensPositif"
 			local result 				= true
 			local id_pointHaut 	=  point_lePlusHautSurY  	_pts
 			
@@ -307,19 +371,31 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 			
 			if vec2.x > vec1.X do result = not result
 			
-			debug "est_sensPositif" var:result
+-- 			debug "est_sensPositif" var:result
 			
 			result
 			
 		),
 		fn changer_sens 					_pts 		=(
-			debug "changer_sens"
+-- 			debug "changer_sens"
 			local result =#()
 			for i= _pts.count to 1 by -1 do 
 				append result 	_pts[i]
 			result
 		),
-		
+		fn BBs_seCroisent		_shp_1  	_shp_2	 =(
+			local result = true
+			if _shp_1.count > 0 do 	(
+				local BB_1 = get_BB_shape	_shp_1
+				local BB_2 = get_BB_shape	_shp_2
+				
+				if BB_1[1].x > BB_2[2].x  			then result = false
+				else if BB_1[2].x < BB_2[1].x  	then result = false
+				else if BB_1[1].y > BB_2[2].y  	then result = false
+				else if BB_1[2].y < BB_2[1].y  	do result = false
+			)
+			result
+		),
 		------- renvois la position d'un shape par rapport à un autre: si un shapes est ' l'interieur d'un autre (trou boolean), se croisent ou à l'exterieur ---------
 		fn get_positionRelative_shapes 		_pts_shp1		_pts_shp_aTester 	=(
 			
@@ -332,117 +408,233 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 			)
 			
 			
-			local result = #exterieur		---- #exterieur,  #interieur, #intersection, ou	 #aCoté	 --------------
+			local result = #aCoté		---- #exterieur,  #interieur, #intersection, ou	 #aCoté	 --------------
 			local intersections =#()
 			
-			---- on regadre si les edges se coupent --- si oui --->  #intersection -----------------			
-			for i = 1 to _pts_shp1.count do (
-				
-				local pt_shp1			= _pts_shp1[ i ]
-				local i_svt	=	if i == _pts_shp1.count  then 1 else i + 1
-				local pt_shp1_svt	= _pts_shp1[ i_svt ]
-				
-				for j = 1 to _pts_shp_aTester.count do (
+			if  BBs_seCroisent 	_pts_shp1 		_pts_shp_aTester do (
+			
+				---- on regadre si les edges se coupent --- si oui --->  #intersection -----------------
+				local se_coupent = false
+				local  i = 1
+				while i <= _pts_shp1.count and not se_coupent do (
 					
-					local pt_shp2			= _pts_shp_aTester[ j ]
-					local j_svt	=	if j == _pts_shp_aTester.count  then 1 else j + 1
-					local pt_shp2_svt	= _pts_shp_aTester[ j_svt ]
+					local pt_shp1			= _pts_shp1[ i ]
+					local i_svt	=	if i == _pts_shp1.count  then 1 else i + 1
+					local pt_shp1_svt	= _pts_shp1[ i_svt ]
 					
-					local intersection = get_intersection_vecteurs		pt_shp1   pt_shp1_svt		pt_shp2		pt_shp2_svt 
-					if intersection != undefined do
-						append intersections ( str_intersection pos:intersection		id_pt_1:i 	id_pt_2:j 	)
+					local  j = 1
+					while j <= _pts_shp_aTester.count and not se_coupent do (
+						
+						local pt_shp2			= _pts_shp_aTester[ j ]
+						local j_svt	=	if j == _pts_shp_aTester.count  then 1 else j + 1
+						local pt_shp2_svt	= _pts_shp_aTester[ j_svt ]
+						
+						local intersection = get_intersection_vecteurs		pt_shp1   pt_shp1_svt		pt_shp2		pt_shp2_svt 
+						if intersection != undefined do (
+							append intersections ( str_intersection pos:intersection		id_pt_1:i 	id_pt_2:j 	)
+							se_coupent = true
+						)
+						j+= 1
+					)
+					i+= 1
+				)
+				
+				---- si on a des intersections, alors ils se croisent ------------------------------------
+				if intersections.count > 0 then
+					result = #intersection				
+				else (
+					---- s'il ne se croisent pas alors ils sont tout à l'interieur ou à l'extierieur l'un de l'autre -------------------------
+					local pts_triangles_shp1 = this.trianguler	_pts_shp1
+-- 					local pts_triangles_shp2 = this.trianguler	_pts_shp_aTester
+					
+					if survol_triangles  	_pts_shp_aTester[1]	pts_triangles_shp1	 then 
+						result = #interieur
+					else -- if survol_triangles  	_pts_shp1[1]		pts_triangles_shp2	 then 
+						result = #exterieur
 						
 				)
-			)
-			
-			---- si on a des intersections, alors ils se croisent ------------------------------------
-			if intersections.count > 0 then
-				result = #intersection
-			
-			else (
-				---- s'il ne se croisent pas alors ils sont tout à l'interieur ou à l'extierieur l'un de l'autre -------------------------
-				local pts_triangles_shp1 = this.trianguler	_pts_shp1
-				local pts_triangles_shp2 = this.trianguler	_pts_shp_aTester
 				
-				if survol  	_pts_shp_aTester[1]	pts_triangles_shp1	 then 
-					result = #interieur
-				else if survol  	_pts_shp1[1]		pts_triangles_shp2	 then 
-					result = #exterieur
-				else
-					result = #aCoté
-					
 			)
 			
 			result
 		),
+		
 		fn shape_estDans_shape		_shp_1  shp_test =(
 			if _shp_1.count == 0 then 			
 				true
-			else 	if get_positionRelative_shapes  _shp_1	shp_test  == #interieur then 
+			else 	if not BBs_seCroisent	_shp_1	shp_test then
+				false	
+			else if get_positionRelative_shapes  _shp_1	shp_test  == #interieur then 
 				true
 			else 
 				false
 		),
-		
-		
-		------------------ Preparation pour geometrie -----------------------------------
-		fn creer_shape_aTrou			_pts_shp1		_pts_shp2 =(
+	/* 	fn point_est_dansShape		_pt		_pts_shp 	=(
 			
-			--- on cherche les deux points des shpes les plus proches pour les connecter --------------
-			local id_pt_connexion_1	=	0
-			local id_pt_connexion_2	=	0 
+			
+		), */
+		
+		
+		
+		
+		
+		
+		
+		fn get_idsPts_connexion   	_pts_shp1		_pts_shp2 =(
+			local results = #()
+			
+			--- on cherche les points des shpes les plus proches pour les connecter --------------
+			
 			local dist_min					= 1e+10			
 			for id_pt1 = 1 to  _pts_shp1.count do (
 				local pt1	=	_pts_shp1[ id_pt1 ]
 				for id_pt2 = 1 to  _pts_shp2.count do (
 					local pt2			=	_pts_shp2[ id_pt2 ]
 					local dist_test	=	distance	pt1 pt2
-					if dist_test < dist_min do (
+					if dist_test < dist_min then (
+						
+						local id_pt2_svt	=	if id_pt2 == _pts_shp2.count  then 1 else id_pt2 + 1
+						local pt_2_svt 		= _pts_shp2[ id_pt2_svt ]
+						---- si plus proche --------------
 						dist_min = dist_test
-						id_pt_connexion_1	=	id_pt1
-						id_pt_connexion_2	=	id_pt2
-					)				
+						results = #()
+						append results 	#( id_pt1 , id_pt2 )
+					) else
+					if abs ( dist_test - dist_min )  == 0   then (
+						append results 	#( id_pt1 , id_pt2 )
+					)
+					
 				)
+				
 			)
+			results
+		),
+		
+		
+		
+		------------------ Preparation pour geometrie -----------------------------------
+		fn ajouter_shape_aBooleen			_pts_shp_booleen		_pts_shp_aAjouter	 =(
+			
+-- 			debug "ajouter_shape_aBooleen"
+			
+			local chrono_temp = timeStamp ()
+			--- on cherche les points des shpes les plus proches pour les connecter --------------
+			local connexions	=	get_idsPts_connexion   	_pts_shp_booleen		_pts_shp_aAjouter 
+			
+			
+			
+			
+-- 			debug"connexions" var:connexions
+			local connexion = connexions[1]
+			--- si on a plusieurs connexions ------------------
+			if connexions.count > 1 then (
+				
+				local id_pt_origine 	= connexions[1][2]
+				local pt_origine 		= _pts_shp_aAjouter[id_pt_origine]
+				
+				local angle_min 			= 1e+10
+				while connexions.count > 1 do (
+					
+					---- si on a des connexion vers le meme point ------------------
+					if id_pt_origine == connexions[2][2] then (
+						
+						local	id_pt_cnx1			= connexions[1][1]
+						local id_pt_cnx1_svt	=	if id_pt_cnx1 == _pts_shp_booleen.count  then 1 else id_pt_cnx1 + 1
+						local id_pt_cnx1_prcd	=	if id_pt_cnx1 == 1  then _pts_shp_booleen.count else id_pt_cnx1 - 1
+						
+						local pt_cnx1 			= _pts_shp_booleen[id_pt_cnx1]
+						local pt_cnx1_svt	= _pts_shp_booleen[id_pt_cnx1_svt]
+						local pt_cnx1_prcd	= _pts_shp_booleen[id_pt_cnx1_prcd]
+						
+						if pt_cnx1_svt == pt_cnx2_prcd then (
+							local pt_est_aGauche 	= est_aGauche		pt_cnx1		pt_cnx1_svt		pt_origine	
+							if pt_est_aGauche then 
+								connexion = deepcopy  connexions[1]
+							else 
+								connexion = deepcopy  connexions[2]
+						) else (
+							local pt_est_aGauche 	= est_aGauche		pt_cnx1_prcd		pt_cnx1		pt_origine
+							if pt_est_aGauche then 
+								connexion = deepcopy  connexions[1]
+							else 
+								connexion = deepcopy  connexions[2]
+						)
+					) 
+					deleteItem connexions 1
+				)
+			)   
+			
+			local id_pt_connexion_1 =	connexion[1]
+			local id_pt_connexion_2 =	connexion[2]
+			
+			
+-- 			debug  ("	TIME:	on cherche les points des shpes les plus proches pour les connecter : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
+-- 			local chrono_temp = timeStamp ()
 			
 			---- les premier shape -----------
 			local pts_result = #()
 			if id_pt_connexion_1 != 0 do (
-				pts_result = #( _pts_shp1[ id_pt_connexion_1 ] )
-				for i_compteur = 1 to  _pts_shp1.count do (
+				pts_result = #( _pts_shp_booleen[ id_pt_connexion_1 ] )
+				for i_compteur = 1 to  _pts_shp_booleen.count do (
 					local id_pt = i_compteur + id_pt_connexion_1 
-					if id_pt > _pts_shp1.count do 
-						id_pt -= _pts_shp1.count 
-					local pt = _pts_shp1[id_pt]
+					if id_pt > _pts_shp_booleen.count do 
+						id_pt -= _pts_shp_booleen.count 
+					local pt = _pts_shp_booleen[id_pt]
 					append pts_result	pt
 				)
 			)
 			
+-- 			debug  ("	TIME:	les premier shape : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
+-- 			local chrono_temp = timeStamp ()
+			
 			---- les second shape, on l'ajoute a l'envers  -----------
-			for i_compteur =  _pts_shp2.count to 1 by -1 do (
+			for i_compteur =  _pts_shp_aAjouter.count to 1 by -1 do (
 				local id_pt = i_compteur + id_pt_connexion_2 
-				if id_pt > _pts_shp2.count do 
-					id_pt -= _pts_shp2.count 
-				local pt = _pts_shp2[id_pt]
+				if id_pt > _pts_shp_aAjouter.count do 
+					id_pt -= _pts_shp_aAjouter.count 
+				local pt = _pts_shp_aAjouter[id_pt]
 				append pts_result	pt
 			)
 			if id_pt_connexion_2 != 0 do
-				append 	pts_result	( _pts_shp2[ id_pt_connexion_2 ] )
+				append 	pts_result	( _pts_shp_aAjouter[ id_pt_connexion_2 ] )
 			
+-- 			debug  ("	TIME:	les second shape, on l'ajoute a l'envers : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
 			
 			pts_result
 			
 		),
 		fn creer_pts_pourFace			_noeud			=(
 			
-			local pts_result =#( )
-			local pts_noeud =_noeud.get_pts	()
+-- 			local chrono_temp = timeStamp ()
+			
+			local pts_result 	=	#()
+			local pts_noeud 	=	_noeud.get_pts	()
+			
+			---- Version on prend les enfants 1 par 1 le plus pret ----------------------
+			local enfants_a_traiter	 = deepcopy _noeud.enfants
+			while enfants_a_traiter.count > 0 do (
+				
+				local shps_enfants_a_traiter	=	for enfant in enfants_a_traiter collect enfant.pts
+				local infos_enfant_proche		=	get_shape_lePlusProche	pts_noeud		shps_enfants_a_traiter
+				local enfant_proche				=	 enfants_a_traiter[ infos_enfant_proche.id_shp ]
+				
+				pts_noeud = ajouter_shape_aBooleen  	pts_noeud		( enfant_proche.get_pts() )
+				
+				for petitEnfant in enfant_proche.enfants do
+					pts_result += creer_pts_pourFace  petitEnfant
+				
+				deleteItem enfants_a_traiter  infos_enfant_proche.id_shp 
+			) 
+			
+			/* ---- Version on prend les enfants 1 par 1 a la suite ----------------------
 			for enfant in _noeud.enfants do (
-				pts_noeud = creer_shape_aTrou  	pts_noeud		( enfant.get_pts() )
+				pts_noeud = ajouter_shape_aBooleen  		pts_noeud		( enfant.get_pts() )
 				for petitEnfant in enfant.enfants do
 					pts_result += creer_pts_pourFace  petitEnfant
 			)
+			*/
 			append pts_result 	pts_noeud
+-- 			debug  ("	TIME:	creer_pts_pourFace : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
 			pts_result
 		),
 		fn get_pts_from_hierachie		_noeud_root	=(
@@ -458,6 +650,272 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 		
 		
 		
+		
+		
+		------------------ Opérations booleennes -----------------------------------
+		---- ( A + B ) --------------------------------
+		fn addition_booleenne	_shp_1	_shp_2 =(
+			
+			debug "addition_booleenne"
+			struct	str_intersection	(
+				pos,
+				id_pt_courant 	=	0,
+				id_pt_autre 	=	0
+			)
+			
+			---- les points à traiter	-------------
+			local pts_restant_shp1 =#{1.._shp_1.count}
+			local pts_restant_shp2 =#{1.._shp_2.count}	
+			
+			--- on retire les points se trouvant à l'interieur des shapes	--------		
+			local triangles_shp1	=	this.trianguler 	_shp_1
+			local triangles_shp2	=	this.trianguler 	_shp_2
+			for i in 1 to _shp_1.count do (
+				local pt = _shp_1[i]
+				if survol_triangles  	pt		triangles_shp2 do
+					pts_restant_shp1[i] = false
+			)
+			for i in 1 to _shp_2.count do (
+				local pt = _shp_2[i]
+				if survol_triangles  	pt		triangles_shp1 do
+					pts_restant_shp2[i] = false
+			)
+			
+			
+			
+			
+			
+			
+			local shp1				= deepcopy _shp_1
+			local shp2				= deepcopy _shp_2
+			
+			
+			local shp_courant	=	shp1
+			local shp_autre		=	shp2
+			local id_pt_courant	=	(pts_restant_shp1 as array )[1]
+			local pt_courant		=	shp_courant[ id_pt_courant ]
+			
+			local shp_initial 		=	shp_courant
+			local id_pt_initial		=	id_pt_courant
+			local pt_initial			=	pt_courant
+			local sens				=	1
+			
+			local shps_results 	=	#()			
+			
+			local sauvetage1 = 0
+			local sauvetage2 = 0s
+			local	il_reste_des_points =true
+			while	il_reste_des_points	and sauvetage1 < 20  do (
+				sauvetage1 += 1 
+				format "\n-------------  NOUVEAU SHAPE	----------------\n"
+				local shp_courant_result 		=	#(pt_courant)
+				local on_continue	= true
+				
+				while on_continue	and sauvetage2 < 100 do (
+					sauvetage2 += 1 
+					format "-----------------------------\n"
+					format "id_pt_courant : %\n"  id_pt_courant
+					format "shp_courant : %\n"  shp_courant
+					
+					commencement = true
+					
+					local id_pt_suivant 	=  id_pt_courant + sens
+					if id_pt_suivant 	> shp_courant.count do id_pt_suivant = 1
+					if id_pt_suivant 	< 1 do id_pt_suivant = shp_courant.count
+					local pt_suivant 		= shp_courant[ id_pt_suivant ]
+					
+						
+						
+					--- on cherche si intersection avec l'autres shapes ----
+					local intersections = #()
+					for j = 1 to shp_autre.count do (
+						
+						local pt_autre			= shp_autre[ j ]
+						local j_svt				=	j + sens
+						if j_svt > shp_autre.count  do j_svt = j_svt - shp_autre.count
+						if j_svt < 1   do j_svt = j_svt + shp_autre.count
+						
+						local pt_autre_svt	= shp_autre[ j_svt ]
+						
+						local intersection = get_intersection_vecteurs		pt_courant   pt_suivant		pt_autre		pt_autre_svt 
+						if intersection != undefined and distance intersection 	pt_courant > .1 do
+							append intersections ( str_intersection pos:intersection		id_pt_courant:id_pt_courant 		id_pt_autre:j 	)
+					)
+					
+					
+					
+					if intersections.count > 0 then (
+						
+						format "	--->	intersection\n"
+						---- on prend la premiere intersection, la plus proche --------
+						local distMin =	1e+10
+						local intersection 
+						for intersec in intersections do 
+							if distance pt_courant intersec.pos < distMin do (
+								intersection = intersec
+								distMin = distance pt_courant intersec.pos
+							)
+						
+-- 						point pos:intersection.pos name:"intersection" 
+						
+						--- on change de shape ----------------
+						
+						if est_aGauche 	pt_courant 	pt_suivant 		shp_autre[ intersection.id_pt_autre ] then (
+							sens = 1 
+							id_pt_courant = intersection.id_pt_autre 
+						) else  (
+							sens = -1
+							id_pt_courant = intersection.id_pt_autre +1
+							
+						)
+						if comparer_tabs	shp_courant  shp1 then (
+							format "	--->	on est sur shp1, on passe sur shp2\n"
+							
+							shp_courant 	= 	shp2
+							shp_autre		=	shp1
+						) else (
+							format "	--->	on est sur shp2, on passe sur shp1\n"
+							shp_courant 	= 	shp1
+							shp_autre		=	shp2
+						)
+						
+						pt_courant = intersection.pos
+						
+					) else (
+						
+						format "	--->	point suivant\n"
+						---- point suivant ----------
+						id_pt_courant 	+=  sens
+						
+						if id_pt_courant 	> shp_courant.count do id_pt_courant = 1
+						if id_pt_courant 	< 1 do id_pt_courant = shp_courant.count
+						
+						pt_courant			=	shp_courant[ id_pt_courant ]
+						
+						---- on retire de la liste des points restant--------------
+						if comparer_tabs	shp_courant  shp1 then 
+							pts_restant_shp1[id_pt_courant] = false
+						else
+							pts_restant_shp2[id_pt_courant] = false
+						
+					)
+					
+					
+					if ( comparer_tabs	shp_initial 	shp_courant  and id_pt_courant == id_pt_initial and pt_courant == pt_initial ) then (
+						on_continue = false
+						format "	---------	FIN	------------\n"
+					) else (
+						--	on ajoute le point --
+						append shp_courant_result 	pt_courant
+					)
+					
+					format "-----------------------------\n"
+					
+				) --- fin while -------------------------------------------------
+				
+				
+				append 	shps_results	shp_courant_result
+				
+				if ( pts_restant_shp1 as array).count >0 then (
+					
+					id_pt_courant 		=	( pts_restant_shp1 as array)[1]
+					shp_courant 		= 	shp1
+					shp_autre			=	shp2
+					pt_courant			=	shp_courant[ id_pt_courant ]
+					
+				) else if ( pts_restant_shp2 as array).count >0 then (
+					id_pt_courant 		=	( pts_restant_shp2 as array)[1]
+					shp_courant 		= 	shp2
+					shp_autre			=	shp1
+					pt_courant			=	shp_courant[ id_pt_courant ]
+					
+				) else 	il_reste_des_points = false
+				
+				shp_initial 		=	shp_courant
+				pt_initial			=	pt_courant
+				id_pt_initial		=	id_pt_courant
+				sens				=	1
+				
+			) --- fin while il reste des points --------------------------------
+			
+			
+			shps_results
+		),
+	
+		
+		
+
+		-------		3 operations :	#addition ( A + B ), #soustraction ( A - B ) et #intersection ( A | B ).	---------------------------
+		fn operation_booleenne		operation			_shp_A 		_shp_B			 =(
+/* 				
+* 		on a 4 possibilités : 	---->	B et A sont à coté l'un de l'autre.		( A + B = A et B ).		---->	A absorbe totalement B.			
+* 																					( A - B = A ).				---->	B est un trou dans le vide.
+* 																					( A | B = 0 ).				---->	Il reste 0 shapes, pas d'intersection.
+* 			
+* 			
+* 								---->	B est entierement dans A.				( A + B = A ).				---->	A absorbe totalement B.			
+* 																					( A - B = B dans A ).		---->	B est un trou complet dans A
+* 																					( A | B = B ).				---->	Il ne reste que B. 
+* 		
+* 		
+*  								---->	A est entierement dans B.				( A + B = B ).				---->	B absorbe totalement A.			
+* 																					( A - B = 0 ).				---->	B fait disparaitre A => 0 shapes.
+* 																					( A | B = A ).				---->	Il ne reste que A.
+* 																			
+* 																			
+* 								---->	A et B se coupent. 						( A + B = A ).				---->	faire les tracés.
+* 																					( A - B = B dans A ).		---->	faire les tracés.
+* 																					( A | B = B ).				---->	faire les tracés.
+*/
+			
+			
+			
+			debug "operation_booleenne"
+			debug "type"	var:operation_type
+			
+			--- on renvois une liste de liste de points ---------
+			local 	result_pts_shps = #()
+			
+			
+			
+			---- On regarde la position respective des shapes ----------------
+			---- B est entierement dans A ?	------
+			local pos_relative = get_positionRelative_shapes 	_shp_A 	_shp_B	
+-- 				debug "pos_relative" var:pos_relative
+			
+			case pos_relative of (
+				------
+				#aCoté:	 	(			----> 	B et A sont à coté l'un de l'autre.		
+						debug "A et B sont à coté l'un de l'autre."					
+						case operation of (
+							#addition:	 		(
+								----- ( A + B = A et B ).		---->	A absorbe totalement B.
+								result_pts_shps 	=	_shp_A
+							)
+							#soustraction:	 		(
+								----- ( A - B = A ).				---->	B est un trou dans le vide.
+							)
+							#intersection:	 		(
+								----- ( A | B = 0 ).				---->	Il reste 0 shapes, pas d'intersection.
+							)
+						)
+						
+					) ---- fin #aCoté ----------------------------
+					
+				#interieur:	 (		---->	B est entierement dans A.
+						debug "B est entierement dans A."
+					) ---- fin #interieur ----------------------------
+				#exterieur:	(		---->	A est entierement dans B.
+						debug "A est entierement dans B."
+					) ---- fin #exterieuré ----------------------------
+				#intersection:	(		---->	A et B se coupent. 	
+						debug "A et B se coupent. "
+					) ---- fin #exterieuré ----------------------------
+			)
+			
+			
+		
+		),
 		
 		
 		------------------ hierarchie booleenne -----------------------------------
@@ -520,19 +978,56 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 					
 			)--- fin du struct----
 			
-			
+		
 			
 			local nv_noeud = str_terrain_booleen_node	()--	struct_prt:this
-			if pts != unsupplied do nv_noeud.set_pts 	pts
+			if pts != unsupplied do (
+				if not est_sensPositif pts do 
+					pts = changer_sens pts
+				
+				nv_noeud.set_pts 	pts
+			)
 			if nom != unsupplied do nv_noeud.nom= nom
 			nv_noeud
 			
 		),
+		
+		
 		fn integrer_nd_dans_hierarchie		_nd_courant		_nd_aIntegrer 	=(
 			
 			local integration_reussie = false			
 			
-			local est_dans_shape = shape_estDans_shape		_nd_courant.pts  	( _nd_aIntegrer.get_pts ())	
+			/* 
+			
+			local pos_relative = get_positionRelative_shapes 	_shp_A 	_shp_B	
+-- 				debug "pos_relative" var:pos_relative
+			
+			case pos_relative of (
+				------
+				#aCoté:	 	(			----> 	B et A sont à coté l'un de l'autre.		
+						debug "A et B sont à coté l'un de l'autre."								
+					) ---- fin #aCoté ---------------------------------------------------------
+				#interieur:	 (			---->	B est entierement dans A.
+						debug "B est entierement dans A."
+					) ---- fin #interieur ---------------------------------------------------------
+				#exterieur:	(			---->	A est entierement dans B.
+						debug "A est entierement dans B."
+					) ---- fin #exterieuré ---------------------------------------------------------
+				#intersection:	(		---->	A et B se coupent. 	
+						debug "A et B se coupent. "
+					) ---- fin #exterieuré ---------------------------------------------------------
+			)
+				
+				
+				 */
+				
+				
+				
+				
+				
+				
+			local est_dans_shape 	= shape_estDans_shape		_nd_courant.pts  	( _nd_aIntegrer.get_pts ())	
+				
 			if est_dans_shape	then (
 				
 				integration_reussie = true
@@ -546,7 +1041,7 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 						integration_dans_enfant = true
 				)
 				
-				if not integration_dans_enfant   then (
+				if not integration_dans_enfant   do (
 					
 					local enfants_a_ajouter =#()
 					for enfant in	_nd_courant.enfants  do (		
@@ -555,9 +1050,8 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 					)
 					
 					for enfant in enfants_a_ajouter do (
-						distance_toParent = get_distance_shapes 	_nd_courant.pts	enfant.pts
+						local distance_toParent = get_distance_shapes 	_nd_courant.pts	enfant.pts
 						_nd_aIntegrer.ajouter_enfant 	enfant	distance_toParent
-						
 					)
 					
 					local distance_toParent = get_distance_shapes 	_nd_courant.pts	_nd_aIntegrer.pts
@@ -566,75 +1060,38 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 				
 			) 
 			
+			
 			integration_reussie
 			
 		),
-	/* 	fn hierarchiser 			_pts_shapes	=(
-			
-			local 	nd_root			=	creer_noeud_hierarchie 	nom:"root"	
-			local 	shps_aTraiter	=	deepCopy _pts_shapes
-			
-			local i = 1
-			for shp in  	shps_aTraiter  do (
-				local nv_nd = 	creer_noeud_hierarchie 		pts:shp	nom:("noeud " + i as string )
-				integrer_nd_dans_hierarchie		nd_root		nv_nd
-				
-				format "------------------ shape % -------------------------\n" i
-				format_noeud 	nd_root
-				
-				i+=1
-			)
-			
-			format "--------------FINAL-----------------------\n"
-			format_noeud 	nd_root
-			format "-------------------------------------------\n"
-			
-			nd_root
-		), */
+		
+	
 		fn preparer_booleens 	_pts_shapes	=(
+			local chrono_temp = timeStamp ()
 			
-			/* 
+			debug "preparer_booleens"
 			local pts_shps = deepCopy _pts_shapes	
 			local pts_shps_result 	=	#()
 			
-			while pts_shps.count > 1 do (
-				local	shp_courant 					= 	pts_shps[1]
-				local shps_restant					=	for i = 2 to pts_shps.count collect pts_shps[i]
-				local shape_lePlusProche 			=	get_shape_lePlusProche	shp_courant	shps_restant
-				local shp_lePlusProche				=	shps_restant[ shape_lePlusProche.id_shp ]
-				local posRelative_auPlusProche 	= get_positionRelative_shapes		shp_courant  	shp_lePlusProche
-				case posRelative_auPlusProche of (
-					#interieur: 		(
-						pts_shps[1] = creer_shape_aTrou		shp_courant		shp_lePlusProche
-						deleteItem pts_shps		( shape_lePlusProche.id_shp + 1 )
-					)
-					#exterieur: 	(
-						pts_shps[1] = creer_shape_aTrou		shp_courant		shp_lePlusProche
-						deleteItem pts_shps		( shape_lePlusProche.id_shp + 1 )
-					)
-					default: 		(
-						append 		pts_shps_result  ( deepcopy pts_shps[1] )
-						deleteItem 	pts_shps		 1
-					)
-				)
-			)
-			append 		pts_shps_result  ( deepcopy pts_shps[1] )
-			
-			 */
 			
 			local 	nd_root			=	creer_noeud_hierarchie 	nom:"root"	
-			local 	shps_aTraiter	=	deepCopy _pts_shapes
+			local 	shps_aTraiter	=	deepCopy pts_shps
 			
 			local i = 1
 			for shp in  	shps_aTraiter  do (
 				local nv_nd = 	creer_noeud_hierarchie 		pts:shp	nom:("noeud " + i as string )
 				integrer_nd_dans_hierarchie		nd_root		nv_nd
-				format_noeud 	nd_root
-				
 				i+=1
 			)
 			
+			debug  ("	TIME:	preparer les booleens : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
+			local chrono_temp = timeStamp ()
+			
 			local		pts_result	= get_pts_from_hierachie		nd_root
+			debug  ("	TIME:	transformer points depuis hierarchie : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
+			
+-- 			format "------------final---------\n"
+-- 			format_noeud 	nd_root
 			
 			pts_result
 		),
@@ -773,8 +1230,14 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 	------------------- INTERFACE -----------------------------------------------------------------------
 	public
 		
-		fn get_points_from_shape  	_shp=( 
-			interpoler_shape 		_shp
+		fn interpoler_pts_from_shape  	_shp=( 
+			
+			local pts_shps = interpoler_shape 		_shp
+			
+			--- on les plaque sur z=0 -----
+			for shp in pts_shps do	shp.z = 0
+			
+			pts_shps
 		),
 		
 		
@@ -782,13 +1245,15 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 		--- renvois le tableau des triangles decoupés -------
 		fn trianguler  _pts =(
 			
+-- 			debug "trianguler"
 			local pts_poly 			= deepcopy _pts
 			
 			local result_triangles	= #()
 			
 			--------------- tant qu'il reste plus de trois point dans le polygone ------------------			
 			while pts_poly.count >= 3 do (
-				
+-- 				debug "trianguler-------------------------------------------------" 
+-- 				debug "	---->	triangle :" var:result_triangles.count
 				
 				-- on commence avec le point le plus a gauche du polygone--
 				local id_pt_aTester 	= point_lePlusAGauche  pts_poly		
@@ -803,25 +1268,30 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 				local triangle_aTester = #(pts_poly[id_pt_avant], pts_poly[id_pt_aTester], pts_poly[id_pt_apres])
 				
 				
+-- 				debug "--------->	triangle_aTester" var:triangle_aTester
 				----- Puis on cherche parmis les points restants du polygone ceux qui seraient à l'interieur du trangle ----		
 				local ids_pts_dansTriangle =#()		
 				for i = 1 to pts_poly.count do(
 					local pt_atester 				= pts_poly[i]
 					local pt_dansTriangle 		= est_dansTriangle 	triangle_aTester[1]	 triangle_aTester[2]	 triangle_aTester[3]	  pt_atester
+-- 					debug "		--------->	est_dansTriangle ?" var:pt_dansTriangle
 					
 					if pt_dansTriangle do append ids_pts_dansTriangle  i
 				)
-				
+-- 				debug "--------->	ids_pts_dansTriangle" var:ids_pts_dansTriangle
 				if ids_pts_dansTriangle.count > 0 then (
 					
 					
 -- 					format "		************	On a un point dans un triangle !!! --> id:%		**************\n"  id_pt_aTester
 					local pts_dansTriangle	=	for id_pt in ids_pts_dansTriangle collect pts_poly[id_pt]
-						
+-- 					debug "--------->	pts_dansTriangle" var:pts_dansTriangle
+					
 					---- si on en trouve : on cherche le plus éloigné de la 'diagonale' du triangle ----
 					local IDpt_diagonal = 	point_lePlusLoinDuSegment  	pts_dansTriangle		triangle_aTester[3]		triangle_aTester[1]
-					local IDpt_decoupe = 	ids_pts_dansTriangle[IDpt_diagonal ]
+					local IDpt_decoupe = 	ids_pts_dansTriangle[ IDpt_diagonal ]
 					
+-- 				debug "--------->	IDpt_diagonal" var:IDpt_diagonal
+-- 				debug "--------->	IDpt_decoupe" var:IDpt_decoupe
 					-- on decoupe le polygone en 2 avec la digonale entre ce dernier point et le point à tester --
 					--- premier polygone découpé -------
 					local IDsPts_poly1  = #(IDpt_decoupe)
@@ -846,10 +1316,30 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 					result_triangles += trianguler  pts_poly2
 					
 					
+					
+					/* 
+					sp = splineShape name:(Uniquename "decoupage poly 1 - ")
+					addnewSpline sp
+					for pt in pts_poly1 do		addknot sp 1 #corner #curve  pt
+					close sp 1
+					updateShape sp
+					sp = splineShape name:(Uniquename "decoupage poly 2 - ")
+					addnewSpline sp
+					for pt in pts_poly2 do		addknot sp 1 #corner #curve  pt
+					close sp 1
+					updateShape sp
+-- 						selectMore sp
+					 */
+					
+					
+					
+					
+					
 					-- on vide les points de poly car on a lancé la fonction recursivement sur les deux poly trouvés, et on veut sortir de la boucle----
 					pts_poly = #()
 					
 				) else (
+					
 					---- si on en trouve pas: on peut creer le triangle et retirer le point tester de la liste du polygone ----
 					append 	result_triangles  triangle_aTester
 					deleteItem pts_poly  id_pt_aTester
@@ -865,198 +1355,14 @@ struct	str_tmp ( 	---	str_terrain_outils_shape (
 		
 		---- on entre une liste de listes de points  (nos differents shapes à analyser )------------
 		---- renvois une liste des points avec fusion des shapes à trous en une seule liste pour creéation de face troué ---------
-		fn preparer_points_pour_geometrie		 	_pts_shps 	=(
+		fn creer_hierarchie_booleens		 	_pts_shps 	=(
 			
 			---- on cherche les booleens --------------------
 			local pts_results 	=  preparer_booleens 	_pts_shps
 			
 			pts_results
 			
-		),
-		
-		
-
-		fn addition_booleenne	_shp_1	_shp_2 =(
-			
-			struct	str_intersection	(
-				pos,
-				id_pt_courant 	=	0,
-				id_pt_autre 	=	0
-			)
-			
-			---- les points à traiter	-------------
-			local pts_restant_shp1 =#{1.._shp_1.count}
-			local pts_restant_shp2 =#{1.._shp_2.count}	
-			
-			--- on retire les points dans les surfcaes --------		
-			local triangles_shp1	=	trianguler 	_shp_1
-			local triangles_shp2	=	trianguler 	_shp_2
-			for i in 1 to _shp_1.count do (
-				local pt = _shp_1[i]
-				if survol  	pt		triangles_shp2 do
-					pts_restant_shp1[i] = false
-			)
-			for i in 1 to _shp_2.count do (
-				local pt = _shp_2[i]
-				if survol  	pt		triangles_shp1 do
-					pts_restant_shp2[i] = false
-			)
-			
-			
-			
-			
-			
-			
-			local shp1				= deepcopy _shp_1
-			local shp2				= deepcopy _shp_2
-			
-			
-			local shp_courant	=	shp1
-			local shp_autre		=	shp2
-			local id_pt_courant	=	1
-			local pt_courant		=	shp_courant[ id_pt_courant ]
-			
-			local shp_initial 		=	shp_courant
-			local id_pt_initial		=	id_pt_courant
-			local pt_initial			=	pt_courant
-			local sens				=	1
-			
-			local shps_results 	=	#()			
-			
-			local sauvetage1 = 0
-			local sauvetage2 = 0s
-			local	il_reste_des_points =true
-			while	il_reste_des_points	and sauvetage1 < 20  do (
-				sauvetage1 += 1 
-				format "\n-------------  NOUVEAU SHAPE	----------------\n"
-				local shp_courant_result 		=	#(pt_courant)
-				local on_continue	= true
-				
-				while on_continue	and sauvetage2 < 100 do (
-					sauvetage2 += 1 
-					format "-----------------------------\n"
-					format "id_pt_courant : %\n"  id_pt_courant
-					format "shp_courant : %\n"  shp_courant
-					
-					commencement = true
-					
-					local id_pt_suivant 	=  if id_pt_courant == shp_courant.count then 1 else id_pt_courant + 1
-					local pt_suivant 		= shp_courant[ id_pt_suivant ]
-					
-					--- on cherche si intersection avec l'autres shapes ----
-					local intersections = #()
-					for j = 1 to shp_autre.count do (
-						
-						local pt_autre			= shp_autre[ j ]
-						local j_svt				=	j + sens
-						if j_svt > shp_autre.count  do j_svt = j_svt - shp_autre.count
-						if j_svt < 1   do j_svt = j_svt + shp_autre.count
-						
-						local pt_autre_svt	= shp_autre[ j_svt ]
-						
-						local intersection = get_intersection_vecteurs		pt_courant   pt_suivant		pt_autre		pt_autre_svt 
-						if intersection != undefined and distance intersection 	pt_courant > .1 do
-							append intersections ( str_intersection pos:intersection		id_pt_courant:id_pt_courant 		id_pt_autre:j 	)
-					)
-					
-					
-					
-					if intersections.count > 0 then (
-						
-						format "	--->	intersection\n"
-						---- on prend la premiere intersection, la plus proche --------
-						local distMin =	1e+10
-						local intersection 
-						for intersec in intersections do 
-							if distance pt_courant intersec.pos < distMin do (
-								intersection = intersec
-								distMin = distance pt_courant intersec.pos
-							)
-						
-						point pos:intersection.pos name:"intersection" 
-						
-						--- on change de shape ----------------
-						
-						if point_estAGauche 	pt_courant 	pt_suivant 		shp_autre[ intersection.id_pt_autre ] then (
-							sens = 1 
-							id_pt_courant = intersection.id_pt_autre 
-						) else  (
-							sens = -1
-							id_pt_courant = intersection.id_pt_autre +1
-							
-						)
-						if comparer_tabs	shp_courant  shp1 then (
-							format "	--->	on est sur shp1, on passe sur shp2\n"
-							
-							shp_courant 	= 	shp2
-							shp_autre		=	shp1
-						) else (
-							format "	--->	on est sur shp2, on passe sur shp1\n"
-							shp_courant 	= 	shp1
-							shp_autre		=	shp2
-						)
-						
-						pt_courant = intersection.pos
-						
-					) else (
-						
-						format "	--->	point suivant\n"
-						---- point suivant ----------
-						id_pt_courant 	+=  sens
-						
-						if id_pt_courant 	> shp_courant.count do id_pt_courant = 1
-						if id_pt_courant 	< 1 do id_pt_courant = shp_courant.count
-						
-						pt_courant			=	shp_courant[ id_pt_courant ]
-						
-						---- on retire de la liste des points restant--------------
-						if comparer_tabs	shp_courant  shp1 then 
-							pts_restant_shp1[id_pt_courant] = false
-						else
-							pts_restant_shp2[id_pt_courant] = false
-						
-					)
-					
-					
-					if ( comparer_tabs	shp_initial 	shp_courant  and id_pt_courant == id_pt_initial and pt_courant == pt_initial ) then (
-						on_continue = false
-						format "	---------	FIN	------------\n"
-					) else (
-						--	on ajoute le point --
-						append shp_courant_result 	pt_courant
-					)
-					
-					format "-----------------------------\n"
-					
-				) --- fin while -------------------------------------------------
-				
-				
-				append 	shps_results	shp_courant_result
-				
-				if ( pts_restant_shp1 as array).count >0 then (
-					
-					id_pt_courant 		=	( pts_restant_shp1 as array)[1]
-					shp_courant 		= 	shp1
-					pt_courant			=	shp_courant[ id_pt_courant ]
-					
-				) else if ( pts_restant_shp2 as array).count >0 then (
-					id_pt_courant 		=	( pts_restant_shp2 as array)[1]
-					shp_courant 		= 	shp2					
-					pt_courant			=	shp_courant[ id_pt_courant ]
-					
-				) else 	il_reste_des_points = false
-				
-				shp_initial 		=	shp_courant
-				pt_initial			=	pt_courant
-				id_pt_initial		=	id_pt_courant
-				sens				=	1
-				
-			) --- fin while il reste des points --------------------------------
-			
-			
-			shps_results
 		)
-	
 	
 		
 			
@@ -1079,27 +1385,28 @@ pts_A = for i in 1 to numknots shp_A collect getknotPoint shp_A	1	i
 pts_B = for i in 1 to numknots shp_B collect  getknotPoint shp_B	1	i
 
 
-mgr_tmp = str_tmp()s
-addition = mgr_tmp.addition_booleenne	pts_A	pts_B
+mgr_tmp = str_temp()
+
+addition = mgr_tmp.operation_booleenne		#addition		pts_A	pts_B
 
 -- (
 
-
+/* 
 format "\n------->	addition : %\n\n"	addition
 	
-for j in 1 to addition.count do (
 	sp = splineShape name:"addition"
+for j in 1 to addition.count do (
 	addnewSpline sp
 
-		for pt in addition[j] do		addknot sp 1 #corner #curve  pt
-	close sp 1
+		for pt in addition[j] do		addknot sp j #corner #curve  pt
+	close sp j
 	updateShape sp
 	select sp
 )
 -- )
 
 
-
+ */
 
 
 
