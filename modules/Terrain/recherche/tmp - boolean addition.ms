@@ -872,19 +872,19 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					--- les noeux en jeux	---------------------
 					local nd_operateur	=	_nd_operateur 													----	le noeud opérant	--------------
 					local nds_bases		=	#( _nd_base ) +	_nd_base.get_descendance ()		----	les noeuds auxquels on applique l'opération -----------
-					local nds_total			=	#( nd_operateur ) +	nds_bases
+					local nds_total		=	#( nd_operateur ) +	nds_bases
 					
 					
 					for nd in nds_total do (
 						--- on reset les marqueurs de suivie de traitement ----------------
 						nd.reset_aTraiter ()
--- 						--- et on décoche les points qui sont dans un shape -------
--- 						for i in 1 to nd.pts.count do (
--- 							local pt = nd.pts[i]
--- 							for nd_aTesterSurvol	in nds_total where nd_aTesterSurvol != nd do 
--- 								if point_est_dansShape 	pt  	nd_aTesterSurvol.pts do
--- 									nd.valider_aTraiter	i
--- 						)
+						--- et on décoche les points qui sont dans un shape -------
+						for i in 1 to nd.pts.count do (
+							local pt = nd.pts[i]
+							for nd_aTesterSurvol	in nds_total where nd_aTesterSurvol != nd do 
+								if point_est_dansShape 	pt  	nd_aTesterSurvol.pts do
+									nd.valider_aTraiter	i
+						)
 					)
 					
 					
@@ -901,9 +901,9 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 								format "\n\n\n\n\n"
 						debug "------------------------------------------------- TANT QU'IL RESTE DES POINTS à TRAITER	--------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 						
-						local	id_pt_initial = 0
-						local	 nd_initial
-						local nds_aTester
+						local		id_pt_initial = 0
+						local	 	nd_initial
+						local 	nds_aTester
 						
 						---- on actualise les conditions initiales 	---------------------------------------------------------------------------------
 						local id_ptOperateur_aTraiter	=	nd_operateur.get_nd_aTraiter ()
@@ -956,14 +956,14 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 						if il_reste_des_points do (
 							
 							------------- on definie les elements courant -----------------------------------
-							nd_courant		=	nd_initial
+							nd_courant			=	nd_initial
 							shp_courant		=	nd_courant.pts
-							id_pt_courant	=	id_pt_initial
-							pt_courant		=	shp_courant[ id_pt_courant ]
+							id_pt_courant		=	id_pt_initial
+							pt_courant			=	shp_courant[ id_pt_courant ]
 							append	result_pts		pt_courant
 							nd_courant.valider_aTraiter	id_pt_courant
 							
-							local sens				=	if nd_courant.est_enCreux () then -1 else 1
+							local sens			=	if nd_courant.est_enCreux () then -1 else 1
 							
 							
 							
@@ -1084,9 +1084,9 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 -- 																						) 
 									)
 									 */
-										debug "sens" var:sens
-										
-										
+-- 										debug "sens" var:sens
+-- 										
+-- 										sens			=	if nd_courant.est_enCreux () then -1 else 1
 										
 									--- on change de noeud courant	------
 									if nd_courant == 	nd_operateur then (
@@ -1840,21 +1840,36 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 
 
 clearlistener ()
+mgr_tmp = str_temp()
+
+shp_1 = $Line001
+shp_2 = $Line002
+
+
+
+
+pts_1 = for i in 1 to numknots shp_1 collect 	getknotPoint shp_1	1	i
+pts_2 = for i in 1 to numknots shp_2 collect  	getknotPoint shp_2	1	i
+
+nd_1 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_1 	nom:"1"
+nd_2 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_2 	nom:"2"
+
+addition = mgr_tmp.operation_booleenne		#addition				nd_1  nd_2
+
+
+
+/* 
 
 shp_A = $LineA
 shp_B = $LineB
 shp_C = $LineC
 shp_D = $LineD
 
-
-
-
 pts_A = for i in 1 to numknots shp_A collect getknotPoint shp_A	1	i
 pts_B = for i in 1 to numknots shp_B collect  getknotPoint shp_B	1	i
 pts_C = for i in 1 to numknots shp_C collect getknotPoint shp_C	1	i
 pts_D = for i in 1 to numknots shp_D collect  getknotPoint shp_D	1	i
 
-mgr_tmp = str_temp()
 nd_A =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_A 	nom:"A"
 nd_B =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_B 	nom:"B"
 nd_C =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_C 	nom:"C"
@@ -1873,8 +1888,8 @@ addition.count
 nd_C.est_enCreux()
 
 format "\n------->	addition : %\n\n"	addition
-	
-	sp = splineShape name:"addition"
+	 */
+sp = splineShape name:"addition"
 for j in 1 to addition.count do (
 	addnewSpline sp
 
