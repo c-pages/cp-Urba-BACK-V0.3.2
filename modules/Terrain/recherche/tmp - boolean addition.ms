@@ -660,6 +660,10 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 		fn est_nd_deBase	_nd_aTester	=(
 			findItem	nds_bases		_nd_aTester != 0
 		),
+		
+		
+		
+		
 		-------		3 operations :	#addition ( A + B ), #soustraction ( A - B ) et #intersection ( A | B ).	---------------------------
 		fn operation_booleenne		operation			_nd_base 			_nd_operateur			 =(
 			
@@ -689,9 +693,18 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			nds_operateurs	=	#( copy _nd_operateur ) 	+	( deepcopy ( _nd_operateur.get_descendance ()	)	)
 			
 			--- on retourne les pts des noeuds en creux -------------------
-			if operation == #soustraction do 
-				for nd in nds_operateurs	do
-					nd.en_creux	=	not  nd_operateur.en_creux	
+			for i = 1 to nds_bases.count do 
+				if nds_bases[i].en_creux do 
+					nds_bases[i].pts = changer_sens 	nds_bases[i].pts 
+			for i = 1 to nds_operateurs.count do 
+				if nds_operateurs[i].en_creux do 
+					nds_operateurs[i].pts = changer_sens 	nds_operateurs[i].pts 
+				
+				
+-- 					nd.en_creux	=	not  nd_operateur.en_creux	
+-- 			if operation == #soustraction do 
+-- 				for nd in nds_operateurs	do
+-- 					nd.en_creux	=	not  nd_operateur.en_creux	
 			
 			
 			
@@ -718,19 +731,20 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 																								nd_operateur:		nd_ope				\
 																								id_operateur:		i 						\
 																								nd_base:			nd_base				\
-																								id_base:				i )
+																								id_base:				j )
 							)
 						)
 					)
 				)			
 			)
-			local intersections_aTraiter	=#{1..intersections_total.count}
+			local ids_intersections_aTraiter	=#{1..intersections_total.count}
 			
 			
 			
 			
 			
-			
+			debug "nds_bases" var:nds_bases param:#nom
+			debug "nds_operateurs" var:nds_operateurs param:#nom
 			
 			
 			
@@ -767,7 +781,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 				*/
 				---- Le point demarrage, la premiere intersection de la liste --------------------
-				local intersection_aTraiter		=	intersections_total[ ( intersections_aTraiter as array )[1] ]
+				local intersection_aTraiter		=	intersections_total[ ( ids_intersections_aTraiter as array )[1] ]
 				
 				---- les noeuds initiaux -------------------------
 				local nd_initial						=	nds_operateurs[1]
@@ -779,16 +793,30 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				local pt_test_intersection		=	intersection_aTraiter.pos
 				local pt_test_operateur		= 	intersection_aTraiter.nd_operateur.pts[ intersection_aTraiter.id_operateur ]
 				local pt_test_base				= 	intersection_aTraiter.nd_base.pts[ intersection_aTraiter.id_base ]
-				if  est_aGauche		pt_test_operateur		pt_test_intersection 		pt_test_base	do (
-					nd_initial					=	intersection_aTraiter.nd_base
+				
+					format "$point001.pos = %\n\n"		pt_test_intersection
+					format "$point002.pos = %\n\n"		pt_test_operateur
+					format "$point003.pos = %\n\n"		pt_test_base
+				
+-- 				if 	not intersection_aTraiter.nd_base.en_creux then 
+					if  not est_aGauche		pt_test_base		pt_test_intersection 	pt_test_operateur		do (
+						nd_initial					=	intersection_aTraiter.nd_base
+						id_pt_initial					=	intersection_aTraiter.id_base
+						
+						debug "On inverse les noeuds initiaux"
+					)
+-- 				else 
+-- 					if  not est_aGauche		pt_test_base		pt_test_intersection 	pt_test_operateur		do (
+-- 						nd_initial					=	intersection_aTraiter.nd_base
+-- 						id_pt_initial					=	intersection_aTraiter.id_base
+-- 						
+-- 						debug "On inverse les noeuds initiaux"
+-- 					)
 					
-					id_pt_initial					=	intersections_aTraiter.id_base				
-				)
+					
+				debug "nd_initial" var:nd_initial param:#nom
 				
-				
-				
-				local sens = 1
-				
+				local pt_initial 				= intersection_aTraiter.pos
 				
 				
 				
@@ -798,7 +826,20 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				local nds_aTester	= 	if est_nd_deBase	nd_courant then 	nds_operateurs else		nds_bases
 				
 				local id_pt_courant	=	id_pt_initial
-				local pt_courant		=	intersection_aTraiter.pos
+				local pt_courant		=	pt_initial
+				
+				local sens = 1
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
 				
 				
 				------ ( C ) 	Tant qu'on est pas retourné à notre point de départ	----------------------------------------------------------------------------------------------------------------
@@ -806,6 +847,14 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				while not on_a_fini_laBoucle  and sauvetage < sauvetage_max 	do (
 					format "\n\n"
 					debug "------------------------------------------------- tant qu'on a pas fini la boucle	----------------------------------------------------------------------------------------------------------------"
+					
+				
+				
+					debug "nd_courant" 		var:nd_courant.nom
+					debug "nds_aTester" 	var:nds_aTester		param:#nom
+					debug "id_pt_courant" 	var:id_pt_courant
+					debug "pt_courant" 		var:pt_courant
+					
 					
 					--- SAUVETAGE	----
 					sauvetage+= 1
@@ -819,7 +868,8 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					
 					
 					----------- ( 2 )	intersection entre pt courant et pt suivant --------------------------------------------	
-					local intersections = #()
+					local distMin =	1e+10
+					local intersection  = undefined
 					for nd in nds_aTester do (
 						
 						--- on cherche si intersection avec l'autres shapes ----
@@ -829,28 +879,81 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 							local j_svt				=	boucler 	nd.pts		( j + 1 )
 							local pt_autre_svt	= 	nd.pts[ j_svt ]
 							
-							local intersection = get_intersection_vecteurs		pt_courant   pt_suivant		pt_autre		pt_autre_svt 
-							if intersection != undefined and distance intersection 	pt_courant > .001 do
-								append intersections ( str_intersection 	nd:nd			pos:intersection		id_pt:j 	)	
+							local intersec_pos = get_intersection_vecteurs		pt_courant   pt_suivant		pt_autre		pt_autre_svt 
+							if intersec_pos != undefined and distance intersec_pos 	pt_courant > .001 and distance pt_courant 	intersec_pos < distMin  do (
+								intersection =  str_intersection 		nd:		nd					\
+																				pos:		intersec_pos	\
+																				id_pt:	j
+								distMin = distance pt_courant 	intersec_pos
+							)
 						)
 					)
 					-----------------------	 ( 2.1 )	Si on a une intersection,  on passe au point d'intersection et on change de noeud  --------------------------------------------	
-					----------------------------------> changement de noeud ----------------------------------
-					----------------------------------		( a ) Addition	:			-	On inverse juste les noeuds
-					----------------------------------		
-					----------------------------------		 ( b ) Soustraction	:	-	On inverse juste les noeuds
-					----------------------------------		
-					----------------------------------		 ( c ) Intersection	:	-	On inverse juste les noeuds
-					
-					
-					
-					
+					if intersection != undefined then (
+						----------------------------------> changement de noeud ----------------------------------
+						----------------------------------		( a ) Addition	:			-	On inverse juste les noeuds
+						----------------------------------		
+						----------------------------------		 ( b ) Soustraction	:	-	On inverse juste les noeuds
+						----------------------------------		
+						----------------------------------		 ( c ) Intersection	:	-	On inverse juste les noeuds
+						--- on change de noeud courant	------
+						
+						
+						if est_nd_deBase		nd_courant 	then (
+							debug "	--->	on est sur une base, on bascule sur l'operateur."
+							nd_courant		=	intersection.nd
+							nds_aTester	=	nds_bases
+						) else (
+							debug "	--->	on est sur l'operateur, on passe sur une base."
+							nd_courant		=	intersection.nd
+							nds_aTester	=	nds_operateurs
+						)
+						
+						-----  on valide si on est sur un point intersection ------------------
+						id_pt_courant 	=  intersection.id_pt
+						pt_courant 	= intersection.pos
+						
+						append result_pts 	pt_courant
+						local  i = 1 
+						local trouve = false
+						while i <= intersections_total.count and not trouve do (
+							local inter = intersections_total[i]
+							if distance inter.pos  pt_courant  <  .001  do (
+								ids_intersections_aTraiter[ i ] = false
+								trouve = true
+							)
+							i+=1
+						)
+						
+						
+						
+						
+						
+						
+						
 					-----------------------	 ( 2.2 )	Si pas dintersection, on passe au point suivant --------------------------------------------	
+					) else (
+						--- on passe au POINT SUIVANT ----
+						id_pt_courant	=	id_pt_svnt
+						pt_courant		=	pt_suivant
+						
+						
+						--	on ajoute le point --
+						if operation != #intersection or   point_est_dansShape 	pt_courant  	_nd_operateur.pts do
+							append result_pts 	( copy pt_courant )
+						
+					)
+					
+					
+					
 					
 					
 					
 					
 					----------- ( 3 )	sortie ? si on est retourné sur le point initial, on sort	--------------------------------------------	
+					if distance	pt_courant  pt_initial < .001	then 
+						on_a_fini_laBoucle = true
+					
 					
 					
 					
@@ -863,7 +966,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				
 				
 				---- test pour sortie ----------------------------------------------
-				if ( intersections_aTraiter as array).count ==0 do
+				if ( ids_intersections_aTraiter as array).count ==0 do
 					il_reste_des_points = false
 				
 			)	---- Fin -	tant qu'il reste des points à traiter		--------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1604,12 +1707,12 @@ nd_A.ajouter_enfant		nd_A1
 nd_B.ajouter_enfant		nd_B1
 nd_B.ajouter_enfant		nd_B2
 
-
+addition = #()
 addition = mgr_tmp.operation_booleenne		#addition		nd_B  nd_A
 -- addition = mgr_tmp.operation_booleenne		#soustraction		   	nd_B  nd_A
 -- addition = mgr_tmp.operation_booleenne		#intersection		nd_B  nd_A
 addition.count
-/* 
+
 -- (
 nd_C.est_enCreux()
 
@@ -1625,7 +1728,7 @@ for j in 1 to addition.count do (
 	select sp
 )
 -- )
- */
+ 
 
 --  mgr_tmp.est_aGauche $point001.pos	$point002.pos	$point003.pos	
 
