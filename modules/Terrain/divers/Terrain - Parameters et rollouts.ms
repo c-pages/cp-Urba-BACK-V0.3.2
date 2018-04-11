@@ -14,6 +14,7 @@
 			
 			--- les nodes -----------
 			contours_nodes		type:#nodeTab 		tabSize:0  		tabSizeVariable:true		--	 ui:btn_contour_pick		animatable:false		invisibleInTV:true
+			contours_operations	type:#stringTab 		tabSize:0  		tabSizeVariable:true		--	 ui:btn_contour_pick		animatable:false		invisibleInTV:true
 			reliefs_nodes			type:#nodeTab		tabSize:0  		tabSizeVariable:true		--	 ui:btn_relief_pick	 		animatable:false		invisibleInTV:true
 			
 			--- parametres divers -----------
@@ -93,27 +94,47 @@
 			fn geo_filt 			obj = superclassof 	obj == GeometryClass	and not aCommeRelief 		obj
 			fn poly_filt 			obj = classof 			obj == Editable_Poly
 			
-			pickbutton 'btn_contour_pick' "+" pos:[10,12] width:16 height:16 filter:shape_filt autoDisplay:false align:#left
-			listbox 'lbx_contours' "" pos:[10,29] width:150 height:10 align:#left
-			GroupBox 'grp_contours' "Borders" pos:[5,-2] width:160 height:172 align:#left
-			button 'btn_supprimer_contour' "-" pos:[25,12] width:16 height:16 align:#left
-			pickbutton 'btn_relief_pick' "+" pos:[10,187] width:16 height:16 filter:geo_filt autoDisplay:false align:#left
-			listbox 'lbx_reliefs' "" pos:[10,204] width:150 height:6 align:#left
-			GroupBox 'grp_reliefs' "Reliefs" pos:[5,172] width:160 height:120 align:#left
-			button 'btn_supprimer_relief' "-" pos:[25,187] width:16 height:16 align:#left
-			spinner 'spn_hauteur' "" pos:[85,298] width:80 height:16 range:[-1e+10,1e+10,0] type:#worldunits align:#left
-			label 'lbl4' "Height :" pos:[10,298] width:47 height:14 align:#left
+			pickbutton 'btn_contour_pick' "+" pos:[10,33] width:16 height:16 filter:shape_filt autoDisplay:false align:#left
+			listbox 'lbx_contours' "" pos:[10,50] width:150 height:10 align:#left
+			GroupBox 'grp_contours' "Borders" pos:[5,19] width:160 height:190 align:#left
+			button 'btn_supprimer_contour' "-" pos:[25,33] width:16 height:16 align:#left
+			pickbutton 'btn_relief_pick' "+" pos:[10,226] width:16 height:16 filter:geo_filt autoDisplay:false align:#left
+			listbox 'lbx_reliefs' "" pos:[10,243] width:150 height:6 align:#left
+			GroupBox 'grp_reliefs' "Reliefs" pos:[5,211] width:160 height:120 align:#left
+			button 'btn_supprimer_relief' "-" pos:[25,226] width:16 height:16 align:#left
+			spinner 'spn_hauteur' "" pos:[85,2] width:80 height:16 range:[-1e+10,1e+10,0] type:#worldunits align:#left
+			label 'lbl_height' "Height :" pos:[10,2] width:47 height:14 align:#left
+			dropdownList 'ddl_contours_mode' "" pos:[85,186] width:75 height:21 items:#("Addition", "Subtraction", "Intersection") align:#left
 			
+			label 'lbl_operation' "Operation :" pos:[10,188] width:67 height:14 align:#left
 			
--- 			checkbox 'chk_nettoyer_triangles' "Clean triangulation edges" pos:[6,314] width:143 height:17 align:#left
+			button 'btn_contours_monter' "/\\" pos:[130,33] width:16 height:16 align:#left
+			button 'btn_contours_descendre' "\/" pos:[145,33] width:16 height:16 align:#left
+			
 			
 			fn actualiser =(
 			 	lbx_contours.items 	= for contour_node in contours_nodes collect if contour_node != undefined then  contour_node.name else "<deleted>"
 				lbx_reliefs.items 		= for relief_node in reliefs_nodes collect if relief_node != undefined then  relief_node.name else "<deleted>"
-				btn_supprimer_contour.enabled 	=	 lbx_contours.selection	!= 0 
-				btn_supprimer_relief.enabled 		=	 lbx_reliefs.selection	!= 0  
+				local on_a_un_contour					=	lbx_contours.selection	!= 0 
+				btn_supprimer_contour.enabled 		=	on_a_un_contour
+				btn_contours_monter.enabled 		=	on_a_un_contour
+				btn_contours_descendre.enabled 	=	on_a_un_contour
+				
+				lbl_operation.enabled 					=	lbx_contours.selection >1
+				ddl_contours_mode.enabled 			=	lbx_contours.selection >1
+				
+				if on_a_un_contour do (
+					case  contours_operations[ lbx_contours.selection ] as name	of (
+						#addition:			ddl_contours_mode.selection = 1
+						#soustraction:		ddl_contours_mode.selection = 2
+						#intersection:		ddl_contours_mode.selection = 3
+					)
+				)
+				
+				
+				btn_supprimer_relief.enabled 			=	 lbx_reliefs.selection	!= 0
+				
 			)
-			
 			
 			on rollout_global open do
 				actualiser ()
@@ -136,13 +157,11 @@
 				)
 			on btn_supprimer_contour pressed do
 			(
-				
 				if lbx_contours.selection > 0 do (
 					local selecBack = copy lbx_contours.selection
-					deleteItem contours_nodes 	lbx_contours.selection
+					supprimer_contour	lbx_contours.selection
 					actualiser ()
 					lbx_contours.selection = selecBack - 1
-					core.actualiser ()
 				)
 			)
 			on btn_relief_pick picked obj do
@@ -168,15 +187,41 @@
 			(
 				if lbx_reliefs.selection > 0 do (
 					local selecBack = copy lbx_reliefs.selection
-					deleteItem reliefs_nodes  lbx_reliefs.selection
+					supprimer_relief  lbx_reliefs.selection
 					actualiser ()
 					lbx_reliefs.selection = selecBack - 1
-					core.actualiser ()
 				)
 			)
 			on spn_hauteur changed val do
 			(
 					core.actualiser ()
+			)
+			on ddl_contours_mode selected sel do
+		(
+				case sel of (
+					1:		contours_operations[ lbx_contours.selection ] = #addition as string
+					2:		contours_operations[ lbx_contours.selection ] = #soustraction as string
+					3:		contours_operations[ lbx_contours.selection ] = #intersection as string
+				)
+				core.actualiser etape:1
+				actualiser ()
+			)
+			on btn_contours_monter picked obj do
+			(
+				max modify mode
+				local selecBack = copy lbx_contours.selection
+				ajouter_contour	obj
+				actualiser ()
+				lbx_contours.selection = selecBack + 1	
+			)
+			on btn_contours_descendre pressed do
+			(
+				if lbx_contours.selection > 0 do (
+					local selecBack = copy lbx_contours.selection
+					supprimer_contour	lbx_contours.selection
+					actualiser ()
+					lbx_contours.selection = selecBack - 1
+				)
 			)
 		)
 		
@@ -358,5 +403,3 @@
 						core.actualiser 	etape:2
 				)
 		)
-		
-	

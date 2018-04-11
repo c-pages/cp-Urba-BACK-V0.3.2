@@ -51,20 +51,29 @@ version:0
 		fn ajouter_relief			_node 	aActualiser:true	=(
 			format "\n"
 			debug "		###	ajouter_relief	###"
--- 			debug "aActualiser" var:aActualiser
 			if appendIfUnique this.reliefs_nodes	 _node and aActualiser do (
 				this.rollout_global.actualiser ()
 				actualiser ()
 			)
 		)
+		fn supprimer_relief	_id=(
+			deleteItem this.reliefs_nodes 	_id
+			actualiser ()
+		)
 		fn ajouter_contour		_node 	aActualiser:true	=(
 			format "\n"
 			debug "		###	ajouter_contour	###"
--- 			debug "aActualiser" var:aActualiser
+			
 			if appendIfUnique this.contours_nodes 	_node and aActualiser  do (
+				append		this.contours_operations	( #addition as string )
 				this.rollout_global.actualiser ()
 				actualiser ()
 			)
+		)
+		fn supprimer_contour	_id	=(
+			deleteItem this.contours_nodes 	_id
+			deleteItem this.contours_operations 	_id
+			actualiser ()
 		)
 		
 		

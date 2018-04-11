@@ -31,7 +31,8 @@ struct	str_terrain_node_core	(
 		mgr_datas						=	str_datasToString (),
 		
 	----- les points stockés pour manip -----
-		m_pts_contours	 			=	#(),		---- les listes de points issues des points des splines contours, cleannés et dans le bon sens. ------------
+-- 		m_pts_contours	 			=	#(),		---- les listes de points issues des points des splines contours, cleannés et dans le bon sens. ------------
+		m_ndRoot_contour			=	undefined,
 		m_pts_faces					=	#(),		---- les listes de points des faces de base. ------------
 		m_pts_quadrillages			=	#(),		---- les positions des points des faces une fois les quadrillage fait et cleanné .------------
 		m_pts_aligner_auShapes	=	#(),		----.------------
@@ -212,25 +213,32 @@ struct	str_terrain_node_core	(
 			
 			local result = #([0,0,0],[0,0,0])
 			
-			local pts_contour = deepCopy m_pts_contours	---	get_contour_pts ()
+-- 			local pts_contour = deepCopy m_pts_contours	---	get_contour_pts ()
 			
 			--- on replace dans 
 			local minX = minY 	= minZ =1e10
 			local maxX = maxY 	= maxZ = -1e10
 			
-			for pts_face in pts_contour do 
-				for pt in pts_face do (
+			for shp_node in m_plug.contours_nodes do (
+				
+				for id_spline in 1 to numSplines shp_node do (
 					
-					pt *= m_plug.transformation
 					
-					if pt.x < minX 		do minX = pt.x 
-					if pt.y < minY 	do minY = pt.y
-					if pt.z < minZ 		do minZ = pt.z 
-					if pt.x > maxX 	do maxX = pt.x 
-					if pt.y > maxY 	do maxY = pt.y 
-					if pt.z > maxZ 	do maxZ = pt.z 
+					for id_pt in 1 to numKnots shp_node	id_spline	do (
+						
+						local pt = getKnotPoint	shp_node	id_spline		id_pt
+						
+						pt *= m_plug.transformation
+						
+						if pt.x < minX 		do minX = pt.x 
+						if pt.y < minY 	do minY = pt.y
+						if pt.z < minZ 		do minZ = pt.z 
+						if pt.x > maxX 	do maxX = pt.x 
+						if pt.y > maxY 	do maxY = pt.y 
+						if pt.z > maxZ 	do maxZ = pt.z 
+					)
 				)
-			
+			)
 -- 			debug "get_BB_contour ?!?"
 			result = #([minX,minY,minZ],[maxX,maxY,maxZ])
 -- 				
@@ -370,21 +378,43 @@ struct	str_terrain_node_core	(
 		
 		
 	---------  Actualisations de l'objet ----------------------------------------------
-		fn actualiser_pts_contours 		=(
--- 			debug "	(1-1)	actualiser_pts_contours"
-			---- maj des points -------------
-			m_pts_contours =#()			
--- 			debug "	---->		m_plug.contours_nodes" var:m_plug.contours_nodes
-			if m_plug.contours_nodes.count > 0 do 
-				for 	contour_node in m_plug.contours_nodes  where contour_node != undefined and not isdeleted contour_node do
-					m_pts_contours	+= 	( mgr_shapes.interpoler_pts_from_shape		contour_node  )
--- 			debug "	---->		m_pts_contours" var:m_pts_contours
+		fn actualiser_noeuds_boolleens 		=(
+
+			m_ndRoot_contour			=		mgr_shapes.creer_noeud_hierarchie 	nom:"root"	
+			
+			if m_plug.contours_nodes.count > 0 do (
+				
+				for 	i = 1 to	m_plug.contours_nodes.count  where m_plug.contours_nodes[ i ] != undefined and not isdeleted m_plug.contours_nodes[ i ] do (
+					local contour_node 	= 	m_plug.contours_nodes[i]
+					local nds_contours 	=	mgr_shapes.get_noeuds_from_shape			contour_node		
+					for nd_contour in nds_contours do (
+						
+						debug "---------------------------------------------------------------------------------------"
+						debug (  "integration nd_contour	" + i as string )
+						debug "---------------------------------------------------------------------------------------"
+						mgr_shapes.integrer_nd_dans_hierarchie		m_ndRoot_contour		nd_contour 		m_plug.contours_operations[i]	
+						debug "---------------------------------------------------------------------------------------"
+						mgr_shapes.format_noeud		m_ndRoot_contour
+						debug "---------------------------------------------------------------------------------------"
+					)
+				)
+			)
+			debug "--------> m_ndRoot_contour	" var:m_ndRoot_contour
+			debug "--------> m_ndRoot_contour.enfants	" var:m_ndRoot_contour.enfants	param:#nom
+			
+			
 		),
 		
 		fn actualiser_pts_faces =(
 -- 			debug "	(1-2)	actualiser_pts_faces"
-			m_pts_faces = mgr_shapes.creer_hierarchie_booleens		m_pts_contours
 			
+			
+			
+			
+			
+			m_pts_faces = mgr_shapes.get_pts_from_hierachie		m_ndRoot_contour
+			
+			debug "--------> m_pts_faces	" var:m_pts_faces
 			/* ----- DEBUG-------------------
 			sp = splineShape name:(Uniquename "m_pts_faces ")
 			for j in 1 to m_pts_faces.count do (
@@ -569,16 +599,16 @@ struct	str_terrain_node_core	(
 				
 				
 				--- on verifie si on doit changer l'etape ---------------------------
-				if 	m_pts_contours.count == 0 or m_pts_faces.count == 0 or m_pts_quadrillages.count == 0 do
+				if 	m_noeuds_contours == undefined or m_noeuds_contours.enfants.count > 0 or m_pts_faces.count == 0 or m_pts_quadrillages.count == 0 do
 					etape = 1
 		
 		
-				
+				----------- ( 1 ) les points de la geometrie de base ----------------
 				if etape <= 1 do (
 					local chrono_temp = timeStamp ()
 					local chrono_temp_2 = timeStamp ()
 					------ 	(1-1)	creer les pts contours de base -----------------------
-					actualiser_pts_contours ()
+					actualiser_noeuds_boolleens ()
 					chrono_1_1 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)
 					local chrono_temp = timeStamp ()
 					------	(1-2)	et creer les points des faces de base -------------------
@@ -586,6 +616,7 @@ struct	str_terrain_node_core	(
 					chrono_1_2 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)
 					chrono_1 = (  ((timeStamp ()) - chrono_temp_2 ) / 1000.0)
 				)
+				
 				
 				------	(2)	creer le quadrillage  ----------------------------------
 				local chrono_2_1 =affichage_tpsVide
@@ -601,11 +632,12 @@ struct	str_terrain_node_core	(
 					chrono_2_1	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)					
 					local chrono_temp = timeStamp ()
 					
-					actualiser_pts_quadrillages ()
+-- 					actualiser_pts_quadrillages ()
 					
 					chrono_2_2	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)
 				)
 				
+				etape = 10
 				------	(3)	creer la projection  -----------------------------------
 				local chrono_3 =affichage_tpsVide
 				if etape <= 3 do (
@@ -633,7 +665,7 @@ struct	str_terrain_node_core	(
 				if debug_detail do (
 					debug ("----------------------------------------------------------------------------------------" )
 					debug ("---	(1)			Analyse des contours : 					" +  chrono_1	as string  )
-					debug ("---	(1)			*	actualiser_pts_contours : 			" +  chrono_1_1	as string  )
+					debug ("---	(1)			*	actualiser_noeuds_boolleens : 			" +  chrono_1_1	as string  )
 					debug ("---	(1)			*	actualiser_pts_faces : 				" +  chrono_1_2	as string  )
 					debug ("---	(2-1)		Construction de la géometrie de base : 	" +  chrono_2_1	as string  )
 					debug ("---	(2-2)		Quadrillage : 							" +  chrono_2_2	as string  )
