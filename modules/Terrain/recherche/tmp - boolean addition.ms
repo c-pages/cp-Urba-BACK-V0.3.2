@@ -669,10 +669,14 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 
 			struct	str_intersection	(
 				pos,
+				
 				nd_operateur,
 				id_operateur 	=	0,
 				nd_base,
-				id_base 	=	0
+				id_base 	=	0,
+				
+				nd,
+				id_pt=0
 			)
 			
 			--- on renvois une liste de liste de shapes ---------
@@ -725,23 +729,6 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			
 			
 			
-			------ ( 1 )	Les conditions initiales	----------------------------------------------------------------------------------------------------------------------------------------------
-			--------------- ( a ) Addition	:		-	le pt de la base de l'intersection est a gauche		----->	on CHANGE : on prend la base comme nd courant
-			---------------							-	le pt de la base de l'intersection est a droite		----->	on RESTE sur l'operateur
-			---------------
-			--------------- ( b ) Soustraction	:	-	le pt de la base de l'intersection est a gauche		----->	on RESTE sur l'operateur
-			---------------							-	le pt de la base de l'intersection est a droite		----->	on CHANGE : on prend la base comme nd courant
-			---------------
-			--------------- ( c ) Intersection	:	-	le pt de la base de l'intersection est a gauche		----->	on RESTE sur l'operateur
-			---------------							-	le pt de la base de l'intersection est a droite		----->	on CHANGE : on prend la base comme nd courant
-			---------------
-			---------------	DONC : le cas particulier c'est 'soustraction'
-			
-			
-			local intersection_enTrtmt	=	intersections_aTraiter[1]
-			local nd_initial						=	nds_operateurs[1]
-			
-			
 			
 			
 			
@@ -757,18 +744,62 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			local sauvetage 				=	0
 			local sauvetage_max 		= 200
 			while il_reste_des_points	and sauvetage < sauvetage_max do (
+				
 				sauvetage += 1
-				format "\n\n\n\n\n"
-				format "\n\n\n\n\n"
-				format "\n\n\n\n\n"
+				format "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
 				debug "------------------------------------------------- TANT QU'IL RESTE DES POINTS à TRAITER	--------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 				
 				local result_pts = #()
+				/* 
+				--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+				---------------	( A )	On reset conditions initiales	----------------------------------------------------------------------------------------------------------------------------------------------
+				--------------- ( a ) Addition	:		-	le pt de la base de l'intersection est a gauche		----->	on CHANGE : on prend la base comme nd courant
+				---------------							-	le pt de la base de l'intersection est a droite		----->	on RESTE sur l'operateur
+				---------------
+				--------------- ( b ) Soustraction	:	-	le pt de la base de l'intersection est a gauche		----->	on RESTE sur l'operateur
+				---------------							-	le pt de la base de l'intersection est a droite		----->	on CHANGE : on prend la base comme nd courant
+				---------------
+				--------------- ( c ) Intersection	:	-	le pt de la base de l'intersection est a gauche		----->	on RESTE sur l'operateur
+				---------------							-	le pt de la base de l'intersection est a droite		----->	on CHANGE : on prend la base comme nd courant
+				--------------- 			
+				--------------- donc :		if 'addition' then	if est_aGauche 		do CHANGE
+				--------------- 			else				if not est_aGauche 	do CHANGE
+				--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+				*/
+				---- Le point demarrage, la premiere intersection de la liste --------------------
+				local intersection_aTraiter		=	intersections_total[ ( intersections_aTraiter as array )[1] ]
+				
+				---- les noeuds initiaux -------------------------
+				local nd_initial						=	nds_operateurs[1]
 				
 				
-				------ ( A )	On reset conditions initiales	----------------------------------------------------------------------------------------------------------------------------------------------
+				local id_pt_initial					=	intersection_aTraiter.id_operateur
+				
+				---- on regarde la position du point d'intersection pour voir si on inverse les noeuds --------------------
+				local pt_test_intersection		=	intersection_aTraiter.pos
+				local pt_test_operateur		= 	intersection_aTraiter.nd_operateur.pts[ intersection_aTraiter.id_operateur ]
+				local pt_test_base				= 	intersection_aTraiter.nd_base.pts[ intersection_aTraiter.id_base ]
+				if  est_aGauche		pt_test_operateur		pt_test_intersection 		pt_test_base	do (
+					nd_initial					=	intersection_aTraiter.nd_base
+					
+					id_pt_initial					=	intersections_aTraiter.id_base				
+				)
+				
+				
+				
+				local sens = 1
+				
+				
+				
 				
 				------ ( B )	On initialise les contitions courantes	----------------------------------------------------------------------------------------------------------------------------------------------
+				--- le point courant initial	----------
+				local nd_courant		=	nd_initial
+				local nds_aTester	= 	if est_nd_deBase	nd_courant then 	nds_operateurs else		nds_bases
+				
+				local id_pt_courant	=	id_pt_initial
+				local pt_courant		=	intersection_aTraiter.pos
+				
 				
 				------ ( C ) 	Tant qu'on est pas retourné à notre point de départ	----------------------------------------------------------------------------------------------------------------
 				local on_a_fini_laBoucle = false
@@ -781,12 +812,28 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					
 					
 					----------- ( 1 )	Le point suivant	--------------------------------------------	
+					local id_pt_svnt	= boucler	nd_courant.pts	 ( id_pt_courant + sens ) 
+					local pt_suivant	=	nd_courant.pts[ id_pt_svnt ]
 					
 					
 					
 					
 					----------- ( 2 )	intersection entre pt courant et pt suivant --------------------------------------------	
-					
+					local intersections = #()
+					for nd in nds_aTester do (
+						
+						--- on cherche si intersection avec l'autres shapes ----
+						for j = 1 to nd.pts.count do (
+							
+							local pt_autre			= 	nd.pts[ j ]
+							local j_svt				=	boucler 	nd.pts		( j + 1 )
+							local pt_autre_svt	= 	nd.pts[ j_svt ]
+							
+							local intersection = get_intersection_vecteurs		pt_courant   pt_suivant		pt_autre		pt_autre_svt 
+							if intersection != undefined and distance intersection 	pt_courant > .001 do
+								append intersections ( str_intersection 	nd:nd			pos:intersection		id_pt:j 	)	
+						)
+					)
 					-----------------------	 ( 2.1 )	Si on a une intersection,  on passe au point d'intersection et on change de noeud  --------------------------------------------	
 					----------------------------------> changement de noeud ----------------------------------
 					----------------------------------		( a ) Addition	:			-	On inverse juste les noeuds
