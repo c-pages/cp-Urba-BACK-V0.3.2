@@ -377,7 +377,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			
 		),
 		fn changer_sens 					_pts 		=(
--- 			debug "changer_sens"
+			debug "changer_sens"
 			local result =#()
 			for i= _pts.count to 1 by -1 do 
 				append result 	_pts[i]
@@ -693,9 +693,12 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			nds_operateurs	=	#( copy _nd_operateur ) 	+	( deepcopy ( _nd_operateur.get_descendance ()	)	)
 			
 			--- si on sousrtrait, on inverse les pleins et creux	-------------
-			if operation == #soustraction do 
-				for nd in nds_operateurs	do
-					nd.en_creux	=	not  nd.en_creux	
+			if operation == #soustraction do (
+-- 				for i = 1 to nds_bases.count 	do
+-- 					nds_bases[i].en_creux	=	not  nds_bases[i].en_creux	
+				for i = 1 to nds_operateurs.count 	do
+					nds_operateurs[i].en_creux	=	not  nds_operateurs[i].en_creux	
+			)
 			
 			
 			--- on retourne les pts des noeuds en creux -------------------
@@ -705,9 +708,10 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			--- operateurs ----
 			for i = 1 to nds_operateurs.count where nds_operateurs[i].en_creux do 
 					nds_operateurs[i].pts = changer_sens 	nds_operateurs[i].pts 
-				
-				
 			
+			
+			debug "nds_bases" var:nds_bases				param:#nom
+			debug "nds_operateurs" var:nds_operateurs	param:#nom
 			
 			
 			
@@ -745,12 +749,6 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			
 			
 			
-			debug "nds_bases" var:nds_bases param:#nom
-			debug "nds_operateurs" var:nds_operateurs param:#nom
-			
-			
-			
-			
 			
 			
 			
@@ -773,21 +771,32 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				
 				
 				---- les noeuds initiaux -------------------------
-				local nd_initial						=	intersection_aTraiter.nd_operateur
-				local id_pt_initial					=	intersection_aTraiter.id_operateur
+				local nd_initial						=	intersection_aTraiter.nd_base
+				local id_pt_initial					=	intersection_aTraiter.id_base
 				
 				---- on regarde la position du point d'intersection pour voir si on inverse les noeuds --------------------
 				local pt_test_intersection		=	intersection_aTraiter.pos
 				local pt_test_operateur		= 	intersection_aTraiter.nd_operateur.pts[ intersection_aTraiter.id_operateur ]
 				local pt_test_base				= 	intersection_aTraiter.nd_base.pts[ intersection_aTraiter.id_base ]
 				
--- 				if operation == #addition then
-				if  not est_aGauche		pt_test_base		pt_test_intersection 	pt_test_operateur		do (
-					nd_initial					=	intersection_aTraiter.nd_base
-					id_pt_initial					=	intersection_aTraiter.id_base
+				if operation == #addition then
+					if  est_aGauche		pt_test_base		pt_test_intersection 	pt_test_operateur		do (
+						nd_initial					=	intersection_aTraiter.nd_operateur
+						id_pt_initial					=	intersection_aTraiter.id_operateur
+						
+						debug "On inverse les noeuds initiaux"
+					)
 					
-					debug "On inverse les noeuds initiaux"
-				)
+				else if operation == #soustraction then
+					if not  est_aGauche		pt_test_base		pt_test_intersection 	pt_test_operateur		do (
+						nd_initial					=	intersection_aTraiter.nd_operateur
+						id_pt_initial					=	intersection_aTraiter.id_operateur
+						
+						debug "On inverse les noeuds initiaux"
+					)
+					
+					
+					
 -- 				else 
 -- 					if  est_aGauche		pt_test_base		pt_test_intersection 	pt_test_operateur		do (
 -- 						nd_initial					=	intersection_aTraiter.nd_base
@@ -888,6 +897,11 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 						----------------------------------		
 						----------------------------------		 ( c ) Intersection	:	-	On inverse juste les noeuds
 						debug "---->	Intersection !"
+						
+-- 						
+-- 						if est_aGauche 
+						
+						
 						--- on change de noeud courant	------
 						nd_courant		=	intersection.nd
 						if est_nd_deBase		nd_courant 	then (
@@ -1698,6 +1712,7 @@ nd_B.ajouter_enfant		nd_B2
 
 addition = #()
 addition = mgr_tmp.operation_booleenne		#addition		  nd_A nd_B
+-- addition = mgr_tmp.operation_booleenne		#addition		  nd_B nd_A
 -- addition = mgr_tmp.operation_booleenne		#soustraction		   	nd_B  nd_A
 -- addition = mgr_tmp.operation_booleenne		#soustraction		   	nd_A  nd_B
 -- addition = mgr_tmp.operation_booleenne		#intersection		nd_B  nd_A
