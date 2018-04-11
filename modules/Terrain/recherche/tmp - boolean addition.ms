@@ -787,23 +787,13 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 						debug "On inverse les noeuds initiaux"
 					)
 					
-				else if operation == #soustraction then
-					if not  est_aGauche		pt_test_base		pt_test_intersection 	pt_test_operateur		do (
+				else 	if not  est_aGauche		pt_test_base		pt_test_intersection 	pt_test_operateur		do (
 						nd_initial					=	intersection_aTraiter.nd_operateur
 						id_pt_initial					=	intersection_aTraiter.id_operateur
 						
 						debug "On inverse les noeuds initiaux"
 					)
 					
-					
-					
--- 				else 
--- 					if  est_aGauche		pt_test_base		pt_test_intersection 	pt_test_operateur		do (
--- 						nd_initial					=	intersection_aTraiter.nd_base
--- 						id_pt_initial					=	intersection_aTraiter.id_base
--- 						
--- 						debug "On inverse les noeuds initiaux"
--- 					)
 					
 					
 				
@@ -1711,11 +1701,11 @@ nd_B.ajouter_enfant		nd_B1
 nd_B.ajouter_enfant		nd_B2
 
 addition = #()
-addition = mgr_tmp.operation_booleenne		#addition		  nd_A nd_B
+-- addition = mgr_tmp.operation_booleenne		#addition		  nd_A nd_B
 -- addition = mgr_tmp.operation_booleenne		#addition		  nd_B nd_A
 -- addition = mgr_tmp.operation_booleenne		#soustraction		   	nd_B  nd_A
 -- addition = mgr_tmp.operation_booleenne		#soustraction		   	nd_A  nd_B
--- addition = mgr_tmp.operation_booleenne		#intersection		nd_B  nd_A
+addition = mgr_tmp.operation_booleenne		#intersection		  nd_A	nd_B
 addition.count
 
 -- (
