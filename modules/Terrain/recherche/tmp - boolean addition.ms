@@ -654,350 +654,123 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 		
 		
 		
+		nds_bases			,--=	#( copy _nd_base ) 		+	( deepcopy ( _nd_base.get_descendance ()	)	)
+		nds_operateurs	,--=	#( copy _nd_operateur ) 	+	( deepcopy ( _nd_operateur.get_descendance ()	)	)
 		------------------ Opérations booleennes -----------------------------------
-		---- ( A + B ) --------------------------------
-		fn addition_booleenne	_shp_1	_shp_2 =(
-			
-			debug "addition_booleenne"
-			struct	str_intersection	(
-				pos,
-				id_pt_courant 	=	0,
-				id_pt_autre 	=	0
-			)
-			
-			---- les points à traiter	-------------
-			local pts_restant_shp1 =#{1.._shp_1.count}
-			local pts_restant_shp2 =#{1.._shp_2.count}	
-			
-			--- on retire les points se trouvant à l'interieur des shapes	--------		
-			local triangles_shp1	=	this.trianguler 	_shp_1
-			local triangles_shp2	=	this.trianguler 	_shp_2
-			for i in 1 to _shp_1.count do (
-				local pt = _shp_1[i]
-				if survol_triangles  	pt		triangles_shp2 do
-					pts_restant_shp1[i] = false
-			)
-			for i in 1 to _shp_2.count do (
-				local pt = _shp_2[i]
-				if survol_triangles  	pt		triangles_shp1 do
-					pts_restant_shp2[i] = false
-			)
-			
-			
-			
-			
-			
-			
-			local shp1				= deepcopy _shp_1
-			local shp2				= deepcopy _shp_2
-			
-			
-			local shp_courant	=	shp1
-			local shp_autre		=	shp2
-			local id_pt_courant	=	(pts_restant_shp1 as array )[1]
-			local pt_courant		=	shp_courant[ id_pt_courant ]
-			
-			local shp_initial 		=	shp_courant
-			local id_pt_initial		=	id_pt_courant
-			local pt_initial			=	pt_courant
-			local sens				=	1
-			
-			local shps_results 	=	#()			
-			
-			local sauvetage1 = 0
-			local sauvetage2 = 0s
-			local	il_reste_des_points =true
-			while	il_reste_des_points	and sauvetage1 < 20  do (
-				sauvetage1 += 1 
-				format "\n-------------  NOUVEAU SHAPE	----------------\n"
-				local shp_courant_result 		=	#(pt_courant)
-				local on_continue	= true
-				
-				while on_continue	and sauvetage2 < 100 do (
-					sauvetage2 += 1 
-					format "-----------------------------\n"
-					format "id_pt_courant : %\n"  id_pt_courant
-					format "shp_courant : %\n"  shp_courant
-					
-					commencement = true
-					
-					local id_pt_suivant 	=  id_pt_courant + sens
-					if id_pt_suivant 	> shp_courant.count do id_pt_suivant = 1
-					if id_pt_suivant 	< 1 do id_pt_suivant = shp_courant.count
-					local pt_suivant 		= shp_courant[ id_pt_suivant ]
-					
-						
-						
-					--- on cherche si intersection avec l'autres shapes ----
-					local intersections = #()
-					for j = 1 to shp_autre.count do (
-						
-						local pt_autre			= shp_autre[ j ]
-						local j_svt				=	j + sens
-						if j_svt > shp_autre.count  do j_svt = j_svt - shp_autre.count
-						if j_svt < 1   do j_svt = j_svt + shp_autre.count
-						
-						local pt_autre_svt	= shp_autre[ j_svt ]
-						
-						local intersection = get_intersection_vecteurs		pt_courant   pt_suivant		pt_autre		pt_autre_svt 
-						if intersection != undefined and distance intersection 	pt_courant > .1 do
-							append intersections ( str_intersection pos:intersection		id_pt_courant:id_pt_courant 		id_pt_autre:j 	)
-					)
-					
-					
-					
-					if intersections.count > 0 then (
-						
-						---- on prend la premiere intersection, la plus proche --------
-						local distMin =	1e+10
-						local intersection 
-						for intersec in intersections do 
-							if distance pt_courant intersec.pos < distMin do (
-								intersection = intersec
-								distMin = distance pt_courant intersec.pos
-							)
-						
-						--- on change de shape ----------------
-						
-						if est_aGauche 	pt_courant 	pt_suivant 		shp_autre[ intersection.id_pt_autre ] then (
-							sens = 1 
-							id_pt_courant = intersection.id_pt_autre 
-						) else  (
-							sens = -1
-							id_pt_courant = intersection.id_pt_autre +1
-							
-						)
-						if comparer_tabs	shp_courant  shp1 then (
-							format "	--->	on est sur shp1, on passe sur shp2\n"
-							
-							shp_courant 	= 	shp2
-							shp_autre		=	shp1
-						) else (
-							format "	--->	on est sur shp2, on passe sur shp1\n"
-							shp_courant 	= 	shp1
-							shp_autre		=	shp2
-						)
-						
-						pt_courant = intersection.pos
-						
-					) else (
-						
-						format "	--->	point suivant\n"
-						---- point suivant ----------
-						id_pt_courant 	+=  sens
-						
-						if id_pt_courant 	> shp_courant.count do id_pt_courant = 1
-						if id_pt_courant 	< 1 do id_pt_courant = shp_courant.count
-						
-						pt_courant			=	shp_courant[ id_pt_courant ]
-						
-						---- on retire de la liste des points restant--------------
-						if comparer_tabs	shp_courant  shp1 then 
-							pts_restant_shp1[id_pt_courant] = false
-						else
-							pts_restant_shp2[id_pt_courant] = false
-						
-					)
-					
-					
-					if ( comparer_tabs	shp_initial 	shp_courant  and id_pt_courant == id_pt_initial and pt_courant == pt_initial ) then (
-						on_continue = false
-						format "	---------	FIN	------------\n"
-					) else (
-						--	on ajoute le point --
-						append shp_courant_result 	pt_courant
-					)
-					
-					format "-----------------------------\n"
-					
-				) --- fin while -------------------------------------------------
-				
-				
-				append 	shps_results	shp_courant_result
-				
-				if ( pts_restant_shp1 as array).count >0 then (
-					
-					id_pt_courant 		=	( pts_restant_shp1 as array)[1]
-					shp_courant 		= 	shp1
-					shp_autre			=	shp2
-					pt_courant			=	shp_courant[ id_pt_courant ]
-					
-				) else if ( pts_restant_shp2 as array).count >0 then (
-					id_pt_courant 		=	( pts_restant_shp2 as array)[1]
-					shp_courant 		= 	shp2
-					shp_autre			=	shp1
-					pt_courant			=	shp_courant[ id_pt_courant ]
-					
-				) else 	il_reste_des_points = false
-				
-				shp_initial 		=	shp_courant
-				pt_initial			=	pt_courant
-				id_pt_initial		=	id_pt_courant
-				sens				=	1
-				
-			) --- fin while il reste des points --------------------------------
-			
-			
-			shps_results
+		fn est_nd_deBase	_nd_aTester	=(
+			findItem	nds_bases		_nd_aTester != 0
 		),
-	
-		
-		
-
 		-------		3 operations :	#addition ( A + B ), #soustraction ( A - B ) et #intersection ( A | B ).	---------------------------
 		fn operation_booleenne		operation			_nd_base 			_nd_operateur			 =(
-			
-			
-			struct	str_intersection	(
-				pos,
-				noeud,
-				id_pt_courant 	=	0,
-				id_pt_autre 	=	0
-			)
-			
-			
 			
 			debug "operation_booleenne"
 			debug "type"	var:operation
 			
 
+			struct	str_intersection	(
+				pos,
+				nd_operateur,
+				id_operateur 	=	0,
+				nd_base,
+				id_base 	=	0
+			)
 			
 			--- on renvois une liste de liste de shapes ---------
 			local 	result_pts_shps = #()
 			
-			--- les noeux en jeux	---------------------
-			local nd_operateur	=	copy _nd_operateur											----	le noeud opérant	--------------
-			if operation == #soustraction do nd_operateur.en_creux	=	true
-			local nds_bases		=	#( copy _nd_base ) +	( deepcopy ( _nd_base.get_descendance ()	)	)----	les noeuds auxquels on applique l'opération -----------
 			
-		
-		
-		
-		
-			-----		les intersections  operateur <--> bases		 ------------------------
-			local intersections_total =#()
-		
-			for i in 1 to nd_operateur.pts.count do (
-				
-				local pt_ope 			= nd_operateur.pts[i]
-				local i_svt				= if i == nd_operateur.pts.count then 1 else  i + 1
-				local pt_ope_svt 	= nd_operateur.pts[ i_svt ]
-				
-				for nd_base in nds_bases do (
-					for j in 1 to nd_base.pts.count do (
-						
-						local pt_base 			= nd_base.pts[ j ]
-						local j_svt				= if j == nd_base.pts.count then 1 else  j + 1
-						local pt_base_svt 	= nd_base.pts[ j_svt ]
-						
-						local intersection_pos 	= get_intersection_vecteurs	pt_ope	pt_ope_svt		pt_base	pt_base_svt
-						if intersection_pos != undefined  do (
-							append intersections_total ( str_intersection 	noeud:nd_base			pos:intersection_pos		id_pt_courant:i 		id_pt_autre:j 	)
+			
+			-------  ( 0 )	les noeuds en jeux	----------------------------------------------------------------------------------------------------------------------------------------------------------
+			nds_bases			=	#( copy _nd_base ) 		+	( deepcopy ( _nd_base.get_descendance ()	)	)
+			nds_operateurs	=	#( copy _nd_operateur ) 	+	( deepcopy ( _nd_operateur.get_descendance ()	)	)
+			
+			--- on retourne les pts des noeuds en creux -------------------
+			if operation == #soustraction do 
+				for nd in nds_operateurs	do
+					nd.en_creux	=	not  nd_operateur.en_creux	
+			
+			
+			
+			
+			---------  ( 0 )		les intersections  operateur <--> bases		 ---------------------------------------------------------------------------------------------------------------------------
+			local intersections_total =#()		
+			for nd_ope in nds_operateurs do (
+				for i in 1 to nd_ope.pts.count do (
+					
+					local pt_ope 			= nd_ope.pts[i]
+					local i_svt				= if i == nd_ope.pts.count then 1 else  i + 1
+					local pt_ope_svt 	= nd_ope.pts[ i_svt ]
+					
+					for nd_base in nds_bases do (
+						for j in 1 to nd_base.pts.count do (
+							
+							local pt_base 			= nd_base.pts[ j ]
+							local j_svt				= if j == nd_base.pts.count then 1 else  j + 1
+							local pt_base_svt 	= nd_base.pts[ j_svt ]
+							
+							local intersection_pos 	= get_intersection_vecteurs	pt_ope	pt_ope_svt		pt_base	pt_base_svt
+							if intersection_pos != undefined  do (
+								append intersections_total ( str_intersection 	pos:					intersection_pos	\
+																								nd_operateur:		nd_ope				\
+																								id_operateur:		i 						\
+																								nd_base:			nd_base				\
+																								id_base:				i )
+							)
 						)
 					)
-				)
+				)			
 			)
+			local intersections_aTraiter	=#{1..intersections_total.count}
 			
-			local ids_intersections_aTraiter	=#{1..intersections_total.count}
 			
-								
+			
+			
+			------ ( 1 )	Les conditions initiales	----------------------------------------------------------------------------------------------------------------------------------------------
+			--------------- ( a ) Addition	:		-	le pt de la base de l'intersection est a gauche		----->	on CHANGE : on prend la base comme nd courant
+			---------------							-	le pt de la base de l'intersection est a droite		----->	on RESTE sur l'operateur
+			---------------
+			--------------- ( b ) Soustraction	:	-	le pt de la base de l'intersection est a gauche		----->	on RESTE sur l'operateur
+			---------------							-	le pt de la base de l'intersection est a droite		----->	on CHANGE : on prend la base comme nd courant
+			---------------
+			--------------- ( c ) Intersection	:	-	le pt de la base de l'intersection est a gauche		----->	on RESTE sur l'operateur
+			---------------							-	le pt de la base de l'intersection est a droite		----->	on CHANGE : on prend la base comme nd courant
+			---------------
+			---------------	DONC : le cas particulier c'est 'soustraction'
+			
+			
+			local intersection_enTrtmt	=	intersections_aTraiter[1]
+			local nd_initial						=	nds_operateurs[1]
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 			
 			---- tant qu'il reste des points à traiter	--------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- 					local	il_reste_des_points 	=	true
+			local	il_reste_des_points 	=	true
 			local sauvetage 				=	0
 			local sauvetage_max 		= 200
-			while ( ids_intersections_aTraiter as array ).count > 1	and sauvetage < sauvetage_max do (
+			while il_reste_des_points	and sauvetage < sauvetage_max do (
 				sauvetage += 1
 				format "\n\n\n\n\n"
 				format "\n\n\n\n\n"
 				format "\n\n\n\n\n"
 				debug "------------------------------------------------- TANT QU'IL RESTE DES POINTS à TRAITER	--------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 				
-				
-				---- on actualise les conditions initiales 	---------------------------------------------------------------------------------
-				local id_ptOperateur_aTraiter
-				local id_inter_aTraiter 				= ( ids_intersections_aTraiter as array )[1]
-				local intersection_aTraiter 		=  intersections_total[ id_inter_aTraiter ]
-				
-				debug "ids_intersections_aTraiter" var:ids_intersections_aTraiter
--- 				debug "intersections_total" var:intersections_total
-				
-				local nds_aTester	= 	nds_bases
-				local nd_initial			=	nd_operateur
-				
-				--- le sens	--------------
-				local sens			=	1				
-				if nd_initial.est_enCreux () do 	sens *= -1		
-				debug "DEBUT SENS" var:sens
-				
-				local pt_TMP				=	nd_initial.pts[ intersection_aTraiter.id_pt_courant ]
-				local id_pt_svnt_TMP	= boucler	nd_initial.pts	 ( intersection_aTraiter.id_pt_courant + sens ) 
-				local pt_suivant_TMP	=	nd_initial.pts[ id_pt_svnt_TMP ]
-				local pt_inter 				= 	intersection_aTraiter.noeud.pts[ intersection_aTraiter.id_pt_autre ]
-				
-				local id_pt_initial		=	intersection_aTraiter.id_pt_courant
-				
-				--- s'il faut on change de noeud -------
-				if  est_aGauche		pt_TMP		pt_suivant_TMP 		pt_inter	and not  intersection_aTraiter.noeud.en_creux	do (
-					
-					debug "###### ON CHANGE DE SHAPOE DES LE DEBUT "
-					debug "###### pt_TMP" var:pt_TMP
-					format "$point001.pos = %\n\n"		pt_TMP
-					debug "###### pt_suivant_TMP" var:pt_suivant_TMP
-					format "$point002.pos = %\n\n"		pt_suivant_TMP
-					debug "###### pt_inter" var:pt_inter
-					format "$point003.pos = %\n\n"		pt_inter
-					nd_initial		=	intersection_aTraiter.noeud
-					nds_aTester	= #(nd_operateur )
-					id_pt_initial		=	intersection_aTraiter.id_pt_autre
-					
-				)
-				
-				if nd_initial.est_enCreux () do 	sens *= -1		
-				
-				local shp_initial		=	nd_initial.pts
-				if nd_initial.est_enCreux () do  id_pt_initial		+= 1
-				local pt_initial			=	intersection_aTraiter.pos	--shp_initial[ id_pt_initial ]
+				local result_pts = #()
 				
 				
+				------ ( A )	On reset conditions initiales	----------------------------------------------------------------------------------------------------------------------------------------------
 				
+				------ ( B )	On initialise les contitions courantes	----------------------------------------------------------------------------------------------------------------------------------------------
 				
-				
-				---- on retire l'intersection des elmts a traiter ---------------
-				ids_intersections_aTraiter[ id_inter_aTraiter ] = false
-				
--- 				local sens = 1
--- 				if operation == #soustraction do
-					
-				
-				debug "pt_initial"	var:pt_initial
-				
-				local result_pts	=#()
-				
-				
-				------------- on definie les elements courant -----------------------------------
-				local nd_courant			=	nd_initial
-				local shp_courant		=	nd_courant.pts
-				local id_pt_courant		=	id_pt_initial
-				local pt_courant			=	pt_initial	--	shp_courant[ id_pt_courant ]
-				
-				---- on ajoute ou pas le point aux resultats -------------
-				append	result_pts		pt_courant
-				
-				
--- 				debug "sens	est_enCreux" var:sens
-			
--- 					sens *= -1
--- 				
--- 				debug "sens	est_aGauche" var:sens
-				/* if 	est_aGauche	intersection_aTraiter.noeud.pts[ intersection_aTraiter.id_pt_autre ]		pt_courant		pt_suivant_TMP do 
-					sens *= -1 */
-					
-				
--- 				if nd_courant.est_enCreux () or 	est_aGauche	intersection_aTraiter.noeud.pts[ intersection_aTraiter.id_pt_autre ]		pt_courant		pt_suivant_TMP do 
--- 					sens *= -1
-				
-				---- tant qu'on a pas fini la boucle	----------------------------------------------------------------------------------------------------------------
+				------ ( C ) 	Tant qu'on est pas retourné à notre point de départ	----------------------------------------------------------------------------------------------------------------
 				local on_a_fini_laBoucle = false
 				while not on_a_fini_laBoucle  and sauvetage < sauvetage_max 	do (
 					format "\n\n"
@@ -1006,153 +779,32 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					--- SAUVETAGE	----
 					sauvetage+= 1
 					
-			
-					--- le point suivant	----
-					local id_pt_svnt	= boucler	shp_courant	 ( id_pt_courant + sens ) 
-					local pt_suivant	=	shp_courant[ id_pt_svnt ]
 					
-					debug "nd_courant" 		var:nd_courant.nom
-					debug "nds_aTester" 		var:nds_aTester		param:#nom
-					debug "id_pt_courant" 	var:id_pt_courant
-					debug "pt_courant" 		var:pt_courant
--- 							debug "->>>>>>> ndx_aPlacer" var:ndx_aPlacer		param:#nom
--- 					debug "->>>>>>> ids_pts_aTraiter" var:ndx_aPlacer		param:#ids_pts_aTraiter
-					
-					debug "id_pt_svnt" var:id_pt_svnt
-					
--- 					debug "-------------------->	result_pts_shps		--->" var:result_pts_shps
--- 					debug "-------------------->	result_pts			--->" var:result_pts
-					
-				
--- 					debug "sens"	var:sens
-				
-				
-					------------------------ on teste les intersection avec les autres noeuds	------------------------------------------------
-					local intersections = #()
-					for nd in nds_aTester do (
-						
-						--- on cherche si intersection avec l'autres shapes ----
-						for j = 1 to nd.pts.count do (
-							
-							local pt_autre			= 	nd.pts[ j ]
-							local j_svt				=	boucler 	nd.pts		( j + 1 )
-							local pt_autre_svt	= 	nd.pts[ j_svt ]
-							
-							local intersection = get_intersection_vecteurs		pt_courant   pt_suivant		pt_autre		pt_autre_svt 
-							if intersection != undefined and distance intersection 	pt_courant > .001 do
-								append intersections ( str_intersection 	noeud:nd			pos:intersection		id_pt_courant:id_pt_courant 		id_pt_autre:j 	)
-						)
-					)
-					
-					
-					
--- 					debug "---->	# intersections#" var:intersections
-					
-					------------------------   Soit on a pas d'intersection sur ce segment	----------------------------------------------------
-					if intersections.count ==	0	then (
-						
-						--- on passe au POINT SUIVANT ----
-						id_pt_courant	=	id_pt_svnt
-						pt_courant		=	pt_suivant
-						
-						
-						--	on ajoute le point --
-						if operation != #intersection or   point_est_dansShape 	pt_courant  	_nd_operateur.pts do
-							append result_pts 	( copy pt_courant )
-						
-					------------------------   Soit on en a et on choisi la plus proche du pt courant	-------------------------------------------		
-					) else  (
-						
-						---- on prend la premiere intersection, la plus proche --------
-						local distMin =	1e+10
-						local intersection 
--- 						debug "intersections" var:intersections
-						for intersec in intersections do 
-							if distance pt_courant intersec.pos < distMin do (
-								intersection = intersec
-								distMin = distance pt_courant 	intersec.pos
-							)
-						
-						
-						debug "---->	# intersection #" var:intersection
-						
-						--- on bascule sur l'autre shape 	-------------------------------------------------
-						local nd_intersec	=	intersection.noeud
-						
-						--- on change de noeud courant	------
-						if nd_courant == 	nd_operateur then (
-							debug "	--->	on est sur l'operateur, on passe sur une base."
-							nd_courant		=	nd_intersec
-							nds_aTester	=	#( nd_operateur )
-						) else (
-							debug "	--->	on est sur une base, on bascule sur l'operateur."
-							nd_courant		=	nd_intersec
-							nds_aTester	=	nds_bases								
-						)
-						
-						
-						
-						
-						--- le sens ---------
-						sens = 1						
-						if  nd_courant.est_enCreux() 	do
-							sens = -1			
-						
-								
-						local pt_inter = 	intersection.noeud.pts[ intersection.id_pt_autre ]	
-						if  not est_aGauche		pt_courant		pt_suivant 		pt_inter	and intersection.noeud.en_creux	do 
-							sens = -1
-						
-						
-						debug "SENS	est_aGauche" var:sens
-						
-						debug "SENS	pt_courant" var:pt_courant		
-						debug "SENS	pt_suivant" var:pt_suivant		
-						debug "SENS	pt_inter" var:pt_inter		
-						debug "id_pt_autre " var:intersection.id_pt_autre 
-						
-						
-						
-						
-						
-						---- l'id du point courant  ---
-						id_pt_courant =  intersection.id_pt_autre 
-						if sens == -1 do id_pt_courant += 1
-						
-						debug "id_pt_courant " var:id_pt_courant
-						--- les point et shape courants ------
-						shp_courant	=	nd_courant.pts
-						pt_courant 	= intersection.pos
-						
-						--	on ajoute le point --
--- 									if operation != #intersection or  point_est_dansShape 	pt_courant  	_nd_operateur.pts do
-						append result_pts 	pt_courant
-						
-						
-						
-						-----  on valide si on est sur un point intersection ------------------
-						local  i = 1 
-						local trouve = false
-						while i <= intersections_total.count and not trouve do (
-							local inter = intersections_total[i]
-							if distance inter.pos  pt_courant  <  .001  do (
-								ids_intersections_aTraiter[ i ] = false
-								trouve = true
-							)
-							i+=1
-						)
-						
-						
-						
-					)
+					----------- ( 1 )	Le point suivant	--------------------------------------------	
 					
 					
 					
 					
+					----------- ( 2 )	intersection entre pt courant et pt suivant --------------------------------------------	
 					
-					--- on gère la fin de la boucle -------------------------------------
-					if distance	pt_courant  pt_initial < .001	then 
-						on_a_fini_laBoucle = true
+					-----------------------	 ( 2.1 )	Si on a une intersection,  on passe au point d'intersection et on change de noeud  --------------------------------------------	
+					----------------------------------> changement de noeud ----------------------------------
+					----------------------------------		( a ) Addition	:			-	On inverse juste les noeuds
+					----------------------------------		
+					----------------------------------		 ( b ) Soustraction	:	-	On inverse juste les noeuds
+					----------------------------------		
+					----------------------------------		 ( c ) Intersection	:	-	On inverse juste les noeuds
+					
+					
+					
+					
+					-----------------------	 ( 2.2 )	Si pas dintersection, on passe au point suivant --------------------------------------------	
+					
+					
+					
+					
+					----------- ( 3 )	sortie ? si on est retourné sur le point initial, on sort	--------------------------------------------	
+					
 					
 					
 				)	---- Fin -	tant qu'on a pas fini la boucle	------------------------------------------------------------------------------------------------------
@@ -1162,9 +814,10 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				---- on ajoute le shape obtenu -----------------------------------
 				append 	result_pts_shps	result_pts
 				
-				debug "BOUCLE--->"
-				debug "sauvetage--->" var:sauvetage
 				
+				---- test pour sortie ----------------------------------------------
+				if ( intersections_aTraiter as array).count ==0 do
+					il_reste_des_points = false
 				
 			)	---- Fin -	tant qu'il reste des points à traiter		--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 						
@@ -1713,8 +1366,6 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 		
 		
 		
-		
-		
 	------------------- INTERFACE -----------------------------------------------------------------------
 	public
 		
@@ -1883,31 +1534,35 @@ addition = mgr_tmp.operation_booleenne		#addition				nd_1  nd_2
 
 	 */
 shp_A = $LineA
+shp_A1 = $LineA1
 shp_B = $LineB
-shp_C = $LineC
-shp_D = $LineD
+shp_B1 = $LineB1
+shp_B2 = $LineB2
 
 pts_A = for i in 1 to numknots shp_A collect getknotPoint shp_A	1	i
+pts_A1 = for i in 1 to numknots shp_A1 collect getknotPoint shp_A1	1	i
 pts_B = for i in 1 to numknots shp_B collect  getknotPoint shp_B	1	i
-pts_C = for i in 1 to numknots shp_C collect getknotPoint shp_C	1	i
-pts_D = for i in 1 to numknots shp_D collect  getknotPoint shp_D	1	i
+pts_B1 = for i in 1 to numknots shp_B1 collect getknotPoint shp_B1	1	i
+pts_B2 = for i in 1 to numknots shp_B2 collect  getknotPoint shp_B2	1	i
 
 nd_A =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_A 	nom:"A"
+nd_A1 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_A1 	nom:"A1"
 nd_B =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_B 	nom:"B"
-nd_C =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_C 	nom:"C"
-nd_D =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_D 	nom:"D"
+nd_B1 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_B1 	nom:"B1"
+nd_B2 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_B2 	nom:"B2"
 
 (nd_B.get_descendance () ).count
 
-nd_B.ajouter_enfant	nd_C
-nd_B.ajouter_enfant	nd_D
+nd_A.ajouter_enfant		nd_A1
+nd_B.ajouter_enfant		nd_B1
+nd_B.ajouter_enfant		nd_B2
 
 
 addition = mgr_tmp.operation_booleenne		#addition		nd_B  nd_A
 -- addition = mgr_tmp.operation_booleenne		#soustraction		   	nd_B  nd_A
 -- addition = mgr_tmp.operation_booleenne		#intersection		nd_B  nd_A
 addition.count
-
+/* 
 -- (
 nd_C.est_enCreux()
 
@@ -1923,7 +1578,7 @@ for j in 1 to addition.count do (
 	select sp
 )
 -- )
-
+ */
 
 --  mgr_tmp.est_aGauche $point001.pos	$point002.pos	$point003.pos	
 
