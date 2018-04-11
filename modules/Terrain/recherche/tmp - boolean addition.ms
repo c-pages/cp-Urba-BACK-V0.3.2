@@ -865,14 +865,25 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			--- on renvois une liste de liste de shapes ---------
 			local 	result_pts_shps = #()
 			
-			case operation of (
-				#addition:	 		(
+-- 			case operation of (
+-- 				#addition:	 		(
 					
 					
 					--- les noeux en jeux	---------------------
+					local nds_total
 					local nd_operateur	=	_nd_operateur 													----	le noeud opérant	--------------
 					local nds_bases		=	#( _nd_base ) +	_nd_base.get_descendance ()		----	les noeuds auxquels on applique l'opération -----------
-					local nds_total		=	#( nd_operateur ) +	nds_bases
+				
+					case operation of (
+						#addition:	 		(
+							nds_total		=	#( nd_operateur ) +	nds_bases
+						)
+						#soustraction:	 	(
+							nds_total		=	nds_bases
+							_nd_operateur.en_creux = true
+						)
+						#intersection:	 		()
+					)
 					
 					
 					for nd in nds_total do (
@@ -882,7 +893,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 						for i in 1 to nd.pts.count do (
 							local pt = nd.pts[i]
 							for nd_aTesterSurvol	in nds_total where nd_aTesterSurvol != nd do 
-								if point_est_dansShape 	pt  	nd_aTesterSurvol.pts do
+								if point_est_dansShape 	pt  	nd_aTesterSurvol.pts and not nd.en_creux 	do
 									nd.valider_aTraiter	i
 						)
 					)
@@ -896,9 +907,9 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					local sauvetage_max 		= 200
 					while il_reste_des_points do (
 						
-								format "\n\n\n\n\n"
-								format "\n\n\n\n\n"
-								format "\n\n\n\n\n"
+						format "\n\n\n\n\n"
+						format "\n\n\n\n\n"
+						format "\n\n\n\n\n"
 						debug "------------------------------------------------- TANT QU'IL RESTE DES POINTS à TRAITER	--------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 						
 						local		id_pt_initial = 0
@@ -1020,8 +1031,6 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 								------------------------   Soit on a pas d'intersection sur ce segment	----------------------------------------------------
 								if intersections.count ==	0	then (
 									
-									
-									
 									--- on passe au point suivant ----
 									id_pt_courant	=	id_pt_svnt
 									pt_courant		=	pt_suivant
@@ -1029,13 +1038,12 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 									--- on valide le point courant si on est pas sur un point intersection ----
 									nd_courant.valider_aTraiter	id_pt_courant
 									
-									
 									--	on ajoute le point --
 									append result_pts 	( copy pt_courant )
 									
-								
 								------------------------   Soit on en a et on choisi la plus proche du pt courant	-------------------------------------------		
-								) else  (						
+								) else  (
+									
 									---- on prend la premiere intersection, la plus proche --------
 									local distMin =	1e+10
 									local intersection 
@@ -1051,43 +1059,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 									
 									--- on bascule sur l'autre shape 	-------------------------------------------------
 									local nd_intersec	=	intersection.noeud
-									/* 
-									---- le sens ---
-									if est_aGauche 	pt_courant 	pt_suivant 		nd_intersec.pts[ intersection.id_pt_autre ] 	then (
-										
-										debug "A GAUCHE"
-										sens = 1
-										if not 	nd_courant.est_enCreux() 	and 			nd_intersec.est_enCreux()  	do  	sens = -1
-										if  		nd_courant.est_enCreux() 	and not	nd_intersec.est_enCreux()  	do  	sens = -1
-										
-																							
-																							
-																							
-																							
-																							
-										
-									) else  (
-										
-										debug "A DROITE"
-										sens = 1 
--- 										if not 	nd_courant.est_enCreux() 	and 			nd_intersec.est_enCreux()  	do  	sens = -1
-										if  		nd_courant.est_enCreux() 		then  	sens = -1
-										
--- 										
--- 										if nd_intersec.est_enCreux()  and  nd_courant.est_enCreux() 	then 	(
--- 											debug "---->	PAS est_aGauche  et   est_enCreux"
--- 											sens = 1
--- 										)
--- 																						else		(
--- 											debug "---->	PAS est_aGauche  et PAS  est_enCreux"
--- 																							sens = -1
--- 																						) 
-									)
-									 */
--- 										debug "sens" var:sens
--- 										
--- 										sens			=	if nd_courant.est_enCreux () then -1 else 1
-										
+									
 									--- on change de noeud courant	------
 									if nd_courant == 	nd_operateur then (
 										debug "	--->	on est sur l'operateur, on passe sur une base."
@@ -1099,9 +1071,9 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 										nds_aTester	=	nds_bases								
 									)
 									
+									--- le sens ---------
 									sens = 1 
--- 									if not 	nd_courant.est_enCreux() 	and 			nd_intersec.est_enCreux()  	do  	sens = -1
-									if  		nd_courant.est_enCreux() 	/* and not	nd_intersec.est_enCreux()  */ 	then  	sens = -1
+									if  nd_courant.est_enCreux() 	then  	sens = -1
 									
 									---- l'id du point courant  ---
 									id_pt_courant =  intersection.id_pt_autre 
@@ -1116,15 +1088,6 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 									
 								)
 								
--- 								debug "FIN DE BOUCLE #	nd_initial == nd_courant ?"	var:(nd_initial == nd_courant)
--- 								debug "FIN DE BOUCLE #	nd_initial "	var:(nd_initial)
--- 								debug "FIN DE BOUCLE #	nd_courant "	var:( nd_courant)
--- 								
--- 								debug "FIN DE BOUCLE #	id_pt_courant == id_pt_initial ?"	var:(id_pt_courant == id_pt_initial)
--- 								debug "FIN DE BOUCLE #	id_pt_initial "	var:(id_pt_initial)
--- 								debug "FIN DE BOUCLE #	id_pt_courant "	var:( id_pt_courant)
-								
-								
 								--- on gère la fin de la boucle -------------------------------------
 								if nd_initial == nd_courant  and id_pt_courant == id_pt_initial then (
 									on_a_fini_laBoucle = true
@@ -1138,16 +1101,11 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 							append 	result_pts_shps	result_pts
 							
 							debug "BOUCLE--->"
-						)	---- Fin -	il reste des points à traiter		--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+						)
+						)	---- Fin -	tant qu'il reste des points à traiter		--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 						
 					
-					)
-				)
-				#soustraction:	 		(
-				)
-				#intersection:	 		(
-				)
-			)
+					
 			
 			result_pts_shps
 			
@@ -1842,6 +1800,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 clearlistener ()
 mgr_tmp = str_temp()
 
+/* 
 shp_1 = $Line001
 shp_2 = $Line002
 
@@ -1858,8 +1817,7 @@ addition = mgr_tmp.operation_booleenne		#addition				nd_1  nd_2
 
 
 
-/* 
-
+	 */
 shp_A = $LineA
 shp_B = $LineB
 shp_C = $LineC
@@ -1881,14 +1839,15 @@ nd_B.ajouter_enfant	nd_C
 nd_B.ajouter_enfant	nd_D
 
 
-addition = mgr_tmp.operation_booleenne		#addition				nd_B  nd_A
+-- addition = mgr_tmp.operation_booleenne		#addition		nd_B  nd_A
+addition = mgr_tmp.operation_booleenne		#soustraction		nd_B  nd_A
 addition.count
 
 -- (
 nd_C.est_enCreux()
 
 format "\n------->	addition : %\n\n"	addition
-	 */
+
 sp = splineShape name:"addition"
 for j in 1 to addition.count do (
 	addnewSpline sp
