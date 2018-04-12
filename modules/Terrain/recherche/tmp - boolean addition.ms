@@ -1,6 +1,6 @@
 
 struct 	str_temp	(	--struct str_terrain_outils_shape (
-		
+	
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
 		m_debug	=	true,
@@ -15,8 +15,9 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 		),
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		--- constantes---------
-		PRECISION_COURBE 		= 50,			--- en cm. ----
+		PRECISION_COURBE 			= 50,			--- en cm. ----
 		SEUIL_SUPERPOSITION  	= .01,
+		SAUVETAGE_MAX 			= 2000,
 		
 -- 	private
 	public --- DEBUG en est en private normalement ----
@@ -617,7 +618,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			local enfants_a_traiter	 = deepcopy _noeud.enfants
 			while enfants_a_traiter.count > 0 do (
 				
-				local shps_enfants_a_traiter	=	for enfant in enfants_a_traiter collect enfant.pts
+				local shps_enfants_a_traiter	=	for enfant in enfants_a_traiter collect ( enfant.get_pts() )
 				local infos_enfant_proche		=	get_shape_lePlusProche	pts_noeud		shps_enfants_a_traiter
 				local enfant_proche				=	 enfants_a_traiter[ infos_enfant_proche.id_shp ]
 				
@@ -668,8 +669,12 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 		-------		3 operations :	#addition ( A + B ), #soustraction ( A - B ) et #intersection ( A | B ).	---------------------------
 		fn operation_booleenne		operation			_nd_base 			_nd_operateur			 =(
 			
+			debug "-------------------------- operation_booleenne	--------------------------------------------"
 			debug "operation_booleenne"
 			debug "type"	var:operation
+			debug "_nd_base"	var:_nd_base
+			debug "_nd_operateur"	var:_nd_operateur
+			debug "-----------------------------------------------------------------------------------------------------------"
 			
 
 			struct	str_intersection	(
@@ -691,7 +696,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			
 			-------  ( 0 )	les noeuds en jeux	----------------------------------------------------------------------------------------------------------------------------------------------------------
 			nds_bases			=	#( copy _nd_base ) 		+	( deepcopy ( _nd_base.get_descendance ()	)	)
-			nds_operateurs	=	#( copy _nd_operateur ) 	+	( deepcopy ( _nd_operateur.get_descendance ()	)	)
+			nds_operateurs		=	#( copy _nd_operateur ) 	+	( deepcopy ( _nd_operateur.get_descendance ()	)	)
 			
 			--- si on sousrtrait, on inverse les pleins et creux des operateurs	-------------
 			if operation == #soustraction do (
@@ -705,11 +710,11 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			--- bases	--
 			for i = 1 to nds_bases.count where nds_bases[i].en_creux do (
 				debug "nds_bases[i]" var:nds_bases[i].nom
-				nds_bases[i].pts = changer_sens 	nds_bases[i].pts 
+				nds_bases[i].changer_sens ()
 			)
 			--- operateurs ----
 			for i = 1 to nds_operateurs.count where nds_operateurs[i].en_creux do 
-					nds_operateurs[i].pts = changer_sens 	nds_operateurs[i].pts 
+					nds_operateurs[i].changer_sens ()
 			
 			
 			
@@ -720,16 +725,16 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			sp = splineShape name:"bases"
 			for j in 1 to nds_bases.count do (
 				addnewSpline sp
-
-				for pt in nds_bases[j].pts do		addknot sp j #corner #curve  pt
+				local pts_tmp = nds_bases[j].get_pts ()
+				for pt in pts_tmp do		addknot sp j #corner #curve  pt
 				close sp j
 				updateShape sp
 			)
 			sp = splineShape name:"operateurs"
 			for j in 1 to nds_bases.count do (
 				addnewSpline sp
-
-				for pt in nds_operateurs[j].pts do		addknot sp j #corner #curve  pt
+				local pts_tmp = nds_operateurs[j].get_pts ()
+				for pt in pts_tmp do		addknot sp j #corner #curve  pt
 				close sp j
 				updateShape sp
 			)
@@ -747,18 +752,20 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			---------  ( 0 )		les intersections  operateur <--> bases		 ---------------------------------------------------------------------------------------------------------------------------
 			local intersections_total =#()		
 			for nd_ope in nds_operateurs do (
-				for i in 1 to nd_ope.pts.count do (
+				local pts_ope = nd_ope.get_pts ()
+				for i in 1 to pts_ope.count do (
 					
-					local pt_ope 			= nd_ope.pts[i]
-					local i_svt				= if i == nd_ope.pts.count then 1 else  i + 1
-					local pt_ope_svt 	= nd_ope.pts[ i_svt ]
+					local pt_ope 			= pts_ope[i]
+					local i_svt				= if i == pts_ope.count then 1 else  i + 1
+					local pt_ope_svt 	= pts_ope[ i_svt ]
 					
 					for nd_base in nds_bases do (
-						for j in 1 to nd_base.pts.count do (
+						local pts_base = nd_base.get_pts ()
+						for j in 1 to pts_base.count do (
 							
-							local pt_base 			= nd_base.pts[ j ]
-							local j_svt				= if j == nd_base.pts.count then 1 else  j + 1
-							local pt_base_svt 	= nd_base.pts[ j_svt ]
+							local pt_base 			= pts_base[ j ]
+							local j_svt				= if j == pts_base.count then 1 else  j + 1
+							local pt_base_svt 	= pts_base[ j_svt ]
 							
 							local intersection_pos 	= get_intersection_vecteurs	pt_ope	pt_ope_svt		pt_base	pt_base_svt
 							if intersection_pos != undefined  do (
@@ -785,10 +792,8 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			---- tant qu'il reste des points à traiter	--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			local	il_reste_des_points 	=	true
 			local sauvetage 				=	0
-			local sauvetage_max 		= 200
-			while il_reste_des_points	and sauvetage < sauvetage_max do (
-				
-				sauvetage += 1
+			local annuler = false
+			while il_reste_des_points	and not annuler do (
 				format "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
 				debug "------------------------------------------------- TANT QU'IL RESTE DES POINTS à TRAITER	--------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 				
@@ -805,8 +810,8 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				
 				---- on regarde la position du point d'intersection pour voir si on inverse les noeuds --------------------
 				local pt_test_intersection		=	intersection_aTraiter.pos
-				local pt_test_operateur		= 	intersection_aTraiter.nd_operateur.pts[ intersection_aTraiter.id_operateur ]
-				local pt_test_base				= 	intersection_aTraiter.nd_base.pts[ intersection_aTraiter.id_base ]
+				local pt_test_operateur		= ( intersection_aTraiter.nd_operateur.get_pts() )[ intersection_aTraiter.id_operateur ]
+				local pt_test_base				= ( intersection_aTraiter.nd_base.get_pts() )[ intersection_aTraiter.id_base ]
 				
 				if operation == #addition then
 					if  est_aGauche		pt_test_base		pt_test_intersection 	pt_test_operateur		do (
@@ -836,7 +841,8 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				------ ( B )	On initialise les contitions courantes	----------------------------------------------------------------------------------------------------------------------------------------------
 				--- le point courant initial	----------
 				local nd_courant		=	nd_initial
-				local nds_aTester	= 	if est_nd_deBase	nd_courant then 	nds_operateurs else		nds_bases
+				local shp_courant		= nd_courant.get_pts()
+				local nds_aTester		= 	if est_nd_deBase	nd_courant then 	nds_operateurs else		nds_bases
 				
 				local id_pt_courant	=	id_pt_initial
 				local pt_courant		=	pt_initial
@@ -857,7 +863,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				
 				------ ( C ) 	Tant qu'on est pas retourné à notre point de départ	----------------------------------------------------------------------------------------------------------------
 				local on_a_fini_laBoucle = false
-				while not on_a_fini_laBoucle  and sauvetage < sauvetage_max 	do (
+				while not on_a_fini_laBoucle  and not annuler	do (
 					format "\n\n"
 					debug "------------------------------------------------- tant qu'on a pas fini la boucle	----------------------------------------------------------------------------------------------------------------"
 					
@@ -869,13 +875,12 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					debug "pt_courant" 		var:pt_courant
 					
 					
-					--- SAUVETAGE	----
-					sauvetage+= 1
 					
 					
 					----------- ( 1 )	Le point suivant	--------------------------------------------	
-					local id_pt_svnt	= boucler	nd_courant.pts	 ( id_pt_courant + sens ) 
-					local pt_suivant	=	nd_courant.pts[ id_pt_svnt ]
+					
+					local id_pt_svnt	= boucler	shp_courant	 ( id_pt_courant + sens ) 
+					local pt_suivant	=	shp_courant[ id_pt_svnt ]
 					
 					
 					
@@ -886,12 +891,14 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					local intersection  = undefined
 					for nd in nds_aTester do (
 						
+						local pts_nd_aTester = nd.get_pts ()
+						
 						--- on cherche si intersection avec l'autres shapes ----
-						for j = 1 to nd.pts.count do (
+						for j = 1 to pts_nd_aTester.count do (
 							
-							local pt_autre			= 	nd.pts[ j ]
-							local j_svt				=		boucler 	nd.pts		( j + 1 )
-							local pt_autre_svt	= 	nd.pts[ j_svt ]
+							local pt_autre			= 	pts_nd_aTester[ j ]
+							local j_svt				=		boucler 	pts_nd_aTester		( j + 1 )
+							local pt_autre_svt	= 	pts_nd_aTester[ j_svt ]
 							
 							local intersec_pos = get_intersection_vecteurs		pt_courant   pt_suivant		pt_autre		pt_autre_svt 
 							if intersec_pos != undefined and distance 	intersec_pos 	pt_courant > SEUIL_SUPERPOSITION   do (
@@ -939,8 +946,9 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 						)
 						
 						-----  on valide si on est sur un point intersection ------------------
+						shp_courant		= nd_courant.get_pts()
 						id_pt_courant 	=  intersection.id_pt
-						pt_courant 	=	intersection.pos
+						pt_courant 		=	intersection.pos
 						
 						append result_pts 	pt_courant
 						local  i = 1 
@@ -969,7 +977,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 						
 						
 						--	on ajoute le point --
-						if operation != #intersection or   point_est_dansShape 	pt_courant  	_nd_operateur.pts do
+-- 						if operation != #intersection or   point_est_dansShape 	pt_courant  	( _nd_operateur.get_pts() ) do
 							append result_pts 	( copy pt_courant )
 						
 					)
@@ -984,8 +992,9 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					if distance	pt_courant  pt_initial < .001	then 
 						on_a_fini_laBoucle = true
 					
-					
-					
+					--- SAUVETAGE	----
+					sauvetage+= 1
+					if sauvetage > SAUVETAGE_MAX do annuler = true
 					
 				)	---- Fin -	tant qu'on a pas fini la boucle	------------------------------------------------------------------------------------------------------
 				
@@ -995,9 +1004,31 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				append 	result_pts_shps	result_pts
 				
 				
-				---- test pour sortie ----------------------------------------------
-				if ( ids_intersections_aTraiter as array).count ==0 do
+				
+				---------- SORTIES ---------------------------------------------
+				---- test pour sortie  correct	----------------------------------------------------------------------------------------------------
+				if ( ids_intersections_aTraiter as array).count ==0 do  (
 					il_reste_des_points = false
+					format "\n\n"
+					debug  "####################################################################################################################################"
+					debug  "								FIN DE L'OPERATION : OK"
+					debug  ( "								RESULTAT : " + result_pts_shps as string )
+					debug  "####################################################################################################################################"
+					format "\n\n"
+				
+					
+					
+				)
+				--- SAUVETAGE	----
+				sauvetage += 1
+				if sauvetage > SAUVETAGE_MAX do (
+					annuler = true
+					format "\n\n"
+					debug  "####################################################################################################################################"
+					debug ( "##########################	/!\	SAUVETAGE : " + sauvetage as string  + " boucles !	/!\	####################################################################")
+					debug  "####################################################################################################################################"
+					format "\n\n"
+				)
 				
 			)	---- Fin -	tant qu'il reste des points à traiter		--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 						
@@ -1015,46 +1046,41 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			---- noeud de la hierarchie ----------
 			struct str_terrain_booleen_node (
 				--------- membres ------------------------------------------------------------------
-				public
-					nom 				=	"",
-					pts 				=	#(),
+				private
 					
-					en_creux		=	false	,		---- si le noeud est en creu ou en plein
-					
+					mgr_shp,
+					pts 					=	#(),
 					
 					dist_auParent	=	0,
-					parent			=	undefined,
 				public
+					nom 				=	"",
+					
+					en_creux			=	true	,		---- si le noeud est en creu ou en plein
+					
+					
+				public
+					parent			=	undefined,
 					enfants			=	#(),
 					
 					
-					ids_pts_aTraiter	=	#{},
 					
 				--------- Fonctions ------------------------------------------------------------------
-				public
-					fn reset_aTraiter	=(
-						ids_pts_aTraiter			=	#{1..pts.count}
-					),
-					fn get_nd_aTraiter	=( 
-						local id_aTraiter = 0
-						if ( ids_pts_aTraiter as array ).count > 0 do
-							id_aTraiter	=	( ids_pts_aTraiter as array )[1]
-						id_aTraiter
-					),
-					fn valider_aTraiter	_id =			ids_pts_aTraiter[_id] = false,
-					
-					
+				public					
 					
 					
 					fn maj_enCreux			=(
-						if parent != undefined do
+						if parent != undefined then
 							en_creux = not parent.en_creux
+						else en_creux = false
+						
 						for enfant in enfants do
 							enfant.maj_enCreux ()
 					),
 					
 					fn est_enCreux	= en_creux,
-					
+					fn changer_sens =(
+						pts = mgr_shp.changer_sens pts
+						),
 					
 					fn set_parent			_ndParent 	= (
 						if parent != undefined and parent  != _ndParent do
@@ -1112,13 +1138,18 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					fn supprimer			=(
 						if parent	!=	undefined do
 							parent.retirer_enfant	this
-					)
+					),
+					
+					fn initialiser 	_ptr_shp = mgr_shp = _ptr_shp
+					
+					
 				
 			)--- fin du struct----
 			
 		
 			
 			local nv_noeud = str_terrain_booleen_node	()--	struct_prt:this
+			nv_noeud.initialiser	this
 			if pts != unsupplied and pts != undefined do (
 				if not est_sensPositif pts do 
 					pts = changer_sens pts
@@ -1165,7 +1196,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			local integration_reussie 	= false			
 			
 			
-			if _nd_courant.nom == "root" or  _nd_courant.nom == "porteur"	then (
+			if _nd_courant.nom == "root" or  _nd_courant.nom == "nd_provisoire"	then (
 				
 				debug"----> on est dans un noeud vide de pts"
 				
@@ -1183,17 +1214,17 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				if not integration_reussie do (
 					local enfants_a_ajouter = #()
 					for enfant in	_nd_courant.enfants  do 
-						if shape_estDans_shape	( _nd_aIntegrer.get_pts () )	enfant.pts   then
+						if shape_estDans_shape	( _nd_aIntegrer.get_pts () )	 ( enfant.get_pts() )   then
 							append enfants_a_ajouter enfant
 					
 					---- ajoute tout les enfants du noeud courant qui rentre dans le noeud à integrer.	-----------------
 					for enfant in enfants_a_ajouter do (
-						local distance_toParent = get_distance_shapes 	_nd_courant.pts	enfant.pts
+						local distance_toParent = get_distance_shapes 	( _nd_courant.get_pts() ) 	( enfant.get_pts() ) 
 						_nd_aIntegrer.ajouter_enfant 	enfant	distance_toParent:distance_toParent
 					)
 					
 					---- ajoute le noeud à integrer aux enfant du noeud courant.	-----------------
-					local distance_toParent = get_distance_shapes 	_nd_courant.pts	_nd_aIntegrer.pts
+					local distance_toParent = get_distance_shapes 	( _nd_courant.get_pts() )	( _nd_aIntegrer.get_pts () )
 					_nd_courant.ajouter_enfant 		_nd_aIntegrer	distance_toParent:distance_toParent	
 						debug " ?! ?! ?! ? 	cet enfant	?! ?! ?! ? "
 					
@@ -1204,7 +1235,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			) else (
 				
 				-------- en fonction de la position relative des shapes ------------------------------------------
-				local pos_relative = get_positionRelative_shapes 	_nd_courant.pts		_nd_aIntegrer.pts
+				local pos_relative = get_positionRelative_shapes 	( _nd_courant.get_pts() )	( _nd_aIntegrer.get_pts () )
 				
 				case pos_relative of (
 					
@@ -1225,24 +1256,6 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 												if result_integration do
 													integration_reussie = true
 											)
-											/* 
-											debug"----> on a interger dans un enfant ?" var:integration_reussie
-											
-											if not integration_reussie do (
-											
-											---- ajoute tout les enfants du noeud courant qui rentre dans le noeud à integrer.	-----------------
-											for enfant in enfants_a_ajouter do (
-												local distance_toParent = get_distance_shapes 	_nd_courant.pts	enfant.pts
-												_nd_aIntegrer.ajouter_enfant 	enfant	distance_toParent:distance_toParent
-											)
-											
-											---- ajoute le noeud à integrer aux enfant du noeud courant.	-----------------
-											local distance_toParent = get_distance_shapes 	_nd_courant.pts	_nd_aIntegrer.pts
-											_nd_courant.ajouter_enfant 		_nd_aIntegrer	distance_toParent:distance_toParent	
-											
-											--- fin du boulot -----------					
-											integration_reussie = true
-											 */
 									)
 									---------	B est un trou dans le vide.				----> 	A	--------------------------------	
 									#soustraction:	 		(
@@ -1293,7 +1306,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 											--- si il ne s'integre pas dans un enfant, on l'integre au neoud courant	----------------
 											if not integration_dans_enfant   do (
 												---- ajoute le noeud à integrer aux enfant du noeud courant.	-----------------
-												local distance_toParent = get_distance_shapes 	_nd_courant.pts	_nd_aIntegrer.pts
+												local distance_toParent = get_distance_shapes 	( _nd_courant.get_pts() )	( _nd_aIntegrer.get_pts () )
 												_nd_courant.ajouter_enfant 		_nd_aIntegrer	distance_toParent:distance_toParent
 											)
 											
@@ -1302,7 +1315,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 									---------	Il ne reste que B. 	----> 	B	--------------------------------	
 									#intersection:	 		(
 										--- on copie les points de B dans A	------------------
-										_nd_courant.pts = 	_nd_aIntegrer.pts	
+										_nd_courant.set_pts 	( _nd_aIntegrer.get_pts () )
 										integration_reussie = true
 									)
 									
@@ -1325,7 +1338,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 									---------	B absorbe totalement A.					----> 	B	--------------------------------	
 									#addition:	 		(
 										--- on copie les points de B dans A	------------------
-										_nd_courant.pts = 	_nd_aIntegrer.pts	
+										_nd_courant.set_pts 	( _nd_aIntegrer.get_pts () )
 										integration_reussie = true
 									)
 									---------	B fait disparaitre A => 0 shapes.		----> 	-VIDE-	--------------------------------	
@@ -1528,10 +1541,9 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 		
 	------------------- INTERFACE -----------------------------------------------------------------------
 	public
-		
 		fn get_noeuds_from_shape 		_shape 			=(
 			
-			local nd_porteur 		=	creer_noeud_hierarchie 	nom:"porteur"
+			local nd_porteur 		=	creer_noeud_hierarchie 	nom:"nd_provisoire"
 			local pts_shps 		= 	interpoler_pts_from_shape		_shape
 			
 			local i = 0
@@ -1545,7 +1557,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			
 		),
 		
-		------- le fonction  traingulation d'un polygone  ---------------------
+		------- le fonction  triangulation d'un polygone  ---------------------
 		--- renvois le tableau des triangles decoupés -------
 		fn trianguler  _pts =(
 			
@@ -1675,9 +1687,6 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 
 
 
-
-
-
 clearlistener ()
 mgr_tmp = str_temp()
 
@@ -1699,11 +1708,11 @@ addition = mgr_tmp.operation_booleenne		#addition				nd_1  nd_2
 
 
 	 */
-
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 delete $addition*
 delete $base*
-delete $operateurs*
-
+delete $result_ope*
+/* 
 addition = #()
 
 shp_1 = $Line001
@@ -1715,51 +1724,74 @@ pts_3 = for i in 1 to numknots shp_3 collect  getknotPoint shp_3	1	i
 nd_1 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_1 	nom:"nd1"
 nd_3 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_3 	nom:"nd3"
 
--- addition = mgr_tmp.operation_booleenne		#addition		 nd_3  nd_4 
--- addition = mgr_tmp.operation_booleenne		#addition		 nd_4	 nd_3 
--- addition = mgr_tmp.operation_booleenne		#soustraction		   	nd_3  nd_4 
-addition = mgr_tmp.operation_booleenne		#soustraction		nd_3    nd_1	  
--- shp_A = $Line003
+-- result_ope = mgr_tmp.operation_booleenne		#addition		 nd_3  nd_4 
+-- result_ope = mgr_tmp.operation_booleenne		#addition		 nd_4	 nd_3 
+-- result_ope = mgr_tmp.operation_booleenne		#soustraction		   	nd_3  nd_4 
+result_ope = mgr_tmp.operation_booleenne		#soustraction		nd_3    nd_1	  
+ */
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+shp_A = $'tracé - voirie'
 -- shp_A1 = $LineA1
--- shp_B = $Line004
+shp_B = $'tracé - motif rond point'
 -- shp_B1 = $LineB1
 -- shp_B2 = $LineB2
 
--- pts_A = for i in 1 to numknots shp_A collect getknotPoint shp_A	1	i
+nds_A	=	mgr_tmp.get_noeuds_from_shape  shp_A
+nd_A = nds_A[1]
+nds_B	=	mgr_tmp.get_noeuds_from_shape  shp_B
+nd_B = nds_B[1]
+/* 
+pts_A = for i in 1 to numknots shp_A collect getknotPoint shp_A	1	i
 -- pts_A1 = for i in 1 to numknots shp_A1 collect getknotPoint shp_A1	1	i
--- pts_B = for i in 1 to numknots shp_B collect  getknotPoint shp_B	1	i
+pts_B = for i in 1 to numknots shp_B collect  getknotPoint shp_B	1	i
 -- pts_B1 = for i in 1 to numknots shp_B1 collect getknotPoint shp_B1	1	i
 -- pts_B2 = for i in 1 to numknots shp_B2 collect  getknotPoint shp_B2	1	i
 
--- nd_A =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_A 	nom:"A"
+nd_A =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_A 	nom:"A"
+nd_A.en_creux = false
 -- nd_A1 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_A1 	nom:"A1"
--- nd_B =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_B 	nom:"B"
+nd_B =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_B 	nom:"B"
+nd_B.en_creux = false
 -- nd_B1 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_B1 	nom:"B1"
 -- nd_B2 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_B2 	nom:"B2"
-
+ */
 
 -- nd_A.ajouter_enfant		nd_A1
 -- nd_B.ajouter_enfant		nd_B1
 -- nd_B.ajouter_enfant		nd_B2
 
--- addition = mgr_tmp.operation_booleenne		#addition		 nd_A  nd_B 
--- addition = mgr_tmp.operation_booleenne		#addition		  nd_B nd_A
--- addition = mgr_tmp.operation_booleenne		#soustraction		   	nd_B  nd_A
--- addition = mgr_tmp.operation_booleenne		#soustraction		   	nd_A  nd_B
--- addition = mgr_tmp.operation_booleenne		#intersection		  nd_A	nd_B
--- addition = mgr_tmp.operation_booleenne		#intersection		  nd_B	nd_A
--- addition.count
+result_ope = mgr_tmp.operation_booleenne		#addition		 nd_A  nd_B 
+-- result_ope = mgr_tmp.operation_booleenne		#addition		  nd_B nd_A
+-- result_ope = mgr_tmp.operation_booleenne		#soustraction		   	nd_B  nd_A
+-- result_ope = mgr_tmp.operation_booleenne		#soustraction		   	nd_A  nd_B
+-- result_ope = mgr_tmp.operation_booleenne		#intersection		  nd_A	nd_B
+-- result_ope = mgr_tmp.operation_booleenne		#intersection		  nd_B	nd_A
+-- result_ope.count
 
 -- (
 -- nd_C.est_enCreux()
 
 -- format "\n------->	addition : %\n\n"	addition
 
-sp = splineShape name:"addition"
-for j in 1 to addition.count do (
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+sp = splineShape name:"result_ope"
+for j in 1 to result_ope.count do (
 	addnewSpline sp
 
-	for pt in addition[j] do		addknot sp j #corner #curve  pt
+	for pt in result_ope[j] do		addknot sp j #corner #curve  pt
 	close sp j
 	updateShape sp
 	select sp

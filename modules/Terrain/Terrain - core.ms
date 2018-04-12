@@ -632,12 +632,12 @@ struct	str_terrain_node_core	(
 					chrono_2_1	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)					
 					local chrono_temp = timeStamp ()
 					
--- 					actualiser_pts_quadrillages ()
+					actualiser_pts_quadrillages ()
 					
 					chrono_2_2	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)
 				)
 				
-				etape = 10
+-- 				etape = 10
 				------	(3)	creer la projection  -----------------------------------
 				local chrono_3 =affichage_tpsVide
 				if etape <= 3 do (
