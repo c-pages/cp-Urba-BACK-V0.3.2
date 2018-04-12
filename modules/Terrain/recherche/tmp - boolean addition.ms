@@ -14,8 +14,9 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			if _nd.enfants.count >0 	do	m_tab_format_nd = substring m_tab_format_nd 1 (	m_tab_format_nd.count -	indent_prfix.count )
 		),
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		
-		precision_courbe 		= 50,			--- en cm. ----
+		--- constantes---------
+		PRECISION_COURBE 		= 50,			--- en cm. ----
+		SEUIL_SUPERPOSITION  	= .01,
 		
 -- 	private
 	public --- DEBUG en est en private normalement ----
@@ -692,10 +693,9 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			nds_bases			=	#( copy _nd_base ) 		+	( deepcopy ( _nd_base.get_descendance ()	)	)
 			nds_operateurs	=	#( copy _nd_operateur ) 	+	( deepcopy ( _nd_operateur.get_descendance ()	)	)
 			
-			--- si on sousrtrait, on inverse les pleins et creux	-------------
+			--- si on sousrtrait, on inverse les pleins et creux des operateurs	-------------
 			if operation == #soustraction do (
--- 				for i = 1 to nds_bases.count 	do
--- 					nds_bases[i].en_creux	=	not  nds_bases[i].en_creux	
+				debug "on inverse les bases"
 				for i = 1 to nds_operateurs.count 	do
 					nds_operateurs[i].en_creux	=	not  nds_operateurs[i].en_creux	
 			)
@@ -703,17 +703,46 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			
 			--- on retourne les pts des noeuds en creux -------------------
 			--- bases	--
-			for i = 1 to nds_bases.count where nds_bases[i].en_creux do 
-					nds_bases[i].pts = changer_sens 	nds_bases[i].pts 
+			for i = 1 to nds_bases.count where nds_bases[i].en_creux do (
+				debug "nds_bases[i]" var:nds_bases[i].nom
+				nds_bases[i].pts = changer_sens 	nds_bases[i].pts 
+			)
 			--- operateurs ----
 			for i = 1 to nds_operateurs.count where nds_operateurs[i].en_creux do 
 					nds_operateurs[i].pts = changer_sens 	nds_operateurs[i].pts 
 			
 			
+			
+			
+			--------- debug ------------------------------
 			debug "nds_bases" var:nds_bases				param:#nom
 			debug "nds_operateurs" var:nds_operateurs	param:#nom
-			
-			
+			sp = splineShape name:"bases"
+			for j in 1 to nds_bases.count do (
+				addnewSpline sp
+
+				for pt in nds_bases[j].pts do		addknot sp j #corner #curve  pt
+				close sp j
+				updateShape sp
+			)
+			sp = splineShape name:"operateurs"
+			for j in 1 to nds_bases.count do (
+				addnewSpline sp
+
+				for pt in nds_operateurs[j].pts do		addknot sp j #corner #curve  pt
+				close sp j
+				updateShape sp
+			)
+			--------- debug ------------------------------
+
+
+
+
+
+
+
+
+
 			
 			---------  ( 0 )		les intersections  operateur <--> bases		 ---------------------------------------------------------------------------------------------------------------------------
 			local intersections_total =#()		
@@ -850,7 +879,8 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					
 					
 					
-					
+					debug "-----------------------------------------------------"
+					debug "cherche intersection"
 					----------- ( 2 )	intersection entre pt courant et pt suivant --------------------------------------------	
 					local distMin =	1e+10
 					local intersection  = undefined
@@ -860,19 +890,25 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 						for j = 1 to nd.pts.count do (
 							
 							local pt_autre			= 	nd.pts[ j ]
-							local j_svt				=	boucler 	nd.pts		( j + 1 )
+							local j_svt				=		boucler 	nd.pts		( j + 1 )
 							local pt_autre_svt	= 	nd.pts[ j_svt ]
 							
 							local intersec_pos = get_intersection_vecteurs		pt_courant   pt_suivant		pt_autre		pt_autre_svt 
-							if intersec_pos != undefined and distance intersec_pos 	pt_courant > .001 and distance pt_courant 	intersec_pos < distMin  do (
-								intersection =  str_intersection 		nd:		nd					\
-																				pos:		intersec_pos	\
-																				id_pt:	j
-								distMin = distance pt_courant 	intersec_pos
+							if intersec_pos != undefined and distance 	intersec_pos 	pt_courant > SEUIL_SUPERPOSITION   do (
+								debug "distance 	intersec_pos 	pt_courant " var:(distance 	intersec_pos 	pt_courant )
+								debug "intersec_pos" var:intersec_pos
+								debug "pt_courant" var:pt_courant
+								if  distance pt_courant 	intersec_pos < distMin do (
+									distMin 			= distance pt_courant 	intersec_pos
+									intersection 	=  str_intersection 		nd:		nd					\
+																							pos:		intersec_pos		\
+																							id_pt:	j
+								)
 							)
 						)
 					)
-					
+					debug "-----------------------------------------------------"					
+					debug "---------->	intersection" var:intersection
 					
 					
 					
@@ -1427,7 +1463,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 						----- Interpolation  - adaptif ----------------------------					
 						local longueur_segment 	= get_longueur_segment	_shp_node	id_spline_contour		id_pt_contour 
 						local pos_courbe 			= 0
-						local nbr_division 			= floor ( longueur_segment / precision_courbe)
+						local nbr_division 			= floor ( longueur_segment / PRECISION_COURBE)
 						local increment_courbe 	= 1 / nbr_division
 						
 						local tangent					=	normalize ( tangentBezier3D   _shp_node 	id_spline_contour 	id_pt_contour 		0 )
@@ -1665,22 +1701,24 @@ addition = mgr_tmp.operation_booleenne		#addition				nd_1  nd_2
 	 */
 
 delete $addition*
+delete $base*
+delete $operateurs*
 
 addition = #()
 
-shp_3 = $Line001
-shp_4 = $Line003
+shp_1 = $Line001
+shp_3 = $Line003
 
-pts_3 = for i in 1 to numknots shp_3 collect getknotPoint shp_3	1	i
-pts_4 = for i in 1 to numknots shp_4 collect  getknotPoint shp_4	1	i
+pts_1 = for i in 1 to numknots shp_1 collect getknotPoint shp_1	1	i
+pts_3 = for i in 1 to numknots shp_3 collect  getknotPoint shp_3	1	i
 
-nd_3 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_3 	nom:"3"
-nd_4 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_4 	nom:"4"
+nd_1 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_1 	nom:"nd1"
+nd_3 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_3 	nom:"nd3"
 
 -- addition = mgr_tmp.operation_booleenne		#addition		 nd_3  nd_4 
 -- addition = mgr_tmp.operation_booleenne		#addition		 nd_4	 nd_3 
-addition = mgr_tmp.operation_booleenne		#soustraction		   	nd_3  nd_4 
--- addition = mgr_tmp.operation_booleenne		#soustraction		    nd_4	 nd_3 
+-- addition = mgr_tmp.operation_booleenne		#soustraction		   	nd_3  nd_4 
+addition = mgr_tmp.operation_booleenne		#soustraction		nd_3    nd_1	  
 -- shp_A = $Line003
 -- shp_A1 = $LineA1
 -- shp_B = $Line004
