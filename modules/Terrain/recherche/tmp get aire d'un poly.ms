@@ -114,10 +114,8 @@ struct str_tmp	(		--		struct str_terrain_outils_shape (
 			local vec_2 		=  ( _pt  -  _seg_pt1)
 			
 			local angle_test 	= get_angleVecteurs    vec_1 vec_2
--- 			debug "	---->	angle_test" var:angle_test
-			local longueur_hypo = length vec_2
--- 			debug "	---->	longueur_dot" var:longueur_dot
-			local dist_result 	= abs ( longueur_hypo	* sin  angle_test )
+			
+			local dist_result 	= abs ( ( dot  vec_1  vec_2 ) * tan  angle_test )
 			dist_result
 			
 		),
@@ -1262,16 +1260,16 @@ struct str_tmp	(		--		struct str_terrain_outils_shape (
 	
 )
 
-popo = str_tmp ()
 
 
 cible 			= $Line001
 pts_cible 	=	for i in 1 to numknots cible collect getknotPoint cible	1	i
+popo = str_tmp ()
 popo.get_aire_shape	pts_cible
 
 
--- triangle 	= $Line002
--- pts_tri 	= for i in 1 to numknots triangle collect getknotPoint triangle	1	i
--- popo.get_aire_triangle	pts_tri
+triangle 	= $Line002
+pts_tri 	= for i in 1 to numknots triangle collect getknotPoint triangle	1	i
+popo.get_aire_triangle	pts_tri
 
 

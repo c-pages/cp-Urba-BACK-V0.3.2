@@ -44,9 +44,9 @@ global urba_clipboard_batiment	=	""
 
 --------------- debugger ---------
 (
--- 	include "$userScripts\cp - GLOBAL\Debuger et ecrire.ms"
+	include "$userScripts\\cp-Urba\\modules\\Commun\\Urba - Debug.ms"
 
-
+/* 
 	global debug, debuger, ecrire
 	global DEBUG_MODE = true
 
@@ -121,7 +121,7 @@ options.printAllElements = oldPrintAllElements
 	-- 	) else debuger 	_txt  	var:var	 param:param
 	)
 
-
+ */
 
 
 

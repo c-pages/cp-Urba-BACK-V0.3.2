@@ -9,6 +9,10 @@ global TERRAIN_ECOUTEUR_deleted, 		TERRAIN_ECOUTEUR_topo, 	TERRAIN_ECOUTEUR_tran
 ---- ecouteurs terrain ------------------
 
 
+--------------- debugger ---------
+(
+	filein "$userScripts\\cp-Urba\\modules\\Commun\\Urba - Debug.ms"
+)
 
 
 plugin geometry  Urba_terrain
