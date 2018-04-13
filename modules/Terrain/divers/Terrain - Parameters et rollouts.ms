@@ -145,6 +145,7 @@
 				ajouter_contour	obj
 				actualiser ()
 				lbx_contours.selection = selecBack + 1	
+				actualiser ()
 			)
 			on lbx_contours selected sel do
 			(
@@ -172,6 +173,7 @@
 					actualiser ()
 					lbx_reliefs.selection += 1
 					core.actualiser ()
+					actualiser ()
 				)
 			)
 			on lbx_reliefs selected sel do

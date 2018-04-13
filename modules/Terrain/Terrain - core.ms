@@ -346,7 +346,7 @@ struct	str_terrain_node_core	(
 			
 			
 			
-			
+			/* 
 -- 			if m_plug.nettoyer_triangles do (
 				--------  cleanner les edges  -------------------------------------------------
 				local grille_segts			=	 polyop.getEdgeSelection m_plug.delegate
@@ -365,6 +365,7 @@ struct	str_terrain_node_core	(
 				m_plug.delegate.remove selLevel:#edge
 				m_plug.delegate.remove selLevel:#vertex
 -- 			)
+			*/
 			polyop.retriangulate m_plug.delegate	#{1..polyop.getNumFaces m_plug.delegate	}
  
 		), -- fin fonctoin
@@ -435,13 +436,13 @@ struct	str_terrain_node_core	(
 -- 			debug "	(2-1)	creer_geometrie_base"
 
 			--- version faces ---------------
-			for pts_shp in m_pts_faces do	mgr_geo.face	pts_shp smGrp:1
+-- 			for pts_shp in m_pts_faces do	mgr_geo.face	pts_shp smGrp:1
 -- 			
--- 			--- version triangles ---------------
--- 			local triangles =#()
--- 			for pts_shp in m_pts_faces do	
--- 				triangles += mgr_shapes.trianguler 	pts_shp
--- 			for pts_tri in triangles do	mgr_geo.face	pts_tri 		smGrp:1
+			--- version triangles ---------------
+			local triangles =#()
+			for pts_shp in m_pts_faces do	
+				triangles += mgr_shapes.trianguler 	pts_shp
+			for pts_tri in triangles do	mgr_geo.face	pts_tri 		smGrp:1
 			
 			/* ----- DEBUG-------------------
 			sp = splineShape name:(Uniquename "triangles ")

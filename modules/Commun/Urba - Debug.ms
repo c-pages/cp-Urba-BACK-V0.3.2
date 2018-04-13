@@ -37,7 +37,7 @@ fn remplirTexte  _txt  var:	 param:  prefix: = (
 				)
 				
 				result += " )" 
-			) else 	result += var as string
+			) else 	result += with printAllElements true ( var ) as string
 		) else 
 		if param != unsupplied  then (
 			if var != undefined then (
@@ -55,7 +55,7 @@ fn debuger	_txt  var:	 param:    prefix: = 	(
 		
 		txtFinal += remplirTexte  _txt  var:var	 param:param 	prefix:prefix
 		
-		format "%\n"	txtFinal
+		with printAllElements true ( format "%\n"	txtFinal )
 	)
 )		
 ----- output ------------------------------
@@ -65,7 +65,7 @@ fn ecrire 		_txt  var:	 param:   script:"Labib"	= 	(
 		local txtFinal = "<" + script + ">	"		
 		
 		txtFinal += remplirTexte  _txt  var:var	 param:param
-		format "%\n"	txtFinal
+		with printAllElements true ( format "%\n"	txtFinal )
 	) else debuger 	_txt  	var:var	 param:param	
 )
 
