@@ -30,8 +30,12 @@ Suite de plugins pour 3DSmax  |  Maxscript  | Pour réalisation de bout de ville
 - [x] Problème des 'intersectRay' qui ne fonctionnent qu'avec des _editable_polys_.
 - [x] Problème des projections sur reliefs, les hauteurs semblent differentes en fonction de la position de l'objet, ou un truc du genre..
 - [x] On verifie quand il va y avoir beaucoup de faces apres une modif de resolution de la grille. : On demande si on veut passer en mode proxy pour l'affichage et si on veut monter la limite de l'alerte pour le mode 'rendu/pasProxy'.
-- [x] correction de quelques petit bugs dans la triangulation.
-- [ ] Grosse correction des opération boolleenes.
+- [x] correction de quelques petits bugs dans la triangulation.
+- [x] Grosse correction des opération boolleenes.
+- [x] correction d'autres petits bugs dans la triangulation avec d'autres cas particuliers.
+- [ ] ca continue a bugger ... (booleen et/ou integration ...)
+
+
 
 #### __Général:__
 - [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes tout les modules.

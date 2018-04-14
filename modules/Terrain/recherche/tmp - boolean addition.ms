@@ -1,20 +1,35 @@
 
-struct 	str_temp	(	--struct str_terrain_outils_shape (
-		
+struct 	str_temp	(	
 	
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
 		m_debug	=	true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | shape"	  	var:var	 param:param		catch (),
-		m_tab_format_nd = "		",
-		fn	format_noeud  _nd = if m_debug do (			 
+	
+		m_tab_format_nd = "		",		
+		fn format_noeud 	_nd =(
 			local indent_prfix = "|    "
-			format (  m_tab_format_nd + _nd.nom + "\n" )
+			debug (  m_tab_format_nd + _nd.nom + "" )
 			if _nd.enfants.count >0 	do	m_tab_format_nd += indent_prfix
 			for enft in _nd.enfants 	do 	format_noeud enft
 			if _nd.enfants.count >0 	do	m_tab_format_nd = substring m_tab_format_nd 1 (	m_tab_format_nd.count -	indent_prfix.count )
 		),
+		fn	debug_nd  _nd = if m_debug do (			 
+			
+			debug "----------------------------------------------------"
+			format_noeud 	_nd 
+			debug "----------------------------------------------------"
+		),
+		
+		
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		
+		
+		
+		
+		
+		
+		
 		--- constantes---------
 		PRECISION_COURBE 			= 50,			--- en cm. ----
 		SEUIL_POINTS_EGAUX  	= .01,
@@ -477,11 +492,11 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 				else (
 					---- s'il ne se croisent pas alors ils sont tout à l'interieur ou à l'extierieur l'un de l'autre -------------------------
 					local pts_triangles_shp1 = this.trianguler	_pts_shp1
--- 					local pts_triangles_shp2 = this.trianguler	_pts_shp_aTester
+ 					local pts_triangles_shp2 = this.trianguler	_pts_shp_aTester
 					
 					if survol_triangles  	_pts_shp_aTester[1]	pts_triangles_shp1	 then 
 						result = #interieur
-					else -- if survol_triangles  	_pts_shp1[1]		pts_triangles_shp2	 then 
+					else  if survol_triangles  	_pts_shp1[1]		pts_triangles_shp2	 then 
 						result = #exterieur
 						
 				)
@@ -1430,7 +1445,9 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			format "\n\n\n\n"
 			debug "######## integrer_nd_dans_hierarchie	########################"
 			debug "_nd_courant" var:_nd_courant.nom
+			debug "_nd_courant" var:( _nd_courant.get_pts())
 			debug "_nd_aIntegrer" var:_nd_aIntegrer.nom
+			debug "_nd_aIntegrer" var:(_nd_aIntegrer.get_pts())
 			debug "_operation" var:_operation
 			debug "#######################################################"
 			
@@ -1461,20 +1478,29 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			
 			if _nd_courant.nom == "root" or  _nd_courant.nom == "nd_provisoire"	then (
 				
-				debug"----> on est dans un noeud vide de pts"
+				debug"----> on est dans un noeud RACINE"
 				
 				
 				---- on regarde si un enfant du noeud courant	rentre dedans	-----------------
-				for enfant in	_nd_courant.enfants  do (
+				local i = 1
+				local  enfantsTemp = 		for enft in   _nd_courant.enfants collect enft
+				while enfantsTemp.count > 0  do (
+					local enfant = enfantsTemp[1]
 					local result_integration =  integrer_nd_dans_hierarchie		enfant		_nd_aIntegrer 		_operation
-					debug "-----> result_integration" var:result_integration
+					debug "--	ROOOT	---> result_integration" var:result_integration
 					if result_integration do
 						integration_reussie = true
+					deleteItem enfantsTemp 1
 				)
 				
-				debug"----> integration_reussie" var:integration_reussie
+				debug"----> integration ENFANT reussie" var:integration_reussie
+				debug"----> ENFANTS RACINE		" var:_nd_courant.enfants
 				
 				if not integration_reussie do (
+					
+-- 					local distance_toParent = get_distance_shapes 	( _nd_courant.get_pts() )	( _nd_aIntegrer.get_pts () )
+					_nd_courant.ajouter_enfant 		_nd_aIntegrer	--distance_toParent:distance_toParent	
+					/* 
 					local enfants_a_ajouter = #()
 					for enfant in	_nd_courant.enfants  do 
 						if shape_estDans_shape	( _nd_aIntegrer.get_pts () )	 ( enfant.get_pts() )   then
@@ -1490,7 +1516,7 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					local distance_toParent = get_distance_shapes 	( _nd_courant.get_pts() )	( _nd_aIntegrer.get_pts () )
 					_nd_courant.ajouter_enfant 		_nd_aIntegrer	distance_toParent:distance_toParent	
 						debug " ?! ?! ?! ? 	cet enfant	?! ?! ?! ? "
-					
+					 */
 					--- fin du boulot -----------					
 					integration_reussie = true
 				)
@@ -1511,17 +1537,21 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 							
 									--------- 	B est ajouter au niveau de A				----> 	A et B			--------------------------------	
 									#addition:	 		(
-											
+-- 										_nd_courant.ajouter_enfant	_nd_aIntegrer	
+-- 										integration_reussie = true
+											/* 
 											---- on regarde si un enfant du noeud courant	rentre dedans	-----------------
 											for enfant in	_nd_courant.enfants  do (
 												local result_integration =  integrer_nd_dans_hierarchie		enfant		_nd_aIntegrer 		_operation
 												debug "-----> result_integration" var:result_integration
 												if result_integration do
 													integration_reussie = true
-											)
+											) */
 									)
 									---------	B est un trou dans le vide.				----> 	A	--------------------------------	
 									#soustraction:	 		(
+										
+										
 										--- fin du boulot, B disparait, rien à faire  -----------		
 									)
 									---------	Il reste 0 shapes, pas d'intersection.	----> 	-VIDE-	--------------------------------	
@@ -1532,8 +1562,8 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 									)
 									
 									#union:(
-										_nd_courant.ajouter_enfant	_nd_aIntegrer	
-										integration_reussie = true
+-- 										_nd_courant.parent.ajouter_enfant	_nd_aIntegrer	
+-- 										integration_reussie = true
 									)
 							) --- fin case operation-	---------------------
 						
@@ -1558,12 +1588,23 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 									---------	B est un trou complet dans A	----> 	B dans A	--------------------------------	
 									#soustraction:	 		(
 										
+										debug "	**********		DEBUT  SOUSTRACTION	interieur	**********"
 											---- on essaye de l'integrer dans les enfants de A  -----
 											local integration_dans_enfant = false	
 											for enfant in	_nd_courant.enfants  do (
-												local integration = integrer_nd_dans_hierarchie  		enfant  		_nd_aIntegrer		#soustraction
-												if integration then  
+-- 												if shape_estDans_shape	( _nd_aIntegrer.get_pts () )	 ( enfant.get_pts() )   then
+												local pos_enfant	=	get_positionRelative_shapes 	( enfant.get_pts() )	( _nd_aIntegrer.get_pts () )
+												if pos_enfant != #aCoté do (
+													if enfant.en_creux	then
+														integrer_nd_dans_hierarchie  		enfant  		_nd_aIntegrer		#addition
+													else
+														integrer_nd_dans_hierarchie  		enfant  		_nd_aIntegrer		#soustraction
+														
 													integration_dans_enfant = true
+												)
+-- 												local integration = integrer_nd_dans_hierarchie  		enfant  		_nd_aIntegrer		#soustraction
+-- 												if integration then  
+-- 													integration_dans_enfant = true
 											)
 											
 											--- si il ne s'integre pas dans un enfant, on l'integre au neoud courant	----------------
@@ -1616,7 +1657,10 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 									)
 									
 									#union:(
-										_nd_aIntegrer.ajouter_enfant		_nd_courant	
+									
+										local prt	=	_nd_courant.parent
+										_nd_aIntegrer.ajouter_enfant		_nd_courant
+										prt.ajouter_enfant		_nd_aIntegrer
 										integration_reussie = true
 									)
 							) --- fin case operation-	---------------------
@@ -1626,8 +1670,37 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 						
 					#seCroisent:	(		---->	A et B se coupent, on va avoir du decoupage à faire ! 					---------------------------------------------------------
 							debug "A et B se coupent. "
-							if operation as name	 != #union then (
-								debug "DEBUT ADDITION" var:operation
+						
+-- 						case operation of (
+-- 							#addition: (
+								
+								debug "----	lancement OPERATION" var:operation
+								local shapes_booleens 	= 	operation_booleenne		operation		_nd_courant		_nd_aIntegrer
+								debug "shapes_booleens COUNT" var:shapes_booleens.count
+								
+-- 								local nom_nd_courant 		= _nd_courant.nom
+-- 								local nd_courant_parent 	= _nd_courant.parent	
+								
+-- 								_nd_courant.supprimer ()
+								if shapes_booleens.count > 0 then (
+									_nd_courant.set_pts  shapes_booleens[ 1 ]
+									
+									local i = 1 
+									local nvx_noeuds = 	this.get_noeuds_from_ptsShapes	shapes_booleens 		nom:nom_nd_courant
+									for i = 2 to   nvx_noeuds.count	do 
+										integrer_nd_dans_hierarchie		_nd_courant.parent		nvx_noeuds[i]		#union
+									
+									
+								) else 	_nd_courant.supprimer ()
+								
+								_nd_aIntegrer.supprimer ()
+								
+								debug "----	fin OPERATION" var:operation
+-- 							)
+							/* 
+							#soustraction: (
+								
+								debug "----	lancement OPERATION" var:operation
 								local shapes_booleens 	= 	operation_booleenne		operation		_nd_courant		_nd_aIntegrer
 								debug "shapes_booleens COUNT" var:shapes_booleens.count
 								
@@ -1640,14 +1713,37 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 								local i = 1 
 								for shp in  shapes_booleens	do (
 									local nv_nd = creer_noeud_hierarchie 	pts:shp				nom:(nom_nd_courant	+ "_" + (  i+=1 ) as string)
-									 integrer_nd_dans_hierarchie		nd_courant_parent		nv_nd 		#union
+									nd_courant_parent.ajouter_enfant		nv_nd 	
 								)
 								
-								debug "FIN ADDITION"
+								debug "----	fin OPERATION" var:operation
+							)
+							 */
+							/* 
+						)
+							if operation as name	 != #union then (
+								
+								debug "----	lancement OPERATION" var:operation
+								local shapes_booleens 	= 	operation_booleenne		operation		_nd_courant		_nd_aIntegrer
+								debug "shapes_booleens COUNT" var:shapes_booleens.count
+								
+								local nom_nd_courant = _nd_courant.nom
+								local nd_courant_parent = _nd_courant.parent	
+								
+								_nd_courant.supprimer ()
+								_nd_aIntegrer.supprimer ()
+								
+								local i = 1 
+								for shp in  shapes_booleens	do (
+									local nv_nd = creer_noeud_hierarchie 	pts:shp				nom:(nom_nd_courant	+ "_" + (  i+=1 ) as string)
+									nd_courant_parent.ajouter_enfant		nv_nd 	
+								)
+								
+								debug "----	fin OPERATION" var:operation
 							) else (
 -- 								_nd_courant.parent.ajouter_enfant		_nd_aIntegrer
 								
-							)
+							) */
 							--- fin du boulot -----------					
 							integration_reussie = true
 						
@@ -1660,13 +1756,21 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			)
 				
 				
-			debug  "FIN 		FIN	FIN integrer_nd_dans_hierarchie	########################"
-			debug  "FIN 		integration_reussie" var:integration_reussie
+			debug  "FIN 	 integrer_nd_dans_hierarchie	########################"
+			debug  "integration_reussie" var:integration_reussie
+			debug_nd	 _nd_courant
+			format"\n\n"
 			integration_reussie
 			
 		),
 		
 	
+		
+		
+		
+		
+		
+		
 		----- manipulation de  points  ---------------
 		fn nettoyer_points_inutiles	_pts	 	_seuil:.9999		=(
 			
@@ -1788,9 +1892,6 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 			
 			result
 		),
-		
-		
-		
 		fn interpoler_pts_from_shape  	_shp_node	=( 
 			
 			local pts_shps = interpoler_shape 		_shp_node
@@ -1803,20 +1904,36 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 		
 		
 	------------------- INTERFACE -----------------------------------------------------------------------
-	public
-		fn get_noeuds_from_shape 		_shape 			=(
+		
+		fn get_noeuds_from_ptsShapes 		_pts_shps 		nom:"nv_nd"	=(
 			
 			local nd_porteur 		=	creer_noeud_hierarchie 	nom:"nd_provisoire"
-			local pts_shps 		= 	interpoler_pts_from_shape		_shape
+			local pts_shps 		= _pts_shps
 			
 			local i = 0
 			for pts_shp in pts_shps do (
-				nv_nd = creer_noeud_hierarchie 	pts:pts_shp	nom:(_shape.name	+ "_" + (  i+=1 ) as string)
+				nv_nd = creer_noeud_hierarchie 	pts:pts_shp	nom:( nom	+ "_" + (  i+=1 ) as string)
 				integrer_nd_dans_hierarchie		nd_porteur		nv_nd 		#union
-				
+-- 				if nom != unsupplied  do
+-- 					nv_nd.nom = ( nom + "_" + (  i+=1 ) as string )
+-- 				nv_nd.maj_enCreux ()
+-- 				nv_nd.parent = undefined
 			)
 			
 			nd_porteur.enfants
+			
+		),
+		
+		
+	public
+		fn get_noeuds_from_shape 		_shape 			=(
+			
+			local nd_porteur 	=	creer_noeud_hierarchie 		nom:"nd_provisoire"
+			local pts_shps 	= 	interpoler_pts_from_shape		_shape
+			local result 		= get_noeuds_from_ptsShapes	pts_shps	nom:_shape.name
+-- 			for nd in result  do
+-- 				nd.nom = (_shape.name	+ "_" + (  i+=1 ) as string)
+			result
 			
 		),
 		
@@ -1888,16 +2005,22 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 					if IDs_pts_diagonal.count > 1 then (
 -- 						debug "Choisir un pt diagonal " 
 -- 						debug "-> id_pt_aTester" var:id_pt_aTester
-						local dist_id_max = -1e+10
+						local dist_id_min = 1e+10
 						for id_pt in IDs_pts_diagonal do (
-							local id_diag 	= ids_pts_dansTriangle[id_pt]
-							if id_diag < id_pt_aTester do id_diag = id_diag + pts_poly.count
+							local id_diag 		= ids_pts_dansTriangle[id_pt]
+-- 							local dist_test = abs ( id_pt_aTester - id_diag )
+							/* if id_diag < id_pt_aTester then (
+								dist_test = id_pt_aTester - 
+								id_diag = id_diag + pts_poly.count
+								
+							)		 */					
+							
 -- 							debug "	-> id_diag" var:id_diag
-							local dist_to_id = id_diag - id_pt_aTester
+							local dist_to_id = abs (id_diag - id_pt_aTester )
 -- 							debug "	-> dist_to_id" var:dist_to_id
-							if dist_to_id > dist_id_max do (
-								IDpt_decoupe = boucler pts_poly id_diag
-								dist_id_max = dist_to_id
+							if dist_to_id < dist_id_min do (
+								IDpt_decoupe 	= id_diag
+								dist_id_min 	= dist_to_id
 							)
 								
 						)
@@ -2001,13 +2124,68 @@ struct 	str_temp	(	--struct str_terrain_outils_shape (
 
 
 
+
+
+
 result_ope =#()
 clearlistener ()
 mgr_tmp = str_temp()
+delete $addition*
+delete $base*
+delete $result_ope*
+delete $operateur*
+delete $pt_orig_triangle*
+delete $triangle*
+delete $decoupage*
 
+
+result_ope = #()
+
+fn pos 	_pos	= (
+	case classof _pos of (
+		Point3: (
+			try delete $p catch ()
+			p =   point pos:_pos		name:"p" centermarker:off axistripod:off cross:on Box:on size:10 constantscreensize:off drawontop:off wirecolor:yellow
+			select p
+		)
+		array: (
+			try delete $sp catch ()
+			sp = splineShape name:"sp"
+			pts = _pos
+			addnewSpline sp
+			for pt in pts do		addknot sp 1 #corner #curve  pt
+			close sp 1
+			updateShape sp
+			select sp
+		)
+		
+		
+	)
+
+)
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/* 
+a = #([184.456,344.802,0], [186.666,328.755,0], [197.284,332.406,0], [196.512,354.078,0])
+b = #([196.15,364.236,0], [176.633,363.957,0], [169.745,342.496,0], [180.454,349.664,0], [182.785,356.946,0], [183.506,351.707,0], [196.292,360.265,0])
+mgr_tmp.get_positionRelative_shapes a b
+
+ */
 /* 
 shp_1 = $Line001
 shp_2 = $Line002
+
+a = #([184.456,344.802,0], [186.666,328.755,0], [197.284,332.406,0], [196.512,354.078,0])
+b = #([196.15,364.236,0], [176.633,363.957,0], [169.745,342.496,0], [180.454,349.664,0], [182.785,356.946,0], [183.506,351.707,0], [196.292,360.265,0])
+mgr_tmp.get_positionRelative_shapes a b
+
+sp = splineShape name:( "result_ope " + j as string )
+
+	addnewSpline sp
+
+	for pt in b do		addknot sp 1 #corner #curve  pt
+	close sp 1
+	updateShape sp
 
 
 
@@ -2023,45 +2201,33 @@ addition = mgr_tmp.operation_booleenne		#addition				nd_1  nd_2
 
 
 	 */
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-delete $addition*
-delete $base*
-delete $result_ope*
-delete $operateur*
-delete $pt_orig_triangle*
-delete $triangle*
-delete $decoupage*
-
-
-result_ope = #()
-
-fn pos 	_pos	= (
-	try delete $p catch ()
-	p =   point name:"p" centermarker:off axistripod:off cross:on Box:on size:10 constantscreensize:off drawontop:off wirecolor:yellow
-	$p.pos = _pos
-)
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-/* 
-shp_1 = $Line001
-shp_2 = $Line002
 
-pts_1 = for i in 1 to numknots shp_1 collect getknotPoint shp_1	1	i
-pts_2 = for i in 1 to numknots shp_2 collect  getknotPoint shp_2	1	i
+shp_A = $testA
+shp_B = $testB
 
-nd_1 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_1 	nom:"nd1"
-nd_2 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_2 	nom:"nd2"
+-- pts_1 = for i in 1 to numknots shp_1 collect getknotPoint shp_1	1	i
+-- pts_2 = for i in 1 to numknots shp_2 collect  getknotPoint shp_2	1	i
 
-result_ope = mgr_tmp.operation_booleenne		#addition		 nd_2  nd_1
+-- nd_1 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_1 	nom:"nd1"
+-- nd_2 =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_2 	nom:"nd2"
+
+nds_A	=	mgr_tmp.get_noeuds_from_shape  shp_A
+-- nd_A = nds_A[1]
+nds_B	=	mgr_tmp.get_noeuds_from_shape  shp_B
+-- nd_B = nds_B[1]
+
+result_ope = mgr_tmp.operation_booleenne		#addition		 nds_A  nds_B
 -- result_ope = mgr_tmp.operation_booleenne		#addition		 nd_1	 nd_2
 -- result_ope = mgr_tmp.operation_booleenne		#soustraction		   	nd_2  nd_1 
 -- result_ope = mgr_tmp.operation_booleenne		#soustraction		nd_2    nd_1	  
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- */
 
 
+/* 
 
 -- shp_A = $LineA
 -- pts_A = for i in 1 to numknots shp_A collect getknotPoint shp_A	1	i
@@ -2091,7 +2257,7 @@ nds_A	=	mgr_tmp.get_noeuds_from_shape  shp_A
 nd_A = nds_A[1]
 nds_B	=	mgr_tmp.get_noeuds_from_shape  shp_B
 nd_B = nds_B[1]
-
+ */
 -- nds_A1	=	mgr_tmp.get_noeuds_from_shape  shp_A1
 -- nd_A1 = nds_A1[1]
 -- nds_B1	=	mgr_tmp.get_noeuds_from_shape  shp_B1
@@ -2124,7 +2290,7 @@ nd_B =  mgr_tmp.creer_noeud_hierarchie 	pts:pts_B 	nom:"B"
 -- result_ope = mgr_tmp.operation_booleenne		#addition		 nd_A  nd_B 
 -- result_ope = mgr_tmp.operation_booleenne		#addition		  nd_B nd_A
 -- result_ope = mgr_tmp.operation_booleenne		#soustraction		   	nd_B  nd_A
-result_ope = mgr_tmp.operation_booleenne		#soustraction		   	nd_A  nd_B
+-- result_ope = mgr_tmp.operation_booleenne		#soustraction		   	nd_A  nd_B
 -- result_ope = mgr_tmp.operation_booleenne		#intersection		  nd_A	nd_B
 -- result_ope = mgr_tmp.operation_booleenne		#intersection		  nd_B	nd_A
 -- result_ope.count
@@ -2138,7 +2304,7 @@ result_ope = mgr_tmp.operation_booleenne		#soustraction		   	nd_A  nd_B
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- result_ope=#(#([35.8057,92.906,0], [35.3481,105.755,0], [35.3481,105.755,0], [34.1173,140.314,0], [34.1173,140.314,0], [33.9782,144.221,0], [19.6893,140.648,0], [19.6893,140.648,0]))
-
+/* 
 if result_ope.count > 0 do (
 
 	for j in 1 to result_ope.count do (
@@ -2153,7 +2319,7 @@ if result_ope.count > 0 do (
 	)
 -- 	select sp
 )
-
+ */
 
 --  mgr_tmp.est_aGauche $point001.pos	$point002.pos	$point003.pos	
 

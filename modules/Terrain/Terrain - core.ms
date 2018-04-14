@@ -381,23 +381,31 @@ struct	str_terrain_node_core	(
 	---------  Actualisations de l'objet ----------------------------------------------
 		fn actualiser_noeuds_boolleens 		=(
 
-			m_ndRoot_contour			=		mgr_shapes.creer_noeud_hierarchie 	nom:"root"	
+			m_ndRoot_contour			=		mgr_shapes.creer_noeud_booleen	nom:"root"	
 			
 			if m_plug.contours_nodes.count > 0 do (
 				
 				for 	i = 1 to	m_plug.contours_nodes.count  where m_plug.contours_nodes[ i ] != undefined and not isdeleted m_plug.contours_nodes[ i ] do (
 					local contour_node 	= 	m_plug.contours_nodes[i]
-					local nds_contours 	=	mgr_shapes.get_noeuds_from_shape			contour_node		
-					for nd_contour in nds_contours do (
+					
+					local nds_contours 	=	mgr_shapes.get_noeuds_from_shape			contour_node	nom:contour_node.nom
+					
+					debug "---------> nds_contours" var:nds_contours
+					
+					
+-- 					for nd_contour in nds_contours do (
 						
 						debug "---------------------------------------------------------------------------------------"
-						debug (  "integration nd_contour	" + i as string )
+						debug (  "integration nd_contour	" + i as string + " ---> " + contour_node.name )
 						debug "---------------------------------------------------------------------------------------"
-						mgr_shapes.integrer_nd_dans_hierarchie		m_ndRoot_contour		nd_contour 		m_plug.contours_operations[i]	
-						debug "---------------------------------------------------------------------------------------"
-						mgr_shapes.format_noeud		m_ndRoot_contour
-						debug "---------------------------------------------------------------------------------------"
-					)
+						-- on detahce les node -------
+-- 						nd_contour.parent = undefined
+						local operation = m_plug.contours_operations[i]	 as name
+						m_ndRoot_contour.enfants  = mgr_shapes.operation_booleenne		operation	m_ndRoot_contour 			nds_contours		
+-- 						debug "---------------------------------------------------------------------------------------"
+-- 						mgr_shapes.debug_nd		m_ndRoot_contour
+-- 						debug "---------------------------------------------------------------------------------------"
+-- 					)
 				)
 			)
 			debug "--------> m_ndRoot_contour	" var:m_ndRoot_contour
@@ -432,7 +440,7 @@ struct	str_terrain_node_core	(
 -- 			debug "	---->		m_pts_faces" var:m_pts_faces
 		),
 		
-		fn creer_geometrie_base = (
+		fn creer_geometrie_base = if m_pts_faces.count > 0 do (
 -- 			debug "	(2-1)	creer_geometrie_base"
 
 			--- version faces ---------------
@@ -457,33 +465,33 @@ struct	str_terrain_node_core	(
 			----- DEBUG------------------- */
 
 			
-			mgr_geo.souder_tout ()
+-- 			mgr_geo.souder_tout ()
 			
 		),
 		
-		fn actualiser_pts_quadrillages =(
+		fn actualiser_pts_quadrillages =  if m_pts_faces.count > 0 do (
 -- 			debug "	(2-2)	actualiser_pts_quadrillages"
 			if m_plug.grille_use	do	quadriller_geometrie_base ()
 			m_pts_quadrillages = for i in 1 to polyop.getNumVerts  m_plug.delegate	collect	polyop.getVert  m_plug.delegate		i
 		),
 		
-		fn actualiser_pts_projections =(
+		fn actualiser_pts_projections =  if m_pts_faces.count > 0 do (
 -- 			debug "	(3)		actualiser_pts_projections"
 			m_pts_projections  = projeter_sur_reliefs		m_pts_quadrillages
 		),
 		
-		fn realigner_auShapes	=(
+		fn realigner_auShapes	=  if m_pts_faces.count > 0 do (
 -- 			debug "	(4)		realigner_auShapes"
 			m_pts_aligner_auShapes = 	for i in 1 to m_pts_projections.count collect 	m_pts_projections[i] * inverse	m_plug.transformation
 		),
 		
-		fn actualiser_pts_decallageZ =(		
+		fn actualiser_pts_decallageZ = if m_pts_faces.count > 0 do (		
 -- 			debug "	(5-1)	actualiser_pts_decallageZ"	
 			m_pts_decallageZ	=	deepcopy m_pts_aligner_auShapes			
 			m_pts_decallageZ.z += m_plug.hauteur
 		),
 		
-		fn placer_pts_geometrie	=(
+		fn placer_pts_geometrie	= if m_pts_faces.count > 0 do (
 -- 			debug "	(5-2)	placer_pts_geometrie"	
 			
 			---- on bouge les vertex-----------

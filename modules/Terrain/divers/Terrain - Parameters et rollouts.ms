@@ -267,7 +267,7 @@
 				
 				-- init ----
 				if resol_Back == undefined 			do 	(
-					format "INIT RESOL BAKKKKKK\n"
+-- 					format "INIT RESOL BAKKKKKK\n"
 					resol_Back 				= 	copy	grille_resolution
 					
 				)

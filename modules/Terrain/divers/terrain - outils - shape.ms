@@ -2,19 +2,27 @@
 include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - mgr - Datas to string.ms" 
 
 struct str_terrain_outils_shape (
-	
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
 		m_debug	=	true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | shape"	  	var:var	 param:param		catch (),
-		m_tab_format_nd = "		",
-		fn	format_noeud  _nd = if m_debug do (			 
+	
+		m_tab_format_nd = "		",		
+		fn format_noeud 	_nd =(
 			local indent_prfix = "|    "
-			format (  m_tab_format_nd + _nd.nom + "\n" )
+			debug (  m_tab_format_nd + _nd.nom + "" )
 			if _nd.enfants.count >0 	do	m_tab_format_nd += indent_prfix
 			for enft in _nd.enfants 	do 	format_noeud enft
 			if _nd.enfants.count >0 	do	m_tab_format_nd = substring m_tab_format_nd 1 (	m_tab_format_nd.count -	indent_prfix.count )
 		),
+		fn	debug_nd  _nd = if m_debug do (			 
+			
+			debug "----------------------------------------------------"
+			format_noeud 	_nd 
+			debug "----------------------------------------------------"
+		),
+		
+		
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		
 		
@@ -485,11 +493,11 @@ struct str_terrain_outils_shape (
 				else (
 					---- s'il ne se croisent pas alors ils sont tout à l'interieur ou à l'extierieur l'un de l'autre -------------------------
 					local pts_triangles_shp1 = this.trianguler	_pts_shp1
--- 					local pts_triangles_shp2 = this.trianguler	_pts_shp_aTester
+ 					local pts_triangles_shp2 = this.trianguler	_pts_shp_aTester
 					
 					if survol_triangles  	_pts_shp_aTester[1]	pts_triangles_shp1	 then 
 						result = #interieur
-					else -- if survol_triangles  	_pts_shp1[1]		pts_triangles_shp2	 then 
+					else  if survol_triangles  	_pts_shp1[1]		pts_triangles_shp2	 then 
 						result = #exterieur
 						
 				)
@@ -653,10 +661,11 @@ struct str_terrain_outils_shape (
 			local pts_noeud 	=	_noeud.get_pts	()
 			
 			---- Version on prend les enfants 1 par 1 le plus pret ----------------------
-			local enfants_a_traiter	 = deepcopy _noeud.enfants
+			local enfants_a_traiter	 = for nd in  _noeud.enfants collect nd
 			while enfants_a_traiter.count > 0 do (
 				
 				local shps_enfants_a_traiter	=	for enfant in enfants_a_traiter collect ( enfant.get_pts() )
+				
 				local infos_enfant_proche		=	get_shape_lePlusProche	pts_noeud		shps_enfants_a_traiter
 				local enfant_proche				=	 enfants_a_traiter[ infos_enfant_proche.id_shp ]
 				
@@ -665,9 +674,36 @@ struct str_terrain_outils_shape (
 				for petitEnfant in enfant_proche.enfants do
 					pts_result += creer_pts_pourFace  petitEnfant
 				
-				deleteItem enfants_a_traiter  infos_enfant_proche.id_shp 
+				deleteItem enfants_a_traiter  infos_enfant_proche.id_shp
+				
 			) 
 			
+			/* 
+			
+			---- Version on prend les enfants 1 par 1 le plus pret ----------------------
+			local enfants_a_traiter	 = for i = 1 to  _noeud.enfants.count collect _noeud.enfants[i]
+			while enfants_a_traiter.count > 0 do (
+				
+				local shps_enfants_a_traiter	=	for enfant in enfants_a_traiter collect ( enfant.get_pts() )
+				
+				local enfant_aTraiter
+				local id_aTraiter = infos_enfant_proche.id_shp
+				if pts_noeud.count > 0 then (
+					local infos_enfant_proche		=	get_shape_lePlusProche	pts_noeud		shps_enfants_a_traiter
+					enfant_aTraiter				=	 enfants_a_traiter[ id_aTraiter ]
+					
+				) else (
+					id_aTraiter = 1
+					enfant_aTraiter = enfants_a_traiter[ id_aTraiter ]
+					
+				)
+				pts_noeud 							= ajouter_shape_aBooleen  	pts_noeud		( enfant_aTraiter.get_pts() )
+				
+				for petitEnfant in enfant_aTraiter.enfants do
+					pts_result += creer_pts_pourFace  petitEnfant
+				
+				deleteItem enfants_a_traiter  id_aTraiter
+			 */
 			/* ---- Version on prend les enfants 1 par 1 a la suite ----------------------
 			for enfant in _noeud.enfants do (
 				pts_noeud = ajouter_shape_aBooleen  		pts_noeud		( enfant.get_pts() )
@@ -837,14 +873,18 @@ struct str_terrain_outils_shape (
 		
 		
 		-------		Opérations booleennes 	-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		fn operation_booleenne		operation			_nd_base 			_nd_operateur			 =(
+		fn operation_booleenne		operation			_nds_base 			_nds_operateur			 =(
+			
+			if classof _nds_base !=array do 	_nds_base = #(_nds_base)
+			if classof _nds_operateur !=array do 	_nds_operateur = #(_nds_operateur)
+			
 			
 			format "\n\n\n\n"
 			format "\n\n\n\n"
 			debug "-------------------------- operation_booleenne	--------------------------------------------"
 			debug "type			"	var:operation
-			debug "_nd_base		"	var:_nd_base
-			debug "_nd_operateur	"	var:_nd_operateur
+			debug "_nd_base		"	var:_nds_base
+			debug "_nd_operateur	"	var:_nds_operateur
 			debug "--------------------------------------------------------------------------------------------"
 			
 
@@ -861,14 +901,23 @@ struct str_terrain_outils_shape (
 			)
 			
 			--- on renvois une liste de liste de shapes ---------
-			local 	result_pts_shps = #()
+			local 	result_nds = #()
 			
 			
 			
 			-------  ( 0 )	les noeuds en jeux	----------------------------------------------------------------------------------------------------------------------------------------------------------
-			m_nds_bases			=	#( copy _nd_base ) 			+	( deepcopy ( _nd_base.get_descendance ()	)	)
-			m_nds_operateurs	=	#( copy _nd_operateur ) 	+	( deepcopy ( _nd_operateur.get_descendance ()	)	)
-			
+			m_nds_bases			=	#()
+			for nd_base in _nds_base do (
+				if (nd_base.get_pts()).count > 0 do
+					append m_nds_bases nd_base 
+				m_nds_bases+= nd_base.get_descendance ()
+			)
+			m_nds_operateurs	= #()
+			for nd_operateur in _nds_operateur do (
+				if (nd_operateur.get_pts()).count > 0 do
+					append 		m_nds_operateurs 	nd_operateur 
+				m_nds_operateurs	+= 	nd_operateur.get_descendance ()
+			)
 			
 			
 			
@@ -999,18 +1048,22 @@ struct str_terrain_outils_shape (
 			
 			
 			---------------  on gere les noeuds sans intersection	-------------------------
-			case operation of (
+			case operation	of (
 				#addition:		(
 					-- on ajoute tout au resultat	-----
-					for nd in nds_operateur_ssIntersection do
-						append	result_pts_shps	( nd.get_pts())
-					for nd in nds_base_ssIntersection do
-						append	result_pts_shps	( nd.get_pts())
+					for nd in nds_operateur_ssIntersection do (
+						debug "ADDITION D UN OPERATEUR"
+						append	result_nds	( nd )
+					)
+					for nd in nds_base_ssIntersection do (
+						debug "ADDITION D UNE BASE"
+						append	result_nds	( nd )
+					)
 				)
 				#soustraction:		(
 					-- on ajoute les bases	-----
 					for nd in nds_base_ssIntersection do
-						append	result_pts_shps	( nd.get_pts())
+						append	result_nds	( nd)
 					-- on supprime les opes -------------------
 					for nd in nds_operateur_ssIntersection do
 						nd.supprimer ()
@@ -1022,13 +1075,19 @@ struct str_terrain_outils_shape (
 					for nd in nds_operateur_ssIntersection do
 						nd.supprimer ()
 				)
+				#union:		(
+					-- on ajoute vraiment tout tout -------------------
+					for nd in m_nds_bases do
+						append	result_nds	( nd)
+					for nd in m_nds_operateurs do
+						append	result_nds	( nd)
+				)
 			)
+		
 			
 			
 			
-			
-			
-			
+-- 			if m_intersections.count > 0 do (
 			
 			
 			
@@ -1037,7 +1096,7 @@ struct str_terrain_outils_shape (
 			
 			
 			---- tant qu'il reste des points à traiter	--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-			local	il_reste_des_points 	=	true
+			local	il_reste_des_points 	=	m_intersections.count > 0  and operation != #union
 			local sauvetage 				=	0
 			local annuler = false
 			while il_reste_des_points	and not annuler do (
@@ -1261,10 +1320,11 @@ struct str_terrain_outils_shape (
 					
 				)	---- Fin -	tant qu'on a pas fini la boucle	------------------------------------------------------------------------------------------------------
 				
+				--- on creer le noeud resultat -----------
+				local nv_nd = this.creer_noeud_booleen 	pts:shp_enConstruction	nom:(operation as string + "_" + result_nds.count as string )
 				
-				
-				---- on ajoute le shape obtenu -----------------------------------
-				append 	result_pts_shps	shp_enConstruction
+				---- on ajoute le noeud obtenu -----------------------------------
+				append 	result_nds	nv_nd
 				
 				
 				
@@ -1276,10 +1336,8 @@ struct str_terrain_outils_shape (
 					format "\n\n"
 					debug  "####################################################################################################################################"
 					debug  "								FIN DE L'OPERATION : OK"
-					debug  ( "								RESULTAT : " + result_pts_shps as string )
 					debug  "####################################################################################################################################"
-					format "\n\n"
-				
+					
 					
 					
 				)
@@ -1297,15 +1355,19 @@ struct str_terrain_outils_shape (
 			)	---- Fin -	tant qu'il reste des points à traiter		--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			
 			
+			debug  "####################################################################################################################################"
+			debug  ( "								RESULTAT : " )
+			debug 	"								result_nds" var:result_nds	 param:#nom
+			debug  "####################################################################################################################################"
+			format "\n\n"
 			
-			
-			result_pts_shps
+			result_nds
 			
 		),
 		
 		
 		------------------ hierarchie booleenne -----------------------------------
-		fn creer_noeud_hierarchie 	pts: 	nom:	=(
+		fn creer_noeud_booleen 	pts: 	nom:	=(
 			
 			---- noeud de la hierarchie ----------
 			struct str_terrain_booleen_node (
@@ -1345,6 +1407,7 @@ struct str_terrain_outils_shape (
 					
 					fn est_enCreux	= en_creux,
 					fn changer_sens =(
+						mgr_shp.debug "changer_sens" var:nom
 						pts = mgr_shp.changer_sens pts
 						),
 					
@@ -1428,20 +1491,21 @@ struct str_terrain_outils_shape (
 					nv_noeud.en_creux = false
 				
 			)
+			
 			nv_noeud
 			
 		),
 		
 		
-		fn integrer_nd_dans_hierarchie		_nd_courant		_nd_aIntegrer 		_operation	=(
+		fn inserer_noeud		_nd_courant		_nd_aIntegrer 		operation:#union	=(
 			
 			format "\n\n\n\n"
-			debug "######## integrer_nd_dans_hierarchie	########################"
+			debug "######## inserer_noeud	########################"
 			debug "_nd_courant" var:_nd_courant.nom
 			debug "_nd_courant" var:( _nd_courant.get_pts())
 			debug "_nd_aIntegrer" var:_nd_aIntegrer.nom
 			debug "_nd_aIntegrer" var:(_nd_aIntegrer.get_pts())
-			debug "_operation" var:_operation
+			debug "operation" var:operation
 			debug "#######################################################"
 			
 /* 			
@@ -1449,7 +1513,7 @@ struct str_terrain_outils_shape (
 * 		on a 4 possibilités : 	---->	B et A sont à coté l'un de l'autre.		( A + B = A et B ).		---->	B est ajouter au niveau de A				----> 	A et B
 * 																					( A - B = A ).				---->	B est un trou dans le vide.				----> 	A
 * 																					( A | B = 0 ).				---->	Il reste 0 shapes, pas d'intersection.	----> 	-VIDE-
-* 			
+* 																					union
 * 			
 * 								---->	B est entierement dans A.				( A + B = A ).				---->	A absorbe totalement B.					----> 	A
 * 																					( A - B = B dans A ).		---->	B est un trou complet dans A			----> 	B dans A
@@ -1465,7 +1529,6 @@ struct str_terrain_outils_shape (
 * 																					( A - B = B dans A ).		---->	faire les tracés.							----> 	tracés
 * 																					( A | B = B ).				---->	faire les tracés.							----> 	tracés
 */
-			local operation				=	_operation	 as name	--	_nd_aIntegrer.operation
 			local integration_reussie 	= false			
 			
 			
@@ -1476,15 +1539,20 @@ struct str_terrain_outils_shape (
 				
 				---- on regarde si un enfant du noeud courant	rentre dedans	-----------------
 				local i = 1
-				local  enfantsTemp = deepcopy		_nd_courant.enfants
-				for enfant in	enfantsTemp  do (
-					local result_integration =  integrer_nd_dans_hierarchie		enfant		_nd_aIntegrer 		_operation
-					debug "-----> result_integration" var:result_integration
-					if result_integration do
+				local  enfantsTemp = 		for enft in   _nd_courant.enfants collect enft
+				while enfantsTemp.count > 0  do (
+					local enfant = enfantsTemp[1]
+					local result_integration =  inserer_noeud		enfant		_nd_aIntegrer 		operation:operation
+					debug "--	ROOOT	---> result_integration" var:result_integration
+					if result_integration do (
+-- 						enfantsTemp = 		for enft in   _nd_courant.enfants collect enft
 						integration_reussie = true
+					 )
+					deleteItem enfantsTemp 1
 				)
 				
-				debug"----> integration_reussie" var:integration_reussie
+				debug"----> integration ENFANT reussie" var:integration_reussie
+				debug"----> ENFANTS RACINE		" var:_nd_courant.enfants
 				
 				if not integration_reussie do (
 					
@@ -1532,7 +1600,7 @@ struct str_terrain_outils_shape (
 											/* 
 											---- on regarde si un enfant du noeud courant	rentre dedans	-----------------
 											for enfant in	_nd_courant.enfants  do (
-												local result_integration =  integrer_nd_dans_hierarchie		enfant		_nd_aIntegrer 		_operation
+												local result_integration =  inserer_noeud		enfant		_nd_aIntegrer 		_operation
 												debug "-----> result_integration" var:result_integration
 												if result_integration do
 													integration_reussie = true
@@ -1552,7 +1620,7 @@ struct str_terrain_outils_shape (
 									)
 									
 									#union:(
-										_nd_courant.ajouter_enfant	_nd_aIntegrer	
+										_nd_courant.parent.ajouter_enfant	_nd_aIntegrer	
 										integration_reussie = true
 									)
 							) --- fin case operation-	---------------------
@@ -1586,13 +1654,13 @@ struct str_terrain_outils_shape (
 												local pos_enfant	=	get_positionRelative_shapes 	( enfant.get_pts() )	( _nd_aIntegrer.get_pts () )
 												if pos_enfant != #aCoté do (
 													if enfant.en_creux	then
-														integrer_nd_dans_hierarchie  		enfant  		_nd_aIntegrer		#addition
+														inserer_noeud  		enfant  		_nd_aIntegrer		operation:#addition
 													else
-														integrer_nd_dans_hierarchie  		enfant  		_nd_aIntegrer		#soustraction
+														inserer_noeud  		enfant  		_nd_aIntegrer		operation:#soustraction
 														
 													integration_dans_enfant = true
 												)
--- 												local integration = integrer_nd_dans_hierarchie  		enfant  		_nd_aIntegrer		#soustraction
+-- 												local integration = inserer_noeud  		enfant  		_nd_aIntegrer		#soustraction
 -- 												if integration then  
 -- 													integration_dans_enfant = true
 											)
@@ -1647,7 +1715,10 @@ struct str_terrain_outils_shape (
 									)
 									
 									#union:(
-										_nd_aIntegrer.ajouter_enfant		_nd_courant	
+									
+										local prt	=	_nd_courant.parent
+										_nd_aIntegrer.ajouter_enfant		_nd_courant
+										prt.ajouter_enfant		_nd_aIntegrer
 										integration_reussie = true
 									)
 							) --- fin case operation-	---------------------
@@ -1665,17 +1736,22 @@ struct str_terrain_outils_shape (
 								local shapes_booleens 	= 	operation_booleenne		operation		_nd_courant		_nd_aIntegrer
 								debug "shapes_booleens COUNT" var:shapes_booleens.count
 								
-								local nom_nd_courant = _nd_courant.nom
-								local nd_courant_parent = _nd_courant.parent	
+								local nom_nd_courant 		= _nd_courant.nom
+								local nd_courant_parent 	= _nd_courant.parent	
 								
 								_nd_courant.supprimer ()
-								_nd_aIntegrer.supprimer ()
+								if shapes_booleens.count > 0 then (
+-- 									_nd_courant.set_pts  shapes_booleens[ 1 ]
+									
+									local nvx_noeuds = 	this.get_noeuds_from_ptsShapes	shapes_booleens 		nom:_nd_courant.nom
+									
+									for i = 1 to   nvx_noeuds.count	do 
+										inserer_noeud		nd_courant_parent	nvx_noeuds[i]
+									
+									
+								) else 	_nd_courant.supprimer ()
 								
-								local i = 1 
-								for shp in  shapes_booleens	do (
-									local nv_nd = creer_noeud_hierarchie 	pts:shp				nom:(nom_nd_courant	+ "_" + (  i+=1 ) as string)
-									nd_courant_parent.ajouter_enfant		nv_nd 	
-								)
+								_nd_aIntegrer.supprimer ()
 								
 								debug "----	fin OPERATION" var:operation
 -- 							)
@@ -1694,7 +1770,7 @@ struct str_terrain_outils_shape (
 								
 								local i = 1 
 								for shp in  shapes_booleens	do (
-									local nv_nd = creer_noeud_hierarchie 	pts:shp				nom:(nom_nd_courant	+ "_" + (  i+=1 ) as string)
+									local nv_nd = creer_noeud_booleen 	pts:shp				nom:(nom_nd_courant	+ "_" + (  i+=1 ) as string)
 									nd_courant_parent.ajouter_enfant		nv_nd 	
 								)
 								
@@ -1717,7 +1793,7 @@ struct str_terrain_outils_shape (
 								
 								local i = 1 
 								for shp in  shapes_booleens	do (
-									local nv_nd = creer_noeud_hierarchie 	pts:shp				nom:(nom_nd_courant	+ "_" + (  i+=1 ) as string)
+									local nv_nd = creer_noeud_booleen 	pts:shp				nom:(nom_nd_courant	+ "_" + (  i+=1 ) as string)
 									nd_courant_parent.ajouter_enfant		nv_nd 	
 								)
 								
@@ -1733,18 +1809,26 @@ struct str_terrain_outils_shape (
 						) ---- fin #seCroisent ---------------------------------------------------------
 						
 				)	---	fin case position relative	------------------------------------
-					
-					
+				
+				
 			)
 				
 				
-			debug  "FIN 		FIN	FIN integrer_nd_dans_hierarchie	########################"
-			debug  "FIN 		integration_reussie" var:integration_reussie
+			debug  "FIN 	 inserer_noeud	########################"
+			debug  "integration_reussie" var:integration_reussie
+			debug_nd	 _nd_courant
+			format"\n\n"
 			integration_reussie
 			
 		),
 		
-	
+		
+		
+		
+		
+		
+		
+		
 		----- manipulation de  points  ---------------
 		fn nettoyer_points_inutiles	_pts	 	_seuil:.9999		=(
 			
@@ -1849,9 +1933,11 @@ struct str_terrain_outils_shape (
 				)
 				
 				--- on met les points dans l'ordre	----------
-				if not est_sensPositif 	pt_result 	 do
+				if not est_sensPositif 	pt_result 	 do (
+					debug "CUILA----------------->"
 					pt_result = changer_sens		pt_result
-				
+					debug "<-----------------CUILA"
+				)
 				append result	pt_result
 			)
 			
@@ -1866,9 +1952,6 @@ struct str_terrain_outils_shape (
 			
 			result
 		),
-		
-		
-		
 		fn interpoler_pts_from_shape  	_shp_node	=( 
 			
 			local pts_shps = interpoler_shape 		_shp_node
@@ -1881,20 +1964,38 @@ struct str_terrain_outils_shape (
 		
 		
 	------------------- INTERFACE -----------------------------------------------------------------------
-	public
-		fn get_noeuds_from_shape 		_shape 			=(
+		
+		fn get_noeuds_from_pts 		_pts_shps 		nom:"nv_nd"	=(
 			
-			local nd_porteur 		=	creer_noeud_hierarchie 	nom:"nd_provisoire"
-			local pts_shps 		= 	interpoler_pts_from_shape		_shape
+			local nd_porteur 		=	creer_noeud_booleen 	nom:"nd_provisoire"
+-- 			local result_nds	=	#()
+			local pts_shps 		= _pts_shps
 			
 			local i = 0
 			for pts_shp in pts_shps do (
-				nv_nd = creer_noeud_hierarchie 	pts:pts_shp	nom:(_shape.name	+ "_" + (  i+=1 ) as string)
-				integrer_nd_dans_hierarchie		nd_porteur		nv_nd 		#union
+				nv_nd = creer_noeud_booleen 	pts:pts_shp	nom:( nom	+ "_" + (  i+=1 ) as string)
+				nd_porteur.enfants	=	operation_booleenne		#union	nd_porteur		nv_nd
 				
+-- 				if nom != unsupplied  do
+-- 					nv_nd.nom = ( nom + "_" + (  i+=1 ) as string )
+-- 				nv_nd.maj_enCreux ()
+-- 				nv_nd.parent = undefined
 			)
 			
+-- 			result_nds
 			nd_porteur.enfants
+		),
+		
+		
+	public
+		fn get_noeuds_from_shape 		_shape 			=(
+			
+			local nd_porteur 	=	creer_noeud_booleen 		nom:"nd_provisoire"
+			local pts_shps 	= 	interpoler_pts_from_shape		_shape
+			local result 		= get_noeuds_from_pts	pts_shps	nom:_shape.name
+-- 			for nd in result  do
+-- 				nd.nom = (_shape.name	+ "_" + (  i+=1 ) as string)
+			result
 			
 		),
 		
@@ -1966,16 +2067,22 @@ struct str_terrain_outils_shape (
 					if IDs_pts_diagonal.count > 1 then (
 -- 						debug "Choisir un pt diagonal " 
 -- 						debug "-> id_pt_aTester" var:id_pt_aTester
-						local dist_id_max = -1e+10
+						local dist_id_min = 1e+10
 						for id_pt in IDs_pts_diagonal do (
-							local id_diag 	= ids_pts_dansTriangle[id_pt]
-							if id_diag < id_pt_aTester do id_diag = id_diag + pts_poly.count
+							local id_diag 		= ids_pts_dansTriangle[id_pt]
+-- 							local dist_test = abs ( id_pt_aTester - id_diag )
+							/* if id_diag < id_pt_aTester then (
+								dist_test = id_pt_aTester - 
+								id_diag = id_diag + pts_poly.count
+								
+							)		 */					
+							
 -- 							debug "	-> id_diag" var:id_diag
-							local dist_to_id = id_diag - id_pt_aTester
+							local dist_to_id = abs (id_diag - id_pt_aTester )
 -- 							debug "	-> dist_to_id" var:dist_to_id
-							if dist_to_id > dist_id_max do (
-								IDpt_decoupe = boucler pts_poly id_diag
-								dist_id_max = dist_to_id
+							if dist_to_id < dist_id_min do (
+								IDpt_decoupe 	= id_diag
+								dist_id_min 	= dist_to_id
 							)
 								
 						)
@@ -2074,6 +2181,7 @@ struct str_terrain_outils_shape (
 			
 	
 )
+
 
 
 

@@ -3,9 +3,32 @@
 
 
 ----- debug ------------------------------
-global debug, debuger, ecrire
+global debug, debuger, ecrire, pos
 global DEBUG_MODE = true
 
+
+fn pos 	_pos	= (
+	case classof _pos of (
+		Point3: (
+			try delete $p catch ()
+			p =   point pos:_pos		name:"p" centermarker:off axistripod:off cross:on Box:on size:10 constantscreensize:off drawontop:off wirecolor:yellow
+			select p
+		)
+		array: (
+			try delete $sp catch ()
+			sp = splineShape name:"sp"
+			pts = _pos
+			addnewSpline sp
+			for pt in pts do		addknot sp 1 #corner #curve  pt
+			close sp 1
+			updateShape sp
+			select sp
+		)
+		
+		
+	)
+
+)
 
 fn remplirTexte  _txt  var:	 param:  prefix: = (
 	
