@@ -162,7 +162,8 @@
 					local selecBack = copy lbx_contours.selection
 					supprimer_contour	lbx_contours.selection
 					actualiser ()
-					lbx_contours.selection = selecBack - 1
+					if lbx_contours.items.count > 1 do
+						lbx_contours.selection = selecBack - 1
 				)
 			)
 			on btn_relief_pick picked obj do

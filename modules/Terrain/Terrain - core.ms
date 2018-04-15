@@ -33,6 +33,9 @@ struct	str_terrain_node_core	(
 	----- les points stockés pour manip -----
 -- 		m_pts_contours	 			=	#(),		---- les listes de points issues des points des splines contours, cleannés et dans le bon sens. ------------
 		m_ndRoot_contour			=	undefined,
+		m_calque_resultat			=	undefined,
+		m_calques						=	#(),
+		
 		m_pts_faces					=	#(),		---- les listes de points des faces de base. ------------
 		m_pts_quadrillages			=	#(),		---- les positions des points des faces une fois les quadrillage fait et cleanné .------------
 		m_pts_aligner_auShapes	=	#(),		----.------------
@@ -378,66 +381,58 @@ struct	str_terrain_node_core	(
 		
 		
 		
-	---------  Actualisations de l'objet ----------------------------------------------
-		fn actualiser_noeuds_boolleens 		=(
-
-			m_ndRoot_contour			=		mgr_shapes.creer_noeud_booleen	nom:"root"	
+	---------  Actualisations de l'objet ----------------------------------------------	
+		fn actualiser_calques 		=(
 			
+			
+			format "\n\n\n\n\n"
+			debug "------------------------	ACTUALISER_CALQUES ()	---------------------------------------------------------------"
+			m_calques = #()
 			if m_plug.contours_nodes.count > 0 do (
-				
 				for 	i = 1 to	m_plug.contours_nodes.count  where m_plug.contours_nodes[ i ] != undefined and not isdeleted m_plug.contours_nodes[ i ] do (
 					local contour_node 	= 	m_plug.contours_nodes[i]
+					append m_calques 	(  mgr_shapes.creer_calque	shape_node:contour_node )
 					
-					local nds_contours 	=	mgr_shapes.get_noeuds_from_shape			contour_node	nom:contour_node.nom
-					
-					debug "---------> nds_contours" var:nds_contours
-					
-					
--- 					for nd_contour in nds_contours do (
-						
-						debug "---------------------------------------------------------------------------------------"
-						debug (  "integration nd_contour	" + i as string + " ---> " + contour_node.name )
-						debug "---------------------------------------------------------------------------------------"
-						-- on detahce les node -------
--- 						nd_contour.parent = undefined
-						local operation = m_plug.contours_operations[i]	 as name
-						m_ndRoot_contour.enfants  = mgr_shapes.operation_booleenne		operation	m_ndRoot_contour 			nds_contours		
--- 						debug "---------------------------------------------------------------------------------------"
--- 						mgr_shapes.debug_nd		m_ndRoot_contour
--- 						debug "---------------------------------------------------------------------------------------"
--- 					)
 				)
 			)
-			debug "--------> m_ndRoot_contour	" var:m_ndRoot_contour
-			debug "--------> m_ndRoot_contour.enfants	" var:m_ndRoot_contour.enfants	param:#nom
+			format "\n\n\n\n\n"
+			debug "------------------------	FIN	actualiser_calques()	---------------------------------------------------------------"
+-- 			debug "---------------- m_calques :"
+			for calque in m_calques	do
+				mgr_shapes.debug_calque calque
+			debug "---------------------------------------------------------------------------------------------------------------------------"
+			format "\n\n\n\n\n"
 			
 			
 		),
+			
+		fn operer_pileDeCalques 		=(
+			format "\n\n\n\n\n"
+			debug "------------------------	OPERER_PILEDECALQUES ()	---------------------------------------------------------------"
+
+			m_calque_resultat		=		mgr_shapes.creer_calque	nom:"root"
+			
+			for calque in m_calques do (
+				/* m_calque_resultat 	=	mgr_shapes. */
+				mgr_shapes.operer_calques	m_calque_resultat		calque
+			)
+			format "\n\n\n\n\n"
+			debug "------------------------	FIN	operer_pileDeCalques ()	---------------------------------------------------------------"
+			debug "---------------->	m_calque_resultat" var:m_calque_resulta
+			debug "---------------------------------------------------------------------------------------------------------------------------"
+			
+			format "\n\n\n\n\n"
+		),
+		
+		
+		
+		
+		
 		
 		fn actualiser_pts_faces =(
--- 			debug "	(1-2)	actualiser_pts_faces"
 			
+			m_pts_faces = m_calque_resultat.get_pts ()
 			
-			
-			
-			
-			m_pts_faces = mgr_shapes.get_pts_from_hierachie		m_ndRoot_contour
-			
-			debug "--------> m_pts_faces	" var:m_pts_faces
-			/* ----- DEBUG-------------------
-			sp = splineShape name:(Uniquename "m_pts_faces ")
-			for j in 1 to m_pts_faces.count do (
-				addnewSpline sp
-
-				for pt in m_pts_faces[j] do		addknot sp j #corner #curve  pt
-				close sp j
-				updateShape sp
--- 				selectMore sp
-			)
-			----- DEBUG------------------- */
-			
-			
--- 			debug "	---->		m_pts_faces" var:m_pts_faces
 		),
 		
 		fn creer_geometrie_base = if m_pts_faces.count > 0 do (
@@ -576,7 +571,7 @@ struct	str_terrain_node_core	(
 		),
 		
 		fn actualiser 	etape:m_etape_aActualiser	=(
-			debug "actualiser"
+			debug "actualiser()"
 			
 -- 			debug "	---->	etape_aActualiser" var:m_etape_aActualiser
 			
@@ -617,7 +612,8 @@ struct	str_terrain_node_core	(
 					local chrono_temp = timeStamp ()
 					local chrono_temp_2 = timeStamp ()
 					------ 	(1-1)	creer les pts contours de base -----------------------
-					actualiser_noeuds_boolleens ()
+					actualiser_calques		()
+					operer_pileDeCalques	()
 					chrono_1_1 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)
 					local chrono_temp = timeStamp ()
 					------	(1-2)	et creer les points des faces de base -------------------
@@ -625,6 +621,11 @@ struct	str_terrain_node_core	(
 					chrono_1_2 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)
 					chrono_1 = (  ((timeStamp ()) - chrono_temp_2 ) / 1000.0)
 				)
+				
+				
+				
+				
+				
 				
 				
 				------	(2)	creer le quadrillage  ----------------------------------
@@ -641,12 +642,14 @@ struct	str_terrain_node_core	(
 					chrono_2_1	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)					
 					local chrono_temp = timeStamp ()
 					
-					actualiser_pts_quadrillages ()
+-- 					actualiser_pts_quadrillages ()
 					
 					chrono_2_2	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)
 				)
 				
--- 				etape = 10
+				--- DEBUG------------------
+				etape = 101
+				--- DEBUG------------------
 				------	(3)	creer la projection  -----------------------------------
 				local chrono_3 =affichage_tpsVide
 				if etape <= 3 do (
@@ -669,12 +672,12 @@ struct	str_terrain_node_core	(
 					placer_pts_geometrie ()
 				)
 				
-				
+				format"\n\n\n"
 				local debug_detail = true
 				if debug_detail do (
 					debug ("----------------------------------------------------------------------------------------" )
 					debug ("---	(1)			Analyse des contours : 					" +  chrono_1	as string  )
-					debug ("---	(1)			*	actualiser_noeuds_boolleens : 			" +  chrono_1_1	as string  )
+					debug ("---	(1)			*	actualiser_calques : 			" +  chrono_1_1	as string  )
 					debug ("---	(1)			*	actualiser_pts_faces : 				" +  chrono_1_2	as string  )
 					debug ("---	(2-1)		Construction de la géometrie de base : 	" +  chrono_2_1	as string  )
 					debug ("---	(2-2)		Quadrillage : 							" +  chrono_2_2	as string  )

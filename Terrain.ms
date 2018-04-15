@@ -69,7 +69,7 @@ version:0
 			debug "		###	ajouter_contour	###"
 			
 			if appendIfUnique this.contours_nodes 	_node and aActualiser  do (
-				append		this.contours_operations	( #addition as string )
+				append		this.contours_operations	( #union as string )
 				this.rollout_global.actualiser ()
 				actualiser ()
 			)
