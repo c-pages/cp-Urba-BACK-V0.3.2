@@ -27,7 +27,7 @@ struct	str_terrain_node_core	(
 		
 	---- managers  ------------------
 		mgr_geo							= 	str_geometrie 		(),
-		mgr_shapes					= 	str_terrain_outils_shape (),
+		mgr_shape					= 	str_terrain_outils_shape (),
 		mgr_datas						=	str_datasToString (),
 		
 	----- les points stockés pour manip -----
@@ -256,7 +256,7 @@ struct	str_terrain_node_core	(
 		fn get_aire_terrain =(
 			local aire_terrain = 0
 			for pts_shp in	m_pts_faces do
-				aire_terrain += mgr_shapes.get_aire_shape		pts_shp
+				aire_terrain += mgr_shape.get_aire_shape		pts_shp
 			aire_terrain
 		),
 		
@@ -391,7 +391,7 @@ struct	str_terrain_node_core	(
 			if m_plug.contours_nodes.count > 0 do (
 				for 	i = 1 to	m_plug.contours_nodes.count  where m_plug.contours_nodes[ i ] != undefined and not isdeleted m_plug.contours_nodes[ i ] do (
 					local contour_node 	= 	m_plug.contours_nodes[i]
-					append m_calques 	(  mgr_shapes.creer_calque	shape_node:contour_node )
+					append m_calques 	(  mgr_shape.creer_calque	shape_node:contour_node )
 					
 				)
 			)
@@ -399,7 +399,7 @@ struct	str_terrain_node_core	(
 			debug "------------------------	FIN	actualiser_calques()	---------------------------------------------------------------"
 -- 			debug "---------------- m_calques :"
 			for calque in m_calques	do
-				mgr_shapes.debug_calque calque
+				mgr_shape.debug_calque calque
 			debug "---------------------------------------------------------------------------------------------------------------------------"
 			format "\n\n\n\n\n"
 			
@@ -410,11 +410,11 @@ struct	str_terrain_node_core	(
 			format "\n\n\n\n\n"
 			debug "------------------------	OPERER_PILEDECALQUES ()	---------------------------------------------------------------"
 
-			m_calque_resultat		=		mgr_shapes.creer_calque	nom:"root"
+			m_calque_resultat		=		mgr_shape.creer_calque	nom:"pile_de_calques"
 			
 			for calque in m_calques do (
-				/* m_calque_resultat 	=	mgr_shapes. */
-				mgr_shapes.operer_calques	m_calque_resultat		calque
+				/* m_calque_resultat 	=	mgr_shape. */
+				mgr_shape.operer_calques	m_calque_resultat		calque
 			)
 			format "\n\n\n\n\n"
 			debug "------------------------	FIN	operer_pileDeCalques ()	---------------------------------------------------------------"
@@ -444,7 +444,7 @@ struct	str_terrain_node_core	(
 			--- version triangles ---------------
 			local triangles =#()
 			for pts_shp in m_pts_faces do	
-				triangles += mgr_shapes.trianguler 	pts_shp
+				triangles += mgr_shape.trianguler 	pts_shp
 			for pts_tri in triangles do	mgr_geo.face	pts_tri 		smGrp:1
 			
 			/* ----- DEBUG-------------------
