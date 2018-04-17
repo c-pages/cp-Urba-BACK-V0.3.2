@@ -2,8 +2,9 @@
 
 
 include	 "$userScripts\\cp-Urba\\modules\\Batiment\\divers\\Batiment - Geometrie.ms"
-include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - shape.ms" 
+-- include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - shape.ms" 
 -- include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - Outils - booleen shape.ms" 
+include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\terrain - mgr de calques.ms" 
 
 
 
@@ -27,7 +28,8 @@ struct	str_terrain_node_core	(
 		
 	---- managers  ------------------
 		mgr_geo							= 	str_geometrie 		(),
-		mgr_shape					= 	str_terrain_outils_shape (),
+-- 		mgr_shape					= 	str_terrain_outils_shape (),
+		mgr_calques					= 	str_mgr_calques	(),
 		mgr_datas						=	str_datasToString (),
 		
 	----- les points stockés pour manip -----
@@ -384,9 +386,29 @@ struct	str_terrain_node_core	(
 	---------  Actualisations de l'objet ----------------------------------------------	
 		fn actualiser_calques 		=(
 			
-			
 			format "\n\n\n\n\n"
 			debug "------------------------	ACTUALISER_CALQUES ()	---------------------------------------------------------------"
+			
+			--- on vide la pile des calques -------------
+			mgr_calques.vider ()
+			
+			--- on ajoute un calque par contour de notre plug -------------
+			local contours_nds = m_plug.contours_nodes
+			if contours_nds.count > 0 do (
+				for 	i = 1 to	contours_nds.count  where contours_nds[ i ] != undefined and not isdeleted contours_nds[ i ] do (
+					local nv_calque	=	mgr_calques.creer_calque		shape_node:contours_nds[ i ]
+					mgr_calques.ajouter_calque	nv_calque
+				)
+			)
+			
+			
+			debug "------------------------	FIN	actualiser_calques()	---------------------------------------------------------------"
+			mgr_calques.debug_pile ()
+			debug "---------------------------------------------------------------------------------------------------------------------------"
+			
+			/* 
+			
+			format "\n\n\n\n\n"
 			m_calques = #()
 			if m_plug.contours_nodes.count > 0 do (
 				for 	i = 1 to	m_plug.contours_nodes.count  where m_plug.contours_nodes[ i ] != undefined and not isdeleted m_plug.contours_nodes[ i ] do (
@@ -402,18 +424,17 @@ struct	str_terrain_node_core	(
 				mgr_shape.debug_calque calque
 			debug "---------------------------------------------------------------------------------------------------------------------------"
 			format "\n\n\n\n\n"
-			
+			 */
 			
 		),
-			
 		fn operer_pileDeCalques 		=(
+			/* 
 			format "\n\n\n\n\n"
 			debug "------------------------	OPERER_PILEDECALQUES ()	---------------------------------------------------------------"
 
 			m_calque_resultat		=		mgr_shape.creer_calque	nom:"pile_de_calques"
 			
 			for calque in m_calques do (
-				/* m_calque_resultat 	=	mgr_shape. */
 				mgr_shape.operer_calques	m_calque_resultat		calque
 			)
 			format "\n\n\n\n\n"
@@ -421,19 +442,18 @@ struct	str_terrain_node_core	(
 			debug "---------------->	m_calque_resultat" var:m_calque_resulta
 			debug "---------------------------------------------------------------------------------------------------------------------------"
 			
-			format "\n\n\n\n\n"
+			format "\n\n\n\n\n" */
 		),
-		
-		
-		
-		
-		
-		
 		fn actualiser_pts_faces =(
 			
-			m_pts_faces = m_calque_resultat.get_pts ()
+-- 			m_pts_faces = m_calque_resultat.get_pts ()
 			
 		),
+		
+		
+		
+		
+		
 		
 		fn creer_geometrie_base = if m_pts_faces.count > 0 do (
 -- 			debug "	(2-1)	creer_geometrie_base"
@@ -611,13 +631,15 @@ struct	str_terrain_node_core	(
 				if etape <= 1 do (
 					local chrono_temp = timeStamp ()
 					local chrono_temp_2 = timeStamp ()
+					
 					------ 	(1-1)	creer les pts contours de base -----------------------
 					actualiser_calques		()
 					operer_pileDeCalques	()
 					chrono_1_1 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)
 					local chrono_temp = timeStamp ()
+					
 					------	(1-2)	et creer les points des faces de base -------------------
-					actualiser_pts_faces	()
+-- 					actualiser_pts_faces	()
 					chrono_1_2 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)
 					chrono_1 = (  ((timeStamp ()) - chrono_temp_2 ) / 1000.0)
 				)
@@ -625,6 +647,10 @@ struct	str_terrain_node_core	(
 				
 				
 				
+				
+				-------- DEBUG  ----- pour sortir du process  ------------------
+				etape = 101  
+				-------- DEBUG  ----- pour sortir du process  ------------------
 				
 				
 				
@@ -647,9 +673,6 @@ struct	str_terrain_node_core	(
 					chrono_2_2	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)
 				)
 				
-				--- DEBUG------------------
-				etape = 101
-				--- DEBUG------------------
 				------	(3)	creer la projection  -----------------------------------
 				local chrono_3 =affichage_tpsVide
 				if etape <= 3 do (

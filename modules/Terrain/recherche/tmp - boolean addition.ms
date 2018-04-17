@@ -1,11 +1,14 @@
 
-struct 	str_temp	(	
+-- struct 	str_temp	(	
+
+
+
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
 		m_debug	=	true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | shape"	  	var:var	 param:param		catch (),
 	
-		m_tab_format_nd = "		",		
+		m_tab_format_nd = "		",
 		fn format_noeud 	_nd =(
 			local indent_prfix = "|    "
 			debug (  m_tab_format_nd +  "+ " + _nd.nom + "" )
@@ -21,7 +24,7 @@ struct 	str_temp	(
 		fn debug_calque	_calq	=(
 			debug "----------------------------------------------------------------------------"
 			debug ("[ " + _calq.nom  + "(#" + _calq.operation as name + ") ]" )
-			for nd in _calq.nds do
+			for nd in _calq.noeuds do
 				debug_nd nd
 -- 			debug "----------------------------------------------------"
 			
@@ -450,9 +453,9 @@ struct 	str_temp	(
 			result
 		),
 		------- renvois la position d'un shape par rapport à un autre: si un shapes est ' l'interieur d'un autre (trou boolean), se croisent ou à l'exterieur ---------
-		fn get_positionRelative_shapes 		_pts_shpA		_pts_shpB 	=(
+		fn get_positionRelative_shapes 		_pts_shpA		_pts_shpB 		renvoyer_intersections:true		=(
 			
--- 			debug "get_positionRelative_shapes"
+-- 			debug "get_positionRelative_shapes()"
 			
 			struct	str_intersection	(
 				pos,
@@ -467,29 +470,36 @@ struct 	str_temp	(
 			---- si les BB se croisent	-------------------
 			if  BBs_seCroisent 	_pts_shpA 		_pts_shpB do (
 			
+-- 				debug "-------->BBs_seCroisent 	_pts_shpA 		_pts_shpB " var:(BBs_seCroisent 	_pts_shpA 		_pts_shpB )
 				---- on regadre si les edges se coupent --- si oui --->  #seCroisent -----------------
--- 				local se_coupent = false
+				local trouve = false
 				local  i = 1
-				while i <= _pts_shpA.count /*and  not se_coupent */ do (
+				while i <= _pts_shpA.count and  not trouve do (
 					
 					local pt_shpA			= _pts_shpA[ i ]
 					local i_svt	=	if i == _pts_shpA.count  then 1 else i + 1
 					local pt_shpA_svt	= _pts_shpA[ i_svt ]
 					
+-- 							debug "-------->pt_shpA " var:pt_shpA
+-- 							debug "-------->pt_shpA_svt " var:pt_shpA_svt
 					local  j = 1
-					while j <= _pts_shpB.count /* and not se_coupent */ do (
+					while j <= _pts_shpB.count 	and  not trouve  do (
 						
 						local pt_shp2			= _pts_shpB[ j ]
 						local j_svt	=	if j == _pts_shpB.count  then 1 else j + 1
 						local pt_shp2_svt	= _pts_shpB[ j_svt ]
+						
+-- 							debug "-------->pt_shpB " var:pt_shp2
+-- 							debug "-------->pt_shpB_svt " var:pt_shp2
 						
 						local intersection_pos = get_intersection_vecteurs		pt_shpA   pt_shpA_svt		pt_shp2		pt_shp2_svt 
 						if intersection_pos != undefined do (
 							append intersections  ( str_intersection 	pos:		intersection_pos		\
 																								id_A:	i 								\
 																								id_B:	j 								)
-																					
--- 							se_coupent = true
+							if not renvoyer_intersections do trouve = true
+-- 							debug "-------->INTERSECTION " 
+																								
 						)
 						j+= 1
 					)
@@ -540,7 +550,7 @@ struct 	str_temp	(
 		
 		
 		
-		
+
 		
 		
 		
@@ -750,456 +760,38 @@ struct 	str_temp	(
 		
 		------------------ OPERATIONS BOOLEENNES ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		---- membres operations booleennes--------------
-		m_nds_bases			,
-		m_nds_operateurs	,
-		m_intersections		,
-		/* 
-		---- fonction secondaires operations booleennes--------------
-		fn est_nd_deBase	_nd_aTester	=(
-			findItem	m_nds_bases		_nd_aTester != 0
-		),
-		 */
-		/* 
-		fn sont_noeuds_egaux		_nd_1		_nd_2 =(
-			format "\n\n"
-				debug " --------------------------sont_noeuds_egaux -------------------------------------------"
-				debug " ---------	_nd_1" var:_nd_1
-				debug " ---------	_nd_2" var:_nd_2
-			
-			local result = true
-			if _nd_1 == undefined and _nd_2 == undefined then  (
-				debug " DIFFERENCE #1"
-				result = true
-			) else if _nd_1 == undefined then   (
-				debug " DIFFERENCE #2"
-				result = false
-			) 	else if _nd_2 == undefined then   (
-				debug " DIFFERENCE #3"
-				result = false
-			) else if _nd_1.nom == _nd_1.nom then   (
-				debug " DIFFERENCE #4"
-				result = false
-			) else if _nd_1.en_creux == _nd_1.en_creux then   (
-				debug " DIFFERENCE #5"
-				result = false
-			) else if not sont_egaux_tableaux ( _nd_1.get_pts () ) ( _nd_2.get_pts () ) then   (
-				debug " DIFFERENCE #6"
-				result = false
-			) else if not sont_noeuds_egaux		_nd_1.parent	_nd_2.parent then   (
-				debug " DIFFERENCE #7"
-				result = false
-			)  else if _nd_1.enfants.count != _nd_2.enfants.count then   (
-				debug " DIFFERENCE #8"
-				result = false
-			) else for i = 1 to _nd_1.enfants.count do
-				if not sont_noeuds_egaux		_nd_1.enfants[1]	_nd_2.enfants[1] do   (
-				debug ( " DIFFERENCE #9-" + i as string )
-					result = false
-				)
-			result
-		),
-		 */
+-- 		m_nds_bases			,
+-- 		m_nds_operateurs	,
+-- 		m_intersections		,
+
 		
-		
-		/* 
-		fn get_intersections		_nd =(
+		fn get_booleen_nds					_nd_A 			_nd_B	operation:#union		intersections:#()	=(
 			
-			local result 			= #()
-			local est_uneBase		=	est_nd_deBase		_nd
-			
-			case est_uneBase of (
-				true:		result		=	for inter in m_intersections where  inter.nd_base 			==  _nd   collect  inter
-				false:	result			=	for inter in m_intersections where inter.nd_operateur 	== _nd 	collect inter
-			)
-			
-			
-			----------	on les classe ?	-----
-			fn compare_ordre_bases	 nd1 nd2 =			(
-				case of				(
-					(nd1.id_A < nd2.id_A): 	-1
-					(nd1.id_A > nd2.id_A): 	1
-					default: 0
-				)
-			)
-			fn compare_ordre_ope	 nd1 nd2 =			(
-				case of				(
-					(nd1.id_B < nd2.id_B): 	-1
-					(nd1.id_B > nd2.id_B): 	1
-					default: 0
-				)
-			)
-			
-			
-			if est_uneBase then
-				qsort result		 compare_ordre_bases
-			else
-				qsort result		 compare_ordre_ope
-			
-			result
-		),
-		 */
-		/* 
-		fn get_pts_jusquA_prochaine_intersection 	_nd_courant		_inter_courante		=(
-			
-			local shp_courant 	= _nd_courant.get_pts ()
-			local est_uneBase		=	est_nd_deBase	_nd_courant
-			local id_debut			=	if est_uneBase then	_inter_courante.id_A	else	_inter_courante.id_B
-			local intersections_avec_nd	=	get_intersections		_nd_courant
-			
-			debug "-----> intersections_avec_nd" var:intersections_avec_nd
-			
-			---- on cherche la prochaine intersection	-------
-			local i = 1
-			local trouve = false
-			local id_pt_next_intersc = 0
-			while i <= intersections_avec_nd.count and not trouve do (
-				local inter_avec_nd = intersections_avec_nd[ i ]
-				if est_uneBase then 
-					if inter_avec_nd.id_A > id_debut do (
-						id_pt_next_intersc = i
-						trouve = true
-					)
-				i+=1
-			)
-			
-			debug "id_pt_next_intersc" var:id_pt_next_intersc
-			
-			---- on creer le bout de  ligne	-------		
-			local 	result_pts 			=#()
-			local 	result_inter_svt		=	intersections_avec_nd [ id_pt_next_intersc ]
-			local 	prochain_stop 		= intersections_avec_nd [ id_pt_next_intersc ].id_A
-			debug "result_inter_svt" var:result_inter_svt
-			if id_pt_next_intersc != 0 do (
-				local id_pt_courant		=	id_debut
-				result_pts 					=	#( id_pt_courant )
-				
-				while 	id_pt_courant != prochain_stop do (
-					local id_pt_suivant	=	boucler 	shp_courant	( id_pt_courant + 1 )
-					append result_pts	 id_pt_suivant
-					id_pt_courant += 1
-				)
-					
-			)
-			
-			#( result_pts , result_inter_svt )
-			
-		),
-		*/
-		
-		fn get_booleen_nds					_nd_A 			_nd_B	operation:#union		intersections:#()=(
-			
-			debug "get_booleen_nds()"
+-- 			debug "get_booleen_nds()"
 			
 -- 			if classof _nds_base 		!=array do 	_nds_base = #(_nds_base)
 -- 			if classof _nds_operateur 	!=array do 	_nds_operateur = #(_nds_operateur)
 -- 			format "\n\n\n\n"
 			local pts_A = _nd_A.get_pts ()
+-- 			local sens = 1
+			if 	_nd_A.en_creux	do 	 sens = -1
+		
 			local pts_B = _nd_B.get_pts ()
+-- 			if 	_nd_A.en_creux	do 	pts_B =	changer_sens	pts_B
 			
 			format "\n\n\n\n"
 			debug "-------------------------- get_booleen_nds	--------------------------------------------"
 			debug "	operation"			var:operation
 			debug "	pts_A"				var:pts_A
 			debug "	pts_B"				var:pts_B
-			debug "	intersections"	var:intersections
+-- 			debug "	intersections"	var:intersections
 -- 			delete $intersection*
 -- 			for intersection in intersections do
 -- 				point pos:intersection.pos	name:(uniquename "intersection" )  centermarker:off axistripod:off cross:on Box:on size:4 constantscreensize:off drawontop:off wirecolor:blue
 			debug "--------------------------------------------------------------------------------------------"
-			
-/* 
-			struct	str_intersection	(
-				pos,
-				
-				nd_A,
-				id_pt_A 	=	0,
-				nd_B,
-				id_B 	=	0
-			)
-			
-			--- on renvois une liste de listes de noeuds ---------
-			*/
+
 			local 	result_nds 	= #()
--- 			local 	nd_result	= this.creer_noeud_booleen 	nom:"nd_provisoire"
-			/*
-			
-			-------  ( 0 )	les noeuds en jeux	----------------------------------------------------------------------------------------------------------------------------------------------------------
-			m_nds_bases			=	#()
-			m_nds_operateurs	= #()
-			
-			for nd_base in _nds_base do 
-				if (nd_base.get_pts()).count > 0 do			append 		m_nds_bases 			nd_base 
-			for nd_operateur in _nds_operateur do 
-				if (nd_operateur.get_pts()).count > 0 do	append 		m_nds_operateurs 	nd_operateur 
-			
-			
-			
-			
-			--- si on sousrtrait, on inverse les pleins et creux des operateurs	-------------
-			if operation == #soustraction do (
-				debug "Soustraction =>	on inverse les noeuds bases"
-				for i = 1 to m_nds_operateurs.count 	do
-					m_nds_operateurs[i].inverser_enCreux ()
-			)
-			
-			
-			--- on retourne les pts des noeuds en creux -------------------
-			--- bases	--
-			for i = 1 to m_nds_bases.count where m_nds_bases[i].en_creux do (
-				debug "m_nds_bases[i]" var:m_nds_bases[i].nom
-				m_nds_bases[i].changer_sens ()
-			)
-			--- operateurs ----
-			for i = 1 to m_nds_operateurs.count where m_nds_operateurs[i].en_creux do 
-					m_nds_operateurs[i].changer_sens ()
-			
-			
-			
-			
-			--------- debug ------------------------------
-			debug "m_nds_bases		" var:m_nds_bases				param:#nom
-			debug "m_nds_operateurs	" var:m_nds_operateurs	param:#nom
 
-*/
-
-
-/* 			sp = splineShape name:"bases"
-			for j in 1 to m_nds_bases.count do (
-				addnewSpline sp
-				local pts_tmp = m_nds_bases[j].get_pts ()
-				for pt in pts_tmp do		addknot sp j #corner #curve  pt
-				close sp j
-				updateShape sp
-			)
-			sp = splineShape name:"operateurs"
-			for j in 1 to m_nds_bases.count do (
-				addnewSpline sp
-				local pts_tmp = m_nds_operateurs[j].get_pts ()
-				for pt in pts_tmp do		addknot sp j #corner #curve  pt
-				close sp j
-				updateShape sp
-			)
-			--------- debug ------------------------------
- */
-
-
-
-
-
-
-/* 
-			
-			---------  ( 0 )		les INTERSECTIONS  operateur <--> bases		 ---------------------------------------------------------------------------------------------------------------------------
-			
-			---- on doit ici trouver les noeuds qui ne touchent personnes, et les autres ------------------
-			m_intersections =#()
-			local ids_opes_aTraiter 	 =	#{}	--1..m_nds_operateurs.count}
-			local ids_bases_aTraiter 	=	#{}	--1..m_nds_bases.count}
-			
-			--- pour chaque operateur-------------
-			for i_ope = 1 to m_nds_operateurs.count do (
-				local nd_ope	=	m_nds_operateurs[ i_ope ]
-				local pts_ope 	= nd_ope.get_pts ()
-				
-				
-				--- avec chaque bases		-------------
-				for i_base = 1 to m_nds_bases.count do (
-					local nd_base	=	m_nds_bases[ i_base ]
-					local pts_base = nd_base.get_pts ()
-					
-					
-					local pos_relative = get_positionRelative_shapes 	pts_base	pts_ope
-					
-					debug "--->	pos_relative" var:pos_relative[1]
-					case pos_relative[1] of (
-						#aCoté:	 		(
-							case operation	of (
-								#addition:		(
-								)
-								#soustraction:		(
-								)
-								#intersection:		(
-								)
-								#union:		(
-									nd_base.ajouter_enfant	nd_ope
-								)
-							) 
-										
-							) ---- fin #aCoté ---------------------------------------------------------
-		
-						#interieur:	 	(
-							) ---- fin #interieur ---------------------------------------------------------
-		
-						#exterieur:		(
-							
-							) ---- fin #exterieur ---------------------------------------------------------
-		
-						#seCroisent:	(
-							local nvls_intersections	=	pos_relative[2]
-							for intersec in nvls_intersections	do (
-								append m_intersections ( str_intersection 	pos:					intersec.pos	\
-																							nd_base:			nd_base			\
-																							nd_operateur:		nd_ope			\
-																							id_pt_base:		intersec.id_A	\
-																							id_pt_operateur:	intersec.id_B	)
-								ids_bases_aTraiter[ i_base ]	= true
-								ids_opes_aTraiter[ i_ope ] 	= true
-							)
-						)---- fin #seCroisent ---------------------------------------------------------
-					)---	fin case position relative	------------------------------------
-				)
-			) */
-			/* 
-			for i_ope = 1 to m_nds_operateurs.count do (
-				local nd_ope		=	m_nds_operateurs[ i_ope ]
-				local pts_ope 	= nd_ope.get_pts ()
-				
-				local ope_aIntersection = false
-				
-				for i in 1 to pts_ope.count do (
-					
-					local pt_ope 		= pts_ope[i]
-					local i_svt				= if i == pts_ope.count then 1 else  i + 1
-					local pt_ope_svt 	= pts_ope[ i_svt ]
-					
-					for i_base = 1 to m_nds_bases.count do (
-						local nd_base	=	m_nds_bases[ i_base ]
-						
-						
-						local base_aIntersection = false
-						
-						local pts_base = nd_base.get_pts ()
-						for j in 1 to pts_base.count do (
-							
-							local pt_base 			= pts_base[ j ]
-							local j_svt				= if j == pts_base.count then 1 else  j + 1
-							local pt_base_svt 	= pts_base[ j_svt ]
-							
-							local intersection_pos 	= get_intersection_vecteurs	pt_ope	pt_ope_svt		pt_base	pt_base_svt
-							if intersection_pos != undefined  do (
-								append m_intersections ( str_intersection 	pos:					intersection_pos	\
-																							nd_operateur:		m_nds_operateurs[ i_ope ]					\
-																							nd_base:				m_nds_bases[ i_base ]				\
-																							id_B:		i 							\
-																							id_A:				j 							)
-								ids_bases_aTraiter[ i_base ]		= true
-								ids_opes_aTraiter[ i_ope ] = true
-							)
-						)
-						
-					)
-				
-				)
-					
-			) */
-			/* 
-			----- on stock les noeuds isolés ------------------------
-			local		nds_opes_isoles 	=	#()	--1..m_nds_operateurs.count}
-			local 	nds_bases_isoles =	#()	--1..m_nds_bases.count}
-			
-			for i = 1 to m_nds_operateurs.count where not ids_opes_aTraiter[i]	do 
-				append nds_opes_isoles		m_nds_operateurs[i]
-			
-			for i = 1 to m_nds_bases.count where not ids_bases_aTraiter[i]	do 
-				append nds_bases_isoles		m_nds_bases[i]
-			
-			
-			
-			
-			local ids_intersections_aTraiter	=#{1..m_intersections.count}
-			
-			debug ""
-			debug"------ analyse intersection	---------------------------------------------------------------"
-			debug ""
-			debug "m_intersections	" var:m_intersections
-			debug "ids_bases_aTraiter" var:ids_bases_aTraiter
-			debug "ids_opes_aTraiter	" var:ids_opes_aTraiter
-			debug "nds_bases_isoles	" var:nds_bases_isoles	param:#nom
-			debug "nds_opes_isoles	" var:nds_opes_isoles	param:#nom
-			debug "--------------------------------------------------------------------------------------------"
-			
-			
-			
-			---------------  on gere les noeuds sans intersection	-------------------------
-			case operation	of (
-				#addition:		(
-					-- on ajoute tout au resultat	-----
-					for nd in nds_opes_isoles do 
-						append	result_nds	( nd )
-					for nd in nds_bases_isoles do 
-						append	result_nds	( nd )
-				)
-				#soustraction:		(
-					-- on ajoute les bases	-----
-					for nd in nds_bases_isoles do
-						append	result_nds	( nd)
-					-- on supprime les opes -------------------
-					for nd in nds_opes_isoles do
-						nd.supprimer ()
-				)
-				#intersection:		(
-					-- on supprime tout -------------------
-					for nd in nds_bases_isoles do
-						nd.supprimer ()
-					for nd in nds_opes_isoles do
-						nd.supprimer ()
-				)
-				#union:		(
-					-- on ajoute vraiment tout tout -------------------
-					for nd in m_nds_bases do
-						append	result_nds	( nd)
-					for nd in m_nds_operateurs do
-						append	result_nds	( nd)
-				)
-			)
-			 */
-			/* 
-			---------------  on gere les noeuds sans intersection	-------------------------
-			case operation	of (
-				#addition:		(
-					-- on ajoute tout au resultat	-----
-					for nd in nds_opes_isoles do (
-						debug "ADDITION D UN OPERATEUR"
-						append	result_nds	( nd )
-					)
-					for nd in nds_bases_isoles do (
-						debug "ADDITION D UNE BASE"
-						append	result_nds	( nd )
-					)
-				)
-				#soustraction:		(
-					-- on ajoute les bases	-----
-					for nd in nds_bases_isoles do
-						append	result_nds	( nd)
-					-- on supprime les opes -------------------
-					for nd in nds_opes_isoles do
-						nd.supprimer ()
-				)
-				#intersection:		(
-					-- on supprime tout -------------------
-					for nd in nds_bases_isoles do
-						nd.supprimer ()
-					for nd in nds_opes_isoles do
-						nd.supprimer ()
-				)
-				#union:		(
-					-- on ajoute vraiment tout tout -------------------
-					for nd in m_nds_bases do
-						append	result_nds	( nd)
-					for nd in m_nds_operateurs do
-						append	result_nds	( nd)
-				)
-			)
-		
-			
-			
-			
--- 			if m_intersections.count > 0 do (
-			
-			
-			
-			 */
-			
 			
 			
 			
@@ -1209,17 +801,17 @@ struct 	str_temp	(
 			local sauvetage 				=	0
 			local annuler = false
 			while il_reste_des_points	and not annuler do (
-				format "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
-				debug "------------------------------------------------- TANT QU'IL RESTE DES intersections à TRAITER	--------------------------------------------------------------------------------------------------------------------------------------------------------------------"
-				debug "------->	intersections" var:intersections
-				debug "------->	ids_intersections_aTraiter" var:ids_intersections_aTraiter				
+-- 				format "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+-- 				debug "------------------------------------------------- TANT QU'IL RESTE DES intersections à TRAITER	--------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+-- 				debug "------->	intersections" var:intersections
+-- 				debug "------->	ids_intersections_aTraiter" var:ids_intersections_aTraiter				
 				---- Le point demarrage, la premiere intersection de la liste --------------------
 				local id_intersection_aTraiter = ( ids_intersections_aTraiter as array )[1]
-				debug "------->	id_intersection_aTraiter" var:id_intersection_aTraiter			
+-- 				debug "------->	id_intersection_aTraiter" var:id_intersection_aTraiter			
 				local intersection_aTraiter		=	intersections[ id_intersection_aTraiter ]
 				ids_intersections_aTraiter [ id_intersection_aTraiter ] = false
 -- 				local intersection_aTraiter		=	m_intersections[1]
-				debug "intersection_aTraiter" 	var:intersection_aTraiter
+-- 				debug "intersection_aTraiter" 	var:intersection_aTraiter
 				
 				
 				---- les noeuds initiaux -------------------------
@@ -1241,7 +833,7 @@ struct 	str_temp	(
 						shp_initial			= pts_A
 						trace_courant		=	#A
 						id_pt_initial			=	intersection_aTraiter.id_A
-						debug "On inverse les noeuds initiaux, on est a GAUCHE"
+-- 						debug "On inverse les noeuds initiaux, on est a GAUCHE"
 					)
 					
 				else 	if   est_aGauche		pt_test_base		pt_test_intersection 	pt_test_operateur		do (
@@ -1250,14 +842,14 @@ struct 	str_temp	(
 						trace_courant		=	#A
 						id_pt_initial			=	intersection_aTraiter.id_A
 						
-						debug "On inverse les noeuds initiaux, on est PAS a GAUCHE"
+-- 						debug "On inverse les noeuds initiaux, on est PAS a GAUCHE"
 					)
 					
 					
 					
 				
 					
-				debug "nd_initial" var:nd_initial param:#nom
+-- 				debug "nd_initial" var:nd_initial param:#nom
 				
 				
 				
@@ -1274,6 +866,7 @@ struct 	str_temp	(
 				local id_pt_courant	=	id_pt_initial
 				local pt_courant		=	pt_initial
 				local sens = 1
+			if 	_nd_A.en_creux	do 	 sens = -1
 				
 				
 				
@@ -1290,17 +883,17 @@ struct 	str_temp	(
 				local on_a_fini_laBoucle = false
 				local annuler = false
 				while not on_a_fini_laBoucle  and not annuler	do (
-					format "\n\n"
-					debug "------------------------------------------------- tant qu'on a pas fini la boucle	----------------------------------------------------------------------------------------------------------------"
+-- 					format "\n\n"
+-- 					debug "------------------------------------------------- tant qu'on a pas fini la boucle	----------------------------------------------------------------------------------------------------------------"
 					
 				
 				
 -- 					debug "nd_courant" 		var:nd_courant.nom
 -- 					debug "nds_aTester" 	var:nds_aTester		param:#nom
-					debug "id_pt_courant" 		var:id_pt_courant
-					debug "pt_courant" 			var:pt_courant
-					debug "trace_courant" 		var:trace_courant
-					debug "" 	
+-- 					debug "id_pt_courant" 		var:id_pt_courant
+-- 					debug "pt_courant" 			var:pt_courant
+-- 					debug "trace_courant" 		var:trace_courant
+-- 					debug "" 	
 					
 					
 					--- on fait le segment  jusqu'a la prochaine intersection 	----------------------------
@@ -1360,10 +953,10 @@ struct 	str_temp	(
 									)
 								)
 							)
-						)-- fin for ----------
+						)		-- fin for ----------
 						
-						debug "intersections" 				var:intersections param:#pos
-						debug "prochaine_intersec" 	var:prochaine_intersec
+-- 						debug "intersections" 				var:intersections param:#pos
+-- 						debug "prochaine_intersec" 	var:prochaine_intersec
 						
 						
 						
@@ -1372,8 +965,8 @@ struct 	str_temp	(
 						if prochaine_intersec != undefined then (
 							
 							
-							debug "---------> INTERSECTION"
-							debug "---------> prochaine_intersec" var:prochaine_intersec
+-- 							debug "---------> INTERSECTION"
+-- 							debug "---------> prochaine_intersec" var:prochaine_intersec
 							
 -- 							ids_intersections_aTraiter[ findItem m_intersections	prochaine_intersec	 ] = false
 							
@@ -1383,14 +976,14 @@ struct 	str_temp	(
 								trace_courant 	=	#B
 								shp_courant	= 	pts_B
 								id_pt_courant 	=  prochaine_intersec.id_B
-	 							debug "	--->	on est sur A, on bascule sur B."
+-- 	 							debug "	--->	on est sur A, on bascule sur B."
 	-- 							nds_aTester	=	nds_bases
 							) else (
 								trace_courant 	=	#A
 -- 								nd_courant		=	prochaine_intersec.nd_base
 								shp_courant		= 	pts_A
 								id_pt_courant 	=  prochaine_intersec.id_A
-	 							debug "	--->	on est sur B, on passe sur A."							
+-- 	 							debug "	--->	on est sur B, on passe sur A."							
 	-- 							nds_aTester	=	nds_bases
 							)
 							
@@ -1422,14 +1015,14 @@ struct 	str_temp	(
 						---- si on a  pas d' intersection ----------------
 						) else (
 							
-							debug "---------> SUIVANT"
+-- 							debug "---------> SUIVANT"
 							
-							id_pt_courant 		= boucler	shp_courant		( id_pt_courant + 1 )
+							id_pt_courant 		= boucler	shp_courant		( id_pt_courant + sens )
 							pt_courant 		= shp_courant [ id_pt_courant ]
 							
 						)
 						
-						debug "---------> pt_courant" var:pt_courant
+-- 						debug "---------> pt_courant" var:pt_courant
 						
 						---- sortie  ou suivant -----------------
 						if prochaine_intersec == intersection_aTraiter then 
@@ -1457,10 +1050,25 @@ struct 	str_temp	(
 					if sauvetage > SAUVETAGE_MAX do annuler = true
 					
 				)	---- Fin -	tant qu'on a pas fini la boucle	------------------------------------------------------------------------------------------------------
-				debug "------------------------------------->	shp_enConstruction" var:shp_enConstruction
-				--- on creer le noeud resultat -----------
-				local nv_nd = this.creer_noeud_booleen 	pts:shp_enConstruction	nom:(operation as string + "_" + result_nds.count as string )
 				
+				
+				
+				
+				
+				--- on creer le noeud resultat -----------
+				
+				if 	_nd_A.en_creux	do 	shp_enConstruction =	changer_sens	shp_enConstruction
+				local nv_nd = this.creer_noeud_booleen 	pts:shp_enConstruction	\
+																				nom:(_nd_A.nom + "_" +_nd_B.nom  /* + "--->" + operation as string  */+ "_" + result_nds.count as string )	
+				
+-- 				nv_nd.enfants = for enfant in _nd_A.enfants collect enfant
+-- 				debug "------------------------------------->	_nd_A" var:_nd_A
+-- 				debug "------------------------------------->	_nd_B" var:_nd_B
+				debug "------------------------------------->	nv_nd" var:nv_nd
+				debug "------------------------------------->	shp_enConstruction" var:shp_enConstruction
+				
+				
+				 
 				---- on ajoute le noeud obtenu -----------------------------------
 				append 	result_nds	nv_nd
 				
@@ -1472,12 +1080,12 @@ struct 	str_temp	(
 
 			 	if 	(ids_intersections_aTraiter as array ).count ==  0	do (
 					il_reste_des_points = false
-					format "\n\n"
-					debug  "####################################################################################################################################"
-					debug  "								FIN DE L'OPERATION : OK"
-					debug  "####################################################################################################################################"
-					
-					
+-- 					format "\n\n"
+-- 					debug  "####################################################################################################################################"
+-- 					debug  "								FIN DE L'OPERATION : OK"
+-- 					debug  "####################################################################################################################################"
+-- 					
+-- 					
 					
 				) 
 				--- SAUVETAGE	----
@@ -1494,13 +1102,13 @@ struct 	str_temp	(
 			)	---- Fin -	tant qu'il reste des points à traiter		--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			
 			
-			debug  "####################################################################################################################################"
-			debug  ( "								RESULTAT : " )
+			debug "--------------------------------------------------------------------------------------------"
+			debug  ( "								RESULTAT booleen: " )
 			debug 	"								result_nds" var:result_nds
 -- 			for nd_result in result_nds do
 -- 				debug_nd	 nd_result
 			
-			debug  "####################################################################################################################################"
+			debug "--------------------------------------------------------------------------------------------"
 			format "\n\n"
 			
 			result_nds
@@ -1554,11 +1162,19 @@ struct 	str_temp	(
 						case operation of (
 								---------	A absorbe totalement B	----> 	A	--------------------------------	
 								#addition:	 		(
+									
+-- 									local enfants_ndA = for nd in_nd_A.enfants collect nd
+									
+									for enfant in _nd_A.enfants do
+										operation_booleenne				operation			enfant 			_nd_B
+									
 									_nd_A.ajouter_enfant	_nd_B
 									result_nds = #( _nd_A  )
 								)
 								---------	B est un trou complet dans A	----> 	B dans A	--------------------------------	
 								#soustraction:	 		(
+									for enfant in _nd_A.enfants do
+										operation_booleenne				operation			enfant 			_nd_B
 									_nd_B.ajouter_enfant	_ndA
 									result_nds = #( _nd_B  )
 								)
@@ -1568,7 +1184,7 @@ struct 	str_temp	(
 								)
 								
 								#union:(
-									_nd_A.ajouter_enfant	_nd_B
+									_nd_A.ajouter_enfant		_nd_B
 									result_nds = #( _nd_A  )
 								)
 						) --- fin case operation-	---------------------
@@ -1605,10 +1221,30 @@ struct 	str_temp	(
 					
 					
 				#seCroisent:	(		---->	A et B se coupent, on va avoir du decoupage à faire ! 					---------------------------------------------------------
+						local result_enfants	=#()
+						local enfants_ndA = for nd in _nd_A.enfants	 collect nd
+						for enfant in  enfants_ndA	 do
+							result_enfants += 	operation_booleenne				operation			enfant 			_nd_B
+-- 						_nd_A.enfants=  #()
 						debug "A et B se croisent."
-						result_nds	 			= 	get_booleen_nds	  _nd_A 		_nd_B		operation:operation		intersections:pos_relative[2]
-					for nd in result_nds do
-						debug "result_nds" var:( nd.get_pts() )
+						result_nds	 		=	get_booleen_nds	  _nd_A 		_nd_B		operation:operation		intersections:pos_relative[2]
+						result_nds	+= result_enfants
+-- 						local result_enfants	=#()
+-- 						local enfants_ndA = for nd in _nd_A.enfants	 collect nd
+-- 						_nd_A.enfants=  #()
+-- 						for enfant in  enfants_ndA	 do
+-- 							result_nds += 	operation_booleenne				operation			enfant 			_nd_B
+						
+						result_nds
+					/* 
+						local calque_result		=	this.creer_calque	()
+						local result_bool	 		=	get_booleen_nds	  _nd_A 		_nd_B		operation:operation		intersections:pos_relative[2]
+						
+						for nd in result_bool do 
+							calque_result.ajouter_noeud	nd	operation:#union	
+
+						result_nds = calque_result.noeuds
+						 */
 					) ---- fin #seCroisent ---------------------------------------------------------
 					
 			)	---	fin case position relative	------------------------------------
@@ -1627,19 +1263,19 @@ struct 	str_temp	(
 			debug "inserer_noeud_dans_calque()"
 			debug "operation" var:operation
 			
-			local nds_du_calque	=	for nd in _calque.nds collect nd
-			_calque.nds =#()
+			local nds_du_calque	=	for nd in _calque.noeuds collect nd
+			_calque.noeuds =#()
 			if nds_du_calque.count == 0 then (
 				debug "nds_du_calque.count == 0"
-				_calque.nds  = #( _nd_aInserer )
+				_calque.noeuds  = #( _nd_aInserer )
 			) else (
 				for nd_calque in nds_du_calque do (
 					local result_bool = operation_booleenne  	operation		nd_calque		_nd_aInserer	
 					debug "---->	result_bool" var:result_bool
-					_calque.nds	+=	result_bool
+					_calque.noeuds	+=	result_bool
 				)
 			)
-			debug "_calque.nds" var:_calque.nds
+			debug "_calque.noeuds" var:_calque.noeuds
 			_calque
 		),
 		 */
@@ -1647,32 +1283,35 @@ struct 	str_temp	(
 		
 		
 		
-		fn operer_calques 	_calque_A	_calque_B	=(
+		fn operer_calques 	_calque_A		_calque_B	=(
 			
-			debug "operer_calques-------------ajouter_nd--------------------------------------------------------"
+			debug "operer_calques-------------ajouter_noeud--------------------------------------------------------"
 			debug ( "operer_calques---->	operation :" + _calque_B.operation )
 			debug ( "operer_calques---->	_calque_A :" + _calque_A.nom )
-			debug ( "operer_calques---->	_calque_A.nds :"  ) var:_calque_A.nds param:#nom
+			debug ( "operer_calques---->	_calque_A.noeuds :"  ) var:_calque_A.noeuds param:#nom
 			debug ( "operer_calques---->	_calque_B :" + _calque_B.nom )
--- 			debug ( "operer_calques---->	_calque_B.nds :" ) var:_calque_B.nds param:#nom
+-- 			debug ( "operer_calques---->	_calque_B.noeuds :" ) var:_calque_B.noeuds param:#nom
 -- 			local calque_result = copy _calque_A
-			local nds_B = #()
-			for nd in _calque_B.nds do(
-				append nds_B	nd
-				nds_B += nd.get_descendance ()
-			)
+			local nds_B = for nd in _calque_B.noeuds	collect nd	--#()
+-- 			_calque_B.noeuds	=#()
+			
+-- 			for nd in _calque_B.noeuds do(
+-- 				append nds_B	nd
+-- 				nds_B += nd.get_descendance ()
+-- 			)
 			
 			debug ( "operer_calques---->	nds_B"  ) var:nds_B	 param:#nom
 			debug "operer_calques--------------------------------------------------------------------------------"
 			for nd_B in nds_B do (
 				format"\n"
 				debug ( "################### 		operer_calques---->	ajouter :" + nd_B.nom )
-				_calque_A.ajouter_nd		nd_B		operation:_calque_B.operation
--- 				debug "operer_calques---------> _calque_A.nds" var:_calque_A.nds
+				debug_calque _calque_A
+				_calque_A.ajouter_noeud		nd_B		operation:_calque_B.operation
+-- 				debug "operer_calques---------> _calque_A.noeuds" var:_calque_A.noeuds
 			)
-			debug "operer_calques--------------------------------------------------------------------------------"
+			debug "--- FIN operer_calques--------------------------------------------------------------------------------"
 			debug_calque _calque_A
-			debug "operer_calques--------------------------------------------------------------------------------"
+			debug "--- FIN operer_calques--------------------------------------------------------------------------------"
 			_calque_A
 		),
 		
@@ -1758,8 +1397,8 @@ struct 	str_temp	(
 						)
 						if not trouve do
 							append enfants  _neudEnfant
-						
-						
+						if _neudEnfant.calque != undefined do
+							_neudEnfant.calque.retirer_nd	_neudEnfant
 						_neudEnfant.set_parent  	this
 					),
 					fn retirer_enfant		_enfant 		=(
@@ -1767,10 +1406,10 @@ struct 	str_temp	(
 						if id_enfant != 0 do
 							deleteItem enfants id_enfant
 					),
-					fn set_pts  			_pts			= pts = _pts,
+					fn set_pts  			_pts			= pts =  for pt in _pts collect pt,
 					
 					
-					fn get_pts  			= pts,
+					fn get_pts  			= for pt in pts collect pt,
 					fn get_descendance	=(
 						local result = #()
 						for enfant in enfants do (
@@ -1868,7 +1507,7 @@ struct 	str_temp	(
 			
 			pts_result
 		),
-		fn interpoler_shape 		_shp_node		=(
+		fn interpoler_shape 		_shp_node								=(
 -- 			debug "interpoler_shape()"
 -- 			debug "_shp_node" var:_shp_node
 			local result	=#()
@@ -1946,7 +1585,7 @@ struct 	str_temp	(
 -- 			debug "result" var:result
 			result
 		),
-		fn interpoler_pts_from_shape  	_shp_node	=( 
+		fn interpoler_pts_from_shape  	_shp_node					=( 
 			
 			local pts_shps = interpoler_shape 		_shp_node
 			
@@ -1961,7 +1600,6 @@ struct 	str_temp	(
 		
 		fn get_noeuds_from_pts 		_pts_shps 		nom:"nv_nd"	=(
 			
--- 			local nd_porteur 		=	creer_noeud_booleen 	nom:"nd_provisoire"
 			local result_nds	=	#()
 			local pts_shps 		= _pts_shps
 			
@@ -1969,27 +1607,88 @@ struct 	str_temp	(
 			for pts_shp in pts_shps do (
 				local nv_nd = creer_noeud_booleen 	pts:pts_shp	nom:( nom	+ "_" + (  i+=1 ) as string)
 				append result_nds 	nv_nd
--- 				nd_porteur.enfants	=	operation_booleenne		#union	nd_porteur		nv_nd
-				
--- 				if nom != unsupplied  do
--- 					nv_nd.nom = ( nom + "_" + (  i+=1 ) as string )
--- 				nv_nd.maj_enCreux ()
--- 				nv_nd.parent = undefined
 			)
 			
--- 			nd_porteur.enfants
 			result_nds
+		),
+		
+		fn integrer_noeud		_nd_A		_nd_B	=(
+			debug "	#######	integrer_noeud	#######"
+			local result
+			
+			local pos_relative	=	get_positionRelative_shapes 		( _nd_A.get_pts () ) 		( _nd_B.get_pts () )  		renvoyer_intersections:false	
+			debug "	---->	pos_relative" var:pos_relative
+			case pos_relative[1] of (
+				
+				#aCoté:	 		result = false
+				
+				#interieur:		 (
+						------ on regarde s'il rentre dans les enfants	--------------
+-- 						for enfant in _nd_A.enfants do (
+						
+						local a_ete_integre	=	false		
+						local	enfants_ndA = 	for nd in _nd_A.enfants collect nd
+						local i = 1
+						while	 i <= enfants_ndA.count and not a_ete_integre	do (
+							local ndA_enfant	=	enfants_ndA[ i ]
+-- 								for nd_calque in noeuds	do (
+							local integration_reussie	=	integrer_noeud		ndA_enfant	_nd_B
+							if integration_reussie do a_ete_integre = true
+							i += 1
+						)
+						
+						if not a_ete_integre do
+							_nd_A.ajouter_enfant 	_nd_B
+							
+						
+						result = true
+							
+					) ---- fin #interieur	----------
+					
+					
+					
+				#exterieur:		(
+					
+						if _nd_B.parent != undefined then (
+							local parent_B = _nd_B.parent 
+							_nd_B.ajouter_enfant 	_nd_A
+							append 	_nd_A.calque.noeuds	_nd_B
+-- 							parent_B.ajouter_enfant	_nd_A
+						) else (
+							_nd_B.ajouter_enfant 	_nd_A
+							append 	_nd_A.calque.noeuds	_nd_B
+						)
+						result = true
+						
+					) ---- fin #exterieur	----------
+				
+					
+					
+				#seCroisent:		(
+				
+						debug "###########################################################"
+						debug "#############################################################"
+						debug "#########											#########"
+						debug "#########	/!\	hmm! probleme, il ne devrait y 		#########"
+						debug "#########	avoir d'intersection de noeuds ici 		#########"
+						debug "#########											#########"
+						debug "#############################################################"
+						result = #PROBLEME
+					result = true
+					) ---- fin #seCroisent	----------
+			)
+			
+			result
 		),
 		
 		
 	public
 		fn get_noeuds_from_shape 		_shape 			=(
 			
-			local nd_porteur 	=	creer_noeud_booleen 		nom:"nd_provisoire"
+			
 			local pts_shps 	= 	interpoler_pts_from_shape		_shape
 			local result 		= 	get_noeuds_from_pts	pts_shps	nom:_shape.name
--- 			for nd in result  do
--- 				nd.nom = (_shape.name	+ "_" + (  i+=1 ) as string)
+			
 			result
 			
 		),
@@ -2009,40 +1708,112 @@ struct 	str_temp	(
 					mgr_shape,
 				
 				public					
-					nds			=	#(),
+					noeuds			=	#(),
 					operation	=	#addition,
-					nom,
+					nom			="",
+				
 				
 				---- fonctions	--------------------------------------------------------------
-					fn	ajouter_nd		_nd_aInserer	operation:#union		=	(
+				private
+						
+					fn integrer_noeuds 	_nds =(
+						local debug = mgr_shape.debug
+						debug "-----------integrer_noeuds--------------------------"
+						debug "----------->	_nds"var:_nds
+							
+							noeuds = #()
+-- 						local nds_calque = noeuds
+-- 						local nds_du_calque = #()
+						for nd in _nds do (
+							nd.set_calque this
+							debug "----------->	 integrer"	var:nd.nom
+							debug "----------->	 pts"	var:(nd.get_pts() )
+							debug "----------->	 noeuds"	var:noeuds	param:#nom
+							local a_ete_integre	=	false						
+							local nds_calque = 	for nd in noeuds collect nd	
+							local i = 1
+							while	 i <= nds_calque.count and not a_ete_integre	do (
+								local nd_calque	=	nds_calque[i]								
+								local integration_reussie	=	mgr_shape.integrer_noeud	nd_calque		nd
+								if integration_reussie do a_ete_integre	= true
+								i += 1
+								mgr_shape.debug_calque 	this
+							)
+							
+							debug "----------->	a_ete_integre"var:a_ete_integre
+							if not a_ete_integre do (
+								noeuds = nds_calque
+								append noeuds nd
+							)
+							
+							mgr_shape.debug_calque 	this
+						) --- fin pour chaque noeuds	_nds	----------------------------
+						
+						
+					),
+				public
+					fn	ajouter_noeud		_nd_aInserer	operation:#union		=	(
 -- 						mgr_shape.inserer_noeud_dans_calque 		_nd		this	
-						mgr_shape.debug 	"CALQUE---->	ajouter_nd"
+						mgr_shape.debug 		"CALQUE---->	ajouter_noeud"
 						mgr_shape.debug ( 	"CALQUE---->	nom :" + nom )
 						mgr_shape.debug ( 	"CALQUE---->	_nd_aInserer :" + _nd_aInserer.nom )
 						mgr_shape.debug ( 	"CALQUE---->	operation :" + operation )
 						
-						local nds_du_calque	=	for nd in nds collect nd
-						nds =#()
-						if nds_du_calque.count == 0 then (
-							nds  = #( _nd_aInserer )
+							
+						mgr_shape.debug ( 	"CALQUE---->	noeuds :" + noeuds as string )
+-- 						local nds_du_calque = #()
+-- 						for nd in noeuds do(
+-- 							append nds_du_calque	nd
+-- 							nds_du_calque += nd.get_descendance ()
+-- 						)
+						
+						
+						if noeuds.count == 0 then (
+							noeuds  = #( _nd_aInserer )
 						) else (
-							for nd_calque in nds_du_calque do (
-								local result_bool = mgr_shape.operation_booleenne  	operation		nd_calque		_nd_aInserer	
-								nds	+=	result_bool
+							
+							------- 
+							local enfants_aInserer = for nd in _nd_aInserer.enfants  collect nd
+							
+							for nd_aInserer_enfant  in enfants_aInserer do (
+								local result_bool = #()
+								local nds_du_calque	=	for nd in noeuds collect nd
+-- 								noeuds =#()
+								for nd_calque in nds_du_calque do (
+-- 									ajouter_noeud		nd_aInserer_enfant
+									result_bool += mgr_shape.operation_booleenne  	operation		nd_calque		nd_aInserer_enfant
+									mgr_shape.debug "result_bool" var:result_bool
+									mgr_shape.debug_calque	this
+								)
+								integrer_noeuds		result_bool
 							)
+							
+								mgr_shape.debug "****************************************************************** <--- là" 
+							mgr_shape.debug_calque	this
+							local result_bool = #()
+							local nds_du_calque	=	for nd in noeuds collect nd
+							for nd_calque in nds_du_calque do (
+-- 									ajouter_noeud		nd_aInserer_enfant
+								result_bool += mgr_shape.operation_booleenne  	operation		nd_calque		_nd_aInserer
+								mgr_shape.debug "result_bool" var:result_bool
+							)
+								mgr_shape.debug "****************************************************************** <--- et là" 
+							integrer_noeuds		result_bool
+							
 						)
 						
-						_nd_aInserer.set_calque	this
+									mgr_shape.debug_calque	this
+-- 						_nd_aInserer.set_calque	this
 						
 					),
 					fn retirer_nd		_nd 		=(
-						local id_nd= findItem nds	_nd
+						local id_nd= findItem noeuds	_nd
 						if id_nd != 0 do
-							deleteItem nds id_nd
+							deleteItem noeuds id_nd
 					),
 					fn get_pts =(
 						local pts_result =#()						
-						for nd in nds do 
+						for nd in noeuds do 
 							pts_result += mgr_shape.creer_pts_pourFace  nd
 						
 						pts_result
@@ -2059,10 +1830,10 @@ struct 	str_temp	(
 			
 			if shape_node != unsupplied	do (
 				nv_calque.nom 	= shape_node.name
-				local nds 			= get_noeuds_from_shape		shape_node
-				debug "nds" var:nds
-				for nd in nds do (
-					nv_calque.ajouter_nd 	nd
+				local noeuds 			= get_noeuds_from_shape		shape_node
+				debug "noeuds" var:noeuds
+				for nd in noeuds do (
+					nv_calque.ajouter_noeud 	nd
 					
 					debug "----------->	nv_calque" var:nv_calque
 				)
