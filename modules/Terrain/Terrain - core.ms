@@ -2,8 +2,8 @@
 
 
 include	 "$userScripts\\cp-Urba\\modules\\Batiment\\divers\\Batiment - Geometrie.ms"
--- include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - shape.ms" 
--- include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - Outils - booleen shape.ms" 
+include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - shape.ms" 
+
 include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\terrain - mgr de calques.ms" 
 
 
@@ -28,7 +28,7 @@ struct	str_terrain_node_core	(
 		
 	---- managers  ------------------
 		mgr_geo							= 	str_geometrie 		(),
--- 		mgr_shape					= 	str_terrain_outils_shape (),
+		mgr_shape						= 	str_outils_shape (),
 		mgr_calques					= 	str_mgr_calques	(),
 		mgr_datas						=	str_datasToString (),
 		
@@ -402,9 +402,8 @@ struct	str_terrain_node_core	(
 			)
 			
 			
-			debug "------------------------	FIN	actualiser_calques()	---------------------------------------------------------------"
 			mgr_calques.debug_pile ()
-			debug "---------------------------------------------------------------------------------------------------------------------------"
+			debug "------------------------	FIN	ACTUALISER_CALQUES ()	---------------------------------------------------------------"
 			
 			/* 
 			
@@ -427,8 +426,8 @@ struct	str_terrain_node_core	(
 			 */
 			
 		),
-		fn operer_pileDeCalques 		=(
 			/* 
+		fn operer_pileDeCalques 		=(
 			format "\n\n\n\n\n"
 			debug "------------------------	OPERER_PILEDECALQUES ()	---------------------------------------------------------------"
 
@@ -442,11 +441,15 @@ struct	str_terrain_node_core	(
 			debug "---------------->	m_calque_resultat" var:m_calque_resulta
 			debug "---------------------------------------------------------------------------------------------------------------------------"
 			
-			format "\n\n\n\n\n" */
-		),
+			format "\n\n\n\n\n" 
+		),*/
 		fn actualiser_pts_faces =(
 			
--- 			m_pts_faces = m_calque_resultat.get_pts ()
+			format "\n\n\n\n\n"
+			debug "------------------------	actualiser_pts_faces ()	---------------------------------------------------------------"
+			m_pts_faces = mgr_calques.get_pts_resultat ()
+			debug "m_pts_faces" var:m_pts_faces
+			debug "------------------------	actualiser_pts_faces ()	---------------------------------------------------------------"
 			
 		),
 		
@@ -634,23 +637,16 @@ struct	str_terrain_node_core	(
 					
 					------ 	(1-1)	creer les pts contours de base -----------------------
 					actualiser_calques		()
-					operer_pileDeCalques	()
+-- 					operer_pileDeCalques	()
 					chrono_1_1 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)
 					local chrono_temp = timeStamp ()
 					
 					------	(1-2)	et creer les points des faces de base -------------------
--- 					actualiser_pts_faces	()
+					actualiser_pts_faces	()
 					chrono_1_2 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)
 					chrono_1 = (  ((timeStamp ()) - chrono_temp_2 ) / 1000.0)
 				)
 				
-				
-				
-				
-				
-				-------- DEBUG  ----- pour sortir du process  ------------------
-				etape = 101  
-				-------- DEBUG  ----- pour sortir du process  ------------------
 				
 				
 				
@@ -672,6 +668,13 @@ struct	str_terrain_node_core	(
 					
 					chrono_2_2	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)
 				)
+				
+				
+				-------- DEBUG  ----- pour sortir du process  ------------------
+				etape = 101  
+				-------- DEBUG  ----- pour sortir du process  ------------------
+				
+				
 				
 				------	(3)	creer la projection  -----------------------------------
 				local chrono_3 =affichage_tpsVide
@@ -711,7 +714,7 @@ struct	str_terrain_node_core	(
 				debug ("---				TERRAIN construit en : 					" +  (  ((timeStamp ()) - chrono_debut ) / 1000.0)	as string   + " s." )
 				
 				if debug_detail do (						
-					debug ("---				Faces: 	" +  (  polyop.getNumFaces m_plug.delegate )	as string   + " 		(estimées: " + (  estimer_nbre_FacesFinal () )	as string + ")" )
+-- 					debug ("---				Faces: 	" +  (  polyop.getNumFaces m_plug.delegate )	as string   + " 		(estimées: " + (  estimer_nbre_FacesFinal () )	as string + ")" )
 					debug ("---				Vertex: " +  (  polyop.getNumVerts m_plug.delegate )	as string  )
 -- 					format "\n"
 -- 					debug ("---				Faces (estimées): 	" + (  estimer_nbre_FacesFinal () )	as string  )

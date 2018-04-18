@@ -45,16 +45,16 @@ struct str_outils_shape (
 		
 		
 		--- constantes---------
-		PRECISION_COURBE 			= 50,			--- en cm. ----
-		SEUIL_POINTS_EGAUX  	= .01,
+		PRECISION_COURBE 			= .1,--50,			--- en cm. ----
+		DOTMAX_COURBE 				= .999,	--- en dot ?!?. ----
+-- 		SEUIL_POINTS_EGAUX  	= .01,
 		-- constante pr debug-----------------
-		SAUVETAGE_MAX 			= 100,
+-- 		SAUVETAGE_MAX 			= 100,
 		
 -- 	private
 	public --- DEBUG en est en private normalement ----
 		
-		fn sont_egaux_tableaux 	first 	second =
-		(
+		fn sont_egaux_tableaux 	first 	second =		(
 			debug "sont_egaux_tableaux"
 			result = true
 			if first.count != second.count then (
@@ -562,7 +562,7 @@ struct str_outils_shape (
 		----- manipulation de  points  ---------------
 		fn nettoyer_points_inutiles	_pts	 	_seuil:.9999		=(
 			
-			local dotmax_courbe 	= _seuil	--- en dot ?!?. ----
+			local DOTMAX_COURBE 	= _seuil	--- en dot ?!?. ----
 			local pts_result 			= deepCopy	_pts
 			
 			---- pour chacune des splines du shape ----------------
@@ -589,7 +589,7 @@ struct str_outils_shape (
 					
 -- 					debug "------------>	dot_tangents" var:dot_tangents
 					
-					if abs dot_vecs >=	dotmax_courbe do (
+					if abs dot_vecs >=	DOTMAX_COURBE do (
 						append ids_aSupprimer 	id_pt_contour
 					)
 					
@@ -608,7 +608,6 @@ struct str_outils_shape (
 -- 			debug "_shp_node" var:_shp_node
 			local result	=#()
 	
-			local dotmax_courbe 		= .999	--- en dot ?!?. ----
 			
 			m_pts_contour = #()
 			
@@ -628,11 +627,13 @@ struct str_outils_shape (
 					local pt_contour_svt_type 	= getKnotType 		_shp_node  id_spline_contour	 id_pt_contour_svt
 					
 					if pt_contour_type != #corner or pt_contour_svt_type != #corner then (
-						
+-- 						debug "ON A UNE COURBE"
 						----- Interpolation  - adaptif ----------------------------					
 						local longueur_segment 	= get_longueur_segment	_shp_node	id_spline_contour		id_pt_contour 
 						local pos_courbe 			= 0
 						local nbr_division 			= floor ( longueur_segment / PRECISION_COURBE)
+-- 						debug "longueur_segment" var:longueur_segment
+-- 						debug "nbr_division" var:nbr_division
 						local increment_courbe 	= 1 / nbr_division
 						
 						local tangent					=	normalize ( tangentBezier3D   _shp_node 	id_spline_contour 	id_pt_contour 		0 )
@@ -650,8 +651,11 @@ struct str_outils_shape (
 							local dot_tangents = dot tangent tangent_derniere
 							
 	-- 						debug "------------>	dot_tangents" var:dot_tangents
-							if dot_tangents <	dotmax_courbe do (
+							if dot_tangents <	DOTMAX_COURBE do (
 								tangent_derniere = tangent
+								
+-- 						debug "--------------> ON Ajoute un point"
+								
 								append pt_result	pt_interpol
 							)
 							pos_courbe	+= increment_courbe
