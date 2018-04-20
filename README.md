@@ -61,6 +61,7 @@ ____________________________
 - [ ] Empecher de s'auto selectionner quand on pick un relief !
 - [ ] si possible ? : quand une surface ne survol pas de relief, faire en sorte que'elle reste plus ou mons a niveau avec la plus proche sur un relief ?
 - [ ] Faire en sorte de pouvoir piquer des splines type 'rectangle', 'circle' ...
+- [ ] Pouvoir donner une épaisseur ? peut etre juste les bords façon extrusion ...
 
 
 #### __Bâtiment__

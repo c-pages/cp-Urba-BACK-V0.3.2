@@ -3,7 +3,7 @@
 include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\terrain - mgr de polygones.ms" 
 
 
------ un calque --------------------------------------------------------------------------------------------
+----- un calque -------------------------------------------------------------------------------------------
 struct str_calque (
 	private
 		mgr_polys 		= str_mgr_polygones (),
@@ -39,7 +39,14 @@ struct str_calque (
 			if id_polygone != 0 do
 				deleteItem polygones id_polygone
 		),
-		fn get_polygones = for poly in polygones collect poly,
+		fn get_polygones 	all:true =(
+			local result = #()
+			for poly in polygones do (
+				append result		poly
+				if all do result	+=	poly.get_descendance ()
+			)
+			result
+		),
 		fn get_pts =(
 			local pts_result =#()						
 			for poly in polygones do 
@@ -123,7 +130,7 @@ struct	str_mgr_calques	(
 			local calque_result		=	this.creer_calque ()
 			
 			--- au premier tour on opere avec les polygones du calque A ------------
-			local polygones_aOperer	=	for poly in _calque_A.polygones collect poly
+			local polygones_aOperer	=	_calque_A.get_polygones ()
 				
 			--- si le calque à operer est vide, on ajoute tout B ----------
 			if polygones_aOperer.count == 0 then
@@ -151,10 +158,14 @@ struct	str_mgr_calques	(
 					
 				)
 			)
-			--- au dernier passage normalement on a tout calculé ---------			
-			calque_result.polygones = polygones_aOperer
+			--- au dernier passage normalement on a tout calculé ---------
+			for poly in polygones_aOperer do
+				calque_result.ajouter_polygone	poly
+			
+-- 			calque_result.polygones = polygones_aOperer
 			
 			calque_result
+			
 		),
 		
 		fn calculer_pile	=(

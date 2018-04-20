@@ -723,6 +723,11 @@ struct str_mgr_polygones (
 								---------	A absorbe totalement B	----> 	A	--------------------------------	
 								#addition:	 		(
 									
+									
+-- 									inserer_poly_ds_poly		_poly_B	_poly_A
+									_poly_A.ajouter_enfant		_poly_B
+									
+									/* 
 									local polys_tmp =#()
 									
 									--- au premier tour on opere avec les enfants du polygone A ------------
@@ -761,7 +766,7 @@ struct str_mgr_polygones (
 											inserer_poly_ds_poly		poly		_poly_A
 										
 									)
-									
+									 */
 									--- on renvoie A -------------------
 									result_polys = #( _poly_A  ) 
 									
@@ -819,6 +824,10 @@ struct str_mgr_polygones (
 				#seCroisent:	(		---->	A et B se coupent, on va avoir du decoupage à faire ! 					---------------------------------------------------------
 						debug "A et B se croisent."
 					
+							---- puis avec le poly A ----------
+							result_polys = 	calculer_booleen	  _poly_A 		_poly_B		operation:operation		intersections:pos_relative[2]	---	operation_booleene				_poly_A 			_poly_B	  operation:operation
+							
+					/* 
 						local polys_tmp = #()
 						
 						--- au premier tour on opere avec les enfants du polygone A ------------
@@ -878,7 +887,7 @@ struct str_mgr_polygones (
 							
 							result_polys = poly_result.enfants
 						)
-						
+						 */
 -- 						--- on renvoie A -------------------
 -- 						result_polys = #( _poly_A  ) 
 						
@@ -891,6 +900,9 @@ struct str_mgr_polygones (
 						result_polys	+= result_enfants
 						
 						result_polys */
+						
+						
+						
 					) ---- fin #seCroisent ---------------------------------------------------------
 					
 			)	---	fin case position relative	------------------------------------
