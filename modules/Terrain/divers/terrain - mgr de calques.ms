@@ -123,7 +123,7 @@ struct	str_mgr_calques	(
 	-----------------	Fonctions	internes ------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
 		fn operer	_calque_A	_calque_B	operation:#union	=(
-			debug "operer ()"
+			debug "-------------operer ()-----------------"
 			
 			debug "	_calque_A" var:_calque_A
 			debug "	_calque_B" var:_calque_B
@@ -133,31 +133,54 @@ struct	str_mgr_calques	(
 			local polygones_aOperer	=	_calque_A.get_polygones ()
 				
 			--- si le calque à operer est vide, on ajoute tout B ----------
-			if polygones_aOperer.count == 0 then
+			if polygones_aOperer.count == 0 then (
+				debug "-------------> polygones_aOperer.count == 0  !"
 				polygones_aOperer = _calque_B.get_polygones ()
+				debug "-------------> POLYGONES_AOPERER  ??????????? " var:polygones_aOperer param:#nom
 			
-			else (
+			) else (
+				debug "------- pour chacun des polygone du calque B ... --------------"
 				--- pour chacun des polygone du calque B ... --------------
 				for polygone_operant in _calque_B.polygones do (
 					
-					debug "	---->	polygone_operant" var:polygone_operant
+				format "\n"
+					debug "		---->	polygone_operant -B- " var:polygone_operant param:#nom
+					
+					
+					---- On vide les enfants ----------
+					polygone_operant.enfants = #()
 					
 					local polygones_result =#()
+					local a_ete_integrer = false
 					
 					---- sinon, à chacune des polygones du calque A  ... ----------
 					for polygone_aOperer in polygones_aOperer do (
-						debug "	---->	polygone_aOperer" var:polygone_aOperer
+						debug "			---->	polygone_aOperer -A-" var:polygone_aOperer param:#nom
+						
+						---- On vide les enfants ----------
+						polygone_aOperer.enfants = #()
 						
 						-----  ... on applique l'operation booleenne.  -----------------------
-						polygones_result +=	mgr_polys.operation_booleene  	polygone_aOperer 		polygone_operant		operation:operation
+						local ope_bool = mgr_polys.operation_booleene  	 polygone_aOperer		polygone_operant		operation:operation
+						
+						polygones_result +=	ope_bool[2]
+						if ope_bool[1]  do
+							a_ete_integrer = true
+						
+						debug "			---->	polygones_result" var:polygones_result param:#nom
 						
 					)
-				
+					
+					if not a_ete_integrer do
+						append polygones_result 	polygone_operant
+					
 					--- apres on opère chaque tour avec le resultat precedant et on recommence avec le polygone operant suivante ------------
 					polygones_aOperer = polygones_result
 					
 				)
 			)
+			
+			debug "-------------> POLYGONES_AOPERER" var:polygones_aOperer param:#nom
 			--- au dernier passage normalement on a tout calculé ---------
 			for poly in polygones_aOperer do
 				calque_result.ajouter_polygone	poly
@@ -170,17 +193,24 @@ struct	str_mgr_calques	(
 		
 		fn calculer_pile	=(
 			debug "calculer_pile ()"
-			--- on renvois un calque -----------
-			local result_calque = this.creer_calque ()
+			local result_calque
+			if m_pile.count >0 then (
+				--- on renvois un calque -----------
+				result_calque = m_pile[1]	--	this.creer_calque ()
+				
+				debug "----->	result_calque" var:result_calque
+				---- pour chaque calque de la pile-------------
+				for i = 2 to m_pile.count do (
+					local calque = m_pile[i]
+					--- on calcule l'operation avec chacun des polygones du calque pile	--------
+					result_calque = 		operer	result_calque	calque	operation:calque.operation
+				)
+				
+			) else 
+				result_calque = this.creer_calque ()
 			
-			debug "----->	result_calque" var:result_calque
-			---- pour chaque calque de la pile-------------
-			for calque in m_pile do 
-				--- on calcule l'operation avec chacun des polygones du calque pile	--------
-				result_calque = 		operer	result_calque	calque	operation:calque.operation
-			
-			
-			debug_calque		result_calque
+
+			debug_calque		result_calque		
 			
 			result_calque
 		),

@@ -279,6 +279,9 @@ struct str_mgr_polygones (
 	public	
 	
 		fn inserer_poly_ds_poly		_poly_aInserer		_poly_dest 		=(
+			debug "inserer_poly_ds_poly()"
+			debug "_poly_aInserer" var:_poly_aInserer
+			debug "_poly_dest" var:_poly_dest
 			if (_poly_dest.get_pts()).count == 0 then (
 				_poly_dest.ajouter_enfant	_poly_aInserer
 			) else (
@@ -689,9 +692,15 @@ struct str_mgr_polygones (
 			debug "operation_booleene ()"
 			local result_polys	=#()
 			
+			
+			
 			local pos_relative = mgr_shp.get_positionRelative_shapes 	( _poly_A.get_pts() )	( _poly_B.get_pts () )
 			
 			debug "pos_relative		"	var:pos_relative
+			
+			local 	result_pos_relative 		= pos_relative[1] 
+			local 	result_a_ete_integre 	= false
+			
 			case pos_relative[1] of (
 				
 				#aCoté:	 	(			----> 	B et A sont à coté l'un de l'autre.	---------------------------------------------------------
@@ -700,18 +709,23 @@ struct str_mgr_polygones (
 					case operation of (			
 								--------- 	B est ajouter au niveau de A				----> 	A et B			--------------------------------	
 								#addition:	 		(
-									result_polys = #( _poly_A , _poly_B )
+			
+									if _poly_A.en_creux then (
+										
+										result_polys = #(  )
+									) else
+										result_polys = #(  _poly_A )
 								)
 								---------	B est un trou dans le vide.				----> 	A	--------------------------------	
 								#soustraction:	 		(
-									result_polys = #( _poly_A )
+									result_polys = #( )
 								)
 								---------	Il reste 0 shapes, pas d'intersection.	----> 	-VIDE-	--------------------------------	
 								#intersection:	 		(
 									result_polys = #( )
 								)
 								#union:(
-									result_polys = #( _poly_A , _poly_B )
+									result_polys = #( _poly_A  )
 								)
 						) --- fin case operation-	---------------------
 					) ---- fin #aCoté ---------------------------------------------------------
@@ -723,24 +737,33 @@ struct str_mgr_polygones (
 								---------	A absorbe totalement B	----> 	A	--------------------------------	
 								#addition:	 		(
 									
+									if _poly_A.en_creux then 
+										result_polys = #( _poly_A  ) 
+									else
+										result_polys = #(   ) 
 									
 -- 									inserer_poly_ds_poly		_poly_B	_poly_A
-									_poly_A.ajouter_enfant		_poly_B
+-- 									_poly_A.ajouter_enfant		_poly_B
 									
 									/* 
 									local polys_tmp =#()
 									
 									--- au premier tour on opere avec les enfants du polygone A ------------
-									local polygones_aOperer	=	for poly in _poly_A.enfants collect poly
-										
-									--- si le calque à operer a des enfants,  ----------
+-- 									local polygones_aOperer	=	for poly in _poly_A.enfants collect poly
+									local polygones_aOperer	=	#( _poly_A ) + _poly_A.get_descendance ()
+									debug "# # # # polygones_aOperer" var:polygones_aOperer
+									
+									--- si le calque à operer n'a pas d'enfants,  ----------
 									if polygones_aOperer.count == 0	then (
 										
 										inserer_poly_ds_poly		_poly_B	_poly_A
 										
 									) else (
+										local polygones_operants = 	#( _poly_B ) + _poly_B.get_descendance ()
+									debug "# # # # polygones_operants" var:polygones_operants
+										
 										--- pour chacun des enfants du polygone B ... --------------
-										for polygone_operant in _poly_B.enfants do (
+										for polygone_operant in polygones_operants do (
 											
 											debug "	---->	polygone_operant" var:polygone_operant
 											
@@ -768,25 +791,24 @@ struct str_mgr_polygones (
 									)
 									 */
 									--- on renvoie A -------------------
-									result_polys = #( _poly_A  ) 
 									
 									
 								)
 								---------	B est un trou complet dans A	----> 	B dans A	--------------------------------	
 								#soustraction:	 		(
-									for enfant in _poly_A.enfants do
-										operation_booleene				operation			enfant 			_poly_B
-									_poly_B.ajouter_enfant	_ndA
-									result_polys = #( _poly_B  )
+-- 									for enfant in _poly_A.enfants do
+-- 										operation_booleene				operation			enfant 			_poly_B
+-- 									_poly_B.ajouter_enfant	_ndA
+									result_polys = #( _poly_A  )
 								)
 								---------	Il ne reste que B. 	----> 	B	--------------------------------	
 								#intersection:	 		(
-									result_polys = #( _poly_B  )
+									result_polys = #( _poly_A  )
 								)
 								
 								#union:(
-									_poly_A.ajouter_enfant		_poly_B
-									result_polys = #( _poly_A  )
+-- 									_poly_A.ajouter_enfant		_poly_B
+									result_polys = #(  )
 								)
 						) --- fin case operation-	---------------------
 
@@ -801,7 +823,11 @@ struct str_mgr_polygones (
 						case operation of (
 								---------	B absorbe totalement A.					----> 	B	--------------------------------	
 								#addition:	 		(
-									result_polys = #( _poly_B  )
+									if _poly_A.en_creux then 
+										result_polys = #(  ) 
+									else
+										result_polys = #(  _poly_A ) 
+-- 									result_polys = #(   )
 								)
 								---------	B fait disparaitre A => 0 shapes.		----> 	-VIDE-	--------------------------------	
 								#soustraction:	 		(
@@ -813,8 +839,8 @@ struct str_mgr_polygones (
 								)
 								
 								#union:(
-									_poly_B.ajouter_enfant	_poly_A
-									result_polys = #( _poly_B  )
+-- 									_poly_B.ajouter_enfant	_poly_A
+									result_polys = #( _poly_A  )
 								)
 						) --- fin case operation-	---------------------
 					) ---- fin #exterieur ---------------------------------------------------------
@@ -822,11 +848,12 @@ struct str_mgr_polygones (
 					
 					
 				#seCroisent:	(		---->	A et B se coupent, on va avoir du decoupage à faire ! 					---------------------------------------------------------
-						debug "A et B se croisent."
-					
+							debug "A et B se croisent."
+							
 							---- puis avec le poly A ----------
 							result_polys = 	calculer_booleen	  _poly_A 		_poly_B		operation:operation		intersections:pos_relative[2]	---	operation_booleene				_poly_A 			_poly_B	  operation:operation
 							
+							result_a_ete_integre  = true
 					/* 
 						local polys_tmp = #()
 						
@@ -907,7 +934,7 @@ struct str_mgr_polygones (
 					
 			)	---	fin case position relative	------------------------------------
 			
-			result_polys
+			#(result_a_ete_integre , result_polys )
 		),
 	
 	
