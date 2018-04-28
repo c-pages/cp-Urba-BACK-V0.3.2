@@ -410,7 +410,7 @@ struct str_outils_shape (
 		
 		
 		--- sens du shape ----------------------
-		fn est_sensPositif 					_pts 		=(
+		fn est_sensPositif 				_pts 		=(
 -- 			debug "est_sensPositif"
 			local result 				= true
 			local id_pointHaut 	=  point_lePlusHautSurY  	_pts
@@ -533,11 +533,17 @@ struct str_outils_shape (
 				
 			)
 			
-			local result  =#( result_pos, result_intersections)
+			
+			---- on renvois le resultat --------------
+			struct str_result (
+				position,
+				intersections
+			)
+			local result  =	str_result  position:result_pos		 intersections:result_intersections
 			result
 		),
 		
-		fn shape_estDans_shape		_shp_1  shp_test =(
+		fn shape_estDans_shape		_shp_1  shp_test 	=(
 			if _shp_1.count == 0 then 			
 				true
 			else 	if not BBs_seCroisent	_shp_1	shp_test then

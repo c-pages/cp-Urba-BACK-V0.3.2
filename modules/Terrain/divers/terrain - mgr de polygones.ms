@@ -92,11 +92,15 @@ struct str_polygone (
 		fn set_pts  			_pts			= pts =  for pt in _pts collect pt,
 		
 		
-		fn get_pts  			= for pt in pts collect pt,
+		fn get_pts  			= (
+			local result = for pt in pts collect pt
+-- 			if en_creux do	mgr_shp.changer_sens	result
+			result			
+		),
 		fn get_descendance	=(
-			local result = #()
+			local result = #(this)
 			for enfant in enfants do (
-				append result enfant
+-- 				append result enfant
 				result		+=	enfant.get_descendance()
 			)
 			result
@@ -113,7 +117,18 @@ struct str_polygone (
 			calque  = _calque
 			maj_enCreux ()
 		),
-		fn initialiser 	_ptr_shp = mgr_shp = _ptr_shp
+		
+		
+		fn get_positionRelative 		_poly_a_tester	=(
+			mgr_shp.get_positionRelative_shapes 	(  get_pts () )	(  _poly_a_tester.get_pts () )
+		)/* ,
+		
+		
+		
+		
+		
+		
+		fn initialiser 	_ptr_shp = mgr_shp = _ptr_shp */
 		
 )--- fin du struct----
 
@@ -286,7 +301,7 @@ struct str_mgr_polygones (
 				_poly_dest.ajouter_enfant	_poly_aInserer
 			) else (
 				local pos_relative = mgr_shp.get_positionRelative_shapes 		(_poly_dest.get_pts ())		(_poly_aInserer.get_pts ())	renvoyer_intersections:false
-				case pos_relative[1] of (
+				case pos_relative.position of (
 					
 					#aCoté:	 		result = false
 					
@@ -334,8 +349,8 @@ struct str_mgr_polygones (
 							debug "###########################################################"
 							debug "#############################################################"
 							debug "#########											#########"
-							debug "#########	/!\	hmm! probleme, il ne devrait y 		#########"
-							debug "#########	avoir d'intersection de noeuds ici 		#########"
+							debug "#########	/!\	hmm! probleme, il ne devrait y 	PAS	#########"
+							debug "#########	avoir d'INTERSECTION de polygones ici, on est dans l'insertion dans le calque		#########"
 							debug "#########											#########"
 							debug "#############################################################"
 							result = #PROBLEME
@@ -390,12 +405,12 @@ struct str_mgr_polygones (
 				---- les noeuds initiaux -------------------------
 -- 				local nd_initial						=	intersection_aTraiter.nd_A
 				local id_pt_initial		=	intersection_aTraiter.id_B				
-				local pt_initial 			= intersection_aTraiter.pos
+				local pt_initial 		= intersection_aTraiter.pos
 				local shp_initial		= pts_B
 				local trace_courant =	#B
 				
 				---- on regarde la position du point d'intersection pour voir si on inverse les noeuds --------------------
-				local pt_test_intersection	=	intersection_aTraiter.pos
+				local pt_test_intersection		=	intersection_aTraiter.pos
 				local pt_test_base				= pts_A[ intersection_aTraiter.id_A ]
 				local pt_test_operateur		= pts_B[intersection_aTraiter.id_B]
 				
@@ -973,7 +988,7 @@ struct str_mgr_polygones (
 			----	renvoie un nouveau polygonne	----
 			local nv_polygone = str_polygone	()		----	struct_prt:this
 			
-			nv_polygone.initialiser	this
+-- 			nv_polygone.initialiser	this
 			if pts != unsupplied and pts != undefined do (
 				if not mgr_shp.est_sensPositif 	pts do 
 					pts = mgr_shp.changer_sens pts

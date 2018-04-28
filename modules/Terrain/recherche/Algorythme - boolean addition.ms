@@ -1,228 +1,115 @@
+/*
 
 
-include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\terrain - mgr de polygones.ms" 
+-------------------------------------------------------------------------------------	CALCULER_BOOLEEN  	poly_A	poly_B	#opertation		-------------------------------------------------------------------------------------
+	*	On retourne les tracé en creux
+	* 	On calcul les intersections
+	*	....
 
+-------------------------------------------------------------------------------------	OPERER_POLYGONES	poly_A	poly_B	#opertation		-------------------------------------------------------------------------------------
 
------ un calque -------------------------------------------------------------------------------------------
-struct str_calque (
-	private
-		mgr_polys 		= str_mgr_polygones (),
-		
-	public					
-		polygones		=	#(),
-		operation		=	#addition,
-		nom				=	"",
-		
-	---- fonctions	--------------------------------------------------------------
-	public
-		fn	ajouter_polygone		_polygone_aAjouter	=	(
-			
-			--- on regarde si on peut l'inserer dans un polygone deja present dans le calque ----------------------------
-			local a_ete_integre			=	false		
-			local i = 1
-			while	 i <= polygones.count and not a_ete_integre	do (
-				local poly_calque				=	polygones[ i ]
-				local integration_reussie	=	mgr_polys.inserer_poly_ds_poly		_polygone_aAjouter		poly_calque
-				if integration_reussie do a_ete_integre = true
-				i += 1
-			)
-			
-			---- s'il a pas été inserer, on l'ajoute basiquement aux polygones du calque- ---------------------------------
-			if not a_ete_integre do
-				append 		polygones 		_polygone_aAjouter
-			
-			polygones
-			
-		),
-		fn retirer_polygone		_polygone 		=(
-			local id_polygone= findItem polygones	_polygone
-			if id_polygone != 0 do
-				deleteItem polygones id_polygone
-		),
-		fn get_polygones  =(	--	all:false
-			
-			local result = #()
-			for poly in polygones do
-				result += poly.get_descendance ()
-			
-			result
-		),
-		fn get_pts =(
-			local pts_result =#()						
-			for poly in polygones do 
-				pts_result += mgr_polys.creer_pts_pourFace  poly
-			
-			pts_result
-		)
-		
-) ---- fin struct calque --------------------------------------------------------------------------------------------
+*******************************************************************************************************	
+***						 				#opertation:	ADDITION	:	A+B								     ****
+*******************************************************************************************************
 
-
-
-struct	str_mgr_calques	(
-
-	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	private
-		m_debug	=	true,
-		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | calques"	  	var:var	 param:param		catch (),
-		
-		m_tab_format_poly = "		",
-		fn format_polygone 	_poly =(
-			local indent_prfix = "|    "
-			debug (  m_tab_format_poly +  "+ " + _poly.nom + "" )
-			if _poly.enfants.count >0 	do	m_tab_format_poly += indent_prfix
-			for enft in _poly.enfants 	do 	format_polygone enft
-			if _poly.enfants.count >0 	do	m_tab_format_poly = substring m_tab_format_poly 1 (	m_tab_format_poly.count -	indent_prfix.count )
-		),
-		fn	debug_poly  _poly = if m_debug do (			 
-			format_polygone 	_poly 
-		),
-		fn debug_calque	_calq	=(
-			
-			for _poly in _calq.polygones do
-				debug_poly _poly
-		),	
-		
-	public
-		fn debug_pile	=	(
-			debug "----------------------------------------------------------------------------"
-			debug "				PILE des calques"
-			local i = -1
-			for calque in this.m_pile do (
+	*	Suivant la position relative entre A et B : 
 				
-				debug "----------------------------------------------------------------------------"
-				debug ("	Calque " + (i+1) as string + " : [ " + calque.nom  + "(#" + calque.operation as name + ") ]" )
-				debug "----------------------------------------------------------------------------"
-				debug_calque calque
-			)
-			debug "----------------------------------------------------------------------------"
-			
-		),
-	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-	
-	-----------------	Membres	------------------------------------------------------------------------------------------------------------------------------------------------------
-	private	
-		m_pile 		=	#(),
-		
-		---- Managers		----------------------------
-		mgr_polys	=	str_mgr_polygones (),
-		mgr_shp				=	str_outils_shape (),
-		
-	
-		SEUIL_POINTS_EGAUX  	= .01,
-		-- constante pr debug-----------------
-		SAUVETAGE_MAX 			= 100,
-	
-	
-	-----------------	Fonctions	internes ------------------------------------------------------------------------------------------------------------------------------------------------------
-	private
-	
-	
-	/* 
-		fn operer	_calque_A	_calque_B	operation:#union	=(
-			debug "-------------operer ()-----------------"
-			
-			debug "	_calque_A" var:_calque_A
-			debug "	_calque_B" var:_calque_B
-			local calque_result		=	this.creer_calque ()
-			
-			
-			
-			
-			
-			
-			calque_result
-			
-		),
-		
-	
-		fn operer	_calque_A	_calque_B	operation:#union	=(
-			
-			debug "-------------operer ()-----------------"
-			
-			debug "	_calque_A" var:_calque_A
-			debug "	_calque_B" var:_calque_B
-			local calque_result		=	this.creer_calque ()
-			
-			--- au premier tour on opere avec les polygones du calque A ------------
-			local polygones_aOperer	=	_calque_A.get_polygones ()
-			
-			--- si le calque à operer est vide, on ajoute tout B -----------------------
-			if polygones_aOperer.count == 0 then (
-				debug "-------------> polygones_aOperer.count == 0  !"
-				polygones_aOperer = _calque_B.get_polygones ()
-				debug "-------------> POLYGONES_AOPERER  ??????????? " var:polygones_aOperer param:#nom
-			
-			) else (
-				debug "------- pour chacun des polygone du calque B ... --------------"
-				--- pour chacun des polygone du calque B ... --------------
-				for polygone_operant in ( _calque_B.get_polygones () ) do (
+				# 	A Coté:		En mode #Addition, les deux polys sont validés	=> 	RESULT_INTREGRATION = FALSE
+										=> 	RESULT_polys		= #( A, B )
 				
-					format "\n"
-					debug "		---->	polygone_operant -B- " var:polygone_operant param:#nom
-					
-					
-					---- On vide les enfants ----------
-					polygone_operant.enfants = #()
-					
-					local polygones_result =#()
-					local a_ete_integrer = false
-					
-					---- sinon, à chacune des polygones du calque A  ... ----------
-					for polygone_aOperer in polygones_aOperer do (
-						debug "			---->	polygone_aOperer -A-" var:polygone_aOperer param:#nom
-						
-						---- On vide les enfants ----------
-						polygone_aOperer.enfants = #()
-						
-						-----  ... on applique l'operation booleenne.  -----------------------
-						local ope_bool = mgr_polys.operation_booleene  	 polygone_aOperer		polygone_operant		operation:operation
-						
-						polygones_result +=	ope_bool[2]
-						if ope_bool[1]  do
-							a_ete_integrer = true
-						
-						debug "			---->	polygones_result" var:polygones_result param:#nom
-						
-					)
-					
-					if not a_ete_integrer do
-						append polygones_result 	polygone_operant
-					
-					--- apres on opère chaque tour avec le resultat precedant et on recommence avec le polygone operant suivante ------------
-					polygones_aOperer = polygones_result
-					
-				)
-			)
-			
-			debug "-------------> POLYGONES_AOPERER" var:polygones_aOperer param:#nom
-			--- au dernier passage normalement on a tout calculé ---------
-			for poly in polygones_aOperer do
-				calque_result.ajouter_polygone	poly
-			
--- 			calque_result.polygones = polygones_aOperer
-			
-			calque_result
-			
-		),
-		
-	
-	*/	
-		
-		
+				#	Interieur:		B étant entierement dans A, on regarde d'abord les operations entre B et les enfants de A:
+										*	pour chaque  A_enfant
+														---->	OPERER_POLYGONES		A_enfant + B		#ADDITION
+										*	Si aucun A_enfant n'a integré B alors on ajoute B est un enfant de A		=>	A(B)
+										=> 	RESULT_INTREGRATION = TRUE
+										=> 	RESULT_polys	= #( A(B) )
+										
+										
+				#	Exterieur:	B intègre entirement A, donc on regarde d'abord les operations entre A et les enfants de B:
+										*	pour chaque  B_enfant
+														---->	OPERER_POLYGONES 		B_enfant + A		#ADDITION
+										*	Si aucun B_enfant n'a integré A alors B est le parent de A		=>	B(A)
+										=> 	RESULT_INTREGRATION = TRUE
+										=> 	RESULT_polys	= #( B(A) )
+										
+				#	SeCoupent:	On va avoir un ou plusieurs polygones à renovoyer :
+										*	On retire A de son parent.
+											On calcul le booleen			 CALCULER_BOOLEEN		A + B (ope_A_B)
+											RESULT_polys	= #( ope_A_B )
+										*	puis pour chaque B_enfant
+												------>		OPERER_POLYGONES 		A + B_enfant 	(ope_A_enfantB)
+												on ajoute à 	RESULT_polys	 ( ope_A_enfantB )
+										*	puis pour chaque A_enfant :
+												------>		OPERER_POLYGONES	 	A_enfant + B 	(ope_enfantA_B)
+												on ajoute à 	RESULT_polys	 ( ope_enfantA_B )
+												* puis avec chaque B_enfant :
+													------>		OPERER_POLYGONES	 	 A_enfant + B_enfant 	(ope_enfantA_enfantB)
+													on ajoute à 	RESULT_polys	 ( ope_enfantA_enfantB )
+										=> 	RESULT_INTREGRATION = TRUE
+										
+
+	*	On renvois	 RESULT_INTREGRATION 		et 		RESULT_polys
+
+
+
+
+
+
+------------------------------------------------------------------------------------	OPERER_CALQUES		calque_A		calque_B		#opertation		-------------------------------------------------------------------------------------
+	*	Polys_operants = les polygones du calque B.
+	*	Pour chaque polygone du calque A : Poly_A
+				---->	Porteur_resultats = Vide
+				*		 avec chaque polygone de polys_operants : Poly_operant
+								---->	On calcul le booleen	OPERER_POLYGONES	poly_A	poly_B	#operation
+								---->	Et on ajoute le resultat à 	Porteur_resultats
+				---->	Si aucune operation n'a integré Poly_A, on l'ajoute aux resultats.
+				---->	on passe les resultats de chaque tour de poly_A	en tant que operants	:	Polys_operants = Porteur_resultats pour recommancer avec le 	Poly_A suivant.
+	*	on renvois 	Porteur_resultats.
+
+
+
+
+
+ */
+ 
+ 
+ 
+ 
+ /* 
+			 
+			 
+			 
+				__________________________________________________________________________________
+				
+								fn 	OPERATION_BOOL		calque_A  	calque_B		#Operation 
+				__________________________________________________________________________________
+				
+				*	On prend tout les polygones des calques : Polys_A et Polys_B. (avec toute leur descendance !)
+				
+				*	On analyse les intersections entre chacuns de ces polygones.
+						---->	on recupère la liste des intersections et les polygones sans intesections (polygones isolés).
+				*	On s'occupe des polygones isolés : en fonction de l'operation on va ajouter, ou pas, les polygones au resultat:
+						---->		#Addition : 		On ajoute tout les polygones isolés.
+						---->		#Soustraction : 	On ajoute les polygones isolés du Calque A.
+						---->		#Union : 			On ajoute rien.
+				*	On choisi la premiere intersection et le sens de départ.
+				*	On boucle tant qu'il reste des intersections à intégrer :
+						---->	on ajoute les points jusqu'à la prochaine intersection
+						---->	une fois à l'intersection on regarde ce que l'on fait:	choix du polygone courant et de la direction en fonction de l'opération en cours.
+						---->	Si on arrive au point initial: On ajoute le polygone obtenu aux resultats.
+				*	On renvois les resultats (dans un calque ?)
+			 
+			 
+			 
+			 
+			 
+			 
+			 
+			 
+			 
+  */
+ 
+ 
 		fn operation_booleene 		_calque_A		_calque_B		operation:#union =(
 			/*__________________________________________________________________________________
 			
@@ -323,7 +210,7 @@ struct	str_mgr_calques	(
 				
 				
 				
-				/* 
+				
 				---- 		On s'occupe des polygones isolés : en fonction de l'operation on va ajouter, ou pas, les polygones au resultat:		----------------
 				case operation of (
 						#addition:	 	(
@@ -352,7 +239,7 @@ struct	str_mgr_calques	(
 				
 				
 				
-				 */
+				
 				
 				
 				
@@ -363,8 +250,6 @@ struct	str_mgr_calques	(
 				
 				local annuler = false
 				while il_reste_des_points	and not annuler do (
-					
-					format"\n\n\n\n"
 					debug "------------------------------------------------------------------------------------------"
 					debug "						On boucle tant qu'il reste des intersections à intégrer "
 					debug "ids_intersections_aTraiter" var:ids_intersections_aTraiter 
@@ -596,105 +481,3 @@ struct	str_mgr_calques	(
 			calque_result
 		),
 		
-		
-		
-		
-		
-		
-		fn calculer_pile	=(
-			debug "calculer_pile ()"
-			local result_calque = this.creer_calque ()
-			if m_pile.count >0 then (
-				--- on renvois un calque -----------
-				result_calque = m_pile[1]	--	this.creer_calque ()
-				
-				debug "----->	result_calque" var:result_calque
-				---- pour chaque calque de la pile-------------
-				for i = 2 to m_pile.count do (
-					local calque = m_pile[i]
-					--- on calcule l'operation avec chacun des polygones du calque pile	--------
-					result_calque = 		operation_booleene	result_calque	calque	operation:calque.operation
-				)
-				
-			) 
-			
-			
--- 			debug_calque		result_calque		
-			
-			result_calque
-		),
-	-----------------	Interface	------------------------------------------------------------------------------------------------------------------------------------------------------
-	public
-		
-	-------------- calques -----------------------------------------
-		---- Manipulations -------------
-		fn creer_calque		shape_node:	nom:"temporaire"		=(
-			
-			--- Creation d'un calque vide	---------
-			local nv_calque = str_calque 	nom:nom
-			
-			--- Si on a un shape en entrée, on ajoute les polygones du shape au nv calque ----------
-			if shape_node != unsupplied	do (
-				
-				nv_calque.nom 	= shape_node.name
-				--- creation des polys à partir du shape -----
-				local polygones 	= mgr_polys.creer_fromShape	shape_node
-				
-				--- Ajout des polys au nv calque -----
-				for poly  in polygones do 
-					nv_calque.ajouter_polygone 	poly
-				
-			)
-			
-			nv_calque
-			
-		),
-		
-	-------------- la pile -----------------------------------------
-		---- Accessions -------------
-		fn get_pts_resultat	=(
-			local result = calculer_pile ()
-			result.get_pts ()
-		),
-		fn get_calques = 	for calque in m_pile collect calque,
-		
-		---- Manipulations -------------
-		fn vider = m_pile =#(),
-		fn ajouter_calque		_calque			index:0	=(
-			if index != 0 then 
-				insertItem		_calque		m_pile	index
-			else 
-				append 	m_pile 	_calque
-		),		
-		fn supprimer_calque	_calque	=(
-			
-		)
-		
-		
-		
-		
-		
-
-) ---------- FIN structure mgr calques --------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
