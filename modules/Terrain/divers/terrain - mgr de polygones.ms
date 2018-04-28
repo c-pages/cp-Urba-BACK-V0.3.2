@@ -1021,6 +1021,7 @@ struct str_mgr_polygones (
 				local nom_poly 	=  _shape_node.name	+ "_" + (  i+=1 ) as string
 				local nv_poly 		= creer_polygone		pts:pts_shp	nom:nom_poly
 				append result_polys nv_poly
+				debug "PTS:" var:(nv_poly.get_pts())
 -- 				
 -- 				--- on l'ajoute à la hierarchie resultante --------------
 -- 				inserer	 result_polys 	nv_poly
