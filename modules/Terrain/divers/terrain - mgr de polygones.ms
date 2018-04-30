@@ -732,8 +732,8 @@ struct str_mgr_polygones (
 				polys					=	#(),		
 				
 				a_cote				=	true,
-				poly_aLinterieur	= 	undefined,
-				poly_aLexterieur	= 	undefined
+				est_aLinterieurDe	= 	undefined,
+				est_aLexterieurDe	= 	undefined
 			)
 			
 			
@@ -775,81 +775,20 @@ struct str_mgr_polygones (
 								---------	A absorbe totalement B	----> 	A	--------------------------------	
 								#addition:	 		(
 									
-									
-									result.poly_aLinterieur	=	_poly_A
-									/* 
-									if _poly_A.en_creux then 
-										result_polys = #( _poly_A  ) 
-									else
-										result_polys = #(   ) 
-									 */
--- 									inserer_poly_ds_poly		_poly_B	_poly_A
--- 									_poly_A.ajouter_enfant		_poly_B
-									
-									/* 
-									local polys_tmp =#()
-									
-									--- au premier tour on opere avec les enfants du polygone A ------------
--- 									local polygones_aOperer	=	for poly in _poly_A.enfants collect poly
-									local polygones_aOperer	=	#( _poly_A ) + _poly_A.get_descendance ()
-									debug "# # # # polygones_aOperer" var:polygones_aOperer
-									
-									--- si le calque à operer n'a pas d'enfants,  ----------
-									if polygones_aOperer.count == 0	then (
-										
-										inserer_poly_ds_poly		_poly_B	_poly_A
-										
-									) else (
-										local polygones_operants = 	#( _poly_B ) + _poly_B.get_descendance ()
-									debug "# # # # polygones_operants" var:polygones_operants
-										
-										--- pour chacun des enfants du polygone B ... --------------
-										for polygone_operant in polygones_operants do (
-											
-											debug "	---->	polygone_operant" var:polygone_operant
-											
-											local polygones_result =#()
-											
-											----  à chacun des enfants du polygone A  ... ----------
-											for polygone_aOperer in polygones_aOperer do (
-												debug "	---->	polygone_aOperer" var:polygone_aOperer
-												
-												-----  ... on applique l'operation booleenne.  -----------------------
-												polygones_result +=	operation_booleene  	polygone_aOperer 		polygone_operant		operation:operation
-												
-											)
-										
-											--- apres on opère chaque tour avec le resultat precedant et on recommence avec le polygone operant suivante ------------
-											polygones_aOperer = polygones_result
-											
-										)
-										
-										---- une fois qu'on a fini on actualise les enfants de A ------
-										_poly_A.enfants = #()
-										for poly in polygones_aOperer do
-											inserer_poly_ds_poly		poly		_poly_A
-										
-									)
-									 */
-									--- on renvoie A -------------------
-									
-									
+									result.est_aLinterieurDe	=	_poly_A
+
 								)
 								---------	B est un trou complet dans A	----> 	B dans A	--------------------------------	
 								#soustraction:	 		(
--- 									for enfant in _poly_A.enfants do
--- 										operation_booleene				operation			enfant 			_poly_B
--- 									_poly_B.ajouter_enfant	_ndA
--- 									result_polys = #( _poly_A  )
+									
 								)
 								---------	Il ne reste que B. 	----> 	B	--------------------------------	
 								#intersection:	 		(
--- 									result_polys = #( _poly_A  )
+									
 								)
 								
 								#union:(
--- 									_poly_A.ajouter_enfant		_poly_B
--- 									result_polys = #(  )
+								
 								)
 						) --- fin case operation-	---------------------
 
@@ -868,27 +807,21 @@ struct str_mgr_polygones (
 								---------	B absorbe totalement A.					----> 	B	--------------------------------	
 								#addition:	 		(
 									
-									result.poly_aLexterieur		=	_poly_A
+									result.est_aLexterieurDe		=	_poly_A
 									
-			debug "result" var:result
--- 									if _poly_A.en_creux then 
--- 										result_polys = #(  ) 
--- 									else
--- 										result_polys = #(  _poly_A ) 
--- 									result_polys = #(   )
+									
 								)
 								---------	B fait disparaitre A => 0 shapes.		----> 	-VIDE-	--------------------------------	
 								#soustraction:	 		(
--- 									result_polys = #( )
+									
 								)
 								---------	Il ne reste que A.						----> 	A	--------------------------------	
 								#intersection:	 		(		
--- 									result_polys = #( _poly_A)
+									
 								)
 								
 								#union:(
--- 									_poly_B.ajouter_enfant	_poly_A
--- 									result_polys = #( _poly_A  )
+								
 								)
 						) --- fin case operation-	---------------------
 					) ---- fin #exterieur ---------------------------------------------------------
@@ -899,84 +832,9 @@ struct str_mgr_polygones (
 							debug "A et B se croisent."
 							
 -- 							---- puis avec le poly A ----------
-							result.polys = 	calculer_booleen	  _poly_A 		_poly_B		operation:operation		intersections:pos_relative[2]	---	operation_booleene				_poly_A 			_poly_B	  operation:operation
+							result.polys = 	calculer_booleen	  _poly_A 		_poly_B		operation:operation		intersections:pos_relative.intersections	---	operation_booleene				_poly_A 			_poly_B	  operation:operation
 							
 						result.a_cote = false
-					/* 
-						local polys_tmp = #()
-						
-						--- au premier tour on opere avec les enfants du polygone A ------------
-						local polygones_aOperer	=	for poly in _poly_A.enfants collect poly
-							
-						--- si le calque à operer A n'a pas d'enfants,  ----------
-						if polygones_aOperer.count == 0	then (
-							
-							--- pour chacun des enfants du polygone B ... --------------
-							for polygone_operant in _poly_B.enfants do 
-								polys_tmp += 	operation_booleene				_poly_A 			polygone_operant	  operation:operation
-							
-							---- puis avec le poly A ----------
-							polys_tmp += 	calculer_booleen	  _poly_A 		_poly_B		operation:operation		intersections:pos_relative[2]	---	operation_booleene				_poly_A 			_poly_B	  operation:operation
-							
-							---- une fois qu'on a fini on insere tout ça dans un poly provisoire --------------- ------
-							local poly_result =  this.creer_polygone	()
-							for poly in polys_tmp do
-								inserer_poly_ds_poly		poly		poly_result
-							
-							
-							result_polys = poly_result.enfants
-							
-						) else (
-							--- pour chacun des enfants du polygone B ... --------------
-							for polygone_operant in _poly_B.enfants do (
-								
-								debug "	---->	polygone_operant" var:polygone_operant
-								
-								local polygones_result =#()
-								
-								----  à chacun des enfants du polygone A  ... ----------
-								for polygone_aOperer in polygones_aOperer do (
-									debug "	---->	polygone_aOperer" var:polygone_aOperer
-									
-									-----  ... on applique l'operation booleenne.  -----------------------
-									polygones_result +=	operation_booleene  	polygone_aOperer 		polygone_operant		operation:operation
-									
-								)
-							
-								--- apres on opère chaque tour avec le resultat precedant et on recommence avec le polygone operant suivante ------------
-								polygones_aOperer = polygones_result
-								
-							)
-							
-							---- puis avec le poly A ----------
-							polygones_aOperer += 	calculer_booleen	  _poly_A 		_poly_B		operation:operation		intersections:pos_relative[2]	---	operation_booleene				_poly_A 			_poly_B	  operation:operation
-							
-							
-							---- une fois qu'on a fini on insere tout ça dans un poly provisoire --------------- ------
-							local poly_result =  this.creer_polygone	()
-							for poly in polygones_aOperer do
-								inserer_poly_ds_poly		poly		poly_result
-							
-							debug "-------------------------------------------------------------------------------------------"
-							debug_poly poly_result
-							
-							result_polys = poly_result.enfants
-						)
-						 */
--- 						--- on renvoie A -------------------
--- 						result_polys = #( _poly_A  ) 
-						
-						/* local result_enfants	=#()
-						local enfants_ndA = for nd in _poly_A.enfants	 collect nd
-						for enfant_A in  enfants_ndA	 do
-							result_enfants += 	operation_booleene				enfant_A 			_poly_B  operation:operation
-						debug "A et B se croisent.-------------"
-						result_polys	 =	calculer_booleen	  _poly_A 		_poly_B		operation:operation		intersections:pos_relative[2]
-						result_polys	+= result_enfants
-						
-						result_polys */
-						
-						
 						
 					) ---- fin #seCroisent ---------------------------------------------------------
 					

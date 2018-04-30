@@ -42,7 +42,7 @@ fn remplirTexte  _txt  var:	 param:  prefix: = (
 	)
 	if var != unsupplied then (
 		
-		result += "	- " + _txt +  " : "	
+		result += _txt +  " : "	
 		
 		if classof 	var == Array then (
 			
