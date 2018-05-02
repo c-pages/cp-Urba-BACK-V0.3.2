@@ -49,6 +49,9 @@ struct str_polygone (
 			pts = mgr_shp.changer_sens pts
 			),
 		
+			
+		fn reset_sens = if not 	mgr_shp.est_sensPositif 	pts	do changer_sens (),
+			
 		fn set_parent			_polygoneParent 	= (
 			if parent != undefined and parent  != _polygoneParent do
 				parent.retirer_enfant	this
@@ -58,6 +61,7 @@ struct str_polygone (
 		),
 		fn ajouter_enfant 	_neudEnfant 	distance_toParent:	= (
 			
+			format "aJOUTER ENFANT\n"
 			--- le placer dans l'ordre du plus proche au plus loin ---------------
 			local distTest	=	distance_toParent	--struct_prt.get_distance_shapes 	pts	_neudEnfant.pts
 			local trouve = false
@@ -80,8 +84,11 @@ struct str_polygone (
 			)
 			if not trouve do
 				append enfants  _neudEnfant
+			
 			if _neudEnfant.calque != undefined do
 				_neudEnfant.calque.retirer_polygone	_neudEnfant
+			
+			
 			_neudEnfant.calque = calque
 			_neudEnfant.set_parent  	this
 		),
@@ -125,6 +132,10 @@ struct str_polygone (
 			this
 		),
 		fn set_calque 		_calque =(
+			
+			for enfant in enfants do 
+				enfant.set_calque 		_calque
+			
 			if calque != undefined and calque  != _calque do
 				calque.retirer_polygone	this
 			
@@ -135,7 +146,9 @@ struct str_polygone (
 		
 		fn get_positionRelative 		_poly_a_tester	=(
 			mgr_shp.get_positionRelative_shapes 	(  get_pts () )	(  _poly_a_tester.get_pts () )
-		)/* ,
+		)
+		
+		/* ,
 		
 		
 		
@@ -308,51 +321,93 @@ struct str_mgr_polygones (
 	public	
 	
 		fn inserer_poly_ds_poly		_poly_aInserer		_poly_dest 		=(
--- 			debug "inserer_poly_ds_poly()"
--- 			debug "_poly_aInserer" var:_poly_aInserer
--- 			debug "_poly_dest" var:_poly_dest
+			format "\n\n"
+			debug "	//////////////////////////			inserer_poly_ds_poly()		//////////////////////////"
+			debug "_poly_aInserer" var:_poly_aInserer
+			debug "_poly_dest" var:_poly_dest
+			debug "_poly_dest  POINTS" var:(_poly_dest.get_pts ())
+			
+			/* 
+			struct str_result	(
+				est_aCote 		= false,
+				est_enfantDe	= undefined,
+				est_parentDe	= undefined
+			)
+			local result = str_result()
+			 */
+			
+			local result = false
+			
+			
 			if (_poly_dest.get_pts()).count == 0 then (
-				_poly_dest.ajouter_enfant	_poly_aInserer
+				_poly_dest.ajouter_enfant		_poly_aInserer
+				result = true
 			) else (
+				
+				
 				local pos_relative = mgr_shp.get_positionRelative_shapes 		(_poly_dest.get_pts ())		(_poly_aInserer.get_pts ())	renvoyer_intersections:false
+				debug "pos_relative" var:pos_relative
 				case pos_relative.position of (
 					
-					#aCoté:	 		result = false
+					#aCoté:	 		result = false		--result.est_aCote = true
 					
-					#interieur:		 (
+					#interieur:		(
 							------ on regarde s'il rentre dans les enfants du poly destination	--------------	
 							local a_ete_integre	=	false		
 							local	enfants_dest = 	for enfant in _poly_dest.enfants collect enfant
 							local i = 1
 							while	 i <= enfants_dest.count and not a_ete_integre	do (
-								local enfant_dest			=	enfants_dest[ i ]
-								local integration_reussie	=	inserer_poly_ds_poly		_poly_aInserer			enfant_dest
-								if integration_reussie do a_ete_integre = true
+								local enfant_dest	=	enfants_dest[ i ]
+								local integration_reussie		=	inserer_poly_ds_poly		_poly_aInserer			enfant_dest
+								if not integration_reussie do a_ete_integre = true
 								i += 1
 							)
-							
+							debug"a_ete_integre" var:a_ete_integre
 							----- sinon on l'ajoute aux enfants du poly dest ----------------
-							if not a_ete_integre do
+							if not a_ete_integre do (
+								
+-- 								result.est_enfantDe					=	_poly_dest
 								_poly_dest.ajouter_enfant 		_poly_aInserer
 								
+							)
 							result = true
+-- 								_poly_dest.ajouter_enfant 		_poly_aInserer
+								
 							
 						) ---- fin #interieur	----------
 						
 						
 						
 					#exterieur:		(
+-- 						result.est_parentDe	 =	_poly_dest
 						
-							if _poly_aInserer.parent != undefined then (
-								local parent_B = _poly_aInserer.parent 
+						local parent_dest = _poly_dest.parent 
+						_poly_aInserer.ajouter_enfant		_poly_dest
+						
+						local calque_dest = _poly_dest.calque 
+-- 						inserer_poly_ds_poly			_poly_dest		_poly_aInserer
+						if parent_dest != undefined then (
+							parent_dest.ajouter_enfant	_poly_aInserer
+							
+-- 							result = fasle	
+						) --else append		calque_dest.polygones		_poly_aInserer
+						
+						/* 
+						local parent_B = _poly_dest.parent 
+						inserer_poly_ds_poly			_poly_dest		_poly_aInserer
+						if _poly_aInserer.parent != undefined then 
+							parent_B.ajouter_enfant	_poly_aInserer
+						 */
+						/* 
 								_poly_aInserer.ajouter_enfant 	_poly_dest
--- 								append 	_poly_dest.calque.polygones	_poly_aInserer
-	-- 							parent_B.ajouter_enfant	_poly_dest
+-- 								append 	_poly_dest.calque.polygones		_poly_aInserer
 							) else (
 								_poly_aInserer.ajouter_enfant 	_poly_dest
 -- 								append 	_poly_dest.calque.polygones	_poly_aInserer
 							)
-							result = true
+-- 							result = true
+							 */
+-- 							result = false
 							
 						) ---- fin #exterieur	----------
 					
@@ -364,14 +419,15 @@ struct str_mgr_polygones (
 							debug "#############################################################"
 							debug "#########											#########"
 							debug "#########	/!\	hmm! probleme, il ne devrait y 	PAS	#########"
-							debug "#########	avoir d'INTERSECTION de polygones ici, on est dans l'insertion dans le calque		#########"
+							debug "#########	avoir d'INTERSECTION de polygones ici, on est dans l'insertion dans : inserer_poly_ds_poly() 	#########"
 							debug "#########											#########"
 							debug "#############################################################"
 							result = #PROBLEME
-						result = true
 						) ---- fin #seCroisent	----------
 				)
 			)
+			debug "	/////////////////////////////////////////////////////////////////////////////" var:result
+			
 			result
 		),
 		
@@ -851,7 +907,7 @@ struct str_mgr_polygones (
 			if  pos_relative.position == #interieur do (
 				local parent 
 				for poly_enfant in _poly_A.enfants do (
-					local est_dans_enfant = est_dans_polygone		poly_enfant 	_poly_B
+					local est_dans_enfant = 	est_dans_polygone		poly_enfant 	_poly_B
 					if est_dans_enfant != undefined do
 						parent	=	est_dans_enfant
 				)
@@ -915,6 +971,24 @@ struct str_mgr_polygones (
 			nv_polygone
 			
 		),
+		
+		fn dupliquer		_poly 	=(
+			local nv_poly = creer_polygone	nom:_poly.nom	pts:(_poly.get_pts ()) 
+			
+-- 			nv_poly.dist_auParent		=	_poly.dist_auParent
+			nv_poly.en_creux				=	 _poly.en_creux
+			
+			for enfant_poly in _poly.enfants do ( 
+				local dup_enfant = dupliquer enfant_poly
+				append	nv_poly.enfants	 dup_enfant
+				dup_enfant.parent = nv_poly
+			)
+			nv_poly.set_calque  undefined	
+						
+			nv_poly
+		), 
+		
+		
 		fn creer_fromShape		_shape_node	=(
 			
 			--- on renvoie une liste de polygones --------

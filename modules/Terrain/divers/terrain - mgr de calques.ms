@@ -5,6 +5,38 @@ include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\terrain - mgr de poly
 
 ----- un calque -------------------------------------------------------------------------------------------
 struct str_calque (
+	
+		--------------- DEBUG --------------------------------------------		
+		m_debug	=	true,
+		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | clq."	  	var:var	 param:param		catch (),
+		
+		m_tab_format_poly = "    ",
+		fn format_polygone 	_poly =(
+			local indent_prfix = "|    "
+			debug (  m_tab_format_poly +  "+ " + _poly.nom + "" )
+			if _poly.enfants.count >0 	do	m_tab_format_poly += indent_prfix
+			for enft in _poly.enfants 	do 	format_polygone enft
+			if _poly.enfants.count >0 	do	m_tab_format_poly = substring m_tab_format_poly 1 (	m_tab_format_poly.count -	indent_prfix.count )
+		),
+		fn	debug_poly  _poly = if m_debug do (			 
+			format_polygone 	_poly 
+		),
+		fn debug_calque	_calq	=(
+			debug ( "calque: " + _calq.nom	+" ---------------------")
+			for _poly in _calq.polygones do
+				debug_poly _poly
+		),	
+		--------------- DEBUG --------------------------------------------
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	private
 		mgr_polys 		= str_mgr_polygones (),
 		
@@ -15,30 +47,45 @@ struct str_calque (
 		
 	---- fonctions	--------------------------------------------------------------
 	public
-		fn	ajouter_polygone		_polygone_aAjouter	=	(
+		fn	ajouter_polygone		_polygone_aAjouter			brut_mode:false		=	(
+			format "\n\n"
+			debug "==================	ajouter_polygone =================================================="
+			debug "_polygone_aAjouter" var:_polygone_aAjouter.nom
+			debug_calque this
+			debug "===================================================================="
+			local en_creux_BACK = _polygone_aAjouter.en_creux
 			
--- 			debug "ajouter_polygone"
--- 			debug "_polygone_aAjouter" var:_polygone_aAjouter.nom
+			
+			_polygone_aAjouter.calque = this
 			
 			--- on regarde si on peut l'inserer dans un polygone deja present dans le calque ----------------------------
 			local a_ete_integre			=	false		
 			local i = 1
-			while	 i <= polygones.count and not a_ete_integre	do (
-				local poly_calque				=	polygones[ i ]
+			local polygones_aTraiter = for poly in polygones collect poly
+			
+			while	 i <= polygones_aTraiter.count and not a_ete_integre	do (
+				local poly_calque				=	polygones_aTraiter[ i ]
 				local integration_reussie	=	mgr_polys.inserer_poly_ds_poly		_polygone_aAjouter		poly_calque
 				if integration_reussie do a_ete_integre = true
 				i += 1
+				debug_calque this
 			)
 			
 			---- s'il a pas été inserer, on l'ajoute basiquement aux polygones du calque- ---------------------------------
-			if not a_ete_integre do
+			if not a_ete_integre do (
 				append 		polygones 		_polygone_aAjouter
+				
+				
+			)
 			
-			_polygone_aAjouter.calque = this
+			if brut_mode do _polygone_aAjouter.en_creux	=	en_creux_BACK
+				
 			
 -- 			debug "a_ete_integre" var:a_ete_integre
--- 			debug "polygones" var:polygones param:#nom
+			debug "polygones" var:polygones param:#nom
 			
+			debug "===================================================================="
+			format "\n\n"
 			polygones
 			
 		),
@@ -51,14 +98,22 @@ struct str_calque (
 			
 			local result = #()
 			
-			if descendance do 
-				for poly in polygones do
-					result += poly.get_descendance ()
-				
-			result += 	for poly in polygones collect poly
+			if descendance then 
+				for poly in polygones do (
+					local dup = mgr_polys.dupliquer 	poly
+					result += dup.get_descendance ()	
+				) 
+			else
+				result += 	for poly in polygones collect ( mgr_polys.dupliquer 	poly )
+			/* 
+			---- on duplique tout ?!? --------------
+			local result_polys = #()
+			for poly_source in result do
+				append result_polys		( mgr_polys.dupliquer   poly_source  )
 			
+			result_polys
+			*/
 			result
-		
 		),
 		fn get_pts =(
 			local pts_result =#()						
@@ -151,7 +206,7 @@ struct	str_mgr_calques	(
 							fn 	OPERATION_BOOL		calque_A  	calque_B		#Operation 
 			__________________________________________________________________________________
 			
-			*	On prend tout les polygones des calques : Polys_A et Polys_B. (avec toute leur descendance !)
+			*	On prend tout les polygones des calques : polys_A_total et polys_B_total. (avec toute leur descendance !)
 			
 			*	On analyse les intersections entre chacuns de ces polygones.
 					---->	on recupère la liste des intersections et les polygones sans intesections (polygones isolés).
@@ -170,17 +225,21 @@ struct	str_mgr_calques	(
 			--- On renvois un calque	-------------
 			local 	calque_result = this.creer_calque	nom:"RESULTAT BOOL"
 			
-			---- 		On prend tout les polygones des calques : Polys_A et Polys_B. (avec toute leur descendance !)		----------------
-			local 	polys_A	=	_calque_A.get_polygones 	descendance:true
-			local 	polys_B	=	_calque_B.get_polygones 	descendance:true
+			---- 		On prend tout les polygones des calques : polys_A_total et polys_B_total. (avec toute leur descendance !)		----------------
+			local 	polys_A_total	=	_calque_A.get_polygones 	descendance:true
+			local 	polys_B_total	=	_calque_B.get_polygones 	descendance:true
+			
+			
+			local 	polys_A	=	_calque_A.get_polygones 	()
+			local 	polys_B	=	_calque_B.get_polygones 	()
 			
 			---- on retire tout les enfants de tout le monde -------------
-			for poly in polys_A do	poly.enfants = #()
-			for poly in polys_B do	poly.enfants = #()
+			for poly in polys_A_total do	poly.enfants = #()
+			for poly in polys_B_total do	poly.enfants = #()
 			
 			debug "-----------------------------------------------------------------"
-			debug "polys_A"	var:polys_A param:#nom
-			debug "polys_B"	var:polys_B param:#nom
+			debug "polys_A_total"	var:polys_A_total param:#nom
+			debug "polys_B_total"	var:polys_B_total param:#nom
 			
 			
 			
@@ -196,13 +255,13 @@ struct	str_mgr_calques	(
 			)
 			
 			local intersections	=#()
-			local ids_polys_A_isoles	=#{1..polys_A.count}
-			local ids_polys_B_isoles	=#{1..polys_B.count}
+			local ids_polys_A_isoles	=#{1..polys_A_total.count}
+			local ids_polys_B_isoles	=#{1..polys_B_total.count}
 			
-			for id_A in 1 to polys_A.count do (
-				local poly_A = polys_A[ id_A ]
-				for id_B in 1 to  polys_B.count do (
-					local poly_B = polys_B[ id_B ]
+			for id_A in 1 to polys_A_total.count do (
+				local poly_A = polys_A_total[ id_A ]
+				for id_B in 1 to  polys_B_total.count do (
+					local poly_B = polys_B_total[ id_B ]
 					
 					local pos_relative = 	poly_A.get_positionRelative		poly_B
 					case pos_relative.position		of (								
@@ -244,40 +303,7 @@ struct	str_mgr_calques	(
 			
 			
 			
-			/* 
-			---- 		On s'occupe des polygones isolés : en fonction de l'operation on va ajouter, ou pas, les polygones au resultat:		----------------
-			case operation of (
-					#addition:	 	(
-						--------	Addition : 		On ajoute tout les polygones isolés.		--------------------------------
-						for id_poly in ( ids_polys_A_isoles as array) do
-							calque_result.ajouter_polygone	polys_A[ id_poly ]
-						for id_poly in ( ids_polys_B_isoles as array) do
-							calque_result.ajouter_polygone	polys_B[ id_poly ]
-					)
-					#soustraction:	 (
-						--------	Soustraction : 	On ajoute les polygones isolés du Calque A.		----------------------------
-						for id_poly in ( ids_polys_A_isoles as array) do
-							calque_result.ajouter_polygone	polys_A[ id_poly ]
-					)
-					#intersection:	 (
-						--------	intersection : 			On ajoute rien.		------------------------------------------------							
-					)
-					#union:			(
-						--------	intersection : 			On ajoute tout.		------------------------------------------------
-						for id_poly in ( ids_polys_A_isoles as array) do
-							calque_result.ajouter_polygone	polys_A[ id_poly ]
-						for id_poly in ( ids_polys_B_isoles as array) do
-							calque_result.ajouter_polygone	polys_B[ id_poly ]						
-					)
-			)
-			
-			
-			
-			 */
-			
-			
-			
-			---- 		On boucle tant qu'il reste des intersections à intégrer :		----------------
+			---- 		On boucle tant qu'il reste des intersections à intégrer :		--------------------------------------------------------------------------------------------------
 			local	il_reste_des_points 	=	intersections.count > 0  and operation != #union
 			local ids_intersections_aTraiter 	= #{1..intersections.count}
 			local sauvetage 				=	0
@@ -302,6 +328,7 @@ struct	str_mgr_calques	(
 				local pt_initial 				
 				local operateur_courant 
 				local poly_courant
+				
 				
 				---- on regarde la position du point d'intersection pour voir si on bascule tout de suite de polygone --------------------
 				local poly_A						=	intersection_aTraiter.poly_A
@@ -372,13 +399,15 @@ struct	str_mgr_calques	(
 							
 							
 						)
+						
 						local operateur_est_aGauche = mgr_shp.est_aGauche		pt_test_courant		pt_test_intersection 	pt_test_autre	
-						if  operateur_est_aGauche 	do (
+						
+						if   operateur_est_aGauche 	do (
 							
-							debug"##########	EST_AGAUCHE		##########################"
+							debug"##########	 EST_AGAUCHE		##########################"
 							poly_courant 			= poly_B
 							shp_initial				= poly_courant.get_pts ()
-							shp_courant	= shp_initial	
+							shp_courant			= shp_initial	
 							operateur_courant	=	#B
 							id_pt_initial				=	intersection_aTraiter.id_pt_B		
 						)
@@ -391,6 +420,7 @@ struct	str_mgr_calques	(
 				
 				----- les points du polygone que l'on va creer ----------------
 				local shp_enConstruction = #()
+				local en_creux = poly_courant.en_creux
 				
 				
 				sens = if 	poly_courant.en_creux	then 	-1	else 1
@@ -437,6 +467,9 @@ struct	str_mgr_calques	(
 						--- on cherche la prochaine intersection ------------
 						local dist_proche = 1e+10
 						local prochaine_intersec = undefined
+						
+						if not poly_courant.en_creux		do
+							en_creux = false
 						
 						for 	intersection in 	intersections  do (								
 -- 							debug "			--> intersection" var:intersection
@@ -548,6 +581,7 @@ struct	str_mgr_calques	(
 					----------- ( 3 )	sortie ? si on est retourné sur le point initial, on sort	--------------------------------------------	
 					
 					if distance	pt_courant  pt_initial <  SEUIL_POINTS_EGAUX	then 
+						
 						on_a_fini_laBoucle = true
 					
 						format"\n\n"
@@ -573,15 +607,15 @@ struct	str_mgr_calques	(
 				
 				
 				
-				
 				--- on creer le noeud resultat -----------
-				local nv_poly = mgr_polys.creer_polygone 	pts:shp_enConstruction	\
-																	nom:(intersection_aTraiter.poly_A.nom + "_" +intersection_aTraiter.poly_B.nom  + "_" + calque_result.polygones.count as string )	 
-				
+				local nv_poly = mgr_polys.creer_polygone 	pts:			shp_enConstruction	\
+																			en_creux: 	en_creux\
+																			nom:			(intersection_aTraiter.poly_A.nom + "_" +intersection_aTraiter.poly_B.nom  + "_" + calque_result.polygones.count as string )	 
+				nv_poly.reset_sens ()
 				
 				---- on ajoute le noeud obtenu -----------------------------------
-				calque_result.ajouter_polygone	nv_poly
-				
+				calque_result.ajouter_polygone		nv_poly		brut_mode:true
+				debug_calque	calque_result
 				
 				---------- SORTIES ---------------------------------------------
 				---- test pour sortie  correct	----------------------------------------------------------------------------------------------------
@@ -606,11 +640,24 @@ struct	str_mgr_calques	(
 			
 			
 			
+			
+			
+			
+			
+			
+			
+					debug  "######	1	##############################################################################################################################"
+				debug_calque	calque_result			
+					debug  "####################################################################################################################################"
+			
 			---- 		On s'occupe des polygones isolés : en fonction de l'operation on va ajouter, ou pas, les polygones au resultat:		----------------
 			format "\n\n"
 				debug "--- les polygones isolés de A ----------------------------------------------------------------------------------------"
+			
+			
+			
 			--- les polygones isolés de A ----------------------------------------------------------------------------------------
-			local polys_A_isoles = for id_poly in (ids_polys_A_isoles as array ) collect polys_A[ id_poly ]
+			local polys_A_isoles = for id_poly in (ids_polys_A_isoles as array ) collect polys_A_total[ id_poly ]
 			for poly_A_isol in polys_A_isoles do (
 				
 				local polyA_dans_polyB
@@ -659,14 +706,19 @@ struct	str_mgr_calques	(
 					
 				)
 				
-					debug "-------> on_ajoute" var:on_ajoute
-				
+					debug  "######	AVANT	##############################################################################################################################"
+				debug_calque	calque_result			
+					debug  "####################################################################################################################################"
+			
 				
 				---- on ajoute le noeud obtenu -----------------------------------
 				if on_ajoute do	
-					calque_result.ajouter_polygone	poly_A_isol
+					calque_result.ajouter_polygone	poly_A_isol		brut_mode:true
 				
-				
+					debug  "######	APRES	##############################################################################################################################"
+				debug_calque	calque_result			
+					debug  "####################################################################################################################################"
+			
 				
 			) ---- fin polygones A isolés ---------------------------
 			
@@ -677,17 +729,20 @@ struct	str_mgr_calques	(
 			
 			
 			format "\n\n"
-				debug "--- les polygones isolés de B ----------------------------------------------------------------------------------------"
+			debug "--- les polygones isolés de B ----------------------------------------------------------------------------------------"
 			--- les polygones isolés de B ----------------------------------------------------------------------------------------
-			local polys_B_isoles = for id_poly in (ids_polys_B_isoles as array ) collect polys_B[ id_poly ]
+			local polys_B_isoles = for id_poly in (ids_polys_B_isoles as array ) collect polys_B_total[ id_poly ]
+			debug "polys_B_isoles" var:polys_B_isoles param:#nom
 			for poly_B_isol in polys_B_isoles do (
 				local polyB_dans_polyA
 				
+				debug "-------> poly_B_isol" var:poly_B_isol
 				--- avec les polygones de A -------------
 				for poly_A in polys_A do (
 					local est_ds_polyA	=	mgr_polys.est_dans_polygone		poly_A 		poly_B_isol	
 					if est_ds_polyA	!= undefined do 
 						polyB_dans_polyA = est_ds_polyA
+					debug "	-------> est_ds_polyA" var:est_ds_polyA
 				)
 				
 				--- on regarde dons si on est dans un vide -------------
@@ -699,6 +754,7 @@ struct	str_mgr_calques	(
 					est_dans_vide = true
 				
 				
+				debug "-------> est_dans_vide" var:est_dans_vide
 				---- on regarde si on l'ajoute ou pas ----------------
 				local on_ajoute = false
 				case operation of (
@@ -725,12 +781,14 @@ struct	str_mgr_calques	(
 					
 				)
 				
+				debug "-------> on_ajoute" var:on_ajoute
 				
 				
 				---- on ajoute le noeud obtenu -----------------------------------
 				if on_ajoute do	
-					calque_result.ajouter_polygone	poly_B_isol
+					calque_result.ajouter_polygone	poly_B_isol	brut_mode:true
 				
+				debug_calque	calque_result
 				
 				
 			) ---- fin polygones A isolés ---------------------------
@@ -747,8 +805,8 @@ struct	str_mgr_calques	(
 			
 			
 			debug "---------	CALQUE_RESULT	--------------------------------------------------------"
-			debug_calque	calque_result
-			
+			debug_calque		calque_result
+			format "\n\n\n"
 			
 			calque_result
 		),
@@ -768,6 +826,7 @@ struct	str_mgr_calques	(
 					local calque = m_pile[i]
 					--- on calcule l'operation avec chacun des polygones du calque pile	--------
 					result_calque = 		operation_booleene		result_calque	calque	operation:calque.operation
+					debug_calque		result_calque		
 				)
 				
 			) 
