@@ -843,7 +843,26 @@ struct str_mgr_polygones (
 			result
 		),
 	
-	
+		fn est_dans_polygone		_poly_A 		_poly_B		=(
+			
+			local pos_relative = mgr_shp.get_positionRelative_shapes 	( _poly_A.get_pts() )	( _poly_B.get_pts () )
+			local result
+			
+			if  pos_relative.position == #interieur do (
+				local parent 
+				for poly_enfant in _poly_A.enfants do (
+					local est_dans_enfant = est_dans_polygone		poly_enfant 	_poly_B
+					if est_dans_enfant != undefined do
+						parent	=	est_dans_enfant
+				)
+				if parent != undefined then 
+					result = parent
+				else
+					result = _poly_A
+			)
+			
+			result
+		),
 	
 		fn creer_pts_pourFace			_poly			=(
 			

@@ -47,14 +47,18 @@ struct str_calque (
 			if id_polygone != 0 do
 				deleteItem polygones id_polygone
 		),
-		fn get_polygones  =(	--	all:false
+		fn get_polygones 	descendance:false	 =(	--	all:false
 			
--- 			local result = #()
--- 			for poly in polygones do
--- 				result += poly.get_descendance ()
--- 			
--- 			result
-			for poly in polygones collect poly
+			local result = #()
+			
+			if descendance do 
+				for poly in polygones do
+					result += poly.get_descendance ()
+				
+			result += 	for poly in polygones collect poly
+			
+			result
+		
 		),
 		fn get_pts =(
 			local pts_result =#()						
@@ -140,189 +144,613 @@ struct	str_mgr_calques	(
 	private
 	
 	
-	
-		fn operer_calque_poly		_calque_A		_poly_B		 operation:#union 	=(
+		
+		fn operation_booleene 		_calque_A		_calque_B		operation:#union =(
+			/*__________________________________________________________________________________
+			
+							fn 	OPERATION_BOOL		calque_A  	calque_B		#Operation 
+			__________________________________________________________________________________
+			
+			*	On prend tout les polygones des calques : Polys_A et Polys_B. (avec toute leur descendance !)
+			
+			*	On analyse les intersections entre chacuns de ces polygones.
+					---->	on recupère la liste des intersections et les polygones sans intesections (polygones isolés).
+			*	On s'occupe des polygones isolés : en fonction de l'operation on va ajouter, ou pas, les polygones au resultat:
+					---->		#Addition : 		On ajoute tout les polygones isolés.
+					---->		#Soustraction : 	On ajoute les polygones isolés du Calque A.
+					---->		#intersection : 	On ajoute rien.
+			*	On choisi la premiere intersection et le sens de départ.
+			*	On boucle tant qu'il reste des intersections à intégrer :
+					---->	on ajoute les points jusqu'à la prochaine intersection
+					---->	une fois à l'intersection on regarde ce que l'on fait:	choix du polygone courant et de la direction en fonction de l'opération en cours.
+					---->	Si on arrive au point initial: On ajoute le polygone obtenu aux resultats.
+			*	On renvois les resultats (dans un calque ?)
+			__________________________________________________________________________________*/
+
+			--- On renvois un calque	-------------
+			local 	calque_result = this.creer_calque	nom:"RESULTAT BOOL"
+			
+			---- 		On prend tout les polygones des calques : Polys_A et Polys_B. (avec toute leur descendance !)		----------------
+			local 	polys_A	=	_calque_A.get_polygones 	descendance:true
+			local 	polys_B	=	_calque_B.get_polygones 	descendance:true
+			
+			---- on retire tout les enfants de tout le monde -------------
+			for poly in polys_A do	poly.enfants = #()
+			for poly in polys_B do	poly.enfants = #()
+			
+			debug "-----------------------------------------------------------------"
+			debug "polys_A"	var:polys_A param:#nom
+			debug "polys_B"	var:polys_B param:#nom
 			
 			
-			If _poly_B.enfants.count>0 do  (
-				for poly_enfant in _poly_B.enfants do
-					operer_calque_poly	_calque_A	poly_enfant	operation:operation
-			) 
 			
 			
-			format "\n\n\n"
-			debug"---------------------------"
-			debug"operer_calque_poly"
-			debug"	_calque_A" var:_calque_A.nom
-			debug"	_poly_B" var:_poly_B.nom
-			debug"---------------------------"
--- 			debug"_poly_B.enfants" var:_poly_B.enfants param:#nom
-			debug_calque _calque_A
-			debug"---------------------------"
+			---- 		On analyse les intersections entre chacuns de ces polygones.		----------------
+			---- 				---->	on recupère la liste des intersections et les polygones sans intesections (polygones isolés).		----------------
+			struct intersection (
+				pos,
+				poly_A,
+				poly_B,
+				id_pt_A,
+				id_pt_B
+			)
 			
+			local intersections	=#()
+			local ids_polys_A_isoles	=#{1..polys_A.count}
+			local ids_polys_B_isoles	=#{1..polys_B.count}
 			
-			local 	polys_A	=	_calque_A.get_polygones ()
-			
-			local est_a_cote			=	true
-			local est_aLinterieurDe	= 	undefined
-			local est_aLexterieurDe	= 	undefined
-			
-			
-			
-			
-			--- pour chacun des polys du calque A ------------
-			for parent_poly_A in polys_A do (				
-				for poly_A in (parent_poly_A.get_descendance())  do (
+			for id_A in 1 to polys_A.count do (
+				local poly_A = polys_A[ id_A ]
+				for id_B in 1 to  polys_B.count do (
+					local poly_B = polys_B[ id_B ]
 					
+					local pos_relative = 	poly_A.get_positionRelative		poly_B
+					case pos_relative.position		of (								
+						#aCoté:	 		(
+							
+							)
+						#interieur:		(
+								
+							)
+						#exterieur:		(
+								
+							)
+						#seCroisent:	(
+								ids_polys_A_isoles[ id_A ] = false
+								ids_polys_B_isoles[ id_B ] = false
+								for inter in pos_relative.intersections do (
+									local nvl_intersection = intersection 	pos:		inter.pos	\
+																						poly_A:	poly_A		\
+																						poly_B:	poly_B		\
+																						id_pt_A:	inter.id_A	\
+																						id_pt_B:	inter.id_B
+									append	intersections	nvl_intersection
+								)
+							)
+					)	--	fin case of position relative	----------------
 					
-					format "\n\n"
-					debug"----- POLY_A" var:poly_A.nom
-					debug"----- POLY_B" var:_poly_B.nom
-					local ope = mgr_polys.operation_booleene  	poly_A 		_poly_B		operation:operation
-					
-					
-					debug"	ope.est_aLinterieurDe" var:ope.est_aLinterieurDe
-					debug"	ope.est_aLexterieurDe" var:ope.est_aLexterieurDe
-					
-					
-					if ope.est_aLexterieurDe != undefined and not _poly_B.en_creux  do (
-						debug"			-----> POLY_B plein et et poly_B est a l'exterieur"
-						debug"			-----> on retire est_aLexterieurDe du calque." 
-						_calque_A.retirer_polygone	ope.est_aLexterieurDe
-						ope.est_aLexterieurDe.supprimer ()
-						ope.est_aLexterieurDe= undefined
-						)
-						
-					if not ope.a_cote do est_a_cote = false
-					if ope.est_aLinterieurDe != undefined and est_aLinterieurDe==undefined do 
-						est_aLinterieurDe=ope.est_aLinterieurDe 
-					if ope.est_aLexterieurDe != undefined and est_aLexterieurDe==undefined do 
-						est_aLexterieurDe=ope.est_aLexterieurDe
-					if ope.est_aLinterieurDe != undefined and est_aLinterieurDe!=undefined do 
-						if ope.est_aLinterieurDe.est_un_enfant		est_aLinterieurDe do est_aLinterieurDe=ope.est_aLinterieurDe
-					if ope.est_aLexterieurDe != undefined and est_aLexterieurDe!=undefined do 
-						if est_aLexterieurDe.est_un_enfant			ope.est_aLexterieurDe do 
-							est_aLexterieurDe=ope.est_aLexterieurDe
-						
-					if ope.polys.count > 0 do (
-						debug"			-----> On a un contact."
-						
-						local parent_A	=	poly_A.parent
-						_calque_A.retirer_polygone	poly_A
-						poly_A.supprimer ()
-						if parent_A	!= undefined then (
-							for ope_poly in ope.polys do
-								parent_A.ajouter_enfant	ope_poly
-						) else (
-							for ope_poly in ope.polys do
-								_calque_A.ajouter_polygone	ope_poly
-						)
-						
-					)
 				)
+				
+			)---- fin for poly_A	------------
+			
+			debug "-----------------------------------------------------------------"
+			debug "intersections"	var:intersections
+			debug "ids_polys_A_isoles"	var:ids_polys_A_isoles --	param:#nom
+			debug "ids_polys_B_isoles"	var:ids_polys_B_isoles	--	param:#nom
+			
+			
+			
+			
+			
+			
+			
+			/* 
+			---- 		On s'occupe des polygones isolés : en fonction de l'operation on va ajouter, ou pas, les polygones au resultat:		----------------
+			case operation of (
+					#addition:	 	(
+						--------	Addition : 		On ajoute tout les polygones isolés.		--------------------------------
+						for id_poly in ( ids_polys_A_isoles as array) do
+							calque_result.ajouter_polygone	polys_A[ id_poly ]
+						for id_poly in ( ids_polys_B_isoles as array) do
+							calque_result.ajouter_polygone	polys_B[ id_poly ]
+					)
+					#soustraction:	 (
+						--------	Soustraction : 	On ajoute les polygones isolés du Calque A.		----------------------------
+						for id_poly in ( ids_polys_A_isoles as array) do
+							calque_result.ajouter_polygone	polys_A[ id_poly ]
+					)
+					#intersection:	 (
+						--------	intersection : 			On ajoute rien.		------------------------------------------------							
+					)
+					#union:			(
+						--------	intersection : 			On ajoute tout.		------------------------------------------------
+						for id_poly in ( ids_polys_A_isoles as array) do
+							calque_result.ajouter_polygone	polys_A[ id_poly ]
+						for id_poly in ( ids_polys_B_isoles as array) do
+							calque_result.ajouter_polygone	polys_B[ id_poly ]						
+					)
 			)
 			
 			
 			
+			 */
 			
 			
 			
-			format "\n\n"
-			debug"-----------  on a fait tout les poly A ----------------"
-			debug"est_a_cote" var:est_a_cote
-			debug"est_aLinterieurDe" var:est_aLinterieurDe
-			debug"est_aLexterieurDe" var:est_aLexterieurDe
+			---- 		On boucle tant qu'il reste des intersections à intégrer :		----------------
+			local	il_reste_des_points 	=	intersections.count > 0  and operation != #union
+			local ids_intersections_aTraiter 	= #{1..intersections.count}
+			local sauvetage 				=	0
 			
-			if est_a_cote then (
+			local annuler = false
+			while il_reste_des_points	and not annuler do (
 				
-					debug"			-----> On a B a coté donc on l'ajoute au calque A."
-					_calque_A.ajouter_polygone	_poly_B
+				format"\n\n\n\n"
+				debug "------------------------------------------------------------------------------------------"
+				debug "						On boucle tant qu'il reste des intersections à intégrer "
+				debug "ids_intersections_aTraiter" var:ids_intersections_aTraiter 
 				
-			) else (
+				
+				---- Le point demarrage, la premiere intersection de la liste --------------------
+				local id_intersection_aTraiter = ( ids_intersections_aTraiter as array )[1]
+				local intersection_aTraiter		=	intersections[ id_intersection_aTraiter ]
+				ids_intersections_aTraiter [ id_intersection_aTraiter ] = false
 			
-			
-		-- 			if est_aLexterieurDe!=undefined 
-						--- B dans un truc ---------
-					if est_aLinterieurDe!=undefined and est_aLexterieurDe==undefined  and est_aLinterieurDe.en_creux do (
+				---- Les conditions initiales	------------------------------------------------------
+				local shp_initial		
+				local id_pt_initial			
+				local pt_initial 				
+				local operateur_courant 
+				local poly_courant
+				
+				---- on regarde la position du point d'intersection pour voir si on bascule tout de suite de polygone --------------------
+				local poly_A						=	intersection_aTraiter.poly_A
+				local poly_B						=	intersection_aTraiter.poly_B
+				
+				local pts_A							= 	poly_A.get_pts()
+				local pts_B							= 	poly_B.get_pts()
+				
+				poly_courant 			= poly_A
+				poly_autre				= poly_B
+				shp_initial				= poly_courant.get_pts ()
+				operateur_courant	=	#A
+				id_pt_initial				=	intersection_aTraiter.id_pt_A
 						
+				
+				pt_initial				=	intersection_aTraiter.pos--shp_initial[ id_pt_initial ]
+				
+				
+				
+				
+				
+				
+				
+				
+				local shp_courant	= shp_initial	
+				local shp_autre		= poly_autre.get_pts ()
+				
+				local sens 				= 1
+				if 	poly_courant.en_creux	do 	 sens = 1
+				
+				
+				----- INtersection : on regarde ou l'on va -----------------------------
+				case operation of (
+					#addition: (
 						
-						debug"			-----> On a B à l'interieur d'un poly de A creux "
-						debug"			-----> On ajoute B dans le poly EST_ALINTERIEURDE" var:est_aLinterieurDe param:#nom
-						est_aLinterieurDe.ajouter_enfant		_poly_B
-					)
-					
-					
-					
-					--- B contient une branche
-					if est_aLinterieurDe==undefined and est_aLexterieurDe!=undefined and _poly_B.en_creux  do   (
+						local pt_test_intersection		=	intersection_aTraiter.pos
 						
-						
-						debug"			-----> On a B creux à l'exterieur d'un poly de A  "
-						debug"			-----> On ajoute le poly EST_ALINTERIEURDE dans B" var:est_aLinterieurDe param:#nom
-						_poly_B.ajouter_enfant		est_aLexterieurDe	
-						
-					)
-					if est_aLinterieurDe==undefined /* and est_aLexterieurDe!=undefined */ and not _poly_B.en_creux  do  (
-		-- 				_poly_B.ajouter_enfant		est_aLexterieurDe
-						debug"			-----> On a B à l'interieur d'aucun poly_A et B plein "
-						debug"			-----> On  ajoute B 	au calque A."
-						
-						_calque_A.ajouter_polygone	_poly_B
-		-- 				debug_calque _calque_A
-					)
-					
-					
-					--- B dans un truc  B contient une branche et b plein ( si b vide rien )
-					if est_aLinterieurDe!=undefined and est_aLexterieurDe!=undefined do  (
-						
-						debug"			-----> On a B à l'interieur et à l'exterieur de polys de A "
-						if not _poly_B.en_creux do (
-							_calque_A.retirer_polygone	est_aLexterieurDe
+						local shp_autre
+						local pt_test_courant
+						local pt_test_autre
+						if operateur_courant		==	#A	then (
 							
-							debug"				-----> On a B plein."
-							if  not est_aLinterieurDe.en_creux   then 	(
-								
-								debug"					-----> On a EST_ALINTERIEURDE plein."
-								
-								_poly_B.supprimer ()
-							)
-							else 
-							(
-								debug"					-----> On a EST_ALINTERIEURDE creux."
-								est_aLinterieurDe.ajouter_enfant		_poly_B					
+							local poly_test_courant 	= intersection_aTraiter.poly_A
+							local id_ptTest_courant =  intersection_aTraiter.id_pt_A
+							if poly_test_courant.en_creux do id_ptTest_courant = mgr_shp.boucler		shp_courant	(id_ptTest_courant+1)
+							pt_test_courant		= 	shp_courant[ id_ptTest_courant ]
 							
-							)
+							
+							local poly_test_autre 		= intersection_aTraiter.poly_B
+							shp_autre 						= intersection_aTraiter.poly_B.get_pts()
+							local id_ptTest_autre =  intersection_aTraiter.id_pt_B
+							if poly_test_autre.en_creux do id_ptTest_autre = mgr_shp.boucler		shp_autre	(id_ptTest_autre+1)
+							pt_test_autre		= 	shp_autre[ id_ptTest_autre ]
+							
+						) else (
+							
+							local poly_test_courant 	= intersection_aTraiter.poly_B
+							local id_ptTest_courant =  intersection_aTraiter.id_pt_B
+							if poly_test_courant.en_creux do id_ptTest_courant = mgr_shp.boucler		shp_courant	(id_ptTest_courant+1)
+							pt_test_courant		= 	shp_courant[ id_ptTest_courant ]
+							
+							
+							local poly_test_autre 		= intersection_aTraiter.poly_A
+							shp_autre 						= intersection_aTraiter.poly_A.get_pts()
+							local id_ptTest_autre =  intersection_aTraiter.id_pt_A
+							if poly_test_autre.en_creux do id_ptTest_autre = mgr_shp.boucler		shp_autre	(id_ptTest_autre+1)
+							pt_test_autre		= 	shp_autre[ id_ptTest_autre ]
+							
+							
+						)
+						local operateur_est_aGauche = mgr_shp.est_aGauche		pt_test_courant		pt_test_intersection 	pt_test_autre	
+						if  operateur_est_aGauche 	do (
+							
+							debug"##########	EST_AGAUCHE		##########################"
+							poly_courant 			= poly_B
+							shp_initial				= poly_courant.get_pts ()
+							shp_courant	= shp_initial	
+							operateur_courant	=	#B
+							id_pt_initial				=	intersection_aTraiter.id_pt_B		
 						)
 						
 					)
 					
 				)
 				
-			format "\n\n"
-			debug"--------  FIN OPERER_CALQUE_POLY -------------------"
-			debug_calque _calque_A
-			debug"---------------------------"
-			format "\n\n"
-		),
-		
-		fn operer_calques	_calque_A 		_calque_B		operation:#union 	=(
-			
-			
-			--- On renvois un calque	-------------
-			local calque_result = this.creer_calque	nom:"RESULTAT BOOL"
-			
-			local 	polys_B	=	_calque_B.get_polygones ()
-			
-			
-			--- pour chacun des polys de B ------------
-			for poly_B in polys_B do
-				operer_calque_poly		_calque_A		poly_B		operation:operation
 				
+				
+				----- les points du polygone que l'on va creer ----------------
+				local shp_enConstruction = #()
+				
+				
+				sens = if 	poly_courant.en_creux	then 	-1	else 1
+				
+				--- le point courant initial	----------				
+				if sens == -1 do id_pt_initial = mgr_shp.boucler	shp_courant (id_pt_initial+1)
+				local id_pt_courant	=	id_pt_initial
+				local pt_courant		=	pt_initial
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				------ Tant qu'on est pas retourné à notre point de départ	----------------------------------------------------------------------------------------------------------------
+				local on_a_fini_laBoucle = false
+				local annuler = false
+				while not on_a_fini_laBoucle  and not annuler	do (
+					
+					local on_continue = true
+					
+					while on_continue and not annuler		do (
+						
+						append 	shp_enConstruction		pt_courant
+						
+						debug "operateur_courant" var:operateur_courant
+						debug "id_pt_courant" var:id_pt_courant
+						debug "pt_courant" var:pt_courant
+						debug "shp_enConstruction" var:shp_enConstruction
+						
+						debug "sens" var:sens 
+						debug "------------------------------------------------------------------------------------------"
+						
+						--- on cherche la prochaine intersection ------------
+						local dist_proche = 1e+10
+						local prochaine_intersec = undefined
+						
+						for 	intersection in 	intersections  do (								
+-- 							debug "			--> intersection" var:intersection
+-- 							debug "			-->par la : #1"
+							local id_pt_test = id_pt_courant
+							if sens == - 1 do id_pt_test = mgr_shp.boucler	shp_courant	(id_pt_test - 1 )
+							
+							---- pour choisir la plus proche ---------------
+							if distance pt_courant	intersection.pos < 	dist_proche do (								
+-- 								debug "			-->par la : #2"
+								
+								---- pour choisir une intersection qui ne soit pas là ou l'on est ---------------
+								if distance pt_courant		intersection.pos 	> SEUIL_POINTS_EGAUX do (
+-- 									debug "			-->par la : #3"
+									
+									if operateur_courant 	==	#A then (
+-- 										debug "			-->par la : #4-1"
+-- 										if 
+										if poly_courant == intersection.poly_A 	and 	intersection.id_pt_A == id_pt_test	do ( 
+-- 											debug "			-->par la : #5-1"
+											local id_pt_base = 	intersection.id_pt_A 
+											if sens == - 1 do id_pt_base = mgr_shp.boucler	shp_courant	(id_pt_base + 1 )
+											local pt_base = shp_courant[	id_pt_base  ]
+											if 	( distance pt_courant		pt_base + distance pt_courant		intersection.pos )  - distance intersection.pos  pt_base 			< SEUIL_POINTS_EGAUX do	(
+-- 												debug "			-->par la : #6-1 ##################"
+												
+													dist_proche = distance pt_courant	intersection.pos
+													prochaine_intersec = intersection
+												)
+										)
+									) else (
+-- 										debug "			-->par la : #4-2"
+										if poly_courant == intersection.poly_B 	and 	intersection.id_pt_B == id_pt_test	 do ( 
+-- 											debug "			-->par la : #5-2"
+											local id_pt_ope = 	intersection.id_pt_B
+											if sens == - 1 do id_pt_ope = mgr_shp.boucler	shp_courant	(id_pt_ope + 1 )
+											local pt_ope = shp_courant[	id_pt_ope  ]
+											if 	( distance pt_courant		pt_ope + distance pt_courant		intersection.pos )  - distance intersection.pos  pt_ope 			< SEUIL_POINTS_EGAUX do											 (
+-- 												debug "			-->par la : #6-2 ##################"
+												
+													dist_proche = distance pt_courant	intersection.pos
+													prochaine_intersec = intersection
+												)
+										)
+									)
+								)
+							)
+						)		-- fin for ----------
+						
+						---- si on a une intersection ----------------
+						if prochaine_intersec != undefined then (
+							
+							debug "--->	INTERSECTION"
+							
+							--- on change de noeud courant	------
+							if  operateur_courant 	==	#A 	then (
+								
+								operateur_courant 	=	#B
+								poly_courant = prochaine_intersec.poly_B
+								shp_courant	= 	prochaine_intersec.poly_B.get_pts ()
+								id_pt_courant 	=  prochaine_intersec.id_pt_B
+								
+							) else (
+								operateur_courant 	=	#A
+								poly_courant = prochaine_intersec.poly_A
+								shp_courant	= 	prochaine_intersec.poly_A.get_pts ()
+								id_pt_courant 	=  prochaine_intersec.id_pt_A									
+							)
+							
+							sens = if 	poly_courant.en_creux	then 	-1	else 1
+							
+-- 							-----  on valide  ------------------
+							pt_courant 		=	prochaine_intersec.pos		
+							if sens == -1 	do 	id_pt_courant		= mgr_shp.boucler		shp_courant	( id_pt_courant + 1 )
+							
+							id_intersection_aTraiter	=	findItem	intersections		prochaine_intersec
+							ids_intersections_aTraiter [ id_intersection_aTraiter ] = false
+							
+							
+							--- on sort ----------
+							on_continue = false
+							
+						---- si on a  pas d' intersection, on passe au point suivant ----------------
+						) else (
+							
+							debug "--->	SUIVANT"
+							
+							id_pt_courant 		= mgr_shp.boucler	shp_courant		( id_pt_courant + sens )
+							pt_courant 		= shp_courant [ id_pt_courant ]
+							
+						)
+						
+					
+						debug "--------------------------------------------"
+						debug "prochaine_intersec" var:prochaine_intersec
+						debug "intersection_aTraiter" var:intersection_aTraiter
+						debug "--------------------------------------------"
+						format"\n\n"
+						
+						--- SAUVETAGE	----
+						sauvetage += 1
+						if sauvetage > SAUVETAGE_MAX do 
+							annuler = true
+						
+						
+					) -- FIN --- on fait le segment  jusqu'a la prochaine intersection 	-------------------------
+					
+					
+					----------- ( 3 )	sortie ? si on est retourné sur le point initial, on sort	--------------------------------------------	
+					
+					if distance	pt_courant  pt_initial <  SEUIL_POINTS_EGAUX	then 
+						on_a_fini_laBoucle = true
+					
+						format"\n\n"
+						format"\n\n"
+						format"\n\n"
+						debug "--------------------------------------------------------------------------------------"
+						debug "pt_courant" var:pt_courant
+						debug "pt_initial" var:pt_initial
+						debug "on_a_fini_laBoucle" var:on_a_fini_laBoucle
+						debug "--------------------------------------------------------------------------------------"
+						format"\n\n"
+						format"\n\n"
+						format"\n\n"
+					
+					
+					
+					--- SAUVETAGE	----
+					sauvetage+= 1
+					if sauvetage > SAUVETAGE_MAX do annuler = true
+					
+				)	---- Fin -	tant qu'on a pas fini la boucle	------------------------------------------------------------------------------------------------------
+				
+				
+				
+				
+				
+				--- on creer le noeud resultat -----------
+				local nv_poly = mgr_polys.creer_polygone 	pts:shp_enConstruction	\
+																	nom:(intersection_aTraiter.poly_A.nom + "_" +intersection_aTraiter.poly_B.nom  + "_" + calque_result.polygones.count as string )	 
+				
+				
+				---- on ajoute le noeud obtenu -----------------------------------
+				calque_result.ajouter_polygone	nv_poly
+				
+				
+				---------- SORTIES ---------------------------------------------
+				---- test pour sortie  correct	----------------------------------------------------------------------------------------------------
+
+			 	if 	(ids_intersections_aTraiter as array ).count ==  0	do (
+					il_reste_des_points = false
+					
+				) 
+				--- SAUVETAGE	----
+				sauvetage += 1
+				if sauvetage > SAUVETAGE_MAX do (
+					annuler = true
+					format "\n\n"
+					debug  "####################################################################################################################################"
+					debug ( "##########################	/!\	SAUVETAGE : " + sauvetage as string  + " boucles !	/!\	####################################################################")
+					debug  "####################################################################################################################################"
+					format "\n\n"
+				)
+				
+			)	---- Fin -	tant qu'il reste des points à traiter		--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			
-			debug_calque		_calque_A		
 			
-			_calque_A
 			
+			
+			---- 		On s'occupe des polygones isolés : en fonction de l'operation on va ajouter, ou pas, les polygones au resultat:		----------------
+			format "\n\n"
+				debug "--- les polygones isolés de A ----------------------------------------------------------------------------------------"
+			--- les polygones isolés de A ----------------------------------------------------------------------------------------
+			local polys_A_isoles = for id_poly in (ids_polys_A_isoles as array ) collect polys_A[ id_poly ]
+			for poly_A_isol in polys_A_isoles do (
+				
+				local polyA_dans_polyB
+				debug "-------> poly_A_isol" var:poly_A_isol
+				--- avec les polygone de B -------------
+				for poly_B in polys_B do (
+					local est_ds_polyB	=	mgr_polys.est_dans_polygone		poly_B 		poly_A_isol	
+					if est_ds_polyB	!= undefined do 
+						polyA_dans_polyB = est_ds_polyB
+					debug "	-------> polyA_dans_polyB" var:polyA_dans_polyB
+				)
+				
+				--- on regarde dons si on est dans un vide -------------
+				local est_dans_vide
+				--- si notre polyA est dans un poly B : ---------				
+				if polyA_dans_polyB != undefined then
+					est_dans_vide = polyA_dans_polyB.en_creux
+				else
+					est_dans_vide = true
+				
+					debug "-------> est_dans_vide" var:est_dans_vide
+				
+				---- on regarde si on l'ajoute ou pas ----------------
+				local on_ajoute = false
+				case operation of (
+					#addition: (
+						---- V dans V =  true ----------
+						if  poly_A_isol.en_creux	and est_dans_vide		then
+							on_ajoute = true
+						---- P dans V =  true ----------
+						else if not poly_A_isol.en_creux	and est_dans_vide		then
+							on_ajoute = true
+						---- P dans P =  false ----------
+						---- V dans P =  false ----------
+					)
+					#soustraction: (	------	ca a l'aire d'etre la meme logique que pour l'addition ...	----------------------------
+						---- V dans V =  true ----------
+						if  poly_A_isol.en_creux	and est_dans_vide		then
+							on_ajoute = true
+						---- P dans V =  true ----------
+						else if not poly_A_isol.en_creux	and est_dans_vide		then
+							on_ajoute = true
+						---- P dans P =  false ----------
+						---- V dans P =  false ----------
+					)
+					
+				)
+				
+					debug "-------> on_ajoute" var:on_ajoute
+				
+				
+				---- on ajoute le noeud obtenu -----------------------------------
+				if on_ajoute do	
+					calque_result.ajouter_polygone	poly_A_isol
+				
+				
+				
+			) ---- fin polygones A isolés ---------------------------
+			
+			
+			
+			
+			
+			
+			
+			format "\n\n"
+				debug "--- les polygones isolés de B ----------------------------------------------------------------------------------------"
+			--- les polygones isolés de B ----------------------------------------------------------------------------------------
+			local polys_B_isoles = for id_poly in (ids_polys_B_isoles as array ) collect polys_B[ id_poly ]
+			for poly_B_isol in polys_B_isoles do (
+				local polyB_dans_polyA
+				
+				--- avec les polygones de A -------------
+				for poly_A in polys_A do (
+					local est_ds_polyA	=	mgr_polys.est_dans_polygone		poly_A 		poly_B_isol	
+					if est_ds_polyA	!= undefined do 
+						polyB_dans_polyA = est_ds_polyA
+				)
+				
+				--- on regarde dons si on est dans un vide -------------
+				local est_dans_vide
+				--- si notre polyA est dans un poly B : ---------				
+				if polyB_dans_polyA != undefined then
+					est_dans_vide = polyB_dans_polyA.en_creux
+				else
+					est_dans_vide = true
+				
+				
+				---- on regarde si on l'ajoute ou pas ----------------
+				local on_ajoute = false
+				case operation of (
+					#addition: (
+						---- V dans V =  true ----------
+						if  poly_B_isol.en_creux	and est_dans_vide		then
+							on_ajoute = true
+						---- P dans V =  true ----------
+						else if not poly_B_isol.en_creux	and est_dans_vide		then
+							on_ajoute = true
+						---- P dans P =  false ----------
+						---- V dans P =  false ----------
+					)
+					#soustraction: (	------	la c'est differents avec B ----------
+						---- V dans P =  true ----------
+						if  poly_B_isol.en_creux	and not est_dans_vide		then
+							on_ajoute = true
+						---- P dans P =  true ----------
+						else if not poly_B_isol.en_creux	and not est_dans_vide		then
+							on_ajoute = true
+						---- P dans V =  false ----------
+						---- V dans V =  false ----------
+					)
+					
+				)
+				
+				
+				
+				---- on ajoute le noeud obtenu -----------------------------------
+				if on_ajoute do	
+					calque_result.ajouter_polygone	poly_B_isol
+				
+				
+				
+			) ---- fin polygones A isolés ---------------------------
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			debug "---------	CALQUE_RESULT	--------------------------------------------------------"
+			debug_calque	calque_result
+			
+			
+			calque_result
 		),
 		
 		
@@ -339,7 +767,7 @@ struct	str_mgr_calques	(
 				for i = 2 to m_pile.count do (
 					local calque = m_pile[i]
 					--- on calcule l'operation avec chacun des polygones du calque pile	--------
-					result_calque = 		operer_calques		result_calque	calque	operation:calque.operation
+					result_calque = 		operation_booleene		result_calque	calque	operation:calque.operation
 				)
 				
 			) 
