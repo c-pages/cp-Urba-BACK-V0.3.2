@@ -34,8 +34,6 @@ struct str_calque (
 			if not a_ete_integre do
 				append 		polygones 		_polygone_aAjouter
 			
-			_polygone_aAjouter.calque = this
-			
 -- 			debug "a_ete_integre" var:a_ete_integre
 -- 			debug "polygones" var:polygones param:#nom
 			
@@ -183,7 +181,7 @@ struct	str_mgr_calques	(
 					
 					debug"	ope.est_aLinterieurDe" var:ope.est_aLinterieurDe
 					debug"	ope.est_aLexterieurDe" var:ope.est_aLexterieurDe
-					
+						
 					
 					if ope.est_aLexterieurDe != undefined and not _poly_B.en_creux  do (
 						debug"			-----> POLY_B plein et et poly_B est a l'exterieur"
