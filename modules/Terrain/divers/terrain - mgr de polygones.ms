@@ -69,7 +69,7 @@ struct str_polygone (
 		fn ajouter_enfant 	_neudEnfant 	distance_toParent:	= (
 			
 			debug "aJOUTER ENFANT a "  var:this.nom
-			debug "_neudEnfant"	var:_neudEnfant
+			debug "enfant a ajouter"	var:_neudEnfant.nom
 			
 			--- le placer dans l'ordre du plus proche au plus loin ---------------
 			local distTest	=	distance_toParent	--struct_prt.get_distance_shapes 	pts	_neudEnfant.pts
@@ -101,7 +101,7 @@ struct str_polygone (
 			_neudEnfant.calque = calque
 			_neudEnfant.set_parent  	this
 			
-			
+			debug "enfants" var:enfants	param:#nom
 			debug " FIN aJOUTER ENFANT	FIN" 
 		),
 		fn retirer_enfant		_enfant 		=(
@@ -340,8 +340,8 @@ struct str_mgr_polygones (
 			
 			format "\n\n"
 			debug "	//////////////////////////			inserer_poly_ds_poly()		//////////////////////////"
-			debug "_poly_aInserer" var:_poly_aInserer
-			debug "_poly_dest" var:_poly_dest
+			debug "_poly_aInserer" var:_poly_aInserer.nom
+			debug "_poly_dest" var:_poly_dest.nom
 			debug "_poly_dest  POINTS" var:(_poly_dest.get_pts ())
 			
 			/* 
@@ -407,10 +407,10 @@ struct str_mgr_polygones (
 						if parent_dest != undefined then (
 							debug	"parent_dest != undefined "
 							parent_dest.ajouter_enfant	_poly_aInserer
-							
+							result = true	
 -- 							result = fasle	
 						) --else append		calque_dest.polygones		_poly_aInserer
-						
+-- 						result = true	
 						/* 
 						local parent_B = _poly_dest.parent 
 						inserer_poly_ds_poly			_poly_dest		_poly_aInserer
