@@ -1,6 +1,13 @@
 # CP - Urba V0.3.1
 Suite de plugins pour 3DSmax  |  Maxscript  | Pour réalisation de bout de villes, bâtiments, surfaces pour rues, trottoire, gazon etc.
 
+###### Auteur :
+
+ Christophe Pagès  
+ contact@c-pages.fr  
+ ![c-pages.fr](c-pages.fr)  
+ ![git](https://github.com/c-pages/cp-Urba)  
+
 ###### En cours de développement :
 
 - __Batiment__ : Objet paramétrique.
@@ -144,5 +151,6 @@ _____________________________
 ____________________________
 
 
-Merci Bruno !
-![GIT](https://github.com/dindoun )
+Merci Dindoune Bruno !
+![git](https://github.com/dindoun)
+![dindoun.lautre.net](http://www.dindoun.lautre.net/)
