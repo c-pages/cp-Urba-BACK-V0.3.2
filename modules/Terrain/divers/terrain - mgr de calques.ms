@@ -7,7 +7,7 @@ include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\terrain - mgr de poly
 struct str_calque (
 	
 		--------------- DEBUG --------------------------------------------		
-		m_debug	=	false,
+		m_debug	=	true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | clq."	  	var:var	 param:param		catch (),
 		
 		m_tab_format_poly = "    ",
@@ -48,7 +48,7 @@ struct str_calque (
 	---- fonctions	--------------------------------------------------------------
 	public
 		fn	ajouter_polygone		_polygone_aAjouter		/* 	brut_mode:false	 */	=	(
--- 			format "\n\n"
+-- 			--format "\n\n"
 			debug "==================	ajouter_polygone =================================================="
 			debug "_polygone_aAjouter" var:_polygone_aAjouter.nom
 			debug_calque this
@@ -68,7 +68,6 @@ struct str_calque (
 				local integration_reussie	=	mgr_polys.inserer_poly_ds_poly		_polygone_aAjouter		poly_calque
 				if integration_reussie do a_ete_integre = true
 				i += 1
-				debug_calque this
 			)
 			
 			debug "ajouter_polygone:	a_ete_integre" var:a_ete_integre
@@ -85,8 +84,9 @@ struct str_calque (
 -- 			debug "a_ete_integre" var:a_ete_integre
 			debug "polygones" var:polygones param:#nom
 			
+			debug_calque this
 			debug "====================================================================\n\n"
--- 			format "\n\n"
+-- 			--format "\n\n"
 			polygones
 			
 		),
@@ -132,7 +132,7 @@ struct	str_mgr_calques	(
 
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug	=	true,
+		m_debug	=	false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | calq."	  	var:var	 param:param		catch (),
 		
 		m_tab_format_poly = "    ",
@@ -360,7 +360,7 @@ struct	str_mgr_calques	(
 				local shp_autre		= poly_autre.get_pts ()
 				
 				local sens 				= 1
-				if 	poly_courant.en_creux	do 	 sens = 1
+				if 	poly_courant.en_creux	do 	 sens = -1
 				
 				
 				----- INtersection : on regarde ou l'on va -----------------------------
@@ -375,12 +375,18 @@ struct	str_mgr_calques	(
 						if operateur_courant		==	#A	then (
 							
 							local poly_test_courant 	= intersection_aTraiter.poly_A
-							local id_ptTest_courant 	=  intersection_aTraiter.id_pt_A
+							local id_ptTest_courant 	=  intersection_aTraiter.id_pt_A							
+-- 							if 	poly_test_courant.en_creux	do 	 id_ptTest_courant = mgr_shp.boucler		shp_courant	(id_ptTest_courant+1)
+								
 							if poly_test_courant.en_creux do id_ptTest_courant = mgr_shp.boucler		shp_courant	(id_ptTest_courant+1)
 							pt_test_courant				= 	shp_courant[ id_ptTest_courant ]
 							
 							
 							local poly_test_autre 		= intersection_aTraiter.poly_B
+							
+							local sensB 				= 1
+							if 	poly_test_autre.en_creux	do 	 sensB = -1
+					
 							shp_autre 						= intersection_aTraiter.poly_B.get_pts()
 							local id_ptTest_autre 		=  intersection_aTraiter.id_pt_B
 							if poly_test_autre.en_creux do id_ptTest_autre = mgr_shp.boucler		shp_autre	(id_ptTest_autre+1)
@@ -390,14 +396,18 @@ struct	str_mgr_calques	(
 							
 							local poly_test_courant 	= intersection_aTraiter.poly_B
 							local id_ptTest_courant 	=  intersection_aTraiter.id_pt_B
-							if poly_test_courant.en_creux do id_ptTest_courant = mgr_shp.boucler		shp_courant	(id_ptTest_courant+1)
+							if 	poly_test_courant.en_creux	do 	 id_ptTest_courant = mgr_shp.boucler		shp_courant	(id_ptTest_courant+1)
+-- 							if poly_test_courant.en_creux do id_ptTest_courant = mgr_shp.boucler		shp_courant	(id_ptTest_courant+sens)
 							pt_test_courant				= 	shp_courant[ id_ptTest_courant ]
 							
 							
-							local poly_test_autre 		= intersection_aTraiter.poly_A
+							local poly_test_autre 		= intersection_aTraiter.poly_B
+							local sensB 				= 1
+							if 	poly_test_autre.en_creux	do 	 sensB = -1
 							shp_autre 						= intersection_aTraiter.poly_A.get_pts()
 							local id_ptTest_autre 		=  intersection_aTraiter.id_pt_A
-							if poly_test_autre.en_creux do id_ptTest_autre = mgr_shp.boucler		shp_autre	(id_ptTest_autre+1)
+-- 							if 	poly_test_autre.en_creux	do 	 id_ptTest_autre = mgr_shp.boucler		shp_autre	(id_ptTest_autre+1)
+							if poly_test_autre.en_creux do 	id_ptTest_autre = mgr_shp.boucler		shp_autre	(id_ptTest_autre+1)
 							pt_test_autre					= 	shp_autre[ id_ptTest_autre ]
 							
 							
@@ -407,7 +417,7 @@ struct	str_mgr_calques	(
 						
 						debug "operateur_est_aGauche" var:operateur_est_aGauche
 						
-						if   operateur_est_aGauche  or not operateur_est_aGauche and operation == #intersection	do (
+						if   operateur_est_aGauche /* and operation != #intersection  */ or  operateur_est_aGauche and operation == #intersection 	do (
 							
 							debug"##########	 EST_AGAUCHE		##########################"
 							poly_courant 			= poly_B
@@ -429,26 +439,36 @@ struct	str_mgr_calques	(
 				
 				
 				sens = 1
+				debug "ici ------- > sens	---> operation" var:operation
+				
 				case operation of (
 					#addition :(
+						debug "ici ------- > #addition"
 						if poly_courant.en_creux 	then  
 							sens =	-1	
 					)
 					#soustraction:(
+							debug "ici ------- > #soustraction"
 						if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
 							sens =	-1	
 							
-						if 	operateur_courant 	==	#B and not poly_courant.en_creux and operation == #soustraction	then  
+						if 	operateur_courant 	==	#B and not poly_courant.en_creux 	then  
 							sens =	-1	
 					)
 					#intersection:(
 						
-						if poly_courant.en_creux 	then  
+							debug "ici ------- > #intersection"
+						if operateur_courant 	==	#A and	not poly_courant.en_creux 	then  (
 							sens =	-1	
--- 						if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
--- 							sens =	-1	
+							debug "la"
+						)
+						if 	operateur_courant 	==	#B and  not poly_courant.en_creux	 then  (
+							sens =	-1	
+							debug "ici"
+						)
 					)
 				)
+				debug "ici ------- > sens" var:sens
 				
 				--- le point courant initial	----------				
 				if sens == -1 do id_pt_initial = mgr_shp.boucler	shp_courant (id_pt_initial+1)
@@ -481,6 +501,7 @@ struct	str_mgr_calques	(
 						
 						append 	shp_enConstruction		pt_courant
 						
+						debug "poly_courant" var:poly_courant
 						debug "operateur_courant" var:operateur_courant
 						debug "id_pt_courant" var:id_pt_courant
 						debug "pt_courant" var:pt_courant
@@ -582,15 +603,16 @@ struct	str_mgr_calques	(
 									if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
 										sens =	-1	
 										
-									if 	operateur_courant 	==	#B and not poly_courant.en_creux and operation == #soustraction	then  
+									if 	operateur_courant 	==	#B and not poly_courant.en_creux then  
 										sens =	-1	
 								)
 								#intersection:(
 									
-									if poly_courant.en_creux 	then  
+									if operateur_courant 	==	#A and	not poly_courant.en_creux 	then  
 										sens =	-1	
-			-- 						if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
-			-- 							sens =	-1	
+										
+									if 	operateur_courant 	==	#B and  not poly_courant.en_creux then  
+										sens =	-1	
 								)
 							)
 							
@@ -683,11 +705,11 @@ struct	str_mgr_calques	(
 				sauvetage += 1
 				if sauvetage > SAUVETAGE_MAX do (
 					annuler = true
-					format "\n\n"
+					--format "\n\n"
 					debug  "####################################################################################################################################"
 					debug ( "##########################	/!\	SAUVETAGE : " + sauvetage as string  + " boucles !	/!\	####################################################################")
 					debug  "####################################################################################################################################"
-					format "\n\n"
+					--format "\n\n"
 				)
 				
 			)	---- Fin -	tant qu'il reste des points à traiter		--------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -706,7 +728,7 @@ struct	str_mgr_calques	(
 					debug  "####################################################################################################################################"
 			
 			---- 		On s'occupe des polygones isolés : en fonction de l'operation on va ajouter, ou pas, les polygones au resultat:		----------------
-			format "\n\n"
+			--format "\n\n"
 				debug "--- les polygones isolés de A ----------------------------------------------------------------------------------------"
 			
 			
@@ -796,7 +818,7 @@ struct	str_mgr_calques	(
 			
 			
 			
-			format "\n\n"
+			--format "\n\n"
 			debug "--- les polygones isolés de B ----------------------------------------------------------------------------------------"
 			--- les polygones isolés de B ----------------------------------------------------------------------------------------
 			local polys_B_isoles = for id_poly in (ids_polys_B_isoles as array ) collect polys_B_total[ id_poly ]
@@ -888,7 +910,7 @@ struct	str_mgr_calques	(
 			
 			debug "---------	CALQUE_RESULT	--------------------------------------------------------"
 			debug_calque		calque_result
-			format "\n\n\n"
+			--format "\n\n\n"
 			
 			calque_result
 		),
@@ -930,6 +952,7 @@ struct	str_mgr_calques	(
 		---- Manipulations -------------
 		fn creer_calque		shape_node:	nom:"temporaire"		=(
 			
+			local chrono_1	=	timeStamp ()
 			--- Creation d'un calque vide	---------
 			local nv_calque = str_calque 	nom:nom
 			
@@ -941,11 +964,15 @@ struct	str_mgr_calques	(
 				local polygones 	= mgr_polys.creer_fromShape	shape_node
 				
 				--- Ajout des polys au nv calque -----
-				for poly  in polygones do 
+				for poly  in polygones do (
+				local chrono_2	=	timeStamp ()
+			
 					nv_calque.ajouter_polygone 	poly
-				
+			debug "--->	nv_calque.ajouter_polygone"  var:( (  ((timeStamp ()) - chrono_2 ) / 1000.0)		as string + " s.")
+				)
 			)
 			
+			debug "--->	creer_calque"  var:( (  ((timeStamp ()) - chrono_1 ) / 1000.0)		as string + " s.")
 			nv_calque
 			
 		),

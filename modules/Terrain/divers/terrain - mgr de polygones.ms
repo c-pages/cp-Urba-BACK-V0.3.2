@@ -161,7 +161,7 @@ struct str_polygone (
 		
 		
 		fn get_positionRelative 		_poly_a_tester	=(
-			mgr_shp.get_positionRelative_shapes 	(  get_pts () )	(  _poly_a_tester.get_pts () )
+			mgr_shp.get_positionRelative_shapes 	(  get_pts () )	(  _poly_a_tester.get_pts () )	 renvoyer_intersections:false
 		)
 		
 		/* ,
@@ -192,7 +192,7 @@ struct str_mgr_polygones (
 	
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug	=	false,
+		m_debug	=	true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | polys"	  	var:var	 param:param		catch (),
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		
@@ -217,7 +217,7 @@ struct str_mgr_polygones (
 			
 			local results = #()
 			
-			--- on cherche les points des shpes les plus proches pour les connecter --------------
+			--- on cherche les points des shpes les plus proches --------------
 			
 			local dist_min					= 1e+10			
 			for id_pt1 = 1 to  _pts_shp1.count do (
@@ -245,16 +245,17 @@ struct str_mgr_polygones (
 		),
 		fn ajouter_shape_aBooleen			_pts_shp_booleen		_pts_shp_aAjouter	 =(
 			
--- 			debug "ajouter_shape_aBooleen"
+			debug "ajouter_shape_aBooleen"
 			
 			local chrono_temp = timeStamp ()
+			
 			--- on cherche les points des shpes les plus proches pour les connecter --------------
 			local connexions	=	get_idsPts_connexion   	_pts_shp_booleen		_pts_shp_aAjouter 
 			
 			
 			
 			
--- 			debug"connexions" var:connexions
+			debug"connexions" var:connexions
 			local connexion = connexions[1]
 			--- si on a plusieurs connexions ------------------
 			if connexions.count > 1 then (
@@ -333,16 +334,115 @@ struct str_mgr_polygones (
 			pts_result
 			
 		),
+		
+		
+		
+		
+		
+		
+		
+		/* 
+		
+		fn ajouter_shape_aBooleen			_pts_shp_booleen		_pts_shp_aAjouter	 =(
+			
+			debug "ajouter_shape_aBooleen"
+			
+			local chrono_temp = timeStamp ()
+			--- on cherche les points des shpes les plus proches pour les connecter --------------
+			local connexions	=	get_idsPts_connexion   	_pts_shp_booleen		_pts_shp_aAjouter 
+			
+			
+			
+			
+			debug"connexions" var:connexions
+			local connexion = connexions[1]
+			--- si on a plusieurs connexions ------------------
+			if connexions.count > 1 then (
+				
+				local id_pt_origine 	= connexions[1][2]
+				local pt_origine 		= _pts_shp_aAjouter[id_pt_origine]
+				
+				local angle_min 			= 1e+10
+				while connexions.count > 1 do (
+					
+					---- si on a des connexion vers le meme point ------------------
+					if id_pt_origine == connexions[2][2] then (
+						
+						local	id_pt_cnx1			= connexions[1][1]
+						local id_pt_cnx1_svt	=	if id_pt_cnx1 == _pts_shp_booleen.count  then 1 else id_pt_cnx1 + 1
+						local id_pt_cnx1_prcd	=	if id_pt_cnx1 == 1  then _pts_shp_booleen.count else id_pt_cnx1 - 1
+						
+						local pt_cnx1 			= _pts_shp_booleen[id_pt_cnx1]
+						local pt_cnx1_svt	= _pts_shp_booleen[id_pt_cnx1_svt]
+						local pt_cnx1_prcd	= _pts_shp_booleen[id_pt_cnx1_prcd]
+						
+						if pt_cnx1_svt == pt_cnx2_prcd then (
+							local pt_est_aGauche 	= mgr_shp.est_aGauche		pt_cnx1		pt_cnx1_svt		pt_origine	
+							if pt_est_aGauche then 
+								connexion = deepcopy  connexions[1]
+							else 
+								connexion = deepcopy  connexions[2]
+						) else (
+							local pt_est_aGauche 	= mgr_shp.est_aGauche		pt_cnx1_prcd		pt_cnx1		pt_origine
+							if pt_est_aGauche then 
+								connexion = deepcopy  connexions[1]
+							else 
+								connexion = deepcopy  connexions[2]
+						)
+					) 
+					deleteItem connexions 1
+				)
+			)   
+			
+			local id_pt_connexion_1 =	connexion[1]
+			local id_pt_connexion_2 =	connexion[2]
+			
+			
+-- 			debug  ("	TIME:	on cherche les points des shpes les plus proches pour les connecter : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
+-- 			local chrono_temp = timeStamp ()
+			
+			---- les premier shape -----------
+			local pts_result = #()
+			if id_pt_connexion_1 != 0 do (
+				pts_result = #( _pts_shp_booleen[ id_pt_connexion_1 ] )
+				for i_compteur = 1 to  _pts_shp_booleen.count do (
+					local id_pt = i_compteur + id_pt_connexion_1 
+					if id_pt > _pts_shp_booleen.count do 
+						id_pt -= _pts_shp_booleen.count 
+					local pt = _pts_shp_booleen[id_pt]
+					append pts_result	pt
+				)
+			)
+			
+-- 			debug  ("	TIME:	les premier shape : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
+-- 			local chrono_temp = timeStamp ()
+			
+			---- les second shape, on l'ajoute a l'envers  -----------
+			for i_compteur =  _pts_shp_aAjouter.count to 1 by -1 do (
+				local id_pt = i_compteur + id_pt_connexion_2 
+				if id_pt > _pts_shp_aAjouter.count do 
+					id_pt -= _pts_shp_aAjouter.count 
+				local pt = _pts_shp_aAjouter[id_pt]
+				append pts_result	pt
+			)
+			if id_pt_connexion_2 != 0 do
+				append 	pts_result	( _pts_shp_aAjouter[ id_pt_connexion_2 ] )
+			
+-- 			debug  ("	TIME:	les second shape, on l'ajoute a l'envers : " +  (  ((timeStamp ()) - chrono_temp ) / 1000.0)	as string + " s." ) 
+			
+			pts_result
+			
+		), */
 	------------ Interface	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public	
 	
 		fn inserer_poly_ds_poly		_poly_aInserer		_poly_dest 		=(
 			
-			format "\n\n"
-			debug "	//////////////////////////			inserer_poly_ds_poly()		//////////////////////////"
-			debug "_poly_aInserer" var:_poly_aInserer.nom
-			debug "_poly_dest" var:_poly_dest.nom
-			debug "_poly_dest  POINTS" var:(_poly_dest.get_pts ())
+			--format "\n\n"
+-- 			debug "	//////////////////////////			inserer_poly_ds_poly()		//////////////////////////"
+-- 			debug "_poly_aInserer" var:_poly_aInserer.nom
+-- 			debug "_poly_dest" var:_poly_dest.nom
+-- 			debug "_poly_dest  POINTS" var:(_poly_dest.get_pts ())
 			
 			/* 
 			struct str_result	(
@@ -396,7 +496,7 @@ struct str_mgr_polygones (
 						
 						
 					#exterieur:		(
-						debug	"#exterieur"
+-- 						debug	"#exterieur"
 -- 						result.est_parentDe	 =	_poly_dest
 						
 						local parent_dest = _poly_dest.parent 
@@ -405,7 +505,7 @@ struct str_mgr_polygones (
 						local calque_dest = _poly_dest.calque 
 -- 						inserer_poly_ds_poly			_poly_dest		_poly_aInserer
 						if parent_dest != undefined then (
-							debug	"parent_dest != undefined "
+-- 							debug	"parent_dest != undefined "
 							parent_dest.ajouter_enfant	_poly_aInserer
 							result = true	
 -- 							result = fasle	
@@ -434,25 +534,25 @@ struct str_mgr_polygones (
 						
 					#seCroisent:		(
 					
-							debug "###########################################################"
-							debug "#############################################################"
-							debug "#########											#########"
-							debug "#########	/!\	hmm! probleme, il ne devrait y 	PAS	#########"
-							debug "#########	avoir d'INTERSECTION de polygones ici, on est dans l'insertion dans : inserer_poly_ds_poly() 	#########"
-							debug "#########											#########"
-							debug "#############################################################"
+-- 							debug "###########################################################"
+-- 							debug "#############################################################"
+-- 							debug "#########											#########"
+-- 							debug "#########	/!\	hmm! probleme, il ne devrait y 	PAS	#########"
+-- 							debug "#########	avoir d'INTERSECTION de polygones ici, on est dans l'insertion dans : inserer_poly_ds_poly() 	#########"
+-- 							debug "#########											#########"
+-- 							debug "#############################################################"
 							result = #PROBLEME
 						) ---- fin #seCroisent	----------
 				)
 			)
-			debug "	/////////////////////////////////////////////////////////////////////////////" var:result
+-- 			debug "	/////////////////////////////////////////////////////////////////////////////" var:result
 			
 			result
 		),
 		
 		fn est_dans_polygone		_poly_A 		_poly_B		=(
 			
-			local pos_relative = mgr_shp.get_positionRelative_shapes 	( _poly_A.get_pts() )	( _poly_B.get_pts () )
+			local pos_relative = mgr_shp.get_positionRelative_shapes 	( _poly_A.get_pts() )	( _poly_B.get_pts () )	renvoyer_intersections:false
 			local result
 			
 			if  pos_relative.position == #interieur do (
@@ -500,6 +600,8 @@ struct str_mgr_polygones (
 			
 			pts_result
 		),
+		
+		
 		fn creer_polygone 	pts: 	nom:		=(
 			
 			----	renvoie un nouveau polygonne	----
@@ -545,10 +647,12 @@ struct str_mgr_polygones (
 			--- on renvoie une liste de polygones --------
 			local result_polys	=	#()
 			
+			local chrono_1 = timeStamp ()
 			--- on recupere nos tracés à partir des splines du shape_node
 			local pts_shps 	= 	mgr_shp.interpoler_shape		_shape_node
-			
-			
+-- 			
+-- 			debug "--->	interpolation"  var:( (  ((timeStamp ()) - chrono_1 ) / 1000.0)		as string + " s.")
+-- 			
 			--- et on créé un polygone par tracé		-------------
 			local i = 0
 			for pts_shp in pts_shps do (
@@ -556,7 +660,7 @@ struct str_mgr_polygones (
 				local nom_poly 	=  _shape_node.name	+ "_" + (  i+=1 ) as string
 				local nv_poly 		= creer_polygone		pts:pts_shp	nom:nom_poly
 				append result_polys nv_poly
-				debug "PTS:" var:(nv_poly.get_pts())
+-- 				debug "PTS:" var:(nv_poly.get_pts())
 -- 				
 -- 				--- on l'ajoute à la hierarchie resultante --------------
 -- 				inserer	 result_polys 	nv_poly

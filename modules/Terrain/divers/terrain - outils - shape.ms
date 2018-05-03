@@ -8,9 +8,10 @@ struct str_outils_shape (
 
 
 
+
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
-		m_debug	=	true,
+		m_debug	=	false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | shape"	  	var:var	 param:param		catch (),
 	
 		m_tab_format_nd = "		",
@@ -718,7 +719,7 @@ struct str_outils_shape (
 				
 -- 				format "\n\n---------------------------------------------------------------------"
 				
--- 				debug" trianguler" var:(i_debug += 1)
+				debug" trianguler" var:(i_debug += 1)
 				
 				
 				-- on commence avec le point le plus a gauche du polygone--
@@ -736,7 +737,7 @@ struct str_outils_shape (
 				local triangle_aTester = #(pts_poly[id_pt_avant], pts_poly[id_pt_aTester], pts_poly[id_pt_apres])
 				
 				
--- 				debug "triangle_aTester" var:triangle_aTester
+				debug "triangle_aTester" var:triangle_aTester
 				
 				----- Puis on cherche parmis les points restants du polygone ceux qui seraient à l'interieur du trangle ------------------------------------------------------------------------------		
 				local ids_pts_dansTriangle =#()
@@ -759,26 +760,26 @@ struct str_outils_shape (
 				------- soit on trouve des points dans le triangle		---->	 on doit découper en 2 polygones		------------------------------------------------------------------------------
 				if ids_pts_dansTriangle.count > 0 then (
 					
--- 					debug "-----> 	DECOUPAGE	->		de " var:pts_poly
+					debug "-----> 	DECOUPAGE	->		de " var:pts_poly
 					
 					local pts_dansTriangle	=	for id_pt in ids_pts_dansTriangle collect pts_poly[id_pt]
 					
 					---- si on en trouve : on cherche le plus éloigné de la 'diagonale' du triangle ----
 					local IDs_pts_diagonal 	= 	points_lesPlusLoinDuSegment  	pts_dansTriangle		triangle_aTester[3]		triangle_aTester[1]
 					
--- 					debug "-----> 	pts_dansTriangle : " var:pts_dansTriangle
--- 					debug "-----> 	IDs_pts_diagonal : " var:IDs_pts_diagonal
+					debug "-----> 	pts_dansTriangle : " var:pts_dansTriangle
+					debug "-----> 	IDs_pts_diagonal : " var:IDs_pts_diagonal
 					
 					
 					--- on gere si on a plusieurs points pour la diagonal --------------------
 					local IDpt_decoupe 
 					if IDs_pts_diagonal.count > 1 then (
--- 						debug "Choisir un pt diagonal " 
--- 						debug "	-> id_pt_aTester" var:id_pt_aTester
+						debug "Choisir un pt diagonal " 
+						debug "	-> id_pt_aTester" var:id_pt_aTester
 						local dist_id_min = 1e+10
 						for id_pt in IDs_pts_diagonal do (
 							local id_diag 		= ids_pts_dansTriangle[id_pt]
--- 							debug "	-> id_diag" var:id_diag
+							debug "	-> id_diag" var:id_diag
 -- 							local dist_test = abs ( id_pt_aTester - id_diag )
 							/* if id_diag < id_pt_aTester then (
 								dist_test = id_pt_aTester - 
@@ -790,13 +791,13 @@ struct str_outils_shape (
 							
 -- 							local dist_to_id = abs (id_diag - id_pt_aTester )
 							local dist_to_id 			=  abs (id_diag - id_pt_aTester )
-							local dist_to_id_inv 		= abs (( pts_poly.count + id_pt_aTester ) -  id_diag )
+							local dist_to_id_inv 		= abs (( pts_poly.count - id_pt_aTester ) -  id_diag )
 							
--- 							debug "	-> dist_to_id" var:dist_to_id
--- 							debug "	-> dist_to_id_inv" var:dist_to_id
+							debug "	-> dist_to_id" var:dist_to_id
+							debug "	-> dist_to_id_inv" var:dist_to_id
 							if dist_to_id_inv < dist_to_id do dist_to_id = dist_to_id_inv
 								
--- 							debug "	--------------> dist_to_id" var:dist_to_id
+							debug "	--------------> dist_to_id" var:dist_to_id
 							if dist_to_id <= dist_id_min do (
 								
 								
@@ -807,7 +808,7 @@ struct str_outils_shape (
 							)
 								
 						)
--- 						debug "	----------------------------------------> IDPT_DECOUPE" var:IDpt_decoupe
+						debug "	----------------------------------------> IDPT_DECOUPE" var:IDpt_decoupe
 					) else					
 						IDpt_decoupe 		= 	ids_pts_dansTriangle[ IDs_pts_diagonal[1] ]
 					
@@ -834,26 +835,26 @@ struct str_outils_shape (
 					)				
 					pts_poly2 = for idPt in IDsPts_poly2 collect pts_poly[idPt]
 
--- 					debug"pts_poly1" var:pts_poly1
--- 					debug"pts_poly2" var:pts_poly2
+					debug"pts_poly1" var:pts_poly1
+					debug"pts_poly2" var:pts_poly2
 					
 					result_triangles += trianguler  pts_poly1
 					result_triangles += trianguler  pts_poly2
 					
-					/* 
-					sp = splineShape name:( "tri - decoupage poly " + i_debug as string + " - 1")
-					addnewSpline sp
-					for pt in pts_poly1 do		addknot sp 1 #corner #curve  pt
-					close sp 1
-					updateShape sp
-					sp = splineShape name:( "tri - decoupage poly " + i_debug as string + " - 2")
-					addnewSpline sp
-					for pt in pts_poly2 do		addknot sp 1 #corner #curve  pt
-					close sp 1
-					updateShape sp
--- 						selectMore sp
-					   */
-					
+					if m_debug do (
+						sp = splineShape name:( "tri - decoupage poly " + i_debug as string + " - 1")
+						addnewSpline sp
+						for pt in pts_poly1 do		addknot sp 1 #corner #curve  pt
+						close sp 1
+						updateShape sp
+						sp = splineShape name:( "tri - decoupage poly " + i_debug as string + " - 2")
+						addnewSpline sp
+						for pt in pts_poly2 do		addknot sp 1 #corner #curve  pt
+						close sp 1
+						updateShape sp
+	-- 						selectMore sp
+						  
+				)
 					
 					
 					
@@ -864,20 +865,21 @@ struct str_outils_shape (
 				------- soit on a pas de points dans le triangle, 		---->	donc on peut le treer tranquile 		------------------------------------------------------------------------------
 				) else (
 					
--- 					debug "-----> 	TRIANGLE	->		" 
+					debug "-----> 	TRIANGLE	->		" 
 					
 					
 					---- si on en trouve pas: 	on peut creer le triangle et retirer le point tester de la liste du polygone ----
 					append 	result_triangles  triangle_aTester
 					deleteItem pts_poly  id_pt_aTester
-					/* 
+					
+					if m_debug do (
 						sp = splineShape name:( "triangle " + i_debug as string )
 						addnewSpline sp
 
 						for pt in triangle_aTester do		addknot sp 1 #corner #curve  pt
 						close sp 1
 						updateShape sp
-						 */
+					)
 				)
 				
 			)  --- fin du while il ya plus de 3 pts dans le polygone ------
@@ -888,9 +890,4 @@ struct str_outils_shape (
 
 	
 )
-
-
-
-
-
 

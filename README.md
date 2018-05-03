@@ -70,6 +70,7 @@ ____________________________
 - [ ] /!\ PROBLEME RENDU RESEAU qui rend pas !!! /!\ a voir si c'est __Batiment__ ou __Terrain__ !!!
 - [ ] faire que quand on ajoute une nouvelle spline, si la touche 'alt' est pressée on l'ajoute en #soustraction
 - [ ] verifer à l'ajout de nouvelle spline qu'elles soient ok : qu'elles ne se croisent pas ni qu'elles aient des points superposer peut-etre, faudra chercher un peu les cas à problème.
+- [ ] Il y a un probleme avec la creation des points avant geometrie à partir des polys ( polygone.__creer_pts_pourFace ()__ )
 
 
 #### __Bâtiment__

@@ -407,44 +407,10 @@ struct	str_terrain_node_core	(
 			mgr_calques.debug_pile ()
 			debug "------------------------	FIN	ACTUALISER_CALQUES ()	---------------------------------------------------------------"
 			
-			/* 
 			
-			format "\n\n\n\n\n"
-			m_calques = #()
-			if m_plug.calques_nodes.count > 0 do (
-				for 	i = 1 to	m_plug.calques_nodes.count  where m_plug.calques_nodes[ i ] != undefined and not isdeleted m_plug.calques_nodes[ i ] do (
-					local calque_node 	= 	m_plug.calques_nodes[i]
-					append m_calques 	(  mgr_shape.creer_calque	shape_node:calque_node )
-					
-				)
-			)
-			format "\n\n\n\n\n"
-			debug "------------------------	FIN	actualiser_calques()	---------------------------------------------------------------"
--- 			debug "---------------- m_calques :"
-			for calque in m_calques	do
-				mgr_shape.debug_calque calque
-			debug "---------------------------------------------------------------------------------------------------------------------------"
-			format "\n\n\n\n\n"
-			 */
 			
 		),
-			/* 
-		fn operer_pileDeCalques 		=(
-			format "\n\n\n\n\n"
-			debug "------------------------	OPERER_PILEDECALQUES ()	---------------------------------------------------------------"
-
-			m_calque_resultat		=		mgr_shape.creer_calque	nom:"pile_de_calques"
-			
-			for calque in m_calques do (
-				mgr_shape.operer_calques	m_calque_resultat		calque
-			)
-			format "\n\n\n\n\n"
-			debug "------------------------	FIN	operer_pileDeCalques ()	---------------------------------------------------------------"
-			debug "---------------->	m_calque_resultat" var:m_calque_resulta
-			debug "---------------------------------------------------------------------------------------------------------------------------"
-			
-			format "\n\n\n\n\n" 
-		),*/
+		
 		fn actualiser_pts_faces =(
 			
 			format "\n\n\n\n\n"
@@ -461,31 +427,13 @@ struct	str_terrain_node_core	(
 		
 		
 		fn creer_geometrie_base = if m_pts_faces.count > 0 do (
--- 			debug "	(2-1)	creer_geometrie_base"
-
-			--- version faces ---------------
--- 			for pts_shp in m_pts_faces do	mgr_geo.face	pts_shp smGrp:1
--- 			
+			
 			--- version triangles ---------------
 			local triangles =#()
 			for pts_shp in m_pts_faces do	
 				triangles += mgr_shape.trianguler 	pts_shp
 			for pts_tri in triangles do	mgr_geo.face	pts_tri 		smGrp:1
 			
-			/* ----- DEBUG-------------------
-			sp = splineShape name:(Uniquename "triangles ")
-			for j in 1 to triangles.count do (
-				addnewSpline sp
-
-				for pt in triangles[j] do		addknot sp j #corner #curve  pt
-				close sp j
-				updateShape sp
--- 				selectMore sp
-			)
-			----- DEBUG------------------- */
-
-			
--- 			mgr_geo.souder_tout ()
 			
 		),
 		

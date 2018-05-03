@@ -790,7 +790,7 @@ struct str_temp (
 							
 -- 							local dist_to_id = abs (id_diag - id_pt_aTester )
 							local dist_to_id 			=  abs (id_diag - id_pt_aTester )
-							local dist_to_id_inv 		= abs (( pts_poly.count + id_pt_aTester ) -  id_diag )
+							local dist_to_id_inv 		= abs (( pts_poly.count - id_pt_aTester ) -  id_diag )
 							
 							debug "	-> dist_to_id" var:dist_to_id
 							debug "	-> dist_to_id_inv" var:dist_to_id
