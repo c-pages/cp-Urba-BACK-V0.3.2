@@ -428,7 +428,20 @@ struct	str_mgr_calques	(
 				local en_creux = poly_courant.en_creux
 				
 				
-				sens = if 	poly_courant.en_creux	then 	-1	else 1
+				sens = 1
+				case operation of (
+					#addition :(
+						if poly_courant.en_creux 	then  
+							sens =	-1	
+					)
+					#soustraction:(
+						if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
+							sens =	-1	
+							
+						if 	operateur_courant 	==	#B and not poly_courant.en_creux and operation == #soustraction	then  
+							sens =	-1	
+					)
+				)
 				
 				--- le point courant initial	----------				
 				if sens == -1 do id_pt_initial = mgr_shp.boucler	shp_courant (id_pt_initial+1)
@@ -544,8 +557,6 @@ struct	str_mgr_calques	(
 								id_pt_courant 	=  prochaine_intersec.id_pt_A									
 							)
 							
-							sens = 1
-							
 							debug "--->	poly_courant	" var:poly_courant.nom							
 							debug "--->				" var:poly_courant
 							debug "--->	operation" var:operation	
@@ -554,9 +565,20 @@ struct	str_mgr_calques	(
 							
 							
 							
-							if 	poly_courant.en_creux and operation == #addition	then  sens =	-1	
-							if 	operateur_courant 	==	#B and not poly_courant.en_creux and operation == #soustraction	then  sens =	-1	
-							
+							sens = 1							
+							case operation of (
+								#addition :(
+									if poly_courant.en_creux 	then  
+										sens =	-1	
+								)
+								#soustraction:(
+									if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
+										sens =	-1	
+										
+									if 	operateur_courant 	==	#B and not poly_courant.en_creux and operation == #soustraction	then  
+										sens =	-1	
+								)
+							)
 							
 							
 							debug "--->	sens" var:sens	
