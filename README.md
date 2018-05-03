@@ -63,7 +63,8 @@ ____________________________
 - [ ] Faire en sorte de pouvoir piquer des splines type 'rectangle', 'circle' ...
 - [ ] Pouvoir donner une épaisseur ? peut etre juste les bords façon extrusion ...
 - [ ] quand un terrain a un ou des modifiers, alors il y a un probleme au rendu en mode Proxy, surement une reference au baseObject Terrain à faire, il ne doit plus voir que c'est un terrain ....
-- [ ] /!\ PROBLEME RENDU RESEAU !!! /!\ a voir si c'est __Batiment__ ou __Terrain__ !!!
+- [ ] /!\ PROBLEME RENDU RESEAU qui rend pas !!! /!\ a voir si c'est __Batiment__ ou __Terrain__ !!!
+- [ ] faire que quand on ajoute une nouvelle spline, si la touche 'alt' est pressée on l'ajoute en #soustraction
 
 
 #### __Bâtiment__

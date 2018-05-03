@@ -33,8 +33,8 @@ struct	str_terrain_node_core	(
 		mgr_datas						=	str_datasToString (),
 		
 	----- les points stockés pour manip -----
--- 		m_pts_contours	 			=	#(),		---- les listes de points issues des points des splines contours, cleannés et dans le bon sens. ------------
-		m_ndRoot_contour			=	undefined,
+-- 		m_pts_calques	 			=	#(),		---- les listes de points issues des points des splines calques, cleannés et dans le bon sens. ------------
+		m_ndRoot_calque			=	undefined,
 		m_calque_resultat			=	undefined,
 		m_calques						=	#(),
 		
@@ -101,7 +101,7 @@ struct	str_terrain_node_core	(
 						case superclassof  nd of (
 							shape:			(
 								for terrain_nd in  terrains do
-									if terrain_nd.aCommeContour  nd do (
+									if terrain_nd.aCommecalque  nd do (
 										terrain_nd.core.set_etape_aActualiser 1
 										terrain_nd.actualiser ()
 									)
@@ -129,7 +129,7 @@ struct	str_terrain_node_core	(
 					case superclassof  nd of (
 						shape:			(
 							for terrain_nd in  terrains do
-								if terrain_nd.aCommeContour  nd do  with redraw off (
+								if terrain_nd.aCommecalque  nd do  with redraw off (
 									terrain_nd.core.set_etape_aActualiser 1
 									terrain_nd.actualiser ()
 								)
@@ -163,8 +163,8 @@ struct	str_terrain_node_core	(
 				local terrains = for obj in geometry where classof obj.baseObject == Urba_terrain collect  obj
 				for terrain_nd in  terrains do (
 					local aActualiser = false
-					for contour_node in terrain_nd.contours_nodes do (
-						if isDeleted contour_node or contour_node == Undefined do (
+					for calque_node in terrain_nd.calques_nodes do (
+						if isDeleted calque_node or calque_node == Undefined do (
 							terrain_nd.core.set_etape_aActualiser 1
 							aActualiser = true
 						)
@@ -213,18 +213,18 @@ struct	str_terrain_node_core	(
 		
 		
 		----- accessions -----------------------------
-		fn get_BB_contour 	=(
--- 			debug "get_BB_contour"
+		fn get_BB_calque 	=(
+-- 			debug "get_BB_calque"
 			
 			local result = #([0,0,0],[0,0,0])
 			
--- 			local pts_contour = deepCopy m_pts_contours	---	get_contour_pts ()
+-- 			local pts_calque = deepCopy m_pts_calques	---	get_calque_pts ()
 			
 			--- on replace dans 
 			local minX = minY 	= minZ =1e10
 			local maxX = maxY 	= maxZ = -1e10
 			
-			for shp_node in m_plug.contours_nodes do (
+			for shp_node in m_plug.calques_nodes do (
 				
 				for id_spline in 1 to numSplines shp_node do (
 					
@@ -244,7 +244,7 @@ struct	str_terrain_node_core	(
 					)
 				)
 			)
--- 			debug "get_BB_contour ?!?"
+-- 			debug "get_BB_calque ?!?"
 			result = #([minX,minY,minZ],[maxX,maxY,maxZ])
 -- 				
 -- 			debug "result ?!?" var:result
@@ -303,7 +303,7 @@ struct	str_terrain_node_core	(
 			mtrx_node_orient.translation	=	[0,0,0]
 			
 			--- BB ---
-			local BB 			= get_BB_contour ()
+			local BB 			= get_BB_calque ()
 			local pt_origine 	= BB[1] 
 			local p_largeur 	= 	get_largeur_grille	()
 			local decallage_grille	 		=  if m_plug.grille_monde_use	then m_plug.grille_monde_position	else	 m_plug.grille_position
@@ -392,11 +392,12 @@ struct	str_terrain_node_core	(
 			--- on vide la pile des calques -------------
 			mgr_calques.vider ()
 			
-			--- on ajoute un calque par contour de notre plug -------------
-			local contours_nds = m_plug.contours_nodes
-			if contours_nds.count > 0 do (
-				for 	i = 1 to	contours_nds.count  where contours_nds[ i ] != undefined and not isdeleted contours_nds[ i ] do (
-					local nv_calque	=	mgr_calques.creer_calque		shape_node:contours_nds[ i ]
+			--- on ajoute un calque par calque de notre plug -------------
+			local calques_nds = m_plug.calques_nodes
+			if calques_nds.count > 0 do (
+				for 	i = 1 to	calques_nds.count  where calques_nds[ i ] != undefined and not isdeleted calques_nds[ i ] do (
+					local nv_calque			=	mgr_calques.creer_calque		shape_node:calques_nds[ i ]
+					nv_calque.operation 	= 	m_plug.calques_operations[i] as name
 					mgr_calques.ajouter_calque	nv_calque
 				)
 			)
@@ -409,10 +410,10 @@ struct	str_terrain_node_core	(
 			
 			format "\n\n\n\n\n"
 			m_calques = #()
-			if m_plug.contours_nodes.count > 0 do (
-				for 	i = 1 to	m_plug.contours_nodes.count  where m_plug.contours_nodes[ i ] != undefined and not isdeleted m_plug.contours_nodes[ i ] do (
-					local contour_node 	= 	m_plug.contours_nodes[i]
-					append m_calques 	(  mgr_shape.creer_calque	shape_node:contour_node )
+			if m_plug.calques_nodes.count > 0 do (
+				for 	i = 1 to	m_plug.calques_nodes.count  where m_plug.calques_nodes[ i ] != undefined and not isdeleted m_plug.calques_nodes[ i ] do (
+					local calque_node 	= 	m_plug.calques_nodes[i]
+					append m_calques 	(  mgr_shape.creer_calque	shape_node:calque_node )
 					
 				)
 			)
@@ -531,7 +532,7 @@ struct	str_terrain_node_core	(
 			if resol == unsupplied do resol = get_largeur_grille	estim:true
 			
 			--- l'aire du BB total ------------
-			local BB			 			= 	get_BB_contour ()
+			local BB			 			= 	get_BB_calque ()
 			local largeur_BB			=	( BB[2].x - BB[1].x )
 			local longueur_BB		=	( BB[2].y - BB[1].y ) 
 			local aire_BB				=	largeur_BB * longueur_BB
@@ -599,7 +600,7 @@ struct	str_terrain_node_core	(
 -- 			debug "	---->	etape_aActualiser" var:m_etape_aActualiser
 			
 			---- si on a pas de shape,  on dessine le logo -----------
-			if m_plug.contours_nodes.count == 0 then (
+			if m_plug.calques_nodes.count == 0 then (
 -- 				debug "--- creation du logo ----"
 				
 				--- on vide la géométrie	-------------------
@@ -618,7 +619,7 @@ struct	str_terrain_node_core	(
 				
 				local affichage_tpsVide = "-"
 				local chrono_debut = timeStamp ()
-				---- analyse des contours	-------------------
+				---- analyse des calques	-------------------
 			
 				local chrono_1		=	affichage_tpsVide
 				local chrono_1_1		=	affichage_tpsVide
@@ -626,7 +627,7 @@ struct	str_terrain_node_core	(
 				
 				
 				--- on verifie si on doit changer l'etape ---------------------------
-				if 	m_noeuds_contours == undefined or m_noeuds_contours.enfants.count > 0 or m_pts_faces.count == 0 or m_pts_quadrillages.count == 0 do
+				if 	m_noeuds_calques == undefined or m_noeuds_calques.enfants.count > 0 or m_pts_faces.count == 0 or m_pts_quadrillages.count == 0 do
 					etape = 1
 		
 		
@@ -635,7 +636,7 @@ struct	str_terrain_node_core	(
 					local chrono_temp = timeStamp ()
 					local chrono_temp_2 = timeStamp ()
 					
-					------ 	(1-1)	creer les pts contours de base -----------------------
+					------ 	(1-1)	creer les pts calques de base -----------------------
 					actualiser_calques		()
 -- 					operer_pileDeCalques	()
 					chrono_1_1 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)
@@ -702,7 +703,7 @@ struct	str_terrain_node_core	(
 				local debug_detail = true
 				if debug_detail do (
 					debug ("----------------------------------------------------------------------------------------" )
-					debug ("---	(1)			Analyse des contours : 					" +  chrono_1	as string  )
+					debug ("---	(1)			Analyse des calques : 					" +  chrono_1	as string  )
 					debug ("---	(1)			*	actualiser_calques : 			" +  chrono_1_1	as string  )
 					debug ("---	(1)			*	actualiser_pts_faces : 				" +  chrono_1_2	as string  )
 					debug ("---	(2-1)		Construction de la géometrie de base : 	" +  chrono_2_1	as string  )

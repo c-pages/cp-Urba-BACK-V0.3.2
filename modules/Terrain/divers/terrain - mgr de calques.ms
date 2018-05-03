@@ -7,7 +7,7 @@ include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\terrain - mgr de poly
 struct str_calque (
 	
 		--------------- DEBUG --------------------------------------------		
-		m_debug	=	true,
+		m_debug	=	false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | clq."	  	var:var	 param:param		catch (),
 		
 		m_tab_format_poly = "    ",
@@ -48,7 +48,7 @@ struct str_calque (
 	---- fonctions	--------------------------------------------------------------
 	public
 		fn	ajouter_polygone		_polygone_aAjouter		/* 	brut_mode:false	 */	=	(
-			format "\n\n"
+-- 			format "\n\n"
 			debug "==================	ajouter_polygone =================================================="
 			debug "_polygone_aAjouter" var:_polygone_aAjouter.nom
 			debug_calque this
@@ -85,8 +85,8 @@ struct str_calque (
 -- 			debug "a_ete_integre" var:a_ete_integre
 			debug "polygones" var:polygones param:#nom
 			
-			debug "===================================================================="
-			format "\n\n"
+			debug "====================================================================\n\n"
+-- 			format "\n\n"
 			polygones
 			
 		),
@@ -147,7 +147,7 @@ struct	str_mgr_calques	(
 			format_polygone 	_poly 
 		),
 		fn debug_calque	_calq	=(
-			debug ( "calque: " + _calq.nom	+" ---------------------")
+			debug ( "calque: " + _calq.nom	+" ---------------------" + _calq.operation )
 			for _poly in _calq.polygones do
 				debug_poly _poly
 		),	
@@ -198,8 +198,8 @@ struct	str_mgr_calques	(
 	
 	-----------------	Fonctions	internes ------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
-	
-	
+		
+		
 		
 		fn operation_booleene 		_calque_A		_calque_B		operation:#union =(
 			/*__________________________________________________________________________________
@@ -240,6 +240,7 @@ struct	str_mgr_calques	(
 			
 			
 			debug "-----------------------------------------------------------------"
+			debug "OPERATION BOOLENNE"	var:operation
 			debug "polys_A_total"	var:polys_A_total param:#nom
 			debug "polys_B_total"	var:polys_B_total param:#nom
 			
@@ -363,8 +364,8 @@ struct	str_mgr_calques	(
 				
 				
 				----- INtersection : on regarde ou l'on va -----------------------------
-				case operation of (
-					#addition: (
+-- 				case operation of (
+-- 					#addition: (
 						
 						local pt_test_intersection		=	intersection_aTraiter.pos
 						
@@ -374,35 +375,37 @@ struct	str_mgr_calques	(
 						if operateur_courant		==	#A	then (
 							
 							local poly_test_courant 	= intersection_aTraiter.poly_A
-							local id_ptTest_courant =  intersection_aTraiter.id_pt_A
+							local id_ptTest_courant 	=  intersection_aTraiter.id_pt_A
 							if poly_test_courant.en_creux do id_ptTest_courant = mgr_shp.boucler		shp_courant	(id_ptTest_courant+1)
-							pt_test_courant		= 	shp_courant[ id_ptTest_courant ]
+							pt_test_courant				= 	shp_courant[ id_ptTest_courant ]
 							
 							
 							local poly_test_autre 		= intersection_aTraiter.poly_B
 							shp_autre 						= intersection_aTraiter.poly_B.get_pts()
-							local id_ptTest_autre =  intersection_aTraiter.id_pt_B
+							local id_ptTest_autre 		=  intersection_aTraiter.id_pt_B
 							if poly_test_autre.en_creux do id_ptTest_autre = mgr_shp.boucler		shp_autre	(id_ptTest_autre+1)
-							pt_test_autre		= 	shp_autre[ id_ptTest_autre ]
+							pt_test_autre					= 	shp_autre[ id_ptTest_autre ]
 							
 						) else (
 							
 							local poly_test_courant 	= intersection_aTraiter.poly_B
-							local id_ptTest_courant =  intersection_aTraiter.id_pt_B
+							local id_ptTest_courant 	=  intersection_aTraiter.id_pt_B
 							if poly_test_courant.en_creux do id_ptTest_courant = mgr_shp.boucler		shp_courant	(id_ptTest_courant+1)
-							pt_test_courant		= 	shp_courant[ id_ptTest_courant ]
+							pt_test_courant				= 	shp_courant[ id_ptTest_courant ]
 							
 							
 							local poly_test_autre 		= intersection_aTraiter.poly_A
 							shp_autre 						= intersection_aTraiter.poly_A.get_pts()
-							local id_ptTest_autre =  intersection_aTraiter.id_pt_A
+							local id_ptTest_autre 		=  intersection_aTraiter.id_pt_A
 							if poly_test_autre.en_creux do id_ptTest_autre = mgr_shp.boucler		shp_autre	(id_ptTest_autre+1)
-							pt_test_autre		= 	shp_autre[ id_ptTest_autre ]
+							pt_test_autre					= 	shp_autre[ id_ptTest_autre ]
 							
 							
 						)
 						
 						local operateur_est_aGauche = mgr_shp.est_aGauche		pt_test_courant		pt_test_intersection 	pt_test_autre	
+						
+						debug "operateur_est_aGauche" var:operateur_est_aGauche
 						
 						if   operateur_est_aGauche 	do (
 							
@@ -414,9 +417,9 @@ struct	str_mgr_calques	(
 							id_pt_initial				=	intersection_aTraiter.id_pt_B		
 						)
 						
-					)
-					
-				)
+-- 					)
+-- 					
+-- 				)
 				
 				
 				
@@ -541,8 +544,22 @@ struct	str_mgr_calques	(
 								id_pt_courant 	=  prochaine_intersec.id_pt_A									
 							)
 							
-							sens = if 	poly_courant.en_creux	then 	-1	else 1
+							sens = 1
 							
+							debug "--->	poly_courant	" var:poly_courant.nom							
+							debug "--->				" var:poly_courant
+							debug "--->	operation" var:operation	
+							
+							debug "--->	operation == #soustraction" var:(operation == #soustraction)	
+							
+							
+							
+							if 	poly_courant.en_creux and operation == #addition	then  sens =	-1	
+							if 	operateur_courant 	==	#B and not poly_courant.en_creux and operation == #soustraction	then  sens =	-1	
+							
+							
+							
+							debug "--->	sens" var:sens	
 -- 							-----  on valide  ------------------
 							pt_courant 		=	prochaine_intersec.pos		
 							if sens == -1 	do 	id_pt_courant		= mgr_shp.boucler		shp_courant	( id_pt_courant + 1 )
@@ -838,6 +855,11 @@ struct	str_mgr_calques	(
 			
 			result_calque
 		),
+		
+		
+		
+		
+		
 	-----------------	Interface	------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
 		

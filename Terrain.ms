@@ -43,7 +43,7 @@ version:0
 		fn initialiser 	=	core.initialiser	this
 		
 		----  Divers -----------------
-		fn aCommeContour	_node 	=	findItem this.contours_nodes	_node != 0
+		fn aCommecalque	_node 	=	findItem this.calques_nodes	_node != 0
 		fn aCommeRelief		_node 	=	findItem this.reliefs_nodes		_node != 0
 		fn set_transform 		_mtrx		=	this.transformation = _mtrx
 		
@@ -64,19 +64,19 @@ version:0
 			deleteItem this.reliefs_nodes 	_id
 			actualiser ()
 		)
-		fn ajouter_contour		_node 	aActualiser:true	=(
+		fn ajouter_calque		_node 	aActualiser:true	=(
 			format "\n"
-			debug "		###	ajouter_contour	###"
+			debug "		###	ajouter_calque	###"
 			
-			if appendIfUnique this.contours_nodes 	_node and aActualiser  do (
-				append		this.contours_operations	( #union as string )
+			if appendIfUnique this.calques_nodes 	_node and aActualiser  do (
+				append		this.calques_operations	( #addition as string )
 				this.rollout_global.actualiser ()
 				actualiser ()
 			)
 		)
-		fn supprimer_contour	_id	=(
-			deleteItem this.contours_nodes 	_id
-			deleteItem this.contours_operations 	_id
+		fn supprimer_calque	_id	=(
+			deleteItem this.calques_nodes 	_id
+			deleteItem this.calques_operations 	_id
 			actualiser ()
 		)
 		
