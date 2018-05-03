@@ -3,11 +3,7 @@ Suite de plugins pour 3DSmax  |  Maxscript  | Pour réalisation de bout de ville
 
 ###### Auteur :
 
- Christophe Pagès  
- contact@c-pages.fr  
- ![c-pages.fr](http://c-pages.fr)  
- ![git](https://github.com/c-pages/cp-Urba)  
-
+ Christophe Pagès |  contact@c-pages.fr  |   ![c-pages.fr](http://c-pages.fr)  | ![git](https://github.com/c-pages/cp-Urba)  
 ###### En cours de développement :
 
 - __Batiment__ : Objet paramétrique.
@@ -17,6 +13,7 @@ Suite de plugins pour 3DSmax  |  Maxscript  | Pour réalisation de bout de ville
 ###### A développer :
 - __Ville__ ou __quartier__ : Utilitaire (ou objet ?) permettant de générer automatiquement des quartiers entiers de batiments, en fonction de certaines contraintes (surface du shape, largeur, orientation ...), tel preset de batiment à utiliser ou pas ( 'garage',  'immeuble de bureau', 'pavillon brique normand', ...).
 
+Merci à Dindoune Amigo Bruno ! | ![git](https://github.com/dindoun) | ![dindoun.lautre.net](http://www.dindoun.lautre.net/)
 
 
 ----------
@@ -148,9 +145,3 @@ _____________________________
 - [x] Un groupe peut être créé dans une séquence de façade pour répétition d'un 'motif'.
 - [x] Les composants peuvent être instanciés.
 - [x] Corrections toitures à 2 pans.
-____________________________
-
-
-Merci Dindoune Bruno !
-![git](https://github.com/dindoun)
-![dindoun.lautre.net](http://www.dindoun.lautre.net/)
