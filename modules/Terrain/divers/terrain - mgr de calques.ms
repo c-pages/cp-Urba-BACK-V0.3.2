@@ -407,7 +407,7 @@ struct	str_mgr_calques	(
 						
 						debug "operateur_est_aGauche" var:operateur_est_aGauche
 						
-						if   operateur_est_aGauche 	do (
+						if   operateur_est_aGauche  or not operateur_est_aGauche and operation == #intersection	do (
 							
 							debug"##########	 EST_AGAUCHE		##########################"
 							poly_courant 			= poly_B
@@ -440,6 +440,13 @@ struct	str_mgr_calques	(
 							
 						if 	operateur_courant 	==	#B and not poly_courant.en_creux and operation == #soustraction	then  
 							sens =	-1	
+					)
+					#intersection:(
+						
+						if poly_courant.en_creux 	then  
+							sens =	-1	
+-- 						if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
+-- 							sens =	-1	
 					)
 				)
 				
@@ -577,6 +584,13 @@ struct	str_mgr_calques	(
 										
 									if 	operateur_courant 	==	#B and not poly_courant.en_creux and operation == #soustraction	then  
 										sens =	-1	
+								)
+								#intersection:(
+									
+									if poly_courant.en_creux 	then  
+										sens =	-1	
+			-- 						if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
+			-- 							sens =	-1	
 								)
 							)
 							
@@ -744,6 +758,19 @@ struct	str_mgr_calques	(
 						---- P dans P =  false ----------
 						---- V dans P =  false ----------
 					)
+					#intersection: (	
+						if polyA_dans_polyB != undefined	and  not polyA_dans_polyB.en_creux	then
+							on_ajoute = true
+
+						---- V dans P =  true ----------
+-- 						if  poly_B_isol.en_creux	and not est_dans_vide		then
+-- 							on_ajoute = true
+						---- P dans P =  true ----------
+-- 						else if not poly_B_isol.en_creux	and not est_dans_vide		then
+-- 							on_ajoute = true
+						---- P dans V =  false ----------
+						---- V dans V =  false ----------
+					)
 					
 				)
 				
@@ -816,6 +843,20 @@ struct	str_mgr_calques	(
 						---- P dans P =  true ----------
 						else if not poly_B_isol.en_creux	and not est_dans_vide		then
 							on_ajoute = true
+						---- P dans V =  false ----------
+						---- V dans V =  false ----------
+					)
+					#intersection: (	
+						---- V dans P =  true ----------
+						if  poly_B_isol.en_creux	and not est_dans_vide		then
+							on_ajoute = true
+						
+						if  not poly_B_isol.en_creux		and not est_dans_vide		then
+							on_ajoute = true
+						
+						---- P dans P =  true ----------
+-- 						else if not poly_B_isol.en_creux	and not est_dans_vide		then
+-- 							on_ajoute = true
 						---- P dans V =  false ----------
 						---- V dans V =  false ----------
 					)

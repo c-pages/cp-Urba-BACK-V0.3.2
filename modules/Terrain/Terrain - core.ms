@@ -397,6 +397,7 @@ struct	str_terrain_node_core	(
 			if calques_nds.count > 0 do (
 				for 	i = 1 to	calques_nds.count  where calques_nds[ i ] != undefined and not isdeleted calques_nds[ i ] do (
 					local nv_calque			=	mgr_calques.creer_calque		shape_node:calques_nds[ i ]
+					
 					nv_calque.operation 	= 	m_plug.calques_operations[i] as name
 					mgr_calques.ajouter_calque	nv_calque
 				)

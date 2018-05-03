@@ -114,7 +114,25 @@
 			
 			
 			fn actualiser =(
-			 	lbx_calques.items 	= for calque_node in calques_nodes collect if calque_node != undefined then  calque_node.name else "<deleted>"
+				
+				local affiche_calques =#()
+				for i = 1 to calques_nodes.count do (
+					local calque_node = calques_nodes[i]
+					if calque_node != undefined then (
+						local pref = ""
+						case calques_operations[i] as name of (
+							#addition: 			pref = "Add. :   " 
+							#soustraction: 	pref = "Sous :   " 
+							#intersection: 	pref = "Int :      " 
+						)
+						if i == 1 do pref = "             " 
+						append 	affiche_calques		( pref + calque_node.name 	)
+					)	else append affiche_calques	"<deleted>"
+				)
+				
+			 	lbx_calques.items 	= for affiche_calque in affiche_calques collect affiche_calque
+																																						
+																																						
 				lbx_reliefs.items 		= for relief_node in reliefs_nodes collect if relief_node != undefined then  relief_node.name else "<deleted>"
 				local on_a_un_calque					=	lbx_calques.selection	!= 0 
 				btn_supprimer_calque.enabled 		=	on_a_un_calque

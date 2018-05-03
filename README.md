@@ -40,6 +40,7 @@ Suite de plugins pour 3DSmax  |  Maxscript  | Pour réalisation de bout de ville
 #### __Général:__
 - [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes tout les modules.
 - [x] Mise en place  du rollout _"A propos'_ dans le dossier _'\commun\'_, utile pour plusieurs des modules.
+- [x] Enfin les operation booleene qui fonctionnent à peu pret, à voir s'il reste quelques bugs ... MERCI BRUNO !
 
 
 ____________________________
@@ -50,7 +51,6 @@ ____________________________
 #### __Terrain__
 - [ ] Gérer un noise sur z avec une influence en lien avec la distance par rapport au bords ? ( ex:pour les terrains genre gazons) (un peu façon multiscatter).
 - [ ] Gérer une distance avec une influence en lien avec la distance par rapport au bord ? (genre effet _gonflé_).
-- [ ] Gérer les contours qui se croisent en addition booléènne ? (un mode soustraction implique un ordre : A - B != B - A mais A + B = B + A !).
 - [ ] Bien gérer les undos (pour les parametres de _Terrain_ et pour objet en reference dans _Terrain_).
 - [ ] Créations des trous automatiquement quand superposition avec un _Bâtiment_. Peut être sous forme d'une option dans les _Bâtiments_ de type 'Perforer les _Terrains_.', et du coup quand le _Terrain_ annalyse ses contours il y ajoute les surfaces des _Bâtiments_ 'perforants'.
 - [ ] Faire en sorte que s'ils sont en mode 'Logo' ils ne soit pas visible au rendu.
@@ -65,6 +65,7 @@ ____________________________
 - [ ] quand un terrain a un ou des modifiers, alors il y a un probleme au rendu en mode Proxy, surement une reference au baseObject Terrain à faire, il ne doit plus voir que c'est un terrain ....
 - [ ] /!\ PROBLEME RENDU RESEAU qui rend pas !!! /!\ a voir si c'est __Batiment__ ou __Terrain__ !!!
 - [ ] faire que quand on ajoute une nouvelle spline, si la touche 'alt' est pressée on l'ajoute en #soustraction
+- [ ] verifer à l'ajout de nouvelle spline qu'elles soient ok : qu'elles ne se croisent pas ni qu'elles aient des points superposer peut-etre, faudra chercher un peu les cas à problème.
 
 
 #### __Bâtiment__
@@ -141,3 +142,7 @@ _____________________________
 - [x] Les composants peuvent être instanciés.
 - [x] Corrections toitures à 2 pans.
 ____________________________
+
+
+Merci Bruno !
+![GIT](https://github.com/dindoun )
