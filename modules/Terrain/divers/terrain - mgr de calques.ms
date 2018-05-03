@@ -47,7 +47,7 @@ struct str_calque (
 		
 	---- fonctions	--------------------------------------------------------------
 	public
-		fn	ajouter_polygone		_polygone_aAjouter			brut_mode:false		=	(
+		fn	ajouter_polygone		_polygone_aAjouter		/* 	brut_mode:false	 */	=	(
 			format "\n\n"
 			debug "==================	ajouter_polygone =================================================="
 			debug "_polygone_aAjouter" var:_polygone_aAjouter.nom
@@ -71,6 +71,7 @@ struct str_calque (
 				debug_calque this
 			)
 			
+			debug "ajouter_polygone:	a_ete_integre" var:a_ete_integre
 			---- s'il a pas été inserer, on l'ajoute basiquement aux polygones du calque- ---------------------------------
 			if not a_ete_integre do (
 				append 		polygones 		_polygone_aAjouter
@@ -78,7 +79,7 @@ struct str_calque (
 				
 			)
 			
-			if brut_mode do _polygone_aAjouter.en_creux	=	en_creux_BACK
+-- 			if brut_mode do _polygone_aAjouter.en_creux	=	en_creux_BACK
 				
 			
 -- 			debug "a_ete_integre" var:a_ete_integre
@@ -229,13 +230,14 @@ struct	str_mgr_calques	(
 			local 	polys_A_total	=	_calque_A.get_polygones 	descendance:true
 			local 	polys_B_total	=	_calque_B.get_polygones 	descendance:true
 			
+			---- on retire tout les enfants de tout le monde -------------
+			for poly in polys_A_total do	poly.detacher ()
+			for poly in polys_B_total do	poly.detacher ()
 			
+			---- les poly racines des calques	----------------
 			local 	polys_A	=	_calque_A.get_polygones 	()
 			local 	polys_B	=	_calque_B.get_polygones 	()
 			
-			---- on retire tout les enfants de tout le monde -------------
-			for poly in polys_A_total do	poly.enfants = #()
-			for poly in polys_B_total do	poly.enfants = #()
 			
 			debug "-----------------------------------------------------------------"
 			debug "polys_A_total"	var:polys_A_total param:#nom
@@ -614,7 +616,7 @@ struct	str_mgr_calques	(
 				nv_poly.reset_sens ()
 				
 				---- on ajoute le noeud obtenu -----------------------------------
-				calque_result.ajouter_polygone		nv_poly		brut_mode:true
+				calque_result.ajouter_polygone		nv_poly		--	brut_mode:true
 				debug_calque	calque_result
 				
 				---------- SORTIES ---------------------------------------------
@@ -713,7 +715,7 @@ struct	str_mgr_calques	(
 				
 				---- on ajoute le noeud obtenu -----------------------------------
 				if on_ajoute do	
-					calque_result.ajouter_polygone	poly_A_isol		brut_mode:true
+					calque_result.ajouter_polygone	poly_A_isol		--	brut_mode:true
 				
 					debug  "######	APRES	##############################################################################################################################"
 				debug_calque	calque_result			
@@ -786,7 +788,7 @@ struct	str_mgr_calques	(
 				
 				---- on ajoute le noeud obtenu -----------------------------------
 				if on_ajoute do	
-					calque_result.ajouter_polygone	poly_B_isol	brut_mode:true
+					calque_result.ajouter_polygone	poly_B_isol	--	brut_mode:true
 				
 				debug_calque	calque_result
 				

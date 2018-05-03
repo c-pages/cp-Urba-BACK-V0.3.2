@@ -4,6 +4,13 @@ include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - sh
 
 ---- polygone de la hierarchie ----------
 struct str_polygone (
+	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	private
+		m_debug	=	true,
+		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | polys"	  	var:var	 param:param		catch (),
+	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		
+	
 	--------- membres ------------------------------------------------------------------
 	private
 		
@@ -61,7 +68,9 @@ struct str_polygone (
 		),
 		fn ajouter_enfant 	_neudEnfant 	distance_toParent:	= (
 			
-			format "aJOUTER ENFANT\n"
+			debug "aJOUTER ENFANT a "  var:this.nom
+			debug "_neudEnfant"	var:_neudEnfant
+			
 			--- le placer dans l'ordre du plus proche au plus loin ---------------
 			local distTest	=	distance_toParent	--struct_prt.get_distance_shapes 	pts	_neudEnfant.pts
 			local trouve = false
@@ -91,6 +100,9 @@ struct str_polygone (
 			
 			_neudEnfant.calque = calque
 			_neudEnfant.set_parent  	this
+			
+			
+			debug " FIN aJOUTER ENFANT	FIN" 
 		),
 		fn retirer_enfant		_enfant 		=(
 			local id_enfant = findItem enfants	_enfant
@@ -99,6 +111,10 @@ struct str_polygone (
 			format"##############################\n"
 		),
 		
+		fn detacher =(
+			enfants = #()
+			parent = undefined
+		),
 		fn get_descendance	=(
 			local result = #()
 			for enfant in enfants do (
@@ -321,6 +337,7 @@ struct str_mgr_polygones (
 	public	
 	
 		fn inserer_poly_ds_poly		_poly_aInserer		_poly_dest 		=(
+			
 			format "\n\n"
 			debug "	//////////////////////////			inserer_poly_ds_poly()		//////////////////////////"
 			debug "_poly_aInserer" var:_poly_aInserer
@@ -359,14 +376,14 @@ struct str_mgr_polygones (
 							while	 i <= enfants_dest.count and not a_ete_integre	do (
 								local enfant_dest	=	enfants_dest[ i ]
 								local integration_reussie		=	inserer_poly_ds_poly		_poly_aInserer			enfant_dest
-								if not integration_reussie do a_ete_integre = true
+								if  integration_reussie do a_ete_integre = true
 								i += 1
 							)
-							debug"a_ete_integre" var:a_ete_integre
+							
+							debug"a_ete_integre		" var:a_ete_integre
 							----- sinon on l'ajoute aux enfants du poly dest ----------------
 							if not a_ete_integre do (
 								
--- 								result.est_enfantDe					=	_poly_dest
 								_poly_dest.ajouter_enfant 		_poly_aInserer
 								
 							)
@@ -379,6 +396,7 @@ struct str_mgr_polygones (
 						
 						
 					#exterieur:		(
+						debug	"#exterieur"
 -- 						result.est_parentDe	 =	_poly_dest
 						
 						local parent_dest = _poly_dest.parent 
@@ -387,6 +405,7 @@ struct str_mgr_polygones (
 						local calque_dest = _poly_dest.calque 
 -- 						inserer_poly_ds_poly			_poly_dest		_poly_aInserer
 						if parent_dest != undefined then (
+							debug	"parent_dest != undefined "
 							parent_dest.ajouter_enfant	_poly_aInserer
 							
 -- 							result = fasle	
