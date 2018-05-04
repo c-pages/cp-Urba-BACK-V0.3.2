@@ -191,11 +191,11 @@ struct	str_OSM_point	(
 		rayonMax = 6378137.0	as double,
 		rayonMin = 6356752.3142	as double,
 		
-		coef_correction_echelle = 1.271505947323704,
+-- 		coef_correction_echelle = 1.271505947323704,
 	
 	private
 		fn mercX	_longitude =(
-			( degToRad  _longitude ) * rayonMax	*coef_correction_echelle
+			( degToRad  _longitude ) * rayonMax	--*coef_correction_echelle
 		),
 		fn mercY	_latitude	=(
 			if _latitude > 89.5 		do	_latitude = 89.5
@@ -214,7 +214,8 @@ struct	str_OSM_point	(
 			
 			local 	ts = tan (.5 * ( PI * 0.5 - phi))/con
 			local 	result = 0 - rayonMax * log ts
-			result *= 	coef_correction_echelle
+			
+-- 			result *= 	coef_correction_echelle
 			result
 			
 		),
@@ -652,9 +653,9 @@ struct str_OSM_importer	(
 -- 					appendIfUnique	m_elems_Nodes	elem_node
 					local nvPoint = str_OSM_point ()
 					
-					local id 				=	elem_node.attributes.getNamedItem "id"
+					local id 					=	elem_node.attributes.getNamedItem "id"
 					local longitude 		= elem_node.attributes.getNamedItem "lon"
-					local latitude 		= elem_node.attributes.getNamedItem "lat"
+					local latitude 			= elem_node.attributes.getNamedItem "lat"
 					local pos_enMetre	=	converterGPS.gpsToMeters   ( longitude.value as double )  ( latitude.value as double )
 					
 					nvPoint.ref			=	id.value

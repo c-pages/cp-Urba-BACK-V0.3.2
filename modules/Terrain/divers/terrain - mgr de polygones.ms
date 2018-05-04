@@ -108,7 +108,7 @@ struct str_polygone (
 			local id_enfant = findItem enfants	_enfant
 			if id_enfant != 0 do
 				deleteItem enfants 	id_enfant
-			format"##############################\n"
+-- 			format"##############################\n"
 		),
 		
 		fn detacher =(
@@ -462,9 +462,13 @@ struct str_mgr_polygones (
 			) else (
 				
 				
-				local pos_relative = mgr_shp.get_positionRelative_shapes 		(_poly_dest.get_pts ())		(_poly_aInserer.get_pts ())	renvoyer_intersections:false
+				
+				--- on utlise les BB !!!  on considere que les shape sont clean ici : ils ne se croisent pas entre eux ....	-----------------------------------------------
+				local pos_relative = mgr_shp.get_positionRelative_BB 		(_poly_dest.get_pts ())		(_poly_aInserer.get_pts ())	
+				
+				
 				debug "pos_relative" var:pos_relative
-				case pos_relative.position of (
+				case pos_relative of (
 					
 					#aCoté:	 		result = false		--result.est_aCote = true
 					
@@ -488,7 +492,6 @@ struct str_mgr_polygones (
 								
 							)
 							result = true
--- 								_poly_dest.ajouter_enfant 		_poly_aInserer
 								
 							
 						) ---- fin #interieur	----------
@@ -496,37 +499,19 @@ struct str_mgr_polygones (
 						
 						
 					#exterieur:		(
--- 						debug	"#exterieur"
--- 						result.est_parentDe	 =	_poly_dest
 						
 						local parent_dest = _poly_dest.parent 
 						_poly_aInserer.ajouter_enfant		_poly_dest
 						
 						local calque_dest = _poly_dest.calque 
--- 						inserer_poly_ds_poly			_poly_dest		_poly_aInserer
+						
 						if parent_dest != undefined then (
 -- 							debug	"parent_dest != undefined "
 							parent_dest.ajouter_enfant	_poly_aInserer
 							result = true	
 -- 							result = fasle	
 						) --else append		calque_dest.polygones		_poly_aInserer
--- 						result = true	
-						/* 
-						local parent_B = _poly_dest.parent 
-						inserer_poly_ds_poly			_poly_dest		_poly_aInserer
-						if _poly_aInserer.parent != undefined then 
-							parent_B.ajouter_enfant	_poly_aInserer
-						 */
-						/* 
-								_poly_aInserer.ajouter_enfant 	_poly_dest
--- 								append 	_poly_dest.calque.polygones		_poly_aInserer
-							) else (
-								_poly_aInserer.ajouter_enfant 	_poly_dest
--- 								append 	_poly_dest.calque.polygones	_poly_aInserer
-							)
--- 							result = true
-							 */
--- 							result = false
+
 							
 						) ---- fin #exterieur	----------
 					

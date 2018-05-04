@@ -53,6 +53,9 @@ struct str_calque (
 			debug "_polygone_aAjouter" var:_polygone_aAjouter.nom
 			debug_calque this
 			debug "===================================================================="
+			
+			local chrono_1 = timeStamp()
+			
 			local en_creux_BACK = _polygone_aAjouter.en_creux
 			
 			
@@ -65,7 +68,9 @@ struct str_calque (
 			
 			while	 i <= polygones_aTraiter.count and not a_ete_integre	do (
 				local poly_calque				=	polygones_aTraiter[ i ]
+				local chrono_2 = timeStamp()
 				local integration_reussie	=	mgr_polys.inserer_poly_ds_poly		_polygone_aAjouter		poly_calque
+				debug "inserer_poly_ds_poly" var:( (  ((timeStamp ()) - chrono_2 ) / 1000.0)		as string + " s.")
 				if integration_reussie do a_ete_integre = true
 				i += 1
 			)
@@ -85,7 +90,9 @@ struct str_calque (
 			debug "polygones" var:polygones param:#nom
 			
 			debug_calque this
-			debug "====================================================================\n\n"
+			debug "===================================================================="
+			
+			debug "--->	ajouter_polygone"  var:( (  ((timeStamp ()) - chrono_1 ) / 1000.0)		as string + " s.\n\n")
 -- 			--format "\n\n"
 			polygones
 			
@@ -314,7 +321,7 @@ struct	str_mgr_calques	(
 			local annuler = false
 			while il_reste_des_points	and not annuler do (
 				
-				format"\n\n\n\n"
+				debug "\n\n\n\n"
 				debug "------------------------------------------------------------------------------------------"
 				debug "						On boucle tant qu'il reste des intersections à intégrer "
 				debug "ids_intersections_aTraiter" var:ids_intersections_aTraiter 
@@ -643,8 +650,7 @@ struct	str_mgr_calques	(
 						debug "--------------------------------------------"
 						debug "prochaine_intersec" var:prochaine_intersec
 						debug "intersection_aTraiter" var:intersection_aTraiter
-						debug "--------------------------------------------"
-						format"\n\n"
+						debug "--------------------------------------------\n\n"
 						
 						--- SAUVETAGE	----
 						sauvetage += 1
@@ -661,17 +667,13 @@ struct	str_mgr_calques	(
 						
 						on_a_fini_laBoucle = true
 					
-						format"\n\n"
-						format"\n\n"
-						format"\n\n"
+						debug"\n\n\n\n\n\n"
 						debug "--------------------------------------------------------------------------------------"
 						debug "pt_courant" var:pt_courant
 						debug "pt_initial" var:pt_initial
 						debug "on_a_fini_laBoucle" var:on_a_fini_laBoucle
-						debug "--------------------------------------------------------------------------------------"
-						format"\n\n"
-						format"\n\n"
-						format"\n\n"
+						debug "--------------------------------------------------------------------------------------\n\n\n\n\n\n"
+
 					
 					
 					
@@ -968,7 +970,7 @@ struct	str_mgr_calques	(
 				local chrono_2	=	timeStamp ()
 			
 					nv_calque.ajouter_polygone 	poly
-			debug "--->	nv_calque.ajouter_polygone"  var:( (  ((timeStamp ()) - chrono_2 ) / 1000.0)		as string + " s.")
+				debug "--->	nv_calque.ajouter_polygone"  var:( (  ((timeStamp ()) - chrono_2 ) / 1000.0)		as string + " s.")
 				)
 			)
 			

@@ -11,7 +11,7 @@ struct str_outils_shape (
 
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
-		m_debug	=	false,
+		m_debug	=	true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | shape"	  	var:var	 param:param		catch (),
 	
 		m_tab_format_nd = "		",
@@ -147,9 +147,15 @@ struct str_outils_shape (
 		--- points ------------
 		fn get_longueur_segment	_shp	_id_spline	_id_pt 	=(
 			
-			local tab_longueurs_sgts		=	getSegLengths 	_shp 	_id_spline	 cum:false byVertex:true numArcSteps:100
+			debug "----- get_longueur_segment -------- " var: _id_pt
+			
+			local tab_longueurs_sgts		=	getSegLengths 	_shp 	_id_spline	 cum:false 		byVertex:true 	numArcSteps:100
+			debug "tab_longueurs_sgts" var: tab_longueurs_sgts
 			local nbr_pts_total 				=	numknots	 		_shp	_id_spline
+			debug "nbr_pts_total" var: nbr_pts_total
 			local longueur_result			= 	tab_longueurs_sgts[ nbr_pts_total + 2 + _id_pt]
+			
+			debug "longueur_result" var: longueur_result
 			
 			longueur_result
 			
@@ -544,6 +550,22 @@ struct str_outils_shape (
 			result
 		),
 		
+		fn get_positionRelative_BB		_pts_shpA		_pts_shpB 	=(
+			
+			local BB_A		= get_BB_shape	_pts_shpA
+			local BB_B 		= get_BB_shape	_pts_shpB
+			local result
+			
+			if BB_A[1].x < BB_B[1].x 	and	BB_A[2].x > BB_B[2].x  	and	BB_A[1].y < BB_B[1].y  	and	BB_A[2].y > BB_B[2].y then
+				result = #interieur
+			else if BB_A[1].x > BB_B[1].x 	and	BB_A[2].x < BB_B[2].x  	and	BB_A[1].y > BB_B[1].y  	and	BB_A[2].y < BB_B[2].y then
+				result = #exterieur
+			else
+				result = #aCoté
+			result
+		),
+		
+		
 		fn shape_estDans_shape		_shp_1  shp_test 	=(
 			if _shp_1.count == 0 then 			
 				true
@@ -611,8 +633,10 @@ struct str_outils_shape (
 			pts_result
 		),
 		fn interpoler_shape 		_shp_node								=(
--- 			debug "interpoler_shape()"
--- 			debug "_shp_node" var:_shp_node
+			debug "INTERPOLER_SHAPE()"
+			
+			
+			
 			local result	=#()
 	
 			
@@ -624,19 +648,29 @@ struct str_outils_shape (
 				
 				local pts_spline_contour = for j= 1 to numKnots 	_shp_node	id_spline_contour	 collect getKnotPoint _shp_node 		id_spline_contour	 	j 
 				local pt_result 	= #()
-				for id_pt_contour	=	1	to pts_spline_contour.count do (
+				
+				if not isClosed _shp_node	id_spline_contour	 do
+					close _shp_node	id_spline_contour	
+				
+				---- pour chacun des points de la spline -----------------------------------
+				for id_pt_contour	=	1	to pts_spline_contour.count  do (
+					debug ""
+					debug "id_pt_contour" var:id_pt_contour
 					
+					---- le point	-
 					local pt_contour  		= getKnotPoint _shp_node 		id_spline_contour	 	id_pt_contour
 					local id_pt_contour_svt = if id_pt_contour != pts_spline_contour.count then id_pt_contour + 1 else 1
--- 					local pt_contour_svt  	= getKnotPoint _shp_node 		id_spline_contour	 	id_pt_contour_svt
 					
 					local pt_contour_type 			= getKnotType 		_shp_node  id_spline_contour	 id_pt_contour
 					local pt_contour_svt_type 	= getKnotType 		_shp_node  id_spline_contour	 id_pt_contour_svt
 					
+					debug "pt_contour_type" var:pt_contour_type
+					debug "pt_contour_svt_type" var:pt_contour_svt_type
+					
 					if pt_contour_type != #corner or pt_contour_svt_type != #corner then (
--- 						debug "ON A UNE COURBE"
+						debug "-------------->		ON A UNE COURBE"
 						----- Interpolation  - adaptif ----------------------------					
-						local longueur_segment 	= get_longueur_segment	_shp_node	id_spline_contour		id_pt_contour 
+						local longueur_segment 	= get_longueur_segment		_shp_node		id_spline_contour		id_pt_contour 
 						local pos_courbe 			= 0
 						local nbr_division 			= floor ( longueur_segment / PRECISION_COURBE)
 -- 						debug "longueur_segment" var:longueur_segment
@@ -717,9 +751,8 @@ struct str_outils_shape (
 			--------------- tant qu'il reste plus de trois point dans le polygone -------------------------------------------------------------------------------------------------------------------------			
 			while pts_poly.count >= 3 do (
 				
--- 				format "\n\n---------------------------------------------------------------------"
 				
-				debug" trianguler" var:(i_debug += 1)
+-- 				debug" trianguler" var:(i_debug += 1)
 				
 				
 				-- on commence avec le point le plus a gauche du polygone--
@@ -737,7 +770,7 @@ struct str_outils_shape (
 				local triangle_aTester = #(pts_poly[id_pt_avant], pts_poly[id_pt_aTester], pts_poly[id_pt_apres])
 				
 				
-				debug "triangle_aTester" var:triangle_aTester
+-- 				debug "triangle_aTester" var:triangle_aTester
 				
 				----- Puis on cherche parmis les points restants du polygone ceux qui seraient à l'interieur du trangle ------------------------------------------------------------------------------		
 				local ids_pts_dansTriangle =#()
@@ -760,15 +793,15 @@ struct str_outils_shape (
 				------- soit on trouve des points dans le triangle		---->	 on doit découper en 2 polygones		------------------------------------------------------------------------------
 				if ids_pts_dansTriangle.count > 0 then (
 					
-					debug "-----> 	DECOUPAGE	->		de " var:pts_poly
+-- 					debug "-----> 	DECOUPAGE	->		de " var:pts_poly
 					
 					local pts_dansTriangle	=	for id_pt in ids_pts_dansTriangle collect pts_poly[id_pt]
 					
 					---- si on en trouve : on cherche le plus éloigné de la 'diagonale' du triangle ----
 					local IDs_pts_diagonal 	= 	points_lesPlusLoinDuSegment  	pts_dansTriangle		triangle_aTester[3]		triangle_aTester[1]
 					
-					debug "-----> 	pts_dansTriangle : " var:pts_dansTriangle
-					debug "-----> 	IDs_pts_diagonal : " var:IDs_pts_diagonal
+-- 					debug "-----> 	pts_dansTriangle : " var:pts_dansTriangle
+-- 					debug "-----> 	IDs_pts_diagonal : " var:IDs_pts_diagonal
 					
 					
 					--- on gere si on a plusieurs points pour la diagonal --------------------
@@ -793,11 +826,11 @@ struct str_outils_shape (
 							local dist_to_id 			=  abs (id_diag - id_pt_aTester )
 							local dist_to_id_inv 		= abs (( pts_poly.count - id_pt_aTester ) -  id_diag )
 							
-							debug "	-> dist_to_id" var:dist_to_id
-							debug "	-> dist_to_id_inv" var:dist_to_id
+-- 							debug "	-> dist_to_id" var:dist_to_id
+-- 							debug "	-> dist_to_id_inv" var:dist_to_id
 							if dist_to_id_inv < dist_to_id do dist_to_id = dist_to_id_inv
 								
-							debug "	--------------> dist_to_id" var:dist_to_id
+-- 							debug "	--------------> dist_to_id" var:dist_to_id
 							if dist_to_id <= dist_id_min do (
 								
 								
@@ -835,13 +868,13 @@ struct str_outils_shape (
 					)				
 					pts_poly2 = for idPt in IDsPts_poly2 collect pts_poly[idPt]
 
-					debug"pts_poly1" var:pts_poly1
-					debug"pts_poly2" var:pts_poly2
+-- 					debug"pts_poly1" var:pts_poly1
+-- 					debug"pts_poly2" var:pts_poly2
 					
 					result_triangles += trianguler  pts_poly1
 					result_triangles += trianguler  pts_poly2
 					
-					if m_debug do (
+					if false and m_debug do (
 						sp = splineShape name:( "tri - decoupage poly " + i_debug as string + " - 1")
 						addnewSpline sp
 						for pt in pts_poly1 do		addknot sp 1 #corner #curve  pt
@@ -854,7 +887,7 @@ struct str_outils_shape (
 						updateShape sp
 	-- 						selectMore sp
 						  
-				)
+					)
 					
 					
 					
@@ -865,14 +898,14 @@ struct str_outils_shape (
 				------- soit on a pas de points dans le triangle, 		---->	donc on peut le treer tranquile 		------------------------------------------------------------------------------
 				) else (
 					
-					debug "-----> 	TRIANGLE	->		" 
+-- 					debug "-----> 	TRIANGLE	->		" 
 					
 					
 					---- si on en trouve pas: 	on peut creer le triangle et retirer le point tester de la liste du polygone ----
 					append 	result_triangles  triangle_aTester
 					deleteItem pts_poly  id_pt_aTester
 					
-					if m_debug do (
+					if false and m_debug do (
 						sp = splineShape name:( "triangle " + i_debug as string )
 						addnewSpline sp
 
