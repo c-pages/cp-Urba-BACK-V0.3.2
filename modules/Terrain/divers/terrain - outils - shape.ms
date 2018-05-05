@@ -147,15 +147,15 @@ struct str_outils_shape (
 		--- points ------------
 		fn get_longueur_segment	_shp	_id_spline	_id_pt 	=(
 			
-			debug "----- get_longueur_segment -------- " var: _id_pt
+-- 			debug "----- get_longueur_segment -------- " var: _id_pt
 			
 			local tab_longueurs_sgts		=	getSegLengths 	_shp 	_id_spline	 cum:false 		byVertex:true 	numArcSteps:100
-			debug "tab_longueurs_sgts" var: tab_longueurs_sgts
+-- 			debug "tab_longueurs_sgts" var: tab_longueurs_sgts
 			local nbr_pts_total 				=	numknots	 		_shp	_id_spline
-			debug "nbr_pts_total" var: nbr_pts_total
+-- 			debug "nbr_pts_total" var: nbr_pts_total
 			local longueur_result			= 	tab_longueurs_sgts[ nbr_pts_total + 2 + _id_pt]
 			
-			debug "longueur_result" var: longueur_result
+-- 			debug "longueur_result" var: longueur_result
 			
 			longueur_result
 			
@@ -199,20 +199,46 @@ struct str_outils_shape (
 		
 		fn get_intersection_vecteurs		vec1_pt_1   vec1_pt_2		vec2_pt_1	vec2_pt_2 =(
 			
-			local pt_intersec			
-			local vec_1 = vec1_pt_2 - vec1_pt_1
-			local vec_2 = vec2_pt_2 - vec2_pt_1
-			
-			if vec_1.x*vec_2.y-vec_1.y*vec_2.x != 0 then (				
-				local coef_vec2 = -(-vec_1.x*vec1_pt_1.y+vec_1.x*vec2_pt_1.y+vec_1.y*vec1_pt_1.x-vec_1.y*vec2_pt_1.x)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
-				local coef_vec1 = -(vec1_pt_1.x*vec_2.y-vec2_pt_1.x*vec_2.y-vec_2.x*vec1_pt_1.y+vec_2.x*vec2_pt_1.y)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
-				if coef_vec1 > 0 and coef_vec1 < 1 and coef_vec2 > 0 and coef_vec2 <1 do
-					pt_intersec	= vec2_pt_1 + coef_vec2*vec_2
-			)
-			
+			local pt_intersec	
+-- 			if BBs_seCroisent #( vec1_pt_1 ,  vec1_pt_2 ) 	#( 	vec2_pt_1	vec2_pt_2  ) do (
+				
+				local vec_1 = vec1_pt_2 - vec1_pt_1
+				local vec_2 = vec2_pt_2 - vec2_pt_1
+				
+				if vec_1.x*vec_2.y-vec_1.y*vec_2.x != 0 then (				
+					local coef_vec2 = -(-vec_1.x*vec1_pt_1.y+vec_1.x*vec2_pt_1.y+vec_1.y*vec1_pt_1.x-vec_1.y*vec2_pt_1.x)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+					local coef_vec1 = -(vec1_pt_1.x*vec_2.y-vec2_pt_1.x*vec_2.y-vec_2.x*vec1_pt_1.y+vec_2.x*vec2_pt_1.y)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+					if coef_vec1 > 0 and coef_vec1 < 1 and coef_vec2 > 0 and coef_vec2 <1 do
+						pt_intersec	= vec2_pt_1 + coef_vec2*vec_2
+				)
+-- 			)
 			pt_intersec
 			
 		),		
+		
+		
+		fn get_intersection_droite_droite		droite1_pt_1		droite1_pt_2 		droite2_pt_1		droite2_pt_2 =(
+			debug "get_intersection_droite_droite"
+			local pt_intersec	
+		
+			local vec_1 = droite1_pt_2 - droite1_pt_1
+			local vec_2 = droite2_pt_2 - droite2_pt_1
+			
+			
+-- 			debug "(vec_1.x*vec_2.y-vec_1.y*vec_2.x)" var:(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+			local coef_vec2 = -(-vec_1.x*droite1_pt_1.y+vec_1.x*droite2_pt_1.y+vec_1.y*droite1_pt_1.x-vec_1.y*droite2_pt_1.x)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+
+			local coef_vec1 = -(droite1_pt_1.x*vec_2.y-droite2_pt_1.x*vec_2.y-vec_2.x*droite1_pt_1.y+vec_2.x*droite2_pt_1.y)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+-- 			if coef_vec1 > 0 and coef_vec1 < 1 and coef_vec2 > 0 and coef_vec2 <1 do
+
+				pt_intersec	= droite2_pt_1 + coef_vec2*vec_2
+			
+			debug "pt_intersec"
+			pt_intersec
+			
+		),
+		
+		
 		fn point_lePlusHautSurY 			_pts		=(
 			local maxi = _pts[1].y
 			local result_id = 1
@@ -419,27 +445,25 @@ struct str_outils_shape (
 		--- sens du shape ----------------------
 		fn est_sensPositif 				_pts 		=(
 -- 			debug "est_sensPositif"
-			local result 				= true
+			local result 			= true
 			local id_pointHaut 	=  point_lePlusHautSurY  	_pts
 			
-			local	id_pt_1 		= id_pointHaut - 1 	---- le point d'avant
+			local	id_pt_1 			= id_pointHaut - 1 	---- le point d'avant
 			local	id_pt_ori 		= id_pointHaut 		---- le point origine
-			local	id_pt_2 		= id_pointHaut + 1	---- le point d'apres
+			local	id_pt_2 			= id_pointHaut + 1	---- le point d'apres
 			
 			-- Boucler limite nombre des points
 			if id_pt_1 < 1 do id_pt_1 = _pts.count
 			if id_pt_2 > _pts.count  do id_pt_2 = 1
 			
-			local	pt_1 		= _pts [	id_pt_1		]
-			local	pt_ori 		= _pts [	id_pt_ori	]
-			local	pt_2 		= _pts [	id_pt_2		]
+			local	pt_1 		= _pts [	id_pt_1	]
+			local	pt_ori 	= _pts [	id_pt_ori	]
+			local	pt_2 		= _pts [	id_pt_2	]
 
 			local	vec1 =  normalize ( pt_1 - pt_ori )
 			local	vec2 =  normalize ( pt_2 - pt_ori )
 			
 			if vec2.x > vec1.X do result = not result
-			
--- 			debug "est_sensPositif" var:result
 			
 			result
 			
@@ -584,6 +608,37 @@ struct str_outils_shape (
 		
 		
 		
+		----- chercher les segments etant sur le meme axe qu'un point	-----
+		-----	Axe: #orizontal ou #vertical	----
+		
+		fn get_sgts_sur_memeAxe		_axe		 _pts_shp		_pt_test		 =(
+-- 			debug "get_sgts_sur_memeAxe"
+			local result = #()
+-- 			local pt_test  					=	_pts_shp[_id_pt_test]
+-- 			local id_pt_test_precedant	=	boucler 	_pts_shp	(_id_pt_test - 1 )
+			
+			
+			
+			for i= 1 to _pts_shp.count   do (
+				local pt_courant	= _pts_shp[ i]
+				
+				if _pt_test != pt_courant do (
+					local i_suivant 	= boucler _pts_shp ( i+1)
+					local pt_suivant 	=_pts_shp[ i_suivant ]
+					case _axe of (
+						#horizontal:	if pt_courant.y >= _pt_test.y and pt_suivant.y <= _pt_test.y 	or 	pt_courant.y <= _pt_test.y and pt_suivant.y >= _pt_test.y do
+												append result i	
+						
+						#vertical:		if pt_courant.x >= _pt_test.x and pt_suivant.x <= _pt_test.x 		or 	pt_courant.x <= _pt_test.y and pt_suivant.x >= _pt_test.x do
+												append result i	
+	-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
+					)
+				)
+			)
+			
+				
+			result
+		),
 		
 		
 		
@@ -633,7 +688,7 @@ struct str_outils_shape (
 			pts_result
 		),
 		fn interpoler_shape 		_shp_node								=(
-			debug "INTERPOLER_SHAPE()"
+-- 			debug "INTERPOLER_SHAPE()"
 			
 			
 			
@@ -654,8 +709,8 @@ struct str_outils_shape (
 				
 				---- pour chacun des points de la spline -----------------------------------
 				for id_pt_contour	=	1	to pts_spline_contour.count  do (
-					debug ""
-					debug "id_pt_contour" var:id_pt_contour
+-- 					debug ""
+-- 					debug "id_pt_contour" var:id_pt_contour
 					
 					---- le point	-
 					local pt_contour  		= getKnotPoint _shp_node 		id_spline_contour	 	id_pt_contour
@@ -664,11 +719,11 @@ struct str_outils_shape (
 					local pt_contour_type 			= getKnotType 		_shp_node  id_spline_contour	 id_pt_contour
 					local pt_contour_svt_type 	= getKnotType 		_shp_node  id_spline_contour	 id_pt_contour_svt
 					
-					debug "pt_contour_type" var:pt_contour_type
-					debug "pt_contour_svt_type" var:pt_contour_svt_type
+-- 					debug "pt_contour_type" var:pt_contour_type
+-- 					debug "pt_contour_svt_type" var:pt_contour_svt_type
 					
 					if pt_contour_type != #corner or pt_contour_svt_type != #corner then (
-						debug "-------------->		ON A UNE COURBE"
+-- 						debug "-------------->		ON A UNE COURBE"
 						----- Interpolation  - adaptif ----------------------------					
 						local longueur_segment 	= get_longueur_segment		_shp_node		id_spline_contour		id_pt_contour 
 						local pos_courbe 			= 0
@@ -726,22 +781,69 @@ struct str_outils_shape (
 -- 			debug "result" var:result
 			result
 		),
-	/* 	fn interpoler_shape  	_shp_node					=( 
-			
-			local pts_shps = interpoler_shape 		_shp_node
-			
-			--- on les plaque sur z=0 -----
-			for shp in pts_shps do	shp.z = 0
-			
-			pts_shps
-		),
-		 */
+
 		
 	------------------- INTERFACE -----------------------------------------------------------------------
 		
-		i_debug = 0,
+		---- TRIANGULATION ----------------
+		/* 
+		fn decouper_polygone_monotone		_liste_pts		balayage:#verticale		=(
+			debug "decouper_polygone_monotone"
+				debug "_liste_pts" var:_liste_pts
+			------ on cherche les 'pointes'---------
+			---			Pour chaque point P, vérifiez si les points voisins sont tous deux du même côté de la ligne de balayage.
+			---			Si c'est le cas, vérifiez la ligne de balayage suivante de l'autre côté. 
+			---			Casser le polygone sur la ligne entre le point d'origine et l'un des points de celui-ci.
+			local polys_result =#()
+			
+			--- pour chaque polygones --------
+			local pts_deRupture =#()
+			for id_poly = 1 to _liste_pts.count do (
+				
+				debug "id_poly" var:id_poly
+				
+				local pts = _liste_pts[id_poly]
+				for i = 1 to pts.count do (
+					
+					debug "i" var:i
+					local i_precedant 	= boucler pts ( i - 1 )
+					local i_suivant 		= boucler pts ( i + 1 )
+					
+					local pt_courant 		= pts [i]					
+					local pt_precedant 	= pts [i_precedant]					
+					local pt_suivant 		= pts [i_suivant]
+					
+					
+					case balayage of (
+						#verticale: (
+							if pt_precedant.y < pt_courant.y and pt_suivant.y < pt_courant.y do (
+-- 								debug "		------->	on a un point de rupture"	var:pt_courant
+								if 
+								append pts_deRupture 	pt_courant
+							)
+								
+						)
+					) -- fin case balayage -------
+					
+					
+				)
+			)
+			
+								debug "		------->	points de  rupture"	var:pts_deRupture
+			
+			
+			
+			polys_result
+			
+		),
+		 */
 		
+		
+		
+		
+		---- BACK		TRIANGULATION 		BACK  ----------------
 		--- renvois le tableau des triangles créés -------
+		i_debug = 0,
 		fn trianguler  _pts =(
 -- 			debug "-------------------- TRIANGULER -----------------------------------------------"
 			local pts_poly 			= deepcopy _pts

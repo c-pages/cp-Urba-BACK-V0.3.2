@@ -7,16 +7,49 @@ global debug, debuger, ecrire, pos
 global DEBUG_MODE = true
 
 
-fn pos 	_pos	= (
-	case classof _pos of (
-		Point3: (
-			try delete $p catch ()
-			p =   point pos:_pos		name:"p" centermarker:off axistripod:off cross:on Box:on size:10 constantscreensize:off drawontop:off wirecolor:yellow
-			select p
-		)
+
+fn creer_debug_pts	_liste_pos =(
+	
+	
+	fn creer_pt 	posit =(
+		p =   point pos:posit		name:"pt_debug" centermarker:off axistripod:off cross:on Box:off size:10 constantscreensize:off drawontop:off wirecolor:yellow	
+		selectmore p
+	)
+	case classof _liste_pos of (
+		Point3:creer_pt  _liste_pos
 		array: (
-			try delete $sp catch ()
-			sp = splineShape name:"sp"
+			if _liste_pos.count > 0 do (	
+				---- recursif pour tableau dans tableau ---------
+				if  classof _liste_pos[1] == array then (
+					for pos in _liste_pos do creer_debug_pts 	pos
+				) else (
+					for pos in _liste_pos do	
+						creer_pt 	pos
+				)
+			)
+		)
+	) --- fin case
+	
+)
+
+
+
+fn pt 	_pos	= (
+	
+	
+
+	try delete $pt_debug* catch ()
+	clearselection ()
+	
+	creer_debug_pts		_pos
+
+)
+fn li 	_pos	= (
+	case classof _pos of (
+		Point3: 	pt _pos
+		array: (
+			try delete $li_debug catch ()
+			sp = splineShape name:"li_debug"
 			pts = _pos
 			addnewSpline sp
 			for pt in pts do		addknot sp 1 #corner #curve  pt
@@ -29,6 +62,8 @@ fn pos 	_pos	= (
 	)
 
 )
+
+
 
 fn remplirTexte  _txt  var:	 param:  prefix: = (
 	

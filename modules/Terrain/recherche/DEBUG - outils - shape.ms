@@ -2,7 +2,7 @@
 include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - mgr - Datas to string.ms" 
 
 struct str_temp (
-
+	
 
 
 
@@ -101,21 +101,29 @@ struct str_temp (
 	
 	
 		--- Analyse position de points (survol_triangles etc..)		-------------
-		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	=(
+		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester		segments_inclus:false		=(
 			
 			local crossProd 	= cross (  _pt_seg_2 - _pt_seg_1 ) ( _pt_aTester - _pt_seg_1 )
 			local sensDot 		= dot crossProd  [0,0,1]
-			local sens 			= if sensDot > 0 then true else false
+			local sens 			= false
+			if  segments_inclus 	then(
+				if sensDot >= 0 then sens =  true 
+			) else (
+				if sensDot > 0 then sens =  true 
+			)
+				
 			sens
 			
 		),
-		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester =(
-			if est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester and est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester  and est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester then (
--- 				if _pt_aTester == _pt_tri_1 or _pt_aTester == _pt_tri_2 or _pt_aTester == _pt_tri_3 then
--- 					false
--- 				else
+		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester 	segments_inclus:false			=(
+			
+			local est_aGauche_pt1 = est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester 	segments_inclus:segments_inclus
+			local est_aGauche_pt2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 	segments_inclus:segments_inclus
+			local est_aGauche_pt3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester	segments_inclus:segments_inclus
+			
+			if est_aGauche_pt1 and est_aGauche_pt2  and est_aGauche_pt3 then 
 					true
-			) else false
+			else false
 		),
 		fn survol_triangles  					_pt_aTester			_pts_triangles_shape 	=(
 			local result = false
@@ -146,9 +154,15 @@ struct str_temp (
 		--- points ------------
 		fn get_longueur_segment	_shp	_id_spline	_id_pt 	=(
 			
-			local tab_longueurs_sgts		=	getSegLengths 	_shp 	_id_spline	 cum:false byVertex:true numArcSteps:100
+-- 			debug "----- get_longueur_segment -------- " var: _id_pt
+			
+			local tab_longueurs_sgts		=	getSegLengths 	_shp 	_id_spline	 cum:false 		byVertex:true 	numArcSteps:100
+-- 			debug "tab_longueurs_sgts" var: tab_longueurs_sgts
 			local nbr_pts_total 				=	numknots	 		_shp	_id_spline
+-- 			debug "nbr_pts_total" var: nbr_pts_total
 			local longueur_result			= 	tab_longueurs_sgts[ nbr_pts_total + 2 + _id_pt]
+			
+-- 			debug "longueur_result" var: longueur_result
 			
 			longueur_result
 			
@@ -543,6 +557,22 @@ struct str_temp (
 			result
 		),
 		
+		fn get_positionRelative_BB		_pts_shpA		_pts_shpB 	=(
+			
+			local BB_A		= get_BB_shape	_pts_shpA
+			local BB_B 		= get_BB_shape	_pts_shpB
+			local result
+			
+			if BB_A[1].x < BB_B[1].x 	and	BB_A[2].x > BB_B[2].x  	and	BB_A[1].y < BB_B[1].y  	and	BB_A[2].y > BB_B[2].y then
+				result = #interieur
+			else if BB_A[1].x > BB_B[1].x 	and	BB_A[2].x < BB_B[2].x  	and	BB_A[1].y > BB_B[1].y  	and	BB_A[2].y < BB_B[2].y then
+				result = #exterieur
+			else
+				result = #aCoté
+			result
+		),
+		
+		
 		fn shape_estDans_shape		_shp_1  shp_test 	=(
 			if _shp_1.count == 0 then 			
 				true
@@ -610,8 +640,10 @@ struct str_temp (
 			pts_result
 		),
 		fn interpoler_shape 		_shp_node								=(
--- 			debug "interpoler_shape()"
--- 			debug "_shp_node" var:_shp_node
+-- 			debug "INTERPOLER_SHAPE()"
+			
+			
+			
 			local result	=#()
 	
 			
@@ -623,19 +655,29 @@ struct str_temp (
 				
 				local pts_spline_contour = for j= 1 to numKnots 	_shp_node	id_spline_contour	 collect getKnotPoint _shp_node 		id_spline_contour	 	j 
 				local pt_result 	= #()
-				for id_pt_contour	=	1	to pts_spline_contour.count do (
+				
+				if not isClosed _shp_node	id_spline_contour	 do
+					close _shp_node	id_spline_contour	
+				
+				---- pour chacun des points de la spline -----------------------------------
+				for id_pt_contour	=	1	to pts_spline_contour.count  do (
+-- 					debug ""
+-- 					debug "id_pt_contour" var:id_pt_contour
 					
+					---- le point	-
 					local pt_contour  		= getKnotPoint _shp_node 		id_spline_contour	 	id_pt_contour
 					local id_pt_contour_svt = if id_pt_contour != pts_spline_contour.count then id_pt_contour + 1 else 1
--- 					local pt_contour_svt  	= getKnotPoint _shp_node 		id_spline_contour	 	id_pt_contour_svt
 					
 					local pt_contour_type 			= getKnotType 		_shp_node  id_spline_contour	 id_pt_contour
 					local pt_contour_svt_type 	= getKnotType 		_shp_node  id_spline_contour	 id_pt_contour_svt
 					
+-- 					debug "pt_contour_type" var:pt_contour_type
+-- 					debug "pt_contour_svt_type" var:pt_contour_svt_type
+					
 					if pt_contour_type != #corner or pt_contour_svt_type != #corner then (
--- 						debug "ON A UNE COURBE"
+-- 						debug "-------------->		ON A UNE COURBE"
 						----- Interpolation  - adaptif ----------------------------					
-						local longueur_segment 	= get_longueur_segment	_shp_node	id_spline_contour		id_pt_contour 
+						local longueur_segment 	= get_longueur_segment		_shp_node		id_spline_contour		id_pt_contour 
 						local pos_courbe 			= 0
 						local nbr_division 			= floor ( longueur_segment / PRECISION_COURBE)
 -- 						debug "longueur_segment" var:longueur_segment
@@ -691,22 +733,13 @@ struct str_temp (
 -- 			debug "result" var:result
 			result
 		),
-	/* 	fn interpoler_shape  	_shp_node					=( 
-			
-			local pts_shps = interpoler_shape 		_shp_node
-			
-			--- on les plaque sur z=0 -----
-			for shp in pts_shps do	shp.z = 0
-			
-			pts_shps
-		),
-		 */
+
 		
 	------------------- INTERFACE -----------------------------------------------------------------------
 		
-		i_debug = 0,
-		
+		---- TRIANGULATION ----------------
 		--- renvois le tableau des triangles créés -------
+		i_debug = 0,
 		fn trianguler  _pts =(
 -- 			debug "-------------------- TRIANGULER -----------------------------------------------"
 			local pts_poly 			= deepcopy _pts
@@ -716,11 +749,12 @@ struct str_temp (
 			--------------- tant qu'il reste plus de trois point dans le polygone -------------------------------------------------------------------------------------------------------------------------			
 			while pts_poly.count >= 3 do (
 				
-				format "\n\n---------------------------------------------------------------------"
+				debug""
+				i_debug += 1
+				debug" trianguler" var:(i_debug)
 				
-				debug" trianguler" var:(i_debug += 1)
-				
-				
+					debug "-----> 	pts_poly	courant " var:pts_poly
+				suspendEditing
 				-- on commence avec le point le plus a gauche du polygone--
 				local id_pt_aTester 	= point_lePlusAGauche  pts_poly		
 				
@@ -746,20 +780,20 @@ struct str_temp (
 -- 					debug "		----------------------> id " var:i
 					local pt_atester 				= pts_poly[i]
 -- 					debug "		----------------------> pt_atester " var:pt_atester
-					local pt_est_dansTriangle 		= est_dansTriangle 	triangle_aTester[1]	 triangle_aTester[2]	 triangle_aTester[3]	  pt_atester
+					local pt_est_dansTriangle 		= est_dansTriangle 		triangle_aTester[1]	 triangle_aTester[2]	 triangle_aTester[3]	  pt_atester	--	segments_inclus:true
 -- 					debug "		----------------------> pt_est_dansTriangle " var:pt_est_dansTriangle
 					
 					if pt_est_dansTriangle do append ids_pts_dansTriangle  i
 				)
 				
--- 				debug "--------> ids_pts_dansTriangle" var:ids_pts_dansTriangle
+				debug "--------> ids_pts_dansTriangle" var:ids_pts_dansTriangle
 				
 				
 				
 				------- soit on trouve des points dans le triangle		---->	 on doit découper en 2 polygones		------------------------------------------------------------------------------
 				if ids_pts_dansTriangle.count > 0 then (
 					
-					debug "-----> 	DECOUPAGE	->		de " var:pts_poly
+					debug "-----> 	DECOUPAGE	->		 " 
 					
 					local pts_dansTriangle	=	for id_pt in ids_pts_dansTriangle collect pts_poly[id_pt]
 					
@@ -792,11 +826,11 @@ struct str_temp (
 							local dist_to_id 			=  abs (id_diag - id_pt_aTester )
 							local dist_to_id_inv 		= abs (( pts_poly.count - id_pt_aTester ) -  id_diag )
 							
-							debug "	-> dist_to_id" var:dist_to_id
-							debug "	-> dist_to_id_inv" var:dist_to_id
+-- 							debug "	-> dist_to_id" var:dist_to_id
+-- 							debug "	-> dist_to_id_inv" var:dist_to_id
 							if dist_to_id_inv < dist_to_id do dist_to_id = dist_to_id_inv
 								
-							debug "	--------------> dist_to_id" var:dist_to_id
+-- 							debug "	--------------> dist_to_id" var:dist_to_id
 							if dist_to_id <= dist_id_min do (
 								
 								
@@ -840,20 +874,20 @@ struct str_temp (
 					result_triangles += trianguler  pts_poly1
 					result_triangles += trianguler  pts_poly2
 					
-					
-					sp = splineShape name:( "tri - decoupage poly " + i_debug as string + " - 1")
-					addnewSpline sp
-					for pt in pts_poly1 do		addknot sp 1 #corner #curve  pt
-					close sp 1
-					updateShape sp
-					sp = splineShape name:( "tri - decoupage poly " + i_debug as string + " - 2")
-					addnewSpline sp
-					for pt in pts_poly2 do		addknot sp 1 #corner #curve  pt
-					close sp 1
-					updateShape sp
--- 						selectMore sp
-					  
-					
+					if true and m_debug do (
+						sp = splineShape name:( "tri - decoupage poly " + i_debug as string + " - 1")
+						addnewSpline sp
+						for pt in pts_poly1 do		addknot sp 1 #corner #curve  pt
+						close sp 1
+						updateShape sp
+						sp = splineShape name:( "tri - decoupage poly " + i_debug as string + " - 2")
+						addnewSpline sp
+						for pt in pts_poly2 do		addknot sp 1 #corner #curve  pt
+						close sp 1
+						updateShape sp
+	-- 						selectMore sp
+						  
+					)
 					
 					
 					
@@ -871,13 +905,14 @@ struct str_temp (
 					append 	result_triangles  triangle_aTester
 					deleteItem pts_poly  id_pt_aTester
 					
+					if true and m_debug do (
 						sp = splineShape name:( "triangle " + i_debug as string )
 						addnewSpline sp
 
 						for pt in triangle_aTester do		addknot sp 1 #corner #curve  pt
 						close sp 1
 						updateShape sp
-						
+					)
 				)
 				
 			)  --- fin du while il ya plus de 3 pts dans le polygone ------
@@ -888,6 +923,8 @@ struct str_temp (
 
 	
 )
+
+
 clearlistener ()
 delete $tri*
 tmp = str_temp ()
@@ -895,7 +932,7 @@ tmp = str_temp ()
 shp_A = $debug_tri
 pts_A = for i in 1 to numknots shp_A collect getknotPoint shp_A	1	i
 triangles	=	tmp.trianguler 	pts_A
-/* 
+/*
 i= 0
 for tri in triangles do (
 	i+=1

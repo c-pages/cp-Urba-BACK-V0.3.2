@@ -6,7 +6,7 @@ include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - sh
 struct str_polygone (
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug	=	false,
+		m_debug	=	true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | polys"	  	var:var	 param:param		catch (),
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		
@@ -17,6 +17,8 @@ struct str_polygone (
 		
 		
 		mgr_shp				=	str_outils_shape (),
+		mgr_polys 			,
+	
 		pts 					=	#(),
 		
 		dist_auParent		=	0,
@@ -117,10 +119,9 @@ struct str_polygone (
 		),
 		fn get_descendance	=(
 			local result = #()
-			for enfant in enfants do (
--- 				append result enfant
+			for enfant in enfants do 				
 				result		+=	enfant.get_descendance()
-			)
+			
 			append result 	this
 			result
 		),
@@ -135,9 +136,9 @@ struct str_polygone (
 		fn set_pts  			_pts			= pts =  for pt in _pts collect pt,
 		
 		
-		fn get_pts  			= (
+		fn get_pts  			 oriente:false 	= (
 			local result = for pt in pts collect pt
--- 			if en_creux do	mgr_shp.changer_sens	result
+			if oriente and en_creux do	mgr_shp.changer_sens	result
 			result			
 		),
 		
@@ -162,16 +163,41 @@ struct str_polygone (
 		
 		fn get_positionRelative 		_poly_a_tester	=(
 			mgr_shp.get_positionRelative_shapes 	(  get_pts () )	(  _poly_a_tester.get_pts () )	 renvoyer_intersections:false
-		)
+		),
 		
-		/* ,
-		
-		
-		
+		--- on regarde si on a ou pas un parent ----------
+		fn est_exterieur =  parent == undefined,
 		
 		
+	
 		
-		fn initialiser 	_ptr_shp = mgr_shp = _ptr_shp */
+		
+		
+		fn trianguler =(
+			debug "trianguler"
+			local triangles = #()
+			local polys_total 	= get_descendance ()
+			
+			
+-- 			local polys_pts = #()			
+-- 			for poly in polys_total do
+-- 				append polys_pts  ( 	poly.get_pts () )
+			
+			local polys_monotones	=	mgr_polys.decouper_polygone_monotone		polys_total
+			
+			debug "FIN	trianguler"
+			triangles
+			
+			polys_monotones
+			
+		),
+		
+		
+		
+		fn initialiser		_mgr_polys = 
+					mgr_polys = _mgr_polys
+		
+		
 		
 )--- fin du struct----
 
@@ -336,7 +362,32 @@ struct str_mgr_polygones (
 		),
 		
 		
-		
+		fn get_sgts_sur_memeAxe		_axe		_polys_total		_id_poly_test		_id_test		=(
+-- 					debug "get_sgts_sur_memeAxe"
+			local segments_surMemeAxe =#()
+			local pts_test 		= _polys_total[ _id_poly_test ].get_pts  oriente:true 
+			local pt_test 			= pts_test[ _id_test ]
+			local id_test_prcdt 	= mgr_shp.boucler pts_test ( _id_test - 1 )
+			
+			for id_poly = 1 to _polys_total.count  do (
+				local poly = _polys_total[ id_poly ]
+				local sgts_surMemeAxe	=	mgr_shp.get_sgts_sur_memeAxe		_axe		( poly.get_pts oriente:true )		pt_test	
+					
+				--- on retire ceux en trop -----------------
+				for i_idsSgt	=	sgts_surMemeAxe.count to 1 by -1  do(
+					local id_sgt = sgts_surMemeAxe[  i_idsSgt]
+					if id_poly == _id_poly_test then (
+						if _id_test == id_sgt or id_test_prcdt== id_sgt do
+							deleteItem sgts_surMemeAxe	 i_idsSgt
+					)
+				)
+				
+				append segments_surMemeAxe		sgts_surMemeAxe
+				
+			)
+-- 			debug "segments_surMemeAxe" var:segments_surMemeAxe
+			segments_surMemeAxe
+		),
 		
 		
 		
@@ -434,6 +485,185 @@ struct str_mgr_polygones (
 			
 		), */
 	------------ Interface	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	public 
+	
+		fn decouper_polygone_monotone		_polys		balayage:#verticale		=(
+			debug "decouper_polygone_monotone"
+				debug "_polys" var:_polys param:#nom
+			------ on cherche les 'pointes'---------
+			---			Pour chaque point P, vérifiez si les points voisins sont tous deux du même côté de la ligne de balayage.
+			---			Si c'est le cas, vérifiez la ligne de balayage suivante de l'autre côté. 
+			---			Casser le polygone sur la ligne entre le point d'origine et l'un des points de celui-ci.
+			local polys_result =#()
+			
+			--- pour chaque polygones --------
+			local pts_deRupture 			=#()
+			local pts_deRupture_horiz 	=#()
+			for id_poly = 1 to _polys.count do (
+				
+				debug "id_poly" var:id_poly
+				
+				local poly_courant 	= _polys[id_poly]
+				local pts 				= poly_courant.get_pts ()
+				
+				for i = 1 to pts.count do (
+					debug "\n"
+					debug "i" var:i
+					local i_precedant 	= mgr_shp.boucler pts ( i - 1 )
+					local i_suivant 		= mgr_shp.boucler pts ( i + 1 )
+					
+					local pt_courant 		= pts [i]					
+					local pt_precedant 	= pts [i_precedant]					
+					local pt_suivant 		= pts [i_suivant]
+-- 					
+-- 				debug "pt_courant" var:pt_courant
+-- 				debug "pt_precedant" var:pt_precedant
+-- 				debug "pt_suivant" var:pt_suivant
+					
+					
+					---- on cherche les points de ruptures ----------------------
+					case balayage of (
+						#verticale: (
+							
+							
+							debug "pt_courant" var:pt_courant
+							
+							
+							-------- CAS 1 : segment horizontal ------------------------
+							if pt_suivant.y == pt_courant.y and 	pt_precedant.y <  pt_courant.y	then (
+								debug "------>	segment horizontal"
+-- 								debug "pt_suivant" var:pt_suivant
+								append pts_deRupture_horiz		#( pt_courant, pt_suivant )
+							)
+							
+							
+							-------- CAS 2 : pointe  ------------------------
+							else	if pt_precedant.y < pt_courant.y and pt_suivant.y < pt_courant.y do (
+								local est_sensPositif = mgr_shp.est_sensPositif	#( pt_precedant, pt_courant, pt_suivant) 
+								debug "est_sensPositif" var:est_sensPositif
+-- 								if  est_sensPositif	do 
+								
+-- 								debug "		------->	on a un point de rupture"	var:pt_courant
+								if 	poly_courant.est_exterieur ()   then (
+									if not est_sensPositif do (
+										
+										append pts_deRupture 	pt_courant
+										
+										
+										local id_pt_connexion_1 = i
+										local id_pt_connexion_2
+										
+										local sgts_sur_memeAxe =	get_sgts_sur_memeAxe		#horizontal			_polys	id_poly	i
+										
+										---------- DEBUG--------------------------
+										debug "sgts_sur_memeAxe" 	var:sgts_sur_memeAxe
+										local pts_debug =#()
+										for id_polys_sgt_surAxe = 1 to sgts_sur_memeAxe.count do (
+											
+											
+											debug "----->	id_polys_sgt_surAxe" var:id_polys_sgt_surAxe
+											
+											
+											local poly 				= _polys[ id_polys_sgt_surAxe ]												
+											local pts 				= poly.get_pts 	oriente:true
+											
+											local sgts_surAxe 	= sgts_sur_memeAxe [ id_polys_sgt_surAxe ]
+											for id_sgt_surAxe in sgts_surAxe do (
+												
+												
+												local pt_sgt_surAxe 			= pts[ id_sgt_surAxe ]
+												local id_sgt_surAxe_svnt		= mgr_shp.boucler	pts ( id_sgt_surAxe + 1 )
+												local pt_sgt_surAxe_svnt 		= pts[ id_sgt_surAxe_svnt ]
+												
+												local pt_courant_horiz 			= pt_courant + [1,0,0]
+												debug "	----->	id_sgt_surAxe" var:id_sgt_surAxe
+												local intersection 				= mgr_shp.get_intersection_droite_droite			pt_courant 	pt_courant_horiz		pt_sgt_surAxe		pt_sgt_surAxe_svnt
+												
+												
+												debug "	----->	intersection" var:intersection
+												append pts_debug	pt_sgt_surAxe
+												
+												
+												
+											)
+										)
+										
+										debug "pts_debug" var:pts_debug
+										---------- DEBUG--------------------------
+										
+									)
+									
+									
+								) else(
+									
+										append pts_deRupture 	pt_courant
+										
+										
+										local sgts_sur_memeAxe =	get_sgts_sur_memeAxe		#horizontal			_polys	id_poly	i
+										
+									
+										---------- DEBUG--------------------------
+										debug "sgts_sur_memeAxe" 	var:sgts_sur_memeAxe
+										local pts_debug =#()
+										for id_polys_sgt_surAxe = 1 to sgts_sur_memeAxe.count do (
+											
+											
+											debug "----->	id_polys_sgt_surAxe" var:id_polys_sgt_surAxe
+											
+											
+											local poly 				= _polys[ id_polys_sgt_surAxe ]												
+											local pts 				= poly.get_pts 	oriente:true
+											
+											local sgts_surAxe 	= sgts_sur_memeAxe [ id_polys_sgt_surAxe ]
+											for id_sgt_surAxe in sgts_surAxe do (
+												
+												
+												local pt_sgt_surAxe 			= pts[ id_sgt_surAxe ]
+												local id_sgt_surAxe_svnt		= mgr_shp.boucler	pts ( id_sgt_surAxe + 1 )
+												local pt_sgt_surAxe_svnt 		= pts[ id_sgt_surAxe_svnt ]
+												
+												local pt_courant_horiz 			= pt_courant + [1,0,0]
+												debug "	----->	id_sgt_surAxe" var:id_sgt_surAxe
+												local intersection 				= mgr_shp.get_intersection_droite_droite			pt_courant 	pt_courant_horiz		pt_sgt_surAxe		pt_sgt_surAxe_svnt
+												
+												
+												debug "	----->	intersection" var:intersection
+												append pts_debug	pt_sgt_surAxe
+												
+												
+												
+											)
+										)
+										
+										debug "pts_debug" var:pts_debug
+										---------- DEBUG--------------------------
+										
+										
+								)
+									
+								
+							)
+								
+						)
+					) -- fin case balayage -------
+					
+					
+				)
+			)
+			
+			debug "		------->	points de  rupture"			var:pts_deRupture
+			debug "		------->	points de  rupture horiz"	var:pts_deRupture_horiz
+			
+			
+			
+			polys_result
+			
+		),
+		
+	
+	
+	
+	
 	public	
 	
 		fn inserer_poly_ds_poly		_poly_aInserer		_poly_dest 		=(
@@ -591,8 +821,8 @@ struct str_mgr_polygones (
 			
 			----	renvoie un nouveau polygonne	----
 			local nv_polygone = str_polygone	()		----	struct_prt:this
+			nv_polygone.initialiser	this
 			
--- 			nv_polygone.initialiser	this
 			if pts != unsupplied and pts != undefined do (
 				if not mgr_shp.est_sensPositif 	pts do 
 					pts = mgr_shp.changer_sens pts

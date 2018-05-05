@@ -123,13 +123,29 @@ struct str_calque (
 			*/
 			result
 		),
-		fn get_pts =(
-			local pts_result =#()						
-			for poly in polygones do 
-				pts_result += mgr_polys.creer_pts_pourFace  poly
+	
+		
+		
+	public
+		--------------------------- Trianguler  -------------------------------------------------------------------------------
+		----- 	triangulation avec decoupage en polygones montones par balayage vertical et horizontal, 			----
+		------	puis decoupage des polygones restant façon oreille peut etre...										----
+		------------------------------------------------------------------------------------------------------------------------
+		fn trianguler =(
+			debug "trianguler"
 			
-			pts_result
+			local result_triangles =#()
+			for poly in polygones do
+				result_triangles += poly.trianguler ()
+			
+			debug "result_triangles"
+			result_triangles
+			
 		)
+		
+		
+		
+		
 		
 ) ---- fin struct calque --------------------------------------------------------------------------------------------
 
@@ -207,7 +223,7 @@ struct	str_mgr_calques	(
 	private
 		
 		
-		
+		----- operation Booleene entre calques ----------------
 		fn operation_booleene 		_calque_A		_calque_B		operation:#union =(
 			/*__________________________________________________________________________________
 			
@@ -916,11 +932,12 @@ struct	str_mgr_calques	(
 			
 			calque_result
 		),
-		
-		
-		
+
+		----- calculer la pile complete des calques ----------------
 		fn calculer_pile	=(
+			
 			debug "calculer_pile ()"
+			
 			local result_calque = this.creer_calque ()
 			if m_pile.count >0 then (
 				--- on renvois un calque -----------
@@ -942,6 +959,8 @@ struct	str_mgr_calques	(
 			
 			result_calque
 		),
+		
+		
 		
 		
 		
@@ -985,6 +1004,13 @@ struct	str_mgr_calques	(
 			local result = calculer_pile ()
 			result.get_pts ()
 		),
+		
+		fn get_calque_pile = (
+-- 			debug "get_calque_pile"
+			calculer_pile ()
+			
+		),
+		
 		fn get_calques = 	for calque in m_pile collect calque,
 		
 		---- Manipulations -------------

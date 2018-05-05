@@ -34,7 +34,7 @@ struct	str_terrain_node_core	(
 		
 	----- les points stockés pour manip -----
 -- 		m_pts_calques	 			=	#(),		---- les listes de points issues des points des splines calques, cleannés et dans le bon sens. ------------
-		m_ndRoot_calque			=	undefined,
+		m_ndRoot_calque				=	undefined,
 		m_calque_resultat			=	undefined,
 		m_calques						=	#(),
 		
@@ -415,9 +415,23 @@ struct	str_terrain_node_core	(
 			
 			format "\n\n\n\n\n"
 			debug "------------------------	actualiser_pts_faces ()	---------------------------------------------------------------"
-			m_pts_faces = mgr_calques.get_pts_resultat ()
-			debug "m_pts_faces" var:m_pts_faces
+			
+			
+			--- version triangles ---------------
+			local calque_pile 	= mgr_calques.get_calque_pile ()
+			debug "------------------------ POPOPPOPO"
+			
+			local triangles 	=	calque_pile.trianguler ()
+			
+			
+			debug "	----> TRIANGLES" var:triangles
+-- 			m_pts_faces = mgr_calques.get_pts_resultat ()
+-- 			debug "m_pts_faces" var:m_pts_faces
+			
+			
+			
 			debug "------------------------	actualiser_pts_faces ()	---------------------------------------------------------------"
+			 
 			
 		),
 		
@@ -427,13 +441,14 @@ struct	str_terrain_node_core	(
 		
 		
 		fn creer_geometrie_base = if m_pts_faces.count > 0 do (
-			
+			/* 
 			--- version triangles ---------------
-			local triangles =#()
-			for pts_shp in m_pts_faces do	
-				triangles += mgr_shape.trianguler 	pts_shp
-			for pts_tri in triangles do	mgr_geo.face	pts_tri 		smGrp:1
+			local calque_pile 	= mgr_calques.get_calque_pile ()
+			local triangles 	=	calque_pile.trianguler ()
 			
+			
+			debug "	----> TRIANGLES" var:triangles
+			 */
 			
 		),
 		
