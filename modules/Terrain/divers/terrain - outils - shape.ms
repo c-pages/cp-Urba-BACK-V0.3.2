@@ -218,7 +218,7 @@ struct str_outils_shape (
 		
 		
 		fn get_intersection_droite_droite		droite1_pt_1		droite1_pt_2 		droite2_pt_1		droite2_pt_2 =(
-			debug "get_intersection_droite_droite"
+-- 			debug "get_intersection_droite_droite"
 			local pt_intersec	
 		
 			local vec_1 = droite1_pt_2 - droite1_pt_1
@@ -233,7 +233,7 @@ struct str_outils_shape (
 
 				pt_intersec	= droite2_pt_1 + coef_vec2*vec_2
 			
-			debug "pt_intersec"
+-- 			debug "pt_intersec"
 			pt_intersec
 			
 		),

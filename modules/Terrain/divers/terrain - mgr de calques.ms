@@ -138,7 +138,7 @@ struct str_calque (
 			for poly in polygones do
 				result_triangles += poly.trianguler ()
 			
-			debug "result_triangles"
+			debug "result_triangles" var:result_triangles
 			result_triangles
 			
 		)
