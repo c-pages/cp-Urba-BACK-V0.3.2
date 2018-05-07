@@ -160,7 +160,8 @@ struct str_outils_shape (
 			longueur_result
 			
 		),
-		fn	get_angleVecteurs v1 v2 =(
+
+		fn	get_angleVecteurs 	v1 v2	 =(
 -- 			debug "get_angleVecteurs"
 -- 			debug "dot (normalize v1) (normalize v2)" var:(dot (normalize v1) (normalize v2))
 			local result_angle
@@ -170,7 +171,19 @@ struct str_outils_shape (
 				result_angle = acos(dot (normalize v1) (normalize v2))
 -- 			format "angle entre vec :%\n" result_angle
 			result_angle
+		),		
+		fn	get_angleVecteurs_oriente 	vec1_pt1	vec1_pt2	vec2_pt1	vec2_pt2 =(
+			local v1 = vec1_pt2 - vec1_pt1
+			local v2 = vec2_pt2 - vec2_pt1
+			
+			local result_angle = get_angleVecteurs 	v1 v2	 
+			
+			if est_aGauche		vec1_pt1	vec1_pt2		( vec1_pt2 +  v2 ) do 
+				result_angle	=	 - result_angle
+			
+			result_angle
 		),
+
 		fn get_distance_point_segment		_pt		_seg_pt1	_seg_pt2 =(
 -- 			debug "			--->	get_distance_point_segment " var:#( _pt	,	_seg_pt1,	_seg_pt2 )
 			
@@ -626,10 +639,10 @@ struct str_outils_shape (
 					local i_suivant 	= boucler _pts_shp ( i+1)
 					local pt_suivant 	=_pts_shp[ i_suivant ]
 					case _axe of (
-						#horizontal:	if pt_courant.y >= _pt_test.y and pt_suivant.y <= _pt_test.y 	or 	pt_courant.y <= _pt_test.y and pt_suivant.y >= _pt_test.y do
+						#horizontal:	if pt_courant.y > _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y < _pt_test.y and pt_suivant.y > _pt_test.y do
 												append result i	
 						
-						#vertical:		if pt_courant.x >= _pt_test.x and pt_suivant.x <= _pt_test.x 		or 	pt_courant.x <= _pt_test.y and pt_suivant.x >= _pt_test.x do
+						#vertical:		if pt_courant.x > _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x < _pt_test.y and pt_suivant.x > _pt_test.x do
 												append result i	
 	-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
 					)

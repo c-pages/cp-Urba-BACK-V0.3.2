@@ -33,6 +33,38 @@ fn creer_debug_pts	_liste_pos =(
 )
 
 
+fn creer_debug_splines	_liste_pos =(
+	
+	
+	fn creer_spline 	_pos =(
+		sp = splineShape name:"li_debug"
+		pts = _pos
+		addnewSpline sp
+		for pt in pts do		addknot sp 1 #corner #curve  pt
+		close sp 1
+		updateShape sp
+		selectmore sp
+	)
+	
+	
+	
+	case classof _liste_pos of (
+		Point3:creer_debug_pts  _liste_pos
+		array: (
+			if _liste_pos.count > 0 do (
+				---- recursif pour tableau dans tableau ---------
+				if  classof _liste_pos[1] == array then 
+							for pos in _liste_pos do creer_debug_splines 	pos
+					else 
+						creer_spline 	_liste_pos
+				
+			)
+		)
+	) --- fin case
+	
+)
+
+
 
 fn pt 	_pos	= (
 	
@@ -45,21 +77,33 @@ fn pt 	_pos	= (
 
 )
 fn li 	_pos	= (
+	
+	try delete $li_debug* catch ()
+	clearselection ()
+	
+	creer_debug_splines	_pos 
+	/* 
 	case classof _pos of (
 		Point3: 	pt _pos
 		array: (
-			try delete $li_debug catch ()
-			sp = splineShape name:"li_debug"
-			pts = _pos
-			addnewSpline sp
-			for pt in pts do		addknot sp 1 #corner #curve  pt
-			close sp 1
-			updateShape sp
-			select sp
+			
+			if _pos.count > 0 do (
+				
+				if classof	_pos[1] == array then
+					for pos in _pos do li  pos
+				else (
+					try delete $li_debug catch ()
+					sp = splineShape name:"li_debug"
+					pts = _pos
+					addnewSpline sp
+					for pt in pts do		addknot sp 1 #corner #curve  pt
+					close sp 1
+					updateShape sp
+					select sp
+				)
+			)
 		)
-		
-		
-	)
+	) */
 
 )
 

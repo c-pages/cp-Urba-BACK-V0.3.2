@@ -2,7 +2,8 @@
 include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - mgr - Datas to string.ms" 
 
 struct str_temp (
-	
+
+
 
 
 
@@ -101,29 +102,21 @@ struct str_temp (
 	
 	
 		--- Analyse position de points (survol_triangles etc..)		-------------
-		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester		segments_inclus:false		=(
+		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	=(
 			
 			local crossProd 	= cross (  _pt_seg_2 - _pt_seg_1 ) ( _pt_aTester - _pt_seg_1 )
 			local sensDot 		= dot crossProd  [0,0,1]
-			local sens 			= false
-			if  segments_inclus 	then(
-				if sensDot >= 0 then sens =  true 
-			) else (
-				if sensDot > 0 then sens =  true 
-			)
-				
+			local sens 			= if sensDot > 0 then true else false
 			sens
 			
 		),
-		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester 	segments_inclus:false			=(
-			
-			local est_aGauche_pt1 = est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester 	segments_inclus:segments_inclus
-			local est_aGauche_pt2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 	segments_inclus:segments_inclus
-			local est_aGauche_pt3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester	segments_inclus:segments_inclus
-			
-			if est_aGauche_pt1 and est_aGauche_pt2  and est_aGauche_pt3 then 
+		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester =(
+			if est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester and est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester  and est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester then (
+-- 				if _pt_aTester == _pt_tri_1 or _pt_aTester == _pt_tri_2 or _pt_aTester == _pt_tri_3 then
+-- 					false
+-- 				else
 					true
-			else false
+			) else false
 		),
 		fn survol_triangles  					_pt_aTester			_pts_triangles_shape 	=(
 			local result = false
@@ -167,7 +160,8 @@ struct str_temp (
 			longueur_result
 			
 		),
-		fn	get_angleVecteurs v1 v2 =(
+
+		fn	get_angleVecteurs 	v1 v2	 =(
 -- 			debug "get_angleVecteurs"
 -- 			debug "dot (normalize v1) (normalize v2)" var:(dot (normalize v1) (normalize v2))
 			local result_angle
@@ -177,7 +171,19 @@ struct str_temp (
 				result_angle = acos(dot (normalize v1) (normalize v2))
 -- 			format "angle entre vec :%\n" result_angle
 			result_angle
+		),		
+		fn	get_angleVecteurs_oriente 	vec1_pt1	vec1_pt2	vec2_pt1	vec2_pt2 =(
+			local v1 = vec1_pt2 - vec1_pt1
+			local v2 = vec2_pt2 - vec2_pt1
+			
+			local result_angle = get_angleVecteurs 	v1 v2	 
+			
+			if est_aGauche		vec1_pt1	vec1_pt2		( vec1_pt2 +  v2 ) do 
+				result_angle	=	 - result_angle
+			
+			result_angle
 		),
+
 		fn get_distance_point_segment		_pt		_seg_pt1	_seg_pt2 =(
 -- 			debug "			--->	get_distance_point_segment " var:#( _pt	,	_seg_pt1,	_seg_pt2 )
 			
@@ -206,20 +212,46 @@ struct str_temp (
 		
 		fn get_intersection_vecteurs		vec1_pt_1   vec1_pt_2		vec2_pt_1	vec2_pt_2 =(
 			
-			local pt_intersec			
-			local vec_1 = vec1_pt_2 - vec1_pt_1
-			local vec_2 = vec2_pt_2 - vec2_pt_1
-			
-			if vec_1.x*vec_2.y-vec_1.y*vec_2.x != 0 then (				
-				local coef_vec2 = -(-vec_1.x*vec1_pt_1.y+vec_1.x*vec2_pt_1.y+vec_1.y*vec1_pt_1.x-vec_1.y*vec2_pt_1.x)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
-				local coef_vec1 = -(vec1_pt_1.x*vec_2.y-vec2_pt_1.x*vec_2.y-vec_2.x*vec1_pt_1.y+vec_2.x*vec2_pt_1.y)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
-				if coef_vec1 > 0 and coef_vec1 < 1 and coef_vec2 > 0 and coef_vec2 <1 do
-					pt_intersec	= vec2_pt_1 + coef_vec2*vec_2
-			)
-			
+			local pt_intersec	
+-- 			if BBs_seCroisent #( vec1_pt_1 ,  vec1_pt_2 ) 	#( 	vec2_pt_1	vec2_pt_2  ) do (
+				
+				local vec_1 = vec1_pt_2 - vec1_pt_1
+				local vec_2 = vec2_pt_2 - vec2_pt_1
+				
+				if vec_1.x*vec_2.y-vec_1.y*vec_2.x != 0 then (				
+					local coef_vec2 = -(-vec_1.x*vec1_pt_1.y+vec_1.x*vec2_pt_1.y+vec_1.y*vec1_pt_1.x-vec_1.y*vec2_pt_1.x)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+					local coef_vec1 = -(vec1_pt_1.x*vec_2.y-vec2_pt_1.x*vec_2.y-vec_2.x*vec1_pt_1.y+vec_2.x*vec2_pt_1.y)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+					if coef_vec1 > 0 and coef_vec1 < 1 and coef_vec2 > 0 and coef_vec2 <1 do
+						pt_intersec	= vec2_pt_1 + coef_vec2*vec_2
+				)
+-- 			)
 			pt_intersec
 			
 		),		
+		
+		
+		fn get_intersection_droite_droite		droite1_pt_1		droite1_pt_2 		droite2_pt_1		droite2_pt_2 =(
+-- 			debug "get_intersection_droite_droite"
+			local pt_intersec	
+		
+			local vec_1 = droite1_pt_2 - droite1_pt_1
+			local vec_2 = droite2_pt_2 - droite2_pt_1
+			
+			
+-- 			debug "(vec_1.x*vec_2.y-vec_1.y*vec_2.x)" var:(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+			local coef_vec2 = -(-vec_1.x*droite1_pt_1.y+vec_1.x*droite2_pt_1.y+vec_1.y*droite1_pt_1.x-vec_1.y*droite2_pt_1.x)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+
+			local coef_vec1 = -(droite1_pt_1.x*vec_2.y-droite2_pt_1.x*vec_2.y-vec_2.x*droite1_pt_1.y+vec_2.x*droite2_pt_1.y)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+-- 			if coef_vec1 > 0 and coef_vec1 < 1 and coef_vec2 > 0 and coef_vec2 <1 do
+
+				pt_intersec	= droite2_pt_1 + coef_vec2*vec_2
+			
+-- 			debug "pt_intersec"
+			pt_intersec
+			
+		),
+		
+		
 		fn point_lePlusHautSurY 			_pts		=(
 			local maxi = _pts[1].y
 			local result_id = 1
@@ -426,27 +458,25 @@ struct str_temp (
 		--- sens du shape ----------------------
 		fn est_sensPositif 				_pts 		=(
 -- 			debug "est_sensPositif"
-			local result 				= true
+			local result 			= true
 			local id_pointHaut 	=  point_lePlusHautSurY  	_pts
 			
-			local	id_pt_1 		= id_pointHaut - 1 	---- le point d'avant
+			local	id_pt_1 			= id_pointHaut - 1 	---- le point d'avant
 			local	id_pt_ori 		= id_pointHaut 		---- le point origine
-			local	id_pt_2 		= id_pointHaut + 1	---- le point d'apres
+			local	id_pt_2 			= id_pointHaut + 1	---- le point d'apres
 			
 			-- Boucler limite nombre des points
 			if id_pt_1 < 1 do id_pt_1 = _pts.count
 			if id_pt_2 > _pts.count  do id_pt_2 = 1
 			
-			local	pt_1 		= _pts [	id_pt_1		]
-			local	pt_ori 		= _pts [	id_pt_ori	]
-			local	pt_2 		= _pts [	id_pt_2		]
+			local	pt_1 		= _pts [	id_pt_1	]
+			local	pt_ori 	= _pts [	id_pt_ori	]
+			local	pt_2 		= _pts [	id_pt_2	]
 
 			local	vec1 =  normalize ( pt_1 - pt_ori )
 			local	vec2 =  normalize ( pt_2 - pt_ori )
 			
 			if vec2.x > vec1.X do result = not result
-			
--- 			debug "est_sensPositif" var:result
 			
 			result
 			
@@ -591,6 +621,37 @@ struct str_temp (
 		
 		
 		
+		----- chercher les segments etant sur le meme axe qu'un point	-----
+		-----	Axe: #orizontal ou #vertical	----
+		
+		fn get_sgts_sur_memeAxe		_axe		 _pts_shp		_pt_test		 =(
+-- 			debug "get_sgts_sur_memeAxe"
+			local result = #()
+-- 			local pt_test  					=	_pts_shp[_id_pt_test]
+-- 			local id_pt_test_precedant	=	boucler 	_pts_shp	(_id_pt_test - 1 )
+			
+			
+			
+			for i= 1 to _pts_shp.count   do (
+				local pt_courant	= _pts_shp[ i]
+				
+				if _pt_test != pt_courant do (
+					local i_suivant 	= boucler _pts_shp ( i+1)
+					local pt_suivant 	=_pts_shp[ i_suivant ]
+					case _axe of (
+						#horizontal:	if pt_courant.y > _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y < _pt_test.y and pt_suivant.y > _pt_test.y do
+												append result i	
+						
+						#vertical:		if pt_courant.x > _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x < _pt_test.y and pt_suivant.x > _pt_test.x do
+												append result i	
+	-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
+					)
+				)
+			)
+			
+				
+			result
+		),
 		
 		
 		
@@ -738,6 +799,62 @@ struct str_temp (
 	------------------- INTERFACE -----------------------------------------------------------------------
 		
 		---- TRIANGULATION ----------------
+		/* 
+		fn decouper_polygone_monotone		_liste_pts		balayage:#verticale		=(
+			debug "decouper_polygone_monotone"
+				debug "_liste_pts" var:_liste_pts
+			------ on cherche les 'pointes'---------
+			---			Pour chaque point P, vérifiez si les points voisins sont tous deux du même côté de la ligne de balayage.
+			---			Si c'est le cas, vérifiez la ligne de balayage suivante de l'autre côté. 
+			---			Casser le polygone sur la ligne entre le point d'origine et l'un des points de celui-ci.
+			local polys_result =#()
+			
+			--- pour chaque polygones --------
+			local pts_deRupture =#()
+			for id_poly = 1 to _liste_pts.count do (
+				
+				debug "id_poly" var:id_poly
+				
+				local pts = _liste_pts[id_poly]
+				for i = 1 to pts.count do (
+					
+					debug "i" var:i
+					local i_precedant 	= boucler pts ( i - 1 )
+					local i_suivant 		= boucler pts ( i + 1 )
+					
+					local pt_courant 		= pts [i]					
+					local pt_precedant 	= pts [i_precedant]					
+					local pt_suivant 		= pts [i_suivant]
+					
+					
+					case balayage of (
+						#verticale: (
+							if pt_precedant.y < pt_courant.y and pt_suivant.y < pt_courant.y do (
+-- 								debug "		------->	on a un point de rupture"	var:pt_courant
+								if 
+								append pts_deRupture 	pt_courant
+							)
+								
+						)
+					) -- fin case balayage -------
+					
+					
+				)
+			)
+			
+								debug "		------->	points de  rupture"	var:pts_deRupture
+			
+			
+			
+			polys_result
+			
+		),
+		 */
+		
+		
+		
+		
+		---- BACK		TRIANGULATION 		BACK  ----------------
 		--- renvois le tableau des triangles créés -------
 		i_debug = 0,
 		fn trianguler  _pts =(
@@ -749,12 +866,10 @@ struct str_temp (
 			--------------- tant qu'il reste plus de trois point dans le polygone -------------------------------------------------------------------------------------------------------------------------			
 			while pts_poly.count >= 3 do (
 				
-				debug""
-				i_debug += 1
-				debug" trianguler" var:(i_debug)
 				
-					debug "-----> 	pts_poly	courant " var:pts_poly
-				suspendEditing
+-- 				debug" trianguler" var:(i_debug += 1)
+				
+				
 				-- on commence avec le point le plus a gauche du polygone--
 				local id_pt_aTester 	= point_lePlusAGauche  pts_poly		
 				
@@ -770,7 +885,7 @@ struct str_temp (
 				local triangle_aTester = #(pts_poly[id_pt_avant], pts_poly[id_pt_aTester], pts_poly[id_pt_apres])
 				
 				
-				debug "triangle_aTester" var:triangle_aTester
+-- 				debug "triangle_aTester" var:triangle_aTester
 				
 				----- Puis on cherche parmis les points restants du polygone ceux qui seraient à l'interieur du trangle ------------------------------------------------------------------------------		
 				local ids_pts_dansTriangle =#()
@@ -780,28 +895,28 @@ struct str_temp (
 -- 					debug "		----------------------> id " var:i
 					local pt_atester 				= pts_poly[i]
 -- 					debug "		----------------------> pt_atester " var:pt_atester
-					local pt_est_dansTriangle 		= est_dansTriangle 		triangle_aTester[1]	 triangle_aTester[2]	 triangle_aTester[3]	  pt_atester	--	segments_inclus:true
+					local pt_est_dansTriangle 		= est_dansTriangle 	triangle_aTester[1]	 triangle_aTester[2]	 triangle_aTester[3]	  pt_atester
 -- 					debug "		----------------------> pt_est_dansTriangle " var:pt_est_dansTriangle
 					
 					if pt_est_dansTriangle do append ids_pts_dansTriangle  i
 				)
 				
-				debug "--------> ids_pts_dansTriangle" var:ids_pts_dansTriangle
+-- 				debug "--------> ids_pts_dansTriangle" var:ids_pts_dansTriangle
 				
 				
 				
 				------- soit on trouve des points dans le triangle		---->	 on doit découper en 2 polygones		------------------------------------------------------------------------------
 				if ids_pts_dansTriangle.count > 0 then (
 					
-					debug "-----> 	DECOUPAGE	->		 " 
+-- 					debug "-----> 	DECOUPAGE	->		de " var:pts_poly
 					
 					local pts_dansTriangle	=	for id_pt in ids_pts_dansTriangle collect pts_poly[id_pt]
 					
 					---- si on en trouve : on cherche le plus éloigné de la 'diagonale' du triangle ----
 					local IDs_pts_diagonal 	= 	points_lesPlusLoinDuSegment  	pts_dansTriangle		triangle_aTester[3]		triangle_aTester[1]
 					
-					debug "-----> 	pts_dansTriangle : " var:pts_dansTriangle
-					debug "-----> 	IDs_pts_diagonal : " var:IDs_pts_diagonal
+-- 					debug "-----> 	pts_dansTriangle : " var:pts_dansTriangle
+-- 					debug "-----> 	IDs_pts_diagonal : " var:IDs_pts_diagonal
 					
 					
 					--- on gere si on a plusieurs points pour la diagonal --------------------
@@ -868,13 +983,13 @@ struct str_temp (
 					)				
 					pts_poly2 = for idPt in IDsPts_poly2 collect pts_poly[idPt]
 
-					debug"pts_poly1" var:pts_poly1
-					debug"pts_poly2" var:pts_poly2
+-- 					debug"pts_poly1" var:pts_poly1
+-- 					debug"pts_poly2" var:pts_poly2
 					
 					result_triangles += trianguler  pts_poly1
 					result_triangles += trianguler  pts_poly2
 					
-					if true and m_debug do (
+					if false and m_debug do (
 						sp = splineShape name:( "tri - decoupage poly " + i_debug as string + " - 1")
 						addnewSpline sp
 						for pt in pts_poly1 do		addknot sp 1 #corner #curve  pt
@@ -898,14 +1013,14 @@ struct str_temp (
 				------- soit on a pas de points dans le triangle, 		---->	donc on peut le treer tranquile 		------------------------------------------------------------------------------
 				) else (
 					
-					debug "-----> 	TRIANGLE	->		" 
+-- 					debug "-----> 	TRIANGLE	->		" 
 					
 					
 					---- si on en trouve pas: 	on peut creer le triangle et retirer le point tester de la liste du polygone ----
 					append 	result_triangles  triangle_aTester
 					deleteItem pts_poly  id_pt_aTester
 					
-					if true and m_debug do (
+					if false and m_debug do (
 						sp = splineShape name:( "triangle " + i_debug as string )
 						addnewSpline sp
 
@@ -925,13 +1040,18 @@ struct str_temp (
 )
 
 
+
+
 clearlistener ()
 delete $tri*
 tmp = str_temp ()
 
-shp_A = $debug_tri
-pts_A = for i in 1 to numknots shp_A collect getknotPoint shp_A	1	i
-triangles	=	tmp.trianguler 	pts_A
+
+tmp.get_angleVecteurs_oriente $point001.pos $point002.pos  $point002.pos  $point003.pos
+
+-- shp_A = $debug_tri
+-- pts_A = for i in 1 to numknots shp_A collect getknotPoint shp_A	1	i
+-- triangles	=	tmp.trianguler 	pts_A
 /*
 i= 0
 for tri in triangles do (
