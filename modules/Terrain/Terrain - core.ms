@@ -421,17 +421,17 @@ struct	str_terrain_node_core	(
 			local calque_pile 	= mgr_calques.get_calque_pile ()
 			debug "------------------------ POPOPPOPO"
 			
-			local triangles 	=	calque_pile.trianguler ()
+			m_pts_faces	=	calque_pile.trianguler ()
 			
 			
-			debug "	----> TRIANGLES" var:triangles
--- 			m_pts_faces = mgr_calques.get_pts_resultat ()
--- 			debug "m_pts_faces" var:m_pts_faces
+			
+			debug "m_pts_faces" var:m_pts_faces
+			
 			
 			
 			
 			debug "------------------------	actualiser_pts_faces ()	---------------------------------------------------------------"
-			 
+			
 			
 		),
 		
@@ -441,6 +441,11 @@ struct	str_terrain_node_core	(
 		
 		
 		fn creer_geometrie_base = if m_pts_faces.count > 0 do (
+			
+			
+			mgr_geo.vider ()
+			for pts in m_pts_faces do
+				mgr_geo.face	pts
 			/* 
 			--- version triangles ---------------
 			local calque_pile 	= mgr_calques.get_calque_pile ()
@@ -453,9 +458,12 @@ struct	str_terrain_node_core	(
 		),
 		
 		fn actualiser_pts_quadrillages =  if m_pts_faces.count > 0 do (
--- 			debug "	(2-2)	actualiser_pts_quadrillages"
-			if m_plug.grille_use	do	quadriller_geometrie_base ()
-			m_pts_quadrillages = for i in 1 to polyop.getNumVerts  m_plug.delegate	collect	polyop.getVert  m_plug.delegate		i
+			debug "	(2-2)	actualiser_pts_quadrillages"
+			if polyop.getNumVerts  m_plug.delegate > 0 do (
+				if m_plug.grille_use	do	quadriller_geometrie_base ()
+				
+				m_pts_quadrillages = for i in 1 to polyop.getNumVerts  m_plug.delegate	collect	polyop.getVert  m_plug.delegate		i
+			)
 		),
 		
 		fn actualiser_pts_projections =  if m_pts_faces.count > 0 do (
@@ -484,8 +492,10 @@ struct	str_terrain_node_core	(
 -- 			debug "	---->	ids_pts_total" var:ids_pts_total
 -- 			debug "	---->	pos_pts_final" var:pos_pts_final
 			
-			polyop.setVert m_plug.delegate	ids_pts_total 	pos_pts_final			
-			polyop.retriangulate	m_plug.delegate #{1..polyop.getNumFaces m_plug.delegate}
+			if polyop.getNumVerts  m_plug.delegate > 0 do (
+				polyop.setVert m_plug.delegate	ids_pts_total 	pos_pts_final			
+				polyop.retriangulate	m_plug.delegate #{1..polyop.getNumFaces m_plug.delegate}
+			)
 		),
 		
 	----------------------------- INTERFACE --------------------------------------
@@ -629,14 +639,14 @@ struct	str_terrain_node_core	(
 					chrono_2_1	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)					
 					local chrono_temp = timeStamp ()
 					
--- 					actualiser_pts_quadrillages ()
+					actualiser_pts_quadrillages ()
 					
 					chrono_2_2	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)
 				)
 				
 				
 				-------- DEBUG  ----- pour sortir du process  ------------------
-				etape = 101  
+-- 				etape = 101  
 				-------- DEBUG  ----- pour sortir du process  ------------------
 				
 				

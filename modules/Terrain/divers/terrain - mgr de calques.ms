@@ -124,7 +124,15 @@ struct str_calque (
 			result
 		),
 	
-		
+		fn get_pts =(
+			local result = #()
+			for poly in polygones do (
+				local polys_descends = poly.get_descendance ()
+				for poly_descend in polys_descends do
+					append result ( poly_descend.get_pts () )
+			)
+			result
+		),
 		
 	public
 		--------------------------- Trianguler  -------------------------------------------------------------------------------
@@ -955,8 +963,8 @@ struct	str_mgr_calques	(
 			) 
 			
 			
--- 			debug_calque		result_calque		
-			
+			debug_calque		result_calque		
+			debug "PILE PTS" var:( result_calque.get_pts ())
 			result_calque
 		),
 		

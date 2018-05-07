@@ -6,7 +6,7 @@ include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - sh
 struct str_polygone (
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug	=	true,
+		m_debug	=	false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | polys"	  	var:var	 param:param		catch (),
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		
@@ -164,7 +164,7 @@ struct str_polygone (
 		
 		
 		fn get_positionRelative 		_poly_a_tester	=(
-			mgr_shp.get_positionRelative_shapes 	(  get_pts () )	(  _poly_a_tester.get_pts () )	 renvoyer_intersections:false
+			mgr_shp.get_positionRelative_shapes 	(  get_pts () )	(  _poly_a_tester.get_pts () )	 renvoyer_intersections:true
 		),
 		
 		--- on regarde si on a ou pas un parent ----------
@@ -229,7 +229,7 @@ struct str_mgr_polygones (
 	
 		SEUIL_POINTS_EGAUX  	= .01,
 		-- constante pr debug-----------------
-		SAUVETAGE_MAX 			= 100,
+		SAUVETAGE_MAX 			= 1000000,
 	
 	
 	
@@ -807,6 +807,7 @@ struct str_mgr_polygones (
 			debug "decouper_polygone_monotone"
 			debug "_polys" var:_polys param:#nom
 			
+			
 			--- on recherche les connexions pour découpage	--------
 			local connexions				 	=analyser_connexions 		_polys		balayage:balayage
 			debug "		------->	connexions"			var:connexions
@@ -855,6 +856,7 @@ struct str_mgr_polygones (
 					debug "ids_connexions_aTraiter" var:ids_connexions_aTraiter
 					debug "id_connexion_courante" var:id_connexion_courante
 					debug "cnx_courante" var:cnx_courante
+					debug "pts_courant" var:pts_courant
 					
 					
 					
@@ -932,7 +934,9 @@ struct str_mgr_polygones (
 						local id_cnx_trouve  = 0
 						while  id_cnx <= connexions.count 	do (
 							if ids_connexions_aTraiter[ id_cnx ] and connexions[ id_cnx ] != cnx_courante do (
-								if connexions[ id_cnx ].est_courante 		id_poly_courant 	id_pt_courant	 != #non_courante		then (
+								local test_onEstSurConnexion = connexions[ id_cnx ].est_courante 		id_poly_courant 	id_pt_courant
+								debug "test_onEstSurConnexion" var:test_onEstSurConnexion
+								if test_onEstSurConnexion	 != #non_courante		then (
 									
 									debug "	--------> on est sur une connexion" var:connexions[ id_cnx ]
 									---- on est sur une connexion -----------------
@@ -1005,6 +1009,7 @@ struct str_mgr_polygones (
 								debug "		--------> PT NORMAL apres comparaison"							
 								
 								
+							cnx_courante		= undefined
 								--- le point courant ----------------------
 								pt_precedant 		= pt_courant
 								
@@ -1053,7 +1058,7 @@ struct str_mgr_polygones (
 						) else (
 							debug "		--------> PT NORMAL"							
 						
-						
+							cnx_courante		= undefined
 						
 							pt_precedant 		= pt_courant
 							
@@ -1146,7 +1151,14 @@ struct str_mgr_polygones (
 					
 				)
 				
-			) else append list_pts_decoupe
+			) else (
+				---- on a pas besoin de le redecouper -----------------
+				for poly in _polys do 
+					append list_pts_decoupe ( poly.get_pts oriente:true )
+				
+				
+				
+			)
 			
 			if  SAUVETAGE == SAUVETAGE_MAX		do (
 				
@@ -1198,7 +1210,7 @@ struct str_mgr_polygones (
 				)
 			) */
 			debug "triangles" var:triangles
-			triangles
+			polys_monotones
 		),
 	
 	public	
