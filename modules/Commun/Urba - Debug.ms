@@ -3,10 +3,10 @@
 
 
 ----- debug ------------------------------
-global debug, debuger, ecrire, pos
+global debug, debuger, ecrire, debug_spline, debug_point
 global DEBUG_MODE = true
 
-
+-- delete $debug*
 
 fn creer_debug_pts	_liste_pos =(
 	
@@ -33,40 +33,41 @@ fn creer_debug_pts	_liste_pos =(
 )
 
 
-fn creer_debug_splines	_liste_pos =(
+fn creer_debug_splines	_liste_pos 	nom:	=(
 	
-	
-	fn creer_spline 	_pos =(
-		sp = splineShape name:"li_debug"
+	local result =#()
+	fn creer_spline 	_pos 		nom:nom		=(
+		sp = splineShape name:(uniquename nom )
 		pts = _pos
 		addnewSpline sp
 		for pt in pts do		addknot sp 1 #corner #curve  pt
 		close sp 1
 		updateShape sp
 		selectmore sp
+		sp
 	)
 	
 	
 	
 	case classof _liste_pos of (
-		Point3:creer_debug_pts  _liste_pos
+		Point3:creer_debug_pts  _liste_pos	nom:nom	
 		array: (
 			if _liste_pos.count > 0 do (
 				---- recursif pour tableau dans tableau ---------
 				if  classof _liste_pos[1] == array then 
-							for pos in _liste_pos do creer_debug_splines 	pos
+							for pos in _liste_pos do creer_debug_splines 	pos 	nom:nom	
 					else 
-						creer_spline 	_liste_pos
+						append result ( creer_spline 	_liste_pos 	nom:nom	)
 				
 			)
 		)
 	) --- fin case
-	
+	result
 )
 
 
 
-fn pt 	_pos	= (
+fn debug_point 	_pos	= if DEBUG_MODE do (
 	
 	
 
@@ -76,12 +77,12 @@ fn pt 	_pos	= (
 	creer_debug_pts		_pos
 
 )
-fn li 	_pos	= (
+fn debug_spline 	_pos	nom:"li_debug"		=  if DEBUG_MODE do (
 	
 	try delete $li_debug* catch ()
 	clearselection ()
 	
-	creer_debug_splines	_pos 
+	creer_debug_splines	_pos 	nom:nom
 	/* 
 	case classof _pos of (
 		Point3: 	pt _pos
@@ -106,6 +107,14 @@ fn li 	_pos	= (
 	) */
 
 )
+
+
+global po 	= debug_point
+global li 	= debug_spline
+
+
+
+
 
 
 

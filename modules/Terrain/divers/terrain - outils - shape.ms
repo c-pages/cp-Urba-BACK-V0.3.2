@@ -98,25 +98,57 @@ struct str_outils_shape (
 			if _id_item < 1 do _id_item += _array.count
 			_id_item as integer
 		),
-	
-	
-	
+		
+		
+		
 		--- Analyse position de points (survol_triangles etc..)		-------------
-		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	=(
+		fn point_estSurSegment	_pt_test		_pt_A		_pt_B	=(
+			
+			local pt_A = _pt_A
+			local pt_B = _pt_B
+			
+			local pt_C = _pt_test
+			
+			
+			local vec_CA	=	pt_A - pt_C
+			local vec_CB	=	pt_B - pt_C
+
+			local norm_CA		=	normalize vec_CA
+			local norm_CB		=	normalize vec_CB
+
+			local dot_CA_CB	=	dot 	norm_CA		norm_CB 
+			
+			debug "dot_CA_CB "  var:dot_CA_CB
+			
+			dot_CA_CB == 1
+			
+		),
+		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	inclure_segment:false	=(
 			
 			local crossProd 	= cross (  _pt_seg_2 - _pt_seg_1 ) ( _pt_aTester - _pt_seg_1 )
 			local sensDot 		= dot crossProd  [0,0,1]
-			local sens 			= if sensDot > 0 then true else false
+			local sens 			
+/* 			if inclure_segment then (
+				sens = if sensDot > 0 then true 
+				else (
+					if point_estSurSegment  _pt_aTester  _pt_seg_1	_pt_seg_2
+					false
+					
+				)
+			) else  */
+				sens = if sensDot > 0 then true else false
 			sens
 			
 		),
-		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester =(
-			if est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester and est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester  and est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester then (
--- 				if _pt_aTester == _pt_tri_1 or _pt_aTester == _pt_tri_2 or _pt_aTester == _pt_tri_3 then
--- 					false
--- 				else
-					true
-			) else false
+		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester 	inclure_segment:false		=(
+			local est_aGgauche1 = est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester 	inclure_segment:inclure_segment
+			local est_aGgauche2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 	inclure_segment:inclure_segment
+			local est_aGgauche3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester	inclure_segment:inclure_segment
+			
+			if est_aGgauche1	and est_aGgauche2  and est_aGgauche3 then
+				true
+			else 
+				false
 		),
 		fn survol_triangles  					_pt_aTester			_pts_triangles_shape 	=(
 			local result = false
