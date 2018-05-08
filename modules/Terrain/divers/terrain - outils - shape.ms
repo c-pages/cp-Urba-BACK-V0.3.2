@@ -123,7 +123,7 @@ struct str_outils_shape (
 			dot_CA_CB == 1
 			
 		),
-		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	inclure_segment:false	=(
+		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	=(
 			
 			local crossProd 	= cross (  _pt_seg_2 - _pt_seg_1 ) ( _pt_aTester - _pt_seg_1 )
 			local sensDot 		= dot crossProd  [0,0,1]
@@ -140,10 +140,10 @@ struct str_outils_shape (
 			sens
 			
 		),
-		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester 	inclure_segment:false		=(
-			local est_aGgauche1 = est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester 	inclure_segment:inclure_segment
-			local est_aGgauche2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 	inclure_segment:inclure_segment
-			local est_aGgauche3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester	inclure_segment:inclure_segment
+		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester 	=(
+			local est_aGgauche1 = est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester 
+			local est_aGgauche2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 
+			local est_aGgauche3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester
 			
 			if est_aGgauche1	and est_aGgauche2  and est_aGgauche3 then
 				true

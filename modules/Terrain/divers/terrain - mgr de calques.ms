@@ -23,8 +23,14 @@ struct str_calque (
 		),
 		fn debug_calque	_calq	=(
 			debug ( "calque: " + _calq.nom	+" ---------------------")
-			for _poly in _calq.polygones do
+			for _poly in _calq.polygones do (
 				debug_poly _poly
+				local enfants = _poly.get_descendance ()
+				for enft in enfants do (
+					debug ""var:enft.nom
+					debug ""var:(enft.get_pts ())
+				)
+			)
 		),	
 		--------------- DEBUG --------------------------------------------
 		

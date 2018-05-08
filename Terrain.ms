@@ -54,7 +54,7 @@ version:0
 		----  Mutations -----------------
 		fn ajouter_relief			_node 	aActualiser:true	=(
 			format "\n"
-			debug "		###	ajouter_relief	###"
+-- 			debug "		###	ajouter_relief	###"
 			if appendIfUnique this.reliefs_nodes	 _node and aActualiser do (
 				this.rollout_global.actualiser ()
 				actualiser ()
@@ -66,7 +66,7 @@ version:0
 		)
 		fn ajouter_calque		_node 	aActualiser:true	=(
 			format "\n"
-			debug "		###	ajouter_calque	###"
+-- 			debug "		###	ajouter_calque	###"
 			
 			if appendIfUnique this.calques_nodes 	_node and aActualiser  do (
 				append		this.calques_operations	( #addition as string )

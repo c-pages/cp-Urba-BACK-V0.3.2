@@ -598,6 +598,8 @@ struct	str_terrain_node_core	(
 				local chrono_1		=	affichage_tpsVide
 				local chrono_1_1		=	affichage_tpsVide
 				local chrono_1_2		=	affichage_tpsVide
+				local chrono_2_1 	=affichage_tpsVide
+				local chrono_2_2 	=affichage_tpsVide
 				
 				
 				--- on verifie si on doit changer l'etape ---------------------------
@@ -620,15 +622,7 @@ struct	str_terrain_node_core	(
 					actualiser_pts_faces	()
 					chrono_1_2 = (  ((timeStamp ()) - chrono_temp ) / 1000.0)
 					chrono_1 = (  ((timeStamp ()) - chrono_temp_2 ) / 1000.0)
-				)
-				
-				
-				
-				
-				------	(2)	creer le quadrillage  ----------------------------------
-				local chrono_2_1 =affichage_tpsVide
-				local chrono_2_2 =affichage_tpsVide
-				if etape <= 2 do (
+					
 					local chrono_temp = timeStamp ()
 					--- on vide la géométrie	-------------------
 					mgr_geo.vider ()
@@ -636,7 +630,18 @@ struct	str_terrain_node_core	(
 					------	(1-3)	pour enfin créer les faces de la géometrie de base. -------------------
 					creer_geometrie_base ()
 					
-					chrono_2_1	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)					
+					chrono_2_1	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)			
+				)
+				
+				
+				-------- DEBUG  ----- pour sortir du process  ------------------
+				etape = 101  
+				-------- DEBUG  ----- pour sortir du process  ------------------
+				
+				
+				
+				------	(2)	creer le quadrillage  ----------------------------------
+				if etape <= 2 do (		
 					local chrono_temp = timeStamp ()
 					
 					actualiser_pts_quadrillages ()
@@ -644,10 +649,6 @@ struct	str_terrain_node_core	(
 					chrono_2_2	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)
 				)
 				
-				
-				-------- DEBUG  ----- pour sortir du process  ------------------
--- 				etape = 101  
-				-------- DEBUG  ----- pour sortir du process  ------------------
 				
 				
 				
