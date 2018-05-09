@@ -232,7 +232,7 @@ struct str_mgr_polygones (
 	
 		SEUIL_POINTS_EGAUX  	= .001,
 		-- constante pr debug-----------------
-		SAUVETAGE_MAX 			= 200,
+		SAUVETAGE_MAX 			= 200000000,
 	
 	
 	

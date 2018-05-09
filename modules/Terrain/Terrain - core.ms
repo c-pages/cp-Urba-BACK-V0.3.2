@@ -426,7 +426,7 @@ struct	str_terrain_node_core	(
 			debug "---------------------------------------------------------------------------------------\n\n\n\n"
 			
 			
-			m_pts_faces	=	calque_pile.trianguler ()
+-- 			m_pts_faces	=	calque_pile.trianguler ()
 			
 			
 			
@@ -630,10 +630,10 @@ struct	str_terrain_node_core	(
 					
 					local chrono_temp = timeStamp ()
 					--- on vide la géométrie	-------------------
-					mgr_geo.vider ()
+-- 					mgr_geo.vider ()
 					
 					------	(1-3)	pour enfin créer les faces de la géometrie de base. -------------------
-					creer_geometrie_base ()
+-- 					creer_geometrie_base ()
 					
 					chrono_2_1	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)			
 				)

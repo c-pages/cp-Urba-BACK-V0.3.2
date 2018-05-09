@@ -48,7 +48,7 @@ struct str_outils_shape (
 		--- constantes---------
 		PRECISION_COURBE 			= .1,--50,			--- en cm. ----
 		DOTMAX_COURBE 				= .999,	--- en dot ?!?. ----
--- 		SEUIL_POINTS_EGAUX  	= .01,
+		SEUIL_POINTS_EGAUX  	= .001,
 		-- constante pr debug-----------------
 -- 		SAUVETAGE_MAX 			= 100,
 		
@@ -668,12 +668,26 @@ struct str_outils_shape (
 				if _pt_test != pt_courant do (
 					local i_suivant 	= boucler _pts_shp ( i+1)
 					local pt_suivant 	=_pts_shp[ i_suivant ]
+					
+					if abs ( pt_courant.y -  pt_suivant.y )  > SEUIL_POINTS_EGAUX   do
+					
 					case _axe of (
-						#horizontal:	if pt_courant.y >= _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y <= _pt_test.y and pt_suivant.y >= _pt_test.y do
-												append result i	
-						
-						#vertical:		if pt_courant.x >= _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x <= _pt_test.y and pt_suivant.x >= _pt_test.x do
-												append result i	
+						#horizontal:		if pt_courant.y >= _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y <= _pt_test.y and pt_suivant.y >= _pt_test.y do (
+													--- si on touche une lihne horizontale on ajoute les deux points -------------------
+													if abs ( pt_courant.y -  pt_suivant.y )  > SEUIL_POINTS_EGAUX   then (
+														appendifunique result i	
+														appendifunique result i_suivant
+													) else 
+														appendifunique result i	
+												) 
+						#vertical:			if pt_courant.x >= _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x <= _pt_test.y and pt_suivant.x >= _pt_test.x do (
+													--- si on touche une lihne horizontale on ajoute les deux points -------------------
+													if abs ( pt_courant.x -  pt_suivant.x )  > SEUIL_POINTS_EGAUX   then (
+														appendifunique result i	
+														appendifunique result i_suivant
+													) else 
+														appendifunique result i	
+												) 
 	-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
 					)
 				)

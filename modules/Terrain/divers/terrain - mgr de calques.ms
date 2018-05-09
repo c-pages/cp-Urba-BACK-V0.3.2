@@ -7,7 +7,7 @@ include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\terrain - mgr de poly
 struct str_calque (
 	
 		--------------- DEBUG --------------------------------------------		
-		m_debug	=	true,
+		m_debug	=	false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | clq."	  	var:var	 param:param		catch (),
 		
 		m_tab_format_poly = "    ",
@@ -292,10 +292,10 @@ struct	str_mgr_calques	(
 			local 	polys_B	=	_calque_B.get_polygones 	()
 			
 			
--- 			debug "-----------------------------------------------------------------"
--- 			debug "OPERATION BOOLENNE"	var:operation
--- 			debug "polys_A_total"	var:polys_A_total param:#nom
--- 			debug "polys_B_total"	var:polys_B_total param:#nom
+			debug "-----------------------------------------------------------------"
+			debug "OPERATION BOOLENNE"	var:operation
+			debug "polys_A_total"	var:polys_A_total param:#nom
+			debug "polys_B_total"	var:polys_B_total param:#nom
 			
 			
 			
@@ -348,10 +348,10 @@ struct	str_mgr_calques	(
 				
 			)---- fin for poly_A	------------
 			
--- 			debug "-----------------------------------------------------------------"
--- 			debug "intersections"	var:intersections
--- 			debug "ids_polys_A_isoles"	var:ids_polys_A_isoles --	param:#nom
--- 			debug "ids_polys_B_isoles"	var:ids_polys_B_isoles	--	param:#nom
+			debug "-----------------------------------------------------------------"
+			debug "intersections"	var:intersections
+			debug "ids_polys_A_isoles"	var:ids_polys_A_isoles --	param:#nom
+			debug "ids_polys_B_isoles"	var:ids_polys_B_isoles	--	param:#nom
 			
 			
 			
@@ -367,10 +367,10 @@ struct	str_mgr_calques	(
 			local annuler = false
 			while il_reste_des_points	and not annuler do (
 				
--- 				debug "\n\n\n\n"
--- 				debug "------------------------------------------------------------------------------------------"
--- 				debug "						On boucle tant qu'il reste des intersections à intégrer "
--- 				debug "ids_intersections_aTraiter" var:ids_intersections_aTraiter 
+				debug "\n\n\n\n"
+				debug "------------------------------------------------------------------------------------------"
+				debug "						On boucle tant qu'il reste des intersections à intégrer "
+				debug "ids_intersections_aTraiter" var:ids_intersections_aTraiter 
 				
 				
 				---- Le point demarrage, la premiere intersection de la liste --------------------
@@ -496,12 +496,12 @@ struct	str_mgr_calques	(
 				
 				case operation of (
 					#addition :(
--- 						debug "ici ------- > #addition"
+						debug "ici ------- > #addition"
 						if poly_courant.en_creux 	then  
 							sens =	-1	
 					)
 					#soustraction:(
--- 							debug "ici ------- > #soustraction"
+							debug "ici ------- > #soustraction"
 						if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
 							sens =	-1	
 							
@@ -510,7 +510,7 @@ struct	str_mgr_calques	(
 					)
 					#intersection:(
 						
--- 							debug "ici ------- > #intersection"
+							debug "ici ------- > #intersection"
 						if operateur_courant 	==	#A and	not poly_courant.en_creux 	then  (
 							sens =	-1	
 -- 							debug "la"
@@ -554,14 +554,14 @@ struct	str_mgr_calques	(
 						
 						append 	shp_enConstruction		pt_courant
 						
--- 						debug "poly_courant" var:poly_courant
--- 						debug "operateur_courant" var:operateur_courant
--- 						debug "id_pt_courant" var:id_pt_courant
--- 						debug "pt_courant" var:pt_courant
--- 						debug "shp_enConstruction" var:shp_enConstruction
--- 						
--- 						debug "sens" var:sens 
--- 						debug "------------------------------------------------------------------------------------------"
+						debug "poly_courant" var:poly_courant
+						debug "operateur_courant" var:operateur_courant
+						debug "id_pt_courant" var:id_pt_courant
+						debug "pt_courant" var:pt_courant
+						debug "shp_enConstruction" var:shp_enConstruction
+						
+						debug "sens" var:sens 
+						debug "------------------------------------------------------------------------------------------"
 						
 						--- on cherche la prochaine intersection ------------
 						local dist_proche = 1e+10
@@ -621,7 +621,7 @@ struct	str_mgr_calques	(
 						---- si on a une intersection ----------------
 						if prochaine_intersec != undefined then (
 							
--- 							debug "--->	INTERSECTION"
+							debug "--->	INTERSECTION"
 							
 							--- on change de noeud courant	------
 							if  operateur_courant 	==	#A 	then (
@@ -685,7 +685,7 @@ struct	str_mgr_calques	(
 						---- si on a  pas d' intersection, on passe au point suivant ----------------
 						) else (
 							
--- 							debug "--->	SUIVANT"
+							debug "--->	SUIVANT"
 							
 							id_pt_courant 		= mgr_shp.boucler	shp_courant		( id_pt_courant + sens )
 							pt_courant 		= shp_courant [ id_pt_courant ]
@@ -693,10 +693,10 @@ struct	str_mgr_calques	(
 						)
 						
 					
--- 						debug "--------------------------------------------"
--- 						debug "prochaine_intersec" var:prochaine_intersec
--- 						debug "intersection_aTraiter" var:intersection_aTraiter
--- 						debug "--------------------------------------------\n\n"
+						debug "--------------------------------------------"
+						debug "prochaine_intersec" var:prochaine_intersec
+						debug "intersection_aTraiter" var:intersection_aTraiter
+						debug "--------------------------------------------\n\n"
 						
 						--- SAUVETAGE	----
 						sauvetage += 1
@@ -709,19 +709,19 @@ struct	str_mgr_calques	(
 					
 					----------- ( 3 )	sortie ? si on est retourné sur le point initial, on sort	--------------------------------------------	
 					
-					if distance	pt_courant  pt_initial <  SEUIL_POINTS_EGAUX	then 
+					if distance	pt_courant  pt_initial <  SEUIL_POINTS_EGAUX	then (
 						
 						on_a_fini_laBoucle = true
 					
--- 						debug"\n\n\n\n\n\n"
--- 						debug "--------------------------------------------------------------------------------------"
--- 						debug "pt_courant" var:pt_courant
--- 						debug "pt_initial" var:pt_initial
--- 						debug "on_a_fini_laBoucle" var:on_a_fini_laBoucle
--- 						debug "--------------------------------------------------------------------------------------\n\n\n\n\n\n"
+						debug"\n\n\n\n\n\n"
+						debug "--------------------------------------------------------------------------------------"
+						debug "pt_courant" var:pt_courant
+						debug "pt_initial" var:pt_initial
+						debug "on_a_fini_laBoucle" var:on_a_fini_laBoucle
+						debug "--------------------------------------------------------------------------------------\n\n\n\n\n\n"
 
 					
-					
+					)
 					
 					--- SAUVETAGE	----
 					sauvetage+= 1
@@ -740,7 +740,7 @@ struct	str_mgr_calques	(
 				
 				---- on ajoute le noeud obtenu -----------------------------------
 				calque_result.ajouter_polygone		nv_poly		--	brut_mode:true
--- 				debug_calque	calque_result
+				debug_calque	calque_result
 				
 				---------- SORTIES ---------------------------------------------
 				---- test pour sortie  correct	----------------------------------------------------------------------------------------------------
@@ -776,7 +776,7 @@ struct	str_mgr_calques	(
 -- 					debug  "####################################################################################################################################"
 			
 			---- 		On s'occupe des polygones isolés : en fonction de l'operation on va ajouter, ou pas, les polygones au resultat:		----------------
-			--format "\n\n"
+-- 			debug "\n\n"
 -- 				debug "--- les polygones isolés de A ----------------------------------------------------------------------------------------"
 			
 			
