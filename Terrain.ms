@@ -43,7 +43,7 @@ version:0
 		fn initialiser 	=	core.initialiser	this
 		
 		----  Divers -----------------
-		fn aCommecalque	_node 	=	findItem this.calques_nodes	_node != 0
+		fn aCommecalque	_node 		=	findItem this.calques_nodes	_node != 0
 		fn aCommeRelief		_node 	=	findItem this.reliefs_nodes		_node != 0
 		fn set_transform 		_mtrx		=	this.transformation = _mtrx
 		
@@ -80,6 +80,14 @@ version:0
 			actualiser ()
 		)
 		
+		fn set_calque_mode		_id_calque		_mode	=(
+			if _id_calque <= this.calques_operations.count do 
+				if _mode == #addition or _mode == #soustraction or _mode == #intersection do ( 
+					this.calques_operations[ _id_calque ] = _mode
+					this.rollout_global.actualiser ()
+					actualiser ()
+				)
+		)
 		
 	---------------- Parameters et rollouts -------------------------------------------------------------------------------------------------------------
 		include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - Parameters et rollouts.ms" 

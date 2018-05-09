@@ -464,8 +464,9 @@ struct str_mgr_polygones (
 		fn  point_lePlusProche_dePoint			_polys		_listeDe_idsPoly_idsPt		_pt_origine	 =(
 -- 				debug "\n"
 -- 				debug "point_lePlusProche_dePoint"	
--- 				debug "_seg_pt_1"	var:_seg_pt_1
--- 				debug "_seg_pt_2"	var:_seg_pt_2
+-- 				debug "_polys"	var:_polys
+-- 				debug "_listeDe_idsPoly_idsPt"	var:_listeDe_idsPoly_idsPt
+-- 				debug "_pt_origine"	var:_pt_origine
 -- 								for i = 1 to _polys.count do (
 -- 			local dist_max = 0
 			local result
@@ -474,6 +475,7 @@ struct str_mgr_polygones (
 			local id_pt_proche 		= 0
 			for  idsPoly_idsPt	in _listeDe_idsPoly_idsPt do (
 				
+-- 				debug "--->	idsPoly_idsPt" var:idsPoly_idsPt
 -- 				debug "POPOPOPOPOPOPOPO 1"	
 -- 				debug "idsPoly_idsPt"	var:idsPoly_idsPt
 				local id_poly_dsTriangle	= idsPoly_idsPt[1]
@@ -483,17 +485,21 @@ struct str_mgr_polygones (
 -- 				debug "--->	pts" var:pts
 				
 -- 				local pts_dsTriangle 		= for id_pt in idsPoly_idsPt[2] collect pts[ id_pt ]
-				for id_pt in idsPoly_idsPt[2] do (
-					local pt_test = pts[ id_pt ]
-					local dist_test = distance		_pt_origine		pt_test
-					if dist_test < dist_min do (
-						dist_min = dist_test
-						id_poly_proche = id_poly_dsTriangle
-						id_pt_proche = id_pt
+				local id_pt =  idsPoly_idsPt[2]
+-- 				for id_pt in idsPoly_idsPt[2] do (
+-- 				debug "--->	id_pt" var:id_pt
+				local pt_test = pts[ id_pt ]
+-- 			debug "--->	pt_test" var:pt_test
+				local dist_test = distance		_pt_origine		pt_test
+-- 											debug "		----->	###################################### "
+				if dist_test < dist_min do (
+					dist_min = dist_test
+					id_poly_proche = id_poly_dsTriangle
+					id_pt_proche = id_pt
 -- 				debug "-------------->id_poly_proche"	 var:id_poly_proche
 -- 				debug "-------------->id_pt_proche"	 var:id_pt_proche
-						
-					)
+					
+-- 					)
 				)
 -- 				debug "POPOPOPOPOPOPOPO 2"	
 
@@ -521,11 +527,21 @@ struct str_mgr_polygones (
 		
 		fn ajouter_connexion	 _liste_connexions	connexion_aAjouter =(
 			local est_deja_presente = false 
-			for cnxn in _liste_connexions do
+			local croise_intersection = false
+			for cnxn in _liste_connexions do  (
 				if sont_egales_connexions	 cnxn	connexion_aAjouter	do
 					est_deja_presente = true
 				
-			if not est_deja_presente do append _liste_connexions	connexion_aAjouter
+				local intersection_pos = mgr_shp.get_intersection_vecteurs		cnxn.pt_A   cnxn.pt_B		connexion_aAjouter.pt_A   connexion_aAjouter.pt_B
+				if intersection_pos != undefined do 
+					croise_intersection = true
+-- 			debug "############ <------------------------------- chuis là"
+			)
+			
+			
+			
+			if not est_deja_presente and not croise_intersection		do 
+				append _liste_connexions	connexion_aAjouter
 
 		),
 		
@@ -547,6 +563,9 @@ struct str_mgr_polygones (
 				id_poly_B	=	0,
 				id_pt_A		=	0,
 				id_pt_B		=	0,
+				pt_A 	,
+				pt_B 	,
+				
 				
 				passages 	= #aucun ,
 				
@@ -609,6 +628,8 @@ struct str_mgr_polygones (
 				local id_seg_valide_G 	= 0
 				local id_seg_valide_D 	= 0
 				
+				
+				
 				for id_polys_sgt_surAxe = 1 to sgts_sur_memeAxe.count do (
 					
 					
@@ -651,13 +672,39 @@ struct str_mgr_polygones (
 												
 												debug "		----->	triangle " var:pts_triangle
 												
-												local 	pts_dsTriangle = #()
-												
 												local 	polys_pts_dsTriangle = #()
 												for i = 1 to _polys.count do (
-													local pt_result = get_pts_dansTriangle 		pts_triangle		( _polys[i].get_pts oriente: true )
-													if pt_result.count > 0 do
-														append polys_pts_dsTriangle  #( i,  pt_result )
+													local ids_pts_result = get_pts_dansTriangle 		pts_triangle		( _polys[i].get_pts oriente: true )
+													
+													
+													if ids_pts_result.count > 0 do (
+														for id_pt_result in ids_pts_result do (
+															local pts_result 					= _polys[i].get_pts oriente:true
+															local id_pt_result_precedant 	= mgr_shp.boucler	pts_result  (id_pt_result - 1 )
+															local id_pt_result_suivant 	= mgr_shp.boucler	pts_result  (id_pt_result + 1 )
+															
+															local pt_result					= pts_result[ id_pt_result ]
+															local pt_result_precedant		= pts_result[ id_pt_result_precedant ]
+															local pt_result_suivant			= pts_result[ id_pt_result_suivant ]
+															
+													
+															local est_sensPositif_result	 = mgr_shp.est_sensPositif	#( pt_result_precedant, pt_result, pt_result_suivant) 
+															
+															if _id_poly ==  i		then (															
+																if  id_pt_result != i_precedant 	and   id_pt_result != i_suivant do (
+																	if not est_sensPositif_result do
+																		append polys_pts_dsTriangle  #( i,  id_pt_result )
+															
+																)
+																
+																
+															) else 
+																append polys_pts_dsTriangle  #( i,  id_pt_result )
+
+	-- 														if _id_poly !=  id_polys_sgt_surAxe			or _id_poly ==  id_polys_sgt_surAxe	and  id_pt_result != i_precedant 	and   id_pt_result != i_suivant do
+	-- 															append polys_pts_dsTriangle  #( i,  id_pt_result )
+														)
+													)
 												)
 												
 												debug "		----->	polys_pts_dsTriangle " var:polys_pts_dsTriangle
@@ -690,16 +737,44 @@ struct str_mgr_polygones (
 												
 												debug "		----->	triangle " var:pts_triangle
 												
+												
 												local 	polys_pts_dsTriangle = #()
 												for i = 1 to _polys.count do (
-													local pt_result = get_pts_dansTriangle 		pts_triangle		( _polys[i].get_pts oriente: true )
-													if pt_result.count > 0 do
-														append polys_pts_dsTriangle  #( i,  pt_result )
+													local ids_pts_result = get_pts_dansTriangle 		pts_triangle		( _polys[i].get_pts oriente: true )
+																										
+													if ids_pts_result.count > 0 do (
+														for id_pt_result in ids_pts_result do (
+															local pts_result 					= _polys[i].get_pts oriente:true
+															local id_pt_result_precedant 	= mgr_shp.boucler	pts_result  (id_pt_result - 1 )
+															local id_pt_result_suivant 	= mgr_shp.boucler	pts_result  (id_pt_result + 1 )
+															
+															local pt_result					= pts_result[ id_pt_result ]
+															local pt_result_precedant		= pts_result[ id_pt_result_precedant ]
+															local pt_result_suivant			= pts_result[ id_pt_result_suivant ]
+															
+															local est_sensPositif_result	 = mgr_shp.est_sensPositif	#( pt_result_precedant, pt_result, pt_result_suivant) 
+															
+															if _id_poly ==  i		then (															
+																if  id_pt_result != i_precedant 	and   id_pt_result != i_suivant do (
+																	if not est_sensPositif_result do
+																		append polys_pts_dsTriangle  #( i,  id_pt_result )
+															
+																)
+																
+																
+															) else 
+																append polys_pts_dsTriangle  #( i,  id_pt_result )
+
+	-- 														if _id_poly !=  id_polys_sgt_surAxe			or _id_poly ==  id_polys_sgt_surAxe	and  id_pt_result != i_precedant 	and   id_pt_result != i_suivant do
+	-- 															append polys_pts_dsTriangle  #( i,  id_pt_result )
+														)
+													)
 												)
 												
 												debug "		----->	polys_pts_dsTriangle " var:polys_pts_dsTriangle
 												
 												if polys_pts_dsTriangle.count > 0 then (
+													
 													
 													local pt_connexion_choisie	=	point_lePlusProche_dePoint		_polys 	polys_pts_dsTriangle		pt_courant
 													
@@ -716,7 +791,7 @@ struct str_mgr_polygones (
 										)
 										
 									)
-						
+						/* 
 							#vertical:  (
 								--- la connexion  en BAS -----
 								if intersection.y < pt_courant.y  then if  filtre == #tout or filtre == #bas  do (
@@ -792,7 +867,7 @@ struct str_mgr_polygones (
 									)
 								)
 								
-							)
+							) */
 						) --- fin case -------
 						
 					)
@@ -805,11 +880,17 @@ struct str_mgr_polygones (
 	-- 				if do (
 						
 						debug "a gauche"
+					local pts_A = _polys[_id_poly ].get_pts oriente:true
+					local pts_B = _polys[id_poly_valide_G ].get_pts oriente:true
+					
+					
 						--- on creer les connexions	---------------------
-						local connexion_G = str_connexion	id_poly_A:	_id_poly									\
-																		id_poly_B:	id_poly_valide_G						\
-																		id_pt_A:		_id_pt									\
-																		id_pt_B:		id_seg_valide_G 
+						local connexion_G = str_connexion	id_poly_A:	_id_poly							\
+																		id_poly_B:	id_poly_valide_G				\
+																		id_pt_A:		_id_pt							\
+																		id_pt_B:		id_seg_valide_G				\
+																		pt_A:			pts_A[ _id_pt ] 				\
+																		pt_B:			pts_B[ id_seg_valide_G ]
 						append result connexion_G
 	-- 				)
 				)
@@ -817,13 +898,20 @@ struct str_mgr_polygones (
 	-- 			debug "result" var:result
 				if id_seg_valide_D != 0  do (
 	-- 				if filtre == #tout or filtre == #droite do (
-				debug "a droite"
+					debug "a droite"
 					if id_poly_valide_G != id_poly_valide_D or  id_seg_valide_G != id_seg_valide_D do ( 
 						
-						local connexion_D = str_connexion	id_poly_A:	_id_poly									\
-																		id_poly_B:	id_poly_valide_D						\
-																		id_pt_A:		_id_pt									\
-																		id_pt_B:		id_seg_valide_D
+					local pts_A = _polys[_id_poly ].get_pts oriente:true
+					local pts_B = _polys[id_poly_valide_D ].get_pts oriente:true
+						
+						
+						
+						local connexion_D = str_connexion	id_poly_A:	_id_poly							\
+																		id_poly_B:	id_poly_valide_D				\
+																		id_pt_A:		_id_pt							\
+																		id_pt_B:		id_seg_valide_D				\
+																		pt_A:			pts_A[ _id_pt ] 				\
+																		pt_B:			pts_B[ id_seg_valide_D ]
 						append result connexion_D
 					)
 	-- 				)
@@ -964,14 +1052,42 @@ struct str_mgr_polygones (
 			debug "debug_points_polys" var:debug_points_polys
 			------------ deBUG -----------------------------
 			
+			
+			
+			local list_pts_decoupe =#()
+			local pts_decoupe_courant =#()
+			
+			
+			
 			--- on recherche les connexions pour découpage	--------
 			local connexions				 	= analyser_connexions 		_polys		balayage:balayage
 			debug "		------->	CONNEXIONS TOTALES"			var:connexions
 			
 			
+			
+			
+			
+			----- les polys sans connexions ------------------------------
+			local ids_poly_ss_connexion	=#{1.._polys.count}
+			for cnxn in connexions do (
+				ids_poly_ss_connexion [ cnxn.id_poly_A ] = false
+				ids_poly_ss_connexion [ cnxn.id_poly_B ] = false
+			)
+			debug "		------->	################# ?! ?! ?! "	
+			debug "		------->	ids_poly_ss_connexion"	 var:ids_poly_ss_connexion
+			for i = 1 to _polys.count where  ids_poly_ss_connexion[i] do (				 
+					local pts = _polys[i].get_pts ()					
+					if not mgr_shp.est_sensPositif pts do pts = 	mgr_shp.changer_sens  pts
+					append list_pts_decoupe	pts
+			)
+			
+			
+			
+			
+			
+			
 			--------- on decoupe les polygones en fonction des connexions 			-----------------------
-			local list_pts_decoupe =#()
-			local pts_decoupe_courant =#()
+
 			if connexions.count > 0 then (
 				
 				local ids_connexions_aTraiter = #{1..connexions.count}
