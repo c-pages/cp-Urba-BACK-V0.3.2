@@ -6,13 +6,12 @@
 global debug, debuger, ecrire, debug_spline, debug_point
 global DEBUG_MODE = true
 
--- delete $debug*
 
 fn creer_debug_pts	_liste_pos =(
 	
 	
 	fn creer_pt 	posit =(
-		p =   point pos:posit		name:"pt_debug" centermarker:off axistripod:off cross:on Box:off size:10 constantscreensize:off drawontop:off wirecolor:yellow	
+		p =   point pos:posit		name:"pt_debug" centermarker:on axistripod:off cross:on Box:off size:100 constantscreensize:off drawontop:off wirecolor:yellow	
 		selectmore p
 	)
 	case classof _liste_pos of (

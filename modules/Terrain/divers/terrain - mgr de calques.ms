@@ -23,14 +23,19 @@ struct str_calque (
 		),
 		fn debug_calque	_calq	=(
 			debug ( "calque: " + _calq.nom	+" ---------------------")
+			local liste_pts = #()
 			for _poly in _calq.polygones do (
 				debug_poly _poly
+			debug ( "----------------------------------")
 				local enfants = _poly.get_descendance ()
 				for enft in enfants do (
-					debug ""var:enft.nom
-					debug ""var:(enft.get_pts ())
+-- 					debug ""var:enft.nom
+-- 					debug ""var:(enft.get_pts ())
+					append liste_pts  (enft.get_pts ())
 				)
 			)
+			debug "pts"var:liste_pts
+			debug ( "----------------------------------")
 		),	
 		--------------- DEBUG --------------------------------------------
 		
@@ -55,10 +60,10 @@ struct str_calque (
 	public
 		fn	ajouter_polygone		_polygone_aAjouter		/* 	brut_mode:false	 */	=	(
 -- 			--format "\n\n"
-			debug "==================	ajouter_polygone =================================================="
-			debug "_polygone_aAjouter" var:_polygone_aAjouter.nom
-			debug_calque this
-			debug "===================================================================="
+-- 			debug "==================	ajouter_polygone =================================================="
+-- 			debug "_polygone_aAjouter" var:_polygone_aAjouter.nom
+-- 			debug_calque this
+-- 			debug "===================================================================="
 			
 			local chrono_1 = timeStamp()
 			
@@ -76,12 +81,12 @@ struct str_calque (
 				local poly_calque				=	polygones_aTraiter[ i ]
 				local chrono_2 = timeStamp()
 				local integration_reussie	=	mgr_polys.inserer_poly_ds_poly		_polygone_aAjouter		poly_calque
-				debug "inserer_poly_ds_poly" var:( (  ((timeStamp ()) - chrono_2 ) / 1000.0)		as string + " s.")
+-- 				debug "inserer_poly_ds_poly" var:( (  ((timeStamp ()) - chrono_2 ) / 1000.0)		as string + " s.")
 				if integration_reussie do a_ete_integre = true
 				i += 1
 			)
 			
-			debug "ajouter_polygone:	a_ete_integre" var:a_ete_integre
+-- 			debug "ajouter_polygone:	a_ete_integre" var:a_ete_integre
 			---- s'il a pas été inserer, on l'ajoute basiquement aux polygones du calque- ---------------------------------
 			if not a_ete_integre do (
 				append 		polygones 		_polygone_aAjouter
@@ -93,12 +98,12 @@ struct str_calque (
 				
 			
 -- 			debug "a_ete_integre" var:a_ete_integre
-			debug "polygones" var:polygones param:#nom
+-- 			debug "polygones" var:polygones param:#nom
 			
-			debug_calque this
-			debug "===================================================================="
+-- 			debug_calque this
+-- 			debug "===================================================================="
 			
-			debug "--->	ajouter_polygone"  var:( (  ((timeStamp ()) - chrono_1 ) / 1000.0)		as string + " s.\n\n")
+-- 			debug "--->	ajouter_polygone"  var:( (  ((timeStamp ()) - chrono_1 ) / 1000.0)		as string + " s.\n\n")
 -- 			--format "\n\n"
 			polygones
 			
@@ -169,7 +174,7 @@ struct	str_mgr_calques	(
 
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug	=	false,
+		m_debug	=	true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | calq."	  	var:var	 param:param		catch (),
 		
 		m_tab_format_poly = "    ",
@@ -183,14 +188,25 @@ struct	str_mgr_calques	(
 		fn	debug_poly  _poly = if m_debug do (			 
 			format_polygone 	_poly 
 		),
+	public
 		fn debug_calque	_calq	=(
-			debug ( "calque: " + _calq.nom	+" ---------------------" + _calq.operation )
-			for _poly in _calq.polygones do
+			debug ( "calque: " + _calq.nom	+" ---------------------")
+			local liste_pts = #()
+			for _poly in _calq.polygones do (
 				debug_poly _poly
+			debug ( "----------------------------------")
+				local enfants = _poly.get_descendance ()
+				for enft in enfants do (
+-- 					debug ""var:enft.nom
+-- 					debug ""var:(enft.get_pts ())
+					append liste_pts  (enft.get_pts ())
+				)
+			)
+			debug "pts"var:liste_pts
+			debug ( "----------------------------------")
 		),	
 		
-	public
-		fn debug_pile	=	(
+		fn debug_pile	=	 if m_debug do (
 			debug "----------------------------------------------------------------------------"
 			debug "				PILE des calques"
 			local i = -1
@@ -276,10 +292,10 @@ struct	str_mgr_calques	(
 			local 	polys_B	=	_calque_B.get_polygones 	()
 			
 			
-			debug "-----------------------------------------------------------------"
-			debug "OPERATION BOOLENNE"	var:operation
-			debug "polys_A_total"	var:polys_A_total param:#nom
-			debug "polys_B_total"	var:polys_B_total param:#nom
+-- 			debug "-----------------------------------------------------------------"
+-- 			debug "OPERATION BOOLENNE"	var:operation
+-- 			debug "polys_A_total"	var:polys_A_total param:#nom
+-- 			debug "polys_B_total"	var:polys_B_total param:#nom
 			
 			
 			
@@ -332,10 +348,10 @@ struct	str_mgr_calques	(
 				
 			)---- fin for poly_A	------------
 			
-			debug "-----------------------------------------------------------------"
-			debug "intersections"	var:intersections
-			debug "ids_polys_A_isoles"	var:ids_polys_A_isoles --	param:#nom
-			debug "ids_polys_B_isoles"	var:ids_polys_B_isoles	--	param:#nom
+-- 			debug "-----------------------------------------------------------------"
+-- 			debug "intersections"	var:intersections
+-- 			debug "ids_polys_A_isoles"	var:ids_polys_A_isoles --	param:#nom
+-- 			debug "ids_polys_B_isoles"	var:ids_polys_B_isoles	--	param:#nom
 			
 			
 			
@@ -351,10 +367,10 @@ struct	str_mgr_calques	(
 			local annuler = false
 			while il_reste_des_points	and not annuler do (
 				
-				debug "\n\n\n\n"
-				debug "------------------------------------------------------------------------------------------"
-				debug "						On boucle tant qu'il reste des intersections à intégrer "
-				debug "ids_intersections_aTraiter" var:ids_intersections_aTraiter 
+-- 				debug "\n\n\n\n"
+-- 				debug "------------------------------------------------------------------------------------------"
+-- 				debug "						On boucle tant qu'il reste des intersections à intégrer "
+-- 				debug "ids_intersections_aTraiter" var:ids_intersections_aTraiter 
 				
 				
 				---- Le point demarrage, la premiere intersection de la liste --------------------
@@ -452,11 +468,11 @@ struct	str_mgr_calques	(
 						
 						local operateur_est_aGauche = mgr_shp.est_aGauche		pt_test_courant		pt_test_intersection 	pt_test_autre	
 						
-						debug "operateur_est_aGauche" var:operateur_est_aGauche
+-- 						debug "operateur_est_aGauche" var:operateur_est_aGauche
 						
 						if   operateur_est_aGauche /* and operation != #intersection  */ or  operateur_est_aGauche and operation == #intersection 	do (
 							
-							debug"##########	 EST_AGAUCHE		##########################"
+-- 							debug"##########	 EST_AGAUCHE		##########################"
 							poly_courant 			= poly_B
 							shp_initial				= poly_courant.get_pts ()
 							shp_courant			= shp_initial	
@@ -476,16 +492,16 @@ struct	str_mgr_calques	(
 				
 				
 				sens = 1
-				debug "ici ------- > sens	---> operation" var:operation
+-- 				debug "ici ------- > sens	---> operation" var:operation
 				
 				case operation of (
 					#addition :(
-						debug "ici ------- > #addition"
+-- 						debug "ici ------- > #addition"
 						if poly_courant.en_creux 	then  
 							sens =	-1	
 					)
 					#soustraction:(
-							debug "ici ------- > #soustraction"
+-- 							debug "ici ------- > #soustraction"
 						if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
 							sens =	-1	
 							
@@ -494,18 +510,18 @@ struct	str_mgr_calques	(
 					)
 					#intersection:(
 						
-							debug "ici ------- > #intersection"
+-- 							debug "ici ------- > #intersection"
 						if operateur_courant 	==	#A and	not poly_courant.en_creux 	then  (
 							sens =	-1	
-							debug "la"
+-- 							debug "la"
 						)
 						if 	operateur_courant 	==	#B and  not poly_courant.en_creux	 then  (
 							sens =	-1	
-							debug "ici"
+-- 							debug "ici"
 						)
 					)
 				)
-				debug "ici ------- > sens" var:sens
+-- 				debug "ici ------- > sens" var:sens
 				
 				--- le point courant initial	----------				
 				if sens == -1 do id_pt_initial = mgr_shp.boucler	shp_courant (id_pt_initial+1)
@@ -538,14 +554,14 @@ struct	str_mgr_calques	(
 						
 						append 	shp_enConstruction		pt_courant
 						
-						debug "poly_courant" var:poly_courant
-						debug "operateur_courant" var:operateur_courant
-						debug "id_pt_courant" var:id_pt_courant
-						debug "pt_courant" var:pt_courant
-						debug "shp_enConstruction" var:shp_enConstruction
-						
-						debug "sens" var:sens 
-						debug "------------------------------------------------------------------------------------------"
+-- 						debug "poly_courant" var:poly_courant
+-- 						debug "operateur_courant" var:operateur_courant
+-- 						debug "id_pt_courant" var:id_pt_courant
+-- 						debug "pt_courant" var:pt_courant
+-- 						debug "shp_enConstruction" var:shp_enConstruction
+-- 						
+-- 						debug "sens" var:sens 
+-- 						debug "------------------------------------------------------------------------------------------"
 						
 						--- on cherche la prochaine intersection ------------
 						local dist_proche = 1e+10
@@ -605,29 +621,29 @@ struct	str_mgr_calques	(
 						---- si on a une intersection ----------------
 						if prochaine_intersec != undefined then (
 							
-							debug "--->	INTERSECTION"
+-- 							debug "--->	INTERSECTION"
 							
 							--- on change de noeud courant	------
 							if  operateur_courant 	==	#A 	then (
 								
 								operateur_courant 	=	#B
-								poly_courant = prochaine_intersec.poly_B
+								poly_courant 	= 	prochaine_intersec.poly_B
 								shp_courant	= 	prochaine_intersec.poly_B.get_pts ()
-								id_pt_courant 	=  prochaine_intersec.id_pt_B
+								id_pt_courant 	=  	prochaine_intersec.id_pt_B
 								
 							) else (
 								operateur_courant 	=	#A
-								poly_courant = prochaine_intersec.poly_A
+								poly_courant 	= 	prochaine_intersec.poly_A
 								shp_courant	= 	prochaine_intersec.poly_A.get_pts ()
-								id_pt_courant 	=  prochaine_intersec.id_pt_A									
+								id_pt_courant 	=  	prochaine_intersec.id_pt_A									
 							)
 							
-							debug "--->	poly_courant	" var:poly_courant.nom							
-							debug "--->				" var:poly_courant
-							debug "--->	operation" var:operation	
-							
-							debug "--->	operation == #soustraction" var:(operation == #soustraction)	
-							
+-- 							debug "--->	poly_courant	" var:poly_courant.nom							
+-- 							debug "--->				" var:poly_courant
+-- 							debug "--->	operation" var:operation	
+-- 							
+-- 							debug "--->	operation == #soustraction" var:(operation == #soustraction)	
+-- 							
 							
 							
 							sens = 1							
@@ -654,7 +670,7 @@ struct	str_mgr_calques	(
 							)
 							
 							
-							debug "--->	sens" var:sens	
+-- 							debug "--->	sens" var:sens	
 -- 							-----  on valide  ------------------
 							pt_courant 		=	prochaine_intersec.pos		
 							if sens == -1 	do 	id_pt_courant		= mgr_shp.boucler		shp_courant	( id_pt_courant + 1 )
@@ -669,7 +685,7 @@ struct	str_mgr_calques	(
 						---- si on a  pas d' intersection, on passe au point suivant ----------------
 						) else (
 							
-							debug "--->	SUIVANT"
+-- 							debug "--->	SUIVANT"
 							
 							id_pt_courant 		= mgr_shp.boucler	shp_courant		( id_pt_courant + sens )
 							pt_courant 		= shp_courant [ id_pt_courant ]
@@ -677,10 +693,10 @@ struct	str_mgr_calques	(
 						)
 						
 					
-						debug "--------------------------------------------"
-						debug "prochaine_intersec" var:prochaine_intersec
-						debug "intersection_aTraiter" var:intersection_aTraiter
-						debug "--------------------------------------------\n\n"
+-- 						debug "--------------------------------------------"
+-- 						debug "prochaine_intersec" var:prochaine_intersec
+-- 						debug "intersection_aTraiter" var:intersection_aTraiter
+-- 						debug "--------------------------------------------\n\n"
 						
 						--- SAUVETAGE	----
 						sauvetage += 1
@@ -697,12 +713,12 @@ struct	str_mgr_calques	(
 						
 						on_a_fini_laBoucle = true
 					
-						debug"\n\n\n\n\n\n"
-						debug "--------------------------------------------------------------------------------------"
-						debug "pt_courant" var:pt_courant
-						debug "pt_initial" var:pt_initial
-						debug "on_a_fini_laBoucle" var:on_a_fini_laBoucle
-						debug "--------------------------------------------------------------------------------------\n\n\n\n\n\n"
+-- 						debug"\n\n\n\n\n\n"
+-- 						debug "--------------------------------------------------------------------------------------"
+-- 						debug "pt_courant" var:pt_courant
+-- 						debug "pt_initial" var:pt_initial
+-- 						debug "on_a_fini_laBoucle" var:on_a_fini_laBoucle
+-- 						debug "--------------------------------------------------------------------------------------\n\n\n\n\n\n"
 
 					
 					
@@ -724,7 +740,7 @@ struct	str_mgr_calques	(
 				
 				---- on ajoute le noeud obtenu -----------------------------------
 				calque_result.ajouter_polygone		nv_poly		--	brut_mode:true
-				debug_calque	calque_result
+-- 				debug_calque	calque_result
 				
 				---------- SORTIES ---------------------------------------------
 				---- test pour sortie  correct	----------------------------------------------------------------------------------------------------
@@ -755,13 +771,13 @@ struct	str_mgr_calques	(
 			
 			
 			
-					debug  "######	1	##############################################################################################################################"
-				debug_calque	calque_result			
-					debug  "####################################################################################################################################"
+-- 					debug  "######	1	##############################################################################################################################"
+-- 				debug_calque	calque_result			
+-- 					debug  "####################################################################################################################################"
 			
 			---- 		On s'occupe des polygones isolés : en fonction de l'operation on va ajouter, ou pas, les polygones au resultat:		----------------
 			--format "\n\n"
-				debug "--- les polygones isolés de A ----------------------------------------------------------------------------------------"
+-- 				debug "--- les polygones isolés de A ----------------------------------------------------------------------------------------"
 			
 			
 			
@@ -770,13 +786,13 @@ struct	str_mgr_calques	(
 			for poly_A_isol in polys_A_isoles do (
 				
 				local polyA_dans_polyB
-				debug "-------> poly_A_isol" var:poly_A_isol
+-- 				debug "-------> poly_A_isol" var:poly_A_isol
 				--- avec les polygone de B -------------
 				for poly_B in polys_B do (
 					local est_ds_polyB	=	mgr_polys.est_dans_polygone		poly_B 		poly_A_isol	
 					if est_ds_polyB	!= undefined do 
 						polyA_dans_polyB = est_ds_polyB
-					debug "	-------> polyA_dans_polyB" var:polyA_dans_polyB
+-- 					debug "	-------> polyA_dans_polyB" var:polyA_dans_polyB
 				)
 				
 				--- on regarde dons si on est dans un vide -------------
@@ -787,7 +803,7 @@ struct	str_mgr_calques	(
 				else
 					est_dans_vide = true
 				
-					debug "-------> est_dans_vide" var:est_dans_vide
+-- 					debug "-------> est_dans_vide" var:est_dans_vide
 				
 				---- on regarde si on l'ajoute ou pas ----------------
 				local on_ajoute = false
@@ -828,18 +844,18 @@ struct	str_mgr_calques	(
 					
 				)
 				
-					debug  "######	AVANT	##############################################################################################################################"
-				debug_calque	calque_result			
-					debug  "####################################################################################################################################"
+-- 					debug  "######	AVANT	##############################################################################################################################"
+-- 				debug_calque	calque_result			
+-- 					debug  "####################################################################################################################################"
 			
 				
 				---- on ajoute le noeud obtenu -----------------------------------
 				if on_ajoute do	
 					calque_result.ajouter_polygone	poly_A_isol		--	brut_mode:true
 				
-					debug  "######	APRES	##############################################################################################################################"
-				debug_calque	calque_result			
-					debug  "####################################################################################################################################"
+-- 					debug  "######	APRES	##############################################################################################################################"
+-- 				debug_calque	calque_result			
+-- 					debug  "####################################################################################################################################"
 			
 				
 			) ---- fin polygones A isolés ---------------------------
@@ -851,20 +867,20 @@ struct	str_mgr_calques	(
 			
 			
 			--format "\n\n"
-			debug "--- les polygones isolés de B ----------------------------------------------------------------------------------------"
+-- 			debug "--- les polygones isolés de B ----------------------------------------------------------------------------------------"
 			--- les polygones isolés de B ----------------------------------------------------------------------------------------
 			local polys_B_isoles = for id_poly in (ids_polys_B_isoles as array ) collect polys_B_total[ id_poly ]
-			debug "polys_B_isoles" var:polys_B_isoles param:#nom
+-- 			debug "polys_B_isoles" var:polys_B_isoles param:#nom
 			for poly_B_isol in polys_B_isoles do (
 				local polyB_dans_polyA
 				
-				debug "-------> poly_B_isol" var:poly_B_isol
+-- 				debug "-------> poly_B_isol" var:poly_B_isol
 				--- avec les polygones de A -------------
 				for poly_A in polys_A do (
 					local est_ds_polyA	=	mgr_polys.est_dans_polygone		poly_A 		poly_B_isol	
 					if est_ds_polyA	!= undefined do 
 						polyB_dans_polyA = est_ds_polyA
-					debug "	-------> est_ds_polyA" var:est_ds_polyA
+-- 					debug "	-------> est_ds_polyA" var:est_ds_polyA
 				)
 				
 				--- on regarde dons si on est dans un vide -------------
@@ -876,7 +892,7 @@ struct	str_mgr_calques	(
 					est_dans_vide = true
 				
 				
-				debug "-------> est_dans_vide" var:est_dans_vide
+-- 				debug "-------> est_dans_vide" var:est_dans_vide
 				---- on regarde si on l'ajoute ou pas ----------------
 				local on_ajoute = false
 				case operation of (
@@ -917,14 +933,14 @@ struct	str_mgr_calques	(
 					
 				)
 				
-				debug "-------> on_ajoute" var:on_ajoute
+-- 				debug "-------> on_ajoute" var:on_ajoute
 				
 				
 				---- on ajoute le noeud obtenu -----------------------------------
 				if on_ajoute do	
 					calque_result.ajouter_polygone	poly_B_isol	--	brut_mode:true
 				
-				debug_calque	calque_result
+-- 				debug_calque	calque_result
 				
 				
 			) ---- fin polygones A isolés ---------------------------
@@ -940,8 +956,8 @@ struct	str_mgr_calques	(
 			
 			
 			
-			debug "---------	CALQUE_RESULT	--------------------------------------------------------"
-			debug_calque		calque_result
+-- 			debug "---------	CALQUE_RESULT	--------------------------------------------------------"
+-- 			debug_calque		calque_result
 			--format "\n\n\n"
 			
 			calque_result
@@ -950,7 +966,7 @@ struct	str_mgr_calques	(
 		----- calculer la pile complete des calques ----------------
 		fn calculer_pile	=(
 			
-			debug "calculer_pile ()"
+-- 			debug "calculer_pile ()"
 			
 			local result_calque = this.creer_calque ()
 			if m_pile.count >0 then (
@@ -963,14 +979,14 @@ struct	str_mgr_calques	(
 					local calque = m_pile[i]
 					--- on calcule l'operation avec chacun des polygones du calque pile	--------
 					result_calque = 		operation_booleene		result_calque	calque	operation:calque.operation
-					debug_calque		result_calque		
+-- 					debug_calque		result_calque		
 				)
 				
 			) 
 			
 			
-			debug_calque		result_calque		
-			debug "PILE PTS" var:( result_calque.get_pts ())
+-- 			debug_calque		result_calque		
+-- 			debug "PILE PTS" var:( result_calque.get_pts ())
 			result_calque
 		),
 		
@@ -1003,11 +1019,11 @@ struct	str_mgr_calques	(
 				local chrono_2	=	timeStamp ()
 			
 					nv_calque.ajouter_polygone 	poly
-				debug "--->	nv_calque.ajouter_polygone"  var:( (  ((timeStamp ()) - chrono_2 ) / 1000.0)		as string + " s.")
+-- 				debug "--->	nv_calque.ajouter_polygone"  var:( (  ((timeStamp ()) - chrono_2 ) / 1000.0)		as string + " s.")
 				)
 			)
 			
-			debug "--->	creer_calque"  var:( (  ((timeStamp ()) - chrono_1 ) / 1000.0)		as string + " s.")
+-- 			debug "--->	creer_calque"  var:( (  ((timeStamp ()) - chrono_1 ) / 1000.0)		as string + " s.")
 			nv_calque
 			
 		),

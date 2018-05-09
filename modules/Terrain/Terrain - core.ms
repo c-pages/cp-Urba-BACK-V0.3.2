@@ -386,7 +386,7 @@ struct	str_terrain_node_core	(
 	---------  Actualisations de l'objet ----------------------------------------------	
 		fn actualiser_calques 		=(
 			
-			format "\n\n\n\n\n"
+			debug "\n\n\n\n\n"
 			debug "------------------------	ACTUALISER_CALQUES ()	---------------------------------------------------------------"
 			
 			--- on vide la pile des calques -------------
@@ -405,7 +405,8 @@ struct	str_terrain_node_core	(
 			
 			
 			mgr_calques.debug_pile ()
-			debug "------------------------	FIN	ACTUALISER_CALQUES ()	---------------------------------------------------------------"
+			
+			debug "------------------------	FIN	ACTUALISER_CALQUES ()	---------------------------------------------------------------\n\n\n\n"
 			
 			
 			
@@ -413,13 +414,17 @@ struct	str_terrain_node_core	(
 		
 		fn actualiser_pts_faces =(
 			
-			format "\n\n\n\n\n"
+			debug "\n\n\n\n\n"
 			debug "------------------------	actualiser_pts_faces ()	---------------------------------------------------------------"
 			
 			
 			--- version triangles ---------------
 			local calque_pile 	= mgr_calques.get_calque_pile ()
-			debug "------------------------ POPOPPOPO"
+			
+			
+			mgr_calques.debug_calque 	calque_pile
+			debug "---------------------------------------------------------------------------------------\n\n\n\n"
+			
 			
 			m_pts_faces	=	calque_pile.trianguler ()
 			
@@ -430,7 +435,7 @@ struct	str_terrain_node_core	(
 			
 			
 			
-			debug "------------------------	actualiser_pts_faces ()	---------------------------------------------------------------"
+			debug "------------------------	actualiser_pts_faces ()	---------------------------------------------------------------\n\n\n\n"
 			
 			
 		),
@@ -674,9 +679,9 @@ struct	str_terrain_node_core	(
 					placer_pts_geometrie ()
 				)
 				
-				format"\n\n\n"
 				local debug_detail = true
 				if debug_detail do (
+					debug"\n\n\n"
 					debug ("----------------------------------------------------------------------------------------" )
 					debug ("---	(1)			Analyse des calques : 					" +  chrono_1	as string  )
 					debug ("---	(1)			*	actualiser_calques : 			" +  chrono_1_1	as string  )

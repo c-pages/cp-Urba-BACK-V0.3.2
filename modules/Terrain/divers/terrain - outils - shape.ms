@@ -485,8 +485,6 @@ struct str_outils_shape (
 			result_aire
 		),
 		
-		
-		
 		--- sens du shape ----------------------
 		fn est_sensPositif 				_pts 		=(
 -- 			debug "est_sensPositif"
@@ -671,10 +669,10 @@ struct str_outils_shape (
 					local i_suivant 	= boucler _pts_shp ( i+1)
 					local pt_suivant 	=_pts_shp[ i_suivant ]
 					case _axe of (
-						#horizontal:	if pt_courant.y > _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y < _pt_test.y and pt_suivant.y > _pt_test.y do
+						#horizontal:	if pt_courant.y >= _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y <= _pt_test.y and pt_suivant.y >= _pt_test.y do
 												append result i	
 						
-						#vertical:		if pt_courant.x > _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x < _pt_test.y and pt_suivant.x > _pt_test.x do
+						#vertical:		if pt_courant.x >= _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x <= _pt_test.y and pt_suivant.x >= _pt_test.x do
 												append result i	
 	-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
 					)
