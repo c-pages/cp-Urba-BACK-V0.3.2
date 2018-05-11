@@ -43,7 +43,7 @@ global urba_clipboard_batiment	=	""
 
 
 --------------- debugger ---------
-(
+-- (
 	include "$userScripts\\cp-Urba\\modules\\Commun\\Urba - Debug.ms"
 
 /* 
@@ -126,7 +126,7 @@ options.printAllElements = oldPrintAllElements
 
 
 
-)	--------- fin debug --------------
+-- )	--------- fin debug --------------
 
 
 
@@ -143,7 +143,7 @@ remap:#(#(#surface_node), #(#surface_node))
 (
 
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-	local m_debug = false
+	local m_debug = true
 	local m_dbgPrefix ="urba | Batiment Plg"
 	fn debug 	_txt  var:	 param:    =(
 		try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
@@ -232,11 +232,13 @@ remap:#(#(#surface_node), #(#surface_node))
 	on create do (
 		debug "creation du plugin"
 		initialiser ()
+		actualiser ()
 	)
 	on update do	(
 		debug "update du plugin"
 		debug "shape : " var:surface_node
--- 		initialiser ()
+		initialiser ()
+-- 		actualiser ()
 	)
 
 ) --- fin du plug ---

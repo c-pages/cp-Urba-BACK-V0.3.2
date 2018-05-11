@@ -167,6 +167,7 @@ struct	str_geometrie	(
 	
 	
 	---- Operations diverses ------------
+		
 		fn extruder 	_faces 	_hauteur	cible: 	=(
 			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
 			

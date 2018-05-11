@@ -459,7 +459,9 @@ struct  str_manager_parametres (
 			
 		),
 		fn dupliquer_element			_element		enregistrer:false 	=(
-			
+			debug""
+			debug "dupliquer_element-------------------------"
+			debug "_element" var:_element
 			--- si on a recuperer un index à la place de l'element lui-meme, on va chercher l'élément ---------------------------
 			if classof  _element == integer then
 				_element = this.get_element_parIndex  _element
@@ -469,16 +471,17 @@ struct  str_manager_parametres (
 			local elem_dupl = creer_element			idConstructeur:_element.type	 --copy _element
 			
 			-- puis on duplique chaque prop de la structure -----------
-			for propnom in getpropNames _element do (				
+			for propnom in getpropNames _element do (
+				debug "propnom" var:propnom
 				local val_orig = getProperty  _element	propnom
--- 				debug "classof val_orig" var:(classof val_orig)
+				debug "classof val_orig" var:(classof val_orig)
 				--tout sauf les fonctions ----------
 				if classof val_orig != MAXScriptFunction/*  */	do (				
 					local val_dup
 					
 					--- si on a un struct ------
 					if superclassOf val_orig == StructDef  and propnom !=#params then (
--- 						debug "PAS tableau:	ON DUPLIQUE un truc" var:val_orig
+						debug "PAS tableau:	ON DUPLIQUE un truc" var:val_orig
 -- 						if propnom == #params then
 -- 							val_dup = dupliquer_paramsElem  val_orig
 -- 						else
@@ -486,11 +489,14 @@ struct  str_manager_parametres (
 						
 					-- sinon on regarde si on a un tableau
 					) else if  classof val_orig ==  array then (
+						debug "tableau:"
 						val_dup = #()
 						if val_orig.count> 0 then (
 							
 							--- si on a des struct, on les dupplique----------
 							if superclassOf val_orig[1] == StructDef then (
+								
+							debug "on a des struct, on les dupplique"
 								
 								local elems_presents = # ()
 								for i = 1 to val_orig.count do (
@@ -503,12 +509,12 @@ struct  str_manager_parametres (
 												id_param_instance = j							
 									)
 									if id_param_instance != undefined then (
--- 										debug "tableau:	ON DUPLIQUE UNE INSTANCE"
+										debug "------>	tableau:	ON DUPLIQUE UNE INSTANCE"
 -- 										debug "param_instance" var:param_instance
 -- 										debug "elems_presents" var:elems_presents
 										val_dup[i]  = val_dup[ id_param_instance ] 
 									)else (
--- 										debug "tableau:	ON DUPLIQUE UNE NON INSTANCE"
+										debug "------>	tableau:	ON DUPLIQUE UNE NON INSTANCE"
 										val_dup[i]  = dupliquer_element  val_orig[i]	enregistrer:enregistrer
 										append  elems_presents		val_orig[i]
 									)
@@ -518,14 +524,24 @@ struct  str_manager_parametres (
 -- 								val_dup = for valTab_orig in val_orig collect dupliquer_element  valTab_orig	enregistrer:enregistrer
 								
 							--- sinon on les copie basiquement ----------
-							) else	val_dup = for valTab_orig in val_orig collect copy  valTab_orig		
+							) else(
+										debug "------>	tableau: on les copie basiquement"
+											val_dup = for valTab_orig in val_orig collect copy  valTab_orig		 
+											)
 							
-						) else val_dup = #()
+						) else ( 
+											val_dup = #()
+										debug "------>	tableau vide"
+										)
 					
 					---- sinon on a une valeur de base -------
-					) else val_dup = copy val_orig
+					) else (
+										
+										val_dup = copy val_orig
+										debug "------>	valeur de base"
+					)
 					
-					debug "val_dup" var:val_dup
+					debug "---------------------> val_dup" var:val_dup
 					setproperty	elem_dupl	propnom 	val_dup
 					
 				)	---	fin if not function	-------

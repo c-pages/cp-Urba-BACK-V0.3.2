@@ -22,10 +22,10 @@ struct facade_params	(
 		
 		--- Limiteurs - Murs	---
 		murs						=	1,					---- ( 1:les deux	2:gouttereaux	3:pignons )	----
-		murs_nord			=	false,
+		murs_nord				=	false,
 		murs_sud				=	false,
 		murs_est				=	false,
-		murs_ouest			=	false,
+		murs_ouest				=	false,
 	
 	
 		--- Limiteurs - Etages	---
@@ -397,7 +397,7 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit
 			
 			--- gestion balcon	------
 			local balcon_ptID_debut
-			local balcon_pts_debut
+			local balcon_pts_debut 
 			local balcon_aConstruire = undefined
 			
 			----gestion loggia -------
@@ -408,16 +408,24 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit
 			local profondeurFacade = 0
 			
 			---  on créé la facade avec la sequence total --------
-			for composant in sequenceTotal do (
+			for i=1 to sequenceTotal.count do (
 				
+				local composant 		= sequenceTotal[i]
+				local coin_de_mur	= #aucun
+				if i == 1 do coin_de_mur = #Gauche
+				if i == sequenceTotal.count do coin_de_mur = #Droite
 				case composant.type as name of (
 					
 					#balcon:(
+					format "BALCON DEBUT\n"
 						balcon_aConstruire 	= composant
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	onConstruitLaDalle:false				
-						balcon_pts_debut 		= ptsIDs_accroche		
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	onConstruitLaDalle:false	coin_de_mur:coin_de_mur
+						balcon_pts_debut 		= for id in ptsIDs_accroche		collect id
+					format "----> balcon_pts_debut :%\n" balcon_pts_debut
 					)
 					#balconFin:(
+					format "BALCON FIN\n"
+					format "----> balcon_pts_debut :%\n" balcon_pts_debut
 						local		pt_balcon_debut	=	polyop.getVert 	m_plug.delegate		balcon_pts_debut[1]	
 						local		pt_balcon_fin		=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
 						composant.params.longueur 				= 		distance	pt_balcon_debut 	pt_balcon_fin
@@ -425,47 +433,20 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit
 					
 						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche	norm_dir:norm_dir	\
 																																		compo_debut:balcon_aConstruire \
-																																		onConstruit_gardeCorps:( onConstruit_gardeCorps  )
+																																		onConstruit_gardeCorps:( onConstruit_gardeCorps  )	coin_de_mur:coin_de_mur
 						
 						composant.params.longueur 	= 	0
 						balcon_aConstruire 				=	undefined
 					
 					)
 					
-					/* 
-					
-					#loggia:(
-						loggia_aConstruire 	= composant
--- 						profondeurFacade 		= loggia_aConstruire.params.profondeur
-					-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	onConstruitLaDalle:false
-						
-						loggia_pts_debut 		= ptsIDs_accroche
-					
-					)
-					#loggiaFin:(
-						local		pt_loggia_debut			=	polyop.getVert 	m_plug.delegate		loggia_pts_debut[1]	
-						local		pt_loggia_fin					=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]
-						
-						composant.params.longueur 		= 	(	distance	pt_loggia_debut 	pt_loggia_fin	)
-						
-						composant.params.profondeur 	= 		loggia_aConstruire.params.profondeur
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	\
-																																			onConstruitLaDalle:false	\
-																																			compo_debut:loggia_aConstruire \
-																																			onConstruit_gardeCorps:( onConstruit_gardeCorps and balcon_aConstruire == undefined )
-						composant.params.longueur 		= 		0
-						loggia_aConstruire = undefined
-					
-					)
-					*/
 					
 					
 					default:(
 						local onConstruitLaDalle = ( balcon_aConstruire == undefined )  -- and  ( loggia_aConstruire == undefined )
 						
 						-----	construction geometrie du composant	----------
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir		onConstruitLaDalle:onConstruitLaDalle		
+						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir		onConstruitLaDalle:onConstruitLaDalle			coin_de_mur:coin_de_mur
 						
 					)
 				) -- fin case	-----------------

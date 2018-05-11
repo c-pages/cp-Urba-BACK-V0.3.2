@@ -105,6 +105,7 @@ struct 	str_composant_generique	 (
 													etage_ht:			\
 													transformation:	\
 													inverse_ouverture:	\
+													coin_de_mur:			\
 													onConstruit_gardeCorps:		= 
 		
 				fnVirt_construire			 _plug		pts	\
@@ -118,6 +119,7 @@ struct 	str_composant_generique	 (
 													etage_ht:etage_ht			\
 													transformation:transformation	\
 													inverse_ouverture:inverse_ouverture	\
+													coin_de_mur:coin_de_mur			\
 													onConstruit_gardeCorps:onConstruit_gardeCorps	
 		
 ) ---- fin composant -------------------------------
