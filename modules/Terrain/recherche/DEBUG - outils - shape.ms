@@ -2,6 +2,10 @@
 include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - mgr - Datas to string.ms" 
 
 struct str_temp (
+	
+	
+	
+-- struct str_outils_shape (
 
 
 
@@ -48,13 +52,14 @@ struct str_temp (
 		--- constantes---------
 		PRECISION_COURBE 			= .1,--50,			--- en cm. ----
 		DOTMAX_COURBE 				= .999,	--- en dot ?!?. ----
--- 		SEUIL_POINTS_EGAUX  	= .01,
+		SEUIL_POINTS_EGAUX  	= .001,
 		-- constante pr debug-----------------
 -- 		SAUVETAGE_MAX 			= 100,
 		
 -- 	private
 	public --- DEBUG en est en private normalement ----
 		
+		----------------- tableaux -----------------
 		fn sont_egaux_tableaux 	first 	second =		(
 			debug "sont_egaux_tableaux"
 			result = true
@@ -91,32 +96,71 @@ struct str_temp (
 			result
 		),
 		
-		----------------- tableaux -----------------
 		fn boucler 							_array				_id_item 		=(
 			
 			if _id_item >	_array.count do _id_item = mod _id_item _array.count
 			if _id_item < 1 do _id_item += _array.count
 			_id_item as integer
 		),
-	
-	
-	
+		
+		fn get_partie_tableau		_tableau		_id_debut	_id_fin	=(
+			local result = #()
+			if _id_fin < _id_debut do
+				_id_fin += _tableau.count
+			result = for id = _id_debut to _id_fin collect _tableau[ ( boucler _tableau id ) ]
+		),
+					
+					
+		
+		
 		--- Analyse position de points (survol_triangles etc..)		-------------
+		fn point_estSurSegment	_pt_test		_pt_A		_pt_B	=(
+			
+			local pt_A = _pt_A
+			local pt_B = _pt_B
+			
+			local pt_C = _pt_test
+			
+			
+			local vec_CA	=	pt_A - pt_C
+			local vec_CB	=	pt_B - pt_C
+
+			local norm_CA		=	normalize vec_CA
+			local norm_CB		=	normalize vec_CB
+
+			local dot_CA_CB	=	dot 	norm_CA		norm_CB 
+			
+			debug "dot_CA_CB "  var:dot_CA_CB
+			
+			dot_CA_CB == 1
+			
+		),
 		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	=(
 			
 			local crossProd 	= cross (  _pt_seg_2 - _pt_seg_1 ) ( _pt_aTester - _pt_seg_1 )
 			local sensDot 		= dot crossProd  [0,0,1]
-			local sens 			= if sensDot > 0 then true else false
+			local sens 			
+/* 			if inclure_segment then (
+				sens = if sensDot > 0 then true 
+				else (
+					if point_estSurSegment  _pt_aTester  _pt_seg_1	_pt_seg_2
+					false
+					
+				)
+			) else  */
+				sens = if sensDot > 0 then true else false
 			sens
 			
 		),
-		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester =(
-			if est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester and est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester  and est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester then (
--- 				if _pt_aTester == _pt_tri_1 or _pt_aTester == _pt_tri_2 or _pt_aTester == _pt_tri_3 then
--- 					false
--- 				else
-					true
-			) else false
+		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester 	=(
+			local est_aGgauche1 = est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester 
+			local est_aGgauche2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 
+			local est_aGgauche3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester
+			
+			if est_aGgauche1	and est_aGgauche2  and est_aGgauche3 then
+				true
+			else 
+				false
 		),
 		fn survol_triangles  					_pt_aTester			_pts_triangles_shape 	=(
 			local result = false
@@ -453,8 +497,6 @@ struct str_temp (
 			result_aire
 		),
 		
-		
-		
 		--- sens du shape ----------------------
 		fn est_sensPositif 				_pts 		=(
 -- 			debug "est_sensPositif"
@@ -638,14 +680,29 @@ struct str_temp (
 				if _pt_test != pt_courant do (
 					local i_suivant 	= boucler _pts_shp ( i+1)
 					local pt_suivant 	=_pts_shp[ i_suivant ]
-					case _axe of (
-						#horizontal:	if pt_courant.y > _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y < _pt_test.y and pt_suivant.y > _pt_test.y do
-												append result i	
-						
-						#vertical:		if pt_courant.x > _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x < _pt_test.y and pt_suivant.x > _pt_test.x do
-												append result i	
-	-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
-					)
+					
+					---- pour les segments non horizontaux ----------------
+-- 					if abs ( pt_courant.y -  pt_suivant.y )  > SEUIL_POINTS_EGAUX   do
+					
+										case _axe of (
+											#horizontal:		if pt_courant.y >= _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y <= _pt_test.y and pt_suivant.y >= _pt_test.y do (
+																		--- si on touche une lihne horizontale on ajoute les deux points -------------------
+																		if abs ( pt_courant.y -  pt_suivant.y )  > SEUIL_POINTS_EGAUX   then (
+																			appendifunique result i	
+																			appendifunique result i_suivant
+																		) else 
+																			appendifunique result i	
+																	) 
+											#vertical:			if pt_courant.x >= _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x <= _pt_test.x and pt_suivant.x >= _pt_test.x do (
+																		--- si on touche une lihne horizontale on ajoute les deux points -------------------
+																		if abs ( pt_courant.x -  pt_suivant.x )  > SEUIL_POINTS_EGAUX   then (
+																			appendifunique result i	
+																			appendifunique result i_suivant
+																		) else 
+																			appendifunique result i	
+																	) 
+						-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
+										)
 				)
 			)
 			

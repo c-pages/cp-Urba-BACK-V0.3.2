@@ -55,6 +55,7 @@ struct str_outils_shape (
 -- 	private
 	public --- DEBUG en est en private normalement ----
 		
+		----------------- tableaux -----------------
 		fn sont_egaux_tableaux 	first 	second =		(
 			debug "sont_egaux_tableaux"
 			result = true
@@ -91,7 +92,6 @@ struct str_outils_shape (
 			result
 		),
 		
-		----------------- tableaux -----------------
 		fn boucler 							_array				_id_item 		=(
 			
 			if _id_item >	_array.count do _id_item = mod _id_item _array.count
@@ -99,6 +99,14 @@ struct str_outils_shape (
 			_id_item as integer
 		),
 		
+		fn get_partie_tableau		_tableau		_id_debut	_id_fin	=(
+			local result = #()
+			if _id_fin < _id_debut do
+				_id_fin += _tableau.count
+			result = for id = _id_debut to _id_fin collect _tableau[ ( boucler _tableau id ) ]
+		),
+					
+					
 		
 		
 		--- Analyse position de points (survol_triangles etc..)		-------------
@@ -655,7 +663,9 @@ struct str_outils_shape (
 		-----	Axe: #orizontal ou #vertical	----
 		
 		fn get_sgts_sur_memeAxe		_axe		 _pts_shp		_pt_test		 =(
--- 			debug "get_sgts_sur_memeAxe"
+-- 			debug ""
+-- 			debug "------get_sgts_sur_memeAxe"
+-- 			debug "	_pt_test" var:_pt_test
 			local result = #()
 -- 			local pt_test  					=	_pts_shp[_id_pt_test]
 -- 			local id_pt_test_precedant	=	boucler 	_pts_shp	(_id_pt_test - 1 )
@@ -669,30 +679,42 @@ struct str_outils_shape (
 					local i_suivant 	= boucler _pts_shp ( i+1)
 					local pt_suivant 	=_pts_shp[ i_suivant ]
 					
-					if abs ( pt_courant.y -  pt_suivant.y )  > SEUIL_POINTS_EGAUX   do
+					---- pour les segments non horizontaux ----------------
+-- 					if abs ( pt_courant.y -  pt_suivant.y )  > SEUIL_POINTS_EGAUX   do
 					
-					case _axe of (
-						#horizontal:		if pt_courant.y >= _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y <= _pt_test.y and pt_suivant.y >= _pt_test.y do (
-													--- si on touche une lihne horizontale on ajoute les deux points -------------------
-													if abs ( pt_courant.y -  pt_suivant.y )  > SEUIL_POINTS_EGAUX   then (
-														appendifunique result i	
-														appendifunique result i_suivant
-													) else 
-														appendifunique result i	
-												) 
-						#vertical:			if pt_courant.x >= _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x <= _pt_test.y and pt_suivant.x >= _pt_test.x do (
-													--- si on touche une lihne horizontale on ajoute les deux points -------------------
-													if abs ( pt_courant.x -  pt_suivant.x )  > SEUIL_POINTS_EGAUX   then (
-														appendifunique result i	
-														appendifunique result i_suivant
-													) else 
-														appendifunique result i	
-												) 
-	-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
-					)
+-- 			debug "	--->	pt_courant" var:pt_courant
+-- 			debug "	--->	pt_suivant" var:pt_suivant
+										case _axe of (
+											#horizontal:		if pt_courant.y >= _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y <= _pt_test.y and pt_suivant.y >= _pt_test.y do (
+																		--- si on touche une lihne horizontale on ajoute les deux points -------------------
+																		if abs ( pt_courant.y -  pt_suivant.y )  < SEUIL_POINTS_EGAUX   then (
+																			
+-- 																			debug "		--->	(A) -- horizontal "
+																			
+																			appendifunique result i	
+																			appendifunique result i_suivant
+																		) else (
+																			appendifunique result i	
+-- 																			debug "		--->	(A)  "
+																		)
+																	) 
+											#vertical:			if pt_courant.x >= _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x <= _pt_test.x and pt_suivant.x >= _pt_test.x do (
+																		--- si on touche une lihne horizontale on ajoute les deux points -------------------
+																		if abs ( pt_courant.x -  pt_suivant.x )  < SEUIL_POINTS_EGAUX   then (
+																			appendifunique result i	
+																			appendifunique result i_suivant
+-- 																			debug "		--->	(B) -- horizontal "
+																		) else (
+																			appendifunique result i	
+-- 																			debug "		--->	(B)  "
+																		)
+																	) 
+						-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
+										)
 				)
 			)
 			
+-- 																			debug "			--->	result " var:result
 				
 			result
 		),

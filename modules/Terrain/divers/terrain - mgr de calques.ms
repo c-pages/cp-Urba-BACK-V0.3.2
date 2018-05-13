@@ -174,7 +174,7 @@ struct	str_mgr_calques	(
 
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug	=	true,
+		m_debug	=	false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | calq."	  	var:var	 param:param		catch (),
 		
 		m_tab_format_poly = "    ",

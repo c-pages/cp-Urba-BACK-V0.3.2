@@ -426,7 +426,7 @@ struct	str_terrain_node_core	(
 			debug "---------------------------------------------------------------------------------------\n\n\n\n"
 			
 			
--- 			m_pts_faces	=	calque_pile.trianguler ()
+			m_pts_faces	=	calque_pile.trianguler ()
 			
 			
 			
