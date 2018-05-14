@@ -114,6 +114,9 @@ struct str_temp (
 		
 		
 		--- Analyse position de points (survol_triangles etc..)		-------------
+
+		
+		--- Analyse position de points (survol_triangles etc..)		-------------
 		fn point_estSurSegment	_pt_test		_pt_A		_pt_B	=(
 			
 			local pt_A = _pt_A
@@ -132,7 +135,15 @@ struct str_temp (
 			
 			debug "dot_CA_CB "  var:dot_CA_CB
 			
-			dot_CA_CB == 1
+			local result = dot_CA_CB == -1
+	
+			if not result and dot_CA_CB < 0 	do (
+				local dist_pt_seg		=		this.get_distance_point_segment		_pt_test		_pt_A		_pt_B
+				debug  "dist_pt_seg" var:dist_pt_seg
+				if dist_pt_seg == 0 do
+					result = true
+			)
+			result
 			
 		),
 		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	=(
@@ -152,15 +163,33 @@ struct str_temp (
 			sens
 			
 		),
-		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester 	=(
-			local est_aGgauche1 = est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester 
-			local est_aGgauche2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 
-			local est_aGgauche3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester
+		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester 			inclure_segmts:false		=(
+			local result = false
 			
-			if est_aGgauche1	and est_aGgauche2  and est_aGgauche3 then
-				true
-			else 
-				false
+			local est_aGauche1 = est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester 
+			local est_aGauche2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 
+			local est_aGauche3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester
+			
+			if inclure_segmts do (
+				if not est_aGauche1 do
+					est_aGauche1 = 	point_estSurSegment	_pt_aTester    _pt_tri_1 	_pt_tri_2 
+				if not est_aGauche2 do
+					est_aGauche2 = 	point_estSurSegment	_pt_aTester    _pt_tri_2 	_pt_tri_3
+				if not est_aGauche3 do
+					est_aGauche3 = 	point_estSurSegment	_pt_aTester    _pt_tri_3 	_pt_tri_1
+			)
+				
+				
+				
+			if est_aGauche1	and est_aGauche2  and est_aGauche3 then
+				result = true
+			
+					
+				
+				
+			
+			
+			result
 		),
 		fn survol_triangles  					_pt_aTester			_pts_triangles_shape 	=(
 			local result = false
@@ -667,7 +696,9 @@ struct str_temp (
 		-----	Axe: #orizontal ou #vertical	----
 		
 		fn get_sgts_sur_memeAxe		_axe		 _pts_shp		_pt_test		 =(
--- 			debug "get_sgts_sur_memeAxe"
+-- 			debug ""
+-- 			debug "------get_sgts_sur_memeAxe"
+-- 			debug "	_pt_test" var:_pt_test
 			local result = #()
 -- 			local pt_test  					=	_pts_shp[_id_pt_test]
 -- 			local id_pt_test_precedant	=	boucler 	_pts_shp	(_id_pt_test - 1 )
@@ -684,28 +715,39 @@ struct str_temp (
 					---- pour les segments non horizontaux ----------------
 -- 					if abs ( pt_courant.y -  pt_suivant.y )  > SEUIL_POINTS_EGAUX   do
 					
+-- 			debug "	--->	pt_courant" var:pt_courant
+-- 			debug "	--->	pt_suivant" var:pt_suivant
 										case _axe of (
 											#horizontal:		if pt_courant.y >= _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y <= _pt_test.y and pt_suivant.y >= _pt_test.y do (
 																		--- si on touche une lihne horizontale on ajoute les deux points -------------------
-																		if abs ( pt_courant.y -  pt_suivant.y )  > SEUIL_POINTS_EGAUX   then (
+																		if abs ( pt_courant.y -  pt_suivant.y )  < SEUIL_POINTS_EGAUX   then (
+																			
+-- 																			debug "		--->	(A) -- horizontal "
+																			
 																			appendifunique result i	
 																			appendifunique result i_suivant
-																		) else 
+																		) else (
 																			appendifunique result i	
+-- 																			debug "		--->	(A)  "
+																		)
 																	) 
 											#vertical:			if pt_courant.x >= _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x <= _pt_test.x and pt_suivant.x >= _pt_test.x do (
 																		--- si on touche une lihne horizontale on ajoute les deux points -------------------
-																		if abs ( pt_courant.x -  pt_suivant.x )  > SEUIL_POINTS_EGAUX   then (
+																		if abs ( pt_courant.x -  pt_suivant.x )  < SEUIL_POINTS_EGAUX   then (
 																			appendifunique result i	
 																			appendifunique result i_suivant
-																		) else 
+-- 																			debug "		--->	(B) -- horizontal "
+																		) else (
 																			appendifunique result i	
+-- 																			debug "		--->	(B)  "
+																		)
 																	) 
 						-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
 										)
 				)
 			)
 			
+-- 																			debug "			--->	result " var:result
 				
 			result
 		),
@@ -1099,12 +1141,14 @@ struct str_temp (
 
 
 
+
 clearlistener ()
-delete $tri*
+-- delete $tri*
 tmp = str_temp ()
 
-
-tmp.get_angleVecteurs_oriente $point001.pos $point002.pos  $point002.pos  $point003.pos
+-- tmp.point_estSurSegment		$point002.pos		$point001.pos		  $point003.pos		
+tmp. est_dansTriangle	[70745.9,3655.6,0] [71006,3550.03,0] [70832.9,3847.92,0]			 $point003.pos	 			inclure_segmts:true
+-- tmp.est_sensPositif  #(  $point001.pos , $point002.pos,   $point003.pos )
 
 -- shp_A = $debug_tri
 -- pts_A = for i in 1 to numknots shp_A collect getknotPoint shp_A	1	i

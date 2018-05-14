@@ -404,10 +404,10 @@ struct	str_terrain_node_core	(
 			)
 			
 			
-			mgr_calques.debug_pile ()
+-- 			mgr_calques.debug_pile 	force:true
 			
 			debug "------------------------	FIN	ACTUALISER_CALQUES ()	---------------------------------------------------------------\n\n\n\n"
-			
+-- 			debug_mode	= dbg_mode_BAck
 			
 			
 		),
@@ -422,7 +422,7 @@ struct	str_terrain_node_core	(
 			local calque_pile 	= mgr_calques.get_calque_pile ()
 			
 			
-			mgr_calques.debug_calque 	calque_pile
+			mgr_calques.debug_calque 	calque_pile 	force:true
 			debug "---------------------------------------------------------------------------------------\n\n\n\n"
 			
 			
@@ -630,10 +630,10 @@ struct	str_terrain_node_core	(
 					
 					local chrono_temp = timeStamp ()
 					--- on vide la géométrie	-------------------
--- 					mgr_geo.vider ()
+					mgr_geo.vider ()
 					
 					------	(1-3)	pour enfin créer les faces de la géometrie de base. -------------------
--- 					creer_geometrie_base ()
+					creer_geometrie_base ()
 					
 					chrono_2_1	=	(  ((timeStamp ()) - chrono_temp ) / 1000.0)			
 				)

@@ -49,6 +49,7 @@ struct str_outils_shape (
 		PRECISION_COURBE 			= .1,--50,			--- en cm. ----
 		DOTMAX_COURBE 				= .999,	--- en dot ?!?. ----
 		SEUIL_POINTS_EGAUX  	= .001,
+		SEUIL_DOT  	= 1e-05,
 		-- constante pr debug-----------------
 -- 		SAUVETAGE_MAX 			= 100,
 		
@@ -110,6 +111,9 @@ struct str_outils_shape (
 		
 		
 		--- Analyse position de points (survol_triangles etc..)		-------------
+
+		
+		--- Analyse position de points (survol_triangles etc..)		-------------
 		fn point_estSurSegment	_pt_test		_pt_A		_pt_B	=(
 			
 			local pt_A = _pt_A
@@ -126,9 +130,18 @@ struct str_outils_shape (
 
 			local dot_CA_CB	=	dot 	norm_CA		norm_CB 
 			
-			debug "dot_CA_CB "  var:dot_CA_CB
+-- 			debug "dot_CA_CB "  var:dot_CA_CB
 			
-			dot_CA_CB == 1
+			local result =  ( 1 + dot_CA_CB   ) < SEUIL_DOT
+	
+			if not result and dot_CA_CB < 0 	do (
+				local dist_pt_seg		=		this.get_distance_point_segment		_pt_test		_pt_A		_pt_B
+-- 				debug  "dist_pt_seg" var:dist_pt_seg
+				if dist_pt_seg < SEUIL_POINTS_EGAUX do
+					result = true
+			)
+-- 			debug "point_estSurSegment" var:result
+			result
 			
 		),
 		fn est_aGauche		_pt_seg_1	_pt_seg_2	_pt_aTester	=(
@@ -148,15 +161,41 @@ struct str_outils_shape (
 			sens
 			
 		),
-		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester 	=(
-			local est_aGgauche1 = est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester 
-			local est_aGgauche2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 
-			local est_aGgauche3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester
+		fn est_dansTriangle		_pt_tri_1	_pt_tri_2	_pt_tri_3	_pt_aTester 			inclure_segmts:false		=(
+			local result = false
 			
-			if est_aGgauche1	and est_aGgauche2  and est_aGgauche3 then
-				true
-			else 
-				false
+-- 			debug "est_dansTriangle	--> _pt_aTester" var:_pt_aTester
+			local est_aGauche1 = est_aGauche  _pt_tri_1 	_pt_tri_2 	_pt_aTester 
+			local est_aGauche2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 
+			local est_aGauche3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester
+			
+-- 			debug "est_dansTriangle	--> est_aGauche1" var:est_aGauche1
+-- 			debug "est_dansTriangle	--> est_aGauche2" var:est_aGauche2
+-- 			debug "est_dansTriangle	--> est_aGauche3" var:est_aGauche3
+			
+			if inclure_segmts do (
+				if not est_aGauche1 do
+					est_aGauche1 = 	point_estSurSegment	_pt_aTester    _pt_tri_1 	_pt_tri_2 
+				if not est_aGauche2 do
+					est_aGauche2 = 	point_estSurSegment	_pt_aTester    _pt_tri_2 	_pt_tri_3
+				if not est_aGauche3 do
+					est_aGauche3 = 	point_estSurSegment	_pt_aTester    _pt_tri_3 	_pt_tri_1
+			)
+				
+				
+				
+				
+			if est_aGauche1	and est_aGauche2  and est_aGauche3 do
+				result = true
+			
+					
+				
+				
+			
+-- 			debug "est_dansTriangle" var:result
+
+			
+			result
 		),
 		fn survol_triangles  					_pt_aTester			_pts_triangles_shape 	=(
 			local result = false
@@ -526,23 +565,69 @@ struct str_outils_shape (
 				append result 	_pts[i]
 			result
 		),
+		fn get_positionRelative_BB		_pts_shpA		_pts_shpB 	=(
+			
+			local BB_A		= get_BB_shape	_pts_shpA
+			local BB_B 		= get_BB_shape	_pts_shpB
+			local result
+			
+			if BB_A[1].x < BB_B[1].x 	and	BB_A[2].x > BB_B[2].x  	and	BB_A[1].y < BB_B[1].y  	and	BB_A[2].y > BB_B[2].y then
+				result = #interieur
+			else if BB_A[1].x > BB_B[1].x 	and	BB_A[2].x < BB_B[2].x  	and	BB_A[1].y > BB_B[1].y  	and	BB_A[2].y < BB_B[2].y then
+				result = #exterieur
+			else if BB_A[1].x > BB_B[2].x 	or		BB_A[2].x < BB_B[1].x 	or BB_A[1].y > BB_B[2].y 	or		BB_A[2].y < BB_B[1].y 	then
+				result = #aCoté
+			else 
+				result = #seCroisent
+			
+			
+			result
+		),
+		
+		
 		fn BBs_seCroisent		_shp_1  	_shp_2	 =(
-			local result = true
+			local result = false
+			
+			
+			
 			if _shp_1.count > 0 do 	(
+				
+				
+				
 				local BB_1 = get_BB_shape	_shp_1
 				local BB_2 = get_BB_shape	_shp_2
+				
+				if get_positionRelative_BB		_pts_shpA		_pts_shpB  == #aCoté do (
+					
+					
+				)
+				
+				/* 
+				--- les X de BB2 dans X de BB1 ---------------
+				if BB_2[1].x > BB_1[1].x	and BB_2[1].x < BB_1[2].x or BB_2[2].x > BB_1[1].x	and BB_2[2].x < BB_1[2].x do
+					--- les Y de BB2 dans Y de BB1 ---------------
+					if BB_2[1].x > BB_1[1].x	and BB_2[1].x < BB_1[2].x or BB_2[2].x > BB_1[1].x	and BB_2[2].x < BB_1[2].x 
+				
+				
+				
 				
 				if BB_1[1].x > BB_2[2].x  			then result = false
 				else if BB_1[2].x < BB_2[1].x  	then result = false
 				else if BB_1[1].y > BB_2[2].y  	then result = false
 				else if BB_1[2].y < BB_2[1].y  	do result = false
+					
+				 */
 			)
 			result
 		),
+		
 		------- renvois la position d'un shape par rapport à un autre: si un shapes est ' l'interieur d'un autre (trou boolean), se croisent ou à l'exterieur ---------
 		fn get_positionRelative_shapes 		_pts_shpA		_pts_shpB 		renvoyer_intersections:true		=(
 			
--- 			debug "get_positionRelative_shapes()"
+			debug "----------get_positionRelative_shapes()"
+			debug "		_pts_shpA" var:_pts_shpA
+			debug "		_pts_shpB" var:_pts_shpB
+			debug "		renvoyer_intersections" var:renvoyer_intersections
 			
 			struct	str_intersection	(
 				pos,
@@ -554,10 +639,14 @@ struct str_outils_shape (
 			local result_pos 		= #aCoté		---- #exterieur,  #interieur, #seCroisent, ou	 #aCoté	 --------------
 			local intersections 	=#()
 			
-			---- si les BB se croisent	-------------------
-			if  BBs_seCroisent 	_pts_shpA 		_pts_shpB do (
+			local BB_pos_relative		=  get_positionRelative_BB		_pts_shpA 		_pts_shpB 
 			
--- 				debug "-------->BBs_seCroisent 	_pts_shpA 		_pts_shpB " var:(BBs_seCroisent 	_pts_shpA 		_pts_shpB )
+			
+				debug "-------->BB_pos_relative " var:BB_pos_relative
+			---- si les BB se croisent	-------------------
+			if  BB_pos_relative != #aCoté 	then (
+			
+				debug "-------->BB  seCroisent"
 				---- on regadre si les edges se coupent --- si oui --->  #seCroisent -----------------
 				local trouve = false
 				local  i = 1
@@ -598,10 +687,14 @@ struct str_outils_shape (
 				---- si on a des intersections, alors ils se croisent ------------------------------------
 				if intersections.count > 0 then (
 					
+					debug "		--------> On a des intersections"
+					
+					
 					result_pos 					= #seCroisent
 					result_intersections		=	intersections
 					
 				) else (
+					debug "		--------> On a PAS d'intersection"
 					---- s'il ne se croisent pas alors ils sont tout à l'interieur ou à l'extierieur l'un de l'autre -------------------------
 					local pts_triangles_shpA = this.trianguler	_pts_shpA
  					local pts_triangles_shp2 = this.trianguler	_pts_shpB
@@ -610,9 +703,13 @@ struct str_outils_shape (
 						result_pos = #interieur
 					else  if survol_triangles  	_pts_shpA[1]		pts_triangles_shp2	 then 
 						result_pos = #exterieur
-						
 				)
 				
+			) else (
+				
+				debug "-------->BB  seCroisent   PAS "
+				result_pos 				= 	BB_pos_relative
+				result_intersections	=	#()
 			)
 			
 			
@@ -622,21 +719,8 @@ struct str_outils_shape (
 				intersections
 			)
 			local result  =	str_result  position:result_pos		 intersections:result_intersections
-			result
-		),
-		
-		fn get_positionRelative_BB		_pts_shpA		_pts_shpB 	=(
 			
-			local BB_A		= get_BB_shape	_pts_shpA
-			local BB_B 		= get_BB_shape	_pts_shpB
-			local result
-			
-			if BB_A[1].x < BB_B[1].x 	and	BB_A[2].x > BB_B[2].x  	and	BB_A[1].y < BB_B[1].y  	and	BB_A[2].y > BB_B[2].y then
-				result = #interieur
-			else if BB_A[1].x > BB_B[1].x 	and	BB_A[2].x < BB_B[2].x  	and	BB_A[1].y > BB_B[1].y  	and	BB_A[2].y < BB_B[2].y then
-				result = #exterieur
-			else
-				result = #aCoté
+			debug " -------> result" var:result
 			result
 		),
 		
@@ -924,7 +1008,7 @@ struct str_outils_shape (
 		--- renvois le tableau des triangles créés -------
 		i_debug = 0,
 		fn trianguler  _pts =(
--- 			debug "-------------------- TRIANGULER -----------------------------------------------"
+-- 			debug "-------------------- TRIANGULER SHP -----------------------------------------------"
 			local pts_poly 			= deepcopy _pts
 			
 			local result_triangles	= #()
@@ -1097,7 +1181,7 @@ struct str_outils_shape (
 				)
 				
 			)  --- fin du while il ya plus de 3 pts dans le polygone ------
-			
+-- 			debug "result_triangles" var:result_triangles
 			result_triangles
 			
 		) --- fin fonction decoupage polygone ----------

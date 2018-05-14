@@ -66,7 +66,7 @@ fn creer_debug_splines	_liste_pos 	nom:	=(
 
 
 
-fn debug_point 	_pos	= if DEBUG_MODE do (
+fn debug_point 	_pos	=  if DEBUG_MODE do  (
 	
 	
 
@@ -76,42 +76,40 @@ fn debug_point 	_pos	= if DEBUG_MODE do (
 	creer_debug_pts		_pos
 
 )
-fn debug_spline 	_pos	nom:"li_debug"		=  if DEBUG_MODE do (
+fn debug_spline 	_pos	nom:"li_debug"		=   if DEBUG_MODE do  (
 	
 	try delete $li_debug* catch ()
 	clearselection ()
 	
 	creer_debug_splines	_pos 	nom:nom
-	/* 
-	case classof _pos of (
-		Point3: 	pt _pos
-		array: (
-			
-			if _pos.count > 0 do (
-				
-				if classof	_pos[1] == array then
-					for pos in _pos do li  pos
-				else (
-					try delete $li_debug catch ()
-					sp = splineShape name:"li_debug"
-					pts = _pos
-					addnewSpline sp
-					for pt in pts do		addknot sp 1 #corner #curve  pt
-					close sp 1
-					updateShape sp
-					select sp
-				)
-			)
-		)
-	) */
-
+	
 )
 
 
-global po 	= debug_point
-global li 	= debug_spline
+fn po  _var	= (
+	
+			
+	local dbg_mode_BAck = ::debug_mode
+	::debug_mode = true
+	
+	debug_point	_var
+	
+	::debug_mode = dbg_mode_BAck
+	
+	
+)
+fn li 	_var	= (
+	
+	local dbg_mode_BAck = ::debug_mode
+	::debug_mode = true
+	
+	debug_spline		_var
 
+	::debug_mode = dbg_mode_BAck
+	
 
+	
+)
 
 
 

@@ -7,7 +7,7 @@ include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\terrain - mgr de poly
 struct str_calque (
 	
 		--------------- DEBUG --------------------------------------------		
-		m_debug	=	false,
+		m_debug	=	true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | clq."	  	var:var	 param:param		catch (),
 		
 		m_tab_format_poly = "    ",
@@ -59,11 +59,11 @@ struct str_calque (
 	---- fonctions	--------------------------------------------------------------
 	public
 		fn	ajouter_polygone		_polygone_aAjouter		/* 	brut_mode:false	 */	=	(
--- 			--format "\n\n"
--- 			debug "==================	ajouter_polygone =================================================="
--- 			debug "_polygone_aAjouter" var:_polygone_aAjouter.nom
--- 			debug_calque this
--- 			debug "===================================================================="
+			debug "\n\n"
+			debug "==================	ajouter_polygone =================================================="
+			debug "_polygone_aAjouter" var:_polygone_aAjouter.nom
+			debug_calque this
+			debug "===================================================================="
 			
 			local chrono_1 = timeStamp()
 			
@@ -86,7 +86,7 @@ struct str_calque (
 				i += 1
 			)
 			
--- 			debug "ajouter_polygone:	a_ete_integre" var:a_ete_integre
+			debug "ajouter_polygone:	a_ete_integre" var:a_ete_integre
 			---- s'il a pas été inserer, on l'ajoute basiquement aux polygones du calque- ---------------------------------
 			if not a_ete_integre do (
 				append 		polygones 		_polygone_aAjouter
@@ -100,8 +100,8 @@ struct str_calque (
 -- 			debug "a_ete_integre" var:a_ete_integre
 -- 			debug "polygones" var:polygones param:#nom
 			
--- 			debug_calque this
--- 			debug "===================================================================="
+			debug_calque this
+			debug "===================================================================="
 			
 -- 			debug "--->	ajouter_polygone"  var:( (  ((timeStamp ()) - chrono_1 ) / 1000.0)		as string + " s.\n\n")
 -- 			--format "\n\n"
@@ -174,7 +174,7 @@ struct	str_mgr_calques	(
 
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug	=	false,
+		m_debug	=	true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | calq."	  	var:var	 param:param		catch (),
 		
 		m_tab_format_poly = "    ",
@@ -189,36 +189,65 @@ struct	str_mgr_calques	(
 			format_polygone 	_poly 
 		),
 	public
-		fn debug_calque	_calq	=(
-			debug ( "calque: " + _calq.nom	+" ---------------------")
-			local liste_pts = #()
-			for _poly in _calq.polygones do (
-				debug_poly _poly
-			debug ( "----------------------------------")
-				local enfants = _poly.get_descendance ()
-				for enft in enfants do (
--- 					debug ""var:enft.nom
--- 					debug ""var:(enft.get_pts ())
-					append liste_pts  (enft.get_pts ())
-				)
+		fn debug_calque	_calq		force:false 	=(
+			local dbg_mode_BAck = ::debug_mode
+			local m_debug_mode_BAck = m_debug
+			if force do (
+				::debug_mode = true
+				m_debug = true
 			)
-			debug "pts"var:liste_pts
-			debug ( "----------------------------------")
+			 if m_debug do (
+				 
+					debug ( "calque: " + _calq.nom	+" ---------------------")
+					local liste_pts = #()
+					for _poly in _calq.polygones do (
+						debug_poly _poly
+					debug ( "----------------------------------")
+						local enfants = _poly.get_descendance ()
+						for enft in enfants do (
+		-- 					debug ""var:enft.nom
+		-- 					debug ""var:(enft.get_pts ())
+							append liste_pts  (enft.get_pts ())
+						)
+					)
+					debug "pts"var:liste_pts
+					debug ( "----------------------------------")
+					
+				)
+			if force do (
+				::debug_mode 	= dbg_mode_BAck
+				m_debug 			= m_debug_mode_BAck
+			)
 		),	
 		
-		fn debug_pile	=	 if m_debug do (
-			debug "----------------------------------------------------------------------------"
-			debug "				PILE des calques"
-			local i = -1
-			for calque in this.m_pile do (
-				
-				debug "----------------------------------------------------------------------------"
-				debug ("	Calque " + (i+1) as string + " : [ " + calque.nom  + "(#" + calque.operation as name + ") ]" )
-				debug "----------------------------------------------------------------------------"
-				debug_calque calque
-			)
-			debug "----------------------------------------------------------------------------"
+		fn debug_pile	force:false  =	(
 			
+			
+			
+			local dbg_mode_BAck = ::debug_mode
+			local m_debug_mode_BAck = m_debug
+			if force do (
+				::debug_mode = true
+				m_debug = true
+			)
+			 if m_debug do (
+				debug "----------------------------------------------------------------------------"
+				debug "				PILE des calques"
+				local i = -1
+				for calque in this.m_pile do (
+					
+					debug "----------------------------------------------------------------------------"
+					debug ("	Calque " + (i+1) as string + " : [ " + calque.nom  + "(#" + calque.operation as name + ") ]" )
+					debug "----------------------------------------------------------------------------"
+					debug_calque calque
+				)
+				debug "----------------------------------------------------------------------------"
+				
+			)
+			if force do (
+				::debug_mode 	= dbg_mode_BAck
+				m_debug 			= m_debug_mode_BAck
+			)
 		),
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		
