@@ -101,6 +101,10 @@ struct str_mgr_surfaces (
 				--- on scanne les points ---- 
 				pts_surface = 	scanner_points		m_plug.surface_node		
 				
+				for i = 1 to pts_surface.count do
+					pts_surface[i] = pts_surface[i] * m_plug.surface_node.transform
+				
+				
 				--- on gere les OPTIMISATIONS  ----
 				if m_plug.optim_souder			do	m_outils.souder				&pts_surface		m_plug.optim_souder_seuil
 				if m_plug.optim_orthonormer	do	m_outils.orthonormer		&pts_surface		m_plug.optim_ortho_seuil
@@ -149,7 +153,7 @@ struct str_mgr_surfaces (
 		/* 
 		fn get_axePrincipal_CORRECT = m_outils.get_axePrincipal_mtrx_CORRECT 		( get_points () ),
 		 */
-		fn get_axePrincipal 	= m_outils.get_axePrincipal_mtrx 		( get_points () ),
+		fn get_axePrincipal 		= m_outils.get_axePrincipal_mtrx 		( get_points () ),
 		fn get_axeP_BB			= m_outils.get_axePrincipal_BB 		( get_points () )  ( get_axePrincipal () ),
 		fn get_mur_cardinal   	_pt1	_pt2	 =(
 			local result 

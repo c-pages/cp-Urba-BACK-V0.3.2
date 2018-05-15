@@ -391,8 +391,8 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		
 		local vec_ep_dalle 	= 	[0,0,1] 		* 	ptr_plug.const_dalle_epaisseur		
 		local vec_allege 		= 	[0,0,1] 		*	allege_hauteur
-		local vec_rtmb 			= 	[0,0,1] 		*	retombe		
-		local vec_ht 				= 	[0,0,1] 		*	hauteur				
+		local vec_rtmb 		= 	[0,0,1] 		*	retombe		
+		local vec_ht 			= 	[0,0,1] 		*	hauteur				
 		local vec_longueur 	= norm_dir 	*	longueur
 		local vec_murEp		=	norm_prof *	ptr_plug.const_murExt_epaisseur
 		
@@ -622,8 +622,8 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 			
 			-------	Creation des faces 	--------
 			local nvlFace = ptr_geo.face 		#(	pts_ids[5], 		pts_ids[6], 		pts_ids[2], 		pts_ids[1] )		 	matID:#menuiserie
-			local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[4] )		 		matID:#menuiserie
-			local nvlFace = ptr_geo.face 		#(	pts_ids[4], 		pts_ids[3], 		pts_ids[7] , 	pts_ids[8] )		 		matID:#menuiserie
+			local nvlFace = ptr_geo.face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[3] , 	pts_ids[4] )		 	matID:#menuiserie
+			local nvlFace = ptr_geo.face 		#(	pts_ids[4], 		pts_ids[3], 		pts_ids[7] , 	pts_ids[8] )		 	matID:#menuiserie
 			local nvlFace = ptr_geo.face 		#(	pts_ids[5], 		pts_ids[1], 		pts_ids[4], 		pts_ids[8] )		 	matID:#menuiserie	
 			local nvlFace = ptr_geo.face 		#(	pts_ids[2], 		pts_ids[6], 		pts_ids[7], 		pts_ids[3] )		 	matID:#menuiserie	
 			
@@ -633,7 +633,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		
 		if ptr_params.volet != undefined do  (
 			ptr_params.volet.params.longueur 		= longueur
-			ptr_params.volet.construire		_plug			pt_pourVolet		 		norm_dir:norm_dir		dist_hauteur:(baie_hauteur )	
+			ptr_params.volet.construire		_plug			pt_pourVolet		 		norm_dir:norm_dir		dist_hauteur:( baie_hauteur )			baie_parent:this
 			ptr_params.volet.params.longueur 		= 0
 			
 		)

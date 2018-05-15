@@ -1,9 +1,10 @@
 
 
 
-include	 "$userScripts\\cp-Urba\\modules\\Batiment\\divers\\Batiment - Geometrie.ms"
-include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - shape.ms" 
+include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - Geometrie.ms"
 
+
+include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - shape.ms"
 include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\terrain - mgr de calques.ms" 
 
 

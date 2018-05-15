@@ -92,12 +92,12 @@ rollout compo_dialog "Balcon" width:180 height:120
 	)
 	on ddl_gardeCorps selected _val do
 	(
-			format "GARDE CORPS selected %\n" _val
+-- 			format "GARDE CORPS selected %\n" _val
 			if _val > 1 then (
 				local nv_gardeCorps = m_plug.core.creer_gardeCorps		( _val - 1 )
 				m_compo.params.gardeCorps = nv_gardeCorps
-				format "nv_gardeCorps: %\n" nv_gardeCorps
-			format "-------> m_compo.params.gardeCorps.type %\n" m_compo.params.gardeCorps.type
+-- 				format "nv_gardeCorps: %\n" nv_gardeCorps
+-- 			format "-------> m_compo.params.gardeCorps.type %\n" m_compo.params.gardeCorps.type
 			) else  m_compo.params.gardeCorps = undefined
 		m_rollPrt.actualiser 	sans_params_1:true
 		m_rollPrt.changer_un_truc ()

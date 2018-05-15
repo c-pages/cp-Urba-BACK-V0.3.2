@@ -106,7 +106,8 @@ struct 	str_composant_generique	 (
 													transformation:	\
 													inverse_ouverture:	\
 													coin_de_mur:			\
-													onConstruit_gardeCorps:		= 
+													onConstruit_gardeCorps:	\
+													baie_parent:		= 
 		
 				fnVirt_construire			 _plug		pts	\
 													norm_dir:norm_dir		\
@@ -120,7 +121,8 @@ struct 	str_composant_generique	 (
 													transformation:transformation	\
 													inverse_ouverture:inverse_ouverture	\
 													coin_de_mur:coin_de_mur			\
-													onConstruit_gardeCorps:onConstruit_gardeCorps	
+													onConstruit_gardeCorps:onConstruit_gardeCorps		\
+													baie_parent:	baie_parent
 		
 ) ---- fin composant -------------------------------
 

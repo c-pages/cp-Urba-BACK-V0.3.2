@@ -105,6 +105,23 @@ fn menuis_fnConstruire  	_plug				 _pt_origine			norm_dir:			dist_hauteur:	ptr_b
 			local traverses					=	ptr_baie.params.traverses
 			
 			
+			/* 
+			--- gestion du hazard -------
+			local test_ouvertureFenetre = random 0 100 <  _plug.alea_volet_clos_proba
+			local mtrx_rotationHasard 
+			if  test_ouvertureFenetre then (
+				local sens_ouvertue  = if not inverse_ouverture then 1 else -1
+				local angleMin 		= sens_ouvertue * 180. * _plug.alea_volet_clos_proba/100
+				local angleMax 		= sens_ouvertue * 180. * _plug.alea_volet_clos_max/100
+					
+				mtrx_rotationHasard 	= rotateZMatrix  	( random angleMin angleMax )
+				
+			)	else
+				mtrx_rotationHasard = matrix3 1
+			
+			 */
+			
+						
 			--- gestion du hazard -------
 			local test_ouvertureFenetre = random 0 100 <  _plug.alea_ouvrant_ouvert_proba
 			local mtrx_rotationHasard 
@@ -119,11 +136,6 @@ fn menuis_fnConstruire  	_plug				 _pt_origine			norm_dir:			dist_hauteur:	ptr_b
 				
 			)	else
 				mtrx_rotationHasard = matrix3 1
-			
-			
-			
--- 			mtrx_rotationHasard.translation = 
--- 			format "mtrx_rotationHasard : %\n" mtrx_rotationHasard
 			
 			
 			

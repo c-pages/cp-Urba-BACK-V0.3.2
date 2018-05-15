@@ -417,15 +417,15 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit
 				case composant.type as name of (
 					
 					#balcon:(
-					format "BALCON DEBUT\n"
+-- 					format "BALCON DEBUT\n"
 						balcon_aConstruire 	= composant
 						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche		norm_dir:norm_dir	onConstruitLaDalle:false	coin_de_mur:coin_de_mur
 						balcon_pts_debut 		= for id in ptsIDs_accroche		collect id
-					format "----> balcon_pts_debut :%\n" balcon_pts_debut
+-- 					format "----> balcon_pts_debut :%\n" balcon_pts_debut
 					)
 					#balconFin:(
-					format "BALCON FIN\n"
-					format "----> balcon_pts_debut :%\n" balcon_pts_debut
+-- 					format "BALCON FIN\n"
+-- 					format "----> balcon_pts_debut :%\n" balcon_pts_debut
 						local		pt_balcon_debut	=	polyop.getVert 	m_plug.delegate		balcon_pts_debut[1]	
 						local		pt_balcon_fin		=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
 						composant.params.longueur 				= 		distance	pt_balcon_debut 	pt_balcon_fin

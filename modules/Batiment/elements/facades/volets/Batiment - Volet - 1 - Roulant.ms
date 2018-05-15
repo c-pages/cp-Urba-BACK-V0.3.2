@@ -68,7 +68,7 @@ rollout compo_dialog "Volet roulant" width:180 height:87
 )
 
 --- la fonction de construction	---------
-fn compo_fnConstruire  	_plug		pt_haut		norm_dir:		 		dist_hauteur:				onConstruitLaDalle:true		this:	= (
+fn compo_fnConstruire  	_plug		pt_haut		norm_dir:		 		dist_hauteur:				onConstruitLaDalle:true		this:			baie_parent:		= (
 	
 -------------  POINTEURS 			-----------------------------------------------------------------------------------------------------------------
 		local ptr_plug				= 	_plug
@@ -76,18 +76,18 @@ fn compo_fnConstruire  	_plug		pt_haut		norm_dir:		 		dist_hauteur:				onConstru
 		local ptr_params		  	= 	this.params
 		local ptr_geo 				= 	ptr_plug.core.get_geo ()
 		
-		local norm_prof			= norm_dir 		* rotateZ ( matrix3 1 ) 90		
-		local emprise_verticale = ptr_params.get_emprise_verticale() 
-		local vec_longueur 		= norm_dir 		* ptr_params.longueur
-		local vec_caisse_ep		= [0,0,1] 		* emprise_verticale
-		local vec_caisse_prof	= norm_prof 	* emprise_verticale
-		local vec_volet_hauteur = [0,0,1] 		* ( dist_hauteur - emprise_verticale )
+		local norm_prof				= norm_dir 		* rotateZ ( matrix3 1 ) 90		
+		local emprise_verticale 	= ptr_params.get_emprise_verticale() 
+		local vec_longueur 			= norm_dir 		* ptr_params.longueur
+		local vec_caisse_ep			= [0,0,1] 		* emprise_verticale
+		local vec_caisse_prof		= norm_prof 	* emprise_verticale
+		local vec_volet_hauteur 	= [0,0,1] 		* ( dist_hauteur - emprise_verticale )
 		
-		local vec_rail_lrg 		= norm_dir * 3
-	
+		local vec_rail_lrg 			= norm_dir * 3
+		
 		local vec_decallage_volet	=	norm_prof * 3
-	
-	
+		
+		
 		
 		
 		--- gestion du hazard -------

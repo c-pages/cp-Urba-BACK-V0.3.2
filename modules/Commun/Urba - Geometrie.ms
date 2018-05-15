@@ -277,6 +277,51 @@ struct	str_geometrie	(
 			faces
 		),
 		
+		fn 	cercle  _pt_centre		_pt_rayon		matID:1 			cible: 	=(
+			/* 
+			public static List<Point> AndresCircle(int xc, int yc, int r)
+{
+    List<Point> ret = new List<Point>();
+
+    int x = 0;
+    int y = r;
+    int d = r - 1;
+
+    while (y >= x)
+    {
+        ret.Add(new Point(xc + x, yc + y));
+        ret.Add(new Point(xc + y, yc + x));
+        ret.Add(new Point(xc - x, yc + y));
+        ret.Add(new Point(xc - y, yc + x));
+        ret.Add(new Point(xc + x, yc - y));
+        ret.Add(new Point(xc + y, yc - x));
+        ret.Add(new Point(xc - x, yc - y));
+        ret.Add(new Point(xc - y, yc - x));
+
+        if (d >= 2 * x)
+        {
+            d -= 2 * x + 1;
+            x++;
+        }
+        else if (d < 2 * (r - y))
+        {
+            d += 2 * y - 1;
+            y--;
+        }
+        else
+        {
+            d += 2 * (y - x - 1);
+            y--;
+            x++;
+        }
+    }
+    return ret;
+} */
+		
+			
+		),
+			
+		
 		
 		---  Boite sans les faces dessus et dessus-------------------
 		fn tube 		_pt_A	_vec_ht		_vec_larg		_vec_ep		matID:1   			cible: 	=(
@@ -306,6 +351,45 @@ struct	str_geometrie	(
 			
 			faces
 		),
+		
+		fn boite 		_pt_origine	_vec_ht		_vec_larg		_vec_ep		matID:1   			cible: 	=(
+			if cible == unsupplied or   cible == undefined do	cible = m_plug.delegate
+			
+			--- localiser les point dans l'espace	--------			
+			local pt_1		=	_pt_origine
+			local pt_2 		= pt_1	+ 	_vec_ht	
+			local pt_3 		= 	pt_2	+ 	_vec_larg		
+			local pt_4 		= pt_1	+ 	_vec_larg
+			
+			local pt_5 		= pt_1	+ 	_vec_ep				
+			local pt_6 		= pt_2	+ 	_vec_ep
+			local pt_7		= pt_3	+ 	_vec_ep				
+			local pt_8 		= pt_4	+ 	_vec_ep
+			
+			--- creation des points 		--------------
+			local pts_pos 	= #( 	pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8 )
+			local pts_ids 	= points 	pts_pos  	cible:cible	
+			
+			-------	Creation des faces 	--------
+			local faces =#()
+			append faces ( face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[3] , 		pts_ids[4] )		 matID:matID )
+			append faces ( face 		#(	pts_ids[5], 		pts_ids[8], 		pts_ids[7] , 		pts_ids[6] )		 matID:matID )
+			append faces ( face 		#(	pts_ids[4], 		pts_ids[3], 		pts_ids[7] , 		pts_ids[8] )		 matID:matID )
+			append faces ( face 		#(	pts_ids[1], 		pts_ids[2], 		pts_ids[6] , 		pts_ids[5] )		 matID:matID )
+			
+			append faces ( face 		#(	pts_ids[1], 		pts_ids[4], 		pts_ids[8] , 		pts_ids[5] )		 matID:matID )
+			append faces ( face 		#(	pts_ids[2], 		pts_ids[6], 		pts_ids[7] , 		pts_ids[3] )		 matID:matID )
+			
+			faces
+			
+		),
+		
+		fn		cylindre		_pt_centre	_rayon	_hauteur		matID:1   			cible: 	=(
+			
+			
+		),
+		
+		
 		
 		
 	------ Initialisation de la structure ------------

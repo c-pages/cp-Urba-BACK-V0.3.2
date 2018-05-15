@@ -603,9 +603,10 @@ struct str_batiment_core (
 			if _nodeTHIS.material == undefined do
 				mgr_mat.appliquer_material  		_nodeTHIS
 			
-			_nodeTHIS.transform = _shape.transform
+-- 			_nodeTHIS.transform = _shape.transform
+-- 			_nodeTHIS.position = _shape.position
 			mgr_surface.assigner		_shape
-			
+			_nodeTHIS.pivot = _shape.pivot
 			
 			actualiser ()
 			
