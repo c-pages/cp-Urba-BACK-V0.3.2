@@ -4,29 +4,25 @@ include	 "$userScripts\\cp-Urba\\modules\\Terrain\\divers\\Terrain - outils - sh
 
 ---- polygone de la hierarchie ----------
 struct str_polygone (
+	
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
 		m_debug	=	false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | poly"	  	var:var	 param:param		catch (),
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		
+	
 	
 	--------- membres ------------------------------------------------------------------
 	private
 		
-		
-		
 		mgr_shp				=	str_outils_shape (),
-		mgr_polys 			,
-	
-		pts 					=	#(),
-		
+		mgr_polys 			,		
+		pts 					=	#(),		
 		dist_auParent		=	0,
+	
 	public
-		nom 					=	"",
-		
+		nom 					=	"",		
 		en_creux			=	true	,		---- si le polygone est  creux ou  plein
-		
 		
 	public
 		parent			=	undefined,
@@ -171,7 +167,6 @@ struct str_polygone (
 		fn est_exterieur =  parent == undefined,
 		
 		
-	
 		
 		
 		
@@ -232,14 +227,14 @@ struct str_mgr_polygones (
 	
 		SEUIL_POINTS_EGAUX  	= .01,
 		-- constante pr debug-----------------
-		SAUVETAGE_MAX 			= 20000000,
+		SAUVETAGE_MAX 			= 200,
 	
 	
 	
 	
 	------------ Fonstions internes 	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
-
-	
+		
+		
 	----- TRIANGULATION ---------------------------------------
 	private
 		fn get_pts_dansTriangle 	_pts_triangle		_pts	=(
@@ -252,7 +247,7 @@ struct str_mgr_polygones (
 			)
 			ids_pts_dsTriangle
 		),
-	
+		
 		fn get_sgts_sur_memeAxe		_axe		_polys_total		_id_poly_test		_id_test		=(
 -- 			debug "get_sgts_sur_memeAxe"
 			
@@ -417,7 +412,7 @@ struct str_mgr_polygones (
 
 		),
 		
-		fn controler_triangle_connexions						_polys			_id_poly_proche			_id_pt_proche				_id_poly_courant			_id_pt_courant			_pt_intersec	sens:#versLeBAs		cote:#gauche			=(
+		fn controler_triangle_connexions						_polys			_id_poly_proche			_id_pt_proche				_id_poly_courant			_id_pt_courant			_pt_intersec			sens:#versLeBAs			cote:#gauche			=(
 			
 			local result =#()
 			debug ""
@@ -462,21 +457,63 @@ struct str_mgr_polygones (
 			
 			
 			
-			local pts_courant 	= _polys[ _id_poly_courant ].get_pts 	oriente:true
-			local pt_courant 		= pts_courant[ _id_pt_courant ]
-			local id_pt_courant_svt			= mgr_shp.boucler 	pts_courant	( _id_pt_courant + 1 )
-			local id_pt_courant_prcdt			= mgr_shp.boucler 	pts_courant	( _id_pt_courant - 1 )
-
+			local pts_courant 					= _polys[ _id_poly_courant ].get_pts 	oriente:true
+			local pt_courant 					= pts_courant[ _id_pt_courant ]
+			local id_pt_courant_svt		= mgr_shp.boucler 	pts_courant	( _id_pt_courant + 1 )
+			local id_pt_courant_prcdt		= mgr_shp.boucler 	pts_courant	( _id_pt_courant - 1 )
 			
-			local pts_proche 		=	_polys[ _id_poly_proche ].get_pts oriente:true
-			local pt_proche			=	pts_proche[ _id_pt_proche ]	
+			local pts_proche 					=	_polys[ _id_poly_proche ].get_pts oriente:true
+			local pt_proche						=	pts_proche[ _id_pt_proche ]	
 			
 			local id_pt_proche_svt			= mgr_shp.boucler 	pts_proche	( _id_pt_proche + 1 )
-			local pt_proch_svt				=	pts_proche[ id_pt_proche_svt ]
+			local pt_proche_svt				=	pts_proche[ id_pt_proche_svt ]
 			
-			local pts_triangle 			= #( pt_courant , pt_proche, 	_pt_intersec	)
+			local id_pt_proche_prcdt		= mgr_shp.boucler 	pts_proche	( _id_pt_proche - 1 )
+			local pt_proche_prcdt			=	pts_proche[ id_pt_proche_prcdt ]
 			
-			if not	mgr_shp.est_sensPositif pts_triangle do 
+			
+			
+			
+			---------------- choix du point a connecter ----------------------------------
+			local		id_pt_sommet_triangle			=  _id_pt_proche
+			local		id_pt_sommet_triangle_svt		=  id_pt_proche_svt
+			------- vers le HAUT ----------------
+			If sens == #versLeHaut  then (
+				debug "-----------------------------------------> PAR ICI #A-----"
+				if pt_proche.y < pt_courant.y do
+					if pt_proche_svt.y < pt_courant.y then (
+						debug "-----------------------------------------> PAR ICI # A-1"
+						id_pt_sommet_triangle			=  id_pt_proche_prcdt
+						id_pt_sommet_triangle_svt		=  _id_pt_proche
+					) else (
+						debug "-----------------------------------------> PAR ICI # A-2"
+-- 						id_pt_sommet_triangle			=  id_pt_proche_svt		
+-- 						id_pt_sommet_triangle_svt		=  _id_pt_proche			
+					)
+			)  else (
+				debug "-----------------------------------------> PAR ICI #B-----"
+				------- vers le BAS ----------------
+				if pt_proche.y > pt_courant.y do
+					if pt_proche_svt.y > pt_courant.y then (
+						debug "-----------------------------------------> PAR ICI # B-1"
+						id_pt_sommet_triangle			=  id_pt_proche_prcdt
+						id_pt_sommet_triangle_svt		=  _id_pt_proche
+					) else (
+						debug "-----------------------------------------> PAR ICI # B-2"
+-- 						id_pt_sommet_triangle			= _id_pt_proche
+-- 						id_pt_sommet_triangle_svt	=  id_pt_proche_svt		
+					)
+			) 
+			
+			
+			
+			local 	pt_sommet_triangle			= pts_proche[ id_pt_sommet_triangle ]	
+			
+			
+			
+			-------------- le triangle ----------------
+			local pts_triangle 		= #( pt_courant , pt_sommet_triangle, 	_pt_intersec	)
+			if not	mgr_shp.est_sensPositif 	pts_triangle do 
 				pts_triangle = mgr_shp.changer_sens	pts_triangle
 		
 		
@@ -490,27 +527,29 @@ struct str_mgr_polygones (
 				
 				local ids_pts_result = get_pts_dansTriangle 		pts_triangle		( _polys[i].get_pts oriente: true )
 				
+				debug "		ids_pts_result" var:ids_pts_result
+				
 				if ids_pts_result.count > 0 do (
 					
 					for id_pt_result in ids_pts_result do (
 						
-						local pts_result 					= _polys[i].get_pts oriente:true
+						local pts_result 						= _polys[i].get_pts oriente:true
 						local id_pt_result_precedant 	= mgr_shp.boucler	pts_result  (id_pt_result - 1 )
-						local id_pt_result_suivant 	= mgr_shp.boucler	pts_result  (id_pt_result + 1 )
+						local id_pt_result_suivant 			= mgr_shp.boucler	pts_result  (id_pt_result + 1 )
 						
-						local pt_result					= pts_result[ id_pt_result ]
+						local pt_result						= pts_result[ id_pt_result ]
 						local pt_result_precedant		= pts_result[ id_pt_result_precedant ]
 						local pt_result_suivant			= pts_result[ id_pt_result_suivant ]
 						
 						---- si on est sur le meme poly que notre point a connecter --------------------------
--- 						if _id_poly_courant ==  i		then (
--- 							debug "			id_pt_courant_svt" var:id_pt_courant_svt
--- 							debug "			id_pt_courant_prcdt" var:id_pt_courant_prcdt
--- 							if  id_pt_result != id_pt_courant_svt 	and   id_pt_result != id_pt_courant_prcdt do (
--- 	-- 									if not est_sensPositif_result do
--- 									append polys_pts_dsTriangle  #( i,  id_pt_result )
--- 							)
--- 						) else 
+						if _id_poly_courant ==  i		then (
+							debug "			id_pt_courant_svt" var:id_pt_courant_svt
+							debug "			id_pt_courant_prcdt" var:id_pt_courant_prcdt
+							if  id_pt_result != id_pt_courant_svt 	and   id_pt_result != id_pt_courant_prcdt do (
+	-- 									if not est_sensPositif_result do
+									append polys_pts_dsTriangle  #( i,  id_pt_result )
+							)
+						) else 
 							append polys_pts_dsTriangle  #( i,  id_pt_result )
 
 					)
@@ -534,7 +573,7 @@ struct str_mgr_polygones (
 				local pts_B = _polys[	_id_poly_proche ].get_pts oriente:true
 				
 				---- le choix du point de connexion	-------
-				local id_pt_connxn	=	 _id_pt_proche 
+				local id_pt_connxn	=	 id_pt_sommet_triangle 
 -- 					debug "		--- POU OPU OPU OPU OPU OPU OPU "
 -- 				if sens	==	#versLeBAs and cote == #gauche		or sens	==	#versLeHaut and cote == #droite	  do
 -- 					id_pt_connxn	=	mgr_shp.boucler 	pts_B		( _id_pt_proche + 1 )
@@ -546,23 +585,25 @@ struct str_mgr_polygones (
 					---- le choix du point suivant la connexion	-------
 					local pt_B 						= pts_B[ id_pt_connxn ]
 				
-					local id_pt_connxn_svt		= mgr_shp.boucler 	pts_B		( id_pt_connxn + 1 )
+-- 					local id_pt_connxn_svt		= mgr_shp.boucler 	pts_B		( id_pt_connxn + 1 )
 					
-					if _polys[ _id_poly_proche ].en_creux do
-						id_pt_connxn_svt		= mgr_shp.boucler 	pts_B		( id_pt_connxn - 1 )
+-- 					if _polys[ _id_poly_proche ].en_creux do
+-- 						id_pt_connxn_svt		= mgr_shp.boucler 	pts_B		( id_pt_connxn - 1 )
 					
-					local pt_B_svt 				= pts_B[ id_pt_connxn_svt ]
+					local pt_B_svt 				= pts_B[ id_pt_sommet_triangle_svt ]
 					
 					---- on regarde si on est dans du plein -----------------
 					local est_valide =  mgr_shp.est_aGauche		pt_B		pt_B_svt	pt_courant 
 					
+						debug "			pt_B		pt_B_svt	" var:#(pt_B	,	pt_B_svt )
+						debug "			pt_courant	" var:pt_courant
 					
-						debug "		est_valide # 1 (est_aGauche)" var:est_valide
+						debug "			est_valide # 1 (est_aGauche)" var:est_valide
 					if  _polys[ _id_poly_proche ].en_creux do  est_valide = not est_valide
 						
 					
 					
-						debug "		est_valide # 2 (en_creux)" var:est_valide
+						debug "			est_valide # 2 (en_creux)" var:est_valide
 					
 					
 					--- si meme shape ------------------
@@ -570,7 +611,7 @@ struct str_mgr_polygones (
 						if id_pt_connxn	==	 id_pt_courant_svt  or id_pt_connxn	==	 id_pt_courant_prcdt do
 							est_valide = false
 					
-						debug "		est_valide # 3 (id voisin)" var:est_valide
+						debug "			est_valide # 3 (id voisin)" var:est_valide
 					
 					
 	-- 				debug "est_valide" var:est_valide
@@ -587,7 +628,7 @@ struct str_mgr_polygones (
 																			id_pt_B:		id_pt_connxn				\
 																			pt_A:			pts_A[ _id_pt_courant ] 				\
 																			pt_B:			pt_B
-							debug "bah alors ?!?"
+-- 							debug "bah alors ?!?"
 						append result  	nvl_connexion
 						
 						
@@ -631,33 +672,29 @@ struct str_mgr_polygones (
 			)
 			result
 		),	
-		fn trouver_connexion_a_point		/* _axe	 */	_polys		_id_poly			_id_pt 	 	filtre:#tout		sens:#versLeHaut	=(
+		fn trouver_connexion_a_point							_polys		_id_poly			_id_pt 	 	filtre:#tout		sens:#versLeHaut		=(
 			
 			debug ""
 			debug "------trouver_connexion_a_point------------"
 			debug "------ 	 	filtre" var:filtre
 			debug "------ 	 	sens" var:sens
 			
-			
-			
-			local result = #()
+			local result 				= #()
 			local poly_courant	=	_polys[ _id_poly ]
-			local pts 				= poly_courant.get_pts oriente:true 
+			local pts 					= poly_courant.get_pts 	oriente:true 
 			local pt_courant 		= pts[ _id_pt ]
 			
 			
-			local i_precedant 	= mgr_shp.boucler pts ( _id_pt - 1 )
-			local i_suivant 		= mgr_shp.boucler pts ( _id_pt + 1 )			
+			local i_precedant 		= mgr_shp.boucler pts ( _id_pt - 1 )
+			local i_suivant 			= mgr_shp.boucler pts ( _id_pt + 1 )			
 			local pt_precedant 	= pts [i_precedant]					
 			local pt_suivant 		= pts [i_suivant]	
-			local est_sensPositif = mgr_shp.est_sensPositif	#( pt_precedant, pt_courant, pt_suivant) 
+			local est_sensPositif	= mgr_shp.est_sensPositif	#( pt_precedant, pt_courant, pt_suivant) 
 			
 			---- tout les segments sur l'axe du point ----------------------------
 			local sgts_sur_memeAxe =	get_sgts_sur_memeAxe		#horizontal			_polys		_id_poly		_id_pt
 			
-			
 			debug "sgts_sur_memeAxe" var:sgts_sur_memeAxe
-			
 			
 			
 			---- on cherche le plus pret ------------------
@@ -677,18 +714,14 @@ struct str_mgr_polygones (
 			local pt_intersect_D
 			
 			
-			----- pour chaque polys -----------
+			----- pour chaque polys des segments_sur_memeAxe		 -----------
 			for  id_poly_mmAxe = 1 to sgts_sur_memeAxe.count	 do (
-				
--- 				debug "	--->	id_poly_mmAxe" var:id_poly_mmAxe
 				
 				local poly_mmAxe	=	_polys[ id_poly_mmAxe ]
 				local pts_mmAxe 	=	poly_mmAxe.get_pts oriente:true
 				
 				----- pour chaque segment sur le meme axe que notre point -----------				
 				for id_pt_mmAxe	in sgts_sur_memeAxe[ id_poly_mmAxe ] do (
-					
--- 					debug "	--->	id_pt_mmAxe" var:id_pt_mmAxe
 					
 					local id_pt_mmAxe_svnt		= mgr_shp.boucler	pts_mmAxe ( id_pt_mmAxe + 1 )
 					local id_pt_mmAxe_prcdt		= mgr_shp.boucler	pts_mmAxe ( id_pt_mmAxe - 1 )
@@ -699,37 +732,25 @@ struct str_mgr_polygones (
 					
 					local pt_courant_axe			= pt_courant + [1,0,0]
 					
-					local intersection 				= mgr_shp.get_intersection_droite_droite			pt_courant 	pt_courant_axe		pt_mmAxe		pt_mmAxe_svnt
+					------ on cherche les intersections avec la droite horizontale passant par notre point --------------------------
+					local intersection 					= mgr_shp.get_intersection_droite_droite			pt_courant 	pt_courant_axe		pt_mmAxe		pt_mmAxe_svnt
 					
-					
+					---- on regarde de quel coté se trouve l'intersection, et on choisi la plus pret de chaque coté --------------
 					------ A GAUCHE -------------------------------------------
-					if intersection.x < pt_courant.x do
-							if  ( filtre == #tout or filtre == #gauche )  and 	distance pt_courant  intersection < dist_min_G do (
-								
-								dist_min_G 	= distance pt_courant  intersection							
-								id_poly_proche_G 	=	id_poly_mmAxe
-								
-								
-								if sens	==	#versLeBAs	  then								
-									id_pt_proche_G 		=	id_pt_mmAxe
-								else						
-									id_pt_proche_G 		=	id_pt_mmAxe_svnt
-									
-								pt_intersect_G 		= 	intersection
+					if intersection.x < pt_courant.x then
+							if  ( filtre == #tout or filtre == #gauche )  and 	distance pt_courant  intersection < dist_min_G do (								
+								dist_min_G 				= distance pt_courant  intersection							
+								id_poly_proche_G 	=	id_poly_mmAxe								
+								id_pt_proche_G 		=	id_pt_mmAxe
+								pt_intersect_G 			=	intersection
 							)
 					------ A DROITE -------------------------------------------
-					if intersection.x > pt_courant.x do
-							if  ( filtre == #tout or filtre == #droite ) and distance pt_courant  intersection < dist_min_D do (
-								
-								dist_min_D	= distance pt_courant  intersection
-								id_poly_proche_D 	=	id_poly_mmAxe
-								if sens	==	#versLeHaut	  then								
-									id_pt_proche_D 		=	id_pt_mmAxe
-								else						
-									id_pt_proche_D 		=	id_pt_mmAxe_svnt
-								
-								
-								pt_intersect_D 		= 	intersection
+					else	-- intersection.x > pt_courant.x do
+							if  ( filtre == #tout or filtre == #droite ) and distance pt_courant  intersection < dist_min_D do (								
+								dist_min_D				= distance pt_courant  intersection
+								id_poly_proche_D 	=	id_poly_mmAxe	
+								id_pt_proche_D 		=	id_pt_mmAxe
+								pt_intersect_D 			= 	intersection
 							)
 					
 				)				
@@ -743,35 +764,31 @@ struct str_mgr_polygones (
 			debug "	------->	id_pt_proche_D" var:id_pt_proche_D
 			
 			
-			---- maintenat qu'on à les connexions les plus prioche, on verifie qu'il n'y a pas de points dans les triangle ---------------------------------
+			---- maintenat qu'on à les connexions les plus proches, on les ajoute au resultat aprés avoir verifié qu'il n'y a pas de points dans les triangles 	---------------------------------
 			------ A GAUCHE -------------------------------------------
 			if  ( filtre == #tout or filtre == #gauche ) and id_poly_proche_G != undefined 	do 	
 				result += 		(  controler_triangle_connexions   		_polys			id_poly_proche_G			id_pt_proche_G			_id_poly					_id_pt			pt_intersect_G			sens:sens		cote:#gauche	)
-			
+				
 			------ A GAUCHE -------------------------------------------
 			if  ( filtre == #tout or filtre == #droite ) and id_poly_proche_D != undefined 	do 	
 				result += 		(  controler_triangle_connexions   		_polys			id_poly_proche_D			id_pt_proche_D			_id_poly					_id_pt			pt_intersect_D			sens:sens		cote:#droite	)
-
+				
 				debug "		----->	result " var:result
 			
 			
 			result
 		),
+		
+		
+	 
+	 
+	 
+		fn analyser_connexions 					_polys		 =(
 			
-			
-		 
-		 
-		 
-		fn analyser_connexions 					_polys		balayage:#verticale	 =(
-			
-			------ on cherche les 'pointes'---------
-			---			Pour chaque point P, vérifiez si les points voisins sont tous deux du même côté de la ligne de balayage.
-			---			Si c'est le cas, vérifiez la ligne de balayage suivante de l'autre côté. 
-			---			Casser le polygone sur la ligne entre le point d'origine et l'un des points de celui-ci.
-			
--- 			local pts_deRupture 			=#()
--- 			local pts_deRupture_horiz 	=#()
+			--- On renvois une liste de connexions----------------------------------
 			local connexions				 	=#()
+			
+			------ pour chacun des polys, on va parcourir chaque point pour trouver les 'pointes'  ----------------------------
 			for id_poly = 1 to _polys.count do (
 				
 				local poly_courant 	= _polys[id_poly]
@@ -780,9 +797,8 @@ struct str_mgr_polygones (
 				debug ""
 				debug "----- id_poly ----- " var:id_poly
 				
--- 				local sur_segment_ortho = false
+				----- avec chacun des points ----------------------
 				for i = 1 to pts.count do (
-					
 					
 					local i_precedant 	= mgr_shp.boucler pts ( i - 1 )
 					local i_suivant 		= mgr_shp.boucler pts ( i + 1 )
@@ -790,134 +806,87 @@ struct str_mgr_polygones (
 					local pt_courant 		= pts [i]					
 					local pt_precedant 	= pts [i_precedant]					
 					local pt_suivant 		= pts [i_suivant]
+					
 					debug""
 					debug""
 					debug  "	---- connexion ? ---------	 " 
 					debug  "	---- id_pt " var:i
 					debug  "	---- pt_courant " var:pt_courant
--- 					debug  "	-->					pt_precedant" var:pt_precedant
--- 					debug  "	-->					pt_suivant" var:pt_suivant
--- 					debug  "		-->					pt_precedant.y - pt_courant.y" var:(pt_precedant.y - pt_courant.y)
--- 					debug  "		-->					pt_precedant.y - pt_courant.y  < SEUIL_POINTS_EGAUX " var:(pt_precedant.y - pt_courant.y  < SEUIL_POINTS_EGAUX)
--- 					debug  "		-->					 pt_suivant.y - pt_courant.y" var:( pt_suivant.y - pt_courant.y) 
--- 					debug  "		-->					( ( pt_suivant.y - pt_courant.y) <  SEUIL_POINTS_EGAUX ) " var:( ( pt_suivant.y - pt_courant.y ) <  SEUIL_POINTS_EGAUX )
 					
--- 					debug ( "pt_courant: "  + pt_courant as string +  "	pt_precedant: "  + pt_precedant as string + "	pt_suivant: "  + pt_suivant as string )
--- 					debug ( "pt_courant: "  +( ( pt_courant.y as double)  * 10000 )as string +  "	pt_precedant: "  + ((pt_precedant.y as double )* 10000 ) as string + "	pt_suivant: "  + ((pt_suivant.y as double  )* 10000 )as string )
--- 					
--- 					local est_sensPositif = mgr_shp.est_sensPositif	#( pt_precedant, pt_courant, pt_suivant) 
--- 					
-					---- on cherche les points de ruptures ----------------------
-					case balayage of (
-						#verticale: (
-							
-							-------- vers le HAUT   ------------------------
-							-------- CAS 1 : pointe vers le HAUT   ------------------------
-							if  pt_courant.y - pt_precedant.y  > SEUIL_POINTS_EGAUX  and  pt_courant.y - pt_suivant.y  >  SEUIL_POINTS_EGAUX 	then (
-								
-								debug "		----> CAS 1 HAUT : POINTE  "
+					local	vec1 =  normalize ( pt_precedant - pt_courant )
+					local	vec2 =  normalize ( pt_suivant - pt_courant )
+					local est_sensPositif = true
+					if vec2.x > vec1.X do est_sensPositif = false
+					
+					
+					
+					
+					---- on cherche les points de ruptures (les 'pointes') ----------------------
+					
+					-------- vers le HAUT   ------------------------------------------------------------------------------------------------------------------------
+					-------- CAS 1 : pointe    ------------------------
+					if  pt_courant.y - pt_precedant.y  > SEUIL_POINTS_EGAUX  and  pt_courant.y - pt_suivant.y  >  SEUIL_POINTS_EGAUX 	then (
+						
+						debug "		----> CAS 1 HAUT : POINTE  "
+						debug "		----> poly_courant.est_exterieur ()  " var:(poly_courant.est_exterieur ()  )
+						debug "		----> est_sensPositif  " var:est_sensPositif	--	(mgr_shp.est_sensPositif  #( pt_precedant, pt_courant, pt_suivant )  )
+						
+-- 						if not poly_courant.est_exterieur () and not est_sensPositif or 	poly_courant.est_exterieur () and not est_sensPositif do (
+						
 								local 	 nvls_cnxns	= trouver_connexion_a_point  		_polys		id_poly		i 		sens:#versLeHaut
 								debug "nvls_cnxns" var:nvls_cnxns
 								for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions nvl_cnxn
-								
-							-------- CAS 2 : segment horizontal debut	------------------------
-							) 
-							 else 	if abs ( pt_suivant.y - pt_courant.y ) < SEUIL_POINTS_EGAUX	 and 	pt_courant.y - pt_precedant.y  > SEUIL_POINTS_EGAUX	then (
-								
-									debug "		----> CAS 2  HAUT : debut PLAT  "
-									local 	 nvls_cnxns	= trouver_connexion_a_point  				_polys		id_poly		i   filtre:#gauche			sens:#versLeHaut
-									debug "nvls_cnxns" var:nvls_cnxns
-									for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions nvl_cnxn
-									
-							-------- CAS 3  le second point a connecter de la partie ortho --------------
-							) else if   abs ( pt_precedant.y -  pt_courant.y ) < SEUIL_POINTS_EGAUX	and pt_courant.y - pt_suivant.y  >  SEUIL_POINTS_EGAUX then (
-								
-								debug "		----> CAS 3  HAUT : fin PLAT  "									
-								local 	 nvls_cnxns	= trouver_connexion_a_point		_polys		id_poly		i 	 filtre:#droite		sens:#versLeHaut
-								for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions 	nvl_cnxn
-								
-							)
+-- 						)
+					-------- CAS 2 : segment horizontal debut ( connexion vers la Gauche )	------------------------
+					) 
+					 else 	if abs ( pt_suivant.y - pt_courant.y ) < SEUIL_POINTS_EGAUX	 and 	pt_courant.y - pt_precedant.y  > SEUIL_POINTS_EGAUX	then (
+						
+							debug "		----> CAS 2  HAUT : debut PLAT  "
+							local 	 nvls_cnxns	= trouver_connexion_a_point  				_polys		id_poly		i   filtre:#gauche			sens:#versLeHaut
+							debug "nvls_cnxns" var:nvls_cnxns
+							for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions nvl_cnxn
 							
-							
-							-------- vers le BAS   ------------------------
-							-------- CAS 1 : pointe vers le BAS   ------------------------
-							if  pt_precedant.y - pt_courant.y  > SEUIL_POINTS_EGAUX  and  pt_suivant.y - pt_courant.y  >  SEUIL_POINTS_EGAUX 	then (
-								
-								debug "		----> CAS 1 BAS : POINTE  "
+					-------- CAS 3  le second point a connecter de la partie horizontal  ( connexion vers la Droite ) --------------
+					) else if   abs ( pt_precedant.y -  pt_courant.y ) < SEUIL_POINTS_EGAUX	and pt_courant.y - pt_suivant.y  >  SEUIL_POINTS_EGAUX then (
+						
+						debug "		----> CAS 3  HAUT : fin PLAT  "									
+						local 	 nvls_cnxns	= trouver_connexion_a_point		_polys		id_poly		i 	 filtre:#droite		sens:#versLeHaut
+						for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions 	nvl_cnxn
+						
+					)
+					
+					
+					-------- vers le BAS   ------------------------
+					-------- CAS 1 : pointe vers le BAS   ------------------------
+					if  pt_precedant.y - pt_courant.y  > SEUIL_POINTS_EGAUX  and  pt_suivant.y - pt_courant.y  >  SEUIL_POINTS_EGAUX 	then (
+						
+						debug "		----> CAS 1 BAS : POINTE  "
+						debug "		----> poly_courant.est_exterieur ()  " var:(poly_courant.est_exterieur ()  )
+						debug "		----> est_sensPositif  " var:est_sensPositif	
+						
+						
+-- 						if not poly_courant.est_exterieur () and  est_sensPositif or 	poly_courant.est_exterieur () and  est_sensPositif do (
+						
 								local 	 nvls_cnxns	= trouver_connexion_a_point  	_polys		id_poly		i 		sens:#versLeBAs
 								debug "nvls_cnxns" var:nvls_cnxns
 								for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions nvl_cnxn	
-								
-							-------- CAS 2 : segment horizontal debut	------------------------
-							)  else 	if abs ( pt_suivant.y - pt_courant.y ) < SEUIL_POINTS_EGAUX	 and 	pt_courant.y - pt_precedant.y  < SEUIL_POINTS_EGAUX	then (
-								
-									debug "		----> CAS 2 BAS : debut PLAT  "
-									local 	 nvls_cnxns	= trouver_connexion_a_point  			_polys		id_poly		i   filtre:#droite		sens:#versLeBAs
-									debug "nvls_cnxns" var:nvls_cnxns
-									for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions 		nvl_cnxn
-									
-							-------- CAS 3  le second point a connecter de la partie ortho --------------
-							) else if   abs ( pt_precedant.y -  pt_courant.y ) < SEUIL_POINTS_EGAUX	and pt_courant.y - pt_suivant.y  <  SEUIL_POINTS_EGAUX then (
-								
-								debug "		----> CAS 3 BAS : fin PLAT  "									
-								local 	 nvls_cnxns	= trouver_connexion_a_point  		_polys		id_poly		i 	 filtre:#gauche		sens:#versLeBAs
-								for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions 	nvl_cnxn
-								
-							) /**/
+-- 						)
+					-------- CAS 2 : segment horizontal debut	------------------------
+					)  else 	if abs ( pt_suivant.y - pt_courant.y ) < SEUIL_POINTS_EGAUX	 and 	pt_courant.y - pt_precedant.y  < SEUIL_POINTS_EGAUX	then (
+						
+							debug "		----> CAS 2 BAS : debut PLAT  "
+							local 	 nvls_cnxns	= trouver_connexion_a_point  			_polys		id_poly		i   filtre:#droite		sens:#versLeBAs
+							debug "nvls_cnxns" var:nvls_cnxns
+							for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions 		nvl_cnxn
 							
-							
-							
-							
-							
-							
-							
-							
-							
-							
-							
-							
-							
-							
-								
-						)
-						/* #horizontal: (
-							
-								-------- CAS 1 : pointe  ------------------------
--- 								if pt_precedant.y < pt_courant.y   and pt_suivant.y < pt_courant.y 	then (
-									
-								if  pt_courant.x - pt_precedant.x > SEUIL_POINTS_EGAUX  and pt_courant.x - pt_suivant.x  >  SEUIL_POINTS_EGAUX 	then (
-									
-									debug "		----> CAS 1 : POINTE  "
-									local 	 nvls_cnxns	= get_connexions  		#vertical		_polys		id_poly		i 
-									debug "nvls_cnxns" var:nvls_cnxns
-									for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions nvl_cnxn
-								)
-							-------- CAS 2 : segment horizontal debut	------------------------
-							else 	if pt_suivant.x == pt_courant.x  and 	pt_precedant.x <  pt_courant.x 	then (
-									
-									debug "		----> CAS 2 : debut PLAT  "
-									local 	 nvls_cnxns	= get_connexions  		#vertical		_polys		id_poly		i   filtre:#bas
-									debug "nvls_cnxns" var:nvls_cnxns
-									for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions nvl_cnxn
-									
-								--- le second point a connecter de la partie ortho --------------
-								) else if pt_suivant.x < pt_courant.x  and 	pt_precedant.x ==  pt_courant.x then (
-									
-									debug "		----> CAS 3 : fin PLAT  "									
-									local 	 nvls_cnxns	= get_connexions  		#horizontal		_polys		id_poly		i 	 filtre:#haut
-									for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions 	nvl_cnxn
-								)
-								
-							
-						) */
-					) -- fin case balayage -------
-					
-					
-					
-					
-					
-					
--- 					debug "		----> connexions " var:connexions
+					-------- CAS 3  le second point a connecter de la partie ortho --------------
+					) else if   abs ( pt_precedant.y -  pt_courant.y ) < SEUIL_POINTS_EGAUX	and pt_courant.y - pt_suivant.y  <  SEUIL_POINTS_EGAUX then (
+						
+						debug "		----> CAS 3 BAS : fin PLAT  "									
+						local 	 nvls_cnxns	= trouver_connexion_a_point  		_polys		id_poly		i 	 filtre:#gauche		sens:#versLeBAs
+						for nvl_cnxn in nvls_cnxns do	ajouter_connexion		connexions 	nvl_cnxn
+						
+					) 
 				)
 			)
 			
@@ -925,38 +894,13 @@ struct str_mgr_polygones (
 			connexions
 		),
 		
-		
-		fn decouper_polygone_monotone		_polys		balayage:#verticale		=(
-			
-			------------ deBUG -----------------------------
-			debug "decouper_polygone_monotone"
-			debug "_polys" var:_polys param:#nom
-			local debug_points_polys =#()
-			for debug_poly in _polys do
-				append debug_points_polys (debug_poly.get_pts  oriente:true )
-			
-			debug "debug_points_polys" var:debug_points_polys
-			------------ deBUG -----------------------------
+		fn decouper_polygone_connexions		_polys		_connexions 	=(
 			
 			
-			
-			local list_pts_decoupe =#()
-			local pts_decoupe_courant =#()
-			
+			local result_polys_decoupes	 	=#()
+			local pts_decoupe_courant 		=#()
 			
 			
-			--- on recherche les connexions pour découpage	--------
-			local connexions				 	= analyser_connexions 		_polys		balayage:balayage
-			debug "		------->	CONNEXIONS TOTALES"			var:connexions
-			
-			
-			
-			
-			
-			--------- on decoupe les polygones en fonction des connexions 			-----------------------
-
-			if connexions.count > 0 then (
-				
 				----- les polys sans connexions ------------------------------
 				local ids_poly_ss_connexion	=#{1.._polys.count}
 				for cnxn in connexions do (
@@ -965,9 +909,9 @@ struct str_mgr_polygones (
 				)
 				debug "		------->	ids_poly_ss_connexion"	 var:ids_poly_ss_connexion
 				for i = 1 to _polys.count where  ids_poly_ss_connexion[i] do (				 
-						local pts = _polys[i].get_pts ()					
-						if not mgr_shp.est_sensPositif pts do pts = 	mgr_shp.changer_sens  pts
-						append list_pts_decoupe	pts
+						local pts = _polys[i].get_pts 	oriente:true			
+-- 						if not mgr_shp.est_sensPositif pts do pts = 	mgr_shp.changer_sens  pts
+						append result_polys_decoupes	pts
 				)
 				
 			
@@ -975,7 +919,7 @@ struct str_mgr_polygones (
 			
 			
 				
-				local ids_connexions_aTraiter = #{1..connexions.count}
+				local ids_connexions_aTraiter = #{1.._connexions.count}
 				
 				--- debug ----------
 				for cnxn in connexions do (
@@ -1000,13 +944,10 @@ struct str_mgr_polygones (
 				
 			
 			
-			
-			
-				
 				
 				---- la premiere courante -----------------
 				local id_connexion_courante 	= (ids_connexions_aTraiter as array )[1]
-				local cnx_courante 				= connexions [ id_connexion_courante ]
+				local cnx_courante 				= _connexions [ id_connexion_courante ]
 				local id_poly_courant 			= cnx_courante.id_poly_A
 				
 				local mode_poly_courant 		= #A
@@ -1093,8 +1034,8 @@ struct str_mgr_polygones (
 						--- on cherche la prochaine connexion -----------------------------------------------------------------------------------------------------
 						-- on cherche les connexions avec le poly courant ----------
 						local cnxns_poly_courant = #()
-						for id_cnx = 1 to connexions.count  /* where connexions[ id_cnx ] != cnx_couranteand ids_connexions_aTraiter[ id_cnx ]  */do (
-							local cnxn = connexions[ id_cnx ]						
+						for id_cnx = 1 to _connexions.count  do (
+							local cnxn = _connexions[ id_cnx ]						
 							if cnxn.id_poly_A == id_poly_courant or cnxn.id_poly_B == id_poly_courant do 
 								append cnxns_poly_courant 	cnxn
 						)
@@ -1295,7 +1236,7 @@ struct str_mgr_polygones (
 							
 							debug "	--------> PT_PRECEDANT" var:pt_precedant
 							mode_poly_courant 		=  cnx_courante.est_courante 		id_poly_courant 	id_pt_courant
-							id_connexion_courante 	= findItem	connexions		cnx_courante
+							id_connexion_courante 	= findItem	_connexions		cnx_courante
 							
 							
 							debug "	--------> MODE_POLY_COURANT" var:mode_poly_courant
@@ -1336,13 +1277,13 @@ struct str_mgr_polygones (
 						onA_faitLeTour = true
 						
 						--- on ajoute nos points au resultat -----
-						append list_pts_decoupe	pts_decoupe_courant
+						append result_polys_decoupes	pts_decoupe_courant
 						
 						debug"\n\n\n"
 						debug "--------------------- ON A FAIT LE TOUR  ----------------------------------- "
 						debug "-------> pts_decoupe_courant" var:pts_decoupe_courant
 						debug "-------> DEBUG_SHAPE" var:(debug_pts	pts_decoupe_courant) 
-						debug "-------> list_pts_decoupe" var:list_pts_decoupe
+						debug "-------> result_polys_decoupes" var:result_polys_decoupes
 						debug "---------------------------------------------------------------------------- "
 						debug "\n\n\n\n\n\n\n\n"
 						
@@ -1355,7 +1296,7 @@ struct str_mgr_polygones (
 						if (ids_connexions_aTraiter as array ).count > 0 then (
 							
 							id_connexion_courante 	= (ids_connexions_aTraiter as array )[1]
-							cnx_courante 				= connexions [ id_connexion_courante ]	
+							cnx_courante 				= _connexions [ id_connexion_courante ]	
 							
 							--- choix de la direction -------------
 							if 	cnx_courante.passages ==#aucun or cnx_courante.passages == #B_vers_A	then (
@@ -1402,20 +1343,61 @@ struct str_mgr_polygones (
 					
 					
 				) -- fin while		 onA_desConnexions_aTraiter			-----
-					
 				
+				
+				
+			result_polys_decoupes
+			
+			
+		),
+		
+		
+		fn get_polygone_monotone		_polys			=(
+			
+			------ on cherche les 'pointes'---------
+			---			Pour chaque point P, vérifiez si les points voisins sont tous deux du même côté de la ligne de balayage.
+			---			Si c'est le cas, vérifiez la ligne de balayage suivante de l'autre côté. 
+			---			Casser le polygone sur la ligne entre le point d'origine et l'un des points de celui-ci.
+			
+			
+			
+			------------ deBUG -----------------------------
+			debug "decouper_polygone_monotone"
+			debug "_polys" var:_polys param:#nom
+			local debug_points_polys =#()
+			for debug_poly in _polys do
+				append debug_points_polys (debug_poly.get_pts  oriente:true )
+			
+			debug "debug_points_polys" var:debug_points_polys
+			------------ deBUG -----------------------------
+			
+			
+			
+			local result_polys_monos	 =#()
+			
+			
+			
+			--- on recherche les connexions pour découpage	--------
+			local connexions				 	= analyser_connexions 		_polys		balayage:balayage
+			debug "		------->	CONNEXIONS TOTALES"			var:connexions
+			
+			
+			
+			
+			
+			--------- on decoupe les polygones en fonction des connexions 			-----------------------
+			if connexions.count > 0 then (
+				
+				result_polys_monos +=		decouper_polygone_connexions		_polys	connexions 
 				
 			) else (
 				---- on a pas besoin de le redecouper -----------------
 				for poly in _polys do (
-					local pts = poly.get_pts ()
-					
-					if not mgr_shp.est_sensPositif pts do pts = 	mgr_shp.changer_sens  pts
-					append list_pts_decoupe	pts
+					local pts = poly.get_pts oriente:true
+					append result_polys_monos	pts
 				)
 				
-				
-			) 
+			)
 			
 			
 			
@@ -1434,10 +1416,10 @@ struct str_mgr_polygones (
 			
 			
 			
-			list_pts_decoupe
+			result_polys_monos
 			
 		),
-	
+		
 		
 	public 	
 		fn trianguler		_polys =(
@@ -1446,7 +1428,7 @@ struct str_mgr_polygones (
 			local triangles = #()
 			
 			----- PREMIER BALAYAGE    --- VERTICAL ---------------
-			local polys_monotones	=	decouper_polygone_monotone	_polys	balayage:#verticale
+			local polys_monotones		=	decouper_polygone_monotone		_polys	
 			debug "polys_monotones" var:polys_monotones
 			
 			triangles = polys_monotones
@@ -1483,11 +1465,11 @@ struct str_mgr_polygones (
 -- 			debug "triangles" var:triangles
 			triangles
 		),
-	
+		
 		
 		
 	public	
-	
+		
 		fn inserer_poly_ds_poly		_poly_aInserer		_poly_dest 		=(
 			
 			debug "\n\n"
@@ -1609,7 +1591,7 @@ struct str_mgr_polygones (
 			
 			result
 		),
-	
+		
 		fn creer_pts_pourFace		_poly			=(
 			
 -- 			local chrono_temp = timeStamp ()
@@ -1707,12 +1689,12 @@ struct str_mgr_polygones (
 			
 			result_polys
 		)
-
 		
 		
 		
-
-	
+		
+		
+		
 ) ------ fin struct mgr polys ---------------------------
 
 

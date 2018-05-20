@@ -165,6 +165,8 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 			onConstruitLaDalle:
 							local pts_ids 	= ptr_geo.points 	#(pt_1, pt_2, pt_3, pt_4 )
 							
 							
+							pt_result_3 = pts_ids[3]
+							
 							local nvlFace_pierre = ptr_geo.face 		#(pts_ids[1], pts_ids[2], pts_ids[3], pts_ids[4] )		matID:#mur
 							
 						)
@@ -183,8 +185,11 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 			onConstruitLaDalle:
 						local pt_3 = pt_2 + vec_hauteur_pierre
 						local pt_4 = pt_1 + vec_hauteur_pierre
 						
+							local pts_ids 	= ptr_geo.points 	#(pt_1, pt_2, pt_3, pt_4 )
+						pt_result_3 = pts_ids[3]
 						
-						local nvlFace_pierre = ptr_geo.face 		#( pt_1,  pt_2, pt_3, 	pt_4 )		matID:#mur
+						
+						local nvlFace_pierre = ptr_geo.face 		#(pts_ids[1], pts_ids[2], pts_ids[3], pts_ids[4] )		matID:#mur
 						ptr_geo.biseauter	 	nvlFace_pierre 	0	-2.5 
 						ptr_geo. extruder 	nvlFace_pierre 	ep_pierre
 						

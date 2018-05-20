@@ -11,7 +11,7 @@ struct str_outils_shape (
 
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
-		m_debug	=	true,
+		m_debug	= false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | shape"	  	var:var	 param:param		catch (),
 	
 		m_tab_format_nd = "		",
@@ -48,8 +48,8 @@ struct str_outils_shape (
 		--- constantes---------
 		PRECISION_COURBE 			= .1,--50,			--- en cm. ----
 		DOTMAX_COURBE 				= .999,	--- en dot ?!?. ----
-		SEUIL_POINTS_EGAUX  	= .001,
-		SEUIL_DOT  	= 1e-05,
+		SEUIL_POINTS_EGAUX  	= .000001,
+		SEUIL_DOT  	= 	1e-05,		--0,	
 		-- constante pr debug-----------------
 -- 		SAUVETAGE_MAX 			= 100,
 		
@@ -132,12 +132,14 @@ struct str_outils_shape (
 			
 -- 			debug "dot_CA_CB "  var:dot_CA_CB
 			
-			local result =  ( 1 + dot_CA_CB   ) < SEUIL_DOT
-	
+-- 			local result =  ( 1 + dot_CA_CB   ) < SEUIL_DOT
+			
+			local result =		( dot_CA_CB	==	-1 )
+			
 			if not result and dot_CA_CB < 0 	do (
 				local dist_pt_seg		=		this.get_distance_point_segment		_pt_test		_pt_A		_pt_B
 -- 				debug  "dist_pt_seg" var:dist_pt_seg
-				if dist_pt_seg < SEUIL_POINTS_EGAUX do
+				if dist_pt_seg == 0 /* < SEUIL_POINTS_EGAUX  */do
 					result = true
 			)
 -- 			debug "point_estSurSegment" var:result
@@ -169,9 +171,9 @@ struct str_outils_shape (
 			local est_aGauche2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 
 			local est_aGauche3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester
 			
--- 			debug "est_dansTriangle	--> est_aGauche1" var:est_aGauche1
--- 			debug "est_dansTriangle	--> est_aGauche2" var:est_aGauche2
--- 			debug "est_dansTriangle	--> est_aGauche3" var:est_aGauche3
+			debug "	--> est_aGauche1" var:est_aGauche1
+			debug "	--> est_aGauche2" var:est_aGauche2
+			debug "	--> est_aGauche3" var:est_aGauche3
 			
 			if inclure_segmts do (
 				if not est_aGauche1 do
@@ -181,10 +183,10 @@ struct str_outils_shape (
 				if not est_aGauche3 do
 					est_aGauche3 = 	point_estSurSegment	_pt_aTester    _pt_tri_3 	_pt_tri_1
 			)
-				
-				
-				
-				
+			
+			
+			
+			
 			if est_aGauche1	and est_aGauche2  and est_aGauche3 do
 				result = true
 			
@@ -192,7 +194,7 @@ struct str_outils_shape (
 				
 				
 			
--- 			debug "est_dansTriangle" var:result
+			debug ( "est_dansTriangle ( " +  _pt_aTester as string + " )" 	)	var:result
 
 			
 			result
