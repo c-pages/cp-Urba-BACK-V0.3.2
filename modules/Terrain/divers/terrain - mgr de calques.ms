@@ -146,19 +146,16 @@ struct str_calque (
 		),
 		
 	public
-		--------------------------- Trianguler  -------------------------------------------------------------------------------
-		----- 	triangulation avec decoupage en polygones montones par balayage vertical et horizontal, 			----
-		------	puis decoupage des polygones restant façon oreille peut etre...										----
-		------------------------------------------------------------------------------------------------------------------------
-		fn trianguler =(
-			debug "trianguler"
+		
+		fn get_surface_pts =(
+-- 			debug "get_surface_pts"
 			
-			local result_triangles =#()
+			local result_surfPts =#()
 			for poly in polygones do
-				result_triangles += poly.trianguler ()
+				result_surfPts += poly.get_polygones_monotones ()
 			
-			debug "result_triangles" var:result_triangles
-			result_triangles
+			debug "get_surface_pts" var:result_surfPts
+			result_surfPts
 			
 		)
 		

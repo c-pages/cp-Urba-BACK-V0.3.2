@@ -130,19 +130,21 @@ struct str_outils_shape (
 
 			local dot_CA_CB	=	dot 	norm_CA		norm_CB 
 			
--- 			debug "dot_CA_CB "  var:dot_CA_CB
+-- 			debug "	###	dot_CA_CB "  var:dot_CA_CB
 			
 -- 			local result =  ( 1 + dot_CA_CB   ) < SEUIL_DOT
 			
 			local result =		( dot_CA_CB	==	-1 )
 			
-			if not result and dot_CA_CB < 0 	do (
-				local dist_pt_seg		=		this.get_distance_point_segment		_pt_test		_pt_A		_pt_B
--- 				debug  "dist_pt_seg" var:dist_pt_seg
-				if dist_pt_seg == 0 /* < SEUIL_POINTS_EGAUX  */do
-					result = true
-			)
--- 			debug "point_estSurSegment" var:result
+-- 			debug  "	###	( dot_CA_CB	==	-1 )" var:( dot_CA_CB	==	-1 )
+			
+-- 			if not result and dot_CA_CB < 0 	do (
+-- 				local dist_pt_seg		=		this.get_distance_point_segment		_pt_test		_pt_A		_pt_B
+-- 				debug  "	###	dist_pt_seg" var:dist_pt_seg
+-- 				if dist_pt_seg == 0 /* < SEUIL_POINTS_EGAUX  */do
+-- 					result = true
+-- 			)
+-- 			debug "	###	point_estSurSegment" var:result
 			result
 			
 		),
@@ -171,9 +173,9 @@ struct str_outils_shape (
 			local est_aGauche2 = est_aGauche  _pt_tri_2 	_pt_tri_3 	_pt_aTester 
 			local est_aGauche3 = est_aGauche  _pt_tri_3 	_pt_tri_1 	_pt_aTester
 			
-			debug "	--> est_aGauche1" var:est_aGauche1
-			debug "	--> est_aGauche2" var:est_aGauche2
-			debug "	--> est_aGauche3" var:est_aGauche3
+-- 			debug "	--> est_aGauche1" var:est_aGauche1
+-- 			debug "	--> est_aGauche2" var:est_aGauche2
+-- 			debug "	--> est_aGauche3" var:est_aGauche3
 			
 			if inclure_segmts do (
 				if not est_aGauche1 do
@@ -194,7 +196,7 @@ struct str_outils_shape (
 				
 				
 			
-			debug ( "est_dansTriangle ( " +  _pt_aTester as string + " )" 	)	var:result
+-- 			debug ( "est_dansTriangle ( " +  _pt_aTester as string + " )" 	)	var:result
 
 			
 			result
@@ -748,7 +750,7 @@ struct str_outils_shape (
 		----- chercher les segments etant sur le meme axe qu'un point	-----
 		-----	Axe: #orizontal ou #vertical	----
 		
-		fn get_sgts_sur_memeAxe		_axe		 _pts_shp		_pt_test		 =(
+		fn get_sgts_sur_memeAxe		_axe		 _pts_shp		_pt_test	/* 	ds_matiere:false	 */ =(
 -- 			debug ""
 -- 			debug "------get_sgts_sur_memeAxe"
 -- 			debug "	_pt_test" var:_pt_test
@@ -756,7 +758,7 @@ struct str_outils_shape (
 -- 			local pt_test  					=	_pts_shp[_id_pt_test]
 -- 			local id_pt_test_precedant	=	boucler 	_pts_shp	(_id_pt_test - 1 )
 			
-			
+		
 			
 			for i= 1 to _pts_shp.count   do (
 				local pt_courant	= _pts_shp[ i]
@@ -765,39 +767,42 @@ struct str_outils_shape (
 					local i_suivant 	= boucler _pts_shp ( i+1)
 					local pt_suivant 	=_pts_shp[ i_suivant ]
 					
-					---- pour les segments non horizontaux ----------------
--- 					if abs ( pt_courant.y -  pt_suivant.y )  > SEUIL_POINTS_EGAUX   do
 					
--- 			debug "	--->	pt_courant" var:pt_courant
--- 			debug "	--->	pt_suivant" var:pt_suivant
-										case _axe of (
-											#horizontal:		if pt_courant.y >= _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y <= _pt_test.y and pt_suivant.y >= _pt_test.y do (
-																		--- si on touche une lihne horizontale on ajoute les deux points -------------------
-																		if abs ( pt_courant.y -  pt_suivant.y )  < SEUIL_POINTS_EGAUX   then (
-																			
--- 																			debug "		--->	(A) -- horizontal "
-																			
-																			appendifunique result i	
-																			appendifunique result i_suivant
-																		) else (
-																			appendifunique result i	
--- 																			debug "		--->	(A)  "
-																		)
-																	) 
-											#vertical:			if pt_courant.x >= _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x <= _pt_test.x and pt_suivant.x >= _pt_test.x do (
-																		--- si on touche une lihne horizontale on ajoute les deux points -------------------
-																		if abs ( pt_courant.x -  pt_suivant.x )  < SEUIL_POINTS_EGAUX   then (
-																			appendifunique result i	
-																			appendifunique result i_suivant
--- 																			debug "		--->	(B) -- horizontal "
-																		) else (
-																			appendifunique result i	
--- 																			debug "		--->	(B)  "
-																		)
-																	) 
-						-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
-										)
-				)
+					----- on regarde si on est du coté matiere de l'edge  testé -----------------
+-- 					local on_est_ds_matiere = est_aGauche		pt_courant	pt_suivant   	_pt_test
+-- 					
+-- 					debug "	---	> on_est_ds_matiere" var:on_est_ds_matiere
+-- 					
+-- 					if not ds_matiere or ds_matiere and	on_est_ds_matiere do (
+						case _axe of (
+							#horizontal:		if pt_courant.y >= _pt_test.y and pt_suivant.y < _pt_test.y 	or 	pt_courant.y <= _pt_test.y and pt_suivant.y >= _pt_test.y do (
+														--- si on touche une lihne horizontale on ajoute les deux points -------------------
+														if abs ( pt_courant.y -  pt_suivant.y )  < SEUIL_POINTS_EGAUX   then (
+															
+	-- 																			debug "		--->	(A) -- horizontal "
+															
+															appendifunique result i	
+															appendifunique result i_suivant
+														) else (
+															appendifunique result i	
+	-- 																			debug "		--->	(A)  "
+														)
+													) 
+							#vertical:			if pt_courant.x >= _pt_test.x and pt_suivant.x < _pt_test.x 		or 	pt_courant.x <= _pt_test.x and pt_suivant.x >= _pt_test.x do (
+														--- si on touche une lihne horizontale on ajoute les deux points -------------------
+														if abs ( pt_courant.x -  pt_suivant.x )  < SEUIL_POINTS_EGAUX   then (
+															appendifunique result i	
+															appendifunique result i_suivant
+	-- 																			debug "		--->	(B) -- horizontal "
+														) else (
+															appendifunique result i	
+	-- 																			debug "		--->	(B)  "
+														)
+													) 
+		-- 					default: 			debug "		/!\	ERREUR dans 'get_segments_surMemeAxe()' l'axe doit etre '#horizontal: ou '#vertical'		/!\	"
+						)
+					)
+-- 				)
 			)
 			
 -- 																			debug "			--->	result " var:result
