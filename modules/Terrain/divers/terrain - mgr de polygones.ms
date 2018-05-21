@@ -227,7 +227,7 @@ struct str_mgr_polygones (
 		SEUIL_POINTS_EGAUX  	= .001,
 		
 		-- constante pr debug-----------------
-		SAUVETAGE_MAX 			= 500,
+		SAUVETAGE_MAX 			= 200,
 	
 	
 	
@@ -707,12 +707,12 @@ struct str_mgr_polygones (
 						
 						
 						---- la nouvelle connexion-----------------
-						local nvl_connexion = str_connexion	id_poly_A:	_id_poly_courant							\
-																			id_poly_B:	_id_poly_connexion				\
-																			id_pt_A:		_id_pt_courant							\
-																			id_pt_B:		id_pt_connexion_result				\
-																			pt_A:			pts_A[ _id_pt_courant ] 				\
-																			pt_B:			pt_B
+						local nvl_connexion = str_connexion		id_poly_A:	_id_poly_courant							\
+																					id_poly_B:	_id_poly_connexion				\
+																					id_pt_A:		_id_pt_courant							\
+																					id_pt_B:		id_pt_connexion_result				\
+																					pt_A:			pts_A[ _id_pt_courant ] 				\
+																					pt_B:			pt_B
 -- 							debug "bah alors ?!?"
 						append result  	nvl_connexion
 						
@@ -729,7 +729,7 @@ struct str_mgr_polygones (
 				local pt_connexion_choisie	=	point_lePlusProche_dePoint		_polys 			polys_pts_dsTriangle		pt_courant
 		
 				local id_poly_connexion				= 	pt_connexion_choisie[1]			
-				local pts_B 	= _polys[ id_poly_connexion ].get_pts oriente:true			
+				local pts_B 									= _polys[ id_poly_connexion ].get_pts oriente:true			
 			
 				local id_pt_connxn		 				=  	pt_connexion_choisie[2]				
 				local id_pt_connxn_svt		 			=  	mgr_shp.boucler 	pts_B  ( id_pt_connxn + 1 )
@@ -753,12 +753,12 @@ struct str_mgr_polygones (
 					
 					
 						---- la nouvelle connexion-----------------
-						local nvl_connexion = str_connexion	id_poly_A:	_id_poly_courant							\
-																			id_poly_B:	id_poly_connexion				\
-																			id_pt_A:		_id_pt_courant							\
-																			id_pt_B:		id_pt_connxn				\
-																			pt_A:			pts_A[ _id_pt_courant ] 				\
-																			pt_B:			pt_B
+						local nvl_connexion = str_connexion		id_poly_A:	_id_poly_courant							\
+																					id_poly_B:	id_poly_connexion				\
+																					id_pt_A:		_id_pt_courant							\
+																					id_pt_B:		id_pt_connxn				\
+																					pt_A:			pts_A[ _id_pt_courant ] 				\
+																					pt_B:			pt_B
 		-- 					debug "bah alors ?!?"
 						append result  	nvl_connexion
 					)
@@ -1133,10 +1133,14 @@ struct str_mgr_polygones (
 						local id_pt_proch_cnxn
 						local id_pt_cnxn
 						local prochaines_cnxns =#()
-						for cnxn in cnxns_poly_courant where cnxn != cnx_courante  do (
+						for cnxn in cnxns_poly_courant /* where cnxn != cnx_courante  */do (
 							
+								debug "				--->cnxn" var:cnxn
 							--- si on est sur une connexion qui reste sur un meme polygone --------------------------------------------------------
 							if cnxn.id_poly_A 	==		cnxn.id_poly_B then (
+								
+								
+								debug "					--->connexion qui reste sur un meme polygone "
 								local id_proch_cnxn_A 	=		cnxn.id_pt_A
 								local id_proch_cnxn_B 	= 	cnxn.id_pt_B
 								if id_proch_cnxn_A < id_pt_courant do
@@ -1145,10 +1149,41 @@ struct str_mgr_polygones (
 									id_proch_cnxn_B += pts_courant.count
 								local idDist_pt_A	=	id_proch_cnxn_A - id_pt_courant
 								local idDist_pt_B	=	id_proch_cnxn_B - id_pt_courant
-								if idDist_pt_A < idDist_pt_B then
-									id_pt_cnxn = mgr_shp.boucler 	pts_courant		id_proch_cnxn_A
-								else
-									id_pt_cnxn = mgr_shp.boucler 	pts_courant		id_proch_cnxn_B
+								
+								debug "						--->id_proch_cnxn_A" var:id_proch_cnxn_A
+								debug "						--->id_proch_cnxn_B" var:id_proch_cnxn_B
+								
+								debug "						--->idDist_pt_A" var:idDist_pt_A
+								debug "						--->idDist_pt_B" var:idDist_pt_B
+								
+								debug "						--->id_pt_courant" var:id_pt_courant
+								
+								
+-- 								----- si on est sur le point A -------------------
+-- 								if cnxn.id_pt_A	== id_pt_courant	and cnx_courante	!= cnxn	 then (
+-- 									id_pt_cnxn = 	cnxn.id_pt_B
+-- 								
+-- 								----- si on est sur le point B -------------------
+-- 								)	else  if cnxn.id_pt_B	== id_pt_courant	and cnx_courante	!= cnxn then (
+-- 									id_pt_cnxn = 	cnxn.id_pt_A
+-- 								
+-- 								----- si on sest pas sur un des points -------------------
+-- 								) else (
+									if idDist_pt_A < idDist_pt_B  then (
+										debug "					--->connexion avec poly A"
+-- 										if cnxn.id_pt_A != id_pt_courant	 do
+											id_pt_cnxn = mgr_shp.boucler 	pts_courant		id_proch_cnxn_A
+									) else (
+										debug "					--->connexion avec poly B"
+-- 										if cnxn.id_pt_B != id_pt_courant	 do
+											id_pt_cnxn = mgr_shp.boucler 	pts_courant		id_proch_cnxn_B
+									)
+-- 								)
+								 
+								
+								
+								
+								
 							)
 							--- si on est sur A  -----------------
 							else		if  cnxn.id_poly_A ==		id_poly_courant	then 
@@ -1163,14 +1198,16 @@ struct str_mgr_polygones (
 							if id_pt_cnxn < id_pt_courant do
 								id_pt_cnxn += pts_courant.count
 							local dist_index = id_pt_cnxn - id_pt_courant
-							if dist_index < dist_index_min then (
-								prochaines_cnxns = #(cnxn)
-								dist_index_min =  dist_index
-								id_pt_proch_cnxn = mgr_shp.boucler pts_courant	 id_pt_cnxn
-							) else if dist_index == dist_index_min do (
-								append prochaines_cnxns 	cnxn
-								id_pt_proch_cnxn = mgr_shp.boucler pts_courant	 id_pt_cnxn
-							)
+-- 							if  cnxn != cnx_courante or ( cnxn == cnx_courante and dist_index > 0 )	  do (
+								if dist_index < dist_index_min  then (
+									prochaines_cnxns = #(cnxn)
+									dist_index_min =  dist_index
+									id_pt_proch_cnxn = mgr_shp.boucler pts_courant	 id_pt_cnxn
+								) else if dist_index == dist_index_min   do (
+									append prochaines_cnxns 	cnxn
+									id_pt_proch_cnxn = mgr_shp.boucler pts_courant	 id_pt_cnxn
+								)
+-- 							)
 						)
 						
 						
@@ -1188,12 +1225,10 @@ struct str_mgr_polygones (
 						local section_pts_result 
 						if id_pt_proch_cnxn != id_pt_courant then (
 							
-							
 							local id_pt_finPartie = mgr_shp.boucler		pts_courant  ( id_pt_proch_cnxn - 1 )
 							---- on a joute les points jusqu' a la connexion -----------------------------------------------------------------------
 							section_pts_result 			= 		mgr_shp.get_partie_tableau		pts_courant				id_pt_courant		id_pt_finPartie		
 							pts_decoupe_courant 		+= 	section_pts_result
-							
 							
 							
 							local id_pt_precedant 		= mgr_shp.boucler 	pts_courant	 ( id_pt_proch_cnxn - 1 )
@@ -1202,6 +1237,7 @@ struct str_mgr_polygones (
 							
 							
 						) else (
+							
 							appendIfUnique 	pts_decoupe_courant 		 pt_courant
 							
 						)
@@ -1296,7 +1332,7 @@ struct str_mgr_polygones (
 						
 						----- soit on reste sur le poly  courant -----------------------------------------------
 						if angle_suivant < angle_cnxn_min then (
-												
+							
 							
 							debug "		--------> PT NORMAL apres comparaison"		
 							
@@ -1304,7 +1340,7 @@ struct str_mgr_polygones (
 							pt_precedant 		= pt_courant
 							id_pt_courant  	= mgr_shp.boucler 	pts_courant 	(id_pt_courant + 1 )							
 							pt_courant 			= pts_courant [ id_pt_courant ]
-							appendIfUnique pts_decoupe_courant 		pt_courant
+							appendIfUnique 	pts_decoupe_courant 		pt_courant
 							
 						---- soit on prend la connexion ----------------------------------------------------
 						) else (
@@ -1429,6 +1465,19 @@ struct str_mgr_polygones (
 				) -- fin while		 onA_desConnexions_aTraiter			-----
 				
 				
+			-------------- DEBUG ---------------------------------------
+			if  SAUVETAGE == SAUVETAGE_MAX		do (	
+				local dbg_mode_BAck = ::debug_mode
+				::debug_mode = true
+				debug "\n\n"
+				debug "	##################################################################################"
+				debug "	##########	/!\		SAUVETAGE MAX => sortie de la boucle 		/!\ 	##########"
+				debug "	##################################################################################\n\n\n"
+				::debug_mode = dbg_mode_BAck
+			)
+			-------------- DEBUG ---------------------------------------
+			
+			
 				
 			result_polys_decoupes
 			
@@ -1464,10 +1513,12 @@ struct str_mgr_polygones (
 			
 			--- on recherche les connexions pour découpage	--------
 			local connexions				 	= analyser_connexions 		_polys		balayage:balayage
-			debug "		------->	CONNEXIONS TOTALES"			var:connexions
 			
 			
 			-------------------	 DEBUG	 ---------------------------------------------------------
+			debug "		------->	CONNEXIONS TOTALES"			var:connexions
+			local debugBACK	=	m_debug
+			m_debug = false
 			for cnxn in connexions do (				
 				debug "		------->	#################  (A) "
 				debug "		------->	#################  cnxn "	var:cnxn
@@ -1500,20 +1551,9 @@ struct str_mgr_polygones (
 				
 			)
 			
-			
-			
-			-------------- DEBUG ---------------------------------------
-			if  SAUVETAGE == SAUVETAGE_MAX		do (	
-				local dbg_mode_BAck = ::debug_mode
-				::debug_mode = true
-				debug "\n\n"
-				debug "	##################################################################################"
-				debug "	##########	/!\		SAUVETAGE MAX => sortie de la boucle 		/!\ 	##########"
-				debug "	##################################################################################\n\n\n"
-				::debug_mode = dbg_mode_BAck
-			)
-			-------------- DEBUG ---------------------------------------
-			
+			-------------------	 DEBUG	 ---------------------------------------------------------
+			m_debug = debugBACK
+			-------------------	 DEBUG	 ---------------------------------------------------------
 			
 			
 			

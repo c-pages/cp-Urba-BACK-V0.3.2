@@ -269,14 +269,20 @@ struct	str_mgr_calques	(
 		mgr_polys	=	str_mgr_polygones (),
 		mgr_shp				=	str_outils_shape (),
 		
-	
+		
+		-- constantes -----------------
 		SEUIL_POINTS_EGAUX  	= .01,
+		SEUIL_DOT  					= 	1e-05,	
+		
 		-- constante pr debug-----------------
 		SAUVETAGE_MAX 			= 100,
 	
 	
 	-----------------	Fonctions	internes ------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
+		
+		
+		
 		
 		
 		----- operation Booleene entre calques ----------------
@@ -378,7 +384,8 @@ struct	str_mgr_calques	(
 			debug "intersections"	var:intersections
 			debug "ids_polys_A_isoles"	var:ids_polys_A_isoles --	param:#nom
 			debug "ids_polys_B_isoles"	var:ids_polys_B_isoles	--	param:#nom
-			
+			local dbg_pts_intersections = for inter in intersections collect inter.pos
+			debug "intersections POS "	var:dbg_pts_intersections
 			
 			
 			
@@ -597,47 +604,77 @@ struct	str_mgr_calques	(
 							en_creux = false
 						
 						for 	intersection in 	intersections  do (								
--- 							debug "			--> intersection" var:intersection
+							debug "			--> intersection" var:intersection
 -- 							debug "			-->par la : #1"
 							local id_pt_test = id_pt_courant
 							if sens == - 1 do id_pt_test = mgr_shp.boucler	shp_courant	(id_pt_test - 1 )
 							
 							---- pour choisir la plus proche ---------------
-							if distance pt_courant	intersection.pos < 	dist_proche do (								
--- 								debug "			-->par la : #2"
+							if distance pt_courant	intersection.pos < 	dist_proche do (
+								debug "			-->par la : #2"
 								
 								---- pour choisir une intersection qui ne soit pas là ou l'on est ---------------
 								if distance pt_courant		intersection.pos 	> SEUIL_POINTS_EGAUX do (
--- 									debug "			-->par la : #3"
+									debug "			-->par la : #3"
 									
 									if operateur_courant 	==	#A then (
--- 										debug "			-->par la : #4-1"
+										debug "			-->par la : #4-1"
 -- 										if 
 										if poly_courant == intersection.poly_A 	and 	intersection.id_pt_A == id_pt_test	do ( 
--- 											debug "			-->par la : #5-1"
+											debug "			-->par la : #5-1"
+											
 											local id_pt_base = 	intersection.id_pt_A 
+											
+-- 											if intersection.poly_A == intersection.poly_B then (
+-- 												if 
+-- 												
+-- 											) else 
+											
+											
+											
+											
 											if sens == - 1 do id_pt_base = mgr_shp.boucler	shp_courant	(id_pt_base + 1 )
 											local pt_base = shp_courant[	id_pt_base  ]
-											if 	( distance pt_courant		pt_base + distance pt_courant		intersection.pos )  - distance intersection.pos  pt_base 			< SEUIL_POINTS_EGAUX do	(
--- 												debug "			-->par la : #6-1 ##################"
+											
+											debug "					-->id_pt_base" var:id_pt_base
+											
+											debug "					-->pt_courant" var:pt_courant
+											debug "					-->pt_base" var:pt_base
+											debug "					-->intersection.pos" var:intersection.pos
+											
+-- 											debug "					-->distance pt_courant		pt_base" var:(distance pt_courant		pt_base)
+-- 											debug "					-->distance pt_courant		intersection.pos" var:(distance pt_courant		intersection.pos)
+-- 											debug "					-->distance intersection.pos  pt_base " var:(distance intersection.pos  pt_base )
+											local norm_vec1 	= normalize (  pt_base 			- pt_courant)
+											local norm_vec2 	= normalize (  intersection.pos 	- pt_courant)
+											if dot  norm_vec1  norm_vec2 < 0 or pt_base ==  pt_courant   do (
+-- 											if 	( distance pt_courant		pt_base + distance pt_courant		intersection.pos )  - distance intersection.pos  pt_base 			< SEUIL_POINTS_EGAUX do	(
+												debug "			-->par la : #6-1 ##################"
 												
 													dist_proche = distance pt_courant	intersection.pos
 													prochaine_intersec = intersection
 												)
 										)
 									) else (
--- 										debug "			-->par la : #4-2"
+										debug "			-->par la : #4-2"
 										if poly_courant == intersection.poly_B 	and 	intersection.id_pt_B == id_pt_test	 do ( 
--- 											debug "			-->par la : #5-2"
+											debug "			-->par la : #5-2"
 											local id_pt_ope = 	intersection.id_pt_B
 											if sens == - 1 do id_pt_ope = mgr_shp.boucler	shp_courant	(id_pt_ope + 1 )
 											local pt_ope = shp_courant[	id_pt_ope  ]
-											if 	( distance pt_courant		pt_ope + distance pt_courant		intersection.pos )  - distance intersection.pos  pt_ope 			< SEUIL_POINTS_EGAUX do											 (
--- 												debug "			-->par la : #6-2 ##################"
+											
+											local norm_vec1 	= normalize (  pt_ope	 			- pt_courant)
+											local norm_vec2 	= normalize (  intersection.pos 	- pt_courant)
+											debug "			-->par la ICI ?!?!?!?!?"
+											if dot  norm_vec1  norm_vec2 < 0  do (
+												
+-- 											if 	( distance pt_courant		pt_ope + distance pt_courant		intersection.pos )  - distance intersection.pos  pt_ope 			< SEUIL_POINTS_EGAUX do											 (
+												debug "			-->par la : #6-2 ##################"
 												
 													dist_proche = distance pt_courant	intersection.pos
 													prochaine_intersec = intersection
 												)
+											debug "			-->par la ICI ?!?!?!?!?"
 										)
 									)
 								)
@@ -650,11 +687,15 @@ struct	str_mgr_calques	(
 							debug "--->	INTERSECTION"
 							
 							--- on change de noeud courant	------
+-- 							if prochaine_intersec.poly_A == prochaine_intersec.poly_B  then (
+-- 								
+-- 								
+-- 							) else	
 							if  operateur_courant 	==	#A 	then (
 								
 								operateur_courant 	=	#B
 								poly_courant 	= 	prochaine_intersec.poly_B
-								shp_courant	= 	prochaine_intersec.poly_B.get_pts ()
+								shp_courant		= 	prochaine_intersec.poly_B.get_pts ()
 								id_pt_courant 	=  	prochaine_intersec.id_pt_B
 								
 							) else (
