@@ -210,7 +210,7 @@ struct str_mgr_polygones (
 	
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug	=	true,
+		m_debug	=	false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | polys"	  	var:var	 param:param		catch (),
 		fn debug_pts 	_pts nom:("debug_")	=   if m_debug  do	 (
 			::debug_spline	_pts	nom:nom

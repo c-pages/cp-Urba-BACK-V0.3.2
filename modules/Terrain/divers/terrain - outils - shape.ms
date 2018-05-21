@@ -11,7 +11,7 @@ struct str_outils_shape (
 
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
-		m_debug	= false,
+		m_debug	= true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | shape"	  	var:var	 param:param		catch (),
 	
 		m_tab_format_nd = "		",
@@ -100,14 +100,40 @@ struct str_outils_shape (
 			_id_item as integer
 		),
 		
-		fn get_partie_tableau		_tableau		_id_debut	_id_fin	=(
+		fn get_partie_tableau		_tableau		_id_debut	_id_fin	sens:1		=(
+			
+			
+			
+			debug "get_partie_tableau	()"
+			
+			
+			
+			
 			local result = #()
-			if _id_fin < _id_debut do
-				_id_fin += _tableau.count
-			result = for id = _id_debut to _id_fin collect _tableau[ ( boucler _tableau id ) ]
+			local id_debut		=	_id_debut
+			local id_fin			=	_id_fin
+			
+			
+			if sens == 1 then
+				if id_fin < id_debut do (
+					id_fin += _tableau.count
+				)
+			else
+				if id_debut < id_fin  do (
+					id_debut += _tableau.count
+				)
+			
+			debug "	sens"	var:sens
+			debug "	_id_debut"	var:_id_debut
+			debug "	id_debut"	var:id_debut
+			debug "	_id_fin"	var: _id_fin
+			debug "	id_fin"	var: id_fin
+			debug "	_tableau.count"	var: _tableau.count
+			result = for id = id_debut to id_fin by sens	collect	_tableau[ ( boucler _tableau id ) ]
+			
 		),
-					
-					
+		
+		
 		
 		
 		--- Analyse position de points (survol_triangles etc..)		-------------
