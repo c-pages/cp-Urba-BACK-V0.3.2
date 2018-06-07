@@ -654,10 +654,10 @@ struct str_outils_shape (
 		------- renvois la position d'un shape par rapport à un autre: si un shapes est ' l'interieur d'un autre (trou boolean), se croisent ou à l'exterieur ---------
 		fn get_positionRelative_shapes 		_pts_shpA		_pts_shpB 		renvoyer_intersections:true		=(
 			
-			debug "----------get_positionRelative_shapes()"
-			debug "		_pts_shpA" var:_pts_shpA
-			debug "		_pts_shpB" var:_pts_shpB
-			debug "		renvoyer_intersections" var:renvoyer_intersections
+-- 			debug "----------get_positionRelative_shapes()"
+-- 			debug "		_pts_shpA" var:_pts_shpA
+-- 			debug "		_pts_shpB" var:_pts_shpB
+-- 			debug "		renvoyer_intersections" var:renvoyer_intersections
 			
 			struct	str_intersection	(
 				pos,
@@ -672,11 +672,11 @@ struct str_outils_shape (
 			local BB_pos_relative		=  get_positionRelative_BB		_pts_shpA 		_pts_shpB 
 			
 			
-				debug "-------->BB_pos_relative " var:BB_pos_relative
+-- 				debug "-------->BB_pos_relative " var:BB_pos_relative
 			---- si les BB se croisent	-------------------
 			if  BB_pos_relative != #aCoté 	then (
 			
-				debug "-------->BB  seCroisent"
+-- 				debug "-------->BB  seCroisent"
 				---- on regadre si les edges se coupent --- si oui --->  #seCroisent -----------------
 				local trouve = false
 				local  i = 1
@@ -717,14 +717,14 @@ struct str_outils_shape (
 				---- si on a des intersections, alors ils se croisent ------------------------------------
 				if intersections.count > 0 then (
 					
-					debug "		--------> On a des intersections"
+-- 					debug "		--------> On a des intersections"
 					
 					
 					result_pos 					= #seCroisent
 					result_intersections		=	intersections
 					
 				) else (
-					debug "		--------> On a PAS d'intersection"
+-- 					debug "		--------> On a PAS d'intersection"
 					---- s'il ne se croisent pas alors ils sont tout à l'interieur ou à l'extierieur l'un de l'autre -------------------------
 					local pts_triangles_shpA = this.trianguler	_pts_shpA
  					local pts_triangles_shp2 = this.trianguler	_pts_shpB
@@ -737,7 +737,7 @@ struct str_outils_shape (
 				
 			) else (
 				
-				debug "-------->BB  seCroisent   PAS "
+-- 				debug "-------->BB  seCroisent   PAS "
 				result_pos 				= 	BB_pos_relative
 				result_intersections	=	#()
 			)
@@ -750,7 +750,7 @@ struct str_outils_shape (
 			)
 			local result  =	str_result  position:result_pos		 intersections:result_intersections
 			
-			debug " -------> result" var:result
+-- 			debug " -------> result" var:result
 			result
 		),
 		
