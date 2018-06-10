@@ -134,9 +134,10 @@ struct str_polygone (
 		
 		fn get_pts  			 oriente:false 	= (
 			
-			local result = for pt in pts collect pt				
-			if oriente and en_creux do
-					result = mgr_shp.changer_sens	result			
+			local result = for pt in pts collect pt
+			
+			if oriente and en_creux do	result = mgr_shp.changer_sens	result	
+			
 			result			
 		),
 		
@@ -159,8 +160,8 @@ struct str_polygone (
 		),
 		
 		
-		fn get_positionRelative 		_poly_a_tester	=(
-			mgr_shp.get_positionRelative_shapes 	(  get_pts () )	(  _poly_a_tester.get_pts () )	 renvoyer_intersections:true
+		fn get_positionRelative 		_poly_a_tester	 renvoyer_intersections:true		=(
+			mgr_shp.get_positionRelative_shapes 	(  get_pts () )	(  _poly_a_tester.get_pts () )	 renvoyer_intersections:renvoyer_intersections
 		),
 		
 		--- on regarde si on a ou pas un parent ----------

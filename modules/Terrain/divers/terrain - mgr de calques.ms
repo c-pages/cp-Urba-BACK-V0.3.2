@@ -226,7 +226,7 @@ struct	str_mgr_calques	(
 				::debug_mode = true
 				m_debug = true
 			)
-			 if m_debug do (
+			if m_debug do (
 				debug "----------------------------------------------------------------------------"
 				debug "				PILE des calques"
 				local i = -1
@@ -284,89 +284,218 @@ struct	str_mgr_calques	(
 		
 		fn get_prochaine_intersection		intersections:		poly_courant:			id_pt_courant:	pt_courant:			sens:		=(
 			
--- 			------------------- DEBUG 	-----------------------------------------------------------------------
+			------------------- DEBUG 	-----------------------------------------------------------------------
 			debug ""
 			debug ""
 			debug "############# get_prochaine_intersection ############"
 			debug "	id_pt_courant" var:id_pt_courant
 			debug "	intersections" var:intersections param:#pos
--- 			------------------- DEBUG 	-----------------------------------------------------------------------
+			------------------- DEBUG 	-----------------------------------------------------------------------
 			
 			
 			---- SECURITE, tout doit etre rempli -------------------
-			if intersections == unsupplied 	do debug "	########## get_prochaine_intersection:	/!\	ERREUR /!\	( intersections:	unsupplied )"
-			if poly_courant == unsupplied 	do debug "	########## get_prochaine_intersection:	/!\	ERREUR /!\	( poly_courant:	unsupplied )"
-			if id_pt_courant == unsupplied 	do debug "	########## get_prochaine_intersection:	/!\	ERREUR /!\	( id_pt_courant:	unsupplied )"
-			if pt_courant == unsupplied 		do debug "	########## get_prochaine_intersection:	/!\	ERREUR /!\	( pt_courant:		unsupplied )"
-			if sens == unsupplied 				do debug "	########## get_prochaine_intersection:	/!\	ERREUR /!\	( sens:				unsupplied )"
+			if intersections == unsupplied 	do debug "	########## get_prochaine_intersection:		/!\	ERREUR /!\		( intersections:	unsupplied )"
+			if poly_courant == unsupplied 	do debug "	########## get_prochaine_intersection:		/!\	ERREUR /!\		( poly_courant:	unsupplied )"
+			if id_pt_courant == unsupplied 	do debug "	########## get_prochaine_intersection:		/!\	ERREUR /!\		( id_pt_courant:	unsupplied )"
+			if pt_courant == unsupplied 		do debug "	########## get_prochaine_intersection:		/!\	ERREUR /!\		( pt_courant:		unsupplied )"
+			if sens == unsupplied 				do debug "	########## get_prochaine_intersection:		/!\	ERREUR /!\		( sens:				unsupplied )"
 			---- SECURITE -------------------
 			
 			
 			------ RESULT -------------
-			local result_prochaine_intersection
+			local result
+			--- si on a qu'une intersection -------
+			if intersections.count == 1 then
+				result = intersections[1]
 			
-			local pts	=	poly_courant.get_pts	()
-			
-			---- pour chaque intersection:	 on cherche la plus proche en ID, en tenant compte du sens du parcours ---------------------------
-			local distID_min	=	1e14
-			local dist_pt_min	=	1e14
-			for intersec	in	intersections do (
+			else (
+			--- sinon on doit les comparer -------
+				local pts	=	poly_courant.get_pts	()
+				
+				---- pour chaque intersection:	 on cherche la plus proche en ID, en tenant compte du sens du parcours ---------------------------
+				local distID_min	=	1e14
+				local dist_pt_min	=	1e14
+				for intersec	in	intersections do (
+					
+					debug "\n"
 					debug "	*	intersec" var:intersec
-				
-				local id_pt_intersec
-				---- cas 1 : on est sur le poly A ------------
-				if intersec.poly_A		==	poly_courant	then	(
-					debug "	*	on est sur poly A"
-					id_pt_intersec	=	intersec.id_pt_A
-				---- cas 2 : on est sur le poly B ------------
-				) else (
-					debug "	*	on est sur poly B"
-					id_pt_intersec	=	intersec.id_pt_B
-				)
-				
-				
-				
-				
-				--- la distance au point courant	,	en fonction du sens -------------
-				local id_pt_intersec_dist	=	id_pt_intersec
-				if sens == 1 then (
-					if id_pt_intersec_dist < id_pt_courant then
-						id_pt_intersec_dist 	+= 	pts.count 	--	( 	id_pt_intersec )
-				) else (
-					if id_pt_intersec_dist > id_pt_courant then
-						id_pt_intersec_dist 	-= 	pts.count 	--	( 	id_pt_intersec )
-				)
+					
+					
+					
+					
+					
+					--- l ID du pt d'intersection ----------------
+					local id_pt_intersec
+					---- cas 1 : on est sur le poly A ------------
+					if intersec.poly_A		==	poly_courant	then	(
+						debug "	*	on est sur poly A"
+						id_pt_intersec	=	intersec.id_pt_A
+					---- cas 2 : on est sur le poly B ------------
+					) else (
+						debug "	*	on est sur poly B"
+						id_pt_intersec	=	intersec.id_pt_B
+					)
+					debug "	*	id_pt_intersec" var:id_pt_intersec
+					
+					
+					
+					
+					-------- on cherche la distance en ID, en nombre de point depuis le pt courant jusqu'a le pt d'intersection ------------------------------------
+					local intersec_ID_prNbrPts	=	id_pt_intersec
+					local intersec_dist_ID			=	0
+					if sens == 1 then (
+						if intersec_ID_prNbrPts < id_pt_courant then
+							intersec_ID_prNbrPts 	+= 	pts.count 	--	( 	id_pt_intersec )
+					) else (
+						
+						--- si on est en sens inverse on doit changer la valeur de l'ID -------------
+						intersec_ID_prNbrPts = mgr_shp.boucler  pts  ( id_pt_intersec + 1 )
+						
+						if intersec_ID_prNbrPts > id_pt_courant then
+							intersec_ID_prNbrPts 	-= 	pts.count 	--	( 	id_pt_intersec )
+					)
+					intersec_dist_ID	= abs (	intersec_ID_prNbrPts	-	id_pt_courant )
+					
+					debug "	*	intersec_dist_ID" var:intersec_dist_ID
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					-------- on cherche la distance et la distance en ID, en nombre de point depuis le pt courant jusqu'a le pt d'intersection ------------------------------------
+					local intersec_dist_pt	=	0.
+					----- (A)	si on est sur le meme segment que le point courant 	-----------------------
+					if intersec_dist_ID == 0 then (
+						
+						debug "			------> (A)  on est sur le meme segment que le point courant "
+						
+						--- on regarde si on est du bon coté du segment, ds le bon sens ---------
+						local pt_intersec 		=	pts[  id_pt_intersec ]
+						local vec_pt_courant 	=	pt_intersec - pt_courant
+						local vec_pt_intersec 	=	intersec.pos - pt_courant
+						local dot_test_sens		=	dot ( normalize vec_pt_courant )	( normalize vec_pt_intersec )					
+						debug "			------> dot_test_sens" var:dot_test_sens
+						
+						
+						---- dot_test vaut 1 alors on va dans le bon sens, l'intersection est apres le pt courant --------------
+						if dot_test == 1 then (
+							intersec_dist_pt	=	distance		pt_courant	intersec.pos
+						) else (
+							---- sinon on doit fair tout le tour pour arriver là ----------------------
+							intersec_dist_ID 	+=	pts.count 
+							intersec_dist_pt	=	distance		pt_intersec		intersec.pos
+						)	
+						
+					
+					) else (
+					----- (B)	sinon on cherche le nbr de pt a parcourir -----------------------
+						
+						local pt_intersec 				=	pts[  id_pt_intersec ]
+						intersec_dist_pt	=	distance		pt_intersec		intersec.pos
+						
+					)
+					
+					debug "			##	intersec_dist_ID" var:intersec_dist_ID
+					debug "			##	intersec_dist_pt" var:intersec_dist_pt
+					
+					if intersec_dist_ID < distID_min then (
+						distID_min 		= intersec_dist_ID
+						dist_pt_min 	= intersec_dist_pt
+						result				=	intersec
+					) else if intersec_dist_ID == distID_min  do (
+						if intersec_dist_pt < dist_pt_min do (
+							distID_min 		= intersec_dist_ID
+							dist_pt_min 	= intersec_dist_pt
+							result				=	intersec
+						)
+					)
+					
+					
+					/* 
+					
+					
+					local id_pt_intersec_dist	=	id_pt_intersec
+					if sens == 1 then (
+						if id_pt_intersec_dist < id_pt_courant then
+							id_pt_intersec_dist 	+= 	pts.count 	--	( 	id_pt_intersec )
+					) else (
+						
+						id_pt_intersec = mgr_shp.boucler  pts  ( id_pt_intersec + 1 )
+						
+						if id_pt_intersec_dist > id_pt_courant then
+							id_pt_intersec_dist 	-= 	pts.count 	--	( 	id_pt_intersec )
+					)
+					
+					
+					
 					debug "	*	id_pt_intersec_dist" var:id_pt_intersec_dist
-				
-				
-				local distID_intersec	= abs (	id_pt_intersec_dist	-	id_pt_courant )
-				
-				debug "	*	id_pt_intersec" var:id_pt_intersec
-				debug "	*	id_pt_intersec pour dist" var:id_pt_intersec_dist
-				debug "	*	distID_intersec" var:distID_intersec
-				
-				
-				if /* distID_intersec > 0 and  */distID_intersec	<=	distID_min do (
 					
-					debug "		*	distID_intersec <=	distID_min !!! "
 					
-					----- si 
--- 					if 
-					distID_min = distID_intersec
-					result_prochaine_intersection	=	intersec
+					
+					
+					
+					local distID_intersec	= abs (	id_pt_intersec_dist	-	id_pt_courant )
+					
+					debug "	*	distID_intersec" var:distID_intersec
+					
+					
+					if distID_intersec	<=	distID_min do (
+						
+						debug "		***	distID_intersec <=	distID_min !!! "
+						
+						----- si on est sur le meme segment que le point courant 	-----------------------
+						if distID_intersec == 0 do (
+							
+							debug "			------> (A)  on est sur le meme segment que le point courant "
+							dist_pt_min = distance	pt_courant		intersec.pos
+							
+							--- on regarde si on est du bon coté du segment, ds le bon sens ---------
+							local pt_poly 				=	pts[  id_pt_intersec ]
+							local vec_pt_courant 	=	pt_poly - pt_courant
+							local vec_pt_intersec 	=	intersec.pos - pt_courant
+							local dot_test	_sens	=	dot ( normalize vec_pt_courant )	( normalize vec_pt_intersec )
+							
+							debug "			------> dot_test" var:dot_test
+	-- 						if dot_test
+						)
+						
+						
+						----- si on est sur le meme segment que la derniere intersection validée	-----------------------
+						if distID_intersec	==	distID_min  do (
+							debug "			------> (B) on est sur le meme segment que la derniere intersection validée"
+							
+							
+							local	pt_intersec_valide = 	result_prochaine_intersection.pos
+							dist_pt_min = distance	pt_intersec_valide		intersec.pos
+							
+							--- on regarde si on est du bon coté du segment, ds le bon sens ---------
+							local pt_poly 				=	pts[  id_pt_intersec ]
+							local vec_pt_courant 	=	pt_poly - pt_intersec_valide
+							local vec_pt_intersec 	=	intersec.pos - pt_courant
+							local dot_test				=	dot ( normalize vec_pt_courant )	( normalize vec_pt_intersec )
+							
+							debug "			------> dot_test" var:dot_test
+						)
+						
+						
+						
+						 */
+						
+	-- 					distID_min = distID_intersec
+	-- 					result_prochaine_intersection	=	intersec
+	-- 					
+	-- 				)
+					
 					
 				)
-				
-				
-				
 			)
 			
-			
-			
--- 			debug "		---->	prochaine intersection" var:result_prochaine_intersection
-			
-			
-			result_prochaine_intersection
+			result
 			
 		),
 		
@@ -681,6 +810,7 @@ struct	str_mgr_calques	(
 			---- 	( 2 )	On BOUCLE tant qu'il reste des intersections à intégrer :		--------------------------------------------------------------------------------------------------
 			local	il_reste_des_intersections 	=	intersections.count > 0  and operation != #union
 			local ids_intersections_aTraiter 	= #{1..intersections.count}
+			local intersection_initiale			=	intersections[1]
 			local sauvetage 						=	0			
 			local annuler 							= false
 			while il_reste_des_intersections	and not annuler do (
@@ -760,7 +890,7 @@ struct	str_mgr_calques	(
 					
 					
 					local poly_test_autre 		= intersection_aTraiter.poly_B
-					local sensB 				= 1
+					local sensB 					= 1
 					if 	poly_test_autre.en_creux	do 	 sensB = -1
 					shp_autre 						= intersection_aTraiter.poly_A.get_pts()
 					local id_ptTest_autre 		=  intersection_aTraiter.id_pt_A
@@ -896,92 +1026,145 @@ struct	str_mgr_calques	(
 						
 						
 						
+						
+						
 						-------------- LA SECTION de points	-------------------------------------------------------------------------------------------------------------
-						-------------- on creer la section de points jusqu'à la prochaine intersection	------------------------------------------
-						--- le point du debut de la section ------------------						
-						local id_pt_debut			=	mgr_shp.boucler	shp_courant	(	id_pt_courant	+	 sens )
 						
-						--- le point de destination -------
-						local id_pt_destination	=	0
-						if prochaine_intersection.poly_A == poly_courant then 
-							id_pt_destination			=	prochaine_intersection.id_pt_A
-						else 	id_pt_destination		=	prochaine_intersection.id_pt_B
-						if sens == -1 do	id_pt_destination = 	mgr_shp.boucler	shp_courant	(	id_pt_destination + 1 )
+						if intersections_polyCourant.count == 0 then (
+							
+							debug "################## ON A PLUS DINTERSECTIONS		############"
+							-------------- on creer la section de points jusqu'au  point initiale 	------------------------------------------
+							--- le point du debut de la section ------------------						
+							local id_pt_debut			=	mgr_shp.boucler	shp_courant	(	id_pt_courant	+	 sens )
+-- 							local id_pt_destination		=	mgr_shp.boucler	shp_courant	(	id_pt_initial	+	 sens )
+							
+							--- le point de destination -------
+							local id_pt_destination	=	0
+							if intersection_initiale.poly_A == poly_courant then 
+								id_pt_destination			=	intersection_initiale.id_pt_A
+							else 	id_pt_destination		=	intersection_initiale.id_pt_B
+							if sens == -1 do	id_pt_destination = 	mgr_shp.boucler	shp_courant	(	id_pt_destination + 1 )
+							
+							
+							
+							debug "id_pt_debut" 			var:id_pt_debut
+							debug "id_pt_destination" 		var:id_pt_destination
+							
+							--- la nouvelle section	---------------------
+							local pts_nvlle_section	=	mgr_shp.get_partie_tableau			shp_courant				id_pt_debut			id_pt_destination		sens:sens
+							
+							
+							debug "pts_nvlle_section" var:pts_nvlle_section
+							
+							
+							
+							--- on ajoute la section au shape en construction	---------------------
+							shp_enConstruction += pts_nvlle_section
+							
+							
+							
+							on_a_fini_laBoucle = true
 						
-						--- la nouvelle section	---------------------
-						local pts_nvlle_section	=	mgr_shp.get_partie_tableau			shp_courant				id_pt_debut			id_pt_destination		sens:sens
-						
-						--- on ajoute la section au shape en construction	---------------------
-						shp_enConstruction += pts_nvlle_section
-						
-						
-						
-						
-						debug "pts_nvlle_section" var:pts_nvlle_section
-						
-						
-						
-						
-						
-						
-						
-						-------------- L'INTERSECTION, on change de shape  -------------------------------------------------------------------------------------------------------------
-						debug""
-						debug""
-						debug "----------------- L'INTERSECTION, on change de shape  -------------------------"
-						
-						debug "	operateur_courant	AVANT" var:operateur_courant
-						
-						if  operateur_courant 	==	#A 	then (							
-							operateur_courant 	=	#B
-							poly_courant 			= 	prochaine_intersection.poly_B
-							shp_courant			= 	prochaine_intersection.poly_B.get_pts ()
-							id_pt_courant 			=  prochaine_intersection.id_pt_B							
+							debug"\n\n\n\n\n\n"
+							debug "--------------------------------------------------------------------------------------"
+							debug "pt_courant" var:pt_courant
+							debug "pt_initial" var:pt_initial
+							debug "on_a_fini_laBoucle" var:on_a_fini_laBoucle
+							debug "--------------------------------------------------------------------------------------\n\n\n\n\n\n"
+
+							
+							
 						) else (
-							operateur_courant 	=	#A
-							poly_courant 			= 	prochaine_intersection.poly_A
-							shp_courant			= 	prochaine_intersection.poly_A.get_pts ()
-							id_pt_courant 			=  prochaine_intersection.id_pt_A									
-						)
-						
-						
-						
-						
-						sens = 1							
-						case operation of (
-							#addition :(
-								if poly_courant.en_creux 	then  
-									sens =	-1	
+							-------------- on creer la section de points jusqu'à la prochaine intersection	------------------------------------------
+							--- le point du debut de la section ------------------						
+							local id_pt_debut			=	mgr_shp.boucler	shp_courant	(	id_pt_courant	+	 sens )
+							
+							--- le point de destination -------
+							local id_pt_destination	=	0
+							if prochaine_intersection.poly_A == poly_courant then 
+								id_pt_destination			=	prochaine_intersection.id_pt_A
+							else 	id_pt_destination		=	prochaine_intersection.id_pt_B
+							if sens == -1 do	id_pt_destination = 	mgr_shp.boucler	shp_courant	(	id_pt_destination + 1 )
+							
+							--- la nouvelle section	---------------------
+							local pts_nvlle_section	=	mgr_shp.get_partie_tableau			shp_courant				id_pt_debut			id_pt_destination		sens:sens
+							
+							--- on ajoute la section au shape en construction	---------------------
+							shp_enConstruction += pts_nvlle_section
+							
+							
+							
+							
+							debug "pts_nvlle_section" var:pts_nvlle_section
+							
+							
+							
+							
+							
+							
+							
+							-------------- L'INTERSECTION, on change de shape  -------------------------------------------------------------------------------------------------------------
+							debug""
+							debug""
+							debug "----------------- L'INTERSECTION, on change de shape  -------------------------"
+							
+							debug "	operateur_courant	AVANT" var:operateur_courant
+							
+							if  operateur_courant 	==	#A 	then (							
+								operateur_courant 	=	#B
+								poly_courant 			= 	prochaine_intersection.poly_B
+								shp_courant			= 	prochaine_intersection.poly_B.get_pts ()
+								id_pt_courant 			=  prochaine_intersection.id_pt_B							
+							) else (
+								operateur_courant 	=	#A
+								poly_courant 			= 	prochaine_intersection.poly_A
+								shp_courant			= 	prochaine_intersection.poly_A.get_pts ()
+								id_pt_courant 			=  prochaine_intersection.id_pt_A									
 							)
-							#soustraction:(
-								if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
-									sens =	-1	
+							
+							
+							
+							
+							sens = 1							
+							case operation of (
+								#addition :(
+									if poly_courant.en_creux 	then  
+										sens =	-1	
+								)
+								#soustraction:(
+									if operateur_courant 	==	#A and	poly_courant.en_creux 	then  
+										sens =	-1	
+										
+									if 	operateur_courant 	==	#B and not poly_courant.en_creux then  
+										sens =	-1	
+								)
+								#intersection:(
 									
-								if 	operateur_courant 	==	#B and not poly_courant.en_creux then  
-									sens =	-1	
+									if operateur_courant 	==	#A and	not poly_courant.en_creux 	then  
+										sens =	-1	
+										
+									if 	operateur_courant 	==	#B and  not poly_courant.en_creux then  
+										sens =	-1	
+								)
 							)
-							#intersection:(
-								
-								if operateur_courant 	==	#A and	not poly_courant.en_creux 	then  
-									sens =	-1	
-									
-								if 	operateur_courant 	==	#B and  not poly_courant.en_creux then  
-									sens =	-1	
-							)
-						)
-						
-						
-						pt_courant 		=	prochaine_intersection.pos		
-						if sens == -1 	do 	id_pt_courant		= mgr_shp.boucler		shp_courant	( id_pt_courant + 1 )
-						
-						id_intersection_aTraiter	=	findItem	intersections		prochaine_intersection
-						ids_intersections_aTraiter [ id_intersection_aTraiter ] = false
-						
-						
-						
-						---- on ajoute le point de l'intersection ----------
-						append shp_enConstruction	pt_courant
-						
+							
+							
+							pt_courant 		=	prochaine_intersection.pos		
+							if sens == -1 	do 	id_pt_courant		= mgr_shp.boucler		shp_courant	( id_pt_courant + 1 )
+							
+							id_intersection_aTraiter	=	findItem	intersections		prochaine_intersection
+							ids_intersections_aTraiter [ id_intersection_aTraiter ] = false
+							
+							
+							
+							---- on ajoute le point de l'intersection ----------
+							append shp_enConstruction	pt_courant
+							
+						) ---- fin on a encore des intersections -------------------
+					
+					
+					
+					
 					
 						debug "	operateur_courant" var:operateur_courant
 						debug "	prochaine_intersection" var:prochaine_intersection
@@ -996,7 +1179,7 @@ struct	str_mgr_calques	(
 						
 						
 						----------- ( 3 )	sortie ? si on est retourné sur le point initial, on sort	--------------------------------------------	
-						
+						/* 
 						if distance	pt_courant  pt_initial <  SEUIL_POINTS_EGAUX	then (
 							
 							on_a_fini_laBoucle = true
@@ -1009,7 +1192,7 @@ struct	str_mgr_calques	(
 							debug "--------------------------------------------------------------------------------------\n\n\n\n\n\n"
 
 						
-						)
+						) */
 						
 -- 					) -- FIN --- on fait le segment  jusqu'a la prochaine intersection 	-------------------------
 					

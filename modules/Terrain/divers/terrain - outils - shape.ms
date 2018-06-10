@@ -654,7 +654,9 @@ struct str_outils_shape (
 		------- renvois la position d'un shape par rapport à un autre: si un shapes est ' l'interieur d'un autre (trou boolean), se croisent ou à l'exterieur ---------
 		fn get_positionRelative_shapes 		_pts_shpA		_pts_shpB 		renvoyer_intersections:true		=(
 			
--- 			debug "----------get_positionRelative_shapes()"
+-- 			debug "\n"
+-- 			debug "----------get_positionRelative_shapes()----------------------------------------"
+			
 -- 			debug "		_pts_shpA" var:_pts_shpA
 -- 			debug "		_pts_shpB" var:_pts_shpB
 -- 			debug "		renvoyer_intersections" var:renvoyer_intersections
@@ -704,7 +706,11 @@ struct str_outils_shape (
 																								id_A:	i 								\
 																								id_B:	j 								)
 							if not renvoyer_intersections do trouve = true
--- 							debug "-------->INTERSECTION " 
+-- 							debug "-------->	INTERSECTION <-----------------" 
+-- 							debug "	-------->_pts_shpA " 	var:_pts_shpA
+-- 							debug "	-------->_pts_shpB " 	var:_pts_shpB
+-- 							debug "	-------->pt_shpA " 		var:pt_shpA
+-- 							debug "	-------->pt_shp2 "  		var:pt_shp2
 																								
 						)
 						j+= 1
@@ -748,9 +754,11 @@ struct str_outils_shape (
 				position,
 				intersections
 			)
+			
+			
+			
 			local result  =	str_result  position:result_pos		 intersections:result_intersections
 			
--- 			debug " -------> result" var:result
 			result
 		),
 		
