@@ -12,7 +12,7 @@
 
 
 
-    ---- l'Algorithme simplifé ----
+    ---- l'Algorithme simplifé ------------------------------------------------------------------------------------------------------------------------------------
     Tant que notre polygone à plus de 3 segments:
         |   - On calcul la distance à parcourir avant le prochain 'Evnmt de Segment' ( il peut y avoir plusieurs 'Evnmt de Segment' en même temps ! )
         |   - On fait tourner la boucle de rétrecissement jusqu'à ce que:
@@ -20,10 +20,10 @@
         |               --> on rencontre un ou plusieurs 'Evnmt de Division'.
         |               --> et donc peut-être un 'Evnmt simultané' finalement.
         |   - On analyse les évènements récoltés, pour chaque évènement:
-        |               # 'Evnmt de Segment':       - On créer la face du segment fusionné, en utilisant sa liste de points associés (pans_points).
-        |                                           - On continue avec le polygone en retirant le point du segment fusionné ( on le retire aussi de la liste (pans_points) ).
-        |               # 'Evnmt de Division':      - on relance avec les deux polygone obtenus.
-    ---------------------------------
+        |               # 'Evnmt de Segment':     -	On créer la face du segment fusionné, en utilisant sa liste de points associés (pans_points).
+        |                                           		-	On continue avec le polygone en retirant le point du segment fusionné ( on le retire aussi de la liste (pans_points) ).
+        |               # 'Evnmt de Division':     -	On relance avec les deux polygone obtenus.
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -56,8 +56,8 @@
     *   la liste des angles internes du polygone (angles).
     *   la distance (segEvnt_dist) à parcourir pour avoir un 'Evnmt de Segment':
             -   pour chaque point:
-                        long_seg    =   pts_poly[i-1] -   pts_poly[i]                               <--- la longueur du segment au point 'i'.
-                        seg_dist    =   long_seg / ( (cos)angles[i-1]/2 +  (cos)angles[i]/2 )       <--- la longueur necéssaire pour fermer la face, 'Evnmt de Segment' (cos?cot?).
+                        long_seg    =   pts_poly[i-1] -   pts_poly[i]                               			<--- la longueur du segment au point 'i'.
+                        seg_dist    =   long_seg / ( (cos)angles[i-1]/2 +  (cos)angles[i]/2 )       	<--- la longueur necéssaire pour fermer la face, 'Evnmt de Segment' (cos?cot?).
             -   On prend le 'seg_dist' le plus petit, ça donne la distance (segEvnt_dist) à parcourir avant le prochain 'Evnmt de Segment'.
     *   Il peut y avoir plusieurs 'Evnmt de Segment' en même temps (à la même distance)
 
@@ -67,7 +67,7 @@
     |       *   on stock la position actuel de chaque point du polygone (pts_pos_back).
     |       *   on trouve la position de destination de chaque point du polygone après rétrécissement (pts_pos_dest).
     |       *   pour chaque points (id_pt) du polygone (pts_poly):
-    |               -   on cherche les intersection entre la demi-droite formée par sa trajectoire (pts_pos_dest[id_pt] - pts_pos_backet[id_pt]) chacun des segments du polygone (pt_evnt):
+    |               -   on cherche les intersection entre la demi-droite formée par sa trajectoire (pts_pos_dest[id_pt] - pts_pos_back[id_pt]) et chacun des segments du polygone (pt_evnt):
     |                       ==>     on a une intersection:
     |                                       -   On calcul la distance à parcourir pour atteindre le moment de l'intersection (dist_avt_intersec).
     |                                       -   et donc on déclanche un 'Evnmt de Division' à la distance de l'intersection (dist_avt_intersec).
@@ -77,8 +77,8 @@
     |                       ==>     on a pas d'intersections: on continue tranquilou.
     |
     |       *   pour chaque évenement rencontré, d'abord les 'Evts de segment', puis les 'Evnmts de Division':
-    |               1) Les 'Evnmts de Segment':     --> index du point évenement:       (id_pt_evnt)
-    |                                               --> position du point évènement:    (pos_pt_evnt)
+    |               1) Les 'Evnmts de Segment':     	--> index du point évenement:       (id_pt_evnt)
+    |                                               				--> position du point évènement:    (pos_pt_evnt)
     |
     |                           *   On ajoute aux points pour la face du segment evenement (pans_points[id_pt_evnt]) la position du point evenement (pos_pt_evnt)
     |                           *   On créé la face formée par nos points (pans_points[id_pt_evnt])
@@ -87,9 +87,9 @@
     |                           *   On ajoute à la liste de points des pans du segment précedant le point evenement (pos_pt_evnt) au début de la liste.
     |                           *   On ajoute à la liste de points des pans du segment suivant le point evenement (pos_pt_evnt) à la fin de la liste.)
     |
-    |               2) Les 'Evnmts de Division':    --> index du point évenement:       (id_pt_evnt)
-    |                                               --> position du point évènement:    (pos_pt_evnt)
-    |                                               --> segment_intersection:           (id_pt_intersec)
+    |               2) Les 'Evnmts de Division':    	--> index du point évenement:		(id_pt_evnt)
+				|                                             --> position du point évènement:		(pos_pt_evnt)
+				|                                             --> segment_intersection:				(id_pt_intersec)
     |
     |                           *   On obtient 2 polygones :    #( id_pt_intersec+1 -> id_pt_evnt )
     |                                                           #( id_pt_evnt       -> id_pt_intersec )
@@ -105,7 +105,7 @@
 ---------------------------------------------------------------------------------------------------------------------------------------*/
 
 
----- les evenemùents ------------------------------------------------------------
+---- les evenements ------------------------------------------------------------
 struct str_squel_evnt_segment (
 	id_pt_evnt		= 0,
 	pos_pt_evnt		= [0,0,0],
@@ -114,9 +114,8 @@ struct str_squel_evnt_segment (
 
 struct str_squel_evnt_division (
 	id_pt_evnt,											--> index du point évenement:       (id_pt_evnt)
-	pos_pt_evnt,	                                    --> position du point évènement:    (pos_pt_evnt)
+	pos_pt_evnt,	                                 	   --> position du point évènement:    (pos_pt_evnt)
 	id_pt_intersec	                                    --> segment_intersection:           (id_pt_intersec)
-	
 )
 
 
@@ -479,7 +478,7 @@ struct  str_squelettisation (
 				
 				-----  on stock la position actuel de chaque point du polygone (pts_pos_back) ------
 				local pts_pos_back 	= deepCopy pts_retrecissement
-				local pts_pos_dest 	= #()
+				local pts_pos_dest 		= #()
 				
 				---- on applique le retrecissement à chaque points ---------
 				for i = 1 to pts_retrecissement.count do (
@@ -889,7 +888,7 @@ squel = str_squelettisation ()
 -- 	point pos:pt_intersc size:50
 
 
-shp = $Line003
+shp = $Line004
 pts = for i = 1 to numknots shp collect getKnotPoint  shp 1 i 
 squel.exe	 pts
 

@@ -289,7 +289,9 @@ struct	str_mgr_calques	(
 			debug ""
 			debug "############# get_prochaine_intersection ############"
 			debug "	id_pt_courant" var:id_pt_courant
+			debug "	pt_courant" var:pt_courant
 			debug "	intersections" var:intersections param:#pos
+			debug "	sens" var:sens
 			------------------- DEBUG 	-----------------------------------------------------------------------
 			
 			
@@ -315,7 +317,7 @@ struct	str_mgr_calques	(
 				---- pour chaque intersection:	 on cherche la plus proche en ID, en tenant compte du sens du parcours ---------------------------
 				local distID_min	=	1e14
 				local dist_pt_min	=	1e14
-				for intersec	in	intersections do (
+				for intersec	in	intersections where intersec.pos 	!=	 pt_courant	do (
 					
 					debug "\n"
 					debug "	*	intersec" var:intersec
@@ -335,12 +337,17 @@ struct	str_mgr_calques	(
 						debug "	*	on est sur poly B"
 						id_pt_intersec	=	intersec.id_pt_B
 					)
-					debug "	*	id_pt_intersec" var:id_pt_intersec
+					debug "	*	id_pt_intersec avat gestion du sens" var:id_pt_intersec
+					
+					
+					--- on corrige l'id si on est en sens inverse -------------------
+					if sens == -1 do (
+						
+					)
 					
 					
 					
-					
-					-------- on cherche la distance en ID, en nombre de point depuis le pt courant jusqu'a le pt d'intersection ------------------------------------
+					-------- on cherche la distance en ID, en nombre de point depuis le pt courant jusqu'au pt d'intersection ------------------------------------
 					local intersec_ID_prNbrPts	=	id_pt_intersec
 					local intersec_dist_ID			=	0
 					if sens == 1 then (
@@ -376,16 +383,22 @@ struct	str_mgr_calques	(
 						
 						--- on regarde si on est du bon coté du segment, ds le bon sens ---------
 						local pt_intersec 		=	pts[  id_pt_intersec ]
-						local vec_pt_courant 	=	pt_intersec - pt_courant
-						local vec_pt_intersec 	=	intersec.pos - pt_courant
+						local vec_pt_courant 	=	pt_courant	-	pt_intersec
+						local vec_pt_intersec 	=	intersec.pos - pt_intersec
 						local dot_test_sens		=	dot ( normalize vec_pt_courant )	( normalize vec_pt_intersec )					
+						debug "			------> pt_intersec" var:pt_intersec						
+						debug "			------> intersec.pos" var:intersec.pos					
+						debug "			------> pt_courant" var:pt_courant	
+						
 						debug "			------> dot_test_sens" var:dot_test_sens
 						
 						
 						---- dot_test vaut 1 alors on va dans le bon sens, l'intersection est apres le pt courant --------------
-						if dot_test == 1 then (
+						if dot_test_sens == 1. then (
+							debug "				------> on va dans le bon sens, "
 							intersec_dist_pt	=	distance		pt_courant	intersec.pos
 						) else (
+							debug "				------> on est dans le mauvais sens "
 							---- sinon on doit fair tout le tour pour arriver là ----------------------
 							intersec_dist_ID 	+=	pts.count 
 							intersec_dist_pt	=	distance		pt_intersec		intersec.pos
@@ -655,9 +668,9 @@ struct	str_mgr_calques	(
 			
 			--- les polygones isolés de B ----------------------------------------------------------------------------------------
 			for poly_B_isol in _polys_isoles_B do (
-				local polyB_dans_polyA
 				
 				--- avec les polygones de A -------------
+				local polyB_dans_polyA
 				for poly_A in polys_A do (
 					local est_ds_polyA	=	mgr_polys.est_dans_polygone		poly_A 		poly_B_isol	
 					if est_ds_polyA	!= undefined do 
@@ -825,9 +838,9 @@ struct	str_mgr_calques	(
 				
 				---- Les conditions initiales	---------------------------------------------------------------------------------------------------------------------------------------				
 				---- Le point demarrage, la premiere intersection de la liste --------------------
-				local id_intersection_aTraiter = ( ids_intersections_aTraiter as array )[1]
+				local id_intersection_aTraiter 	= ( ids_intersections_aTraiter as array )[1]
 				local intersection_aTraiter		=	intersections[ id_intersection_aTraiter ]
-				ids_intersections_aTraiter [ id_intersection_aTraiter ] = false
+-- 				ids_intersections_aTraiter [ id_intersection_aTraiter ] = false
 				
 				local poly_A						=	intersection_aTraiter.poly_A
 				local poly_B						=	intersection_aTraiter.poly_B
@@ -977,14 +990,12 @@ struct	str_mgr_calques	(
 					
 -- 					local on_continue = true
 					
--- 					while on_continue and not annuler		do (
-						
 						
 						debug "--------- on a pas fini la boucle: on continue		---------"
 						debug "	shp_enConstruction" var:shp_enConstruction
 						
 						
-						--- EN CREUX				<------( ? ! ? ! ? )
+						--- EN CREUX				<------ ? ! ? ! ? 
 						if not poly_courant.en_creux		do	en_creux = false
 						
 						
@@ -1179,7 +1190,7 @@ struct	str_mgr_calques	(
 						
 						
 						----------- ( 3 )	sortie ? si on est retourné sur le point initial, on sort	--------------------------------------------	
-						/* 
+						
 						if distance	pt_courant  pt_initial <  SEUIL_POINTS_EGAUX	then (
 							
 							on_a_fini_laBoucle = true
@@ -1192,10 +1203,8 @@ struct	str_mgr_calques	(
 							debug "--------------------------------------------------------------------------------------\n\n\n\n\n\n"
 
 						
-						) */
+						) 
 						
--- 					) -- FIN --- on fait le segment  jusqu'a la prochaine intersection 	-------------------------
-					
 					
 					
 					--- SAUVETAGE	----
@@ -1300,7 +1309,7 @@ struct	str_mgr_calques	(
 		
 	-----------------	Interface	------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
-		
+	
 	-------------- calques -----------------------------------------
 		---- Manipulations -------------
 		fn creer_calque		shape_node:	nom:"temporaire"		=(
@@ -1318,7 +1327,7 @@ struct	str_mgr_calques	(
 				
 				--- Ajout des polys au nv calque -----
 				for poly  in polygones do (
-				local chrono_2	=	timeStamp ()
+					local chrono_2	=	timeStamp ()
 			
 					nv_calque.ajouter_polygone 	poly
 -- 				debug "--->	nv_calque.ajouter_polygone"  var:( (  ((timeStamp ()) - chrono_2 ) / 1000.0)		as string + " s.")

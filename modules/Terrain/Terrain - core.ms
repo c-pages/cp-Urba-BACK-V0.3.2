@@ -604,8 +604,8 @@ struct	str_terrain_node_core	(
 				local chrono_1		=	affichage_tpsVide
 				local chrono_1_1		=	affichage_tpsVide
 				local chrono_1_2		=	affichage_tpsVide
-				local chrono_2_1 	=affichage_tpsVide
-				local chrono_2_2 	=affichage_tpsVide
+				local chrono_2_1 	=	affichage_tpsVide
+				local chrono_2_2 	=	affichage_tpsVide
 				
 				
 				--- on verifie si on doit changer l'etape ---------------------------

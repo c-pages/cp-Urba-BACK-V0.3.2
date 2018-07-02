@@ -211,7 +211,7 @@ struct str_mgr_polygones (
 	
 	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private
-		m_debug	=	false,
+		m_debug	=	true,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | polys"	  	var:var	 param:param		catch (),
 		fn debug_pts 	_pts nom:("debug_")	=   if m_debug  do	 (
 			::debug_spline	_pts	nom:nom
@@ -1733,9 +1733,8 @@ struct str_mgr_polygones (
 				nv_polygone.nom= nom
 				if nom != "root" and nom != "temporaire" do
 					nv_polygone.en_creux = false
-				
 			)
-			
+			debug "VERIF_SENS_PTS" var:(nv_polygone.get_pts())
 			nv_polygone
 			
 		),
@@ -1756,6 +1755,7 @@ struct str_mgr_polygones (
 		), 
 		fn creer_fromShape		_shape_node	=(
 			
+			debug "CREER_FROMSHAPECREER_FROMSHAPECREER_FROMSHAPECREER_FROMSHAPE" var:_shape_node.name
 			--- on renvoie une liste de polygones --------
 			local result_polys	=	#()
 			
@@ -1768,11 +1768,12 @@ struct str_mgr_polygones (
 			--- et on créé un polygone par tracé		-------------
 			local i = 0
 			for pts_shp in pts_shps do (
+				debug "pts_shp" var:pts_shp
 				--- le nouveau polygone ---
 				local nom_poly 	=  _shape_node.name	+ "_" + (  i+=1 ) as string
-				local nv_poly 		= creer_polygone		pts:pts_shp	nom:nom_poly
+				local nv_poly 		= 	creer_polygone		pts:pts_shp	nom:nom_poly
 				append result_polys nv_poly
--- 				debug "PTS:" var:(nv_poly.get_pts())
+				debug "PTS:" var:(nv_poly.get_pts())
 -- 				
 -- 				--- on l'ajoute à la hierarchie resultante --------------
 -- 				inserer	 result_polys 	nv_poly

@@ -104,8 +104,8 @@ struct str_outils_shape (
 			
 			
 			
-			debug "get_partie_tableau	()"
-			
+-- 			debug "get_partie_tableau	()"
+-- 			
 			
 			
 			
@@ -123,12 +123,12 @@ struct str_outils_shape (
 					id_debut += _tableau.count
 				)
 			
-			debug "	sens"	var:sens
-			debug "	_id_debut"	var:_id_debut
-			debug "	id_debut"	var:id_debut
-			debug "	_id_fin"	var: _id_fin
-			debug "	id_fin"	var: id_fin
-			debug "	_tableau.count"	var: _tableau.count
+-- 			debug "	sens"	var:sens
+-- 			debug "	_id_debut"	var:_id_debut
+-- 			debug "	id_debut"	var:id_debut
+-- 			debug "	_id_fin"	var: _id_fin
+-- 			debug "	id_fin"	var: id_fin
+-- 			debug "	_tableau.count"	var: _tableau.count
 			result = for id = id_debut to id_fin by sens	collect	_tableau[ ( boucler _tableau id ) ]
 			
 		),
@@ -897,7 +897,6 @@ struct str_outils_shape (
 			
 			
 			local result	=#()
-	
 			
 			m_pts_contour = #()
 			
