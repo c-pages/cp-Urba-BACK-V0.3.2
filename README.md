@@ -3,7 +3,7 @@ Suite de plugins pour 3DSmax  |  Maxscript  | Pour réalisation de bout de ville
 
 #### Auteur :
 
- Christophe Pagès |  contact@c-pages.fr  |   [c-pages.fr](http://c-pages.fr)  | [git](https://github.com/c-pages/cp-Urba)  
+ Christophe Pagès |  contact@c-pages.fr  |   [c-pages.fr](http://c-pages.fr)  | [git](https://github.com/c-pages/cp-Urba)
 #### En cours de développement :
 
 - __Batiment__ : Objet paramétrique.
@@ -70,7 +70,11 @@ ____________________________
 - [ ] /!\ PROBLEME RENDU RESEAU qui rend pas !!! /!\ a voir si c'est __Batiment__ ou __Terrain__ !!!
 - [ ] faire que quand on ajoute une nouvelle spline, si la touche 'alt' est pressée on l'ajoute en #soustraction
 - [ ] verifer à l'ajout de nouvelle spline qu'elles soient ok : qu'elles ne se croisent pas ni qu'elles aient des points superposer peut-etre, faudra chercher un peu les cas à problème.
-- [ ] Il y a un probleme avec la creation des points avant geometrie à partir des polys ( polygone.__creer_pts_pourFace ()__ )
+- [ ] Il y a un probleme avec la creation des points avant geometrie à partir des polys (polygone.__creer_pts_pourFace ()__).
+
+##### Importeur de reliefs
+- [ ] Créer un importeur de terrain utilisant model de terrain en ligne ?
+- [ ] DEM/DTM Data base. ex:https://asterweb.jpl.nasa.gov/gdem.asp
 
 
 #### __Bâtiment__
@@ -120,7 +124,7 @@ Avec un vitrage transparant on pourrait:
   - [ ] Création d'outils de manipulation de _Bâtiments_ en groupe (une version simplifier du générateur de bout de ville):
     * - [ ] Appliquer un style à plusieur batiments séléctionnés.
     * - [ ] Variations de paramètre de manière aléatoire (pente de toit, variance de materiaux, décallage ouvertures,...
-  - [ ] Faire en sorte que s'ils sont en mode 'Logo' ils ne soit pas visible au rendu.  
+  - [ ] Faire en sorte que s'ils sont en mode 'Logo' ils ne soit pas visible au rendu.
   - [ ] On pourra peut être cleanner un peu l'interface entre rollouts et reste du plug.
   - [ ] Continuer le débogage ...
 
