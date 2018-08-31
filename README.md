@@ -72,6 +72,7 @@ ____________________________
 - [ ] verifer à l'ajout de nouvelle spline qu'elles soient ok : qu'elles ne se croisent pas ni qu'elles aient des points superposer peut-etre, faudra chercher un peu les cas à problème.
 - [ ] Il y a un probleme avec la creation des points avant geometrie à partir des polys (polygone.__creer_pts_pourFace ()__).
 
+
 ##### Importeur de reliefs
 - [ ] Créer un importeur de terrain utilisant model de terrain en ligne ?
 - [ ] DEM/DTM Data base. ex:https://asterweb.jpl.nasa.gov/gdem.asp
@@ -131,6 +132,8 @@ Avec un vitrage transparant on pourrait:
 
 #### __OSM__
  - [ ] Revoir algorythme de convertion coordonées en plan.
+ - [ ] a voir aprés tests avec beru : projection en Lambert 93
+ - [ ] changement de centre ? WGS84 -> RGF 93
 
 _____________________________
 ### Historique des versions:
