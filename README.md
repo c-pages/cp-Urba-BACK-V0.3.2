@@ -133,7 +133,7 @@ Avec un vitrage transparant on pourrait:
 #### __OSM__
  - [ ] Revoir algorythme de convertion coordonées en plan.
  - [ ] a voir aprés tests avec beru : projection en Lambert 93
- - [ ] changement de centre ? WGS84 -> RGF 93
+ - [ ] changement de centre ? WGS84 -> RGF 93 (cf: http://www.forumsig.org/showthread.php/3239-Conversion-Lat-Long-vers-Lambert-93)
 
 _____________________________
 ### Historique des versions:
