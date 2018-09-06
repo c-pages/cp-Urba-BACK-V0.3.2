@@ -1,4 +1,4 @@
-# CP - Urba V0.3.1
+# CP - Urba V0.3.2
 Suite de plugins pour 3DSmax  |  Maxscript  | Pour réalisation de bout de villes, bâtiments, surfaces pour rues, trottoire, gazon etc.
 
 #### Auteur :
