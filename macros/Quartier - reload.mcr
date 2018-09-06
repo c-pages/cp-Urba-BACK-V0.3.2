@@ -12,4 +12,5 @@ toolTip:"DEBUG : recompile le plugin Urba | Quartier"
 		for obj in geometry where classof obj == Urba_quartier	do delete obj
 		popo = Urba_quartier()
 		select popo
+		
 )

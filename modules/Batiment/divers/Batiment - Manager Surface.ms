@@ -101,8 +101,8 @@ struct str_mgr_surfaces (
 				--- on scanne les points ---- 
 				pts_surface = 	scanner_points		m_plug.surface_node		
 				
-				for i = 1 to pts_surface.count do
-					pts_surface[i] = pts_surface[i] * m_plug.surface_node.transform
+-- 				for i = 1 to pts_surface.count do
+-- 					pts_surface[i] = pts_surface[i] * m_plug.surface_node.transform
 				
 				
 				--- on gere les OPTIMISATIONS  ----

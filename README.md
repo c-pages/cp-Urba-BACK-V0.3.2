@@ -28,8 +28,12 @@ M
 
  ### V0.3.2
  6 septembre 2018
+ #### __Batiment__
+ - [x] Correction du problème de position du batiment à l'assignation de son contour.
+
+
  #### __Quartier__
- - [ ] Première ébauche des concepts de base et de l'interface.
+ - [x] Première ébauche des concepts de base et de l'interface.
 
  ### Version blender
  Passage du plugin en phython pour intégration à Blender par Dindoune Amigo Bruno ! | git | dindoun.lautre.net

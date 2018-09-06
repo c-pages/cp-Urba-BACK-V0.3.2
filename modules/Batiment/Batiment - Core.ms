@@ -57,9 +57,6 @@ struct str_batiment_core (
 	
 	
 	-------- MEMBRES	--------------------------------------------------------------------------------------------------------
-	public
-		version_du_plugin = "V0.11",		
-		
 	private
 	---- pointeur  vers le plugin --------------------
 		m_plug,	
@@ -606,7 +603,9 @@ struct str_batiment_core (
 -- 			_nodeTHIS.transform = _shape.transform
 -- 			_nodeTHIS.position = _shape.position
 			mgr_surface.assigner		_shape
-			_nodeTHIS.pivot = _shape.pivot
+			
+-- 			_nodeTHIS.pivot = _shape.pivot
+			_nodeTHIS.transform = _shape.transform
 			
 			actualiser ()
 			

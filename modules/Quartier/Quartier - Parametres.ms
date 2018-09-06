@@ -1,4 +1,3 @@
-
 /*#########################################################################################################################
 	Christophe Pages (http://www.c-pages.fr)
 ##########################################################################################################################
@@ -6,25 +5,8 @@
 	URBA - BATIMENT
 	Générateur de batiment procédurale pour utilisation avec générateur de ville procédurale
 
-##########################################################################################################################
-
-	QUARTIER - les parametres du plug --------------------
-
-##########################################################################################################################
-
-	NOTES :
-
-##########################################################################################################################
-
-	todo:
-	- gerer les unité des parametre (pour le calcul ou  l'affichage des longueurpar ex..)
-
-##########################################################################################################################
-
-	changelog:
-	*v0.1 - [206/09/2018] -----------------------------------------------------------------------------
-	- Mise en place globale
-
+	QUARTIER - les parametres du plug
+	
 ########################################################################################################################*/
 
 
@@ -33,7 +15,11 @@
 
 parameters params_global 						rollout:roll_global		(
 		
-		p_contours							type:#nodeTab 			tabSize:0  		tabSizeVariable:true				----	Les shapes des batiments composant le quartier.
+		p_contours						type:#nodeTab 			tabSize:0  		tabSizeVariable:true				----	Les shapes des batiments composant le quartier.
+		
+		p_typologies					type:#stringTab 			tabSize:0  		tabSizeVariable:true				----	Les parametres (sous formes de DATAS (cf. manager Data to string) ) des differentes typologies du quartier.
+		
+		/* 
 		p_batiments						type:#stringTab 			tabSize:0  		tabSizeVariable:true				----	Les addresse des fichiers models des batiments à utiliser pour construir le quartier.
 		
 		p_conditions_surfMin_use		type:#boolTab	 		tabSize:0  		tabSizeVariable:true				----	Utilisation d'une condition de surface minimum pour choisir le contour du batiment.	(tableau de booleans)
@@ -54,7 +40,7 @@ parameters params_global 						rollout:roll_global		(
 		p_variations_nbrEtages			type:#intTab		 		tabSize:0  		tabSizeVariable:true				----	Nombre d'étages à ajouter ou a soustraire aux nombres d'étages du model				(tableau de integers)
 		p_variations_nbrEtagesMin		type:#intTab		 		tabSize:0  		tabSizeVariable:true				----	Nombre d'étages minimum.		(tableau de integers)
 		p_variations_nbrEtagesMax	type:#intTab		 		tabSize:0  		tabSizeVariable:true				----	Nombre d'étages maximum.		(tableau de integers)
-			
+		*/
 )
 
 parameters params_options 						rollout:roll_global		(
