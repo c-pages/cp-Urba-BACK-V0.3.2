@@ -102,10 +102,10 @@ struct str_batiment_core (
 		mgr_surface				= str_mgr_surfaces (),
 		
 		---- dialogs secondaires ----
-		m_editeur_dialog 	= fileIn "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout - Editeur.ms",
-		m_editeur_ouvert 	= false,
-		m_editeur_pos		=[300,100],
-		m_editeur_taille	= [290,630],
+		m_editeur_dialog 		= 	fileIn "$userScripts\cp-Urba\modules\Batiment\\rollouts\Batiment - rollout - Editeur.ms",
+		m_editeur_ouvert 	= 	false,
+		m_editeur_pos			=	[300,100],
+		m_editeur_taille		= 	[290,630],
 		
 		--- le batiment en edition ----
 		m_bat_edition = undefined ,
@@ -163,8 +163,8 @@ struct str_batiment_core (
 		fn preset_enregistrer  =(
 			mgr_presets.enregistrer	 m_plug
 		),
-		fn preset_charger  =(
-			mgr_presets.charger	 m_plug
+		fn preset_charger  	fichier:	=(
+			mgr_presets.charger	 m_plug	fichier:
 			m_plug.actualiser_rollouts ()
 			actualiser ()
 		),

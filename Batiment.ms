@@ -180,6 +180,8 @@ remap:#(#(#surface_node), #(#surface_node))
 
 		)
 	) */
+	
+	
 	---Initialisations / Actualisations ------
 	fn initialiser 	doLogo:false	=(
 -- 		activer_ecouteur_selection ()
@@ -193,15 +195,27 @@ remap:#(#(#surface_node), #(#surface_node))
 	)
 
 
-	---- Divers	---------
+	---- Contours	---------
 	fn assigner_shape 		_nodeTHIS		_shape 		=	core.assigner_surface 	_nodeTHIS		_shape
 
+	
+	---- Accessions --------------
 	fn get_facades 							= core.get_facades ()
 	fn	get_etage_ht		_etageNum 	= core.get_etage_ht _etageNum
-
 	fn get_toiture 							= core.get_toiture ()
 
-
+	
+	
+	
+	--- Models -------------
+	fn charger		_nomDuFichier		= (
+		if doesFileExist	_nomDuFichier	then
+			core.preset_charger  	fichier:_nomDuFichier
+		else format "/!\\ Attention! le fichier (%) n'existe pas, impossible à charger/n"		(_nomDuFichier as string )
+	)
+	
+	
+	
 
 	--------------- CREATION  ----------------------------------------------------------------------------------------------------------------------
 	tool create (

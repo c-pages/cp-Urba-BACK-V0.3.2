@@ -131,12 +131,16 @@ struct str_presets_batiment (
 			)
 		),
 	public
-		fn charger  	_this 	= (
+		fn charger  	_this 		fichier:		= (
 			
-			local fichierCible 	=	getopenFileName 		caption:				"Charger" 				\
-																			filename:			fichier_dossier 		\
-																			types:				fichier_type			\
-																			historyCategory:	fichier_categorie
+			local fichierCible 	
+			if fichier == unsupplied then
+					fichierCible 	=	getopenFileName 		caption:				"Charger" 				\
+																	filename:			fichier_dossier 		\
+																	types:				fichier_type			\
+																	historyCategory:	fichier_categorie
+			else 	fichierCible	=	fichier
+			
 			if fichierCible != undefined do (
 				local datas = lire_fichier 	fichierCible
 				set_params 	_this 	datas
@@ -164,6 +168,11 @@ struct str_presets_batiment (
 				close stream
 			)
 		), 
+		
+		
+		
+		
+		
 		
 		fn copier _this =(
 			urba_clipboard_batiment = get_params		_this 

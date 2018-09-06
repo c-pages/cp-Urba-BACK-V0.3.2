@@ -4,47 +4,42 @@ Suite de plugins pour 3DSmax  |  Maxscript  | Pour réalisation de bout de ville
 #### Auteur :
 
  Christophe Pagès |  contact@c-pages.fr  |   [c-pages.fr](http://c-pages.fr)  | [git](https://github.com/c-pages/cp-Urba)
-#### En cours de développement :
 
-- __Batiment__ : Objet paramétrique.
-- __Terrain__ : Objet paramétrique.
-- __OSM importer__ : Utilitaire
+ ###### En cours de développement :
 
-#### A développer :
-- __Ville__ ou __quartier__ : Utilitaire (ou objet ?) permettant de générer automatiquement des quartiers entiers de batiments, en fonction de certaines contraintes (surface du shape, largeur, orientation ...), tel preset de batiment à utiliser ou pas ( 'garage',  'immeuble de bureau', 'pavillon brique normand', ...).
+ - __Batiment__ : Objet paramétrique.
+
+     Permet de créer des bâtiments à partir d'un shape "contour", façades et toitures.
+
+ - __Quartier__ : Objet paramétrique, n'est pas rendu, organise des _Batiments_.
+M
+     Permet de construire et manipuler des quartiers entiers de batiments, en fonction de certaines contraintes (surface du shape, largeur, orientation ...), tel preset de batiment à utiliser ou pas ( 'garage',  'immeuble de bureau', 'pavillon brique normand', ...).
+ - __Terrain__ : Objet paramétrique.
+
+     Générateur de terrain utilisant d'un coté un ou plusieurs objects servant de relief, et de l'autre un ou plusieurs shapes délimitant des surfaces (ex: création d'une voire, route + trottoires). Voir si il y a moyen d'utiliser base de donnée SIG en ligne pour importer des reliefs.
+
+ - __OSM importer__ : Utilitaire
+
+     Permet d'importer depuis OpenStreetMap des cartes, pour utiliser les contours pour nos _Batiments_.
+
+
+ ----------
+
+
+ ### V0.3.2
+ 6 septembre 2018
+ #### __Quartier__
+ - [ ] Première ébauche des concepts de base et de l'interface.
+
+ ### Version blender
+ Passage du plugin en phython pour intégration à Blender par Dindoune Amigo Bruno ! | git | dindoun.lautre.net
+
 
 Merci à Dindoune Amigo Bruno ! | [git](https://github.com/dindoun) | [dindoun.lautre.net](http://www.dindoun.lautre.net/)
 
 
 ----------
 
-
-### V0.3.1 :
-#### __Terrain__ :
-
-- [x] Correction du problème avec la position du node qui devait être sur [0,0,0]. Maintenant le node peut etre placer n'importe ou dans la scène.
-- [x] Nettoyage du manager de shape : integration du struct de _triangulation_ et _booleen_.
-- [x] Création de la géométrie un peu plus propre.
-- [x] Le terrain se construit maintenant même sans relief, il se place alors à la hauteur de l'objet.
-- [x] Remise en forme des rollouts.
-- [x] On peut maintenant déplacer l'origine de la grille
-- [x] Mise en place d'une grille 'monde', donc avec l'option par objet de soit utiliser la grille 'monde', soit la grille 'local'.
-- [x] Création de la géométrie ENCORE plus propre, et optimisée.
-- [x] et une grosse correction de problème dans la création des suites de points des booléens.
-- [x] Problème des 'intersectRay' qui ne fonctionnent qu'avec des _editable_polys_.
-- [x] Problème des projections sur reliefs, les hauteurs semblent differentes en fonction de la position de l'objet, ou un truc du genre..
-- [x] On verifie quand il va y avoir beaucoup de faces apres une modif de resolution de la grille. : On demande si on veut passer en mode proxy pour l'affichage et si on veut monter la limite de l'alerte pour le mode 'rendu/pasProxy'.
-- [x] correction de quelques petits bugs dans la triangulation.
-- [x] Grosse correction des opération boolleenes.
-- [x] correction d'autres petits bugs dans la triangulation avec d'autres cas particuliers.
-- [ ] ca continue a bugger ... (booleen et/ou integration ...)
-
-
-
-#### __Général:__
-- [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes tout les modules.
-- [x] Mise en place  du rollout _"A propos'_ dans le dossier _'\commun\'_, utile pour plusieurs des modules.
-- [x] Enfin les operation booleene qui fonctionnent à peu pret, à voir s'il reste quelques bugs ... MERCI BRUNO !
 
 
 ____________________________
@@ -137,6 +132,34 @@ Avec un vitrage transparant on pourrait:
 
 _____________________________
 ### Historique des versions:
+
+### V0.3.1 :
+#### __Terrain__ :
+
+- [x] Correction du problème avec la position du node qui devait être sur [0,0,0]. Maintenant le node peut etre placer n'importe ou dans la scène.
+- [x] Nettoyage du manager de shape : integration du struct de _triangulation_ et _booleen_.
+- [x] Création de la géométrie un peu plus propre.
+- [x] Le terrain se construit maintenant même sans relief, il se place alors à la hauteur de l'objet.
+- [x] Remise en forme des rollouts.
+- [x] On peut maintenant déplacer l'origine de la grille
+- [x] Mise en place d'une grille 'monde', donc avec l'option par objet de soit utiliser la grille 'monde', soit la grille 'local'.
+- [x] Création de la géométrie ENCORE plus propre, et optimisée.
+- [x] et une grosse correction de problème dans la création des suites de points des booléens.
+- [x] Problème des 'intersectRay' qui ne fonctionnent qu'avec des _editable_polys_.
+- [x] Problème des projections sur reliefs, les hauteurs semblent differentes en fonction de la position de l'objet, ou un truc du genre..
+- [x] On verifie quand il va y avoir beaucoup de faces apres une modif de resolution de la grille. : On demande si on veut passer en mode proxy pour l'affichage et si on veut monter la limite de l'alerte pour le mode 'rendu/pasProxy'.
+- [x] correction de quelques petits bugs dans la triangulation.
+- [x] Grosse correction des opération boolleenes.
+- [x] correction d'autres petits bugs dans la triangulation avec d'autres cas particuliers.
+- [ ] ca continue a bugger ... (booleen et/ou integration ...)
+
+
+
+#### __Général:__
+- [x] Mise en place du dossier _'\commun\'_ pour y mettre les structures communes tout les modules.
+- [x] Mise en place  du rollout _"A propos'_ dans le dossier _'\commun\'_, utile pour plusieurs des modules.
+- [x] Enfin les operation booleene qui fonctionnent à peu pret, à voir s'il reste quelques bugs ... MERCI BRUNO !
+
 ### V0.3.0 :
 - [x] ___Terrain___ : Version basique mais fonctionnelle.
     - [x] Inverser le poly resultat, c'est à dire utiliser les contours pour creuser le cadre former par le ou les reliefs. pour pouvoir avec la meme spline creer la route ou l'inverse c'est a dire les trottoires.
