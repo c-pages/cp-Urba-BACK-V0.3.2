@@ -13,7 +13,10 @@
 
 
 ------------ Declaration de variables global --------------
-global urba_fn_afficherContours 
+--- pour le display dans le viewport ---
+global urba_fn_afficherContours , urba_fn_afficherTypologie
+
+
 
 
 --------------- le plug in ---------
@@ -65,6 +68,7 @@ version:0
 	)
 	fn actualiser_rollouts	= (
 		roll_contours.actualiser ()
+		roll_typologies.actualiser ()
 	)
 	
 	

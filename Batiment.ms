@@ -211,7 +211,7 @@ remap:#(#(#surface_node), #(#surface_node))
 	fn charger		_nomDuFichier		= (
 		if doesFileExist	_nomDuFichier	then
 			core.preset_charger  	fichier:_nomDuFichier
-		else format "/!\\ Attention! le fichier (%) n'existe pas, impossible à charger/n"		(_nomDuFichier as string )
+		else core.preset_charger()	--format "/!\\ Attention! le fichier (%) n'existe pas, impossible à charger/n"		(_nomDuFichier as string )
 	)
 	
 	

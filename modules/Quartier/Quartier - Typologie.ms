@@ -8,16 +8,17 @@
 
 struct str_typologie (
 		
-	
+		
 		ID									=	"",
-	
+		
 		nom								=	"Typologie",
 		couleur							=	yellow,
 		
 		
 		
 		contours_tout						=	true,					----	Si on utilise tout les contours du quartier ou seulement un groupe.
-		contours							=	#(),				----	le groupe des contours du quartier à utiliser pour la typologie.
+		contours_groupe					=	#(),				----	le groupe des contours du quartier à utiliser pour la typologie.
+		contours_index					=	#(),				----	le groupe des contours du quartier à utiliser pour la typologie.
 		
 		
 		
@@ -41,10 +42,10 @@ struct str_typologie (
 		
 		
 		
-		batiments						=	#(),					----	Les models des batiments à utiliser pour construir le quartier.
+		batiments						=	#(),					----	Les fichiers des models des batiments à utiliser pour construir le quartier.
 		batiments_pourcent			=	#(),					----	Liste des pourcentage utilisé pour la création de bâtiment dans cette typologie
 		
-		variations_nbrEtages			=	#(),					----	Nombre d'étages à ajouter ou a soustraire aux nombres d'étages du model				(tableau de integers)
+		variations_nbrEtages		=	#(),					----	Nombre d'étages à ajouter ou a soustraire aux nombres d'étages du model				(tableau de integers)
 		variations_nbrEtagesMin	=	#(),					----	Nombre d'étages minimum.		(tableau de integers)
 		variations_nbrEtagesMax	=	#(),					----	Nombre d'étages maximum.		(tableau de integers)
 		

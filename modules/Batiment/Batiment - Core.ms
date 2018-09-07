@@ -68,9 +68,9 @@ struct str_batiment_core (
 		mgr_datas 				= str_datasToString 	m_prt:this,
 		
 		---- les presets (chargement et enregistrement des parametres dans un fichier -----------------
-		mgr_presets				= str_presets_batiment  fichier_dossier:		"$userScripts\cp-Urba\lib\\" 	\
-																			fichier_categorie:	"Urba_batiment"\
-																			fichier_extension:	"bati",
+		mgr_presets				= str_presets_batiment  	fichier_dossier:		"$userScripts\cp-Urba\lib\Batiments\\" 	\
+																			fichier_categorie:		"Urba_batiment"\
+																			fichier_extension:		"bati",
 		
 		--- construction de la geometrie  -------------------
 		mgr_construction		= str_construction 	(),
@@ -161,7 +161,7 @@ struct str_batiment_core (
 			mgr_presets.enregistrer	 m_plug
 		),
 		fn preset_charger  	fichier:	=(
-			mgr_presets.charger	 m_plug	fichier:
+			mgr_presets.charger	 m_plug	fichier:fichier
 			m_plug.actualiser_rollouts ()
 			actualiser ()
 		),
