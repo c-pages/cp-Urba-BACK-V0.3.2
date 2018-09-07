@@ -10,6 +10,12 @@
 ########################################################################################################################*/
 
 
+
+
+------------ Declaration de variables global --------------
+global urba_fn_afficherContours 
+
+
 --------------- le plug in ---------
 plugin geometry 	Urba_quartier
 name:"Quartier"
@@ -18,11 +24,8 @@ category:"CP | Urba"
 extends:Editable_poly 
 replaceUI:true 
 version:0
--- remap:#(#(#surface_node), #(#surface_node))
 (
 
-	
-	
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	local m_debug = true
@@ -43,7 +46,8 @@ version:0
 	
 	
 	--------------- PARAMETRES  et ROLLOUTS ----------------------------------------------------------------------------------------------------------------------
-
+	local 	roll_contours, roll_typologies, roll_param_typologie
+	
 	---- on  importe les parametres -----
 	include "$userScripts\\cp-Urba\\modules\\Quartier\\Quartier - Parametres.ms"
 	
@@ -59,7 +63,9 @@ version:0
 	fn actualiser 		=(
 		core.actualiser ()
 	)
-	
+	fn actualiser_rollouts	= (
+		roll_contours.actualiser ()
+	)
 	
 	
 	
@@ -91,7 +97,6 @@ version:0
 		debug "update du plugin"
 		debug "shape : " var:surface_node
 		initialiser ()
--- 		actualiser ()
 	)
 	
 	

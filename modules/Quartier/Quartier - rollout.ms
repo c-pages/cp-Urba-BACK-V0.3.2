@@ -14,28 +14,30 @@
 --------------- ROLLOUT  --------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------
 
-rollout roll_global "Global" width:195 height:410
+
+
+rollout roll_presets "Presets" width:195 height:410
 (
 
+	button 'btn_enregistrer' "Enregistrer" pos:[87,6] width:82 height:16 toolTip:"Enregistrer comme preset de quartier." align:#left
+	button 'btn_charger' "Charger" pos:[7,6] width:81 height:16 enabled:true toolTip:"Charger un preset de quartier." align:#left
 
-	fn shape_filt 		obj = superclassof obj == shape
+)-- fin rollout ------------------------
 
-
-	GroupBox 'grp_presets' "Presets :" pos:[8,1] width:162 height:39 align:#left
-	button 'btn_enregistrer' "Enregistrer" pos:[88,19] width:77 height:16 align:#left
-	button 'btn_charger' "Charger" pos:[13,19] width:76 height:16 enabled:true align:#left
-
+rollout roll_contours "Contours" width:195 height:410
+(
+	
+	
+	fn shape_filt 		obj = superclassof obj == shape  and findItem p_contours	obj == 0
+	
+	
 	--- Surface ------
-	checkbutton 'chkbtn_surbillance' "Surbrillance" pos:[98,54] width:66 height:19 highlightColor:(color 180 180 50) toolTip:"Revele dans le viewport les contours séléctionnés dans la liste.." align:#left
-	checkbutton 'chkbtn_ajouter_contour' "+" pos:[13,54] width:19 height:19 toolTip:"Ajouter à contour au quartier." filter:shape_filt autoDisplay:false align:#left
-	GroupBox 'grp_contours' "Contours :" pos:[8,40] width:162 height:287 align:#left
-	button 'btn_retirer_contour' "-" pos:[31,54] width:19 height:19 toolTip:"Retirer le contour séléctionné du quartier." align:#left
-	
-	multiListBox 'lbx_contours' "" pos:[13,75] width:150 height:16 align:#left
-	
-	button 'btn_select' "Select" pos:[13,289] width:76 height:16 align:#left
-	button 'btnselect_unused' "Unused" pos:[88,289] width:76 height:16 align:#left
-	button 'btn163' "Nouvelle typologie" pos:[13,304] width:150 height:16 toolTip:"Crée une nouvelle typologie utilisant les contours selectionnés comme groupe à utiliser." align:#left
+	checkbutton 'chkbtn_surbillance' "" pos:[158,6] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Revele dans le viewport les contours séléctionnés dans la liste.." align:#left
+	checkbutton 'chkbtn_ajouter_contour' "+" pos:[6,6] width:16 height:16 toolTip:"Ajouter des contours au quartier depuis le viewport. (Clique droit pour options)" align:#left
+	button 'btn_retirer_contour' "-" pos:[52,6] width:16 height:16 toolTip:"Retirer le contour séléctionné du quartier." align:#left
+	button 'btn_liste' "Liste" pos:[21,6] width:32 height:16 toolTip:"Ajouter des contours au quartier depuis une liste." align:#left
+	multiListBox 'lbx_contours' "" pos:[6,23] width:168 height:16 align:#left
+	button 'btn_select' "Select" pos:[119,6] width:40 height:16 toolTip:"Selectionne les shapes des contours." align:#left
 	
 	
 	
@@ -47,16 +49,11 @@ rollout roll_global "Global" width:195 height:410
 	)
 
 	fn actualiser =(
-		afficher_contours ()
-		
+		afficher_contours ()		
 		btn_retirer_contour.enabled = ( lbx_contours.selection as array).count > 0 
-		format  "lbx_contours.selection : % , count : %\n" lbx_contours.selection		( lbx_contours.selection as array).count
 	)
 
 
-
-
-
 	
 	
 	
@@ -68,24 +65,19 @@ rollout roll_global "Global" width:195 height:410
 	
 	
 	
-	on roll_global open do
+	on roll_contours open do
 		actualiser ()
-	on roll_global close do
-		()
-	on btn_enregistrer pressed do
-		()
-	on btn_charger pressed do
-		()
 	on chkbtn_surbillance changed state do
 	(
+			case state of (
+				true: 	core.activer_surbrillance ()
+				false: 	core.desactiver_surbrillance ()
+			)
 		)
 	on chkbtn_ajouter_contour changed state do
 	(
-			format "pique contours ... \n"
-			
-			case state of (
-				true: (
-					local shps_aAjouter = pickObject prompt:"popo"	filter:shape_filt  count:#multiple  forceListenerFocus:false
+				if  state do (
+					local shps_aAjouter = pickObject prompt:"popo"	filter:shape_filt  count:#multiple  forceListenerFocus:false	rubberBand:$.position 	rubberBandColor:yellow 
 					if shps_aAjouter.count > 0 do (
 						core.ajouter_contours	shps_aAjouter
 						actualiser ()
@@ -93,90 +85,400 @@ rollout roll_global "Global" width:195 height:410
 					chkbtn_ajouter_contour.checked = false
 				)
 			)
-			format "... pique contours fin. \n"
-		
-		)
 	on btn_retirer_contour pressed do
 	(
-		
-		)
+				core.retirer_contour_parIds	 ( lbx_contours.selection as array)
+				actualiser ()
+			)
+	on btn_liste pressed  do	(
+		core.ouvrir_rollout_liste ()
+	)
 	on lbx_contours selected _id do
 		actualiser ()
+	on lbx_contours	doubleClicked arg do
+		select p_contours[arg]
 	on btn_select pressed do
 	(
-		
-		)
-	on btnselect_unused pressed do
-	(
-		
-		)
-	on btn163 pressed do
-	(
-		
-		)
+				if p_contours.count > 0 do (
+					clearSelection ()
+					for obj in  p_contours do
+						selectMore obj
+					redrawViews ()
+				)
+			)
 )
 
-
-
-rollout roll_typologies "Typologies" width:182 height:447
+rollout roll_typologies "Typologies" width:195 height:410
 (
 
 
-	fn shape_filt 		obj = superclassof obj == shape
-
-
+	
 
 	--- Surface ------
-	checkbutton 'chkbtn_surbillance' "Surbrillance" pos:[110,27] width:66 height:19 highlightColor:(color 180 180 50) toolTip:"Revele dans le viewport les contours séléctionnés dans la liste.." align:#left
-	checkbutton 'btn_ajouter_typologie' "+" pos:[8,27] width:19 height:19 toolTip:"Créer une nouvelle typologie de bâtiment." align:#left
-	button 'btn_supprimer_typologie' "-" pos:[26,27] width:19 height:19 toolTip:"Supprimer la typologie." align:#left
-	GroupBox 'grp8' "Conditions contours  " pos:[6,133] width:168 height:120 align:#left
-	GroupBox 'grp9' "Batiments  " pos:[6,259] width:168 height:162 align:#left
-		
-		
-		
+	button 'btn_creer_typologie' "+" pos:[8,4] width:16 height:16 toolTip:"Créer une nouvelle typologie de batiment." align:#left
+	button 'btn_supprimer_typologie' "-" pos:[23,4] width:16 height:16 toolTip:"Supprime la typologie sélectionnée." align:#left
 	
-	spinner 'spn21' "" pos:[26,164] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	spinner 'spn22' "" pos:[103,164] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	checkbutton 'ckb45' "" pos:[90,164] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
-	label 'lbl20' "Surface :" pos:[14,149] width:52 height:15 align:#left
-	checkbutton 'ckb46' "" pos:[13,164] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-	spinner 'spn23' "" pos:[101,370] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	spinner 'spn25' "" pos:[26,194] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	spinner 'spn26' "" pos:[103,194] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	checkbutton 'ckb49' "" pos:[90,194] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
-	label 'lbl23' "Largeur :" pos:[14,179] width:52 height:15 align:#left
-	checkbutton 'ckb50' "" pos:[13,194] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-	spinner 'spn27' "" pos:[26,224] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	spinner 'spn28' "" pos:[103,224] width:63 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	checkbutton 'ckb51' "" pos:[90,224] width:16 height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left
-	label 'lbl24' "Longueur :" pos:[14,209] width:52 height:15 align:#left
-	checkbutton 'ckb52' "" pos:[13,224] width:16 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left
-	button 'btn82' "Select." pos:[123,273] width:42 height:16 align:#left
-	dropdownList 'ddl16' "" pos:[8,7] width:168 height:21 align:#left
-	label 'lbl31' "+" pos:[92,370] width:7 height:15 align:#left
-	spinner 'spn41' "" pos:[101,385] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	label 'lbl32' "-" pos:[94,385] width:7 height:15 align:#left
-	GroupBox 'grp50' "Contours sources  " pos:[6,74] width:168 height:55 align:#left
-	radiobuttons 'rdo1' "" pos:[19,88] width:58 height:32 labels:#("Tous", "Groupe") columns:1 align:#left
-	button 'btn115' "Editer" pos:[101,104] width:63 height:16 align:#left
-	listbox 'lbx11' "" pos:[16,290] width:149 height:3 align:#left
-	spinner 'spn52' "" pos:[101,337] width:64 height:16 range:[0,100,0] type:#float scale:1 align:#left
-	label 'lbl41' "Pourcentage :" pos:[18,337] width:71 height:15 align:#left
-	button 'btn116' "+" pos:[17,273] width:16 height:16 align:#left
-	button 'btn117' "-" pos:[32,273] width:16 height:16 align:#left
-	edittext 'edt13' "" pos:[5,47] width:154 height:16 align:#left
-	spinner 'spn111' "" pos:[101,355] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	label 'lbl88' "Etages :" pos:[18,355] width:47 height:15 align:#left
-	colorPicker 'cp1' "" pos:[155,46] width:21 height:19 color:(color 255 255 0) align:#left
+	ListBox 'lbx_typologies' "" pos:[8,21] width:150 height:16 align:#left
+	
+	button 'btn_monter' "/\\" pos:[159,20] width:16 height:16 toolTip:"Monter la typologie (dans l'ordre des priorités)." align:#left
+	button 'btn_descendre' "\/" pos:[159,36] width:16 height:16 toolTip:"Descendre la typologie (dans l'ordre des priorités)." align:#left
+	
+	
+	
+	
+	
+	fn afficher_typologies =(
+		
+		local noms_typologies 	= for typo in core.m_typologies collect typo.nom
+		lbx_typologies.items 	= noms_typologies
+		
+	)
+
+	fn actualiser =(
+		
+		
+		afficher_typologies ()
+		
+		----- on actualise le rollout des parametre de la typo s'il yen a une de selectionné.---------
+		roll_param_typologie.actualiser ()
+		
+		
+		btn_monter.enabled 					= lbx_typologies.selection != 1
+		btn_descendre.enabled 			= lbx_typologies.selection != lbx_typologies.items.count		
+		btn_supprimer_typologie.enabled	=  lbx_typologies.items.count > 0
+		
+	)
+
+
+	
+	
+	
+	on roll_typologies open do (
+		core.charger_typologies ()
+		actualiser ()
+	)
+	
+	on btn_creer_typologie pressed  do -- undo "creer_typologie" on  
+		(
+		core.creer_typologie	()
+		
+		actualiser ()
+		lbx_typologies.selection =  lbx_typologies.items.count
+		
+		actualiser ()
+	)
+	
+	on btn_supprimer_typologie pressed do -- undo "supprimer_typologie" on 
+	(
+		core.supprimer_typologie	core.m_typologies[ lbx_typologies.selection ]
+		actualiser ()
+		
+	)
+	on lbx_typologies selected _id do (
+		actualiser ()
+		
+		
+	)
+	on btn_monter pressed  do
+(
+	core.monter_typologie	lbx_typologies.selection
+	lbx_typologies.selection -= 1 
+	actualiser ()
+	)
+	on btn_descendre pressed  do
+(
+	core.descendre_typologie	lbx_typologies.selection
+	lbx_typologies.selection += 1 
+	actualiser ()
+	
+	)
+)
+
+
+rollout roll_param_typologie "Parametres typologie" width:182 height:447
+(
+
+	local		m_typo
+
+	--- Surface ------
+	GroupBox 'grp_conditions' "Conditions contours  " pos:[6,95] width:168 height:120 align:#left
+	GroupBox 'grp_batiment' "Batiments  " pos:[6,221] width:168 height:154 align:#left
+	
+	spinner 'spn_surfaceMin' "" pos:[26,126] width:64 height:16 range:[0,1e+13,0] type:#float scale:1 align:#left
+	spinner 'spn_surfaceMax' "" pos:[103,126] width:63 height:16 range:[0,1e+13,0] type:#float scale:1 align:#left
+	checkbox 'ckb_surfaceMax_use' "" pos:[90,126] width:15 height:16 highlightColor:(color 255 255 0) toolTip:"Surface maximum." align:#left
+	label 'lbl_surface' "Surface :" pos:[14,111] width:52 height:15 align:#left
+	checkbox 'ckb_surfaceMin_use' "" pos:[13,126] width:15 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Surface minimum." align:#left
+	spinner 'spn_bat_etages_enPlus' "" pos:[101,332] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+	spinner 'spn_largeurMin' "" pos:[26,156] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	spinner 'spn_largeurMax' "" pos:[103,156] width:63 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	checkbox 'ckb_largeurMax_use' "" pos:[90,156] width:15 height:16 highlightColor:(color 255 255 0) toolTip:"Largeur maximum." align:#left
+	label 'lbl_largeur' "Largeur :" pos:[14,141] width:52 height:15 align:#left
+	checkbox 'ckb_largeurMin_use' "" pos:[13,156] width:15 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Largeur minimum." align:#left
+	spinner 'spn_longueurMin' "" pos:[26,186] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	spinner 'spn_longueurMax' "" pos:[103,186] width:63 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	checkbox 'ckb_longueurMax_use' "" pos:[90,186] width:15 height:16 highlightColor:(color 255 255 0) toolTip:"Longueur maximum." align:#left
+	label 'lbl_longueur' "Longueur :" pos:[14,171] width:52 height:15 align:#left
+	checkbox 'ckb_longueurMin_use' "" pos:[13,186] width:15 height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Longueur minimum." align:#left
+	button 'btn_selectionner_batiments' "Select." pos:[123,235] width:42 height:16 align:#left
+	label 'lbl_bat_etages_enPlus' "+" pos:[92,332] width:7 height:15 align:#left
+	spinner 'spn_bat_etages_enMoins' "" pos:[101,347] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+	label 'lbl_bat_etages_enMoins' "-" pos:[94,347] width:7 height:15 align:#left
+	GroupBox 'grp_contours' "Contours sources  " pos:[6,36] width:168 height:55 align:#left
+	radiobuttons 'rdo_groupe_use' "" pos:[19,50] width:58 height:32 labels:#("Tous", "Groupe") columns:1 align:#left
+	button 'btn_groupe_editer' "Editer" pos:[101,66] width:63 height:16 align:#left
+	listbox 'lbx_batiments' "" pos:[16,252] width:149 height:3 align:#left
+	spinner 'spn_bat_pourcent' "" pos:[101,299] width:64 height:16 range:[0,100,0] type:#float scale:1 align:#left
+	label 'lbl_bat_pourcent' "Pourcentage :" pos:[18,299] width:71 height:15 align:#left
+	button 'btn_ajouter_batiment' "+" pos:[17,235] width:16 height:16 align:#left
+	button 'btn_retirer_batiment' "-" pos:[32,235] width:16 height:16 align:#left
+	edittext 'edt_nom' "" pos:[5,9] width:146 height:16 align:#left
+	spinner 'spn_bat_etages' "" pos:[101,317] width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+	label 'lbl_bat_etages' "Etages :" pos:[18,317] width:47 height:15 align:#left
+	colorPicker 'cp_couleur' "" pos:[151,9] width:26 height:17 align:#left
+	
+	local m_btns	=#( 	'grp_conditions', 'grp_batiment',  'spn_surfaceMin' , 'spn_surfaceMax', 'ckb_surfaceMax_use', 'lbl_surface', 'ckb_surfaceMin_use', 'spn_bat_etages_enPlus', 'spn_largeurMin', 'spn_largeurMax', 'ckb_largeurMax_use', \
+								'lbl_largeur', 'ckb_largeurMin_use', 'spn_longueurMin', 'spn_longueurMax', 'ckb_longueurMax_use', 'lbl_longueur', 'ckb_longueurMin_use', 'lbl_longueur', 'ckb_longueurMin_use', 'btn_selectionner_batiments', \
+								'lbl_bat_etages_enPlus', 'spn_bat_etages_enMoins', 'lbl_bat_etages_enMoins', 'grp_contours', 'rdo_groupe_use', 'btn_groupe_editer', 'lbx_batiments', 'spn_bat_pourcent', 'lbl_bat_pourcent', 'btn_ajouter_batiment', \
+								'btn_retirer_batiment', 'edt_nom', 'spn_bat_etages', 'lbl_bat_etages', 'cp_couleur' )
+	
+	
+	
+	
+	
+	fn actualiser =(
+		
+		format "ACTUALISER roll_param_typologie() \n"
+-- 		format "		m_typo:% \n"	m_typo
+		
+		---- la typologie selectionnée --------
+		local typo_selec = roll_typologies.lbx_typologies.selection 
+		if typo_selec == 0 then
+			m_typo = undefined
+		else
+			m_typo = core.m_typologies[ typo_selec ]
+		
+		
+		for btn in m_btns do	(
+			btn.enabled = core.m_typologies.count != 0 and m_typo != undefined --	 != undefined
+		
+-- 		format "			--> btn.enabled  :% \n"	(btn.enabled  )
+		)
+-- 		format "		core.m_typologies.count != 0 :% \n"	(core.m_typologies.count != 0 )
+		
+		
+		
+		
+		
+		
+		if m_typo != undefined then (
+			edt_nom.text 						= m_typo.nom			
+			cp_couleur.color 					= m_typo.couleur
+			
+			
+			ckb_surfaceMin_use.checked	=	m_typo.conditions_surfMin_use
+			spn_surfaceMin.enabled 		= 	m_typo.conditions_surfMin_use
+			if m_typo.conditions_surfMin_use then (
+				spn_surfaceMin.indeterminate	=	false
+				spn_surfaceMin.value = m_typo.conditions_surfMin
+			)	else (
+				spn_surfaceMin.indeterminate	=	true
+			)
+			ckb_surfaceMax_use.checked	=	m_typo.conditions_surfMax_use
+			spn_surfaceMax.enabled 		= 	m_typo.conditions_surfMax_use
+			if m_typo.conditions_surfMax_use then (
+				spn_surfaceMax.indeterminate	=	false
+				spn_surfaceMax.value = m_typo.conditions_surfMax
+			)	else (
+				spn_surfaceMax.indeterminate	=	true
+			)
+			
+			
+			
+			ckb_largeurMin_use.checked	=	m_typo.conditions_largMin_use
+			spn_largeurMin.enabled 		= 	m_typo.conditions_largMin_use
+			if m_typo.conditions_largMin_use then (
+				spn_largeurMin.indeterminate	=	false
+				spn_largeurMin.value = m_typo.conditions_largMin
+			)	else (
+				spn_largeurMin.indeterminate	=	true
+			)
+			ckb_largeurMax_use.checked	=	m_typo.conditions_largMax_use
+			spn_largeurMax.enabled 		= 	m_typo.conditions_largMax_use
+			if m_typo.conditions_largMax_use then (
+				spn_largeurMax.indeterminate	=	false
+				spn_largeurMax.value = m_typo.conditions_largMax
+			)	else (
+				spn_largeurMax.indeterminate	=	true
+			)
+			
+			
+			
+			ckb_longueurMin_use.checked	=	m_typo.conditions_longMin_use
+			spn_longueurMin.enabled 		= 	m_typo.conditions_longMin_use
+			if m_typo.conditions_longMin_use then (
+				spn_longueurMin.indeterminate	=	false
+				spn_longueurMin.value = m_typo.conditions_longMin
+			)	else (
+				spn_longueurMin.indeterminate	=	true
+			)
+			ckb_longueurMax_use.checked	=	m_typo.conditions_longMax_use
+			spn_longueurMax.enabled 		= 	m_typo.conditions_longMax_use
+			if m_typo.conditions_longMax_use then (
+				spn_longueurMax.indeterminate	=	false
+				spn_longueurMax.value = m_typo.conditions_longMax
+			)	else (
+				spn_longueurMax.indeterminate	=	true
+			)
+			
+			
+			
+			
+			
+			if m_typo.contours_tout then (
+				rdo_groupe_use.state = 1
+				btn_groupe_editer.enabled = false
+			) else (
+				rdo_groupe_use.state = 2
+				btn_groupe_editer.enabled = true				
+			)
+		) else (
+			cp_couleur.color = color 10	10	10
+		)
+		
+		
+		
+	)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	on roll_param_typologie open do
+	(
+	-- 		format "actualiser OPEN\n"
+			actualiser ()
+			
+		)
+	on spn_surfaceMin changed val do
+	(
+				m_typo.conditions_surfMin = val
+				core.enregistrer_typologie		m_typo
+				actualiser ()
+		)
+	on spn_surfaceMax changed val do
+	(
+				m_typo.conditions_surfMax = val
+				core.enregistrer_typologie		m_typo
+				actualiser ()
+		)
+	on ckb_surfaceMax_use changed state do
+	(
+				m_typo.conditions_surfMax_use = state
+				core.enregistrer_typologie		m_typo
+				actualiser ()
+		
+		)
+	on ckb_surfaceMin_use changed state do
+	(
+				m_typo.conditions_surfMin_use =state
+				core.enregistrer_typologie		m_typo
+				actualiser ()
+		
+		)
+	on spn_largeurMin changed val do
+	(
+					m_typo.conditions_largMin = val
+					core.enregistrer_typologie		m_typo
+					actualiser ()
+	)
+	on spn_largeurMax changed val do
+	(
+					m_typo.conditions_largMax = val
+					core.enregistrer_typologie		m_typo
+					actualiser ()
+	)
+	on ckb_largeurMax_use changed state do
+	(
+				m_typo.conditions_largMax_use =state
+				core.enregistrer_typologie		m_typo
+				actualiser ()
+		
+		)
+	on ckb_largeurMin_use changed state do
+	(
+				m_typo.conditions_largMin_use =state
+				core.enregistrer_typologie		m_typo
+				actualiser ()
+		
+		)
+	on spn_longueurMin changed val do
+	(
+					m_typo.conditions_longMin = val
+					core.enregistrer_typologie		m_typo
+					actualiser ()
+	)
+	on spn_longueurMax changed val do
+	(
+					m_typo.conditions_longMax = val
+					core.enregistrer_typologie		m_typo
+					actualiser ()
+	)
+	on ckb_longueurMax_use changed state do
+	(
+				m_typo.conditions_longMax_use =state
+				core.enregistrer_typologie		m_typo
+				actualiser ()
+		
+		)
+	on ckb_longueurMin_use changed state do
+	(
+				m_typo.conditions_longMin_use =state
+				core.enregistrer_typologie		m_typo
+				actualiser ()
+		
+		)
+	on rdo_groupe_use changed state do
+	(
+			m_typo.contours_tout = state == 1
+			core.enregistrer_typologie		m_typo
+			actualiser ()
+		)
+	on edt_nom entered text do
+	(
+			m_typo.nom	=	text
+			core.enregistrer_typologie		m_typo
+			roll_typologies.actualiser ()
+		)
+	on cp_couleur changed col do
+	(
+		m_typo.couleur	=	col
+		core.enregistrer_typologie		m_typo
+	)
 )
 
 
 
 
+rollout roll_affichage "Affichage" width:182 height:60
+(
+	button 'btn_generer' "Générer le quartier" pos:[6,22] width:168 height:32 align:#left
+	checkbox 'ckb_majAuto' "Maj. auto" pos:[7,7] width:84 height:16 align:#left
+	
+	checkbox 'ckb_proxies' "Proxies" pos:[90,7] width:84 height:16 align:#left
+	
+	fn actualiser =(
+		ckb_proxies.enabled = ckb_majAuto.checked 
+	)
 
-
-
+	on roll_affichage open do
+		actualiser ()
+	on ckb_majAuto changed state do actualiser ()
+)
 
 
 

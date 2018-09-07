@@ -314,9 +314,9 @@ struct 	str_bat_VP 		(
 		
 		on create do (
 -- 			format "initialiser\n"
-			global 	urba_fn_afficher_longueurs  	= fn_afficher_longueurs
+			global 	urba_fn_afficher_longueurs  		= fn_afficher_longueurs
 			global 	urba_fn_afficher_facades  		= fn_afficher_facades
-			global 	urba_fn_afficher_etages  		= fn_afficher_etages
+			global 	urba_fn_afficher_etages  			= fn_afficher_etages
 		)
 	
 )
