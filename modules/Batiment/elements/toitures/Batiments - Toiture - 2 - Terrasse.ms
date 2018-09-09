@@ -115,54 +115,90 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		local ptr_geo 				= 	_plug.core.get_geo ()
 		
 -------------  PARAMETRES 	 et constantes		-----------------------------------------------------------------------------------------------------------------
-		local ep_murExt		= ptr_plug.const_murExt_epaisseur
+		local ep_murExt			= ptr_plug.const_murExt_epaisseur
 		local ht_acrotere 		= ptr_composant.params.acrotere_ht
-		local ep_couvertine	= ptr_plug.const_couvertine_epaisseur
-		local ep_dalle			= ptr_plug.const_dalle_epaisseur
+		local ep_couvertine		= ptr_plug.const_couvertine_epaisseur
+		local ep_dalle				= ptr_plug.const_dalle_epaisseur
 		
--------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
-		
-		--- la dalle	-------
-		ptr_geo.facesContour	pts_accroches	 pts_accroches[1].z 		ep_dalle  matid:#mur
-		for pt in pts_accroches do pt.z += ep_dalle
-		
-		--- la face de base 	--------
-		local faceBase 	= ptr_geo.face		pts_accroches						matID:1
-		ptr_geo.set_matID 	faceBase	#mur 
-		
-		
-		--- l'acrotere --------
-		ptr_geo.biseauter	faceBase 	0		 -ep_murExt
-		ptr_geo.set_matID 	faceBase	#graviers 
-		local faceAExtruder = #{ faceBase +1..(polyop.getNumFaces ptr_plug.delegate)} as array
-		ptr_geo.extruder 	faceAExtruder 	ht_acrotere
-		
-		---- la couvertine  -----
-		-- m_matID --
-		ptr_geo.set_matID 	faceAExtruder	#metal 
-		
-		-- gemoetrie --
-		ptr_geo.biseauter	faceAExtruder 	0		ep_couvertine
-		ptr_geo.extruder 	faceAExtruder 			ep_couvertine
-		
+	
+	
+	
+		if not  _plug.affiche_asProxy	then (
+		-------------  CONSTRUCTION  NORMAL		-----------------------------------------------------------------------------------------------------------------
 			
-		---- les elements -----------
-		if  this.params.elements.count > 0 do (
-			local face_center = polyop.getFaceCenter  	ptr_plug.delegate  faceBase
-			local faceNormal = polyop.getFaceNormal  	ptr_plug.delegate  faceBase
+			--- la dalle	-------
+			ptr_geo.facesContour	pts_accroches	 pts_accroches[1].z 		ep_dalle  matid:#mur
+			for pt in pts_accroches do pt.z += ep_dalle
 			
-			local mgr_surface	= _plug.core.get_mgr_surface ()
-			
-			local mtrx_principale 	= mgr_surface.get_axePrincipal ()
--- 			format  "mtrx_principale.translationpart :%\n" mtrx_principale.translationpart
+			--- la face de base 	--------
+			local faceBase 	= ptr_geo.face		pts_accroches						matID:1
+			ptr_geo.set_matID 	faceBase	#mur 
 			
 			
-			local transf_insertion		=	mtrx_principale * ( transMatrix face_center )  
+			--- l'acrotere --------
+			ptr_geo.biseauter	faceBase 	0		 -ep_murExt
+			ptr_geo.set_matID 	faceBase	#graviers 
+			local faceAExtruder = #{ faceBase +1..(polyop.getNumFaces ptr_plug.delegate)} as array
+			ptr_geo.extruder 	faceAExtruder 	ht_acrotere
+			
+			---- la couvertine  -----
+			-- m_matID --
+			ptr_geo.set_matID 	faceAExtruder	#metal 
+			
+			-- gemoetrie --
+			ptr_geo.biseauter	faceAExtruder 	0		ep_couvertine
+			ptr_geo.extruder 	faceAExtruder 			ep_couvertine
+			
+				
+			---- les elements -----------
+			if  this.params.elements.count > 0 do (
+				local face_center = polyop.getFaceCenter  	ptr_plug.delegate  faceBase
+				local faceNormal = polyop.getFaceNormal  	ptr_plug.delegate  faceBase
+				
+				local mgr_surface	= _plug.core.get_mgr_surface ()
+				
+				local mtrx_principale 	= mgr_surface.get_axePrincipal ()
+	-- 			format  "mtrx_principale.translationpart :%\n" mtrx_principale.translationpart
+				
+				
+				local transf_insertion		=	mtrx_principale * ( transMatrix face_center )  
+				
+				
+				for elem in this.params.elements do
+					elem.construire	 	ptr_plug			surface_points  	transformation:transf_insertion
+			)
+			
+		)	---   FIN CONTRUCTION  NORMAL -----------------
+		
+		
+		
+		
+		else (
+		-------------  CONSTRUCTION  PROXY		-----------------------------------------------------------------------------------------------------------------
+			
+-- 			--- la dalle	-------
+-- 			ptr_geo.facesContour	pts_accroches	 pts_accroches[1].z 		ep_dalle  matid:#mur
+-- 			for pt in pts_accroches do pt.z += ep_dalle
+			
+			--- la face de base 	--------
+			local faceBase 	= ptr_geo.face		pts_accroches						matID:1
+			ptr_geo.set_matID 	faceBase	#mur 
 			
 			
-			for elem in this.params.elements do
-				elem.construire	 	ptr_plug			surface_points  	transformation:transf_insertion
+-- 			--- l'acrotere --------
+-- 			ptr_geo.biseauter	faceBase 	0		 -ep_murExt
+-- 			ptr_geo.set_matID 	faceBase	#graviers 
+			local faceAExtruder = #(faceBase)
+			ptr_geo.extruder 	faceAExtruder 	ht_acrotere
+-- 			
+-- 			---- la couvertine  -----
+-- 			-- m_matID --
+-- 			ptr_geo.set_matID 	faceAExtruder	#metal 
+			
+			
 		)
+		
+		
 		/* 
 		
 		local faceToitsSurface = m_outils_poly.etendreFaces  	m_plug.delegate 	#(_face)

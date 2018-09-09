@@ -285,6 +285,30 @@ rollout roll_aleatoire "Hasard" width:162 height:237
 	)
 )
 
+/* 
+rollout roll_quartier "Quartier" width:162 height:70
+(
+	button 'btn_select' "Selectionner Quartier" pos:[5,5] width:152 height:21 align:#left
+	
+	fn actualiser =
+		btn_select.enabled =  quartier_parent != undefined
+	
+	
+	on	roll_quartier open	do
+		actualiser ()
+	
+	on btn_select pressed  do
+	(
+		select	quartier_parent.node
+	)
+)
+ */
+
+-- maxObjectTabArray (nodeTransformMonitor node:x forwardTransformChangeMsgs:false)
+
+
+
+
 /*
 rollout roll_viewport "Viewport" width:162 height:204
 (
@@ -315,4 +339,5 @@ rollout roll_viewport "Viewport" width:162 height:204
 
 
 ) */
+	
 	

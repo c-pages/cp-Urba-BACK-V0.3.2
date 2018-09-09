@@ -180,7 +180,9 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		
 		local nvlsFaces 		= #()
 		
--------------  CONSTRUCTION 	-----------------------------------------------------------------------------------------------------------------
+		
+		
+	
 		--- gestion de l'angle de la pente .... ----		
 		local pt_0 = (  [0,0,0]  *  mtrx_axeP )
 		local pt_1 = (  [longeur,0,0]  *  mtrx_axeP )
@@ -221,53 +223,88 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		)
 		for pt in pointsPente do pt.z += recalleZ			
 		
-		--- creation de la face du dessus ----
-		local faceDessus =  ptr_geo.face 	pointsPente 	
-		append nvlsFaces faceDessus
-		ptr_geo.set_matID  faceDessus	#toiture
 		
-		---- creation des raccord mur ----------
-		local facesMurs = #()
-		for i = 1 to pointsMurs.count  do (
+		-------------  CONSTRUCTION  NORMAL		-----------------------------------------------------------------------------------------------------------------
+		if not  _plug.affiche_asProxy	then (
 			
-			local j = i+1
-			if j >  pointsMurs.count  do j = 1
+			--- creation de la face du dessus ----
+			local faceDessus =  ptr_geo.face 	pointsPente 	
+			append nvlsFaces faceDessus
+			ptr_geo.set_matID  faceDessus	#toiture
 			
-			local ptMur1 		= pointsMurs[i]
-			local ptMur2 		= pointsMurs[j]
-			local ptPente3 		= pointsPente[j]
-			local ptPente4		= pointsPente[i]
+			---- creation des raccord mur ----------
+			local facesMurs = #()
+			for i = 1 to pointsMurs.count  do (
+				
+				local j = i+1
+				if j >  pointsMurs.count  do j = 1
+				
+				local ptMur1 		= pointsMurs[i]
+				local ptMur2 		= pointsMurs[j]
+				local ptPente3 		= pointsPente[j]
+				local ptPente4		= pointsPente[i]
+				
+				local pointsRaccord 	= #(ptMur1, ptMur2, ptPente3, ptPente4)
+				local faceMurs 			= ptr_geo.face 	pointsRaccord
+				
+				ptr_geo.set_matID  faceMurs	#mur
+				
+				append nvlsFaces faceMurs
+				
+			)
+		
 			
-			local pointsRaccord 	= #(ptMur1, ptMur2, ptPente3, ptPente4)
-			local faceMurs 			= ptr_geo.face 	pointsRaccord
 			
-			ptr_geo.set_matID  faceMurs	#mur
+			-- souder les points --
+			local vertsASouder =#()
+			for IDFace in nvlsFaces do (
+				local vertsFace = polyop.getFaceVerts ptr_plug.delegate	 IDFace
+				for vert in vertsFace do 
+					appendIfUnique  vertsASouder 	vert
+			)
+			ptr_geo.souder		(vertsASouder as bitArray)
 			
-			append nvlsFaces faceMurs
+			
+			---- debord et epaisseur du toit -----
+			ptr_geo.biseauter	faceDessus 	0.0 	toiture_debord
+			ptr_geo.extruder	faceDessus 	toiture_epaisseur
+
+		)	---   FIN CONTRUCTION  NORMAL -----------------
+		
+		
+		
+		
+		else (
+		-------------  CONSTRUCTION  PROXY		-----------------------------------------------------------------------------------------------------------------
+			
+			
+			
+			---- creation des raccord mur ----------
+			local facesMurs = #()
+			for i = 1 to pointsMurs.count  do (
+				
+				local j = i+1
+				if j >  pointsMurs.count  do j = 1
+				
+				local ptMur1 		= pointsMurs[i]
+				local ptMur2 		= pointsMurs[j]
+				local ptPente3 		= pointsPente[j]
+				local ptPente4		= pointsPente[i]
+				
+				local pointsRaccord 	= #(ptMur1, ptMur2, ptPente3, ptPente4)
+				local faceMurs 			= ptr_geo.face 	pointsRaccord
+				
+				ptr_geo.set_matID  faceMurs	#mur
+				
+				ptr_geo.face		pointsPente	matID:#toiture
+				
+			)
+			
 			
 		)
+		
+	)		---- fin 	toiture_fnConstruire---------------
 	
-		
-		
-		-- souder les points --
-		local vertsASouder =#()
-		for IDFace in nvlsFaces do (
-			local vertsFace = polyop.getFaceVerts ptr_plug.delegate	 IDFace
-			for vert in vertsFace do 
-				appendIfUnique  vertsASouder 	vert
-		)
-		ptr_geo.souder		(vertsASouder as bitArray)
-		
-		
-		---- debord et epaisseur du toit -----
-		ptr_geo.biseauter	faceDessus 	0.0 	toiture_debord
-		ptr_geo.extruder	faceDessus 	toiture_epaisseur
-
-		
-	)
-	
-
-
 
 
 
@@ -275,7 +312,7 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 --- on importe le fichier mere des composants ----
 _str_contructeur = fileIn "$userScripts\cp-Urba\modules\Batiment\elements\Batiment - Constructeur.ms"
 --- Creation de la structure mere	-----------------
-_str_contructeur  	tooltip:toiture_tooltip		nom:toiture_nom	type:toiture_type	params:(toiture_params () )	dialog:toiture_dialog	fnConstruire:toiture_fnConstruire
+_str_contructeur  	tooltip:toiture_tooltip		nom:toiture_nom	type:toiture_type	params:(toiture_params () )	dialog:toiture_dialog		fnConstruire:toiture_fnConstruire
 
 	
 	

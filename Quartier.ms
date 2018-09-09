@@ -14,7 +14,9 @@
 
 ------------ Declaration de variables global --------------
 --- pour le display dans le viewport ---
-global urba_fn_afficherContours , urba_fn_afficherTypologie
+unregisterRedrawViewsCallback 	urba_fn_afficherContours
+-- unregisterRedrawViewsCallback 	urba_fn_afficherTypologie
+global urba_fn_afficherContours --*, urba_fn_afficherTypologie
 
 
 

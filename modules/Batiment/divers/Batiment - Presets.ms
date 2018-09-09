@@ -39,7 +39,7 @@ struct str_presets_batiment (
 		---- convertisseur Parametres to String  -------------
 		mgr_datas 					= str_datasToString 	m_prt:this,
 		
-		separateur_params 		="¤",
+		separateur_params 			="¤",
 		separateur_mutation 		= "µ",
 		separateur_items 			= "`",
 		
@@ -49,8 +49,7 @@ struct str_presets_batiment (
 		fn lire_fichier 			_fichier = (
 			
 			local stream 	= openFile _fichier mode:"r"
-			local datas 	= readLine  stream
-			
+			local datas 	= readLine  stream			
 			close  stream
 			datas
 		),
@@ -62,7 +61,7 @@ struct str_presets_batiment (
 				
 				
 				-- seulement les non constantes	-------
-				if findString	( param as string )  "const" == undefined do (
+				if findString	( param as string )  "const" == undefined and findString	( param as string )  "affiche" == undefined 	do (
 					
 					local prop = ( getProperty  _this 	param )
 					local type = classof prop
@@ -100,7 +99,7 @@ struct str_presets_batiment (
 				
 				
 				-- seulement les non constantes	-------
-				if findString	( nomProp as string ) "const" == undefined do (
+				if findString	( param as string )  "const" == undefined and findString	( param as string )  "affiche" == undefined 	do (
 					case type of (
 						MAXScriptFunction:	()
 						string:						( 

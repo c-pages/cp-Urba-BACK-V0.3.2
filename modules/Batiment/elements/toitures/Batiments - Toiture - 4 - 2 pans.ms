@@ -270,63 +270,100 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 		
 		
 		
-		--------- creation des geometries ---------------------
-		--- les murs ----
-		for i = 1 to pointsMurs.count  do (
+		-------------  CONSTRUCTION  NORMAL		-----------------------------------------------------------------------------------------------------------------
+		if not  _plug.affiche_asProxy	then (
+				
+			--------- creation des geometries ---------------------
+			--- les murs ----
+			for i = 1 to pointsMurs.count  do (
+				
+				local j = i+1
+				if j > pointsMurs.count do j = 1
+				
+				local ptMur1 	= pointsMurs[ i ]
+				local ptMur2 	= pointsMurs[ j ]
+				local ptPente3 	= pointsPente[ j ] + [0,0,recalleZ]
+				local ptPente4	= pointsPente[ i ] + [0,0,recalleZ]
+				
+				local pointsRaccord = #(ptMur1, ptMur2, ptPente3, ptPente4)
+				local nvlFace = ptr_geo.face 	pointsRaccord 	
+				append nvlsFaces nvlFace
+				-- m_matID --
+				ptr_geo.set_matID  nvlFace	#mur
+			) 
 			
-			local j = i+1
-			if j > pointsMurs.count do j = 1
+			--- les pentes -----
+			local facesDessus =#()
+			local face1 =  ptr_geo.face 		pointsPente1 	
+			local face2 =  ptr_geo.face 		pointsPente2 	
 			
-			local ptMur1 	= pointsMurs[ i ]
-			local ptMur2 	= pointsMurs[ j ]
-			local ptPente3 	= pointsPente[ j ] + [0,0,recalleZ]
-			local ptPente4	= pointsPente[ i ] + [0,0,recalleZ]
+			append facesDessus face1
+			append facesDessus face2
 			
-			local pointsRaccord = #(ptMur1, ptMur2, ptPente3, ptPente4)
-			local nvlFace = ptr_geo.face 	pointsRaccord 	
-			append nvlsFaces nvlFace
+			append nvlsFaces face1
+			append nvlsFaces face2
+			
+			
 			-- m_matID --
-			ptr_geo.set_matID  nvlFace	#mur
-		) 
-		
-		--- les pentes -----
-		local facesDessus =#()
-		local face1 =  ptr_geo.face 		pointsPente1 	
-		local face2 =  ptr_geo.face 		pointsPente2 	
-		
-		append facesDessus face1
-		append facesDessus face2
-		
-		append nvlsFaces face1
-		append nvlsFaces face2
-		
-		
-		-- m_matID --
-		ptr_geo.set_matID  facesDessus	#toiture
-		
-		
-		
-		
-		
-		
-		-- souder les points --
-		local vertsASouder =#()
-		for IDFace in nvlsFaces where IDFace != undefined do (
-			local vertsFace = polyop.getFaceVerts ptr_plug.delegate	 IDFace
-			for vert in vertsFace do 
-				appendIfUnique  vertsASouder 	vert
-			-- ptr_plug.delegate.weldThreshold
-		)
-		ptr_geo.souder   (vertsASouder as bitArray)
-		
-		
-		---- debord et epaisseur du toit -----
-		facesDessus = #( ptr_plug.delegate.getNumFaces () - 1, ptr_plug.delegate.getNumFaces () )
+			ptr_geo.set_matID  facesDessus	#toiture
+			
+			
+			
+			
+			
+			
+			-- souder les points --
+			local vertsASouder =#()
+			for IDFace in nvlsFaces where IDFace != undefined do (
+				local vertsFace = polyop.getFaceVerts ptr_plug.delegate	 IDFace
+				for vert in vertsFace do 
+					appendIfUnique  vertsASouder 	vert
+				-- ptr_plug.delegate.weldThreshold
+			)
+			ptr_geo.souder   (vertsASouder as bitArray)
+			
+			
+			---- debord et epaisseur du toit -----
+			facesDessus = #( ptr_plug.delegate.getNumFaces () - 1, ptr_plug.delegate.getNumFaces () )
 
-		ptr_geo.biseauter	facesDessus 	0.0 	toiture_debord
-		ptr_geo.extruder	facesDessus 	toiture_epaisseur
+			ptr_geo.biseauter	facesDessus 	0.0 	toiture_debord
+			ptr_geo.extruder	facesDessus 	toiture_epaisseur
+			
+		
+		)	---   FIN CONTRUCTION  NORMAL -----------------
 		
 		
+		
+		
+		else (
+		-------------  CONSTRUCTION  PROXY		-----------------------------------------------------------------------------------------------------------------
+			
+			--------- creation des geometries ---------------------
+			--- les murs ----
+			for i = 1 to pointsMurs.count  do (
+				
+				local j = i+1
+				if j > pointsMurs.count do j = 1
+				
+				local ptMur1 	= pointsMurs[ i ]
+				local ptMur2 	= pointsMurs[ j ]
+				local ptPente3 	= pointsPente[ j ] + [0,0,recalleZ]
+				local ptPente4	= pointsPente[ i ] + [0,0,recalleZ]
+				
+				local pointsRaccord = #(ptMur1, ptMur2, ptPente3, ptPente4)
+				local nvlFace = ptr_geo.face 	pointsRaccord 	
+				append nvlsFaces nvlFace
+				-- m_matID --
+				ptr_geo.set_matID  nvlFace	#mur
+			) 
+			
+			
+			--- les pentes -----
+			local facesDessus =#()
+			local face1 =  ptr_geo.face 		pointsPente1 		matID:#toiture
+			local face2 =  ptr_geo.face 		pointsPente2 		matID:#toiture
+			
+		)--- fin proxy -----------------
 		
 )
 

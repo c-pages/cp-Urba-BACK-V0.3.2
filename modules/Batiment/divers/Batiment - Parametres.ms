@@ -57,6 +57,7 @@ parameters params_facades 						rollout:roll_global	(
 	facades_params					type:#stringTab 	tabSize:0  		tabSizeVariable:true
 
 )
+
 parameters params_facades_composants 		(
 	
 	---- les composants de facades -----------
@@ -114,8 +115,13 @@ parameters params_interieur				rollout:roll_global					(
 	
 )
 
-
-
+/* 
+parameters params_quartier				rollout:roll_quartier					(
+	
+	quartier_parent	 type:#maxObject	-- subAnim:true
+	
+)
+ */
 
 
 

@@ -10,7 +10,7 @@ struct str_construction (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 -- 		m_debug = true,
-		m_debug = false,
+		m_debug = true,
 		m_dbgPrefix ="urba | str_construction",
 		fn debug 	_txt  var:	 param:    =(
 			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
@@ -93,17 +93,39 @@ struct str_construction (
 		------------ Construction-------------------------
 	private
 		fn creer_proxy					&z =(
+			
+			
+			---- facades------------------
 			local ht_bat = m_plug.const_dalle_epaisseur 
 			for i = 0 to m_plug.etages_nbre do 
-				ht_bat += m_plug.core.get_etage_ht	i	+ m_plug.const_dalle_epaisseur  
+				ht_bat += 	m_plug.core.get_etage_ht	i	+ m_plug.const_dalle_epaisseur 
 			
-			local hauteur_proxy	=		ht_bat 
+			local hauteur_proxy		=		ht_bat 
 			local surface_points 	= m_plug.core.get_surface_points 	()
-			local faces 				= m_geo.facesContour	 	surface_points		z 		hauteur_proxy matID:#mur
-			
+			local faces 				= m_geo.facesContour	 	surface_points		z 		hauteur_proxy 	matID:#mur
 			
 			z += hauteur_proxy
-			creer_dalle	( z )  matID:#mur
+			
+			---- toiture------------------
+			surface_points.z += z
+			
+			local toiture				=	m_plug.get_toiture ()
+			toiture.construire	 	m_plug			surface_points
+			/* 
+			case m_plug.toiture_type	as name of (
+				#sans: (
+-- 					debug "Pas de toiture	-	PROXY"
+					creer_dalle	( z )  matID:#mur
+				)
+				#terrasse: (
+-- 					debug "toiture terrase	-	PROXY"
+				)
+				#pan1: (
+-- 					debug "toiture 1 PAN	-	PROXY"
+				)
+				
+			) */
+			
 			
 		),
 		fn creer_ssBassement  		&z	bat_edition:		=(

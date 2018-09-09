@@ -145,7 +145,7 @@ struct str_batiment_core (
 		),
 	----- Actualiser  -----------------------
 	public
-		fn actualiser 		bat_edition:		proxy:false	=(
+		fn actualiser 		bat_edition:		proxy:false		=(
 			
 			---- on actualise la surface ----
 			mgr_surface.actualiser ()
@@ -153,17 +153,24 @@ struct str_batiment_core (
 			---- on consrtuit ----
 			mgr_construction.actualiser   bat_edition:bat_edition  proxy:proxy
 			bat_a_reconstruire = false
-		),		
+		),
+		fn actualiser_geometrie =(
+			---- on consrtuit ----
+			mgr_construction.actualiser ()
+			bat_a_reconstruire = false
+		),
 		
 	----- Presets -----------------------
 	public
 		fn preset_enregistrer  =(
 			mgr_presets.enregistrer	 m_plug
 		),
-		fn preset_charger  	fichier:	=(
+		fn preset_charger  	fichier:	maj:true  =(
 			mgr_presets.charger	 m_plug	fichier:fichier
-			m_plug.actualiser_rollouts ()
-			actualiser ()
+			if maj do (
+				m_plug.actualiser_rollouts ()
+				actualiser ()
+			)
 		),
 		fn preset_copier  =(
 			mgr_presets.copier	 m_plug

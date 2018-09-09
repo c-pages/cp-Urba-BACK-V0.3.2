@@ -203,19 +203,49 @@ remap:#(#(#surface_node), #(#surface_node))
 	fn get_facades 							= core.get_facades ()
 	fn	get_etage_ht		_etageNum 	= core.get_etage_ht _etageNum
 	fn get_toiture 							= core.get_toiture ()
-
+	fn set_etages_nbre	_nbr_etages =(
+		etages_nbre			 = _nbr_etages
 	
+	)
+	fn set_etages_ht		_ht_etages =(
+		etages_hauteur_global = _ht_etages
+	)
 	
+	---- Affichage --------------
+	fn set_proxy_mode 	_state 	=(
+		affiche_asProxy = _state
+		core.actualiser_geometrie ()
+	)
 	
 	--- Models -------------
-	fn charger		_nomDuFichier		= (
-		if doesFileExist	_nomDuFichier	then
-			core.preset_charger  	fichier:_nomDuFichier
+	fn charger		_nomDuFichier		val_etages_nbre:		val_etages_ht:	= (
+		debug""
+				debug "charger" 
+				debug "_nomDuFichier" var:_nomDuFichier
+		
+				debug "val_etages_nbre" var:val_etages_nbre
+				debug "val_etages_ht" var:val_etages_ht
+		if doesFileExist	_nomDuFichier	then (
+			if val_etages_nbre != unsupplied or  val_etages_ht != unsupplied then (
+				
+				core.preset_charger  	fichier:_nomDuFichier	maj:false
+				
+				if val_etages_nbre != unsupplied 	do etages_nbre = val_etages_nbre
+				if val_etages_ht != unsupplied 	do etages_ht = val_etages_ht
+				debug "etages_nbre" var:etages_nbre
+				debug "etages_ht" var:etages_ht
+				core.actualiser ()
+				
+			) else
+				core.preset_charger  	fichier:_nomDuFichier
+		)
 		else core.preset_charger()	--format "/!\\ Attention! le fichier (%) n'existe pas, impossible à charger/n"		(_nomDuFichier as string )
 	)
 	
-	
-	
+	--- Quartier parent ----------------
+	fn assigner_quartier 	_quartier =(
+		quartier_parent = (nodeTransformMonitor node:_quartier forwardTransformChangeMsgs:false)
+	)
 
 	--------------- CREATION  ----------------------------------------------------------------------------------------------------------------------
 	tool create (
@@ -233,7 +263,7 @@ remap:#(#(#surface_node), #(#surface_node))
 
 	--------------- EVENEMENTS  ----------------------------------------------------------------------------------------------------------------------
 	on load 						do 	(
-		debug "load du plugin"
+-- 		debug "load du plugin"
 
 
 
@@ -244,13 +274,13 @@ remap:#(#(#surface_node), #(#surface_node))
 		initialiser ()
 	)
 	on create do (
-		debug "creation du plugin"
+-- 		debug "creation du plugin"
 		initialiser ()
 		actualiser ()
 	)
 	on update do	(
-		debug "update du plugin"
-		debug "shape : " var:surface_node
+-- 		debug "update du plugin"
+-- 		debug "shape : " var:surface_node
 		initialiser ()
 -- 		actualiser ()
 	)

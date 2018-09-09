@@ -2,7 +2,7 @@
 struct str_mgr_presets (
 		
 		------------ DEBUG	----------------------------------------------------------------------------------
-		m_debug = true,
+		m_debug = false,
 		m_dbgPrefix ="presets_MGR",
 		fn debug 	_txt  var:	 param:    =(
 			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
@@ -29,11 +29,12 @@ struct str_mgr_presets (
 	public
 		
 		fn lire_fichier 			_fichier = (
-			
+			debug "lire fichier"
 			local stream 	= openFile _fichier mode:"r"
 			local datas 	= readLine  stream
 			
 			close  stream
+			debug "fermer fichier"
 			datas
 		),
 		
@@ -99,13 +100,20 @@ struct str_mgr_presets (
 		fn set_params 		_this		_datas =(
 			
 			local params = filterString _datas		separateur_params
-			for paramStrg in params do (
+			for i = 1 to params.count do (
+				debug "" 
+				debug " -------------  NOUVEAU PARAM -----------------" 
+				local paramStrg = params[i]
+				debug "---> paramStrg" var:paramStrg
+				
 				local param = filterString paramStrg		separateur_mutation
+				
 				
 				local nomProp 	= param[1] as name
 				local prop 		= ( getProperty  _this 	nomProp )
 				local type 		= classof prop
 				
+										debug "nomProp" var:nomProp
 				
 				-- seulement les non constantes	-------
 				if findString	( nomProp as string ) "const" == undefined do (
@@ -119,24 +127,36 @@ struct str_mgr_presets (
 							if param[2] != undefined then (
 								local paramTab = filterString 	param[2]		separateur_items
 								if paramTab.count > 0 then (
-									
-									try ( 
-										local param_exe = execute paramTab[1] 
-										if param_exe != undefined then
-											setproperty 	_this 	nomProp		( for param in  paramTab collect (execute param ) )
-										else setproperty 	_this 	nomProp		( paramTab ) 
-									) catch setproperty 	_this 	nomProp		( paramTab ) 
-									
+									debug "paramTab[1]" var:paramTab[1]
+									debug "paramTab[1][2]" var:paramTab[1][2]
+									if paramTab[1][2] == ":" then (
+										debug "ON CHARGE UNE ADDRESSE"
+										setproperty 	_this 	nomProp		( paramTab ) 
+									)	else (
+										debug "ON CHARGE PAS UNE ADDRESSE"
+										try ( 
+											local param_exe = execute paramTab[1] 
+											if param_exe != undefined then
+												setproperty 	_this 	nomProp		( for param in  paramTab collect (execute param ) )
+											else setproperty 	_this 	nomProp		( paramTab ) 
+										) catch setproperty 	_this 	nomProp		( paramTab ) 
+									)
 								)	else 	setproperty 	_this 	nomProp		#()
 							) else 
 								setproperty 	_this 	nomProp		#()
 						)
 						default:						(
+										debug "ON CHARGE PAr defaut"
+										debug "param[2]" var:param[2]
 							setproperty 	_this 	nomProp	(execute param[2])
+										debug "ON CHARGE PAr defaut OKOKOKOKOKO"
 						)
 					)
+					debug "----------------------> par ici ?"
 				)
+					debug "----------------------> par looo ?!?!?"
 			)
+			debug "----------------------> et là c'est fini alors?"
 		),
 	public
 		fn charger  	_this 		fichier:		= (
@@ -153,6 +173,7 @@ struct str_mgr_presets (
 				local datas = lire_fichier 	fichierCible
 				set_params 	_this 	datas
 			)
+			debug " FIN FINF INF INF IN F IFNI FINFIN FINF INF IFNF charger ?"
 		),
 		fn enregistrer 		_this	=(
 			if not doesFileExist fichier_dossier do makeDir  fichier_dossier

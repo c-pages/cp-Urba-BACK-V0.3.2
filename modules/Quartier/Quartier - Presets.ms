@@ -30,10 +30,14 @@ struct str_mgr_typologie_presets (
 		
 		fn lire_fichier 			_fichier = (
 			
+			debug "lire fichier"
 			local stream 	= openFile _fichier mode:"r"
 			local datas 	= readLine  stream
 			
 			close  stream
+			
+			debug "lire fichier FIN"
+			
 			datas
 		),
 		fn get_params 			_this =(
@@ -91,16 +95,15 @@ struct str_mgr_typologie_presets (
 							if param[2] != undefined then (
 								local paramTab = filterString 	param[2]		separateur_items
 								if paramTab.count > 0 then (
-										if paramTab[1][2] == ":" then
+										if paramTab[1][2] == ":" then (
 											setproperty 	_this 	nomProp		( paramTab ) 
+											debug "ON CHARGE UNE ADDRESSE"
+										)
 										else (
 											try ( 
 												
 												
 												local param_exe 
-												if paramTab[1][2] == ":" then
-													setproperty 	_this 	nomProp		( paramTab ) 
-												
 												
 												param_exe = execute paramTab[1]
 												if param_exe != undefined then

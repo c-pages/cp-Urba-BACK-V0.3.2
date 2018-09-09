@@ -107,9 +107,9 @@ struct 	str_composant_generique	 (
 													inverse_ouverture:	\
 													coin_de_mur:			\
 													onConstruit_gardeCorps:	\
-													baie_parent:		= 
+													baie_parent:		
 		
-				fnVirt_construire			 _plug		pts	\
+			= 	fnVirt_construire			 _plug		pts	\
 													norm_dir:norm_dir		\
 													onConstruitLaDalle:onConstruitLaDalle  		\
 													profondeur:profondeur	\

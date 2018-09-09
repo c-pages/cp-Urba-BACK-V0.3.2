@@ -35,6 +35,7 @@ M
  #### __Quartier__
  - [x] Première ébauche des concepts de base et de l'interface.
  - [x] Il commence à y avoir un debut de fonctionnement.
+ - [x] Bon bah là y'a presque tout.
 
  ### Version blender
  Passage du plugin en phython pour intégration à Blender par Dindoune Amigo Bruno ! | git | dindoun.lautre.net

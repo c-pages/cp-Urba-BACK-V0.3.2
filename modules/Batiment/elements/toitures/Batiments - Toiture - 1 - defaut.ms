@@ -33,9 +33,23 @@ rollout toiture_dialog "Paramètres"  width:180 height:70	(
 fn toiture_fnConstruire  	_plug		pts_accroches		 		= (
 		
 		local ptr_geo 				= 	_plug.core.get_geo ()
-		local face = ptr_geo.face		pts_accroches						matID:#mur
-		ptr_geo.extruder	face	_plug.const_dalle_epaisseur
+		if not  _plug.affiche_asProxy	then (
+		-------------  CONSTRUCTION  NORMAL		-----------------------------------------------------------------------------------------------------------------
+			
+			local face = ptr_geo.face		pts_accroches						matID:#mur
+			ptr_geo.extruder	face	_plug.const_dalle_epaisseur
 		
+		)	---   FIN CONTRUCTION  NORMAL -----------------
+		
+		
+		
+		
+		else (
+		-------------  CONSTRUCTION  PROXY		-----------------------------------------------------------------------------------------------------------------
+			
+			local face = ptr_geo.face		pts_accroches						matID:#mur
+			
+		)
 	)
 	
 

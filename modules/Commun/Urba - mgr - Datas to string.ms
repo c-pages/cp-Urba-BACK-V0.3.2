@@ -129,9 +129,14 @@ struct str_datasToString (
 								local datas_liste  = filterString	dataTab[2] 	separateur_items
 								local tabResult =#()
 								for data in datas_liste do (
-									local data_exe 	= execute data
+									
+									local data_exe 	
+									try data_exe = execute data catch ()
+									
 									--------------- string ---------------
-									if data_exe 		== undefined then 	append tabResult ( data)
+									if data_exe 		== undefined then 	append tabResult ( data) 
+									
+									
 									--------------- un objet ---------------
 									else	if classof data_exe == Name then (	
 										local elemTmp =  ( m_prt.get_parametre	  data 	)	
