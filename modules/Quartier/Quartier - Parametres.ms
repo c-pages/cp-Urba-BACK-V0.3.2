@@ -23,6 +23,13 @@ parameters params_contours 						rollout:roll_contours		(
 )
 
 
+parameters params_contours 						rollout:roll_reliefs		(
+	
+	p_reliefs						type:#nodeTab 			tabSize:0  		tabSizeVariable:true		----	Les shapes des batiments composant le quartier.
+	
+)
+
+
 parameters params_typologies						rollout:roll_typologies		(
 	
 	p_typologies					type:#stringTab 			tabSize:0  			tabSizeVariable:true				----	Les parametres (sous formes de DATAS (cf. manager Data to string) ) des differentes typologies du quartier.

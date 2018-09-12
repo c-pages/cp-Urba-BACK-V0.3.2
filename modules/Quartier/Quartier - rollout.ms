@@ -24,7 +24,7 @@ rollout roll_presets "Presets" width:195 height:410
 
 )-- fin rollout ------------------------ */
 
-rollout roll_contours "Contours" width:195 height:410
+rollout roll_contours "Contours" width:182 height:567
 (
 	
 	
@@ -32,25 +32,20 @@ rollout roll_contours "Contours" width:195 height:410
 	
 	
 	--- Surface ------
-	checkbutton 'chkbtn_ajouter_contour' "+" pos:[6,6] width:16 height:16 toolTip:"Ajouter des contours au quartier depuis le viewport. (Clique droit pour options)" align:#left
-	button 'btn_retirer_contour' "-" pos:[52,6] width:16 height:16 toolTip:"Retirer le contour séléctionné du quartier." align:#left
-	button 'btn_liste' "Liste" pos:[21,6] width:32 height:16 toolTip:"Ajouter des contours au quartier depuis une liste." align:#left
-	multiListBox 'lbx_contours' "" pos:[6,23] width:168 height:16 align:#left
-	button 'btn_select_contours' "Sel. contours" pos:[90,333] width:84 height:16 toolTip:"Selectionne les shapes des contours." align:#left
+	checkbutton 'chkbtn_ajouter_contour' "+" pos:[6,0] width:16 height:16 toolTip:"Ajouter des contours au quartier depuis le viewport. (Clique droit pour options)" align:#left
+	button 'btn_retirer_contour' "-" pos:[52,0] width:16 height:16 toolTip:"Retirer le contour séléctionné du quartier." align:#left
+	button 'btn_liste' "Liste" pos:[21,0] width:32 height:16 toolTip:"Ajouter des contours au quartier depuis une liste." align:#left
+	multiListBox 'lbx_contours' "" pos:[6,17] width:168 height:16 align:#left
+	button 'btn_select_contours' "Sel. contours" pos:[90,327] width:84 height:16 toolTip:"Selectionne les shapes des contours." align:#left
 	
-	GroupBox 'grp_infos' "Infos Contours" pos:[6,238] width:168 height:62 align:#left
-	
-	label 'lbl_info' "Surface : Largeur : Longueur :" pos:[14,254] width:52 height:40 align:#left	
-	
-	
-	
-	
-	label 'lbl_infos_valeurs' "...m²\n...m\n...m" pos:[68,254] width:98 height:40 align:#left
+	GroupBox 'grp_infos' "Infos Contours" pos:[6,232] width:168 height:62 align:#left
+	label 'lbl_info' "Surface : Largeur : Longueur :" pos:[14,248] width:52 height:40 align:#left
+	label 'lbl_infos_valeurs' "...m²\n...m\n...m" pos:[68,248] width:99 height:40 align:#left
+	button 'btn_generer' "Générer le quartier" pos:[6,296] width:168 height:32 align:#left
+	button 'btn_select_bats' "Sel. Batiments" pos:[6,327] width:85 height:16 toolTip:"Selectionne les shapes des contours." align:#left
 	
 	
-	button 'btn_generer' "Générer le quartier" pos:[6,302] width:168 height:32 align:#left
 	
-	button 'btn_select_bats' "Sel. Batiments" pos:[6,333] width:85 height:16 toolTip:"Selectionne les shapes des contours." align:#left
 	
 	fn afficher_infos	_valeurs	=(
 		lbl_infos_valeurs.text	=		( _valeurs[1] / 10000 )	as string + " m²\n"
@@ -104,18 +99,6 @@ rollout roll_contours "Contours" width:195 height:410
 	
 	
 	
-	
-	
-	on roll_contours open do
-	(
-			core.charger_parametres ()
-			actualiser ()
-			core.activer_surbrillance ()
-		)
-	on roll_contours close do
-	(
-			core.desactiver_surbrillance ()
-	)
 	on chkbtn_ajouter_contour changed state do
 	(
 				if  state do (
@@ -150,8 +133,8 @@ rollout roll_contours "Contours" width:195 height:410
 				if p_contours.count > 0 do (
 					clearSelection ()
 					select p_contours
--- 					for obj in  p_contours do
--- 						selectMore obj
+	-- 					for obj in  p_contours do
+	-- 						selectMore obj
 					redrawViews ()
 				)
 			)
@@ -162,14 +145,63 @@ rollout roll_contours "Contours" width:195 height:410
 		if p_batiments.count > 0 do (
 			clearSelection ()
 			select p_batiments
--- 			for obj in  p_batiments do
--- 				selectMore obj
+	-- 			for obj in  p_batiments do
+	-- 				selectMore obj
 			redrawViews ()
 		)
 	)
 )
 
-rollout roll_typologies "Typologies" width:195 height:410
+
+rollout roll_reliefs "Reliefs" width:182 height:493
+(
+	
+	fn relief_filt 		obj = superclassof obj == GeometryClass  and  classof obj != Urba_quartier	 and  classof obj != Urba_Batiment	and	findItem p_reliefs	obj == 0
+	
+	checkbutton 'ckb_ajouter_relief' "+" pos:[6,0] width:16 height:16 toolTip:"Ajouter des contours au quartier depuis le viewport. (Clique droit pour options)" align:#left
+	button 'btn_retirer_relief' "-" pos:[52,0] width:16 height:16 toolTip:"Retirer le contour séléctionné du quartier." align:#left
+	button 'btn_ouvrir_liste_reliefs' "Liste" pos:[21,0] width:32 height:16 toolTip:"Ajouter des contours au quartier depuis une liste." align:#left
+	multiListBox 'lbx_reliefs' "" pos:[6,17] width:168 height:8 align:#left
+	
+	fn actualiser  =(
+		
+		local noms_reliefs = for relief in p_reliefs collect relief.name
+		lbx_reliefs.items = noms_reliefs
+	)
+	
+	on ckb_ajouter_relief changed state do
+	(
+				if  state do (
+					local shps_aAjouter = pickObject filter:relief_filt  count:#multiple  forceListenerFocus:false	rubberBand:$.position 	rubberBandColor:yellow 
+					if shps_aAjouter.count > 0 do (
+						core.ajouter_reliefs	shps_aAjouter
+						actualiser ()
+						lbx_reliefs.selection = #{lbx_reliefs.items.count}
+						actualiser ()
+					)
+					ckb_ajouter_relief.checked = false
+				)
+			)
+	on btn_retirer_relief pressed do
+	(
+				core.retirer_relief_parIds	 ( lbx_reliefs.selection as array)
+				actualiser ()
+			)
+	on btn_ouvrir_liste_reliefs pressed do
+	(
+			core.ouvrir_rollout_relief ()
+		)
+	on lbx_reliefs selected _id do
+	(
+-- 			actualiser_infos ()
+-- 			redrawviews ()
+		)
+	on lbx_reliefs doubleClicked arg do
+		select p_reliefs[arg]
+)
+
+
+rollout roll_typologies "Typologies" width:182 height:410
 (
 
 
@@ -719,9 +751,6 @@ rollout roll_affichage "Affichage" width:182 height:60
 	on ckb_majAuto changed state do
 		actualiser ()
 )
-
-
-
 
 
 

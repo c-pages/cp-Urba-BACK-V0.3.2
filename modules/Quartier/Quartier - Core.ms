@@ -191,6 +191,58 @@ struct str_quartier_core (
 		
 		
 		
+		------ Reliefs --------------
+		fn appliquer_relief 	_bat 		=(
+			debug "Appliquer RELIEF"
+			local relief_maxZ = -1e15
+			local onAUne_intersec = false
+			for relief in m_plug.p_reliefs do				(
+				
+				local testRay = ray _bat.pos 	[0,0,-1]
+				
+				local nodeMaxZ = relief.max.z
+				testRay.pos.z = nodeMaxZ + 0.0001 * abs nodeMaxZ
+				local intersec_point 	= intersectRay relief 	testRay
+				
+				if intersec_point != undefined and intersec_point.pos.z > relief_maxZ  then (
+					relief_maxZ = intersec_point.pos.z
+					onAUne_intersec = true
+				)
+				
+			)--end i loop
+			
+			debug "onAUne_intersec" var:onAUne_intersec
+			debug "relief_maxZ" var:relief_maxZ
+			if onAUne_intersec then (
+				_bat.pos.z = relief_maxZ
+			) else 
+				_bat.pos.z = _bat.surface_node.pos.z
+			
+		),
+		fn appliquer_relief_tous			=(
+			for bat in m_plug.p_batiments do
+				appliquer_relief 		bat 	
+		),
+		
+		
+		fn ajouter_reliefs 	_reliefs	=(
+			for relief in _reliefs do
+				appendIfUnique	m_plug.p_reliefs	relief
+			appliquer_relief_tous()
+		),
+		fn retirer_relief_parIds 	_ids	=(
+			for i= _ids.count to 1 by -1 do 
+				deleteItem m_plug.p_reliefs	_ids[i]
+			
+			appliquer_relief_tous()
+		),
+		fn ouvrir_rollout_relief =(
+		),
+		
+		
+		
+		
+		
 		
 		------ Contours --------------
 		
@@ -746,6 +798,10 @@ struct str_quartier_core (
 			
 		),
 		
+		
+		
+		
+		
 		fn generer_batiment		_id_contour	_typo 	_id_model		=(
 			
 			local bat 
@@ -773,12 +829,18 @@ struct str_quartier_core (
 			--- On met a jour le model et les parametre du batiment  -------------
 			if _typo.batiments_models.count >= 1 do (
 				
+				
+				
 				----- choix du model ----------
 -- 				local id_model_choisi = _typo.contours_ids_modelBat_choisis[i]
 				if _id_model != 0 do (
 					local model_choisi = _typo.batiments_models[ _id_model ]
 					
-					bat 							= 	m_plug.p_batiments[ _id_contour ]					
+					bat 							= 	m_plug.p_batiments[ _id_contour ]			
+					
+					--- maj du relief -----------
+					appliquer_relief 	bat 
+					
 					bat.affiche_asProxy 		= 	m_plug.affiche_asProxy
 					local nbr_etages 		= 	( _typo.batiments_nbr_etages[ _id_model ]	 + random 0 ( _typo.batiments_nbr_etagesPlus[ _id_model ] ) )
 -- 						bat.set_etages_nbre	nbr_etages
@@ -833,11 +895,12 @@ struct str_quartier_core (
 					local id_model_choisi = _typo.contours_ids_modelBat_choisis[i]					
 					local bat = generer_batiment		id_contour		_typo 		id_model_choisi
 					
-					
-					if m_batiments_mats[ id_model_choisi ] == undefined then
-						m_batiments_mats[ id_model_choisi ] = bat.material
-					else
-						bat.material = m_batiments_mats[ id_model_choisi ] 
+					if id_model_choisi != 0 do (
+						if m_batiments_mats[ id_model_choisi ] == undefined then
+							m_batiments_mats[ id_model_choisi ] = bat.material
+						else
+							bat.material = m_batiments_mats[ id_model_choisi ] 
+					)
 				)					
 			)
 			
