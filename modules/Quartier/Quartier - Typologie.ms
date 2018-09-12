@@ -51,6 +51,7 @@ struct str_typologie (
 		batiments_nbr_etages		=	#(),					----	
 		batiments_nbr_etagesPlus	=	#(),					----	
 		batiments_ht_etages		=	#(),					----	
+		batiments_ht_etages_variations		=	#(),					----	
 		
 		variations_nbrEtages		=	#(),					----	Nombre d'étages à ajouter ou a soustraire aux nombres d'étages du model				(tableau de integers)
 		variations_nbrEtagesMin	=	#(),					----	Nombre d'étages minimum.		(tableau de integers)

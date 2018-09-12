@@ -62,8 +62,8 @@ struct str_quartier_core (
 		
 		m_contours_aUtiliser	=	#{},			----
 		
-		m_nbr_bats_aConstruire = 0,
-		m_nbr_bats_construits = 0,
+		m_nbr_bats_aConstruire 	= 0,
+		m_nbr_bats_construits 		= 0,
 		
 	
 	
@@ -170,9 +170,44 @@ struct str_quartier_core (
 			charger_parametres ()
 		),
 		fn actualiser	=(
+			
 			debug "actualiser"
+			mgr_geo.vider ()
 			mgr_geo.face		m_logo
+			
+			--------- pour la BB z----------
+			if m_plug.p_batiments.count > 0 or m_plug.p_contours.count > 0  do (
+				debug "refaire la BB"
+				local pt_min =[1e15,1e15,1e15]
+				local pt_max =[-1e15,-1e15,-1e15]
+				
+				for contour in m_plug.p_contours do (
+					if contour.min.x < pt_min.x do pt_min.x = contour.min.x
+					if contour.min.y < pt_min.y do pt_min.y = contour.min.y
+					if contour.min.z < pt_min.z do pt_min.z = contour.min.z
+						
+					if contour.max.x > pt_max.x do pt_max.x = contour.max.x
+					if contour.max.y > pt_max.y do pt_max.y = contour.max.y
+					if contour.max.z > pt_max.z do pt_max.z = contour.max.z
+				)
+				
+				for bat in m_plug.p_batiments where isValidNode bat	do (
+					if bat.min.x < pt_min.x do pt_min.x = bat.min.x
+					if bat.min.y < pt_min.y do pt_min.y = bat.min.y
+					if bat.min.z < pt_min.z do pt_min.z = bat.min.z
+						
+					if bat.max.x > pt_max.x do pt_max.x = bat.max.x
+					if bat.max.y > pt_max.y do pt_max.y = bat.max.y
+					if bat.max.z > pt_max.z do pt_max.z = bat.max.z
+				)
+				
+				mgr_geo.points 	#( pt_min, pt_max )
+			)
 		),
+		
+		
+		
+		
 		
 		---- Models de typologies ----------------
 		fn charger_typologies_preset 				= (
@@ -198,7 +233,7 @@ struct str_quartier_core (
 			local onAUne_intersec = false
 			for relief in m_plug.p_reliefs do				(
 				
-				local testRay = ray _bat.pos 	[0,0,-1]
+				local testRay = ray 	_bat.pos 	[0,0,-1]
 				
 				local nodeMaxZ = relief.max.z
 				testRay.pos.z = nodeMaxZ + 0.0001 * abs nodeMaxZ
@@ -220,7 +255,7 @@ struct str_quartier_core (
 			
 		),
 		fn appliquer_relief_tous			=(
-			for bat in m_plug.p_batiments do
+			for bat in m_plug.p_batiments where isValidNode bat do
 				appliquer_relief 		bat 	
 		),
 		
@@ -541,6 +576,7 @@ struct str_quartier_core (
 -- 				debug "m_contours_aUtiliser" var:m_contours_aUtiliser
 			)
 			
+			actualiser ()
 		),
 		
 		
@@ -749,6 +785,7 @@ struct str_quartier_core (
 						append _typo.batiments_pourcent				100
 						append _typo.batiments_nbr_etages			nbr_etages
 						append _typo.batiments_ht_etages				ht_etages
+						append _typo.batiments_ht_etages_variations		0
 						append _typo.batiments_nbr_etagesPlus		0
 				
 					)
@@ -842,7 +879,8 @@ struct str_quartier_core (
 					appliquer_relief 	bat 
 					
 					bat.affiche_asProxy 		= 	m_plug.affiche_asProxy
-					local nbr_etages 		= 	( _typo.batiments_nbr_etages[ _id_model ]	 + random 0 ( _typo.batiments_nbr_etagesPlus[ _id_model ] ) )
+					local nbr_etages 		= 	_typo.batiments_nbr_etages[ _id_model ]	 	+ random 0 ( _typo.batiments_nbr_etagesPlus[ _id_model ] ) 
+					local ht_etages 			= 	_typo.batiments_ht_etages[ _id_model ]		+ random 0. ( _typo.batiments_ht_etages_variations[ _id_model ] ) 
 -- 						bat.set_etages_nbre	nbr_etages
 -- 						bat.etages_nbre 			= 		nbr_etages
 -- 						bat.set_etages_ht		_typo.batiments_ht_etages[ id_model_choisi ]
@@ -850,7 +888,7 @@ struct str_quartier_core (
 					debug "nbr_etages" var:nbr_etages
 					
 					bat.charger		model_choisi	val_etages_nbre:nbr_etages	 \
-															val_etages_ht:(_typo.batiments_ht_etages[ _id_model ])
+															val_etages_ht:ht_etages
 					
 					debug "	bat.etages_nbre" var:	bat.etages_nbre
 				)
@@ -904,7 +942,10 @@ struct str_quartier_core (
 				)					
 			)
 			
-			if solo do progressEnd() 
+			if solo do (
+				progressEnd() 
+				actualiser ()
+			)
 			
 			
 			format "	Typologie '%' généré en % s.\n" 	_typo.nom		( ( timestamp ()	 - chrono_debut ) /1000 )
@@ -926,6 +967,8 @@ struct str_quartier_core (
 			for typo in m_typologies do 
 				generer_typologie		typo    
 				
+			actualiser ()
+			
 			local chrono_fin = timestamp ()
 			progressEnd() 
 			format "Quartier généré en % s.\n" ( ( chrono_fin - chrono_debut ) /1000 )

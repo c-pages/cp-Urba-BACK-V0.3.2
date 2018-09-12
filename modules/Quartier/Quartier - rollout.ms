@@ -15,15 +15,6 @@
 -------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-/* 
-rollout roll_presets "Presets" width:195 height:410
-(
-
-	button 'btn_enregistrer' "Enregistrer" pos:[87,6] width:82 height:16 toolTip:"Enregistrer comme preset de quartier." align:#left
-	button 'btn_charger' "Charger" pos:[7,6] width:81 height:16 enabled:true toolTip:"Charger un preset de quartier." align:#left
-
-)-- fin rollout ------------------------ */
-
 rollout roll_contours "Contours" width:182 height:567
 (
 	
@@ -69,6 +60,7 @@ rollout roll_contours "Contours" width:182 height:567
 	)
 
 	fn actualiser_infos =(
+		format "actualiser_infos !!!!!\n"
 		
 		local sel = ( lbx_contours.selection as array)
 		local enable_infos 	=  sel.count != 0
@@ -84,7 +76,7 @@ rollout roll_contours "Contours" width:182 height:567
 	)
 	
 	fn actualiser =(
-		
+		format "Actualiser le rollout !!!!!\n"
 		afficher_contours ()		
 		actualiser_infos ()
 	)
@@ -99,6 +91,15 @@ rollout roll_contours "Contours" width:182 height:567
 	
 	
 	
+	on roll_contours open  do
+	(
+		core.activer_surbrillance ()
+		actualiser ()
+	)
+	on roll_contours close  do
+	(
+		core.desactiver_surbrillance ()
+	)
 	on chkbtn_ajouter_contour changed state do
 	(
 				if  state do (
@@ -144,9 +145,9 @@ rollout roll_contours "Contours" width:182 height:567
 	(
 		if p_batiments.count > 0 do (
 			clearSelection ()
-			select p_batiments
-	-- 			for obj in  p_batiments do
-	-- 				selectMore obj
+	-- 			select p_batiments
+			for obj in  p_batiments where isValidNode obj do
+				selectMore obj
 			redrawViews ()
 		)
 	)
@@ -401,7 +402,7 @@ rollout roll_param_typologie "Parametres typologie" width:182 height:447
 	colorPicker 'cp_couleur' "" pos:[151,9] width:26 height:17 align:#left
 	spinner 'spn_bat_htEtages' "" pos:[101,350] width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
 	label 'lbl_ht_etages' "Ht. étages :" pos:[18,350] width:64 height:15 align:#left
-	label 'lbl_plusOuMoins' "+/-" pos:[83,350] width:16 height:15 align:#left
+	label 'lbl_plusOuMoins' "+" pos:[92,350] width:7 height:15 align:#left
 	
 	
 	
@@ -418,25 +419,20 @@ rollout roll_param_typologie "Parametres typologie" width:182 height:447
 	
 	fn actualiser =(
 		
--- 		format "ACTUALISER roll_param_typologie() \n"
--- 		format "		m_typo:% \n"	m_typo
 		
 		---- la typologie selectionnée --------
 		local typo_selec = roll_typologies.lbx_typologies.selection 
 		if typo_selec == 0 then
 			m_typo = undefined
-		else (
+		else 
 			m_typo = ( core.get_typologies())[ typo_selec ]
-		)
+		
 		
 		core.set_typo_active 	typo_selec
 		
-		for btn in m_btns do	(
+		for btn in m_btns do	
 			btn.enabled =( core.get_typologies ()).count != 0 and m_typo != undefined --	 != undefined
 		
--- 		format "			--> btn.enabled  :% \n"	(btn.enabled  )
-		)
--- 		format "		core.m_typologies.count != 0 :% \n"	(core.m_typologies.count != 0 )
 		
 		
 		
@@ -518,10 +514,10 @@ rollout roll_param_typologie "Parametres typologie" width:182 height:447
 				spn_bat_etages.indeterminate			=	false
 				spn_bat_etages_enPlus.indeterminate	=	false
 				spn_bat_htEtages.indeterminate			=	false
-				spn_bat_pourcent.value 			= m_typo.batiments_pourcent[ lbx_batiments.selection ]
-				spn_bat_etages.value 				= m_typo.batiments_nbr_etages[ lbx_batiments.selection ]
-				spn_bat_etages_enPlus.value 	= m_typo.batiments_nbr_etagesPlus[ lbx_batiments.selection ]
-				spn_bat_htEtages.value 			= m_typo.batiments_ht_etages[ lbx_batiments.selection ]
+				spn_bat_pourcent.value 					= m_typo.batiments_pourcent[ lbx_batiments.selection ]
+				spn_bat_etages.value 						= m_typo.batiments_nbr_etages[ lbx_batiments.selection ]
+				spn_bat_etages_enPlus.value 			= m_typo.batiments_nbr_etagesPlus[ lbx_batiments.selection ]
+				spn_bat_htEtages.value 					= m_typo.batiments_ht_etages_variations[ lbx_batiments.selection ]
 				
 			) else (
 				spn_bat_pourcent.indeterminate			=	true
@@ -726,7 +722,7 @@ rollout roll_param_typologie "Parametres typologie" width:182 height:447
 	)
 	on spn_bat_htEtages changed val do
 	(
-			m_typo.batiments_ht_etages[ lbx_batiments.selection ] = val
+			m_typo.batiments_ht_etages_variations[ lbx_batiments.selection ] = val
 		
 			core.enregistrer_typologie			m_typo
 			actualiser ()

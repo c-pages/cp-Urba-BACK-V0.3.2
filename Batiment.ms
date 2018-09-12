@@ -231,9 +231,9 @@ remap:#(#(#surface_node), #(#surface_node))
 				core.preset_charger  	fichier:_nomDuFichier	maj:false
 				
 				if val_etages_nbre != unsupplied 	do etages_nbre = val_etages_nbre
-				if val_etages_ht != unsupplied 	do etages_ht = val_etages_ht
+				if val_etages_ht != unsupplied 		do etages_hauteur_global = val_etages_ht
 				debug "etages_nbre" var:etages_nbre
-				debug "etages_ht" var:etages_ht
+				debug "etages_hauteur_global" var:etages_hauteur_global
 				core.actualiser ()
 				
 			) else
