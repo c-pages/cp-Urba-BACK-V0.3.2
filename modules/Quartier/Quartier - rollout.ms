@@ -36,19 +36,21 @@ rollout roll_contours "Contours" width:195 height:410
 	button 'btn_retirer_contour' "-" pos:[52,6] width:16 height:16 toolTip:"Retirer le contour séléctionné du quartier." align:#left
 	button 'btn_liste' "Liste" pos:[21,6] width:32 height:16 toolTip:"Ajouter des contours au quartier depuis une liste." align:#left
 	multiListBox 'lbx_contours' "" pos:[6,23] width:168 height:16 align:#left
-	button 'btn_select' "Select" pos:[135,6] width:40 height:16 toolTip:"Selectionne les shapes des contours." align:#left
+	button 'btn_select_contours' "Sel. contours" pos:[90,333] width:84 height:16 toolTip:"Selectionne les shapes des contours." align:#left
 	
-	GroupBox 'grp_infos' "Infos   " pos:[6,238] width:168 height:62 align:#left
+	GroupBox 'grp_infos' "Infos Contours" pos:[6,238] width:168 height:62 align:#left
 	
 	label 'lbl_info' "Surface : Largeur : Longueur :" pos:[14,254] width:52 height:40 align:#left	
+	
 	
 	
 	
 	label 'lbl_infos_valeurs' "...m²\n...m\n...m" pos:[68,254] width:98 height:40 align:#left
 	
 	
-	button 'btn_generer' "Générer le quartier" pos:[6,303] width:168 height:32 align:#left
+	button 'btn_generer' "Générer le quartier" pos:[6,302] width:168 height:32 align:#left
 	
+	button 'btn_select_bats' "Sel. Batiments" pos:[6,333] width:85 height:16 toolTip:"Selectionne les shapes des contours." align:#left
 	
 	fn afficher_infos	_valeurs	=(
 		lbl_infos_valeurs.text	=		( _valeurs[1] / 10000 )	as string + " m²\n"
@@ -102,12 +104,18 @@ rollout roll_contours "Contours" width:195 height:410
 	
 	
 	
+	
+	
 	on roll_contours open do
 	(
 			core.charger_parametres ()
 			actualiser ()
 			core.activer_surbrillance ()
 		)
+	on roll_contours close do
+	(
+			core.desactiver_surbrillance ()
+	)
 	on chkbtn_ajouter_contour changed state do
 	(
 				if  state do (
@@ -137,17 +145,28 @@ rollout roll_contours "Contours" width:195 height:410
 		)
 	on lbx_contours doubleClicked arg do
 		select p_contours[arg]
-	on btn_select pressed do
+	on btn_select_contours pressed do
 	(
 				if p_contours.count > 0 do (
 					clearSelection ()
-					for obj in  p_contours do
-						selectMore obj
+					select p_contours
+-- 					for obj in  p_contours do
+-- 						selectMore obj
 					redrawViews ()
 				)
 			)
 	on btn_generer pressed do
 		core.generer_batiments ()
+	on btn_select_bats pressed do
+	(
+		if p_batiments.count > 0 do (
+			clearSelection ()
+			select p_batiments
+-- 			for obj in  p_batiments do
+-- 				selectMore obj
+			redrawViews ()
+		)
+	)
 )
 
 rollout roll_typologies "Typologies" width:195 height:410
@@ -245,6 +264,18 @@ rollout roll_typologies "Typologies" width:195 height:410
 			redrawviews ()
 			
 		)
+	on lbx_typologies doubleClicked sel do
+	(
+		with redraw off
+		(
+				clearselection ()
+				local typo =  core.get_typo_active () 
+-- 				format "typo.batiments_ids	:%\n"	typo.batiments_ids	
+				for id_bat in typo.batiments_ids	 do 
+					selectmore		p_batiments[ id_bat ]
+				
+			)
+	)
 	on btn_monter pressed do
 	(
 		core.monter_typologie	lbx_typologies.selection
@@ -265,22 +296,23 @@ rollout roll_typologies "Typologies" width:195 height:410
 				clearselection ()
 				local typo =  core.get_typo_active () 
 				format "typo.batiments_ids	:%\n"	typo.batiments_ids	
-				for id_bat in typo.batiments_ids	 do 
-					selectmore		p_batiments[ id_bat ]
-				
+				local bats = for id_bat in typo.batiments_ids	  collect 		p_batiments[ id_bat ]
+				select bats
 			)
 		)
 	on chkbtn_surbillance_typo changed state do
 	(
--- 		format "STATE : %\n"	state
--- 			case state of (
--- 				true: 	core.activer_surbrillance_typologie ()
--- 				false: 	core.desactiver_surbrillances ()
--- 			)
+	-- 		format "STATE : %\n"	state
+	-- 			case state of (
+	-- 				true: 	core.activer_surbrillance_typologie ()
+	-- 				false: 	core.desactiver_surbrillances ()
+	-- 			)
 		)
 	on btn_generer pressed do
 	(
-		core.generer_typologie		( core.get_typo_active () )
+		local typo = core.get_typo_active ()
+		core.initialiser_compteur	typo
+		core.generer_typologie		typo	solo:true
 		)
 	on btn_select_contours pressed do
 	(
@@ -288,10 +320,9 @@ rollout roll_typologies "Typologies" width:195 height:410
 			(
 					clearselection ()
 					local typo =  core.get_typo_active () 
-				format "typo.batiments_ids	:%\n"	typo.batiments_ids	
-					for id_bat in typo.batiments_ids	 do 
-						selectmore		p_batiments[ id_bat ]
-					
+					format "typo.batiments_ids	:%\n"	typo.batiments_ids	
+					local contours = 	for id_bat in typo.batiments_ids	  collect 	p_batiments[ id_bat ]
+					select contours
 				)
 		)
 )
@@ -537,7 +568,7 @@ rollout roll_param_typologie "Parametres typologie" width:182 height:447
 		
 		
 				m_typo.batiments_nbr_etagesPlus[ lbx_batiments.selection ] = val
-				core.analyser_typologies ()
+		
 					core.enregistrer_typologie		m_typo
 					actualiser ()
 		
@@ -608,6 +639,11 @@ rollout roll_param_typologie "Parametres typologie" width:182 height:447
 			core.enregistrer_typologie		m_typo
 			actualiser ()
 		)
+	on btn_groupe_editer pressed  do
+	(
+		core.ouvrir_rollout_typo_selection ()
+		
+	)
 	on lbx_batiments selected sel do
 	(
 		actualiser ()
@@ -647,7 +683,7 @@ rollout roll_param_typologie "Parametres typologie" width:182 height:447
 	(
 		
 			m_typo.batiments_nbr_etages[ lbx_batiments.selection ] = val
-			core.analyser_typologies ()
+		
 			core.enregistrer_typologie			m_typo
 			actualiser ()
 		)
@@ -659,7 +695,7 @@ rollout roll_param_typologie "Parametres typologie" width:182 height:447
 	on spn_bat_htEtages changed val do
 	(
 			m_typo.batiments_ht_etages[ lbx_batiments.selection ] = val
-			core.analyser_typologies ()
+		
 			core.enregistrer_typologie			m_typo
 			actualiser ()
 		)

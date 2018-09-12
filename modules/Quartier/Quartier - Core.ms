@@ -14,7 +14,6 @@ include	"$userScripts\\cp-Urba\\modules\\Commun\\Urba - Geometrie.ms"
 include	"$userScripts\\cp-Urba\\modules\\Commun\\Urba - Shapes.ms" 
 include	"$userScripts\\cp-Urba\\modules\\Commun\\Urba - Presets.ms" 
 -- include	"$userScripts\\cp-Urba\\modules\\Quartier\\Quartier - Presets.ms"
-include	"$userScripts\\cp-Urba\\modules\\Quartier\\Quartier - typologie.ms"
 
 
 
@@ -63,66 +62,23 @@ struct str_quartier_core (
 		
 		m_contours_aUtiliser	=	#{},			----
 		
--- 		m_contours_datas	=	#(),	----	les datas des contours 
+		m_nbr_bats_aConstruire = 0,
+		m_nbr_bats_construits = 0,
+		
 	
 	
 	-------- FONCTIONS	--------------------------------------------------------------------------------------------------------
 	private
-	---- Surbrillance ----------------------
+	---- Surbrillance --------------------------------------------------------------
 		----- la fonction propre ---------------
-		/* 
-		fn fn_afficher_surbrillance_typologie  =(
-			if selection.count == 1 and classof $ == Urba_Quartier do (
-				
-				local typo = $.core.get_typo_active ()
-				if typo != undefined and $.p_typologies_surbrillance do (
-					gw.setTransform (matrix3 1)
-					
-					--- pour chaque contours -------
-					gw.setColor	#line		typo.couleur
-					for id_contour in typo.contours_index do (
-						
-						local shp = $.p_contours[ id_contour ]
-						if shp != ndefined do (
-							pts_shp	 = for i in 1 to numknots shp collect getknotPoint shp	1	i
-							gw.polyline pts_shp	true
-						)
--- 						for pt in pts_shp	do							
--- 							gw.Marker pt		#smallDiamond    color:typo.couleur--yellow
-					)
-					
-					gw.updateScreen() 
-				)
-			)
-		), */
 		fn fn_afficher_surbrillance_contours  =(
 			if selection.count == 1 and classof $ == Urba_Quartier do (
-				/* if  $.p_typologies_surbrillance then (
-					gw.setTransform (matrix3 1)
-					
-					--- pour chaque contours -------
-					gw.setColor	#line		typo.couleur
-					for id_contour in typo.contours_index do (
-						
-						local shp = $.p_contours[ id_contour ]
-						if shp != ndefined do (
-							pts_shp	 = for i in 1 to numknots shp collect getknotPoint shp	1	i
-							gw.polyline pts_shp	true
-						)
--- 						for pt in pts_shp	do							
--- 							gw.Marker pt		#smallDiamond    color:typo.couleur--yellow
-					)
-					
-					gw.updateScreen() 
-				
-					
-				) else (
-				 */
+			
 					gw.setTransform (matrix3 1)
 					
 					
 					local couleur =  white
-					if  $.p_typologies_surbrillance then (
+					if  $.p_typologies_surbrillance and $.p_typologies.count >0 then (
 						--- pour chaque typologie -------
 						local coutours_gris 	= true
 						local typo_active 	= $.core.get_typo_active ()
@@ -132,24 +88,29 @@ struct str_quartier_core (
 							-- la couleur ----------					
 							if typo == typo_active or typos.count == 1 do (
 								coutours_gris = false
--- 								couleur = yellow
 							)
 							
 							---- les contours --------
-							for i = 1 to typo.contours_index.count do (
-								local id_contour = typo.contours_index [i]
--- 								for id_contour in  typo.contours_index do (
+							
+							local contours_ids 	=	#()
+							if typo.contours_tout then contours_ids = typo.contours_index
+									else	contours_ids = typo.contours_groupe
+							
+							
+							for i = 1 to contours_ids.count /* where typo.contours_valides[i] */	do (
+								local id_contour = contours_ids[i]
 								local shp =  $.p_contours[ id_contour ]
 								
+								
+								
 								couleur =  if coutours_gris then gray else white		
-								if typo == typo_active  /* and (typo.contours_index as bitarray)[i]  */do
+								if typo == typo_active and typo.contours_valides[ id_contour ] do
 									couleur = yellow
 								
 								gw.setColor	#line		couleur
 								
 								local pts_shp	 = for i in 1 to numknots shp collect getknotPoint shp	1	i
 								gw.polyline pts_shp	true
--- 								)
 								
 							)
 						)
@@ -167,40 +128,8 @@ struct str_quartier_core (
 						)
 					)
 					
-					/* 
-					--- pour chaque contours -------
-					local coutours_gris = true
-					for i = 1 to $.p_contours.count do (
-						
-						local couleur =  white
-						local shp =  $.p_contours[i]
-						
-						---- si on est en typologie --------
-						if  $.p_typologies_surbrillance then (
-							
-							couleur = if coutours_gris then gray else white
-							
-							local typo = $.core.get_typo_active ()
-							if typo != undefined  and  ( typo.contours_index as bitArray )[ i] then (
-								couleur = yellow
-								coutours_gris = false
-							)
-						) else (
-						
-							if $.roll_contours.lbx_contours.selection[ i ] then couleur = yellow
-						)
-						gw.setColor	#line		couleur
-						
-						
-						pts_shp	 = for i in 1 to numknots shp collect getknotPoint shp	1	i
-						gw.polyline pts_shp	true
--- 						for pt in pts_shp	do							
--- 							gw.Marker pt		#smallCircle   color:white
-					)
-					 */
 					gw.updateScreen() 
 				
-				--)
 			)
 		),
 	public			
@@ -209,40 +138,14 @@ struct str_quartier_core (
 			--- reset --------
 			unregisterRedrawViewsCallback 	urba_fn_afficherContours
 			
--- 			if m_plug.p_contours_surbrillance do (
-				urba_fn_afficherContours = fn_afficher_surbrillance_contours
-				registerRedrawViewsCallback 		urba_fn_afficherContours 	
--- 			)
+			urba_fn_afficherContours = fn_afficher_surbrillance_contours
+			registerRedrawViewsCallback 		urba_fn_afficherContours 
 			redrawviews ()
 		),
-		/* 
-		fn activer_surbrillance_contours =(
-			debug "activer_surbrillance_contours"
-			--- reset --------
-			unregisterRedrawViewsCallback 	urba_fn_afficherContours
-			
-			if m_plug.p_contours_surbrillance do (
-				urba_fn_afficherContours = fn_afficher_surbrillance_contours
-				registerRedrawViewsCallback 		urba_fn_afficherContours 	
-			)
-			redrawviews ()
-		),
-		fn activer_surbrillance_typologie =(
-			debug "activer_surbrillance_typologie"
-			--- reset --------
-			unregisterRedrawViewsCallback 	urba_fn_afficherTypologie
-			
-			if m_plug.p_typologies_surbrillance do (
-				urba_fn_afficherTypologie = fn_afficher_surbrillance_typologie
-				registerRedrawViewsCallback 		urba_fn_afficherTypologie 	
-			)
-			redrawviews ()
-		),
-		 */
 		
-		fn desactiver_surbrillances =(
-			debug "desactiver_surbrillances"
--- 			unregisterRedrawViewsCallback 	urba_fn_afficherContours
+		fn desactiver_surbrillance =(
+			debug "desactiver_surbrillance"
+			
 			unregisterRedrawViewsCallback 	urba_fn_afficherTypologie
 			gw.updateScreen() 
 			redrawviews ()
@@ -291,7 +194,7 @@ struct str_quartier_core (
 		
 		------ Contours --------------
 		
-		fn analyser_contour		_shp		=(
+		fn analyser_contour		_shp		= if _shp != undefined do (
 			
 			
 			------- structures de datas -----------------
@@ -402,93 +305,12 @@ struct str_quartier_core (
 		),
 		fn ouvrir_rollout_contours =(
 			debug	"ouvrir_rollout_liste"
-			rollout roll_liste_contours "Contours" width:375 height:262
-			(
-				
-				local	m_plug
-				
-				local liste_contours =#()
-				local liste_scene =#()
-				
-				multiListBox 'lbx_scene' "Scène" pos:[5,6] width:173 height:16 align:#left
-				button 'btn_ajouter' ">" pos:[179,25] width:16 height:16 align:#left
-				
-				button 'btn_retirer' "<" pos:[179,40] width:16 height:16 align:#left
-				multiListBox 'lbx_quartier' "Quartier" pos:[196,6] width:173 height:16 align:#left
-				button 'btn_annuler' "Annuler" pos:[309,238] width:60 height:20 align:#left
-				button 'btn_valider' "Valider" pos:[250,238] width:60 height:20 align:#left
-				
-				button 'btn_selec_tout' "Tout" pos:[5,238] width:36 height:20 align:#left
-				
-				
-				
-				fn actualiser =(
-					
-					local noms_shapes_scene = for obj in liste_scene	collect  obj.name
-					lbx_scene.items = noms_shapes_scene
-					
-					local noms_shapes_quartier	= for obj in liste_contours	collect  obj.name
-					lbx_quartier.items = noms_shapes_quartier
-				)
-				
-				
-				on roll_liste_contours open do
-				(
-					liste_contours	= 	for obj in $.p_contours 	collect  obj
-					liste_scene		=	for obj in shapes where findItem	liste_contours 	obj	==0	collect  obj
-					actualiser ()
-				)
-				on btn_ajouter pressed do
-				(
-					
-					local ids_aAjouter	=	 lbx_scene.selection as array
-					
-					-- on les ajoute au quartier -------
-					for id_scene in ids_aAjouter do
-						append	liste_contours	liste_scene[ id_scene ]
-					
-					--- on les retire de la scene ----------
-					for i = ids_aAjouter.count to 1 by -1 do 
-						deleteItem	liste_scene		ids_aAjouter[i]
-					
-					actualiser ()
-				)
-				on btn_retirer pressed do
-				(
-									
-									local ids_aRetirer	=	 lbx_quartier.selection as array
-									
-									-- on les retire du quartier -------
-									for i = ids_aRetirer.count to 1 by -1 do
-										deleteItem	liste_contours	ids_aRetirer[ i ]
-									
-									--- on actualise la liste de la scene ----------
-									liste_scene		=	for obj in shapes where findItem	liste_contours 	obj	==0	collect  obj
-									
-									actualiser ()
-								)
-				on btn_annuler pressed do
-					destroydialog roll_liste_contours
-				on btn_valider pressed do
-				(
-					m_plug.p_contours = #()
-					m_plug.core.ajouter_contours 	liste_contours
-					
-					
-					m_plug.actualiser_rollouts ()
-					destroydialog roll_liste_contours	
-				)
-				on btn_selec_tout pressed do
-				(
-						liste_scene			= 	#()
-						liste_contours		=	for obj in shapes	collect  obj
-						
-						actualiser ()
-					)
-			)
+			include	"$userScripts\\cp-Urba\\modules\\Quartier\\Quartier - rollout - selection Contours.ms"
+			
+			createdialog	roll_liste_contours	style:#(#style_titlebar , #style_border ,  #style_sysmenu ,#style_resizing)	--#(#style_titlebar , #style_border ,  #style_sysmenu )
 			
 			
-			createdialog	roll_liste_contours	
+			
 			roll_liste_contours.m_plug = m_plug
 			
 		),
@@ -505,25 +327,44 @@ struct str_quartier_core (
 	private
 		fn	analyser_typologie   _typo 	contours_aUtiliser:	=(
 			
+-- 			debug "analyser_typologie"
+-- 			debug "_typo" var:_typo
 			
 			local contours =#()			
 			contours = for contour in m_plug.p_contours collect contour
 			
 			
 			
-			_typo.contours_index 						=#()
-			_typo.contours_ids_modelBat_choisis	=#()
+			_typo.contours_index 						=	#()
+			_typo.contours_ids_modelBat_choisis	=	#()
+			
+			_typo.contours_valides						=	#{}
+			
 			
 			--- on choisi les CONTOURS ------------
-			for i = 1 to contours.count where 	m_contours_aUtiliser[i]	== true	do (
-				
-				local contour = contours[i]
-				local dt_contour = analyser_contour		contour
-				local valide = true
+			for i = 1 to contours.count where 	m_contours_aUtiliser[i]	do (
 				
 				--- unité affichag en metre² -----
 				local facteur_unite_m2 	= 10000.
 				local facteur_unite_m	 	= 100.
+				
+				
+				local contour 			= contours[i]
+				local dt_contour 		= analyser_contour		contour
+				local valide 			= true
+				
+				
+				
+				
+				
+				
+-- 				if  _typo.contours_tout or  	not _typo.contours_tout and  ( _typo.contours_groupe as bitarray )[i] do	
+				append 	_typo.contours_index 	i
+				
+				
+				
+				
+				if not _typo.contours_tout and not ( _typo.contours_groupe as bitarray )[i] do	valide = false
 				
 				--- condition de surface ------
 				if _typo.conditions_surfMin_use do
@@ -546,65 +387,67 @@ struct str_quartier_core (
 				
 				--- on valide ou pas -----
 				if valide do (
-					append 	_typo.contours_index 	i
-					m_contours_aUtiliser[i]	= false
+-- 					append 	_typo.contours_valides 	i
+					_typo.contours_valides[i] 	= true
+					m_contours_aUtiliser[i]			= false
 				)
 			)
 			
 			
 			
 			--- on choisi les BATIMENTS pour chaque contour ------------	
-				if _typo.batiments_models.count == 1 then (
+			if _typo.batiments_models.count == 1 then (
+				
+				for id_contour in _typo.contours_index do
+					append _typo.contours_ids_modelBat_choisis 1
+				
+			) else if _typo.batiments_models.count > 1 then (
+				for i = 1 to _typo.contours_index.count where _typo.contours_valides[i]  do (
 					
-					for id_contour in _typo.contours_index do
-						append _typo.contours_ids_modelBat_choisis 1
+					local id_contour = _typo.contours_index[i]
 					
-				) else if _typo.batiments_models.count > 1 then (
-					for i = 1 to _typo.contours_index.count do (
+					local pourcentTotal = 0
+					for pourcent in _typo.batiments_pourcent do pourcentTotal += pourcent				
+					local tirage = random 0. pourcentTotal
+					 
+					/*debug	""
+					debug "	--->	tirage" var:tirage
+					debug "	--->	typo.batiments_pourcent" var:_typo.batiments_models
+					debug "	--->	typo.batiments_pourcent" var:_typo.batiments_pourcent
+					debug "	--->	pourcentTotal" var:pourcentTotal */
+					
+					local j				= 1
+					local bat_choisi 	= 0
+					local trouve 		= false
+					local fin 			= false
+					local val_min 		= 0
+					local val_max 		= _typo.batiments_pourcent[ 1 ]
+					while not trouve and not fin do (
+						if tirage > val_min and tirage <= val_max then (
+							trouve = true
+							bat_choisi = j
+						) 
 						
-						local id_contour = _typo.contours_index[i]
+						j +=1
 						
-						local pourcentTotal = 0
-						for pourcent in _typo.batiments_pourcent do pourcentTotal += pourcent				
-						local tirage = random 0. pourcentTotal
-						
-						debug	""
-						debug "	--->	tirage" var:tirage
-						debug "	--->	typo.batiments_pourcent" var:_typo.batiments_models
-						debug "	--->	typo.batiments_pourcent" var:_typo.batiments_pourcent
-						debug "	--->	pourcentTotal" var:pourcentTotal
-						
-						local j				= 1
-						local bat_choisi 	= 0
-						local trouve 		= false
-						local fin 			= false
-						local val_min 		= 0
-						local val_max 		= _typo.batiments_pourcent[ 1 ]
-						while not trouve and not fin do (
-							if tirage > val_min and tirage <= val_max then (
-								trouve = true
-								bat_choisi = j
-							) 
-							
-							j +=1
-							
-							if j > _typo.batiments_pourcent.count then fin = true
-								else (								
-									val_min = val_max
-									val_max += _typo.batiments_pourcent[j]
-								)
-						)
-						
-						if trouve do 
-							_typo.contours_ids_modelBat_choisis[i] = bat_choisi
-						debug "	--------->	bat_choisi" var:bat_choisi
-						
-						
+						if j > _typo.batiments_pourcent.count then fin = true
+							else (								
+								val_min = val_max
+								val_max += _typo.batiments_pourcent[j]
+							)
 					)
+					
+					if trouve do 
+						_typo.contours_ids_modelBat_choisis[i] = bat_choisi
+-- 					debug "	--------->	bat_choisi" var:bat_choisi
+					
+					
+				)
 				
 			) else for id_contour in _typo.contours_index do
 				append _typo.contours_ids_modelBat_choisis 0
 			
+-- 			debug "	---->	_typo.contours_index" var:_typo.contours_index
 			
 			this.enregistrer_typologie		_typo
 			
@@ -650,7 +493,10 @@ struct str_quartier_core (
 		
 		
 		
-		
+		fn get_typo_vide =(
+			include	"$userScripts\\cp-Urba\\modules\\Quartier\\Quartier - typologie.ms"
+			str_typologie ()
+		),
 		
 		
 		fn	set_typo_active	_id	=	m_typo_active = _id,
@@ -660,7 +506,7 @@ struct str_quartier_core (
 			m_typologies = #()
 			--- on charge les typologies depuis les parametres du plug --------------
 			for typo_strg in m_plug.p_typologies do (
-				local nvlle_typo	=	str_typologie ()
+				local nvlle_typo	=	get_typo_vide ()
 				
 -- 				debug " |||||||||||||||||||||||||| 		A		 ||||||||||||||||||||||||||"
 -- 				debug " typo_strg" var:typo_strg
@@ -680,7 +526,7 @@ struct str_quartier_core (
 			local trouve = false
 			local i = 1
 			while not trouve  do (
-				local typo_test	=	str_typologie ()
+				local typo_test	=	get_typo_vide()
 				mgr_datas.set_datas_string		m_plug.p_typologies[i]		typo_test
 				
 				if typo_test.id == _typo.id do (
@@ -709,13 +555,15 @@ struct str_quartier_core (
 		
 		fn creer_typologie	=(
 			
-			local nvlle_typo = str_typologie ()
+			local nvlle_typo = get_typo_vide ()
 			nvlle_typo.initialiser ()
 			append m_typologies		nvlle_typo
 			nvlle_typo.nom += " " + m_typologies.count as string
 			
 			local nvlle_typo_asString	=	mgr_datas.get_datas_string		nvlle_typo			
 			append  m_plug.p_typologies		nvlle_typo_asString
+			
+			set_typo_active	m_plug.p_typologies[m_plug.p_typologies.count]
 			
 			analyser_typologies ()
 			
@@ -728,7 +576,7 @@ struct str_quartier_core (
 			local trouve = false
 			local i = 1
 			while not trouve  do (
-				local typo_test	=	str_typologie ()
+				local typo_test	=	get_typo_vide ()
 				mgr_datas.set_datas_string		m_plug.p_typologies[i]		typo_test
 				
 				debug "typo_test" var:typo_test
@@ -776,7 +624,20 @@ struct str_quartier_core (
 		),
 		
 		
-		
+		fn ouvrir_rollout_typo_selection =(
+			
+			debug	"ouvrir_rollout_typo_selection"
+			include	"$userScripts\\cp-Urba\\modules\\Quartier\\Quartier - rollout - selection Typologie.ms"
+			
+			createdialog	roll_liste_contours_typo	style:#(#style_titlebar , #style_border ,  #style_sysmenu ,#style_resizing)	--#(#style_titlebar , #style_border ,  #style_sysmenu )
+			
+			roll_liste_contours_typo.m_plug = m_plug
+			roll_liste_contours_typo.m_typo = get_typo_active()
+			
+			roll_liste_contours_typo.initialiser_listes ()
+			roll_liste_contours_typo.actualiser ()
+			
+		),
 		
 		
 		
@@ -853,71 +714,157 @@ struct str_quartier_core (
 		),
 		
 		
-		-------- generation des batiments ----------
-		fn generer_typologie		_typo =		with redraw off 		(
+		
+		
+		
+		
+		
+		
+		fn initialiser_compteur		_typo 		=(
 			
-			local batiment_mat	=	undefined
-			local chrono_debut = timestamp ()
+			m_nbr_bats_aConstruire = 0.
+			m_nbr_bats_construits = 0.
 			
-			for i = 1 to	_typo.contours_index.count do (
+			local contours_ids 	=	#()
+			if _typo.contours_tout then contours_ids = _typo.contours_index
+					else	contours_ids = _typo.contours_groupe
+			m_nbr_bats_aConstruire += contours_ids.count
+			
+		),
+		
+		fn initialiser_compteur_global 		=(
+			
+			m_nbr_bats_aConstruire = 0.
+			m_nbr_bats_construits = 0.
+			
+			for typo in m_typologies do (
+				local contours_ids 	=	#()
+				if typo.contours_tout then contours_ids = typo.contours_index
+						else	contours_ids = typo.contours_groupe
+				m_nbr_bats_aConstruire += contours_ids.count
+			)
+			
+		),
+		
+		fn generer_batiment		_id_contour	_typo 	_id_model		=(
+			
+			local bat 
+			
+			
+			---- si on n'a pas encore de batiment, ou s'il a été supprimer on le créer-------------
+			if m_plug.p_batiments[ _id_contour ]  == undefined or isdeleted m_plug.p_batiments[ _id_contour ] 	do (
 				
-				local id_contours = _typo.contours_index[i]
-				---- si on n'a pas encore de batiment pour ce contour -------------
-				if m_plug.p_batiments[ id_contours ]  == undefined or isdeleted m_plug.p_batiments[ id_contours ] 	do (
-					
-					--- creation du batiment -------------					
-					local nv_bat = Urba_Batiment	affiche_asProxy:m_plug.affiche_asProxy	wirecolor:_typo.couleur					
-					nv_bat.assigner_shape 		nv_bat		m_plug.p_contours[ id_contours ]
-					m_plug.p_batiments[ id_contours ] = nv_bat
-					append	_typo.batiments_ids		id_contours
-					
-					--- gestion du material -------------
-					if batiment_mat	==	undefined then (
-						batiment_mat = nv_bat.material			
-						batiment_mat.name = _typo.nom
-					) else 
-						nv_bat.material = batiment_mat
-					
-					enregistrer_typologie		_typo
-				)
+				--- creation du batiment -------------					
+				local nv_bat = Urba_Batiment	affiche_asProxy:m_plug.affiche_asProxy	wirecolor:_typo.couleur					
+				nv_bat.assigner_shape 		nv_bat		m_plug.p_contours[ _id_contour ]
+				m_plug.p_batiments[ _id_contour ] = nv_bat
+				append	_typo.batiments_ids		_id_contour
 				
-				--- maj du model -------------
-				if _typo.batiments_models.count >= 1 do (
+				--- gestion du material -------------
+				if batiment_mat	==	undefined then (
+					batiment_mat = nv_bat.material			
+					batiment_mat.name = _typo.nom
+				) else 
+					nv_bat.material = batiment_mat
+				
+				enregistrer_typologie		_typo
+			)
+			
+			--- On met a jour le model et les parametre du batiment  -------------
+			if _typo.batiments_models.count >= 1 do (
+				
+				----- choix du model ----------
+-- 				local id_model_choisi = _typo.contours_ids_modelBat_choisis[i]
+				if _id_model != 0 do (
+					local model_choisi = _typo.batiments_models[ _id_model ]
 					
-					----- choix du model ----------
-					local id_model_choisi = _typo.contours_ids_modelBat_choisis[i]
-					if id_model_choisi != 0 do (
-						local model_choisi = _typo.batiments_models[ id_model_choisi ]
-						
-						local bat 					= m_plug.p_batiments[ id_contours ]					
-						bat.affiche_asProxy 		= 		m_plug.affiche_asProxy
-						local nbr_etages 		= ( _typo.batiments_nbr_etages[ id_model_choisi ]	 + random 0 ( _typo.batiments_nbr_etagesPlus[ id_model_choisi ] ) )
+					bat 							= 	m_plug.p_batiments[ _id_contour ]					
+					bat.affiche_asProxy 		= 	m_plug.affiche_asProxy
+					local nbr_etages 		= 	( _typo.batiments_nbr_etages[ _id_model ]	 + random 0 ( _typo.batiments_nbr_etagesPlus[ _id_model ] ) )
 -- 						bat.set_etages_nbre	nbr_etages
 -- 						bat.etages_nbre 			= 		nbr_etages
 -- 						bat.set_etages_ht		_typo.batiments_ht_etages[ id_model_choisi ]
-						
-						debug "nbr_etages" var:nbr_etages
-						
-						bat.charger		model_choisi	val_etages_nbre:nbr_etages	 \
-																val_etages_ht:(_typo.batiments_ht_etages[ id_model_choisi ])
-						
-						debug "	bat.etages_nbre" var:	bat.etages_nbre
-					)
+					
+					debug "nbr_etages" var:nbr_etages
+					
+					bat.charger		model_choisi	val_etages_nbre:nbr_etages	 \
+															val_etages_ht:(_typo.batiments_ht_etages[ _id_model ])
+					
+					debug "	bat.etages_nbre" var:	bat.etages_nbre
 				)
 			)
+		
+			m_nbr_bats_construits += 1
+			
+			local pourCent = m_nbr_bats_construits / m_nbr_bats_aConstruire * 100
+			progressUpdate pourCent
+			
+			bat 
+			
+		),
+		
+		
+		
+		m_batiments_mats	=	#(),
+
+		-------- generation des batiments ----------
+		fn generer_typologie		_typo 		solo:false	=		with redraw off 		(
+			
+			m_batiments_mats	=	#()
+			
+			local chrono_debut 	=	timestamp ()
+			if solo do (
+				progressStart ( "Création des batiments ..." )
+				progressUpdate 0
+				initialiser_compteur 	_typo
+			)
+			
+			
+			
+			
+			
+			local contours_ids 	=		if _typo.contours_tout 		then 	_typo.contours_index
+																					else		_typo.contours_groupe
+			for i = 1 to	contours_ids.count/*  where _typo.contours_valides[i]	 */do (		
+				
+				local id_contour = contours_ids[i]	
+				if  _typo.contours_valides[ id_contour ]	do (
+					
+					local id_model_choisi = _typo.contours_ids_modelBat_choisis[i]					
+					local bat = generer_batiment		id_contour		_typo 		id_model_choisi
+					
+					
+					if m_batiments_mats[ id_model_choisi ] == undefined then
+						m_batiments_mats[ id_model_choisi ] = bat.material
+					else
+						bat.material = m_batiments_mats[ id_model_choisi ] 
+				)					
+			)
+			
+			if solo do progressEnd() 
+			
 			
 			format "	Typologie '%' généré en % s.\n" 	_typo.nom		( ( timestamp ()	 - chrono_debut ) /1000 )
 		),
+		
+		
+		
 		
 		fn generer_batiments	= with redraw off (
 			
 			debug "generer_batiments--------" 
 			local chrono_debut = timestamp ()
+			
+			progressStart ( "Création des batiments ..." )
+			progressUpdate 0
+			
+			initialiser_compteur_global ()
+			
 			for typo in m_typologies do 
-				generer_typologie		typo 
+				generer_typologie		typo    
 				
 			local chrono_fin = timestamp ()
-			
+			progressEnd() 
 			format "Quartier généré en % s.\n" ( ( chrono_fin - chrono_debut ) /1000 )
 			
 		)

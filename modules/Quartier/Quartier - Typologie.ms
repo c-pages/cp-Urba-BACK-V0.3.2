@@ -16,11 +16,13 @@ struct str_typologie (
 		
 		
 		
-		contours_tout						=	true,					----	Si on utilise tout les contours du quartier ou seulement un groupe.
-		contours_groupe					=	#(),				----	le groupe des contours du quartier à utiliser pour la typologie.
-		contours_index					=	#(),				----	le groupe des contours du quartier à utiliser pour la typologie.
-		contours_ids_modelBat_choisis		=	#(),				----	le groupe des contours du quartier à utiliser pour la typologie.
+		contours_tout							=	true,				----	Si on utilise tout les contours du quartier ou seulement un groupe.
+		contours_groupe						=	#(),				----	le groupe des contours du quartier à utiliser pour la typologie.
+		contours_index						=	#(),				----	le groupe des contours du quartier à utiliser pour la typologie.
 		
+		contours_valides						=	#{},				----	
+		
+		contours_ids_modelBat_choisis	=	#(),				----	le groupe des contours du quartier à utiliser pour la typologie.
 		
 		
 		
