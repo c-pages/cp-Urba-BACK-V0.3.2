@@ -31,6 +31,7 @@ M
  #### __Batiment__
  - [x] Correction du problème de position du batiment à l'assignation de son contour.
  - [x] Integration de nouveaux éléments pour toiture ( antenne, cheminets )
+ - [x] Possiblité de faire des baies arquées( divusion a revoir).
 
 
  #### __Quartier__
@@ -104,6 +105,7 @@ ____________________________
   - [ ] Création de poteaux (rond ou rectangle) avec facade en retrait (ex: façon galerie couverte en RdC (cf Marseille pouillon).
   - [ ] Peut être intégrer un composant 'Modele' permettant à l'utilisateur d'intégrer n'importe quel objet à lui à la façade.
   - [ ] Dans le _'mode édition'_: intégrer une prévisualisation des composant dans le viewport (ajouter dans chaque fichiers composant une fonction VP).
+  - [ ] Baies : revoir la division des arcs (radial au lieu de linéaire).
 * **Toitures**
   - [ ] Refaire complètement les toitures à pentes.
   - [ ] Construction à revoir pour meilleur gestion et pour meilleur controle des géométrie (ex: débords créés géométriquement et non avec l'opération extrude de Max).

@@ -119,8 +119,8 @@ struct str_batiment_core (
 		m_edit_affiche_fcd 		= true,
 		m_edit_affiche_etages 	= false,
 		
-		m_edit_maj_auto 			= true,
-		m_edit_proxy				= true,
+		m_edit_maj_auto 		= true,
+		m_edit_proxy				= false,
 -- 		
 		
 	-------- FONCTIONS	--------------------------------------------------------------------------------------------------------

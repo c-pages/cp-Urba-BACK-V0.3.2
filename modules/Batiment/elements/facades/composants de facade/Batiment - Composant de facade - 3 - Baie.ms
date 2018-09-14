@@ -5,9 +5,10 @@
 	
 
 ------ parametres de base	-----------------------------
-compo_nom 		= "Baie"	
+compo_nom 		= "Baie simple"	
 compo_type		=	#baie
 compo_toolTip 	=	"Ouverture dans un mur."
+
 
 
 --- les parametres du composant	---------
@@ -17,9 +18,12 @@ struct compo_params	(
 		longueur						= 100,
 		etirable							=	true,
 		hauteur							= 210,
-		profondeur					= 20,		
+		profondeur						= 20,		
 		allege_hauteur 		 		= 100,
 		
+		arc_use							=	 false,
+		arc_rayon						=	 70,
+	
 		--- Menuiseries	-------------
 		sequence 						= #(),		---- La sequence qui compose la baie ( #fenetre, #fixe, #porte , etc ...)	----------
 		traverses 						= #(),		---- liste des traverses par hauteur	----------
@@ -41,7 +45,7 @@ struct compo_params	(
 )
 
 --- les rollout du composant	---------
-rollout compo_dialog "Baie" width:433 height:747
+rollout compo_dialog "Baie" width:433 height:500
 (
 	local m_rollPrt
 	local	m_plug
@@ -54,39 +58,44 @@ rollout compo_dialog "Baie" width:433 height:747
 	spinner 'spn_longueur' "" pos:[116,36] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
 	label 'lbl21' "Hauteur:" pos:[15,66] width:49 height:13 align:#left
 	spinner 'spn_hauteur' "" pos:[116,66] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
-	GroupBox 'grp1' "Global" pos:[6,21] width:187 height:101 align:#left
+	GroupBox 'grp1' "Global" pos:[6,21] width:187 height:134 align:#left
 	label 'lbl24' "Allège pleine :" pos:[15,96] width:77 height:13 align:#left
 	spinner 'spn_allege' "" pos:[116,96] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
 	label 'lbl29' "Profondeur:" pos:[15,81] width:59 height:13 align:#left
 	spinner 'spn_profondeur' "" pos:[116,81] width:70 height:16 range:[-5,100000,0] type:#worldunits scale:1 align:#left
 	
 	---- traverses --------
-	GroupBox 'grp_traverses' "Traverses horizontales" pos:[13,227] width:173 height:104 align:#left
-	listbox 'lbx_traverses' "" pos:[21,262] width:158 height:3 align:#left
-	button 'btn_ajouter_traverse' "Nouv." pos:[21,246] width:35 height:16 align:#left
-	button 'btn_supprimer_traverse' "Supp." pos:[142,246] width:35 height:16 align:#left
-	label 'lbl_traverses_ht' "Hauteur:" pos:[21,309] width:49 height:13 align:#left
-	spinner 'spn_traverse_ht' "" pos:[109,308] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
+	GroupBox 'grp_traverses' "Traverses horizontales" pos:[13,274] width:173 height:104 align:#left
+	listbox 'lbx_traverses' "" pos:[21,309] width:158 height:3 align:#left
+	button 'btn_ajouter_traverse' "Nouv." pos:[21,293] width:35 height:16 align:#left
+	button 'btn_supprimer_traverse' "Supp." pos:[142,293] width:35 height:16 align:#left
+	label 'lbl_traverses_ht' "Hauteur:" pos:[21,356] width:49 height:13 align:#left
+	spinner 'spn_traverse_ht' "" pos:[109,355] width:70 height:16 range:[1,100000,0] type:#worldunits scale:1 align:#left
 	
 	---- sequence --------
-	GroupBox 'grp_sequence' "Séquence" pos:[13,139] width:173 height:86 align:#left
-	listbox 'lbx_sequence' "" pos:[21,175] width:142 height:3 align:#left
-	button 'btn_ajouter_element' "Nouv." pos:[21,158] width:35 height:16 align:#left
-	button 'btn_supprimer_element' "Supp." pos:[127,158] width:35 height:16 align:#left
-	button 'btn_dupliquer_element' "Dup." pos:[55,158] width:35 height:16 toolTip:"Dupliquer l'élément" align:#left
+	GroupBox 'grp_sequence' "Séquence" pos:[13,186] width:173 height:86 align:#left
+	listbox 'lbx_sequence' "" pos:[21,222] width:142 height:3 align:#left
+	button 'btn_ajouter_element' "Nouv." pos:[21,205] width:35 height:16 align:#left
+	button 'btn_supprimer_element' "Supp." pos:[127,205] width:35 height:16 align:#left
+	button 'btn_dupliquer_element' "Dup." pos:[55,205] width:35 height:16 toolTip:"Dupliquer l'élément" align:#left
 	
 	---- volet --------
-	GroupBox 'grp_volet' "Volets" pos:[5,359] width:187 height:50 align:#left
-	dropdownList 'ddl_volet' "" pos:[17,377] width:161 height:21 items:#("Aucun", "Roulant", "Battant simple", "Battant double") align:#left
+	GroupBox 'grp_volet' "Volets" pos:[5,418] width:187 height:50 align:#left
+	dropdownList 'ddl_volet' "" pos:[17,436] width:161 height:21 items:#("Aucun", "Roulant", "Battant simple", "Battant double") align:#left
 	
-	button 'btn_sequence_monter' "/\\" pos:[164,174] width:16 height:16 toolTip:"Monter l'élément" align:#left
-	button 'btn_sequence_descendre' "\/" pos:[164,189] width:16 height:16 toolTip:"Descendre l'élément" align:#left
-	GroupBox 'grp_menuis' "Menuiseries" pos:[6,122] width:187 height:233 align:#left
+	button 'btn_sequence_monter' "/\\" pos:[164,221] width:16 height:16 toolTip:"Monter l'élément" align:#left
+	button 'btn_sequence_descendre' "\/" pos:[164,236] width:16 height:16 toolTip:"Descendre l'élément" align:#left
+	GroupBox 'grp_menuis' "Menuiseries" pos:[6,169] width:187 height:233 align:#left
 	
-	checkbox 'chk_tablette' "Tablette" pos:[18,335] width:163 height:15 align:#left
+	checkbox 'chk_tablette' "Tablette" pos:[18,382] width:163 height:15 align:#left
 		
 	checkbox 'chk_etirable' "Etirable" pos:[14,52] width:98 height:15 align:#left
 		
+	
+		
+	label 'lbl_rayon' "Rayon :" pos:[15,130] width:49 height:13 align:#left
+	spinner 'spn_arc_rayon' "" pos:[116,130] width:70 height:16 range:[0,100000,0] type:#worldunits scale:1 align:#left
+	checkbox 'chk_arc' "Arc" pos:[14,116] width:98 height:15 align:#left
 		
 		
 		fn actualiser =(
@@ -98,6 +107,16 @@ rollout compo_dialog "Baie" width:433 height:747
 			spn_profondeur.value 	=	m_compo.params.profondeur	
 			spn_hauteur.value 		= m_compo.params.hauteur
 			spn_allege.value 			=	m_compo.params.allege_hauteur
+			
+			chk_arc.checked			=	m_compo.params.arc_use
+			lbl_rayon.enabled			=	m_compo.params.arc_use
+			spn_arc_rayon.enabled	=	m_compo.params.arc_use
+			
+			if chk_arc.checked then (
+				spn_arc_rayon.indeterminate = false
+				spn_arc_rayon.value		=	m_compo.params.arc_rayon				
+			) else
+				spn_arc_rayon.indeterminate = true
 			
 			--- traverses -----------
 			lbx_traverses.items		=	for ht_trav in m_compo.params.traverses collect (ht_trav as string + "cm." )
@@ -178,8 +197,6 @@ rollout compo_dialog "Baie" width:433 height:747
 	
 	
 	
-	
-		
 	on edt_nom entered txt 	do
 	(
 		m_compo.nom = txt
@@ -189,6 +206,14 @@ rollout compo_dialog "Baie" width:433 height:747
 	on spn_longueur changed val 	do
 	(
 			m_compo.params.longueur 					= val
+				format "m_compo.params.arc_rayon : %\n" m_compo.params.arc_rayon
+				format "val / 2 : %\n" (val / 2)
+				format "m_compo.params.arc_rayon < val / 2 : %\n" (m_compo.params.arc_rayon < (val / 2) )
+			if  m_compo.params.arc_rayon < (val / 2) do (
+				format "---> PLUS grand\n"
+				m_compo.params.arc_rayon 	= val / 2 +.001
+				actualiser ()
+			)
 			m_rollPrt.actualiser 	sans_params_1:true
 			m_rollPrt.changer_un_truc ()
 		)
@@ -252,7 +277,7 @@ rollout compo_dialog "Baie" width:433 height:747
 	(
 			
 		)
-	on ddl_volet 	selected 	_index  	do
+	on ddl_volet selected _index  	do
 	(
 			if _index == 1 then 
 				m_compo.params.volet  = undefined
@@ -311,6 +336,22 @@ rollout compo_dialog "Baie" width:433 height:747
 			m_rollPrt.actualiser 	sans_params_1:true
 			m_rollPrt.changer_un_truc ()
 		)
+	on spn_arc_rayon changed val 	do
+	(
+		if val < m_compo.params.longueur / 2 do 
+			val = m_compo.params.longueur / 2 +.001
+			m_compo.params.arc_rayon 					= val
+			m_rollPrt.changer_un_truc ()
+					actualiser ()
+		)
+	on chk_arc changed state do
+	(
+		
+			m_compo.params.arc_use = state
+			m_rollPrt.actualiser 	sans_params_1:true
+			m_rollPrt.changer_un_truc ()
+					actualiser ()
+		)
 )
 	
 
@@ -328,9 +369,10 @@ rollout compo_dialog "Baie" width:433 height:747
 
 
 
-
 ------ la fonction de construction	---------
 fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruitLaDalle:false	= (
+	
+		local onCreer_menuiserie_si_sequenceVide = false
 	
 		--- Result -------------
 		local pt_result_1, pt_result_2, pt_result_3
@@ -394,7 +436,7 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		local vec_rtmb 		= 	[0,0,1] 		*	retombe		
 		local vec_ht 			= 	[0,0,1] 		*	hauteur				
 		local vec_longueur 	= norm_dir 	*	longueur
-		local vec_murEp		=	norm_prof *	ptr_plug.const_murExt_epaisseur
+		local vec_murEp		=	norm_prof 	*	profondeur	+	norm_prof		*	menuis_epaisseur--	norm_prof *	ptr_plug.const_murExt_epaisseur
 		
 		local vec_volet_empriseVert  =  [0,0,1] * volet_empriseVert
 		
@@ -482,14 +524,64 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		if onConstruit_laTablette 	then		ptr_geo.set_matID 	nvlFace	#menuiserie
 												else 		ptr_geo.set_matID 	nvlFace	#mur
 		
-		ptr_geo.face 		#(	pts_ids[10], 		pts_ids[9], 		pts_ids[5], 		pts_ids[4] )				matID:#mur 
-		ptr_geo.face 		#(	pts_ids[4], 		pts_ids[5], 		pts_ids[6], 		id_ptAccroche_3 )		matID:#mur 
+		---- construction de l'arc ------------
+		if ptr_params.arc_use then (
+			
+			fn get_arc 			longueur:		rayon:		norm_dir:	pt_origine:		nbr_division:12		=(
+				
+				local result = #(pt_origine)
+				
+				local dX 				= ( longueur / 2 )
+				local dZ 				= sqrt ( rayon^2 - dX ^2 )
+				
+				for i = 1 to	nbr_division	do (
+					local nv_pt = [0,0,0]
+					
+					nv_pt.x = 		i * ( longueur / nbr_division ) - dX
+					nv_pt.z = 		sqrt ( rayon^2 - nv_pt.x ^2 )
+					
+					nv_pt.x +=		dX
+					nv_pt.z -= 	dZ
+					
+					local pt_result = pt_origine + norm_dir * nv_pt.x
+					pt_result.z += nv_pt.z
+					append	result		pt_result 
+				)
+				result
+			) -- fin fn get_arc
+
+			local pts_arc_1 = get_arc  longueur:ptr_params.longueur	rayon:ptr_params.arc_rayon		norm_dir:norm_dir	pt_origine:pt_4	
+			--- la face au dessus de la baie --------------
+			ptr_geo.face 		( pts_arc_1 + #(	pts_ids[6], 		id_ptAccroche_3 ))		matID:#mur 
+			
+			--- la face au fond de  l'arc --------------
+			local pts_arc_2 = get_arc  longueur:ptr_params.longueur	rayon:ptr_params.arc_rayon		norm_dir:norm_dir	pt_origine:(pt_10	 - vec_men_ep  )
+			local pts_arc_2_inv = for i = pts_arc_2.count to 1 by	-1	collect	pts_arc_2[i]
+			ptr_geo.face 	 pts_arc_2_inv 	matID:#mur 
+			
+			
+			---- epaisseur de l'arc ----------
+			for i = 1 to pts_arc_1.count - 1 do (
+				
+			local face_deLarc = ptr_geo.face 	#(pts_arc_1[i+1], pts_arc_1[i ], pts_arc_2[i], pts_arc_2[i+1])		matID:#mur   smGrp:13
+-- 			format  "face_deLarc :%\n	" (face_deLarc	)
+-- 			format  "polyop.getFaceSmoothGroup :%\n	" (polyop.getFaceSmoothGroup _plug.delegate	 face_deLarc	)
+			)
+			
+			
+			
+		) else (
+		---- construction san arc ------------
+			-- face horizontale retombée -----
+			ptr_geo.face 		#(	pts_ids[10], 	pts_ids[9], 		pts_ids[5], 		pts_ids[4] )				matID:#mur 
+			-- face verticale retombée -----
+			ptr_geo.face 		#(	pts_ids[4], 		pts_ids[5], 		pts_ids[6], 		id_ptAccroche_3 )		matID:#mur 
+			
+		)
 		ptr_geo.face 		#(	pts_ids[3], 		pts_ids[7], 		pts_ids[10],   	pts_ids[4] )				matID:#mur 
 		ptr_geo.face 		#(	pts_ids[8], 		pts_ids[2], 		pts_ids[5],   		pts_ids[9] )				matID:#mur 
 		
 		
-		
-		local onCreer_menuiserie_si_sequenceVide = true
 		
 		-------	  MENUISERIE -	CADRE 	---------------------------------------------------------------------------------------------------------------		
 		
@@ -511,21 +603,26 @@ fn compo_fnConstruire  		_plug			_ptsIDs_accroche		norm_dir:		this: 	onConstruit
 		
 		
 		--- si besoin on fait la menuiserie du bas	et le vitrage	---------
-		if sequence.count == 0 and 	onCreer_menuiserie_si_sequenceVide		then (
-			--- menuiserie du bas ------------
-			local ptTmp					=	pts_baie[1]  +  vec_men_lrg + vec_men_ht
-			local vecTMP_longBas 	= vecTMP_long - 2*vec_men_lrg
-			ptr_geo.tube		ptTmp		vecTMP_longBas		-vec_men_ht		vec_men_ep				matID:#menuiserie 
-			
-			--- menuiserie de droite	------------
-			local ptTmp			=	pts_baie[3]  -  vec_men_lrg - vec_men_ht  - vec_volet_empriseVert
-			ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg		vec_men_ep				matID:#menuiserie 	
-			
-			--- vitrage	------------
-			local ptTmp					=	pts_baie[1]  +  vec_men_lrg + vec_men_ht + ( (vec_men_ep - vec_vitrage_ep )/ 2 )
-			local vecTMP_htVitr		= vecTMP_ht 	- 	vec_men_ht 
-			ptr_geo.tube		ptTmp		vecTMP_htVitr		vecTMP_longBas	vec_vitrage_ep				matID:#vitrage 
-			
+		if sequence.count == 0 then (
+			if onCreer_menuiserie_si_sequenceVide		then (
+				ptr_geo.face 		#(	pts_ids[7], 	pts_ids[8], 		pts_ids[9], 		pts_ids[10] )				matID:#mur 
+				
+				--- menuiserie du bas ------------
+				local ptTmp					=	pts_baie[1]  +  vec_men_lrg + vec_men_ht
+				local vecTMP_longBas 	= vecTMP_long - 2*vec_men_lrg
+				ptr_geo.tube		ptTmp		vecTMP_longBas		-vec_men_ht		vec_men_ep				matID:#menuiserie 
+				
+				--- menuiserie de droite	------------
+				local ptTmp			=	pts_baie[3]  -  vec_men_lrg - vec_men_ht  - vec_volet_empriseVert
+				ptr_geo.tube		ptTmp		-vecTMP_ht		vec_men_lrg		vec_men_ep				matID:#menuiserie 	
+				
+				--- vitrage	------------
+				local ptTmp					=	pts_baie[1]  +  vec_men_lrg + vec_men_ht + ( (vec_men_ep - vec_vitrage_ep )/ 2 )
+				local vecTMP_htVitr		= vecTMP_ht 	- 	vec_men_ht 
+				ptr_geo.tube		ptTmp		vecTMP_htVitr		vecTMP_longBas	vec_vitrage_ep				matID:#vitrage 
+				
+			)	else 
+				ptr_geo.face 		#(	pts_ids[7], 	pts_ids[8], 		pts_ids[9], 		pts_ids[10] )				matID:#mur 
 		)  else  (
 		
 			
