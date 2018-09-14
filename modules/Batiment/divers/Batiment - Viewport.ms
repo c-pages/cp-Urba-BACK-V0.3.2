@@ -16,6 +16,7 @@ struct 	str_bat_VP 		(
 				
 				local surface_pts 	= 	nd.core.get_surface_points		()
 				
+					
 					local ptID = 0 
 					while ptID <  surface_pts.count do (
 						ptID += 1
@@ -27,8 +28,8 @@ struct 	str_bat_VP 		(
 						local vec_dalle				=	[0,0,1] * nd.const_dalle_epaisseur
 						local vec_decallage		=	[0,0,1] * 300
 	
-						local pt 						= surface_pts[ptID] --*  nd.transform 
-						local pt_suivant 			= surface_pts[ptID_suivant] --*  nd.transform  
+						local pt 						= surface_pts[ptID] 	*  nd.transform 
+						local pt_suivant 			= surface_pts[ptID_suivant] *  nd.transform  
 						local longueur_facade 	= ( (floor ( ( distance pt pt_suivant ) * 10 ) ) / 10 )
 						local txt_affichage 		= "  " + longueur_facade as string + " cm"
 						
@@ -101,8 +102,8 @@ struct 	str_bat_VP 		(
 						local vec_dalle				=	[0,0,1] * nd.const_dalle_epaisseur
 						local vec_decallage		=	[0,0,1] * 300
 	
-						local pt 						= surface_pts[ptID] --*  nd.transform 
-						local pt_suivant 			= surface_pts[ptID_suivant] --*  nd.transform  
+						local pt 						= surface_pts[ptID] *  nd.transform 
+						local pt_suivant 			= surface_pts[ptID_suivant] *  nd.transform  
 						local longueur_facade 	= ( (floor ( ( distance pt pt_suivant ) * 10 ) ) / 10 )
 -- 						local txt_affichage 		= "  " + longueur_facade as string + " cm"
 						
