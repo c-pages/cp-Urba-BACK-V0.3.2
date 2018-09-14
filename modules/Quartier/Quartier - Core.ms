@@ -164,6 +164,8 @@ struct str_quartier_core (
 		),
 		fn initialiser 	_plug	= (
 			debug "initialiser"
+			debug "_plug" var:_plug
+			
 			m_plug = _plug
 			mgr_geo.initialiser	_plug			
 			
@@ -877,7 +879,7 @@ struct str_quartier_core (
 					
 					--- maj du relief -----------
 					appliquer_relief 	bat 
-					
+					seed (timestamp())
 					bat.affiche_asProxy 		= 	m_plug.affiche_asProxy
 					local nbr_etages 		= 	_typo.batiments_nbr_etages[ _id_model ]	 	+ random 0 ( _typo.batiments_nbr_etagesPlus[ _id_model ] ) 
 					local ht_etages 			= 	_typo.batiments_ht_etages[ _id_model ]		+ random 0. ( _typo.batiments_ht_etages_variations[ _id_model ] ) 

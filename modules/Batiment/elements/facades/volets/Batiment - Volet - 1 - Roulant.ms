@@ -88,11 +88,13 @@ fn compo_fnConstruire  	_plug		pt_haut		norm_dir:		 		dist_hauteur:				onConstru
 		local vec_decallage_volet	=	norm_prof * 3
 		
 		
+-- 		seed _plug.alea_seed
 		
 		
 		--- gestion du hazard -------
 		local test_closVolet = random 0 100 <  _plug.alea_volet_clos_proba
 		local vec_clos_volet = [0,0,0] -- *  vec_volet_hauteur
+-- 		seed _plug.alea_seed
 		if  test_closVolet do
 			vec_clos_volet = [0,0,1] * vec_volet_hauteur * (random 	_plug.alea_volet_clos_min 		_plug.alea_volet_clos_max) / 100
 

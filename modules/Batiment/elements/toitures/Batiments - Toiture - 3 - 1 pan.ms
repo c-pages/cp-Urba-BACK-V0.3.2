@@ -7,6 +7,8 @@
 	
 
 
+
+
 --- parametres de base	-----------------------------
 toiture_nom 	= "1 pan"	
 toiture_type	=	#pan1
@@ -19,6 +21,8 @@ struct toiture_params	(
 	orientation				=	0,
 	debord					= 50.,
 	epaisseur 				= 15,
+	
+	elements 				=	#(),
 	
 	fn VP_afficher 	nd	surface_pts	z	=(
 		
@@ -98,31 +102,50 @@ struct toiture_params	(
 	
 )
 --- les rollout du composant	---------
-rollout toiture_dialog "Paramètres"  width:215 height:115
+rollout toiture_dialog "Paramètres" width:215 height:284
 (
 	local m_plug
 	local m_compo
 	local m_rolloutP
 	
-	label 'lbl_pente' "Pente (°):" pos:[9,10] width:61 height:13 align:#left
-	spinner 'spn_pente' "" pos:[133,9] width:70 height:16 range:[0.001,70,0] type:#float scale:1 align:#left
-	label 'lbl_decallage' "Décallage (z)" pos:[9,26] width:63 height:13 align:#left
-	spinner 'spn_decallage' "" pos:[133,25] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
-	label 'lbl_orientation' "Orientation (°):" pos:[9,42] width:70 height:13 align:#left
-	spinner 'spn_orientation' "" pos:[133,41] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
+	label 'lbl_pente' "Pente (°):" pos:[9,2] width:61 height:13 align:#left
+	spinner 'spn_pente' "" pos:[133,1] width:70 height:16 range:[0.001,70,0] type:#float scale:1 align:#left
+	label 'lbl_decallage' "Décallage (z)" pos:[9,18] width:63 height:13 align:#left
+	spinner 'spn_decallage' "" pos:[133,17] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
+	label 'lbl_orientation' "Orientation (°):" pos:[9,34] width:70 height:13 align:#left
+	spinner 'spn_orientation' "" pos:[133,33] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
 	
 	
-	label 'lbl_debord' "Debord" pos:[9,58] width:63 height:13 align:#left
-	spinner 'spn_debord' "" pos:[133,57] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
-	label 'lbl_epaisseur' "Epaisseur" pos:[9,74] width:70 height:13 align:#left
-	spinner 'spn14' "" pos:[133,73] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
+	label 'lbl_debord' "Debord" pos:[9,50] width:63 height:13 align:#left
+	spinner 'spn_debord' "" pos:[133,49] width:70 height:16 range:[0,10000,0] type:#worldunits scale:1 align:#left
+	label 'lbl_epaisseur' "Epaisseur" pos:[9,66] width:70 height:13 align:#left
+	spinner 'spn_epaisseur' "" pos:[133,65] width:70 height:16 range:[-360,360,0] type:#float scale:1 align:#left
 	
 	
+	
+	listbox 'lbx_elements' "" pos:[9,117] width:201 height:4 align:#left
+	button 'btn_elements_nouveau' "Nouv." pos:[9,101] width:35 height:16 align:#left
+	button 'btn_elements_supprimer' "Supp." pos:[176,101] width:35 height:16 align:#left
+	GroupBox 'grp_elements' "Elements" pos:[2,83] width:219 height:97 align:#left
 	
 	fn actualiser =(
-		spn_pente.value 	= 	m_compo.params.pente
--- 		edt_nom.text 			=	m_compo.nom
+		
+		lbx_elements.items 						= for elem in m_compo.params.elements collect elem.nom		
+		
+		
+-- 		m_core = m_rolloutP.m_core
+		
+		spn_pente.value 				= 	m_compo.params.pente
+		spn_orientation.value 		= 	m_compo.params.orientation
+		spn_decallage.value 		= 	m_compo.params.decalage_hauteur
+		spn_debord.value 			= 	m_compo.params.debord
+		spn_epaisseur.value 		= m_compo.params.epaisseur
+		
+		
+		
+		
 	)
+
 
 	on spn_pente changed val do
 	(
@@ -144,11 +167,21 @@ rollout toiture_dialog "Paramètres"  width:215 height:115
 			m_compo.params.debord		= val
 		m_rolloutP.changer_un_truc ()
 		)
-	on spn14 changed val do
+	on spn_epaisseur changed val do
 	(
 			m_compo.params.epaisseur		= val
 		m_rolloutP.changer_un_truc ()
 		)
+	on lbx_elements selected _index do
+		actualiser ()
+	on btn_elements_nouveau pressed do
+		m_plug.core.get_menu_contructeur  #toitElements
+	on btn_elements_supprimer pressed do
+	(
+		deleteItem 		m_compo.params.elements		lbx_elements.selection
+		actualiser ()
+		m_rolloutP.changer_un_truc ()
+	)
 )
 --- la fonction de construction	---------
 fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
@@ -269,6 +302,30 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 			ptr_geo.biseauter	faceDessus 	0.0 	toiture_debord
 			ptr_geo.extruder	faceDessus 	toiture_epaisseur
 
+			
+			
+			
+			
+			
+			
+			---- les elements -----------
+			if  this.params.elements.count > 0 do (
+				local face_center = polyop.getFaceCenter  	ptr_plug.delegate  faceDessus
+				local faceNormal = polyop.getFaceNormal  	ptr_plug.delegate  faceDessus
+				
+				local mgr_surface	= _plug.core.get_mgr_surface ()
+				
+				local mtrx_principale 	= mgr_surface.get_axePrincipal ()
+				
+				local transf_insertion		=	mtrx_principale * ( transMatrix face_center )  
+				
+				
+				for elem in this.params.elements do
+					elem.construire	 	ptr_plug			surface_points  	transformation:transf_insertion
+			)
+			
+			
+			
 		)	---   FIN CONTRUCTION  NORMAL -----------------
 		
 		
@@ -322,7 +379,6 @@ _str_contructeur  	tooltip:toiture_tooltip		nom:toiture_nom	type:toiture_type	pa
 ) ----	FileIn ----
 
 
-	
 	
 	
 	

@@ -69,6 +69,9 @@ struct str_mgr_trimesh (
 		local datas_pts = filterString 	donnees[1] 	separateur_items
 		local pts = for data in datas_pts collect ( execute data )
 		
+		
+		
+		/* 
 		---- mise a la bonne taille du model ----------
 		for IDvert 	in 	( _params.verts_Gauche as array ) do
 			pts[ IDvert ] +=  [500,0,0] 	- [1,0,0]  * _params.largeur / 2
@@ -81,7 +84,7 @@ struct str_mgr_trimesh (
 -- 		for IDvert 	in 	( _params.verts_Arriere as array ) do
 -- 			pts[ IDvert ] +=  [0, -1000,0] 	+ [0,1,0]  * _params.longueur / 2
 		
-		
+		 */
 		
 		
 		
@@ -129,14 +132,14 @@ struct str_mgr_trimesh (
 
 
 
-/* 
+ /* 
 
 popo = str_mgr_trimesh ()
 
 data3D = popo.getdatas $
 
-popo.creer_objet 	data3D
+-- popo.creer_objet 	data3D
 
 
- */
+  */
 

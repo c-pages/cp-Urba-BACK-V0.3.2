@@ -21,12 +21,16 @@ struct toiture_params	(
 	
 	debord					= 15.,
 	epaisseur 				= 15,
+	
+	elements 				=	#(),
+	
+	
 	fn VP_afficher 	nd	surface_pts	z	=()
 	
 )
 
 --- les rollout du composant	---------
-rollout toiture_dialog "Paramètres"  width:180 height:128
+rollout toiture_dialog "Paramètres" width:243 height:230
 (
 	local m_plug
 	local m_compo
@@ -46,12 +50,24 @@ rollout toiture_dialog "Paramètres"  width:180 height:128
 	label 'lbl6' "Décallage (X)" pos:[9,42] width:63 height:13 align:#left
 	spinner 'spn_decallage_larg' "" pos:[92,41] width:70 height:16 range:[-10000,10000,0] type:#worldunits scale:1 align:#left
 	
+	
+	
+	listbox 'lbx_elements' "" pos:[9,142] width:201 height:4 align:#left
+	button 'btn_elements_nouveau' "Nouv." pos:[9,126] width:35 height:16 align:#left
+	button 'btn_elements_supprimer' "Supp." pos:[176,126] width:35 height:16 align:#left
+	GroupBox 'grp_elements' "Elements" pos:[2,108] width:219 height:97 align:#left
+	
+	
+	
 	fn actualiser =(
 		m_core = m_rolloutP.m_core
 		
-		spn_pente.value 			= 	m_compo.params.pente
-		spn_orientation.value 	= 	m_compo.params.orientation
+		lbx_elements.items 						= for elem in m_compo.params.elements collect elem.nom		
+		
+		spn_pente.value 				= 	m_compo.params.pente
+		spn_orientation.value 		= 	m_compo.params.orientation
 		spn_decallage.value 		= 	m_compo.params.decalage_hauteur
+		spn_decallage_larg.value 	= 	m_compo.params.decalage_largeur
 		spn_debord.value 			= 	m_compo.params.debord
 		spn_epaisseur.value 		= 	m_compo.params.epaisseur
 	)
@@ -92,12 +108,22 @@ rollout toiture_dialog "Paramètres"  width:180 height:128
 		
 			
 			m_compo.params.decalage_largeur		= decallage_largeur
--- 			spn_decallage_larg.value = decallage_largeur
+	-- 			spn_decallage_larg.value = decallage_largeur
 			
 			m_rolloutP.changer_un_truc ()
 			actualiser ()
 			
 		)
+	on lbx_elements selected _index do
+		actualiser ()
+	on btn_elements_nouveau pressed do
+		m_plug.core.get_menu_contructeur  #toitElements
+	on btn_elements_supprimer pressed do
+	(
+		deleteItem 		m_compo.params.elements		lbx_elements.selection
+		actualiser ()
+		m_rolloutP.changer_un_truc ()
+	)
 )
 --- la fonction de construction	---------
 fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
@@ -328,6 +354,50 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 
 			ptr_geo.biseauter	facesDessus 	0.0 	toiture_debord
 			ptr_geo.extruder	facesDessus 	toiture_epaisseur
+			
+			
+			
+			
+			seed _plug.alea_seed
+			
+			
+			---- les elements -----------
+			if  this.params.elements.count > 0 do (
+				
+				local pan_cible = random 1 2				
+				local elem_cible = random 0 this.params.elements.count
+				if elem_cible > 0 do (
+					---- Pan 1 --------------
+					local face_center = polyop.getFaceCenter  	ptr_plug.delegate  facesDessus[pan_cible]
+					local faceNormal = polyop.getFaceNormal  	ptr_plug.delegate  facesDessus[pan_cible]
+					
+					local mgr_surface		= _plug.core.get_mgr_surface ()
+					local mtrx_principale 	= mgr_surface.get_axePrincipal ()
+					local transf_insertion	=	mtrx_principale * ( transMatrix face_center )
+					
+					
+					this.params.elements[elem_cible].construire	 	ptr_plug			surface_points  	transformation:transf_insertion
+	-- 				for elem in this.params.elements do
+	-- 					elem.construire	 	ptr_plug			surface_points  	transformation:transf_insertion
+				
+				)
+				---- Pan 2 --------------
+				elem_cible = random 0 this.params.elements.count
+				if elem_cible > 0 do (
+					pan_cible = if pan_cible == 1 then 2 else 1
+					local face_center 	= polyop.getFaceCenter  	ptr_plug.delegate  facesDessus[pan_cible]
+					local faceNormal 		= polyop.getFaceNormal  	ptr_plug.delegate  facesDessus[pan_cible]
+					
+					local mgr_surface			= _plug.core.get_mgr_surface ()
+					local mtrx_principale 		= mgr_surface.get_axePrincipal ()
+					local transf_insertion		=	mtrx_principale * ( transMatrix face_center )
+					
+					this.params.elements[elem_cible].construire	 	ptr_plug			surface_points  	transformation:transf_insertion
+	-- 				for elem in this.params.elements do
+	-- 					elem.construire	 	ptr_plug			surface_points  	transformation:transf_insertion
+				)
+			)
+			
 			
 		
 		)	---   FIN CONTRUCTION  NORMAL -----------------

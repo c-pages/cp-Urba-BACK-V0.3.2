@@ -30,6 +30,7 @@ M
  6 septembre 2018
  #### __Batiment__
  - [x] Correction du problème de position du batiment à l'assignation de son contour.
+ - [x] Integration de nouveaux éléments pour toiture ( antenne, cheminets )
 
 
  #### __Quartier__

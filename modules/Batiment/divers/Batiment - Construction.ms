@@ -317,10 +317,10 @@ struct str_construction (
 -- 						debug "bat_edition" var:bat_edition
 						
 						if proxy then
-							creer_bat_modeEdition 		&zCourant		bat_edition
+							creer_bat_modeEdition 			&zCourant		bat_edition
 						else (
 							---- ...  et on construit le batiment -----
-							creer_ssBassement 			&zCourant		bat_edition:bat_edition
+							creer_ssBassement 				&zCourant		bat_edition:bat_edition
 							creer_etages						&zCourant		bat_edition:bat_edition
 							creer_toiture						&zCourant		bat_edition:bat_edition
 						)
@@ -330,7 +330,7 @@ struct str_construction (
 						local chrono_debut = timeStamp ()
 						
 						---- ...  et on construit le batiment -----
-						creer_ssBassement 			&zCourant
+						creer_ssBassement 				&zCourant
 						creer_etages						&zCourant
 						creer_toiture						&zCourant
 					
@@ -339,7 +339,7 @@ struct str_construction (
 						
 					) else (
 						---- ...  et on construit le proxy -----
-						creer_ssBassement 			&zCourant
+						creer_ssBassement 				&zCourant
 						creer_proxy 						&zCourant
 					)
 					

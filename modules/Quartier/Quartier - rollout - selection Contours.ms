@@ -72,7 +72,7 @@
 					
 				)
 				fn actualiser_liste_scene =(
-					liste_scene		=	for obj in shapes where findItem	liste_contours 	obj	== 0	and obj.isHidden	== false	or chk_hidden.checked		collect  obj
+					liste_scene		=	for obj in shapes where not chk_hidden.checked	and findItem	liste_contours 	obj	== 0	and obj.isHiddenInVpt	== false	or chk_hidden.checked	 and findItem	liste_contours 	obj	== 0		collect  obj
 				)
 				
 				

@@ -9,9 +9,9 @@
 
 
 --- parametres de base	-----------------------------
-toiture_nom 	= "Terrasse"	
-toiture_type	=	#terrasse
-toiture_toolTip =	"..."
+toiture_nom 		= "Terrasse"	
+toiture_type		=	#terrasse
+toiture_toolTip 	=	"..."
 
 --- les parametres du composant	---------
 struct toiture_params	(
@@ -59,7 +59,7 @@ struct toiture_params	(
 		gw.setColor	#line		yellow
 		gw.polyline pts_etage	true 
 	)
-					
+	
 )
 --- les rollout du composant	---------
 rollout toiture_dialog "Paramètres" width:230 height:374
@@ -75,10 +75,10 @@ rollout toiture_dialog "Paramètres" width:230 height:374
 	listbox 'lbx_elements' "" pos:[9,50] width:201 height:4 align:#left
 	button 'btn_elements_nouveau' "Nouv." pos:[9,34] width:35 height:16 align:#left
 	button 'btn_elements_supprimer' "Supp." pos:[176,34] width:35 height:16 align:#left
-	GroupBox 'grp17' "Elements" pos:[2,16] width:219 height:97 align:#left
+	GroupBox 'grp_elements' "Elements" pos:[2,16] width:219 height:97 align:#left
 	
 	
-	fn actualiser =(
+	fn actualiser 	=(
 		
 		lbx_elements.items 						= for elem in m_compo.params.elements collect elem.nom		
 		spn_htAcrotere.value 					= 	m_compo.params.acrotere_ht
@@ -87,17 +87,14 @@ rollout toiture_dialog "Paramètres" width:230 height:374
 	)
 
 	
-	on spn_htAcrotere changed val do
-	(
+	on spn_htAcrotere changed val do	(
 			m_compo.params.acrotere_ht		= val
 			m_rolloutP.changer_un_truc ()
 		)
 	on lbx_elements selected _index do
 		actualiser ()
 	on btn_elements_nouveau pressed do
-	(
 			m_plug.core.get_menu_contructeur  #toitElements
-		)
 	on btn_elements_supprimer pressed do
 	(
 		deleteItem 		m_compo.params.elements		lbx_elements.selection
@@ -134,7 +131,6 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 			local faceBase 	= ptr_geo.face		pts_accroches						matID:1
 			ptr_geo.set_matID 	faceBase	#mur 
 			
-			
 			--- l'acrotere --------
 			ptr_geo.biseauter	faceBase 	0		 -ep_murExt
 			ptr_geo.set_matID 	faceBase	#graviers 
@@ -149,7 +145,6 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 			ptr_geo.biseauter	faceAExtruder 	0		ep_couvertine
 			ptr_geo.extruder 	faceAExtruder 			ep_couvertine
 			
-				
 			---- les elements -----------
 			if  this.params.elements.count > 0 do (
 				local face_center = polyop.getFaceCenter  	ptr_plug.delegate  faceBase
@@ -158,8 +153,6 @@ fn toiture_fnConstruire  	_plug		pts_accroches		 this:		= (
 				local mgr_surface	= _plug.core.get_mgr_surface ()
 				
 				local mtrx_principale 	= mgr_surface.get_axePrincipal ()
-	-- 			format  "mtrx_principale.translationpart :%\n" mtrx_principale.translationpart
-				
 				
 				local transf_insertion		=	mtrx_principale * ( transMatrix face_center )  
 				
