@@ -28,10 +28,7 @@
 -------------------------------------------------------------------------------------------------------------------------------------------------
 --------------- PARAMETRES  ---------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------
-parameters params_global 						rollout:roll_global		(
-	
-	------- Surface		------------------
-	surface_node					type:#node 								 	ui:btn_pick_surface		animatable:false		invisibleInTV:true
+parameters params_general 						rollout:roll_general		(
 	
 	------- Etages			------------------
 	etages_nbre					type: #integer			default:1			/* ui:spn_nbres	 */		animatable:false		invisibleInTV:true
@@ -48,7 +45,7 @@ parameters params_global 						rollout:roll_global		(
 	
 )
 
-parameters params_facades 						rollout:roll_global	(
+parameters params_facades 						rollout:roll_facades	(
 	
 	---- générale -----------
 	facades_id 						type:#stringTab 	tabSize:0  		tabSizeVariable:true
@@ -110,7 +107,7 @@ parameters params_toiture 							(
 	
 )
 
-parameters params_interieur				rollout:roll_global					(
+parameters params_interieur				rollout:roll_general					(
 	interieur_use			type:#boolean			default:false	/* 	ui:chk_planchers	 */	animatable:false		invisibleInTV:true
 	
 )
@@ -140,7 +137,10 @@ parameters params_constantes 							(
 	
 	
 )
-parameters params_optimSurface				rollout:roll_optimSurface	(
+parameters params_surface				rollout:roll_surface	(
+	
+	------- Surface		------------------
+	surface_node					type:#node 								 	ui:btn_pick_surface		animatable:false		invisibleInTV:true
 	
 	------- Optimisations		------------------
 	optim_aplanir					type:#boolean			default:true		ui:chk_aplanir		animatable:false		invisibleInTV:true
@@ -156,7 +156,7 @@ parameters params_optimSurface				rollout:roll_optimSurface	(
 	optim_aligner_seuil			type:#float				default:50.			ui:spn_aligner		animatable:false		invisibleInTV:true
 	
 )
-parameters params_viewport				rollout:roll_global	(
+parameters params_viewport				rollout:roll_general	(
 	--- proxy_mode	-----
 	affiche_asProxy				type:#boolean			default:false	 ui:ckb_proxy	 	animatable:false		invisibleInTV:true
 	

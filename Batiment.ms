@@ -158,7 +158,7 @@ remap:#(#(#surface_node), #(#surface_node))
 	local core = str_batiment_core  	()
 
 	--------------- PARAMETRES  et ROLLOUTS ----------------------------------------------------------------------------------------------------------------------
-	local roll_global, roll_toiture, roll_facades 										----, roll_niveaux,  roll_presets,   roll_infos, roll_trace
+	local roll_general, roll_toiture, roll_facades 										----, roll_niveaux,  roll_presets,   roll_infos, roll_trace
 	include "$userScripts\\cp-Urba\\Modules\\Batiment\\rollouts\\Batiment - rollouts.ms"
 	include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - rollout - A propos.ms" 
 
@@ -191,7 +191,7 @@ remap:#(#(#surface_node), #(#surface_node))
 		core.actualiser ()
 	)
 	fn actualiser_rollouts =(
-		roll_global.actualiser ()
+		roll_general.actualiser ()
 	)
 
 

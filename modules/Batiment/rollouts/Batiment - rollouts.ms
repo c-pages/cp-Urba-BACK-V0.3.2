@@ -32,7 +32,7 @@ include "$userScripts\\cp-Urba\\modules\\Batiment\\divers\\Batiment - Parametres
 -------------------------------------------------------------------------------------------------------------------------------------------------
 --------------- ROLLOUT  --------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------
-/*
+
 rollout roll_presets 			"Presets" 		rolledUp:true		(
 
 
@@ -60,7 +60,7 @@ rollout roll_presets 			"Presets" 		rolledUp:true		(
 		core.preset_charger ()
 
 ) -- fin rllout presets -*
-*/
+/* 
 rollout roll_global "Global" width:195 height:341
 (
 
@@ -91,17 +91,17 @@ rollout roll_global "Global" width:195 height:341
 
 
 
-/*
-	--- Global ------
-	GroupBox 'grp_global' "Etages :" pos:[4,40] width:162 height:51 align:#left
--- 	spinner 'spn_rotation_axeP' "" pos:[88,87] width:48 height:16 range:[-360,360,0] type:#float scale:1 align:#left
--- 	label 'lbl_axeP' "Orientation:" pos:[10,87] width:59 height:15 align:#left
--- 	button 'btn_rotation' "+90" pos:[137,87] width:24 height:16 align:#left
-	label 'lbl_nbre' "Nbre. d'étages:" pos:[10,56] width:79 height:15 align:#left
-	spinner 'spn_nbres' "" pos:[88,55] width:72 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
-	spinner 'spn_hauteur' "" pos:[88,71] width:72 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
-	label 'lbl_hauteur' "Hauteur :" pos:[10,72] width:76 height:15 align:#left
-	 */
+-- 		
+-- 			--- Global ------
+-- 			GroupBox 'grp_global' "Etages :" pos:[4,40] width:162 height:51 align:#left
+-- 		-- 	spinner 'spn_rotation_axeP' "" pos:[88,87] width:48 height:16 range:[-360,360,0] type:#float scale:1 align:#left
+-- 		-- 	label 'lbl_axeP' "Orientation:" pos:[10,87] width:59 height:15 align:#left
+-- 		-- 	button 'btn_rotation' "+90" pos:[137,87] width:24 height:16 align:#left
+-- 			label 'lbl_nbre' "Nbre. d'étages:" pos:[10,56] width:79 height:15 align:#left
+-- 			spinner 'spn_nbres' "" pos:[88,55] width:72 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+-- 			spinner 'spn_hauteur' "" pos:[88,71] width:72 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+-- 			label 'lbl_hauteur' "Hauteur :" pos:[10,72] width:76 height:15 align:#left
+-- 			 
 
 	--- Facades -----
 
@@ -116,19 +116,19 @@ rollout roll_global "Global" width:195 height:341
 
 		btn_coller.enabled 			= urba_clipboard_batiment != ""
 		ckb_editeur.checked 	= core.editeur_estOuvert ()
-		/*
-		lbx_facades.items 						=  facades_nom as array
+		
+-- 		lbx_facades.items 						=  facades_nom as array
 
-		btn_supprimerFacade.enabled	=	lbx_facades.selection != 0
-		btn_editer_facade.enabled			=	lbx_facades.selection != 0
-		btn_dupliquer_facade.enabled	=	lbx_facades.selection != 0
+-- 		btn_supprimerFacade.enabled	=	lbx_facades.selection != 0
+-- 		btn_editer_facade.enabled			=	lbx_facades.selection != 0
+-- 		btn_dupliquer_facade.enabled	=	lbx_facades.selection != 0
 
-		btn_editer_facade.checked			=	core.facadeEditeur_estOuvert ()
-		btn_editer_toiture.enabled 		=	toiture_params != ""
+-- 		btn_editer_facade.checked			=	core.facadeEditeur_estOuvert ()
+-- 		btn_editer_toiture.enabled 		=	toiture_params != ""
 
-		ddl_toiture.items						=	core.get_toiture_constructeursNoms ()
-		ddl_toiture.selection 					= 	core.get_toiture_index ()
-		 */
+-- 		ddl_toiture.items						=	core.get_toiture_constructeursNoms ()
+-- 		ddl_toiture.selection 					= 	core.get_toiture_index ()
+		 
 	)
 
 
@@ -175,20 +175,27 @@ rollout roll_global "Global" width:195 height:341
 		)
 	on ckb_proxy changed state do
 		core.actualiser ()
-)
-rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
+) */
+rollout roll_surface "Surface" width:162 height:210
+(
 
-	checkbox 'chk_aplanir' "Aplanir" pos:[6,34] width:62 height:13 align:#left
-	checkbox 'chk_ortho' "Orthonorm." pos:[6,19] width:76 height:13 align:#left
-	spinner 'spn_aplanir' "" pos:[87,33] width:80 height:16 range:[0,40,0] align:#left
-	checkbox 'chk_souder' "Souder" pos:[6,4] width:55 height:13 align:#left
-	spinner 'spn_souder' "" pos:[87,3] width:80 height:16 range:[0,100,0] type:#worldunits align:#left
-	spinner 'spn_ortho' "" pos:[87,18] width:80 height:16 range:[0,100,0] type:#float align:#left
 
-	checkbox 'chk_aligner' "Aligner" pos:[6,49] width:50 height:13 align:#left
-	spinner 'spn_aligner' "" pos:[87,48] width:80 height:16 range:[0,100,0] align:#left
+	fn shape_filt 		obj = superclassof obj == shape
 
-	checkbox 'chk_projeter' "Projeter" pos:[6,64] width:75 height:13 align:#left
+	--- Surface ------
+	pickbutton 'btn_pick_surface' "Pick shape" pos:[7,5] width:152 height:20 filter:shape_filt toolTip:"Le shape à utiliser comme surface de base pour la création du bâtiment." autoDisplay:true align:#left
+	
+	checkbox 'chk_aplanir' "Aplanir" pos:[6,61] width:62 height:13 align:#left
+	checkbox 'chk_ortho' "Orthonorm." pos:[6,46] width:76 height:13 align:#left
+	spinner 'spn_aplanir' "" pos:[87,60] width:80 height:16 range:[0,40,0] align:#left
+	checkbox 'chk_souder' "Souder" pos:[6,31] width:55 height:13 align:#left
+	spinner 'spn_souder' "" pos:[87,30] width:80 height:16 range:[0,100,0] type:#worldunits align:#left
+	spinner 'spn_ortho' "" pos:[87,45] width:80 height:16 range:[0,100,0] type:#float align:#left
+
+	checkbox 'chk_aligner' "Aligner" pos:[6,76] width:50 height:13 align:#left
+	spinner 'spn_aligner' "" pos:[87,75] width:80 height:16 range:[0,100,0] align:#left
+
+	checkbox 'chk_projeter' "Projeter" pos:[6,91] width:75 height:13 align:#left
 
 	fn actualiser =(
 
@@ -206,35 +213,293 @@ rollout roll_optimSurface 	"Surface" 		rolledUp:true		(
 
 	)
 
-	on roll_surface 	open 				do	actualiser ()
 
-	on chk_aplanir 	changed state  		do	(
-		core.actualiser ()
-		actualiser ()
-	)
-	on chk_ortho 		changed state  	do	(
-		core.actualiser ()
-		actualiser ()
-	)
-	on chk_souder 	changed state  		do	(
-		core.actualiser ()
-		actualiser ()
-	)
-	on chk_aligner 	changed state  		do	(
-		core.actualiser ()
-		actualiser ()
-	)
-	on chk_projeter 	changed state  	do	(
-		core.actualiser ()
-		actualiser ()
-	)
 
-	on spn_aplanir 	changed state  		do	core.actualiser ()
-	on spn_souder	changed state  		do	core.actualiser ()
-	on spn_ortho	 	changed state  		do	core.actualiser ()
-	on spn_aligner 	changed state  		do	core.actualiser ()
+	on btn_pick_surface picked _shape do
+		core.assigner_surface 		$		_shape
 
+	on chk_aplanir changed state  		do
+	(
+			core.actualiser ()
+			actualiser ()
+		)
+	on chk_ortho changed state  	do
+	(
+			core.actualiser ()
+			actualiser ()
+		)
+	on spn_aplanir changed state  		do
+		core.actualiser ()
+	on chk_souder changed state  		do
+	(
+			core.actualiser ()
+			actualiser ()
+		)
+	on spn_souder changed state  		do
+		core.actualiser ()
+	on spn_ortho changed state  		do
+		core.actualiser ()
+	on chk_aligner changed state  		do
+	(
+			core.actualiser ()
+			actualiser ()
+		)
+	on spn_aligner changed state  		do
+		core.actualiser ()
+	on chk_projeter changed state  	do
+	(
+			core.actualiser ()
+			actualiser ()
+		)
 )
+rollout roll_general "Général" width:280 height:556
+(
+	local m_rolloutP
+	local m_plug
+	local m_core
+	
+	local m_bat
+	
+	--- Global ------
+	GroupBox 'grp_etages' "Etages :" pos:[4,-3] width:160 height:190 align:#left	
+	
+	
+	
+	
+	label 'lbl_nbre' "Nombre:" pos:[17,16] width:53 height:15 align:#left
+	spinner 'spn_nbres' "" pos:[86,15] width:72 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+	label 'lbl_hauteur' "Hauteur :" pos:[17,32] width:76 height:15 align:#left
+	spinner 'spn_hauteur' "" pos:[86,30] width:72 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#left
+	
+	--- etages specifiques -----------
+	GroupBox 'grp_etages_specifiques' "Etages spécifiques" pos:[10,49] width:148 height:131 align:#left
+	button 'btn_etages_nouveau' "Nouv." pos:[17,65] width:35 height:16 toolTip:"Ajouter	étages spécifiques" align:#left
+	button 'btn_etages_supprimer' "Sup." pos:[117,64] width:35 height:16 toolTip:"Supprimer étages spécifiques" align:#left	
+	
+	
+	
+	listbox 'lbx_etages_specifiques' "" pos:[17,81] width:135 height:4 align:#left
+	
+	label 'lbl_etage_specifiques' "Etages :" pos:[17,139] width:45 height:19 align:#left
+	spinner 'spn_etageMin_specifiques' "" pos:[63,142] width:40 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#left
+	label 'lbl_hauteur_specifiques' "Hauteur :" pos:[17,157] width:55 height:22 align:#left
+	spinner 'spn_etageMax_specifiques' "" pos:[115,142] width:40 height:16 range:[0,1e+13,0] type:#integer align:#left
+	checkbutton 'ckb_etageMax_specifiques' ">" pos:[100,141] width:16 height:16 align:#left
+	spinner 'spn_hauteur_specifiques' "" pos:[63,158] width:92 height:16 range:[0,1e+13,0] type:#worldunits align:#left
+	
+	---- Divers ------
+	GroupBox 'grp_divers' "Divers" pos:[4,200] width:160 height:60 align:#left
+	label 'lbl_decallageZ' "Décallage (Z):" pos:[17,217] width:92 height:18 align:#left
+	spinner 'spn_decallageZ' "" pos:[86,217] width:72 height:16 range:[-1e+13,1e+13,0] type:#worldunits scale:1 align:#left
+	checkbox 'chk_interieur' "Cloisons intèrieures" pos:[16,236] width:141 height:16 align:#left
+	
+	
+	checkbox 'ckb_proxy' "Affichage simplifié" pos:[4,262] width:161 height:19 align:#left
+	
+	
+	--- rollout------------------
+	fn actualiser =(
+		
+		m_bat			= m_rolloutP.m_batiment
+		
+		-------- global ------------------------
+		spn_nbres.value		=	m_bat.etages_nbre		
+		spn_hauteur.value		=	m_bat.etages_hauteur_global
+		
+		
+		-------- etages spécifiques --------------
+		--- affichage dans la liste-
+		local liste_affichage = #()
+		for i = 1 to m_bat.etages_min.count do (
+			local affichage = ""
+			affichage+= m_bat.etages_min[i] as string  
+			if m_bat.etages_max_use[i] do 
+				affichage+= " ---> " + m_bat.etages_max[i] as string 				
+			affichage+= " : " + m_bat.etages_hauteurs[i] as string  + "cm."			
+			append liste_affichage affichage
+		)
+		lbx_etages_specifiques.items = liste_affichage
+		
+		--- les boutons ------------
+		local enable_prop =  lbx_etages_specifiques.selection != 0
+		btn_etages_supprimer.enabled 	= enable_prop
+		
+		spn_etageMin_specifiques.enabled 	= enable_prop
+		lbl_etage_specifiques.enabled 		= enable_prop
+		spn_etageMax_specifiques.enabled	= enable_prop
+		lbl_hauteur_specifiques.enabled		= enable_prop
+		ckb_etageMax_specifiques.enabled	= enable_prop
+		spn_hauteur_specifiques.enabled 	= enable_prop
+		
+		if enable_prop do (
+			local index = lbx_etages_specifiques.selection 
+			spn_etageMin_specifiques.value					=	m_bat.etages_min[ index ] 
+			ckb_etageMax_specifiques.checked 			= m_bat.etages_max_use[ index ] 
+			spn_etageMax_specifiques.indeterminate	=	not ckb_etageMax_specifiques.checked
+			spn_etageMax_specifiques.enabled				=	ckb_etageMax_specifiques.checked
+			if  ckb_etageMax_specifiques.checked do 
+				spn_etageMax_specifiques.value				=	m_bat.etages_max[ index ] 
+			
+			spn_hauteur_specifiques.value					=	m_bat.etages_hauteurs[ index ] 
+			
+			spn_etageMax_specifiques.range.x = spn_etageMin_specifiques.value		
+		)
+		
+		
+	)
+	
+	fn initialiser  _roll_edit =(
+		m_rolloutP 	= _roll_edit
+		m_plug			= m_rolloutP.m_plug
+		m_core			= m_rolloutP.m_core
+		
+		spn_etageMax_specifiques.range.x = 0
+	)
+		
+		
+		
+		
+	---- donnees -----------------	
+	fn set_etage = (
+		m_bat.set_etage		lbx_etages_specifiques.selection 		\
+										spn_etageMin_specifiques.value			\
+										ckb_etageMax_specifiques.checked		\
+										spn_etageMax_specifiques.value			\
+										spn_hauteur_specifiques.value
+		m_rolloutP.changer_un_truc ()
+		actualiser ()
+	)
+		
+		
+	
+	
+	
+	
+	
+	
+		
+		
+	on spn_nbres changed val do
+	(
+			m_bat.etages_nbre		= val
+			m_rolloutP.changer_un_truc ()
+		)
+	on spn_hauteur changed val do
+	(
+			m_bat.etages_hauteur_global		= val
+			m_rolloutP.changer_un_truc ()
+		)
+	on btn_etages_nouveau pressed do
+	(
+			m_bat.ajouter_etage ()		
+			m_rolloutP.changer_un_truc ()
+			lbx_etages_specifiques.selection += 1
+			actualiser ()
+		)
+	on btn_etages_supprimer pressed do
+	(
+			if lbx_etages_specifiques.selection > 0 do (
+				m_bat.supprimer_etage		lbx_etages_specifiques.selection
+				m_rolloutP.changer_un_truc ()
+				if lbx_etages_specifiques.selection > lbx_etages_specifiques.items.count do
+					lbx_etages_specifiques.selection = lbx_etages_specifiques.items.count 
+				actualiser ()
+			)
+		)
+	on lbx_etages_specifiques selected val 		do
+		actualiser ()
+	on spn_etageMin_specifiques changed val 		do
+		set_etage ()
+	on spn_etageMax_specifiques changed val 		do
+		set_etage ()
+	on ckb_etageMax_specifiques changed state 	do
+		set_etage ()
+	on spn_hauteur_specifiques changed val 		do
+		set_etage ()
+	on spn_decallageZ changed val do
+	(
+			m_bat.decallage_z = val
+			m_rolloutP.changer_un_truc ()		
+			)
+	on chk_interieur changed state do
+	(
+			m_bat.interieur_use = state
+			m_rolloutP.changer_un_truc ()
+			)
+)
+
+rollout roll_facades "Façades" width:280 height:556
+(
+	checkbutton 'ckb_editeur' "Edition" pos:[7,7] width:160 height:30 align:#left -- highlightColor:(color 255 255 0)
+ -- highlightColor:(color 255 255 0)
+	
+)
+rollout sub_toiture "Toiture" width:557 height:427
+(
+
+	local m_rolloutP
+	local m_core
+	local m_plug
+	local m_bat
+	
+	label 'lbl_appliquerA' "Type :" pos:[7,6] width:32 height:15 align:#left
+	
+	dropdownList 'ddl_toiture' "" pos:[43,4] width:120 height:21 selection:3 align:#left
+	
+	subRollout 'subroll_parametres' "Parametres" pos:[7,27] width:155 height:209 align:#left
+	
+	
+	fn actualiser =(
+		
+		m_bat			= m_rolloutP.m_batiment
+		local index_toiture 	= m_bat.get_toiture_index		m_core	
+		ddl_toiture.selection 	= 	index_toiture
+		
+		local dialog_toiture = m_bat.toiture.get_dialog ()		
+		for x in subroll_parametres.rollouts do removeSubRollout subroll_parametres x
+		addSubRollout subroll_parametres 	dialog_toiture
+		
+		dialog_toiture.m_compo		= m_bat.toiture		
+		dialog_toiture.m_rolloutP	= m_rolloutP
+		dialog_toiture.m_plug		= m_plug
+		dialog_toiture.actualiser ()
+		
+-- 		btn_editer_toiture.enabled = mgr_toiture.a_desParametres		()
+		
+		
+		
+	)
+	
+
+	fn initialiser  _roll_edit =(
+		m_rolloutP 	= _roll_edit
+		m_plug			= m_rolloutP.m_plug
+		m_core			= m_rolloutP.m_core
+		
+		local mgr_toiture 			= m_core.get_mgr_toiture ()
+		local models_toiture 		= mgr_toiture.get_constructeurs ()
+		ddl_toiture.items 		=  ( for  model in models_toiture collect model.nom )
+	)
+	/* 
+	fn changer_taille_rollout 	_taille	=(
+		
+	) */
+	 
+	on ddl_toiture selected _val do
+	(
+			
+			
+			local nvl_toiture 			=	m_core.creer_toiture		_val
+			
+			
+			m_bat.toiture = nvl_toiture
+			
+			m_rolloutP.changer_un_truc ()
+			
+			actualiser ()
+		)
+)
+
 
 rollout roll_aleatoire "Hasard" width:162 height:237
 (
@@ -339,5 +604,3 @@ rollout roll_viewport "Viewport" width:162 height:204
 
 
 ) */
-	
-	
