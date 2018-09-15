@@ -4,12 +4,13 @@
 		mur 				= 	10,
 		menuiserie 		= 	20,
 		volet 			= 	25,
+		volet_LP			= 	26,
 		vitrage 			= 	30,
 		
 		-- toiture ----------------
 		toiture 			= 	40,
 		graviers			= 45,
-		metal				=	50,
+		metal			=	50,
 		
 		-- interieur ----------------
 		int_plafond		= 60,

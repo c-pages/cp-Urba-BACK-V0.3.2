@@ -101,17 +101,17 @@ struct str_quartier_core (
 								local id_contour = contours_ids[i]
 								local shp =  $.p_contours[ id_contour ]
 								
+								if isValidNode shp do (
 								
-								
-								couleur =  if coutours_gris then gray else white		
-								if typo == typo_active and typo.contours_valides[ id_contour ] do
-									couleur = yellow
-								
-								gw.setColor	#line		couleur
-								
-								local pts_shp	 = for i in 1 to numknots shp collect getknotPoint shp	1	i
-								gw.polyline pts_shp	true
-								
+									couleur =  if coutours_gris then gray else white		
+									if typo == typo_active and typo.contours_valides[ id_contour ] do
+										couleur = yellow
+									
+									gw.setColor	#line		couleur
+									
+									local pts_shp	 = for i in 1 to numknots shp collect getknotPoint shp	1	i
+									gw.polyline pts_shp	true
+								)
 							)
 						)
 					

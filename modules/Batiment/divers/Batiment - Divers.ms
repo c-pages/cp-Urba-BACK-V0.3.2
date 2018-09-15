@@ -685,7 +685,7 @@ struct str_shape_outils (
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 -- 	m_debug = true,
 	m_debug = false,
-	m_dbgPrefix ="urba | str_shape_outils",
+	m_dbgPrefix ="urba | str_shape_outils DIVERS",
 	fn debug 	_txt  var:	 param:    =(
 		try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 		catch ()
@@ -1213,7 +1213,7 @@ struct str_shape_outils (
 	public
 		
 		fn orthonormer 		&_pts	_seuil  =(
-			
+			debug"orthonormer"
 			
 			local mtrx_AP	= get_axePrincipal_mtrx 	_pts
 			local pts_result 	= deepcopy _pts
@@ -1329,61 +1329,26 @@ struct str_shape_outils (
 		
 		
 		
-		/* 
-		fn orthonormer 		&_pts	_seuil  =(
-			debug "orthonormer" 
-			local mtrx_AP = get_axePrincipal_mtrx 	_pts
-			local pt_result = deepcopy _pts
-			for i = 1 to _pts.count + 1  do (
-				if i > _pts.count do i = mod  i _pts.count
-				local j = i + 1
-				if j > _pts.count do j = mod j _pts.count 
-				local pt = _pts[i]	* inverse  mtrx_AP 
-				local pt_suivant = _pts[j] *  inverse mtrx_AP 
-				local vec_moyenne 
-				
-				debug "-----	i" var:i
-				debug "-----	j" var:j
-				debug "	estPignon _pts  i " var:(estPignon _pts  i  )
-				
-				
-				if   estPignon _pts  i  then (
-					local moyenneX = ( pt_suivant.x - pt.x ) /2					
-					vec_moyenne = [moyenneX,0,0] * _seuil / 100
-				) else  (
-					local moyenneY = ( pt_suivant.y - pt.y ) /2
-					vec_moyenne = [0,moyenneY,0] * _seuil / 100
-				) 
-				
-				pt 				= _pts[i]	* inverse  mtrx_AP  + vec_moyenne 
-				pt_suivant 	= _pts[j]	* inverse  mtrx_AP  - vec_moyenne 
-				
-				pt_result[i] = pt *   mtrx_AP 
-				pt_result[j] = pt_suivant  *   mtrx_AP 
--- 				_pts[i] = pt *   mtrx_AP 
--- 				_pts[j] = pt_suivant  *   mtrx_AP 
-			)
-			_pts = pt_result
-		),*/
-		
 		 
 		fn souder 				&_pts	_seuil  =(
 			debug "souder"
+			debug "_pts" var:_pts
 			
 			local i = 1
 			while i <=_pts.count do (
 				
--- 					debug "i" var:i
+					debug "i" var:i
 				local j= i+1
 				if j > _pts.count  do j =1
 					
 				local pt 			= _pts[i]
 				local ptSuivant 	= _pts[j]
 				if distance pt ptSuivant <= _seuil do (
-					debug "SOUDURE"
+					debug "		SOUDURE"
 					deleteitem _pts j
 					_pts[i] = ( pt + ptSuivant ) / 2
 					i = 1
+				debug "		_pts" var:_pts
 				)
 				i+=1
 			)
@@ -1460,6 +1425,7 @@ struct str_shape_outils (
 		),
 		fn projeter		 		&_pts 	=(
 			
+			debug"projeter"
 			local mtrx_AP 	= get_axePrincipal_mtrx 	_pts
 			local seuil = 5
 			local result

@@ -424,20 +424,21 @@ fn facade_fnConstruire  	_plug		_pts_extremite		norm_dir:		 		this:		onConstruit
 -- 					format "----> balcon_pts_debut :%\n" balcon_pts_debut
 					)
 					#balconFin:(
--- 					format "BALCON FIN\n"
--- 					format "----> balcon_pts_debut :%\n" balcon_pts_debut
-						local		pt_balcon_debut	=	polyop.getVert 	m_plug.delegate		balcon_pts_debut[1]	
-						local		pt_balcon_fin		=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
-						composant.params.longueur 				= 		distance	pt_balcon_debut 	pt_balcon_fin
--- 						composant.params.profondeur 			= 		balcon_aConstruire.params.profondeur
-					
-						ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche	norm_dir:norm_dir	\
-																																		compo_debut:balcon_aConstruire \
-																																		onConstruit_gardeCorps:( onConstruit_gardeCorps  )	coin_de_mur:coin_de_mur
+-- 						format "BALCON FIN\n"
+-- 						format "----> balcon_pts_debut :%\n" balcon_pts_debut
+-- 						if balcon_pts_debut != undefined do (
+							local		pt_balcon_debut	=	polyop.getVert 	m_plug.delegate		balcon_pts_debut[1]	
+							local		pt_balcon_fin		=	polyop.getVert 	m_plug.delegate		ptsIDs_accroche[1]	
+							composant.params.longueur 				= 		distance	pt_balcon_debut 	pt_balcon_fin
+	-- 						composant.params.profondeur 			= 		balcon_aConstruire.params.profondeur
 						
-						composant.params.longueur 	= 	0
-						balcon_aConstruire 				=	undefined
-					
+							ptsIDs_accroche = composant.construire	 	m_plug			ptsIDs_accroche	norm_dir:norm_dir	\
+																																			compo_debut:balcon_aConstruire \
+																																			onConstruit_gardeCorps:( onConstruit_gardeCorps  )	coin_de_mur:coin_de_mur
+							
+							composant.params.longueur 	= 	0
+							balcon_aConstruire 				=	undefined
+-- 						)
 					)
 					
 					

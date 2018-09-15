@@ -121,10 +121,10 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		---- LE  BALCON  -----------------------------------------------------------------------		
 		---face du dessus ---
 		-------	Creation des points 	--------
-		local pt_sol_1 		= ptAccroche_2
+		local pt_sol_1 		= ptAccroche_2 -- + vec_prof - vec_balcon
 		local pt_sol_2 		= pt_sol_1 		+ 	vec_balcon
 		local pt_sol_3 		= pt_sol_2 		+ 	vec_longueur
-		local pt_sol_4		= pt_sol_3 		- 	vec_balcon
+		local pt_sol_4			= pt_sol_3 		- 	vec_balcon
 		
 		--- creation des points --------------
 		local pts_pos 	= #( pt_sol_1, pt_sol_2, pt_sol_3, pt_sol_4 )
@@ -136,10 +136,14 @@ fn compo_fnConstruire  	_plug		pts_accroches		norm_dir:		 this:		onConstruitLaDa
 		
 		---face du plafond ---
 		-------	Creation des points 	--------
-		local pt_plafond_1 		= pt_sol_1 +	vec_ht		--	- vec_ep_dalle
-		local pt_plafond_2 		= pt_sol_2 +	vec_ht		--	- vec_ep_dalle
-		local pt_plafond_3 		= pt_sol_3 +	vec_ht		--	- vec_ep_dalle
-		local pt_plafond_4		= pt_sol_4 +	vec_ht		--	- vec_ep_dalle
+-- 		local pt_plafond_1 		= pt_sol_1 +	vec_ht		--	- vec_ep_dalle
+-- 		local pt_plafond_2 		= pt_sol_2 +	vec_ht		--	- vec_ep_dalle
+-- 		local pt_plafond_3 		= pt_sol_3 +	vec_ht		--	- vec_ep_dalle
+-- 		local pt_plafond_4		= pt_sol_4 +	vec_ht		--	- vec_ep_dalle
+		local pt_plafond_1 		= pt_sol_1 	- vec_ep_dalle
+		local pt_plafond_2 		= pt_sol_2 	- vec_ep_dalle
+		local pt_plafond_3 		= pt_sol_3 	- vec_ep_dalle
+		local pt_plafond_4		= pt_sol_4 	- vec_ep_dalle
 		
 		--- creation des points --------------
 		local pts_pos 	= #( pt_plafond_1, pt_plafond_2, pt_plafond_3, pt_plafond_4 )

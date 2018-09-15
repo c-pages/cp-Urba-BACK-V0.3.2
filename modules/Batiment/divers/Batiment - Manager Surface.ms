@@ -33,7 +33,7 @@ struct str_mgr_surfaces (
 	
 	--- Aquisition shape ---------------------
 		fn scanner_points 	_shape	=(
-			
+			debug "scanner_points"
 			local ptsSurface				=#()
 			
 			---- On chope les points de la surface a scanner -----------
@@ -43,16 +43,21 @@ struct str_mgr_surfaces (
 				append ptsSurface 	 pt_surface
 			)
 			
+			debug "scanner_points #2"
 			
 			--- on fait tourner les spline dans le meme sens ----
 			if not m_outils.est_sensPositif 	ptsSurface 	 do
 				ptsSurface = m_outils.changer_sens		ptsSurface
+			
+			debug "scanner_points FIN"var:ptsSurface
+			
 			
 			ptsSurface
 			
 		),
 		fn valider_shape 		_shape 	=(
 			
+			debug "valider_shape"
 			local id_premiertraceFerme 	= 0
 			local b_result 						= true
 			/* 
@@ -98,8 +103,13 @@ struct str_mgr_surfaces (
 			m_points = #()
 			if m_plug.surface_node != undefined do (
 				
+				debug "actualiser  #2"
+				
 				--- on scanne les points ---- 
 				pts_surface = 	scanner_points		m_plug.surface_node		
+				
+				debug "pts_surface" var:pts_surface
+				debug "actualiser	OPTIMISATIONS AVT"
 				
 -- 				for i = 1 to pts_surface.count do
 -- 					pts_surface[i] = pts_surface[i] * m_plug.surface_node.transform
@@ -110,7 +120,9 @@ struct str_mgr_surfaces (
 				if m_plug.optim_orthonormer	do	m_outils.orthonormer		&pts_surface		m_plug.optim_ortho_seuil
 				if m_plug.optim_aplanir			do	m_outils.aplanir				&pts_surface		m_plug.optim_aplanir_seuil
 				if m_plug.optim_aligner			do	m_outils.aligner				&pts_surface		m_plug.optim_aligner_seuil
-				if m_plug.optim_projeter		do	m_outils.projeter			&pts_surface
+				if m_plug.optim_projeter		do	m_outils.projeter				&pts_surface
+				
+				debug "actualiser	OPTIMISATIONS FIN"
 				
 				m_points = pts_surface
 				
@@ -200,13 +212,19 @@ struct str_mgr_surfaces (
 			if _shape != undefined do (
 				
 				---- si pas valide on clean -------
-				if not valider_shape 		_shape then 					
+				if not valider_shape 		_shape then 	(
 					m_plug.surface_node 				= undefined
 					
+					debug "assigner #2-a"
 				--- sinon on assigne les points de base ---- 
-				else 	m_plug.surface_node				= 	_shape
+				)	else 	(
+					m_plug.surface_node				= 	_shape
+					
+					debug "assigner #2-b"
+				)
 				
 				actualiser ()
+				debug "assigner #3"
 				
 			)
 			

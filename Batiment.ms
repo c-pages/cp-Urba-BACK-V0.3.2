@@ -143,7 +143,7 @@ remap:#(#(#surface_node), #(#surface_node))
 (
 
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-	local m_debug = true
+	local m_debug = false
 	local m_dbgPrefix ="urba | Batiment Plg"
 	fn debug 	_txt  var:	 param:    =(
 		try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix

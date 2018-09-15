@@ -46,7 +46,10 @@ include	 "$userScripts\cp-Urba\modules\Batiment\divers\Batiment - presets.ms"
 struct str_batiment_core (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-	m_debug = true,
+
+-- 	m_debug	= true,
+	m_debug = false,
+	
 	m_dbgPrefix ="urba | Batiment CORE",
 	fn debug 	_txt  var:	 param:    =(
 		try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
@@ -604,15 +607,22 @@ struct str_batiment_core (
 		fn get_axePrincipal					=	mgr_surface.get_axePrincipal	(),
 		fn get_surface_points				=	mgr_surface.get_points	(),
 		fn assigner_surface 		_nodeTHIS		_shape 		=(
+			debug "assigner_surface"
+			debug "_shape" var:_shape
 			if _nodeTHIS.material == undefined do
 				mgr_mat.appliquer_material  		_nodeTHIS
+			debug "_nodeTHIS.material " var:_nodeTHIS.material 
 			
 -- 			_nodeTHIS.transform = _shape.transform
 -- 			_nodeTHIS.position = _shape.position
 			mgr_surface.assigner		_shape
 			
+			debug "assigner_surface #2" 
+			
 -- 			_nodeTHIS.pivot = _shape.pivot
 			_nodeTHIS.transform = _shape.transform
+			
+			debug "assigner_surface #3" 
 			
 			actualiser ()
 			

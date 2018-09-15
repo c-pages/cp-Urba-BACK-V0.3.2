@@ -11,7 +11,8 @@ struct str_outils_shape (
 
 		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
-		m_debug	= true,
+-- 		m_debug	= true,
+		m_debug = false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | shape"	  	var:var	 param:param		catch (),
 	
 		m_tab_format_nd = "		",
@@ -580,7 +581,7 @@ struct str_outils_shape (
 		
 		--- sens du shape ----------------------
 		fn est_sensPositif 				_pts 		=(
--- 			debug "est_sensPositif"
+			debug "est_sensPositif"
 			local result 			= true
 			local id_pointHaut 	=  point_lePlusHautSurY  	_pts
 			
@@ -601,14 +602,16 @@ struct str_outils_shape (
 			
 			if vec2.x > vec1.X do result = not result
 			
+			debug "est_sensPositif FIN"
 			result
 			
 		),
 		fn changer_sens 					_pts 		=(
--- 			debug "changer_sens()"
+			debug "changer_sens()"
 			local result =#()
 			for i= _pts.count to 1 by -1 do 
 				append result 	_pts[i]
+			debug "changer_sens()	FIN"
 			result
 		),
 		fn get_positionRelative_BB		_pts_shpA		_pts_shpB 	=(

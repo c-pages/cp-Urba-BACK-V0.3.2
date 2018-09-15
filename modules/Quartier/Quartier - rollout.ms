@@ -535,10 +535,10 @@ rollout roll_param_typologie "Parametres typologie" width:182 height:447
 			
 			
 			if m_typo.contours_tout then (
-				rdo_groupe_use.state = 1 
+				try rdo_groupe_use.state = 1  catch()
 				btn_groupe_editer.enabled = false
 			) else (
-				rdo_groupe_use.state = 2
+				try rdo_groupe_use.state = 2  catch()
 				btn_groupe_editer.enabled = true				
 			)
 		) else (
