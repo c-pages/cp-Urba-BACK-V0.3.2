@@ -1,8 +1,8 @@
-struct	str_geometrie	(
+struct	str_geometrie_mesh	(
 	
 		------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 		m_debug = true,
-		m_dbgPrefix ="urba | str_geometrie",
+		m_dbgPrefix ="urba | str_geometrieMesh",
 		fn debug 	_txt  var:	 param:    =(
 			try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 			catch ()
