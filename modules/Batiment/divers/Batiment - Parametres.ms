@@ -31,18 +31,20 @@
 parameters params_general 						rollout:roll_general		(
 	
 	------- Etages			------------------
-	etages_nbre					type: #integer			default:1			/* ui:spn_nbres	 */		animatable:false		invisibleInTV:true
-	etages_hauteur_global	type: #float 				default:250.		/* ui:spn_hauteur	 */	animatable:false		invisibleInTV:true
+	etages_nbre					type: #integer			default:1			 ui:spn_nbres	 		animatable:false		invisibleInTV:true
+	etages_hauteur_global	type: #float 				default:250.		 ui:spn_hauteur	 	animatable:false		invisibleInTV:true
 	
-	etages_min					type:#intTab 			tabSize:0  		tabSizeVariable:true
+	---- les etages spécifiques -----------
+	etages_min					type:#intTab 				tabSize:0  		tabSizeVariable:true
 	etages_max_use			type:#boolTab	 		tabSize:0  		tabSizeVariable:true
-	etages_max					type:#intTab		 		tabSize:0  		tabSizeVariable:true
+	etages_max				type:#intTab		 		tabSize:0  		tabSizeVariable:true
 	etages_hauteurs			type:#floatTab	 		tabSize:0  		tabSizeVariable:true
 	
 	---- Divers --------
-	decallage_z					type:#float	 			default:0.			animatable:false		invisibleInTV:true
+	decallage_z					type:#float	 			default:0.		ui:spn_decallageZ	animatable:false		invisibleInTV:true
 	
 	
+	interieur_use			type:#boolean			default:false	 	ui:chk_interieur	 	animatable:false		invisibleInTV:true
 )
 
 parameters params_facades 						rollout:roll_facades	(
@@ -106,12 +108,11 @@ parameters params_toiture 							(
 	toiture_params				type:#string		default:""				animatable:false		invisibleInTV:true /* tabSize:0  		tabSizeVariable:true */
 	
 )
-
+/* 
 parameters params_interieur				rollout:roll_general					(
-	interieur_use			type:#boolean			default:false	/* 	ui:chk_planchers	 */	animatable:false		invisibleInTV:true
 	
 )
-
+ */
  
  
  

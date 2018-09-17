@@ -300,23 +300,23 @@ rollout roll_general "Général" width:280 height:556
 	--- rollout------------------
 	fn actualiser =(
 		
-		m_bat			= m_rolloutP.m_batiment
+-- 		m_bat			= m_rolloutP.m_batiment
 		
 		-------- global ------------------------
-		spn_nbres.value		=	m_bat.etages_nbre		
-		spn_hauteur.value		=	m_bat.etages_hauteur_global
+-- 		spn_nbres.value			=	m_bat.etages_nbre		
+-- 		spn_hauteur.value		=	m_bat.etages_hauteur_global
 		
 		
 		-------- etages spécifiques --------------
 		--- affichage dans la liste-
 		local liste_affichage = #()
-		for i = 1 to m_bat.etages_min.count do (
+		for i = 1 to etages_min.count do (
 			local affichage = ""
-			affichage+= m_bat.etages_min[i] as string  
-			if m_bat.etages_max_use[i] do 
-				affichage+= " ---> " + m_bat.etages_max[i] as string 				
-			affichage+= " : " + m_bat.etages_hauteurs[i] as string  + "cm."			
-			append liste_affichage affichage
+			affichage+= etages_min[i] as string  
+			if etages_max_use[i] do 
+				affichage+= " ---> " + etages_max[i] as string 				
+			affichage+= " : " + etages_hauteurs[i] as string  + "cm."			
+			append liste_affichage 	affichage
 		)
 		lbx_etages_specifiques.items = liste_affichage
 		
@@ -333,74 +333,77 @@ rollout roll_general "Général" width:280 height:556
 		
 		if enable_prop do (
 			local index = lbx_etages_specifiques.selection 
-			spn_etageMin_specifiques.value					=	m_bat.etages_min[ index ] 
-			ckb_etageMax_specifiques.checked 			= m_bat.etages_max_use[ index ] 
+			spn_etageMin_specifiques.value					=	etages_min[ index ] 
+			ckb_etageMax_specifiques.checked 			= etages_max_use[ index ] 
 			spn_etageMax_specifiques.indeterminate	=	not ckb_etageMax_specifiques.checked
 			spn_etageMax_specifiques.enabled				=	ckb_etageMax_specifiques.checked
 			if  ckb_etageMax_specifiques.checked do 
-				spn_etageMax_specifiques.value				=	m_bat.etages_max[ index ] 
+				spn_etageMax_specifiques.value				=	etages_max[ index ] 
 			
-			spn_hauteur_specifiques.value					=	m_bat.etages_hauteurs[ index ] 
+			spn_hauteur_specifiques.value					=	etages_hauteurs[ index ] 
 			
-			spn_etageMax_specifiques.range.x = spn_etageMin_specifiques.value		
+			spn_etageMax_specifiques.range.x 		= spn_etageMin_specifiques.value		
 		)
 		
 		
 	)
-	
-	fn initialiser  _roll_edit =(
-		m_rolloutP 	= _roll_edit
+	/* 
+	fn initialiser  _roll_edit 	=(
+		m_rolloutP 		= _roll_edit
 		m_plug			= m_rolloutP.m_plug
 		m_core			= m_rolloutP.m_core
 		
 		spn_etageMax_specifiques.range.x = 0
-	)
+	) */
 		
 		
 		
 		
 	---- donnees -----------------	
 	fn set_etage = (
-		m_bat.set_etage		lbx_etages_specifiques.selection 		\
+			core.set_etage		lbx_etages_specifiques.selection 		\
 										spn_etageMin_specifiques.value			\
 										ckb_etageMax_specifiques.checked		\
 										spn_etageMax_specifiques.value			\
 										spn_hauteur_specifiques.value
-		m_rolloutP.changer_un_truc ()
+-- 		m_rolloutP.changer_un_truc ()
 		actualiser ()
+-- 		core.actualiser ()
 	)
 		
 		
 	
 	
 	
-	
+	on roll_general open do actualiser ()
 	
 	
 		
 		
 	on spn_nbres changed val do
 	(
-			m_bat.etages_nbre		= val
-			m_rolloutP.changer_un_truc ()
+		core.actualiser()
+-- 			m_bat.etages_nbre		= val
+-- 			m_rolloutP.changer_un_truc ()
 		)
 	on spn_hauteur changed val do
 	(
-			m_bat.etages_hauteur_global		= val
-			m_rolloutP.changer_un_truc ()
+		core.actualiser()
+-- 			m_bat.etages_hauteur_global		= val
+-- 			m_rolloutP.changer_un_truc ()
 		)
 	on btn_etages_nouveau pressed do
 	(
-			m_bat.ajouter_etage ()		
-			m_rolloutP.changer_un_truc ()
+			core.ajouter_etage ()		
+-- 			m_rolloutP.changer_un_truc ()
 			lbx_etages_specifiques.selection += 1
 			actualiser ()
 		)
 	on btn_etages_supprimer pressed do
 	(
 			if lbx_etages_specifiques.selection > 0 do (
-				m_bat.supprimer_etage		lbx_etages_specifiques.selection
-				m_rolloutP.changer_un_truc ()
+				core.supprimer_etage		lbx_etages_specifiques.selection
+-- 				m_rolloutP.changer_un_truc ()
 				if lbx_etages_specifiques.selection > lbx_etages_specifiques.items.count do
 					lbx_etages_specifiques.selection = lbx_etages_specifiques.items.count 
 				actualiser ()
@@ -416,15 +419,28 @@ rollout roll_general "Général" width:280 height:556
 		set_etage ()
 	on spn_hauteur_specifiques changed val 		do
 		set_etage ()
-	on spn_decallageZ changed val do
+-- 	on spn_decallageZ	 entered 	inSpin_arg	inCancel_arg	do (
+	on spn_decallageZ	 buttonup 		inCancel_arg	do (
+-- 		format "inSpin_arg:%\n" inSpin_arg
+		format "inCancel_arg:%\n" inCancel_arg
+		if inCancel_arg do (
+			core.actualiser ()
+		)
+	)
+-- on spn_decallageZ buttonDown 	do flagForeground $baz...* true
+-- on spn_decallageZ buttonUp 		do flagForeground $baz...* false
+	on spn_decallageZ changed val do with undo on
 	(
-			m_bat.decallage_z = val
-			m_rolloutP.changer_un_truc ()		
+		format "spn_decallageZ changed :\n" 
+		core.actualiser ()
+-- 			decallage_z = val
+-- 			m_rolloutP.changer_un_truc ()		
 			)
 	on chk_interieur changed state do
 	(
-			m_bat.interieur_use = state
-			m_rolloutP.changer_un_truc ()
+		core.actualiser ()
+-- 			interieur_use = state
+-- 			m_rolloutP.changer_un_truc ()
 			)
 )
 
@@ -433,6 +449,13 @@ rollout roll_facades "Façades" width:280 height:556
 	checkbutton 'ckb_editeur' "Edition" pos:[7,7] width:160 height:30 align:#left -- highlightColor:(color 255 255 0)
  -- highlightColor:(color 255 255 0)
 	
+	on ckb_editeur changed state do
+	(
+			case state of (
+				true:		core.editeur_ouvrir ()
+				false:	(core.get_editeur_dialog ()).fermer ()
+			)
+		)
 )
 rollout sub_toiture "Toiture" width:557 height:427
 (

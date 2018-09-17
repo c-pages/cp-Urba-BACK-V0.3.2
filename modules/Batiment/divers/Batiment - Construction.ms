@@ -1,7 +1,8 @@
 
 
 --- la structure pour créer des geometries du delegate -------------------
-include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - Geometrie.ms"
+-- include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - Geometrie.ms"
+include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - Geometrie - Mesh.ms"
 
 
 
@@ -26,7 +27,7 @@ struct str_construction (
 	private
 		m_plug,
 	public			
-		m_geo		= 	str_geometrie 	(),
+		m_geo		= 	str_geometrie_mesh 	(),
 		
 		
 		---- Outils -------------

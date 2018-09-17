@@ -47,8 +47,8 @@ struct str_batiment_core (
 	
 	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 
--- 	m_debug	= true,
-	m_debug = false,
+	m_debug	= true,
+-- 	m_debug = false,
 	
 	m_dbgPrefix ="urba | Batiment CORE",
 	fn debug 	_txt  var:	 param:    =(
@@ -149,7 +149,7 @@ struct str_batiment_core (
 	----- Actualiser  -----------------------
 	public
 		fn actualiser 		bat_edition:		proxy:false		=(
-			
+			debug "actualiser"
 			---- on actualise la surface ----
 			mgr_surface.actualiser ()
 			
@@ -209,12 +209,14 @@ struct str_batiment_core (
 			append 	m_plug.etages_max_use	false
 			append 	m_plug.etages_max			1
 			append 	m_plug.etages_hauteurs	250.
+			actualiser ()
 		),
 		fn supprimer_etage 		_index	=(
 			deleteItem 	m_plug.etages_min			_index
 			deleteItem 	m_plug.etages_max_use	_index
 			deleteItem 	m_plug.etages_max			_index
 			deleteItem 	m_plug.etages_hauteurs	_index
+			actualiser ()
 		),
 		fn set_etage		_index		_etages_min			_etages_max_use		_etages_max		_etages_hauteurs 	=(
 			m_plug.etages_min[ _index ]			=	_etages_min
