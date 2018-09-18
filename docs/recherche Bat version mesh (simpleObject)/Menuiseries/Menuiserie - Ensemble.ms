@@ -5,16 +5,17 @@
 global elemFac_menuiserie
 
 dossier = "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\menuiseries\\fix"
-plugs_aCharger = getfiles		( dossier + "*.ms" )
+-- plugs_aCharger = getfiles		( dossier + "*.ms" )
 for plug_aCharger in plugs_aCharger do
 	filein plug_aCharger
 	 */
 
-include "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\menuiseries\\fix\\menuis_fix_defaut.ms"
+include "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\Menuiseries\\Menuiserie - Fix.ms"
+include "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\Menuiseries\\Menuiserie - Ouvrant.ms"
 
 
-plugin simpleObject 	bat_facade_sequence
-name:"bat_facade_sequence"
+plugin simpleObject 	urba_menuis_ensemble
+name:"Ensemble"
 classID:#(782522,1273452)
 category:"CP | Urba | Batiment"
 (
@@ -58,7 +59,7 @@ category:"CP | Urba | Batiment"
 		
 		---- on creer le sous objet model ---------------------
 		if m_menuiserie == undefined do
-			m_menuiserie = createInstance  elemFac_menuiserie	
+			m_menuiserie = createInstance  urba_menuis_fix	
 		m_menuiserie.largeur 				= largeur
 		m_menuiserie.hauteur 				= hauteur
 		m_menuiserie.profondeur 			= prof

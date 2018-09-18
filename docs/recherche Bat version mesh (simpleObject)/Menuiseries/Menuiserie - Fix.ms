@@ -1,12 +1,12 @@
 
 
 
-include  "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\objets simples\\boite.ms"
+include  "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\Primitives\\Primitive - Boite.ms"
 	
-plugin simpleObject		elemFac_menuiserie
-name:"elemFac_menuiserie"
+plugin simpleObject		urba_menuis_fix
+name:"Fix"
 classID:#(125512,563854)
-category:"Scripted Primitives"
+category:"CP | Urba | menuiseries"
 -- invisible:true
 (
 	local m_boite
@@ -17,6 +17,7 @@ category:"Scripted Primitives"
 	)
 	parameters main rollout:roll_params
 	(
+		
 		largeur 			type:#worldUnits 	ui:spn_largeur 			default:100
 		hauteur 			type:#worldUnits 	ui:spn_hauteur 			default:250
 		profondeur	 	type:#worldUnits 	ui:spn_profondeur		default:5
@@ -27,9 +28,6 @@ category:"Scripted Primitives"
 		
 		matId_menuis		type:#integer 			ui:spn_matId_menuis			default:1
 		matId_vitrage		type:#integer 			ui:spn_matId_vitrage			default:2
-		
-		
--- 		rot			 	type:#float 			ui:spn_rot					default:0
 		
 	)
 	
@@ -44,17 +42,14 @@ category:"Scripted Primitives"
 		spinner spn_profondeur 	"profondeur" 	type:#worldunits range:[-1000,1000,0]
 		spinner spn_epaisseur	 	"epaisseur" 					type:#worldunits range:[-1000,1000,0]
 		spinner spn_matId_menuis 	"matId_menuis" 		type:#integer range:[1,1000,1]
-		spinner spn_matId_vitrage	 	"matId_vitrage" 		type:#integer range:[1,1000,1]
--- 		spinner spn_rot	 	"rot" 						type:#float range:[-360,360,0]
-		
-		
+		spinner spn_matId_vitrage	"matId_vitrage" 		type:#integer range:[1,1000,1]
 	)
 	
 	fn ajoute_boite 	largeur		hauteur		prof		transf:	matID:	=(
 		
 		---- on creer le sous objet model ---------------------
 		if m_boite == undefined do
-			m_boite = createInstance  simple_boite	
+			m_boite = createInstance  urba_prim_boite	
 		m_boite.largeur 				= largeur
 		m_boite.hauteur 				= hauteur
 		m_boite.profondeur 			= prof	

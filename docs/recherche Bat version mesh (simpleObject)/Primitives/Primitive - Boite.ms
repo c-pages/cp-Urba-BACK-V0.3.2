@@ -1,8 +1,8 @@
 
-plugin simpleObject		simple_boite
-name:"simple_boite"
+plugin simpleObject		urba_prim_boite
+name:"Boite"
 classID:#(736867,153465)
-category:"Scripted Primitives"
+category:"CP | Urba | Primitives"
 -- invisible:true
 (
 	parameters transfo
