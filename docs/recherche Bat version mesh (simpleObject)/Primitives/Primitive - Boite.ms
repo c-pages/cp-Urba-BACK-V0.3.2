@@ -1,9 +1,9 @@
 
 plugin simpleObject		urba_prim_boite
 name:"Boite"
-classID:#(736867,153465)
-category:"CP | Urba | Primitives"
--- invisible:true
+classID:#(0x55f6e4c7, 0x22f553a7)
+category:"CP | Primitives"
+invisible:true
 (
 	parameters transfo
 	(

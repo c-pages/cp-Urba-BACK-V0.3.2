@@ -5,27 +5,27 @@ include  "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)
 	
 plugin simpleObject		urba_menuis_ouvrant
 name:"Ouvrant"
-classID:#(1155378,428717)
+classID:#(0x6f5f9c8f, 0x1da0418a)
 category:"CP | Urba | menuiseries"
--- invisible:true
+invisible:true
 (
 	local m_boite
 	
-	parameters transfo
+	parameters params_transformation
 	(
 		transformation	type:#matrix3	default:(matrix3 1)
 	)
-	parameters main rollout:roll_params
+	parameters params_general rollout:roll_general
 	(
 		
-		largeur 					type:#worldUnits 	ui:spn_largeur 			default:100
-		hauteur 					type:#worldUnits 	ui:spn_hauteur 			default:250
-		profondeur	 			type:#worldUnits 	ui:spn_profondeur		default:5		
-		epaisseur	 			type:#worldUnits 	ui:spn_epaisseur			default:7
-		vitrage_ep	 			type:#worldUnits 	default:2
+		largeur 					type:#worldUnits 	ui:spn_largeur 					default:0
+		hauteur 					type:#worldUnits 	ui:spn_hauteur 					default:0
+		profondeur	 			type:#worldUnits 	ui:spn_profondeur				default:0		
+		epaisseur	 			type:#worldUnits 	ui:spn_epaisseur					default:0
+		vitrage_ep	 			type:#worldUnits 											default:2
 		
-		ouverture_aGauche	type:#boolean 		ui:shk_ouverture_AGauche			default:true
-		ouverture_angle	 	type:#float			 	ui:spn_ouverture_angle				default:0
+		ouverture_aGauche	type:#boolean 		ui:shk_ouverture_AGauche		default:true
+		ouverture_angle	 	type:#float			 	ui:spn_ouverture_angle			default:0
 		
 		matId_menuis			type:#integer 			ui:spn_matId_menuis			default:1
 		matId_vitrage			type:#integer 			ui:spn_matId_vitrage			default:2
@@ -36,26 +36,40 @@ category:"CP | Urba | menuiseries"
 	
 	
 	
-	rollout roll_params "Two Faces Parameters"
+	rollout roll_general "Ouvrant"
 	(
+		
+		local m_parent
+		
 		group 	"global" (
-			spinner spn_largeur 						"largeur" 				type:#worldunits range:[-1000,1000,0]
-			spinner spn_hauteur 						"hauteur" 				type:#worldunits range:[-1000,1000,0]
-			spinner spn_profondeur 					"profondeur" 			type:#worldunits range:[-1000,1000,0]
-			spinner spn_epaisseur	 					"epaisseur" 				type:#worldunits range:[-1000,1000,0]
+			spinner spn_largeur 						"Largeur" 				type:#worldunits range:[-1000,1000,0]
+			spinner spn_hauteur 						"Hauteur" 				type:#worldunits range:[-1000,1000,0]
+			spinner spn_profondeur 					"Profondeur" 			type:#worldunits range:[-1000,1000,0]
+			spinner spn_epaisseur	 					"Epaisseur" 				type:#worldunits range:[-1000,1000,0]
 		)
 		
 		group 	"Ouverture" (
-			checkbox	shk_ouverture_AGauche		"à Gauche" 				
+			checkbox	shk_ouverture_AGauche		"A Gauche" 				
 			spinner 	spn_ouverture_angle	 	"Angle" 					type:#float range:[0,180,0]
 		)
 		
 		group 	"Material ID" (
-			spinner spn_matId_menuis 				"matId_menuis" 		type:#integer range:[1,1000,1]
-			spinner spn_matId_vitrage				"matId_vitrage" 		type:#integer range:[1,1000,1]
+			spinner spn_matId_menuis 				"Menuiseries" 		type:#integer range:[1,1000,1]
+			spinner spn_matId_vitrage				"Vitrage" 			type:#integer range:[1,1000,1]
 		)
+		
+		on spn_largeur 					changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
+		on spn_hauteur 					changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
+		on spn_profondeur 				changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
+		on spn_epaisseur 				changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
+		on shk_ouverture_AGauche	changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
+		on spn_ouverture_angle		changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
+		on spn_matId_menuis 			changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
+		on spn_matId_vitrage 			changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
+		
 	)
 	
+	fn enregistrer_params	=()
 	fn ajoute_boite 	largeur		hauteur		prof		transf:	matID:	=(
 		
 		---- on creer le sous objet model ---------------------
@@ -75,7 +89,6 @@ category:"CP | Urba | menuiseries"
 		meshop.attach	mesh		m_boite.mesh
 		
 	)
-	
 	
 	
 	on buildMesh do
