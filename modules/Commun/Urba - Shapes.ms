@@ -650,7 +650,6 @@ struct str_outils_shape (
 			
 			axeMtrx
 		),
-			
 		fn get_axePrincipal_BB					_pts  	_mtrxAxe  	=(
 			
 			local pt1 = _pts[1] * inverse _mtrxAxe

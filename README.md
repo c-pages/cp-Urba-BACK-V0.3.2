@@ -139,6 +139,10 @@ Avec un vitrage transparant on pourrait:
  - [ ] Revoir algorythme de convertion coordonées en plan.
  - [ ] a voir aprés tests avec beru : projection en Lambert 93
  - [ ] changement de centre ? WGS84 -> RGF 93 (cf: http://www.forumsig.org/showthread.php/3239-Conversion-Lat-Long-vers-Lambert-93)
+ - [ ] beru :"ha sinon pour ton histoire de projection de cartes osm, tu peux projeter directement les coordonnées en wgs84 sur un plan régional sans passer par le lambert 93, en UTM30
+http://spatialreference.org/ref/epsg/wgs-84-utm-zone-30n/
+et si tu dois absolument passer par le rgf93 le mieux c'est de reprojeter en lambert regional cc49 ou cc50
+http://spatialreference.org/ref/epsg/3949/"
 
 _____________________________
 ### Historique des versions:

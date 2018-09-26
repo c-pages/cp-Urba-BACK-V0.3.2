@@ -36,12 +36,11 @@ invisible:true
 	
 	
 	
-	rollout roll_general "Ouvrant"
-	(
+	rollout roll_general "Ouvrant"	(
 		
 		local m_parent
 		
-		group 	"global" (
+		group 	"Global" (
 			spinner spn_largeur 						"Largeur" 				type:#worldunits range:[-1000,1000,0]
 			spinner spn_hauteur 						"Hauteur" 				type:#worldunits range:[-1000,1000,0]
 			spinner spn_profondeur 					"Profondeur" 			type:#worldunits range:[-1000,1000,0]
@@ -49,7 +48,7 @@ invisible:true
 		)
 		
 		group 	"Ouverture" (
-			checkbox	shk_ouverture_AGauche		"A Gauche" 				
+			checkbox	shk_ouverture_AGauche	"A Gauche" 				
 			spinner 	spn_ouverture_angle	 	"Angle" 					type:#float range:[0,180,0]
 		)
 		
@@ -70,7 +69,7 @@ invisible:true
 	)
 	
 	fn enregistrer_params	=()
-	fn ajoute_boite 	largeur		hauteur		prof		transf:	matID:	=(
+	fn creer_boite 	largeur		hauteur		prof		transf:	matID:	=(
 		
 		---- on creer le sous objet model ---------------------
 		if m_boite == undefined do
@@ -93,62 +92,52 @@ invisible:true
 	
 	on buildMesh do
 	(
--- 		format "build menuiserie \n"
+		
 		delete mesh
 		
--- 		transformation =  rotateZMatrix	rot
+		local matrx_origine = matrix3 1
 		
-		local matrx_origine = matrix3 1		
-		------------ LE CADRE -----------------
-		
+		------------ LE CADRE -----------------		
 		--- montant vertical 1 ----------
 		local mtrx_verti_1 =	matrx_origine  * transformation		
-		ajoute_boite 	epaisseur		hauteur		profondeur		transf:mtrx_verti_1		matID:matId_menuis
+		creer_boite 	epaisseur		hauteur		profondeur		transf:mtrx_verti_1		matID:matId_menuis
 		
 		--- montant vertical 2 ----------
 		local mtrx_verti_2 =	matrx_origine * transMatrix  [largeur - epaisseur,0,0]	 * transformation		
-		ajoute_boite 	epaisseur		hauteur		profondeur		transf:mtrx_verti_2	matID:matId_menuis
-		/* 
-		--- montant horizontal 1 ----------
-		local mtrx_hori_1 =		matrx_origine * transMatrix  [epaisseur,0,0]	 		* transformation	
-		ajoute_boite 	( largeur - 2 *epaisseur)		epaisseur		profondeur		transf:mtrx_hori_1	matID:matId_menuis
-		 */
+		creer_boite 	epaisseur		hauteur		profondeur		transf:mtrx_verti_2	matID:matId_menuis
+		
 		--- montant horizontal 2 ----------
 		local mtrx_hori_2 =		matrx_origine * transMatrix  [epaisseur,0,hauteur - epaisseur]	 	* transformation	
-		ajoute_boite 	( largeur - 2 *epaisseur)		epaisseur		profondeur		transf:mtrx_hori_2	matID:matId_menuis
-		/* 
-		--- vitrage ----------
-		local mtrx_vitrage =	matrx_origine * transMatrix  [epaisseur, (profondeur - vitrage_ep) / 2  , epaisseur]	 	* transformation	
-		ajoute_boite 	( largeur - 2 *epaisseur)		( hauteur - 2 *epaisseur)		vitrage_ep		transf:mtrx_vitrage	matID:matId_vitrage
-		*/
+		creer_boite 	( largeur - 2 *epaisseur)		epaisseur		profondeur		transf:mtrx_hori_2	matID:matId_menuis
 		
 		
 		
 		
-		local matrix_ouverture = rotateZMatrix	ouverture_angle * transMatrix  [epaisseur,profondeur  ,0]
-		local matrx_origine_ouvrant = matrx_origine  * transMatrix  [0, -profondeur / 2 ,0]	
 		
 		
 		----- L'OUVRANT ----------------
+		local matrix_ouverture 			= rotateZMatrix	ouverture_angle * transMatrix  [epaisseur,profondeur  ,0]
+		local matrx_origine_ouvrant 	= matrx_origine  * transMatrix  [0, -profondeur / 2 ,0]
+		
 		--- montant vertical 1 ----------
 		local mtrx_verti_1 =	matrx_origine_ouvrant	*	matrix_ouverture							* transformation		
-		ajoute_boite 	epaisseur		( hauteur - epaisseur )		profondeur		transf:mtrx_verti_1		matID:matId_menuis
+		creer_boite 	epaisseur		( hauteur - epaisseur )		profondeur		transf:mtrx_verti_1		matID:matId_menuis
 		
 		--- montant vertical 2 ----------
 		local mtrx_verti_2 =	matrx_origine_ouvrant * transMatrix  [largeur - 3 * epaisseur,0,0]	*	matrix_ouverture	 	* transformation	
-		ajoute_boite 	epaisseur		( hauteur - epaisseur )			profondeur		transf:mtrx_verti_2	matID:matId_menuis
+		creer_boite 	epaisseur		( hauteur - epaisseur )			profondeur		transf:mtrx_verti_2	matID:matId_menuis
 		
 		--- montant horizontal 1 ----------
 		local mtrx_hori_1 =		matrx_origine_ouvrant * transMatrix  [epaisseur,0,0]	*	matrix_ouverture		 	* transformation	
-		ajoute_boite 	( largeur - 4 *epaisseur)		epaisseur		profondeur		transf:mtrx_hori_1	matID:matId_menuis
+		creer_boite 	( largeur - 4 *epaisseur)		epaisseur		profondeur		transf:mtrx_hori_1	matID:matId_menuis
 		
 		--- montant horizontal 2 ----------
 		local mtrx_hori_1 =		matrx_origine_ouvrant * transMatrix  [epaisseur,0,hauteur - 2 * epaisseur]	*	matrix_ouverture		 	* transformation	
-		ajoute_boite 	( largeur - 4 *epaisseur)		epaisseur		profondeur		transf:mtrx_hori_1	matID:matId_menuis
+		creer_boite 	( largeur - 4 *epaisseur)		epaisseur		profondeur		transf:mtrx_hori_1	matID:matId_menuis
 		
 		--- vitrage ----------
 		local mtrx_vitrage =	matrx_origine_ouvrant * transMatrix  [epaisseur, (profondeur - vitrage_ep) / 2  , epaisseur]	*	matrix_ouverture	 	* transformation	
-		ajoute_boite 	( largeur - 4 *epaisseur)		( hauteur - 3 *epaisseur)		vitrage_ep		transf:mtrx_vitrage	matID:matId_vitrage
+		creer_boite 	( largeur - 4 *epaisseur)		( hauteur - 3 *epaisseur)		vitrage_ep		transf:mtrx_vitrage	matID:matId_vitrage
 -- 		
 -- 		
 -- 		
