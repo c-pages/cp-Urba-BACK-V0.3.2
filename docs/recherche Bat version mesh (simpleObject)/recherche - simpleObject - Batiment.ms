@@ -1,9 +1,11 @@
 
-include "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\mgr - presets.ms"
+include 	"$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\mgr - presets.ms"
+	filein "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\recherche - simpleObject - Façade.ms"
+include	"$userScripts\\cp-Urba\\modules\\Commun\\Urba - Shapes.ms"
 
-include "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\Menuiseries\\Menuiserie - Ensemble.ms"
 
-include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - Shapes.ms"
+
+
 
 plugin simpleObject 	urba_batiment_temp
 name:"Bâtiment"
@@ -51,17 +53,15 @@ category:"CP | Urba | Bâtiment"
 		/* 
 		---- les etages spécifiques -----------
 		etages_min					type:#intTab 				tabSize:0  		tabSizeVariable:true
-		etages_max_use			type:#boolTab	 		tabSize:0  		tabSizeVariable:true
-		etages_max				type:#intTab		 		tabSize:0  		tabSizeVariable:true
-		etages_hauteurs			type:#floatTab	 		tabSize:0  		tabSizeVariable:true
+		etages_max_use				type:#boolTab	 			tabSize:0  		tabSizeVariable:true
+		etages_max					type:#intTab		 			tabSize:0  		tabSizeVariable:true
+		etages_hauteurs				type:#floatTab	 			tabSize:0  		tabSizeVariable:true
 		
 		---- Divers --------
 		decallage_z					type:#float	 			default:0.		ui:spn_decallageZ	animatable:false		invisibleInTV:true
 		
-		
 		interieur_use			type:#boolean			default:false	 	ui:chk_interieur	 	animatable:false		invisibleInTV:true
-			
-			
+		
 		*/
 	)
 	parameters params_surface				rollout:roll_surface	(
@@ -149,9 +149,10 @@ category:"CP | Urba | Bâtiment"
 		checkbox 'chk_projeter' "Projeter"  align:#left
 		
 		
-		on btn_pick_surface picked _shape do
+		on btn_pick_surface picked _shape do (
 			scanner_shape _shape
-	
+			update mesh
+		)
 	
 	
 	)
@@ -179,7 +180,7 @@ category:"CP | Urba | Bâtiment"
 		spinner 'spn_etageMax_specifiques' "" pos:[115,142] width:40 height:16 range:[0,1e+13,0] type:#integer align:#right
 		checkbutton 'ckb_etageMax_specifiques' ">" pos:[100,141] width:16 height:16 align:#right
 		spinner 'spn_hauteur_specifiques' "" pos:[63,158] width:92 height:16 range:[0,1e+13,0] type:#worldunits align:#right
-		 */
+		*/
 		/* 
 		---- Divers ------
 		GroupBox 'grp_divers' "Divers" pos:[4,200] width:160 height:60 align:#right
@@ -189,7 +190,7 @@ category:"CP | Urba | Bâtiment"
 		
 		
 		checkbox 'ckb_proxy' "Affichage simplifié" pos:[4,262] width:161 height:19 align:#right
-		 */
+		*/
 		
 	)
 	
@@ -210,7 +211,34 @@ category:"CP | Urba | Bâtiment"
 	on buildMesh do
 	(
 		---- on vide le mesh -----------
--- 		delete mesh
+		delete mesh
+		
+		--- si on a un shape et des points on creer le mesh ----------------------
+		if surface_node != undefined and surface_points.count > 0 do (
+			
+			--- on place notre batiment sur le shape -----------
+			local thisNode = (refs.dependents this)[1]
+			thisNode.transform = surface_node.transform
+			
+			----- On collect les points du shape ---------------- 
+			local pts 		= for pt in surface_points collect pt
+			
+			----- Optimisations du shape --------------------------
+			if optim_orthonormer do	mgr_shapes.orthonormer  		&pts		optim_ortho_seuil			
+			if optim_souder 		do	mgr_shapes.souder 				&pts		optim_souder_seuil
+			if optim_aplanir 		do	mgr_shapes.aplanir 				&pts		optim_aplanir_seuil
+			if optim_aligner 		do	mgr_shapes.aligner				&pts		optim_aligner_seuil 
+			if optim_projeter		do	mgr_shapes.projeter		 		&pts
+			
+			
+			--------- construction du mesh ----------------
+			setMesh mesh 	verts:pts
+			meshop.createPolygon mesh	( #{1..pts.count} as array )
+			
+			extrudeFace mesh #{1..( getNumFaces  mesh)} (etages_nbre * etages_hauteur_global) 100 dir:#common
+			
+			
+		)
 		
 	) --- fin buildMesh	---------------------------
 	

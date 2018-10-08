@@ -1,4 +1,6 @@
 
+include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - mgr - Datas to string.ms" 
+
 struct str_mgr_presets (
 		
 		------------ DEBUG	----------------------------------------------------------------------------------

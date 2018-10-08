@@ -1,5 +1,4 @@
 
-include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - mgr - Datas to string.ms" 
 
 struct str_outils_shape (
 
@@ -9,12 +8,11 @@ struct str_outils_shape (
 
 
 
-		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public
 -- 		m_debug	= true,
 		m_debug = false,
 		fn debug 	_txt  var:	 param:    =	try if m_debug  do ::debuger 	_txt	prefix:"Terrain | shape"	  	var:var	 param:param		catch (),
-	
 		m_tab_format_nd = "		",
 		fn format_noeud 	_nd =(
 			local indent_prfix = "|    "
@@ -36,9 +34,7 @@ struct str_outils_shape (
 -- 			debug "----------------------------------------------------"
 			
 		),
-		
-		
-		------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	------------ DEBUG	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		
 		
 		
@@ -136,9 +132,6 @@ struct str_outils_shape (
 		
 		
 		
-		
-		--- Analyse position de points (survol_triangles etc..)		-------------
-
 		
 		--- Analyse position de points (survol_triangles etc..)		-------------
 		fn point_estSurSegment	_pt_test		_pt_A		_pt_B	=(
@@ -578,6 +571,9 @@ struct str_outils_shape (
 -- 			debug "	--->	get_aire_shape " var:result_aire
 			result_aire
 		),
+		
+		
+		
 		
 		--- sens du shape ----------------------
 		fn est_sensPositif 				_pts 		=(
@@ -1120,13 +1116,763 @@ struct str_outils_shape (
 		),
 		 */
 		
+	-----------------  divers ----------------------
+	public
+		fn estPignon 	_pts		_id		=(
+			
+			local mtrx_AP	= get_axePrincipal_mtrx 	_pts
+			local j 				= boucler  _pts  (_id+1)
+			local vec 			= (_pts[j]-_pts[_id])
+			local orientation 	= get_axePrincipal_orientation		mtrx_AP		vec
+			
+			if orientation == #perpendiculaire 
+				then true 
+				else false
+		),
+	
+	
+		
+	private
+		fn intersection 	_pt_orig 	_pt_2 		_pt_seg_1 	_pt_seg_2  		 =(
+			local pt_result
+			local seuil = 1
+			
+			local vec_proj		= _pt_orig - _pt_2
+			local vec_seg		= _pt_seg_1 - _pt_seg_2
+			
+			local norm_proj		= normalize vec_proj
+			local norm_seg		= normalize vec_seg
+			local dot_proj_seg 	= dot norm_proj norm_seg
+			
+			
+			--- si pas parallele -------------------------
+			local a1, b1, a2, b2 
+			local d1_vert = false
+			local d2_vert = false
+			if dot_proj_seg != 1 and dot_proj_seg != -1 do (
+				
+				--- données pour les eaquations de droite y = ax + b ----
+				-- droite projeté----------------------
+				if (( _pt_orig.y *1000) as integer /1000  == ( _pt_2.y *1000) as integer /1000) then (
+					-- horizontale --
+					a1 = 0
+					b1 	= _pt_orig.y 
+				) else if (( _pt_orig.x *1000) as integer /1000  == ( _pt_2.x *1000) as integer /1000) then (
+					-- verticale --s
+					a1 	= 1
+					b1 	= _pt_orig.y - _pt_orig.x
+					d1_vert = true
+				) else (
+					a1 	= (_pt_orig.y - _pt_2.y ) / (_pt_orig.x - _pt_2.x)
+					b1 	= _pt_orig.y - a1*_pt_orig.x
+				)		
+				-- droite reception
+				if _pt_seg_1.y == _pt_seg_2.y then (
+					-- horizontale --
+					a2 = 0
+					b2 	= _pt_seg_1.y 
+				) else if _pt_seg_1.x == _pt_seg_2.x then (
+					-- verticale --
+					a2 	= 1
+					b2 	= _pt_seg_1.y - _pt_seg_1.x
+					d2_vert = true
+				) else (
+					a2 	= (_pt_seg_1.y - _pt_seg_2.y ) / (_pt_seg_1.x - _pt_seg_2.x)
+					b2 	= _pt_seg_1.y - a2*_pt_seg_1.x
+				)
+				
+				
+				
+				
+				local x, y
+				if 	d1_vert then (
+					if not d2_vert do (
+						x =   _pt_orig.x
+						y =   a2 * x + b2
+					)
+				) else 	if 	d2_vert then (
+					if not d1_vert do (
+						x =   _pt_seg_1.x
+						y =   a1 * x + b1
+					)
+				) else (
+						x =   ( b2 - b1 ) / (a1  - a2 )
+						y =   a1 * x + b1
+				)
+				
+				-- si on a un point on verifie la suite -----------------------------
+				if x != undefined do (
+					
+					local pt_proj  = [x,0,y]
+					
+						--- si projection est dans le bon sens ----------
+						if   dot  ( normalize ( _pt_orig - _pt_2 ) )  (  normalize (   pt_proj - _pt_orig) )   > 0 do (
+							
+							local precision = 1000
+							local dist_seg 		= ( ( distance _pt_seg_1 	_pt_seg_2 ) * precision as integer ) / precision
+							local dist_ptProj 		= ( ( distance _pt_seg_1 	pt_proj 		+ distance _pt_seg_2 	pt_proj ) * precision as integer ) / precision	
+							
+							if  dist_ptProj  as string == dist_seg as string  do 
+								pt_result 	= pt_proj
+							
+						)
+				)
+				
+			)
+			pt_result
+		),
+		fn chercher_pt_a90degGauche	_id_pt  	vec_pt		 =(
+			
+			local seuil = 1			
+			local vertexSurLigne = #()
+			local mtrx_AP 		= m_plug.axeP_mtrx			
+			local pt 				= _pts[ _id_pt ] 			* 	inverse  	mtrx_AP	
+			local norm_pt 		= normalize vec_pt			
+			local mtrx_rotateZ90	=	rotateY	(matrix3 1)	90
+			local norm_test 			= norm_pt * mtrx_rotateZ90			
+			local pt_virtuel 			= pt + norm_test			
+			local a,b
+			local verticale 		= false
+			
+			if (( pt.y *1000) as integer /1000  == ( pt_virtuel.y *1000) as integer /1000) then (
+				-- horizontale --
+				a = 0
+				b = pt.y 
+			) else if (( pt.x *1000) as integer /1000  == ( pt_virtuel.x *1000) as integer /1000) then (
+				-- verticale --
+				a 	= 1
+				b 	= pt.y - pt.x
+				verticale = true
+			) else (
+				a 	= (pt.y - pt_virtuel.y ) / (pt.x - pt_virtuel.x)
+				b 	= pt.y - a*pt.x
+			)		
+			
+			
+			if not verticale then (
+				for i=1 to _pts.count do (
+					local pt_test = _pts[i] * 	inverse  	mtrx_AP	
+					
+					if  abs ( pt_test.y - ( pt_test.x * a + b ) ) < seuil do (
+						
+						local dot_test_dir = dot (normalize (pt_test - pt ))  norm_test
+							
+						if pt_test != pt and dot_test_dir > 0 do 
+							append vertexSurLigne i
+						
+					)
+				)
+			) else (
+				for i=1 to _pts.count do (
+					local pt_test = _pts[i] * 	inverse  	mtrx_AP	
+					
+					if  abs ( pt_test.x - pt.x ) < seuil  do (
+						
+						local dot_test_dir = dot (normalize (pt_test - pt ))  norm_test
+							
+						if pt_test != pt and dot_test_dir > 0 do 
+							append vertexSurLigne i
+						
+					)
+				)
+			)
+			
+			vertexSurLigne
+			local result 
+			local dist_min = 0
+			for id_pt_test in vertexSurLigne do (
+				local pt_test = _pts[ id_pt_test ] 			* 	inverse  	mtrx_AP	
+				local dist_test = distance pt pt_test
+				if  dist_test < dist_min or dist_min == 0 do (
+					result = id_pt_test
+					dist_min = dist_test
+				)
+			)
+			
+			result
+			
+		),
+		fn unir 	_listeTraces 	=(
+			
+			local traces = #() 
+			
+			for trace in _listeTraces do (
+				local traceTmp = for _pt  in trace collect _pt
+					append traces traceTmp
+			)
+				
+			
+			
+			local continu = true
+			local suivant = false
+			local idTrace1 = 1
+			local idTrace2 = 1
+			local trace1, trace2
+			
+			
+			while traces.count > 1 and	continu do (
+				trace1 	= traces[idTrace1]
+				suivant 	= false
+				for idTrace2 = 1 to traces.count where idTrace1 != idTrace2 and  not suivant 	do (
+					
+					trace2 	= traces[ idTrace2 ]
+					
+					local ptsCommuns			= #()
+					local ptsCommuns_trouve = false
+					local idCommun_rect1 		= 0
+					
+					for i = 1 to  trace1.count  where not  ptsCommuns_trouve   do (
+						local id1 = trace1[i]
+						local id2 =	finditem 	trace2	 id1
+						
+						if  id2 != 0 then (
+							
+							append ptsCommuns id1
+							if ptsCommuns.count == 2 do 
+								ptsCommuns_trouve = true
+						)
+					)
+				
+					
+					if ptsCommuns.count > 1 then (
+						local idPt1_communTrace2 = findItem	trace2  ptsCommuns[1]
+						local idPt2_communTrace2 = boucler	trace2  ( idPt1_communTrace2 + 1 )
+						
+						if trace2[ idPt2_communTrace2 ] != ptsCommuns[2] then (
+							local id_Pt1_trace2 = boucler trace2 (idPt1_communTrace2 + 1)
+							local id_Pt2_trace2 = boucler trace2 (idPt1_communTrace2 + 2)
+							
+							local idPt1_communTrace1 = findItem	trace1  ptsCommuns[1]
+							local idPt2_communTrace1 = boucler trace1 ( idPt1_communTrace1 + 1 )
+							if trace1[ idPt2_communTrace1 ] != ptsCommuns[2] then (
+								local idPt2_communTrace1 = boucler trace1		( (finditem trace1  ptsCommuns[2] ) + 1 )
+								insertItem   trace2[  id_Pt2_trace2 ]	trace1	 idPt2_communTrace1
+								insertItem   trace2[  id_Pt1_trace2 ]	trace1	 idPt2_communTrace1
+								
+							) else (
+								local idPt2_communTrace1 = boucler trace1		( (finditem trace1  ptsCommuns[1] ) + 1 )
+								insertItem   trace2[  id_Pt2_trace2 ]	trace1	 idPt2_communTrace1
+								insertItem   trace2[  id_Pt1_trace2 ]	trace1	 idPt2_communTrace1
+							)
+							
+							
+							
+						) else (
+							local id_Pt1_trace2 = boucler trace2 (idPt2_communTrace2 +1)
+							local id_Pt2_trace2 = boucler trace2 (idPt2_communTrace2 +2)
+-- 								format "		-> - B - on insert a partir de %\n" trace2[ id_Pt1_trace2 ]
+							
+							local idPt1_communTrace1 = findItem	trace1  ptsCommuns[1]
+							local idPt2_communTrace1 = boucler trace1 ( idPt1_communTrace1 + 1 )
+							if trace1[ idPt2_communTrace1 ] != ptsCommuns[2] then (
+								local idPt2_communTrace1 = boucler trace1		( (finditem trace1  ptsCommuns[2] ) + 1 )
+								insertItem   trace2[  id_Pt2_trace2 ]	trace1	 idPt2_communTrace1
+								insertItem   trace2[  id_Pt1_trace2 ]	trace1	 idPt2_communTrace1
+								
+							) else (
+								local idPt2_communTrace1 = boucler trace1		( (finditem trace1  ptsCommuns[1] ) + 1 )
+								insertItem   trace2[  id_Pt2_trace2 ]	trace1	 idPt2_communTrace1
+								insertItem   trace2[  id_Pt1_trace2 ]	trace1	 idPt2_communTrace1
+							)
+							
+							
+						)
+						
+						traces[idTrace1] = ordonner_Points 	trace1
+						deleteItem  traces 	idTrace2
+						idTrace1 = 1
+						
+						suivant = true
+					)
+				)
+				if suivant == false do 	
+					idTrace1 += 1
+				if idTrace1 > traces.count - 1 do 	
+					continu = false
+				
+			) -- fin du while --------
+			
+			
+			traces
+			
+			
+			
+		),
+	
+	public ---TEMP --
+		fn chercher_alignements	_pts		_idTest		_seuil		=(
+			
+			local mtrx_AP 			= get_axePrincipal_mtrx 	_pts
+			local pt_test				= _pts[_idTest]		* inverse  mtrx_AP
+			local result =#()
+		
+			for i = 1  to _pts.count do (
+				
+				local j 				= boucler 	_pts	( i + 1)
+				local pt 			= _pts[i]	* inverse  mtrx_AP
+				local pt_suivant 	= _pts[j]	* inverse  mtrx_AP
+				
+				
+				if estPignon  _pts	_idTest		 and estPignon  _pts 	i 	 					do 	(
+					if abs ( pt_test.x - pt.x ) < _seuil do 
+						appendIfUnique result i
+					if abs ( pt_test.x - pt_suivant.x ) < _seuil do 
+						appendIfUnique result i
+				)
+				
+				if not estPignon  _pts	_idTest		 and not estPignon _pts i  	do (
+					if abs ( pt_test.y - pt.y ) < _seuil do
+						appendIfUnique result i
+					if abs ( pt_test.y - pt_suivant.y ) < _seuil do 
+						appendIfUnique result i
+				)
+				
+			)
+				
+				
+
+			result
+		),
+		
+		
+	-----------------  Optimisations ----------------------
+	public
+		fn orthonormer 		&_pts	_seuil  =(
+			debug"orthonormer"
+			
+			local mtrx_AP	= get_axePrincipal_mtrx 	_pts
+			local pts_result 	= deepcopy _pts
+			
+			local grps_de_points = #()
+			
+			--- on fait les groupes de point à aligner -----------
+			local i = 1
+			while i <= _pts.count do (
+				
+				local pt_courant = _pts[i]
+				
+				local groupe = #(i)
+				
+				local pt_courant_estPignon = estPignon	 _pts	  i  
+				local onChangeDePoint = true
+				local i_aTester = i+ 1
+				
+				while  onChangeDePoint do (
+					if i_aTester >  _pts.count  then i_aTester = 1 
+					if estPignon	 _pts	  i_aTester  ==   pt_courant_estPignon
+						then (
+							append groupe  i_aTester
+						) else
+							onChangeDePoint = false
+						
+					i_aTester += 1
+				)
+				i += groupe.count
+				
+				
+				-- on checked les doublons premier-drenier-------------
+				if i > _pts.count and grps_de_points.count > 1 do (
+					local present  = false
+					for pt_test_id in groupe do (
+						if findItem grps_de_points[1]  pt_test_id != 0 do
+							present = true
+					)
+					if present do (
+						for pt_tmp_id in grps_de_points[1]  do
+							appendIfUnique	 groupe  pt_tmp_id
+						deleteItem grps_de_points 1
+					)
+				)
+				
+				append grps_de_points  groupe
+				
+				
+			)
+			
+			for grp in grps_de_points do (
+				
+				-- on cherche la position moyenne du groupe de points -------
+				local position_moyenne = 0
+				
+				for  i = 1 to grp.count do (
+					local idPt  			= grp[i ]
+					local pt 				= _pts[idPt]				* inverse  mtrx_AP 
+					if   estPignon _pts  idPt  then (
+						position_moyenne += ( /* pt_suivant.x -  */pt.x ) /( grp.count + 1 )
+					)else (
+						position_moyenne += ( /* pt_suivant.y -  */pt.y ) /( grp.count + 1 )
+					)
+				)
+				
+				local idPt  			= grp[ grp.count ]
+				local idPt_suivant 	= idPt + 1
+				if idPt_suivant > _pts.count do idPt_suivant = 1
+				local pt_suivant 	= _pts[idPt_suivant]	*  inverse mtrx_AP 
+				if   estPignon _pts  idPt  then (
+					position_moyenne += ( pt_suivant.x ) /( grp.count + 1 )
+				)else (
+					position_moyenne += ( pt_suivant.y ) /( grp.count + 1 )
+				)
+				
+				
+				-- on bouge les points	-------
+				
+				for  i = 1 to grp.count do (
+					
+					local idPt  			= grp[i ]
+					local	pt 				= pts_result[idPt]				*	inverse  mtrx_AP  	
+					
+					if   estPignon _pts  idPt  then (
+-- 						pts_result[idPt] 				= ( pt 				+ [position_moyenne - pt.x , 0,0 ] 		* _seuil/100			) *   mtrx_AP 
+						pts_result[idPt] 				= ( pt 				) 
+						pts_result[idPt].x += ( position_moyenne - pt.x ) 	* _seuil/100		
+						
+					)else (
+-- 						pts_result[idPt] 				= ( pt 				- [0,position_moyenne - pt.y , 0 ] 		* _seuil/100			) *   mtrx_AP 
+						pts_result[idPt] 				= ( pt 				) 
+						pts_result[idPt].y += ( position_moyenne - pt.y ) 	* _seuil/100		
+					)
+					pts_result[idPt] *= mtrx_AP
+				)
+				local idPt  			= grp[ grp.count ]
+				local idPt_suivant = idPt + 1
+				if idPt_suivant > _pts.count do idPt_suivant = 1
+				local	pt_suivant 				= pts_result[idPt_suivant]				*	inverse  mtrx_AP  	
+				pts_result[idPt_suivant] 	= ( pt_suivant ) 
+				if   estPignon _pts  idPt  then (
+						pts_result[idPt_suivant].x += ( position_moyenne - pt_suivant.x ) 	* _seuil/100		
+				)else(
+						pts_result[idPt_suivant].y += ( position_moyenne - pt_suivant.y ) 	* _seuil/100		
+				)
+				pts_result[idPt_suivant] *= mtrx_AP
+				
+			)
+			
+			_pts = pts_result
+			
+		),
+		fn souder 				&_pts	_seuil  =(
+			debug "souder"
+			debug "_pts" var:_pts
+			
+			local i = 1
+			while i <=_pts.count do (
+				
+					debug "i" var:i
+				local j= i+1
+				if j > _pts.count  do j =1
+					
+				local pt 			= _pts[i]
+				local ptSuivant 	= _pts[j]
+				if distance pt ptSuivant <= _seuil do (
+					debug "		SOUDURE"
+					deleteitem _pts j
+					_pts[i] = ( pt + ptSuivant ) / 2
+					i = 1
+				debug "		_pts" var:_pts
+				)
+				i+=1
+			)
+			
+		),
+		fn aplanir 				&_pts	_seuil  =(
+			debug "aplanir"
+			
+			local i = 1
+			while i <= _pts.count do (
+				
+				local h = i - 1
+				if h < 1  do h = _pts.count
+				local j= i+1
+				if j > _pts.count  do j =1
+				local ptDAvant 	= _pts[h]
+				local pt 			= _pts[i]
+				local ptSuivant 	= _pts[j]
+				
+				local vec1 = normalize (ptDAvant - pt)
+				local vec2 = normalize (ptSuivant - pt)
+				
+				local anglePt = acos(dot vec1 vec2)			
+				if 	anglePt >= 180 - _seuil  then (
+					deleteitem _pts i
+					i = 0
+				)
+				dot
+				i +=1
+			)
+
+			result
+		),
+		fn aligner				&_pts	_seuil  =(	
+			debug "aligner"
+			
+			local mtrx_AP 	= get_axePrincipal_mtrx 	_pts
+			local pts_result = deepcopy _pts
+			for i = 1 to   _pts.count  do (
+				
+				local aligns = 	chercher_alignements	_pts	i		_seuil	
+				
+				local pt_moyenne = [0,0,0]
+				for id_align in aligns do 
+					pt_moyenne += _pts[id_align]	* inverse  mtrx_AP
+				pt_moyenne /=  aligns.count
+				
+				for id_align in aligns  do (
+					
+					local j 						= boucler _pts (  id_align + 1 )
+					local pt 					= _pts[id_align]	* inverse  mtrx_AP  
+					local pt_suivant 			= _pts[j]	* inverse  mtrx_AP
+					
+					local vec_moyenne1 	= pt_moyenne	 - pt
+					local vec_moyenne2 	= pt_moyenne	 - pt_suivant
+					local vec_align1, vec_align2
+					if not estPignon  _pts	id_align		 then (
+						vec_align1 			= [0,vec_moyenne1.y,0] 
+						vec_align2 			= [0,vec_moyenne2.y,0] 						
+					) else (
+						vec_align1 			= [vec_moyenne1.x,0,0] 
+						vec_align2 			= [vec_moyenne2.x,0,0] 
+					)
+					
+					pt 							= _pts[id_align]	* inverse  mtrx_AP  	+ vec_align1 
+					pt_suivant 					= _pts[j]			* inverse  mtrx_AP  	+ vec_align2
+					
+					pts_result[id_align] 	= pt *   mtrx_AP 
+					pts_result[j] 			= pt_suivant *   mtrx_AP 
+					
+				)
+			)
+			_pts = pts_result
+		),
+		fn projeter		 		&_pts 	=(
+			
+			debug"projeter"
+			local mtrx_AP 	= get_axePrincipal_mtrx 	_pts
+			local seuil = 5
+			local result
+			local trace 		= _pts
+			local trace_temp =  for item in trace collect item
+			
+			local est_subdivise_total = false
+			while not est_subdivise_total do (
+				
+				local est_subdivise = false
+				local est_trouve = false
+				
+				local i = 1
+				while i <=  trace_temp.count and not est_trouve do (
+					
+					local id_direction_suiv		=  boucler trace_temp  (i+1)
+					local id_direction_prec		= 	boucler trace_temp  (i-1)
+					
+					local pt_orig		= 	trace_temp[ i ]	* 	inverse  	mtrx_AP  
+					local pt_suiv		=	trace_temp[ id_direction_suiv  ]  * 	inverse  	mtrx_AP
+					local pt_prec		= 	trace_temp[ id_direction_prec  ] * 	inverse  	mtrx_AP
+					
+					---- les segments a tester------------
+					local compteur_segment = 0
+					while compteur_segment <  trace_temp.count  - 2 and not est_trouve do (
+						
+						--- le segment -----
+						local id_seg_1 	= boucler trace_temp  ( i + compteur_segment + 1 )
+						local id_seg_2 	= boucler trace_temp  ( i + compteur_segment + 2	)
+						
+						local pt_seg_1	= trace_temp[ id_seg_1 ]	* 	inverse  	mtrx_AP
+						local pt_seg_2	= trace_temp[ id_seg_2 ] 	* 	inverse  	mtrx_AP 
+						
+						--- la projection 1 -------
+						local pt_proj = intersection 	pt_orig		pt_suiv		pt_seg_1	 	pt_seg_2		
+						
+						if pt_proj != undefined  do (	
+							
+							if distance pt_proj 	pt_seg_1 > seuil and  distance pt_proj 	pt_seg_2 > seuil do (
+								if not pt_est_dejaPresent   trace_temp  	( pt_proj	* 	mtrx_AP )	 do ( 
+									local id_place = trouver_pt	 trace_temp  ( pt_seg_1 * 	mtrx_AP )
+									insertItem			( pt_proj	* 	mtrx_AP )	trace_temp 	( id_place + 1 )
+									est_subdivise = est_trouve = true
+								)
+							)
+						)
+						
+						--- la projection 2 -------
+						local pt_proj = intersection 	pt_orig		pt_prec		pt_seg_1	 	pt_seg_2	
+						
+						if pt_proj != undefined  do (	
+							
+							if distance pt_proj 	pt_seg_1 > seuil and  distance pt_proj 	pt_seg_2 > seuil do (
+								if not pt_est_dejaPresent   trace_temp  	( pt_proj	* 	mtrx_AP )	 do ( 
+									local id_place = trouver_pt	 trace_temp  ( pt_seg_1 * 	mtrx_AP )
+									insertItem			( pt_proj	* 	mtrx_AP )	trace_temp 	( id_place + 1 )
+									est_subdivise = est_trouve = true
+								)
+							)
+						)
+						
+						compteur_segment +=  1
+					) -- fin while compteur_segment
+					
+					i += 1
+					
+				) -- fin while i  --
+				
+				if not est_subdivise do est_subdivise_total = true
+				
+			) -- fin while not est_subdivise_total
+			
+			_pts = trace_temp
+			
+		),
+		
+		
+		------Subdivision ----------------------------------------------------------
+		fn scanner_points 	_shape	=(
+			
+			local ptsSurface				=#()
+			
+			---- On chope les points de la surface a scanner -----------
+			for id_pt = 1 to ( numKnots 	_shape 	1 ) do	(
+				local pt_shape 	= getKnotPoint 	_shape 	1 	id_pt
+				local pt_surface 	= pt_shape * inverse  _shape.transform
+				append ptsSurface 	 pt_surface
+			)
+			
+			
+			--- on fait tourner les spline dans le meme sens ----
+			if not m_outils.est_sensPositif 	ptsSurface 	 do
+				trace_absolu = m_outils.changer_sens		ptsSurface
+			
+			ptsSurface
+			
+		),
+		fn subdiviser		 	_pts 		=(
+			debug "subdiviser"
+			
+			--- on  les points projetés au tracé --------
+			projeter		_pts
+			
+			local result = #()
+			local result_reste =#()
+			
+			m_rectangles_traces 		= #()
+			
+			local seuil 					= 1
+			local mtrx_AP 			= get_axePrincipal_mtrx 	_pts
+			local trace 				= _pts
+			
+			for i = 1 to  trace.count 	do (
+				
+				local pt_orig			= 	trace[ i ]	* 	inverse  	mtrx_AP 
+				local id_pt_preced 	= boucler 	trace	( i - 1)
+				local pt_preced 		= trace[ id_pt_preced ] * 	inverse  	mtrx_AP	
+				local vec_pt 			= pt_orig - pt_preced		
+				local id_pt_1, id_pt_2, id_pt_3, id_pt_4
+				
+				id_pt_1	= chercher_pt_a90degGauche	i 	vec_pt	 
+				
+				if id_pt_1 != undefined then (
+					local norm 		= vec_pt * (rotateY	(matrix3 1)	90 )
+					id_pt_2				= chercher_pt_a90degGauche	id_pt_1 	norm		 
+				)  				
+				if id_pt_2 != undefined then (
+					local norm	 	= vec_pt * (rotateY	(matrix3 1)	180 )
+					id_pt_3 				= chercher_pt_a90degGauche	id_pt_2 	norm	 
+				)  				
+				if id_pt_3 != undefined then (
+					local norm	 	= vec_pt * (rotateY	(matrix3 1)	270 )
+					id_pt_4 				= chercher_pt_a90degGauche	id_pt_3 	norm	 
+				)  
+				
+				---- si on a les quatre points -------
+				if id_pt_4 == i do (
+					
+					local pt_rect_1 = trace[ id_pt_1 ]	* 	inverse  	mtrx_AP 
+					local pt_rect_2 = trace[ id_pt_2 ]	* 	inverse  	mtrx_AP 
+					local pt_rect_3 = trace[ id_pt_3 ]	* 	inverse  	mtrx_AP 
+					
+					local surf = ( distance pt_orig pt_rect_1 ) * ( distance pt_orig pt_rect_3 )  / 10000
+					
+					local rect =  #( i, id_pt_1, id_pt_2, id_pt_3 )
+					
+					local rect_ordo = ordonner_Points 	rect
+					append m_rectangles_traces 		rect_ordo
+					virerDoublonsDansTableau 	m_rectangles_traces
+					
+				)
+			) -- fin while i  --
+			
+			
+		),
+		fn decouper 		 	_pts 		=(
+			debug "decouper"
+			
+			
+			--  points concaves -----------------
+			
+			
+			local result = #()
+			local result_reste =#()
+			
+			
+			
+			local seuil 				= 1
+			local mtrx_AP 			= get_axePrincipal_mtrx 	_pts
+			local trace 				= _pts
+			local trace_restant 	= for i = 1 to trace.count collect i
+			
+			--- creer la face tracé pour tester intersection 	------------
+			
+			for sstrace in   m_rectangles_traces 	do (
+				
+				local estValide = true
+				
+				local pt_rect_1 = trace[ sstrace[ 1 ] ]	* 	inverse  	mtrx_AP 
+				local pt_rect_2 = trace[ sstrace[ 2 ] ]	* 	inverse  	mtrx_AP 
+				local pt_rect_3 = trace[ sstrace[ 3 ] ]	* 	inverse  	mtrx_AP 
+				local pt_rect_4 = trace[ sstrace[ 4 ] ]	* 	inverse  	mtrx_AP 
+				
+				local surf = ( distance pt_rect_2 	pt_rect_1 ) * ( distance pt_rect_1 pt_rect_4 )  / 10000
+				
+				
+				if m_plug.sousTraces_surf_min_use do
+					if surf < m_plug.sousTraces_surf_min do estValide = false
+				if m_plug.sousTraces_surf_max_use do
+					if surf > m_plug.sousTraces_surf_max do estValide = false
+									
+				if estValide then (
+					local nvTrace = str_ssTrace 		trace:sstrace		etages:m_plug.sousTraces_etages
+					appendIfUnique result  nvTrace
+					
+				) else (
+					
+					append result_reste 		sstrace
+					virerDoublonsDansTableau 		result_reste
+					
+				)
+			
+			) -- fin while i  --
+			
+			result_reste = unir  result_reste
+			
+			if result_reste.count >0 do (
+				for traceResultRest in result_reste do (
+					local nvTrace = str_ssTrace 	trace:traceResultRest	etages:m_plug.niveaux_nbre
+					append  result  nvTrace
+				)
+			)
+			
+			
+			m_sousTraces = result
+			
+		),
+		
 		
 		
 		
 		---- BACK		TRIANGULATION 		BACK  ----------------
 		--- renvois le tableau des triangles créés -------
 		i_debug = 0,
-		fn trianguler  _pts =(
+		fn trianguler  _pts 	return_ptsIDs:false 	=(
+			
 -- 			debug "-------------------- TRIANGULER SHP -----------------------------------------------"
 			local pts_poly 			= deepcopy _pts
 			
@@ -1255,8 +2001,8 @@ struct str_outils_shape (
 -- 					debug"pts_poly1" var:pts_poly1
 -- 					debug"pts_poly2" var:pts_poly2
 					
-					result_triangles += trianguler  pts_poly1
-					result_triangles += trianguler  pts_poly2
+					result_triangles += trianguler  pts_poly1	return_ptsIDs:return_ptsIDs
+					result_triangles += trianguler  pts_poly2	return_ptsIDs:return_ptsIDs
 					
 					if false and m_debug do (
 						sp = splineShape name:( "tri - decoupage poly " + i_debug as string + " - 1")
@@ -1286,8 +2032,22 @@ struct str_outils_shape (
 					
 					
 					---- si on en trouve pas: 	on peut creer le triangle et retirer le point tester de la liste du polygone ----
-					append 	result_triangles  triangle_aTester
+					--- soit on renvois les ids des points ----
+					if return_ptsIDs then 	(
+						local id_pt_1 = findItem _pts 	triangle_aTester[1]
+						local id_pt_2 = findItem _pts 	triangle_aTester[2]
+						local id_pt_3 = findItem _pts 	triangle_aTester[3]
+						append 	result_triangles  	[ id_pt_1, id_pt_2, id_pt_3 ]
+					--- soit on renvois les coordonnées des points ----
+					) else	append 	result_triangles  	triangle_aTester
+					
 					deleteItem pts_poly  id_pt_aTester
+					
+					
+					
+					
+					
+					/* 
 					
 					if false and m_debug do (
 						sp = splineShape name:( "triangle " + i_debug as string )
@@ -1296,7 +2056,7 @@ struct str_outils_shape (
 						for pt in triangle_aTester do		addknot sp 1 #corner #curve  pt
 						close sp 1
 						updateShape sp
-					)
+					)  */
 				)
 				
 			)  --- fin du while il ya plus de 3 pts dans le polygone ------

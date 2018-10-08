@@ -12,6 +12,7 @@ struct str_mgr_surfaces (
 		try if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 		catch ()
 	),
+	------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 	
 	
 	

@@ -68,7 +68,7 @@ category:"CP | Urba | menuiseries"
 			#fix:				menuiserie = createInstance  urba_menuis_fix	
 			#ouvrant:		menuiserie = createInstance  urba_menuis_ouvrant	
 		)
-		if long 				!= unsupplied do		menuiserie.largeur 				= long		
+		if long 				!= unsupplied do		menuiserie.longueur 				= long		
 		if haut 				!= unsupplied do		menuiserie.hauteur 				= haut		
 		if prof 				!= unsupplied do		menuiserie.profondeur 			= prof		
 		if epais				!= unsupplied do		menuiserie.epaisseur 			= epais		
@@ -178,9 +178,9 @@ category:"CP | Urba | menuiseries"
 			button		'btn_retirer_element'			"-" width: 20 height:20 align:#left
 			button		'btn_monter_element'		"/\\" width: 20 height:20 align:#left
 			button		'btn_descendre_element'	"\/" width: 20 height:20 align:#left
-			listbox		'lbx_sequence' 				"" width:145 height:8 align:#left
+			listbox		'lbx_sequence' 				"" /* width:145 */ height:5 align:#left
 -- 			label			'lbl_params'	 					"Parametres: "  align:#left
-			subrollout	'subroll_param_elem'		width: 145 height:280 align:#left
+			subrollout	'subroll_param_elem'		/* width: 145 */ height:200 align:#left
 		)
 		
 		
@@ -292,8 +292,8 @@ category:"CP | Urba | menuiseries"
 			local dist_imposees	 	= 	0
 			local nbr_divis				=	0
 			for elem in m_sequence do 
-				if elem.largeur != 0 then
-					dist_imposees += elem.largeur 
+				if elem.longueur != 0 then
+					dist_imposees += elem.longueur 
 				else nbr_divis += 1			
 			local longueur_elem 	= ( longueur - dist_imposees ) / nbr_divis
 			
@@ -306,11 +306,11 @@ category:"CP | Urba | menuiseries"
 				local menuiserie_temp 			=  mgr_presets.get_element_from_datas		elem_data
 				
 				---- on actualise les paramatres de l'element  (si param == 0 alors on utilise le parametre general ) ---------------
-				if menuiserie_temp.largeur 	== 0 	do	menuiserie_temp.largeur 		= longueur_elem				
+				if menuiserie_temp.longueur 	== 0 	do	menuiserie_temp.longueur 		= longueur_elem				
 				if menuiserie_temp.epaisseur	== 0 	do	menuiserie_temp.epaisseur		= epaisseur				
 				if menuiserie_temp.hauteur  	== 0 	then	menuiserie_temp.hauteur 		= hauteur
 					else (
-						local imposte_tmp = creer_menuiserie 	#fix	long:		menuiserie_temp.largeur	\
+						local imposte_tmp = creer_menuiserie 	#fix	long:		menuiserie_temp.longueur	\
 																						haut:		( hauteur - menuiserie_temp.hauteur  )	\
 																						prof:		5	\
 																						epais:	menuiserie_temp.epaisseur		\
@@ -326,7 +326,7 @@ category:"CP | Urba | menuiseries"
 				meshop.attach	mesh		menuiserie_temp.mesh
 				
 				---- on translate le point d'insertion ---------------
-				translate mtrx_insertion ( [ menuiserie_temp.largeur ,0,0]  * transformation )
+				translate mtrx_insertion ( [ menuiserie_temp.longueur ,0,0]  * transformation )
 				
 			) 
 		) --- fin creation de la sequence -------------
