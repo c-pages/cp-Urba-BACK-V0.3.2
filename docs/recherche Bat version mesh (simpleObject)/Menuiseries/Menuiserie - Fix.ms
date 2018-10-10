@@ -1,40 +1,64 @@
 
 
 include  "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\Primitives\\Primitive - Boite.ms"
+include  "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\recherche - simpleObject - mgr - Construction base.ms"
 	
-plugin simpleObject		urba_menuis_fix
-name:"Fix"
+	
+	
+	
+plugin simpleObject		urba_menuis_fixe
+name:"Fixe"
 classID:#(0x4dd385d2, 0x5dd07f21)
 category:"CP | Urba | menuiseries"
--- invisible:true
 (
 	
-	parameters params_translationormation 	(
-		translationormation	type:#matrix3	default:(matrix3 1)
-	)
+	
+	------------ DEBUG	----------------------------------------------------------------------------------
+	local m_debug = true
+-- 	local 	m_debug = false
+	local 	m_dbgPrefix ="urba_menuis_fix"
+	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
+	------------ DEBUG	----------------------------------------------------------------------------------
+	
+	
+	
+	--- Optionnel:	le  plug contenant la menuiserie ("ensemble" de mensuierie) pour permettre d'enregistrer les parametres du fix dans le parent.
+	local m_parent
+	
+	local mgr_constr	=	str_contruction_base ()
+	
+	
+	/* 
+	fn initialiser	=	(
+		debug "initialiser ()"
+	) */
+	
+	
+	
+	
+	
+	
 	parameters params_general rollout:roll_general
 	(
 		
-		longueur			type:#worldUnits 	ui:spn_longueur 			default:0
-		hauteur 			type:#worldUnits 	ui:spn_hauteur 			default:0
-		profondeur	 	type:#worldUnits 	ui:spn_profondeur		default:0
+		longueur				type:#worldUnits 	ui:spn_longueur 			default:0
+		hauteur 				type:#worldUnits 	ui:spn_hauteur 			default:0
+		profondeur	 		type:#worldUnits 	ui:spn_profondeur		default:0		
+		epaisseur	 		type:#worldUnits 	ui:spn_epaisseur			default:0
+		vitrage_ep	 		type:#worldUnits 	default:2
 		
-		epaisseur	 	type:#worldUnits 	ui:spn_epaisseur			default:7.
-		vitrage_ep	 	type:#worldUnits 	default:2
+		matId_menuis		type:#integer 			ui:spn_matId_menuis	default:1
+		matId_vitrage		type:#integer 			ui:spn_matId_vitrage	default:2
 		
-		matId_menuis		type:#integer 		ui:spn_matId_menuis	default:1
-		matId_vitrage		type:#integer 		ui:spn_matId_vitrage	default:2
+		montant_G			type:#boolean 		default:true
+		montant_D			type:#boolean 		default:true
+		traverse_H			type:#boolean 		default:true
 		
 	)
-	
-	
-	
-	
-	
-	rollout roll_general  "Fix"
+	rollout roll_general  "Fixe"
 	(
 		
-		group "Global" (
+		group "Menuiserie" (
 			spinner spn_longueur 		"Longueur" 		type:#worldunits range:[0,1e20,0]
 			spinner spn_hauteur 		"Hauteur" 		type:#worldunits range:[0,1e20,0]
 			spinner spn_profondeur 	"Profondeur" 	type:#worldunits range:[0,1e20,0]
@@ -55,54 +79,14 @@ category:"CP | Urba | menuiseries"
 		
 	)
 	
-	fn enregistrer_params	=()
-	fn creer_boite 	longueur		hauteur		prof		translation:		matID:	=(
-		
-		---- on creer le sous objet model ---------------------
-		nvl_boite = createInstance  urba_prim_boite	
-		nvl_boite.longueur	 			= longueur
-		nvl_boite.hauteur 				= hauteur
-		nvl_boite.profondeur 			= prof	
-		
-		if matID!= unsupplied do	nvl_boite.matID 				= matID
-		
-		
-		--- onl'ajoute a notre mesh ----------
-		local id_pt_debut = ( meshop.getNumVerts mesh + 1 )
-		meshop.attach	mesh		nvl_boite.mesh
-		
-		--- et on le place ----------
-		if translation!= unsupplied do		
-			meshop.moveVert 	mesh	#{id_pt_debut..(meshop.getNumVerts mesh)} translation
-	)
+	
+
 	
 	
 	
-	on buildMesh do	(
-		--- vider le mesh --------
-		delete mesh
-		
-		local matrx_origine = matrix3 1
-		
-		--- montant vertical 1 ----------
-		creer_boite 	epaisseur		hauteur		profondeur			matID:matId_menuis
-		
-		--- montant vertical 2 ----------
-		creer_boite 	epaisseur		hauteur		profondeur		translation:[longueur - epaisseur,0,0]	matID:matId_menuis
-		
-		--- montant horizontal 1 ----------
-		creer_boite 	( longueur - 2 *epaisseur)		epaisseur		profondeur		translation: [epaisseur,0,0]	matID:matId_menuis
-		
-		--- montant horizontal 2 ----------
-		creer_boite 	( longueur - 2 *epaisseur)		epaisseur		profondeur		translation:[epaisseur,0,hauteur - epaisseur]		matID:matId_menuis
-		
-		--- vitrage ----------
-		creer_boite 	( longueur - 2 *epaisseur)		( hauteur - 2 *epaisseur)		vitrage_ep		translation:[epaisseur, (profondeur - vitrage_ep) / 2  , epaisseur]	matID:matId_vitrage
-		
-	)
 	
 	
-	
+	------------ TOOLS	----------------------------------------------------------------------------------------------------------------------
 	tool create
 	(
 		local pt_debut
@@ -135,13 +119,98 @@ category:"CP | Urba | menuiseries"
 					pt_hauteur				=	gridPoint
 				)
 				4:	hauteur 					= length ( gridPoint - pt_hauteur )
-			)
+			)		
+	) --- fin tool create ---------
+	
+	
+	
+	
+	--------------- EVENEMENTS  ----------------------------------------------------------------------------------------------------------------------
+	
+	
+	on buildMesh do	(
+		
+		--- vider le mesh --------
+		delete mesh
+		
+		
+		
+		--- la longueur des traverses------
+		local long_trav	=	longueur
+		if montant_G	do long_trav -= epaisseur
+		if montant_D	do long_trav -= epaisseur
+		
+		--- la hauteur du vitrage -----
+		local ht_vitrage	=	hauteur - epaisseur 
+		if traverse_H	do ht_vitrage -= epaisseur 
 		
 		
 		
 		
+		--- montant  gauche ----------
+		if montant_G do
+			mgr_constr.ajouter_boite 	mesh		long:		epaisseur		\
+															prof:		profondeur		\
+															ht:		hauteur			\
+															matID:	matId_menuis
 		
+		--- montant droite ----------
+		if montant_D do
+			mgr_constr.ajouter_boite 	mesh		long:			epaisseur		\
+															prof:			profondeur		\
+															ht:			hauteur			\
+															transf:		[longueur - epaisseur,0,0]	\
+															matID:		matId_menuis
 		
+		--- traverse basse ----------
+		mgr_constr.ajouter_boite 	mesh		long:			long_trav					\
+														prof:			profondeur					\
+														ht:			epaisseur					\
+														transf:		[epaisseur,0,0]				\
+														matID:		matId_menuis
+							
+		--- traverse	haute ----------
+		if traverse_H do
+			mgr_constr.ajouter_boite 	mesh		long:			long_trav				\
+															prof:			profondeur									\
+															ht:			epaisseur									\
+															transf:		[epaisseur,0,hauteur - epaisseur]	\
+															matID:		matId_menuis
+		
+		--- vitrage ----------
+		mgr_constr.ajouter_boite 	mesh		long:			long_trav		\
+														prof:			vitrage_ep							\
+														ht:			ht_vitrage		\
+														transf:		[epaisseur, (profondeur - vitrage_ep) / 2  , epaisseur]	\
+														matID:		matId_vitrage
+	
+	)  ----- fin on buld mesh -----------------
+	
+	
+	
+	
+	/* 
+	on load 						do 	(
+		initialiser ()
 	)
-)
+	on clone 	_original 	do (	
+		initialiser ()
+	)
+	on create do (
+		initialiser ()
+	)
+	on update do	(
+		initialiser ()
+	)
+	 */
+	
+	
+) ----- fin plugin -------------------
 
+
+
+
+
+
+
+	

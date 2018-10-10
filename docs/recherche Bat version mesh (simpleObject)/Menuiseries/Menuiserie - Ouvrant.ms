@@ -2,43 +2,54 @@
 
 
 include  "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\Primitives\\Primitive - Boite.ms"
+include  "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\recherche - simpleObject - mgr - Construction base.ms"
+
+
 	
 plugin simpleObject		urba_menuis_ouvrant
 name:"Ouvrant"
 classID:#(0x6f5f9c8f, 0x1da0418a)
 category:"CP | Urba | menuiseries"
--- invisible:true
 (
-	local m_boite
--- 	
--- 	parameters params_transformation
--- 	(
--- 		transformation	type:#matrix3	default:(matrix3 1)
--- 	)
+	
+	
+	------------ DEBUG	----------------------------------------------------------------------------------
+	local m_debug = true
+-- 	local 	m_debug = false
+	local 	m_dbgPrefix ="urba_menuis_ouvrant"
+	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
+	------------ DEBUG	----------------------------------------------------------------------------------
+	
+	
+	
+	--- Optionnel:		Le plug contenant la menuiserie ("ensemble" de mensuierie) pour permettre d'enregistrer les parametres du fix dans le parent.
+	local m_parent
+	
+	local mgr_constr	=	str_contruction_base ()
+	
+	
+	
 	parameters params_general rollout:roll_general
 	(
 		
 		longueur 				type:#worldUnits 	ui:spn_longueur 					default:0
 		hauteur 					type:#worldUnits 	ui:spn_hauteur 					default:0
 		profondeur	 			type:#worldUnits 	ui:spn_profondeur				default:0		
-		epaisseur	 			type:#worldUnits 	ui:spn_epaisseur					default:7
+		epaisseur	 			type:#worldUnits 	ui:spn_epaisseur					default:0
 		vitrage_ep	 			type:#worldUnits 											default:2
 		
-		ouverture_aGauche	type:#boolean 		ui:shk_ouverture_AGauche		default:true
 		ouverture_angle	 	type:#float			 	ui:spn_ouverture_angle			default:0
+		ouverture_inverse	type:#boolean 		ui:shk_ouverture_inverser		default:false
 		
 		matId_menuis			type:#integer 			ui:spn_matId_menuis			default:1
 		matId_vitrage			type:#integer 			ui:spn_matId_vitrage			default:2
 		
-	)
-	
-	
-	
-	
-	
-	rollout roll_general "Ouvrant"	(
+		montant_G				type:#boolean 		default:true
+		montant_D				type:#boolean 		default:true
+		traverse_H				type:#boolean 		default:true
 		
-		local m_parent
+	)
+	rollout roll_general "Ouvrant"	(
 		
 		group 	"Global" (
 			spinner spn_longueur 						"longueur" 				type:#worldunits range:[0,1e20,0]
@@ -48,7 +59,7 @@ category:"CP | Urba | menuiseries"
 		)
 		
 		group 	"Ouverture" (
-			checkbox	shk_ouverture_AGauche	"A Gauche" 				
+			checkbox	shk_ouverture_inverser		"Inverse" 				
 			spinner 	spn_ouverture_angle	 	"Angle" 					type:#float range:[0,180,0]
 		)
 		
@@ -57,95 +68,117 @@ category:"CP | Urba | menuiseries"
 			spinner spn_matId_vitrage				"Vitrage" 			type:#integer range:[1,1000,1]
 		)
 		
+
 		on spn_longueur 					changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
 		on spn_hauteur 					changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
 		on spn_profondeur 				changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
 		on spn_epaisseur 				changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
-		on shk_ouverture_AGauche	changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
+		on shk_ouverture_inverser	changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
 		on spn_ouverture_angle		changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
 		on spn_matId_menuis 			changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
 		on spn_matId_vitrage 			changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
 		
 	)
 	
-	fn enregistrer_params	=()
-	fn creer_boite 	longueur		hauteur		prof	transformation:	translation:		orientation:		matID:	=(
-		
-		---- on creer le sous objet model ---------------------
-		if m_boite == undefined do
-			m_boite = createInstance  urba_prim_boite	
-		m_boite.longueur 				= longueur
-		m_boite.hauteur 				= hauteur
-		m_boite.profondeur 			= prof	
-		
-		if matID!= unsupplied do
-			m_boite.matID 				= matID
-		
--- 		if orientation!= unsupplied do	
--- 			rotate m_boite orientation
-		
-		--- onl'ajoute a notre mesh ----------
-		local id_pt_debut = ( meshop.getNumVerts mesh + 1 )
-		meshop.attach	mesh		m_boite.mesh
-		
-		if translation!= unsupplied do	
-			meshop.moveVert 	mesh	#{id_pt_debut..(meshop.getNumVerts mesh)} translation
-		
-		if transformation		!= unsupplied do	(
-			local transf_tab =#()
-			for id_pt = id_pt_debut to  (meshop.getNumVerts mesh) do (
-				local pos_base =  meshop.getVert  mesh id_pt
-				local pos_dest = pos_base * transformation
-				append transf_tab ( pos_dest - pos_base)
-			)
-			meshop.moveVert 	mesh	#{id_pt_debut..(meshop.getNumVerts mesh)} transf_tab
-			
-			
-		)
-	)
+	
+	
 	
 	
 	on buildMesh do
 	(
 		
+		--- vider le mesh --------
 		delete mesh
 		
-		local matrx_origine = matrix3 1
+		
+		--- la longueur des traverses------
+		local long_trav	=	longueur
+		if montant_G	do long_trav -= epaisseur
+		if montant_D	do long_trav -= epaisseur
+		
+		--- la hauteur du vitrage -----
+		local ht_vitrage	=	hauteur - epaisseur 
+		if traverse_H	do ht_vitrage -= epaisseur 
+		
+		
+		
 		
 		------------ LE CADRE -----------------		
-		--- montant vertical 1 ----------
-		creer_boite 	epaisseur		hauteur		profondeur		/* transf:mtrx_verti_1 */		matID:matId_menuis
+		--- montant G  ----------
+		if montant_G do
+			mgr_constr.ajouter_boite 	mesh		long:		epaisseur			\
+															prof:		profondeur			\
+															ht:		hauteur				\
+															matID:	matId_menuis		
 		
-		--- montant vertical 2 ----------	
-		creer_boite 	epaisseur		hauteur		profondeur		translation:[longueur - epaisseur,0,0]	matID:matId_menuis
+		--- montant D ----------	
+		if montant_D do
+			mgr_constr.ajouter_boite 	mesh		long:		epaisseur		\
+															prof:		profondeur		\
+															ht:		hauteur			\
+															transf:	[longueur - epaisseur,0,0] 					\
+															matID:	matId_menuis
 		
-		--- montant horizontal 2 ----------
-		creer_boite 	( longueur - 2 *epaisseur)		epaisseur		profondeur		translation:[epaisseur,0,hauteur - epaisseur]	matID:matId_menuis
+		--- traverse haute ----------
+		mgr_constr.ajouter_boite 	mesh		long:		long_trav		\
+														prof:		profondeur		\
+														ht:		epaisseur		 	\
+														transf:	[epaisseur,0,hauteur - epaisseur]				\
+														matID:	matId_menuis
+		
+		
 		
 		
 		----- L'OUVRANT ----------------
-		local matrix_ouverture 			= rotateZMatrix	ouverture_angle * transMatrix  [epaisseur,profondeur  ,0]
-		local matrx_origine_ouvrant 	= matrx_origine  * transMatrix  [0, -profondeur / 2 ,0]
-
-		--- montant vertical 1 ----------
-		local mtrx_verti_1 =	matrx_origine_ouvrant	*	matrix_ouverture
-		creer_boite 	epaisseur		( hauteur - epaisseur )		profondeur		transformation:mtrx_verti_1		matID:matId_menuis
+		local matrix_ouverture 			
+		local matrx_origine_ouvrant 	
+		if not ouverture_inverse then (
+			matrx_origine_ouvrant 	= transMatrix  [0, -profondeur / 2 ,0]
+			matrix_ouverture 			= rotateZMatrix	ouverture_angle * transMatrix  [epaisseur,profondeur  ,0]
+		) else (
+			matrx_origine_ouvrant 	= transMatrix  [-longueur, -profondeur / 2 ,0]
+			matrix_ouverture 			= rotateZMatrix	-ouverture_angle * transMatrix  [longueur + epaisseur,profondeur  ,0]
+		)
 		
-		--- montant vertical 2 ----------
-		local mtrx_verti_2 =	matrx_origine_ouvrant * transMatrix  [longueur - 3 * epaisseur,0,0]	*	matrix_ouverture
-		creer_boite 	epaisseur		( hauteur - epaisseur )			profondeur		transformation:mtrx_verti_2	matID:matId_menuis
 		
-		--- montant horizontal 1 ----------
-		local mtrx_hori_1 =		matrx_origine_ouvrant * transMatrix  [epaisseur,0,0]	*	matrix_ouverture
-		creer_boite 	( longueur - 4 *epaisseur)		epaisseur		profondeur		transformation:mtrx_hori_1	matID:matId_menuis
 		
-		--- montant horizontal 2 ----------
-		local mtrx_hori_1 =		matrx_origine_ouvrant * transMatrix  [epaisseur,0,hauteur - 2 * epaisseur]	*	matrix_ouverture
-		creer_boite 	( longueur - 4 *epaisseur)		epaisseur		profondeur		transformation:mtrx_hori_1	matID:matId_menuis
-
+		
+		
+		
+		--- montant G ----------
+		mgr_constr.ajouter_boite 	mesh		long:		epaisseur		\
+														prof:		profondeur		\
+														ht:		( hauteur - epaisseur )			\
+														transf:	( matrx_origine_ouvrant	*	matrix_ouverture )	\
+														matID:	matId_menuis
+							
+		--- montant D ----------
+		mgr_constr.ajouter_boite 	mesh		long:		epaisseur		\
+														prof:		profondeur		\
+														ht:		( hauteur - epaisseur )			\
+														transf:	( matrx_origine_ouvrant * transMatrix  [long_trav - epaisseur,0,0]	*	matrix_ouverture )	\
+														matID:	matId_menuis
+		
+		--- traverse B ----------
+		mgr_constr.ajouter_boite 	mesh		long:		( long_trav - 2 *epaisseur)		\
+														prof:		profondeur		\
+														ht:		epaisseur			\
+														transf:	( matrx_origine_ouvrant * transMatrix  [epaisseur,0,0]	*	matrix_ouverture )	\
+														matID:	matId_menuis
+		
+		--- traverse ht ----------
+		mgr_constr.ajouter_boite 	mesh		long:		( long_trav - 2 *epaisseur)		\
+														prof:		profondeur		\
+														ht:		epaisseur			\
+														transf:	( matrx_origine_ouvrant * transMatrix  [epaisseur,0,hauteur - 2 * epaisseur]	*	matrix_ouverture )	\
+														matID:	matId_menuis
+		
 		--- vitrage ----------
-		local mtrx_vitrage =	matrx_origine_ouvrant * transMatrix  [epaisseur, (profondeur - vitrage_ep) / 2  , epaisseur]	*	matrix_ouverture
-		creer_boite 	( longueur - 4 *epaisseur)		( hauteur - 3 *epaisseur)		vitrage_ep	transformation:mtrx_vitrage		matID:matId_vitrage
+		mgr_constr.ajouter_boite 	mesh		long:		( long_trav - 2 *epaisseur)		\
+														prof:		vitrage_ep		\
+														ht:		( hauteur - 3 *epaisseur)			\
+														transf:	( matrx_origine_ouvrant * transMatrix  [epaisseur, (profondeur - vitrage_ep) / 2  , epaisseur]	*	matrix_ouverture )	\
+														matID:	matId_vitrage
 		
 	)
 	
@@ -153,19 +186,7 @@ category:"CP | Urba | menuiseries"
 	
 	tool create
 	(
-		/* on mousePoint click do
-		case click of
-		(
-			1: nodeTM.translation = gridPoint
-			3: #stop
-		)
-		on mouseMove click do
-		case click of
-		(
-			2: (longueur = abs gridDist.x)
-			3: hauteur = gridDist.z
-		) */
-			local pt_debut
+		local pt_debut
 		local pt_profondeur
 		local pt_hauteur
 		

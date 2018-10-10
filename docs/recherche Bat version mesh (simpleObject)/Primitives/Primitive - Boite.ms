@@ -3,7 +3,6 @@ plugin simpleObject		urba_prim_boite
 name:"Boite"
 classID:#(0x55f6e4c7, 0x22f553a7)
 category:"CP | Primitives"
-invisible:false
 (
 	
 	parameters main rollout:roll_params
@@ -60,7 +59,7 @@ invisible:false
 		----- le mapping 	--------------
 		meshop.applyUVWMap 	mesh  #box
 		
-	)
+	) --------- fin on build mesh --------------------------
 	
 	tool create
 	(
@@ -93,8 +92,10 @@ invisible:false
 					profondeur 				= length ( gridPoint - pt_profondeur )
 					pt_hauteur				=	gridPoint
 				)
-				4:	hauteur 					= length ( gridPoint.z - pt_hauteur.z )
+				4:	hauteur 					= length ( gridPoint - pt_hauteur )
 			)
 		
-	)
-)
+	) ----- fin tool create -------------
+) --------- fin plugin --------------
+
+

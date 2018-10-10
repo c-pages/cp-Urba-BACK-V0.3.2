@@ -2,13 +2,17 @@
 include "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\mgr - presets.ms"
 include "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\Menuiseries\\Menuiserie - Fix.ms"
 include "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\Menuiseries\\Menuiserie - Ouvrant.ms"
+include "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\Menuiseries\\Menuiserie - Porte.ms"
 
+include  "$userScripts\\cp-Urba\\docs\\recherche Bat version mesh (simpleObject)\\recherche - simpleObject - mgr - Construction Menuiseries.ms"
 
 plugin simpleObject 	urba_menuis_ensemble
 name:"Ensemble"
 classID:#(0x21304168, 0x530c47ab)
 category:"CP | Urba | menuiseries"
 (
+	
+	
 	
 	------------ DEBUG	----------------------------------------------------------------------------------
 	local m_debug = true
@@ -25,6 +29,8 @@ category:"CP | Urba | menuiseries"
 	-----------------    VARIABLES ----------------------------------------------------------------------------------------------------------------------
 	local roll_general
 	local m_sequence 	=	#()
+	
+	local mgr_constr		=	str_contruction_menuiseries ()
 	local mgr_presets 	=	str_presets_manager ()
 	
 	
@@ -38,9 +44,6 @@ category:"CP | Urba | menuiseries"
 	
 	
 	------------ PARAMETRES	----------------------------------------------------------------------------------------------------------------------
-	parameters params_transformation		(
-		transformation	type:#matrix3	default:(matrix3 1)
-	)
 	parameters params_general rollout:roll_general	(
 		
 		----- global ----------------
@@ -49,7 +52,7 @@ category:"CP | Urba | menuiseries"
 		epaisseur	 		type:#worldUnits 	ui:spn_epaisseur		default:7
 		profondeur	 		type:#worldUnits 	ui:spn_profondeur	default:5		
 		
-		------	sequence	---------------
+		------	la sequence	---------------
 		sequence_datas	type:#stringTab		tabSizeVariable:true
 		
 	)----- fin parameters main	---------------------------
@@ -60,54 +63,36 @@ category:"CP | Urba | menuiseries"
 	
 	
 	-----------------    FONCTIONS	 ----------------------------------------------------------------------------------------------------------------------
-	fn creer_menuiserie 		_type		long:		haut:		prof:	 epais:	transf:		matId_menuis:		matId_vitrage:	=(
-		
-		---- on creer le sous objet model ---------------------
-		local menuiserie 
-		case _type of (
-			#fix:				menuiserie = createInstance  urba_menuis_fix	
-			#ouvrant:		menuiserie = createInstance  urba_menuis_ouvrant	
-		)
-		if long 				!= unsupplied do		menuiserie.longueur 				= long		
-		if haut 				!= unsupplied do		menuiserie.hauteur 				= haut		
-		if prof 				!= unsupplied do		menuiserie.profondeur 			= prof		
-		if epais				!= unsupplied do		menuiserie.epaisseur 			= epais		
-		if transf				!= unsupplied do		menuiserie.transformation 		= transf		
-		if matId_menuis	!= unsupplied do		menuiserie.matId_menuis 		= matId_menuis		
-		if matId_vitrage	!= unsupplied do		menuiserie.matId_vitrage 		= matId_vitrage
-		
-		menuiserie
-		
-	)
+	
+	
+	
+	
+	
+	
+	
+	------ parametres ---------------------
 	fn charger_params 			=(
 		m_sequence = #()
-		for elem_datas in sequence_datas do (
-			local nvl_menuiserie 	=  mgr_presets.get_element_from_datas		elem_datas
-			append	m_sequence		nvl_menuiserie
-		)
+		for elem_datas in sequence_datas do
+			append	m_sequence		( mgr_presets.get_element_from_datas		elem_datas )		
 	)
-	fn enregistrer_params 		=(
-		
+	fn enregistrer_params 		=(		
 		sequence_datas = #()
-		for elem in m_sequence do (
-			local params_menuis 	= mgr_presets.get_params	elem
-			append	sequence_datas		params_menuis
-		)
-		
+		for elem in m_sequence do 
+			append	sequence_datas		( mgr_presets.get_params		elem )
 		redrawviews ()
 	)
 	
 	
+	
+	
+	
+	
 	------ sequence ------------
-	fn ajouter_element		_type 	=(
-		
-		debug"ajouter_element"
-		
-		local nvl_menuis 			= creer_menuiserie 	_type
-		append	m_sequence		nvl_menuis
-		
-		enregistrer_params 	()
-		
+	fn ajouter_element		_type 	=(		
+		local nvl_menuis 			= mgr_constr.creer_menuiserie 		_type
+		append	m_sequence	nvl_menuis		
+		enregistrer_params 	()		
 		nvl_menuis
 	)
 	fn retirer_element		_id	 	=(
@@ -138,11 +123,20 @@ category:"CP | Urba | menuiseries"
 	------------ ROLLOUT	----------------------------------------------------------------------------------------------------------------------
 	rollout roll_general	"Ensemble Menuisé"	(
 		
-		local m_parent
 		
 		fn ouvrir_RCMenu =(
 			
-			rcMenu nvMenu
+			
+			
+			
+			--- POUR CREER MENU A LA VOLEE ---------------
+			--- 		popo = for clas in GeometryClass.classes where findstring (clas as string) "Urba"  != undefined collect clas as string			
+			--- POUR CREER MENU A LA VOLEE ---------------
+			
+			
+			
+			
+			rcMenu nvMenu			
 			(
 				menuItem btn_fix  					"Fix" 			
 				menuItem btn_ouvrant  			"Ouvrant" 	
@@ -167,7 +161,7 @@ category:"CP | Urba | menuiseries"
 		
 		
 	
-		group "Global" (
+		group "Menuiserie" (
 			spinner 'spn_longueur' 			"Longueur" 		range:[0.001,1e+09,0.001] type:#worldunits align:#right
 			spinner 'spn_hauteur' 			"Hauteur"   		range:[0.001,1e+09,0.001] type:#worldunits align:#right
 			spinner 'spn_epaisseur'	 	"Epaisseur" 		type:#worldunits range:[0,1000,0] align:#right
@@ -178,23 +172,14 @@ category:"CP | Urba | menuiseries"
 			button		'btn_retirer_element'			"-" width: 20 height:20 align:#left
 			button		'btn_monter_element'		"/\\" width: 20 height:20 align:#left
 			button		'btn_descendre_element'	"\/" width: 20 height:20 align:#left
-			listbox		'lbx_sequence' 				"" /* width:145 */ height:5 align:#left
--- 			label			'lbl_params'	 					"Parametres: "  align:#left
-			subrollout	'subroll_param_elem'		/* width: 145 */ height:200 align:#left
+			listbox		'lbx_sequence' 				""  height:5 align:#left
+			subrollout	'subroll_param_elem'		height:200 align:#left
 		)
 		
 		
 		fn actualiser =(
 			
-			--- la sequence	-------------			
-			local sequence_noms		=	#()
-			for  i = 1 to sequence_datas.count do (	
-				local elem_data 			= sequence_datas[i]
-				local nvl_menuiserie 	=  mgr_presets.get_element_from_datas	elem_data
-				local nom 					= ( classof nvl_menuiserie ).name
-				append sequence_noms	nom
-			)
-			lbx_sequence.items = for nom in sequence_noms collect nom
+			lbx_sequence.items = for elem in m_sequence collect  ( classof elem ).name
 			
 			
 			--- les boutons --------------
@@ -205,21 +190,22 @@ category:"CP | Urba | menuiseries"
 			
 			--- les parametres de l'element (le subrollout)  ---------------			
 			if lbx_sequence.selection > 0 do (
+				
 				--- on retire les vieux rollouts --------
 				if subroll_param_elem.rollouts.count > 0 do 
 					for subRoll in subroll_param_elem.rollouts  do
-						removeSubRollout subroll_param_elem	subRoll				
+						removeSubRollout subroll_param_elem	subRoll
+				
 				---- on ajoute le nouveau -----------------
-				local nvl_menuiserie 	=  m_sequence[  lbx_sequence.selection ]
+				local nvl_menuiserie 		=  m_sequence[  lbx_sequence.selection ]
+				nvl_menuiserie.m_parent	=	this				
 				addSubRollout 	subroll_param_elem		nvl_menuiserie.roll_general
-				nvl_menuiserie.roll_general.m_parent	=	this				
 			)
 			
 		) --- fin actualiser  ------
 		
 		on roll_general open do (
--- 			if selection.count > 0 do 
-				charger_params 	()
+			charger_params 	()
 			actualiser ()
 		)
 		
@@ -254,23 +240,47 @@ category:"CP | Urba | menuiseries"
 	
 	
 	------------ TOOLS	----------------------------------------------------------------------------------------------------------------------
-	tool create
-	(
+	tool create	(
+		local pt_debut
+		local pt_profondeur
+		local pt_hauteur
+		
 		on mousePoint click do
-		case click of
-		(
-			1: nodeTM.translation = gridPoint
-			3: #stop
-		)
+			case click of
+			(
+				1: (	pt_debut 	=  gridPoint
+						nodeTM.translation = pt_debut
+				)
+				4: #stop
+			)
 		on mouseMove click do
-		case click of
-		(
-			2: (longueur = abs gridDist.x)
-			3: hauteur = gridDist.z
-		)
+			case click of
+			(
+				2: ( 
+					longueur 				= length ( gridPoint - pt_debut )
+					local norm_dir 		=	normalize (gridPoint - pt_debut )
+					local angle_pts		=	acos(dot  [1,0,0]  norm_dir)		
+					if  norm_dir.y < 0 do angle_pts = 360 - angle_pts 
+					nodeTM  				= rotateZMatrix angle_pts
+					nodeTM.translation 	= pt_debut
+					
+					pt_profondeur	=	gridPoint
+				)
+				3:	(
+					profondeur 				= length ( gridPoint - pt_profondeur )
+					pt_hauteur				=	gridPoint
+				)
+				4:	hauteur 					= length ( gridPoint - pt_hauteur )
+			)
+		
+		
+		
+		
+		
+		
+		
+		
 	) --- fin tool create
-	
-	
 	
 	
 	
@@ -281,74 +291,110 @@ category:"CP | Urba | menuiseries"
 		---- on vide le mesh -----------
 		delete mesh
 		
-		---- la sequence est vide --------------------------
-		if sequence_datas.count == 0 then (			
-			local nvl_menuiserie	=		creer_menuiserie 	#fix	long:longueur		haut:hauteur		prof:5		epais:epaisseur		--transf:mtrx_insertion
-			mesh += nvl_menuiserie.mesh
+		---- si la sequence est vide on fait un fixe de base --------------------------
+		if m_sequence.count == 0 then (
+			
+			mgr_constr.ajouter_menuiserie 	mesh		#fix	long:		longueur		\
+																	ht:		hauteur		\
+																	prof:		profondeur	\
+																	epais:	epaisseur
 		
+			
+			
+			
+			
 		--------- Sinon on construit la sequence ----------------
-		) else (			
+		) else (
+			
 			---- preparation longueurs ------------
 			local dist_imposees	 	= 	0
 			local nbr_divis				=	0
-			for elem in m_sequence do 
-				if elem.longueur != 0 then
-					dist_imposees += elem.longueur 
-				else nbr_divis += 1			
-			local longueur_elem 	= ( longueur - dist_imposees ) / nbr_divis
+			
+			for elem in m_sequence do 	if elem.longueur != 0 
+				then		dist_imposees += elem.longueur 
+				else 		nbr_divis += 1
+			
+			local longueur_epaiss		=	epaisseur * ( nbr_divis + 1) 
+			local longueur_ss_epaiss	=	( ( longueur - dist_imposees ) - longueur_epaiss )/ nbr_divis			
+			local longueur_elem			=	longueur_ss_epaiss + epaisseur
+			
+			
 			
 			---- on pose les éléménts --------------------------
-			local mtrx_insertion 		= matrix3 1 * transformation
+			local mtrx_insertion 		= matrix3 1 
 			for  i = 1 to sequence_datas.count do (	
+				
+				
 				
 				--- on creer l'element depuis les params du plug	--------------------------------
 				local elem_data 					= sequence_datas[i]
-				local menuiserie_temp 			=  mgr_presets.get_element_from_datas		elem_data
+				local menuiserie_instance 		=  mgr_presets.get_element_from_datas		elem_data
+				
+				
+				----- on gere la longueur de chaque element pour bien centrer les montant -----------------------
+				if sequence_datas.count  > 1 then (					
+					if i < sequence_datas.count or i == 1		do  	menuiserie_instance.montant_D = false
+					if i == sequence_datas.count 				do 	longueur_elem		=	longueur_ss_epaiss +  2*epaisseur					
+				) else 	longueur_elem		=	longueur_ss_epaiss +  2*epaisseur
+				
+				
+				
 				
 				---- on actualise les paramatres de l'element  (si param == 0 alors on utilise le parametre general ) ---------------
-				if menuiserie_temp.longueur 	== 0 	do	menuiserie_temp.longueur 		= longueur_elem				
-				if menuiserie_temp.epaisseur	== 0 	do	menuiserie_temp.epaisseur		= epaisseur				
-				if menuiserie_temp.hauteur  	== 0 	then	menuiserie_temp.hauteur 		= hauteur
-					else (
-						local imposte_tmp = creer_menuiserie 	#fix	long:		menuiserie_temp.longueur	\
-																						haut:		( hauteur - menuiserie_temp.hauteur  )	\
-																						prof:		5	\
-																						epais:	menuiserie_temp.epaisseur		\
-																						transf:	( mtrx_insertion * transMatrix [0,0, menuiserie_temp.hauteur ] )
-						meshop.attach	mesh		imposte_tmp.mesh
-					)
-				if menuiserie_temp.profondeur  == 0 do	menuiserie_temp.profondeur			= profondeur
+				menuiserie_instance.m_parent 		= this
+				if menuiserie_instance.longueur 		== 0 	do	menuiserie_instance.longueur 		= longueur_elem 
+				if menuiserie_instance.epaisseur		== 0 	do	menuiserie_instance.epaisseur		= epaisseur
+				if menuiserie_instance.profondeur  	== 0 	do	menuiserie_instance.profondeur		= profondeur
+				if menuiserie_instance.hauteur  		== 0 	then	menuiserie_instance.hauteur 			= hauteur
+					else  --- sinon on creer l'imposte --------------
+						mgr_constr.ajouter_menuiserie 	mesh		#fix	long:		menuiserie_instance.longueur	\
+																	ht:		( hauteur - menuiserie_instance.hauteur  )	\
+																	prof:		profondeur	\
+																	epais:	epaisseur		\
+																	transf:	( mtrx_insertion * transMatrix [0,0, menuiserie_instance.hauteur ] )
+					
 				
-				----- on place l'élément -----				
-				menuiserie_temp.transformation 		= mtrx_insertion
 				
-				---- on l'attache a notre mesh ---------------
-				meshop.attach	mesh		menuiserie_temp.mesh
+				
+				--- on stock l'id du vertex pour pouvoir deplacer les point si besoin ----------------
+				local id_vertex_debut = ( meshop.getNumVerts mesh + 1 )
+				
+				--- on l'ajoute a notre mesh ----------
+				meshop.attach	mesh		menuiserie_instance.mesh
+				
+				----- et on place l'élément ---------------
+				if transf		!= unsupplied do	
+					mgr_constr.transform_vertex		mesh		id_debut:	id_vertex_debut	\
+																id_fin:		(meshop.getNumVerts mesh)	\
+																transf:		mtrx_insertion
+		
 				
 				---- on translate le point d'insertion ---------------
-				translate mtrx_insertion ( [ menuiserie_temp.longueur ,0,0]  * transformation )
+				translate mtrx_insertion ( [ menuiserie_instance.longueur ,0,0]  )
 				
-			) 
+			)
 		) --- fin creation de la sequence -------------
 		
 	) ---- fin on BUILD ------------------
+	
+	
+	
+	
+	
+	
+	
 	on load 						do 	(
 		debug "load du plugin"
 		charger_params ()
 	)
-	on clone 	_original 	do (
--- 		initialiser ()
+	on clone 	_original 	do (		
 		charger_params ()
 	)
 	on create do (
--- 		debug "creation du plugin"
--- 		initialiser ()
--- 		actualiser ()
+		
 	)
 	on update do	(
--- 		debug "update du plugin"
--- 		debug "shape : " var:surface_node
--- 		initialiser ()
+		charger_params ()
 	)
 	
 	
