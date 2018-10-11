@@ -32,10 +32,15 @@ category:"CP | Urba | menuiseries"
 	parameters params_general rollout:roll_general
 	(
 		
-		longueur 				type:#worldUnits 	ui:spn_longueur 					default:0
-		hauteur 					type:#worldUnits 	ui:spn_hauteur 					default:0
-		profondeur	 			type:#worldUnits 	ui:spn_profondeur				default:0		
-		epaisseur	 			type:#worldUnits 	ui:spn_epaisseur					default:0
+		----- global ----------------
+		longueur 				type:#worldUnits 		ui:spn_longueur 		default:1E-3
+		hauteur	 				type:#worldUnits 		ui:spn_hauteur 		default:1E-3
+		profondeur	 			type:#worldUnits 		ui:spn_profondeur	default:5		
+		
+		----- les menuiseries -------------
+		menuis_epaisseur	 	type:#worldUnits 		ui:spn_epaisseur		default:7
+		
+		
 		vitrage_ep	 			type:#worldUnits 											default:2
 		
 		ouverture_angle	 	type:#float			 	ui:spn_ouverture_angle			default:0
@@ -55,7 +60,7 @@ category:"CP | Urba | menuiseries"
 			spinner spn_longueur 						"longueur" 				type:#worldunits range:[0,1e20,0]
 			spinner spn_hauteur 						"Hauteur" 				type:#worldunits range:[0,1e20,0]
 			spinner spn_profondeur 					"Profondeur" 			type:#worldunits range:[0,1e20,0]
-			spinner spn_epaisseur	 					"Epaisseur" 				type:#worldunits range:[0,1e20,0]
+			spinner spn_epaisseur	 					"Menuiseries" 				type:#worldunits range:[0,1e20,0]
 		)
 		
 		group 	"Ouverture" (
@@ -67,16 +72,6 @@ category:"CP | Urba | menuiseries"
 			spinner spn_matId_menuis 				"Menuiseries" 		type:#integer range:[1,1000,1]
 			spinner spn_matId_vitrage				"Vitrage" 			type:#integer range:[1,1000,1]
 		)
-		
-
-		on spn_longueur 					changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
-		on spn_hauteur 					changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
-		on spn_profondeur 				changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
-		on spn_epaisseur 				changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
-		on shk_ouverture_inverser	changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
-		on spn_ouverture_angle		changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
-		on spn_matId_menuis 			changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
-		on spn_matId_vitrage 			changed val do		if m_parent != undefined do m_parent.enregistrer_params	()
 		
 	)
 	
@@ -93,12 +88,12 @@ category:"CP | Urba | menuiseries"
 		
 		--- la longueur des traverses------
 		local long_trav	=	longueur
-		if montant_G	do long_trav -= epaisseur
-		if montant_D	do long_trav -= epaisseur
+		if montant_G	do long_trav -= menuis_epaisseur
+		if montant_D	do long_trav -= menuis_epaisseur
 		
 		--- la hauteur du vitrage -----
-		local ht_vitrage	=	hauteur - epaisseur 
-		if traverse_H	do ht_vitrage -= epaisseur 
+		local ht_vitrage	=	hauteur - menuis_epaisseur 
+		if traverse_H	do ht_vitrage -= menuis_epaisseur 
 		
 		
 		
@@ -106,24 +101,24 @@ category:"CP | Urba | menuiseries"
 		------------ LE CADRE -----------------		
 		--- montant G  ----------
 		if montant_G do
-			mgr_constr.ajouter_boite 	mesh		long:		epaisseur			\
+			mgr_constr.ajouter_boite 	mesh		long:		menuis_epaisseur			\
 															prof:		profondeur			\
 															ht:		hauteur				\
 															matID:	matId_menuis		
 		
 		--- montant D ----------	
 		if montant_D do
-			mgr_constr.ajouter_boite 	mesh		long:		epaisseur		\
+			mgr_constr.ajouter_boite 	mesh		long:		menuis_epaisseur		\
 															prof:		profondeur		\
 															ht:		hauteur			\
-															transf:	[longueur - epaisseur,0,0] 					\
+															transf:	[longueur - menuis_epaisseur,0,0] 					\
 															matID:	matId_menuis
 		
 		--- traverse haute ----------
 		mgr_constr.ajouter_boite 	mesh		long:		long_trav		\
 														prof:		profondeur		\
-														ht:		epaisseur		 	\
-														transf:	[epaisseur,0,hauteur - epaisseur]				\
+														ht:		menuis_epaisseur		 	\
+														transf:	[menuis_epaisseur,0,hauteur - menuis_epaisseur]				\
 														matID:	matId_menuis
 		
 		
@@ -134,10 +129,10 @@ category:"CP | Urba | menuiseries"
 		local matrx_origine_ouvrant 	
 		if not ouverture_inverse then (
 			matrx_origine_ouvrant 	= transMatrix  [0, -profondeur / 2 ,0]
-			matrix_ouverture 			= rotateZMatrix	ouverture_angle * transMatrix  [epaisseur,profondeur  ,0]
+			matrix_ouverture 			= rotateZMatrix	ouverture_angle * transMatrix  [menuis_epaisseur,profondeur  ,0]
 		) else (
 			matrx_origine_ouvrant 	= transMatrix  [-longueur, -profondeur / 2 ,0]
-			matrix_ouverture 			= rotateZMatrix	-ouverture_angle * transMatrix  [longueur + epaisseur,profondeur  ,0]
+			matrix_ouverture 			= rotateZMatrix	-ouverture_angle * transMatrix  [longueur + menuis_epaisseur,profondeur  ,0]
 		)
 		
 		
@@ -146,38 +141,38 @@ category:"CP | Urba | menuiseries"
 		
 		
 		--- montant G ----------
-		mgr_constr.ajouter_boite 	mesh		long:		epaisseur		\
+		mgr_constr.ajouter_boite 	mesh		long:		menuis_epaisseur		\
 														prof:		profondeur		\
-														ht:		( hauteur - epaisseur )			\
+														ht:		( hauteur - menuis_epaisseur )			\
 														transf:	( matrx_origine_ouvrant	*	matrix_ouverture )	\
 														matID:	matId_menuis
 							
 		--- montant D ----------
-		mgr_constr.ajouter_boite 	mesh		long:		epaisseur		\
+		mgr_constr.ajouter_boite 	mesh		long:		menuis_epaisseur		\
 														prof:		profondeur		\
-														ht:		( hauteur - epaisseur )			\
-														transf:	( matrx_origine_ouvrant * transMatrix  [long_trav - epaisseur,0,0]	*	matrix_ouverture )	\
+														ht:		( hauteur - menuis_epaisseur )			\
+														transf:	( matrx_origine_ouvrant * transMatrix  [long_trav - menuis_epaisseur,0,0]	*	matrix_ouverture )	\
 														matID:	matId_menuis
 		
 		--- traverse B ----------
-		mgr_constr.ajouter_boite 	mesh		long:		( long_trav - 2 *epaisseur)		\
+		mgr_constr.ajouter_boite 	mesh		long:		( long_trav - 2 *menuis_epaisseur)		\
 														prof:		profondeur		\
-														ht:		epaisseur			\
-														transf:	( matrx_origine_ouvrant * transMatrix  [epaisseur,0,0]	*	matrix_ouverture )	\
+														ht:		menuis_epaisseur			\
+														transf:	( matrx_origine_ouvrant * transMatrix  [menuis_epaisseur,0,0]	*	matrix_ouverture )	\
 														matID:	matId_menuis
 		
 		--- traverse ht ----------
-		mgr_constr.ajouter_boite 	mesh		long:		( long_trav - 2 *epaisseur)		\
+		mgr_constr.ajouter_boite 	mesh		long:		( long_trav - 2 *menuis_epaisseur)		\
 														prof:		profondeur		\
-														ht:		epaisseur			\
-														transf:	( matrx_origine_ouvrant * transMatrix  [epaisseur,0,hauteur - 2 * epaisseur]	*	matrix_ouverture )	\
+														ht:		menuis_epaisseur			\
+														transf:	( matrx_origine_ouvrant * transMatrix  [menuis_epaisseur,0,hauteur - 2 * menuis_epaisseur]	*	matrix_ouverture )	\
 														matID:	matId_menuis
 		
 		--- vitrage ----------
-		mgr_constr.ajouter_boite 	mesh		long:		( long_trav - 2 *epaisseur)		\
+		mgr_constr.ajouter_boite 	mesh		long:		( long_trav - 2 *menuis_epaisseur)		\
 														prof:		vitrage_ep		\
-														ht:		( hauteur - 3 *epaisseur)			\
-														transf:	( matrx_origine_ouvrant * transMatrix  [epaisseur, (profondeur - vitrage_ep) / 2  , epaisseur]	*	matrix_ouverture )	\
+														ht:		( hauteur - 3 *menuis_epaisseur)			\
+														transf:	( matrx_origine_ouvrant * transMatrix  [menuis_epaisseur, (profondeur - vitrage_ep) / 2  , menuis_epaisseur]	*	matrix_ouverture )	\
 														matID:	matId_vitrage
 		
 	)
