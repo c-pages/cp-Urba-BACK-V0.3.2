@@ -61,8 +61,14 @@ category:"CP | Primitives"
 	(
 		button 'btn1' "Button" pos:[24,30] width:123 height:27 align:#left
 		
-		on btn1 pressed  do  ajouter ()
+		checkbox 'chk1' "Checkbox" pos:[40,76] width:43 height:8 align:#left
 		
+		on btn1 pressed do
+			ajouter ()
+		on chk1 changed state do
+	(
+	
+		)
 	)
 	
 	
