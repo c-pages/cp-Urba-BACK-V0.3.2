@@ -1,8 +1,8 @@
 
-plugin simpleObject		urba_menuiserieBase_cadre
+plugin simpleObject		menuiserie_composant_cadre
 name:"Cadre"
 classID:#(0x191d683f, 0x345d8d04)
-category:"CP | Menuiserie base"
+category:"CP | Menuiserie | Composant"
 -- invisible:true
 (
 	
@@ -21,13 +21,13 @@ category:"CP | Menuiserie base"
 	--- le manager de primitives---------------	
 	local mgr_constr	=	str_mgr_primitives ()
 	
+	--- Prédéfinitions ------------------
+	local corriger_parametres
 	
 	
 	
-	
-	parameters params_general rollout:roll_general
+	parameters params_general rollout:roll_general	
 	(
-		
 		----- global ----------------
 		longueur 						type:#worldUnits 	ui:spn_longueur 			default:0.
 		profondeur	 					type:#worldUnits 	ui:spn_profondeur		default:0.
@@ -45,32 +45,47 @@ category:"CP | Menuiserie base"
 		------ mat ID ----------
 		matId_menuis					type:#integer 			ui:spn_matId_menuis	default:1
 		
-	)
+		----- pour rester dans valeurs corrects ------------------------
+		on menuis_epaisseur 	set val do corriger_parametres ()
+		on longueur 				set val do corriger_parametres ()
+		on hauteur 				set val do corriger_parametres ()
+		
+	)	-----	fin parametres --------------------
+	
 	rollout roll_general  "Cadre"
 	(
+		group "Global" (
+			spinner spn_longueur 			"longueur" 				type:#worldunits range:[0,1e20,0]
+			spinner spn_hauteur 			"Hauteur" 				type:#worldunits range:[0,1e20,0]
+			spinner spn_profondeur 		"Profondeur" 			type:#worldunits range:[0,1e20,0]
+		)
 		group "Menuiserie" (
-			spinner spn_longueur 		"longueur" 		type:#worldunits range:[0,1e20,0]
-			spinner spn_hauteur 		"Hauteur" 		type:#worldunits range:[0,1e20,0]
-			spinner spn_profondeur 	"Profondeur" 	type:#worldunits range:[0,1e20,0]
-			spinner spn_epaisseur	 	"Epaisseur" 		type:#worldunits range:[0,1e20,0]
+			spinner spn_epaisseur	 		"Epaisseur" 				type:#worldunits range:[0,1e20,0]
+			checkbox	shk_montant_G	"Montant gauche" 			
+			checkbox	shk_montant_D	"Montant droit" 		
+			checkbox	shk_traverse_B	"traverse basse" 	
 		)
 		group "Qualité" (
-			checkbox	shk_lowPoly			"Low poly"
-		)
-		
-		group "Options" (	
-			checkbox	shk_montant_G		"Montant gauche" 			
-			checkbox	shk_montant_D		"Montant droit" 		
-			checkbox	shk_traverse_B		"traverse basse" 		
+			checkbox	shk_lowPoly		"Low poly"
 		)
 		group "Material ID" (
-			spinner spn_matId_menuis 	"Menuiseries" 		type:#integer range:[1,1000,1]
-		)
-		
+			spinner spn_matId_menuis 	"Menuiseries" 			type:#integer range:[1,1000,1]
+		)		
+	) ---- fin rollout	----------
+	
+	
+	
+	
+	--------------- FONCTIONS  ----------------------------------------------------------------------------------------------------------------------
+	fn corriger_parametres 	=(		
+		if menuis_epaisseur >longueur/2 do menuis_epaisseur = longueur/2
+		if menuis_epaisseur >hauteur/2 do menuis_epaisseur = hauteur/2 
 	)
-	
-	
 
+	
+	
+	
+	
 	
 	--------------- CONSTRUCTION  ----------------------------------------------------------------------------------------------------------------------
 	on buildMesh do	(

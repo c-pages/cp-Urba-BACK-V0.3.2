@@ -77,8 +77,8 @@ category:"CP | Primitives"
 		format "Ajouter\n"
 		monMaxObject = creer_boite long:		10			\
 												prof:		10			\
-												ht:		10				\
-												matID:	10		\
+												ht:		10			\
+												matID:	10			\
 												bool:		true
 		format "monMaxObject : %\n" monMaxObject
 		redrawviews ()

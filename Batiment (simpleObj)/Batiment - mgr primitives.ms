@@ -1,5 +1,6 @@
 
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Primitives\\Batiment - Primitive - Plan vertical.ms"
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Primitives\\Batiment - Primitive - Plan horizontal.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Primitives\\Batiment - Primitive - Boite.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Primitives\\Batiment - Primitive - Boite U.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Primitives\\Batiment - Primitive - Boite L.ms"
@@ -21,7 +22,7 @@ struct str_mgr_primitives	(
 	
 	
 		--------- TRANSFORMATION   ------------------------------------------------------------------------------------------------------
-		fn transform_vertex		_mesh		transf:	=(
+		fn transformer		_mesh		transf:	=(
 			if classof transf == point3 do transf = transMatrix transf
 			local transf_tab =#()
 			for id_pt = 1 to   _mesh.numverts  do (
@@ -38,7 +39,7 @@ struct str_mgr_primitives	(
 		
 		
 		--------- CREATION D'OBJETS PRIMITFS ------------------------------------------------------------------------------------------------------
-		fn ajouter_plan_Vertical		_mesh	long:0		ht:0			transf:			matID:		bool:false	=(
+		fn ajouter_plan_vertical	_mesh	long:0		ht:0			transf:		matID:			bool:false	=(
 			
 			---- on creer le sous objet model ---------------------
 			local nv_plan	 = createInstance  urba_primitive_planVertical	longueur:	long		\
@@ -50,7 +51,7 @@ struct str_mgr_primitives	(
 			----- et on place la menuiserie si besoin ---------------
 			local plan_Mesh = copy nv_plan.mesh
 			if transf		!= unsupplied do	
-				transform_vertex			plan_Mesh			transf:transf
+				transformer			plan_Mesh			transf:transf
 			
 			
 			--- on l'ajoute a notre mesh ----------
@@ -59,8 +60,33 @@ struct str_mgr_primitives	(
 			
 			nv_plan
 			
-		), --- fin creer boite L	------------------
-		fn ajouter_boite_L 		_mesh	long:0		prof:0		ht:0		sym:false	horiz: false		transf:			matID:		bool:false	=(
+		), --- fin creer plan vertical	------------------
+		
+		fn ajouter_plan_horizontal	_mesh	long:0		prof:0			transf:		matID:			bool:false	=(
+			
+			---- on creer le sous objet model ---------------------
+			local nv_plan	 = createInstance  urba_primitive_planHorizontal	longueur:	long		\
+																									profondeur:	prof			
+			
+			if matID!= unsupplied do	nv_plan.matID 		= matID
+			
+			
+			----- et on place la menuiserie si besoin ---------------
+			local plan_Mesh = copy nv_plan.mesh
+			if transf		!= unsupplied do	
+				transformer			plan_Mesh			transf:transf
+			
+			
+			--- on l'ajoute a notre mesh ----------
+			if not bool 	then 	meshop.attach		_mesh		plan_Mesh
+							else 		_mesh + plan_Mesh
+			
+			nv_plan
+			
+		), --- fin creer plan vertical	------------------
+				
+		
+		fn ajouter_boite_L 			_mesh	long:0		prof:0		ht:0			sym:false		horiz: false		transf:			matID:		bool:false	=(
 			
 			---- on creer le sous objet model ---------------------
 			local nvl_boite = createInstance  urba_primitive_boite_L	longueur:	long		\
@@ -75,7 +101,7 @@ struct str_mgr_primitives	(
 			----- et on place la menuiserie si besoin ---------------
 			local boite_Mesh = copy nvl_boite.mesh
 			if transf		!= unsupplied do	
-				transform_vertex			boite_Mesh			transf:transf
+				transformer			boite_Mesh			transf:transf
 			
 			
 			--- on l'ajoute a notre mesh ----------
@@ -85,8 +111,7 @@ struct str_mgr_primitives	(
 			nvl_boite
 			
 		), --- fin creer boite L	------------------
-	
-		fn ajouter_boite_U		_mesh	long:0		prof:0		ht:0		horiz: false		transf:			matID:		bool:false	=(
+		fn ajouter_boite_U			_mesh	long:0		prof:0		ht:0			horiz: false		transf:			matID:		bool:false	=(
 			
 			---- on creer le sous objet model ---------------------
 			local nvl_boite = createInstance  urba_primitive_boite_U	longueur:	long		\
@@ -100,7 +125,7 @@ struct str_mgr_primitives	(
 			----- et on place la menuiserie si besoin ---------------
 			local boite_Mesh = copy nvl_boite.mesh
 			if transf		!= unsupplied do	
-				transform_vertex			boite_Mesh			transf:transf
+				transformer			boite_Mesh			transf:transf
 			
 			
 			--- on l'ajoute a notre mesh ----------
@@ -110,8 +135,7 @@ struct str_mgr_primitives	(
 			nvl_boite
 			
 		), --- fin creer boite L	------------------
-	
-		fn ajouter_boite 		_mesh	long:0		prof:0		ht:0		transf:			matID:		bool:false	=(
+		fn ajouter_boite 				_mesh	long:0		prof:0		ht:0			transf:			matID:			bool:false	=(
 			
 			---- on creer le sous objet model ---------------------
 			local nvl_boite = createInstance  urba_primitive_boite		longueur:	long		\
@@ -124,7 +148,7 @@ struct str_mgr_primitives	(
 			----- et on place la menuiserie si besoin ---------------
 			local boite_Mesh = copy nvl_boite.mesh
 			if transf		!= unsupplied do	
-				transform_vertex			boite_Mesh			transf:transf
+				transformer			boite_Mesh			transf:transf
 			
 			
 			--- on l'ajoute a notre mesh ----------

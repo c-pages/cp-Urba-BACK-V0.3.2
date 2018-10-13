@@ -3,7 +3,7 @@ plugin simpleObject		urba_primitive_boite
 name:"Boite"
 classID:#(0x3046a558, 0x2e92f235)
 category:"CP | Primitives"
--- invisible:true
+invisible:true
 (
 	
 	parameters main rollout:roll_params

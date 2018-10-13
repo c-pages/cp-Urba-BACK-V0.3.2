@@ -1,15 +1,15 @@
 
-plugin simpleObject		urba_primitive_planVertical
-name:"Plan vert."
-classID:#(0x49e13042, 0x7ebe4e67)
+plugin simpleObject		urba_primitive_planHorizontal
+name:"Plan horizontal"
+classID:#(0x66aff812, 0x7e864a94)
 category:"CP | Primitives"
-invisible:true
+-- invisible:true
 (
 	
 	parameters main rollout:roll_params
 	(
 		longueur 		type:#worldUnits 	ui:spn_longueur 			default:0
-		hauteur 			type:#worldUnits 	ui:spn_hauteur 			default:0
+		profondeur		type:#worldUnits 	ui:spn_profondeur 			default:0
 		
 		matId			type:#integer 			ui:spn_matId 				default:1
 	)
@@ -18,7 +18,7 @@ invisible:true
 	(
 		group "Global" (
 			spinner spn_longueur 		"Longueur" 		type:#worldunits range:[0,1e20,0]
-			spinner spn_hauteur	 	"Hauteur" 		type:#worldunits range:[0,1e20,0]
+			spinner spn_profondeur	 	"Profondeur" 		type:#worldunits range:[0,1e20,0]
 		)		
 		group "Mat ID" (
 			spinner spn_matId 			"MatId" 			type:#integer	 range:[1,1000,1]
@@ -34,8 +34,8 @@ invisible:true
 		--- on place les points ---------
 		local pt_1		=	[0,0,0]
 		local pt_2		=	[longueur,0,0]
-		local pt_3		=	[longueur,0,hauteur]
-		local pt_4		=	[0,0,hauteur]		
+		local pt_3		=	[longueur,profondeur,0]
+		local pt_4		=	[0,profondeur, 0]		
 		local pts	= #(pt_1, pt_2, pt_3, pt_4) 
 		
 		----- on creer les faces --------------
@@ -59,7 +59,7 @@ invisible:true
 	tool create
 	(
 		local pt_debut
-		local pt_hauteur
+		local pt_profondeur
 		
 		on mousePoint click do
 			case click of
@@ -80,9 +80,9 @@ invisible:true
 					nodeTM  				= rotateZMatrix angle_pts
 					nodeTM.translation 	= pt_debut
 					
-					pt_hauteur	=	gridPoint
+					pt_profondeur	=	gridPoint
 				)
-				3:	hauteur 					= length ( gridPoint - pt_hauteur )
+				3:	profondeur 					= length ( gridPoint - pt_profondeur )
 			)
 		
 	) ----- fin tool create -------------
