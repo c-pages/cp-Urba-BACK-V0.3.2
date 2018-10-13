@@ -13,6 +13,12 @@ invisible:true
 		profondeur	 	type:#worldUnits 	ui:spn_profondeur		default:0
 		
 		matId			type:#integer 			ui:spn_matId 				default:1
+		
+		--- non utilisé : pour compatibilité avec boite en L et en U ------------------
+		symetrie			type:#boolean 
+		horizontal		type:#boolean
+		--- non utilisé	------------------
+		
 	)
 	
 	rollout roll_params "boite"

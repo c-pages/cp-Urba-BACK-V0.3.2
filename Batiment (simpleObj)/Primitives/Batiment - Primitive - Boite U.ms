@@ -3,7 +3,7 @@ plugin simpleObject		urba_primitive_boite_U
 name:"Boite U"
 classID:#(0x729c803f, 0x12e92614)
 category:"CP | Primitives"
-invisible:true
+-- invisible:true
 (
 	
 	parameters main rollout:roll_params
@@ -15,6 +15,11 @@ invisible:true
 		horizontal		type:#boolean 		ui:shk_horizontal			default:false
 		
 		matId			type:#integer 			ui:spn_matId 				default:1
+		
+		--- non utilisé : pour compatibilité avec boite en L et en U ------------------
+		symetrie			type:#boolean
+		--- non utilisé ------------------
+		
 	)
 	
 	rollout roll_params "boite"

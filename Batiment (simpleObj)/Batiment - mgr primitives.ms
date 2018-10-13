@@ -33,10 +33,13 @@ struct str_mgr_primitives	(
 			meshop.moveVert 	_mesh	#{1.._mesh.numverts} transf_tab
 		),
 		
-		
-		
-		
-		
+		/* 
+		createInstance  urba_primitive_planVertical
+		createInstance  urba_primitive_planHorizontal
+		createInstance  urba_primitive_boite_L
+		createInstance  urba_primitive_boite_U
+		createInstance  urba_primitive_boite
+		 */
 		
 		--------- CREATION D'OBJETS PRIMITFS ------------------------------------------------------------------------------------------------------
 		fn ajouter_plan_vertical	_mesh	long:0		ht:0			transf:		matID:			bool:false	=(
@@ -61,7 +64,6 @@ struct str_mgr_primitives	(
 			nv_plan
 			
 		), --- fin creer plan vertical	------------------
-		
 		fn ajouter_plan_horizontal	_mesh	long:0		prof:0			transf:		matID:			bool:false	=(
 			
 			---- on creer le sous objet model ---------------------
@@ -84,8 +86,6 @@ struct str_mgr_primitives	(
 			nv_plan
 			
 		), --- fin creer plan vertical	------------------
-				
-		
 		fn ajouter_boite_L 			_mesh	long:0		prof:0		ht:0			sym:false		horiz: false		transf:			matID:		bool:false	=(
 			
 			---- on creer le sous objet model ---------------------
@@ -158,7 +158,6 @@ struct str_mgr_primitives	(
 			nvl_boite
 			
 		) --- fin creer boite	------------------
-	
 	
 )	----	fin struct	str_mgr_primitives --------------------
 

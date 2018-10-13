@@ -50,6 +50,9 @@ category:"CP | Menuiserie"
 		matId_menuis					type:#integer 			ui:spn_matId_menuis	default:1
 		matId_vitrage					type:#integer 			ui:spn_matId_vitrage	default:2
 		
+		
+		
+		------- mise a jour des valeurs --------------
 		on longueur					set val 	do	composants_actualiser ()
 		on profondeur					set val 	do	composants_actualiser ()
 		on hauteur						set val 	do	composants_actualiser ()
@@ -64,6 +67,12 @@ category:"CP | Menuiserie"
 		
 		on matId_menuis				set val 	do	composants_actualiser ()
 		on matId_vitrage				set val 	do	composants_actualiser ()
+		
+		
+		
+-- 		----- pour rester dans valeurs corrects ------------------------
+-- 		on traverse_B_epaisseur 		set val do corriger_parametres ()
+-- 		
 		
 	)	-----	fin parametres --------------------
 	
@@ -120,14 +129,18 @@ category:"CP | Menuiserie"
 		composant_base.matId_menuis	 			= matId_menuis
 		composant_base.matId_vitrage	 			= matId_vitrage
 		
-		
 	)  --- fin composants_actualiser  ------------------
 	
 	
 	
 	
 	
-	
+	fn initialiser =(
+		---- creation des composants ------------
+		composant_base		= 	mgr_compo.get_chassis ()
+-- 		composant_imposte	= 	mgr_compo.get_chassis ()
+		
+	)
 	
 	
 	
@@ -209,8 +222,9 @@ category:"CP | Menuiserie"
 	) --- fin tool create ---------
 	
 	on create do (
-		composant_base		= 	mgr_compo.get_chassis ()
-		composant_imposte	= 	mgr_compo.get_chassis ()
+		initialiser ()
+-- 		composant_base		= 	mgr_compo.get_chassis ()
+-- 		composant_imposte	= 	mgr_compo.get_chassis ()
 	)
 ) ------- fin plugin ---------------------
 

@@ -18,9 +18,6 @@ category:"CP | Menuiserie | Composant"
 	
 	
 	
-	--- le manager de primitives---------------	
-	local mgr_constr	=	str_mgr_primitives ()
-	
 	--- Prédéfinitions ------------------
 	local corriger_parametres
 	
@@ -77,12 +74,35 @@ category:"CP | Menuiserie | Composant"
 	
 	
 	--------------- FONCTIONS  ----------------------------------------------------------------------------------------------------------------------
-	fn corriger_parametres 	=(		
-		if menuis_epaisseur >longueur/2 do menuis_epaisseur = longueur/2
-		if menuis_epaisseur >hauteur/2 do menuis_epaisseur = hauteur/2 
+	---- les parametres ----------------
+	fn corriger_parametres 	=(
+		
+		local longueurMax	=	longueur/2
+		if not montant_G	and montant_D 	or not montant_D	and montant_G do longueurMax = longueur
+		local hauteurMax		= hauteur /2
+		if not	traverse_B do hauteurMax =	hauteur
+		
+		if montant_G	or  montant_D 	do
+			if menuis_epaisseur >longueurMax do menuis_epaisseur = longueurMax
+		if menuis_epaisseur >hauteurMax do menuis_epaisseur = hauteurMax
 	)
-
 	
+	----  construction du mesh	-------------------
+	fn transformer_mesh		_mesh		_transf	=(
+		if classof _transf == point3 do _transf = transMatrix _transf
+		local transf_tab =#()
+		for id_pt = 1 to   _mesh.numverts  do (
+			local pos_base 	=  meshop.getVert  _mesh 	id_pt
+			local pos_dest 	= pos_base * _transf
+			append transf_tab ( pos_dest - pos_base)
+		)
+		meshop.moveVert 	_mesh	#{1.._mesh.numverts} transf_tab
+	)
+	fn attacher_composant			_composant		_transf	=(
+		local compo_mesh	=	copy _composant.mesh
+		transformer_mesh		compo_mesh		_transf
+		meshop.attach		mesh		compo_mesh
+	)
 	
 	
 	
@@ -103,89 +123,49 @@ category:"CP | Menuiserie | Composant"
 		if montant_D	do long_trav -= menuis_epaisseur
 		
 		
-		---- la version low poly ----------------
-		if low_poly then (
-			
-			--- montant  gauche ----------
-			if montant_G do
-				mgr_constr.ajouter_boite_L 	mesh		long:		menuis_epaisseur		\
-																	prof:		profondeur				\
-																	ht:		hauteur					\
-																	matID:	matId_menuis			
-			
-			--- montant droite ----------
-			if montant_D do
-				mgr_constr.ajouter_boite_L 	mesh		long:			menuis_epaisseur							\
-																	prof:			profondeur									\
-																	ht:			hauteur										\
-																	sym:			true											\
-																	transf:		[longueur - menuis_epaisseur,0,0]	\
-																	matID:		matId_menuis								
-			
-			--- traverse basse ----------
-			if traverse_B do
-				mgr_constr.ajouter_boite_L 	mesh		long:			long_trav						\
-																	prof:			profondeur						\
-																	ht:			menuis_epaisseur		\
-																	transf:		[posX_traverses,0,0]		\
-																	horiz:			true								\
-																	matID:		matId_menuis					
-			
-			--- traverse	haute ----------
-			mgr_constr.ajouter_boite_L 	mesh		long:			long_trav														\
-																prof:			profondeur														\
-																ht:			menuis_epaisseur												\
-																horiz:			true																\
-																sym:			true																\
-																transf:		[posX_traverses,0,hauteur - menuis_epaisseur]		\
-																matID:		matId_menuis													
+		----- les composants ----------------
+		local composant
+		if low_poly 	then	composant = createInstance  urba_primitive_boite_L		matId:matId_menuis
+						else	composant = createInstance  urba_primitive_boite		matId:matId_menuis
 		
-		---- la version normale ----------------
-		) else (
+		--- montant  gauche ----------
+		if montant_G do (
+			composant.longueur			=	menuis_epaisseur
+			composant.profondeur		=	profondeur
+			composant.hauteur			=	hauteur
 			
-			--- montant  gauche ----------
-			if montant_G do
-				mgr_constr.ajouter_boite 	mesh		long:		menuis_epaisseur		\
-																prof:		profondeur				\
-																ht:		hauteur					\
-																matID:	matId_menuis			\
-																bool:		false
-			
-			--- montant droite ----------
-			if montant_D do
-				mgr_constr.ajouter_boite 	mesh		long:			menuis_epaisseur							\
-																prof:			profondeur									\
-																ht:			hauteur										\
-																transf:		[longueur - menuis_epaisseur,0,0]	\
-																matID:		matId_menuis								\
-																bool:			false
-			
-			--- traverse basse ----------
-			if traverse_B do
-				mgr_constr.ajouter_boite 	mesh		long:			long_trav						\
-																prof:			profondeur						\
-																ht:			menuis_epaisseur		\
-																transf:		[posX_traverses,0,0]		\
-																matID:		matId_menuis					\
-																bool:			false
-			
-			--- traverse	haute ----------
-			mgr_constr.ajouter_boite 	mesh		long:			long_trav														\
-															prof:			profondeur														\
-															ht:			menuis_epaisseur												\
-															transf:		[posX_traverses,0,hauteur - menuis_epaisseur]	\
-															matID:		matId_menuis													\
-															bool:			false
-		
-			
+			meshop.attach		mesh		composant.mesh
 		)
 		
+		--- montant droite ----------
+		if montant_D do (
+			composant.longueur			=	menuis_epaisseur
+			composant.profondeur		=	profondeur
+			composant.hauteur			=	hauteur
+			composant.symetrie			=	true
+			
+			attacher_composant 	composant		[longueur - menuis_epaisseur,0,0]				
+		)
 		
-		--- on clean -----
-		if mesh.numfaces> 1 do
-			meshop.autoSmooth		mesh 	#{1..mesh.numfaces} 		10
+		--- traverse basse ----------
+		if traverse_B do (			
+			composant.longueur			=	long_trav
+			composant.profondeur		=	profondeur
+			composant.hauteur			=	menuis_epaisseur
+			composant.symetrie			=	false
+			composant.horizontal		=	true
+			
+			attacher_composant 	composant	[posX_traverses,0,0]				
+		)
 		
+		--- traverse	haute ----------
+		composant.longueur			=	long_trav
+		composant.profondeur		=	profondeur
+		composant.hauteur			=	menuis_epaisseur
+		composant.symetrie			=	true
+		composant.horizontal		=	true
 		
+		attacher_composant 	composant	[posX_traverses,0,hauteur - menuis_epaisseur]
 		
 	)  ----- fin on buld mesh -----------------
 	
