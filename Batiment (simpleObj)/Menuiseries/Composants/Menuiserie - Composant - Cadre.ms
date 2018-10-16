@@ -10,7 +10,7 @@ category:"CP | Menuiserie | Composant"
 	------------ DEBUG	----------------------------------------------------------------------------------
 	local m_debug = true
 -- 	local 	m_debug = false
-	local 	m_dbgPrefix ="urba_menuis_fix"
+	local 	m_dbgPrefix ="menuiserie_composant_cadre"
 	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 	------------ DEBUG	----------------------------------------------------------------------------------
 	
@@ -21,53 +21,71 @@ category:"CP | Menuiserie | Composant"
 	--- Prédéfinitions ------------------
 	local corriger_parametres
 	
+	---- manager de mesh -------------------
+	local mgr_mesh = str_mgr_mesh ()
 	
 	
 	parameters params_general rollout:roll_general	
 	(
 		----- global ----------------
-		longueur 						type:#worldUnits 	ui:spn_longueur 			default:0.
-		profondeur	 					type:#worldUnits 	ui:spn_profondeur		default:0.
-		hauteur	 						type:#worldUnits 	ui:spn_hauteur 			default:0.
+		longueur 				type:#worldUnits 	ui:spn_longueur 			default:0.
+		profondeur	 			type:#worldUnits 	ui:spn_profondeur		default:0.
+		hauteur	 				type:#worldUnits 	ui:spn_hauteur 			default:0.
 		
 		----- les menuiseries -------------
-		menuis_epaisseur	 			type:#worldUnits 	ui:spn_epaisseur			default:0.
+		menuis_largeur	 	type:#worldUnits 	ui:spn_menuis_largeur	default:0.
 		
 		------ options --------------
-		low_poly				type:#boolean 		ui:shk_lowPoly				default:true
-		montant_G			type:#boolean 		ui:shk_montant_G		default:true
-		montant_D			type:#boolean 		ui:shk_montant_D		default:true
-		traverse_B			type:#boolean 		ui:shk_traverse_B		default:true
-		
-		------ mat ID ----------
-		matId_menuis					type:#integer 			ui:spn_matId_menuis	default:1
+		montant_G				type:#boolean 		ui:shk_montant_G		default:true
+		montant_D				type:#boolean 		ui:shk_montant_D		default:true
+		travBasse				type:#boolean 		ui:shk_traverse_B		default:true
+		travBasse_hauteur	type:#worldUnits 	ui:spn_travBasse_ht		default:0.
 		
 		----- pour rester dans valeurs corrects ------------------------
-		on menuis_epaisseur 	set val do corriger_parametres ()
+		on menuis_largeur 		set val do corriger_parametres ()
 		on longueur 				set val do corriger_parametres ()
 		on hauteur 				set val do corriger_parametres ()
 		
+	)
+	
+	parameters params_divers rollout:roll_divers
+	(
+		------ mat ID ----------
+		low_poly					type:#boolean 		ui:shk_lowPoly				default:false
+		matId_menuis			type:#integer 			ui:spn_matId_menuis	default:1
+		
 	)	-----	fin parametres --------------------
 	
-	rollout roll_general  "Cadre"
+	rollout roll_general  "Paramètres"
 	(
-		group "Global" (
+-- 		group "Global" (
 			spinner spn_longueur 			"longueur" 				type:#worldunits range:[0,1e20,0]
 			spinner spn_hauteur 			"Hauteur" 				type:#worldunits range:[0,1e20,0]
 			spinner spn_profondeur 		"Profondeur" 			type:#worldunits range:[0,1e20,0]
-		)
+-- 		)
 		group "Menuiserie" (
-			spinner spn_epaisseur	 		"Epaisseur" 				type:#worldunits range:[0,1e20,0]
-			checkbox	shk_montant_G	"Montant gauche" 			
-			checkbox	shk_montant_D	"Montant droit" 		
-			checkbox	shk_traverse_B	"traverse basse" 	
+			spinner 	spn_menuis_largeur	 "Largeur" 				type:#worldunits range:[0,1e20,0]
+			checkbox	shk_montant_G		"Montant gauche" 			
+			checkbox	shk_montant_D		"Montant droit" 		
+			checkbox	shk_traverse_B		"traverse basse" 	
+			spinner 	spn_travBasse_ht	"Hauteur" 				type:#worldunits range:[0,1e20,0]
 		)
+		fn actualiser = (
+			
+			spn_travBasse_ht.Indeterminate 			= not travBasse
+			spn_travBasse_ht.enabled 					= travBasse
+		)
+		on roll_general		open 					do actualiser ()
+		on shk_traverse_B	changed state 	do actualiser ()
+	)
+	rollout roll_divers  "Divers" (
 		group "Qualité" (
 			checkbox	shk_lowPoly		"Low poly"
 		)
 		group "Material ID" (
 			spinner spn_matId_menuis 	"Menuiseries" 			type:#integer range:[1,1000,1]
-		)		
+		)
+		
 	) ---- fin rollout	----------
 	
 	
@@ -80,30 +98,12 @@ category:"CP | Menuiserie | Composant"
 		local longueurMax	=	longueur/2
 		if not montant_G	and montant_D 	or not montant_D	and montant_G do longueurMax = longueur
 		local hauteurMax		= hauteur /2
-		if not	traverse_B do hauteurMax =	hauteur
+		if not	travBasse do hauteurMax =	hauteur
 		
 		if montant_G	or  montant_D 	do
-			if menuis_epaisseur >longueurMax do menuis_epaisseur = longueurMax
-		if menuis_epaisseur >hauteurMax do menuis_epaisseur = hauteurMax
+			if menuis_largeur >longueurMax do menuis_largeur = longueurMax
+		if menuis_largeur > hauteur -   travBasse_hauteur do menuis_largeur =  hauteur -   travBasse_hauteur 
 	)
-	
-	----  construction du mesh	-------------------
-	fn transformer_mesh		_mesh		_transf	=(
-		if classof _transf == point3 do _transf = transMatrix _transf
-		local transf_tab =#()
-		for id_pt = 1 to   _mesh.numverts  do (
-			local pos_base 	=  meshop.getVert  _mesh 	id_pt
-			local pos_dest 	= pos_base * _transf
-			append transf_tab ( pos_dest - pos_base)
-		)
-		meshop.moveVert 	_mesh	#{1.._mesh.numverts} transf_tab
-	)
-	fn attacher_composant			_composant		_transf	=(
-		local compo_mesh	=	copy _composant.mesh
-		transformer_mesh		compo_mesh		_transf
-		meshop.attach		mesh		compo_mesh
-	)
-	
 	
 	
 	
@@ -113,59 +113,67 @@ category:"CP | Menuiserie | Composant"
 		--- vider le mesh --------
 		delete mesh
 		
-		--- la longueur des traverses------
+		--- Données  ---------------------------------------------------------------------------------------
 		local posX_traverses	=	0
 		local long_trav	=	longueur
 		if montant_G	do (
-			long_trav 			-= menuis_epaisseur
-			posX_traverses 	+= menuis_epaisseur
+			long_trav 			-= menuis_largeur
+			posX_traverses 	+= menuis_largeur
 		)
-		if montant_D	do long_trav -= menuis_epaisseur
+		if montant_D	do long_trav -= menuis_largeur
 		
 		
+		
+		
+		
+		--- Construction ---------------------------------------------------------------------------------------
 		----- les composants ----------------
-		local composant
-		if low_poly 	then	composant = createInstance  urba_primitive_boite_L		matId:matId_menuis
-						else	composant = createInstance  urba_primitive_boite		matId:matId_menuis
+		local composant=	if low_poly 	then	 createInstance  urba_primitive_boite_L	matId:matId_menuis
+													else	 createInstance  urba_primitive_boite		matId:matId_menuis
 		
 		--- montant  gauche ----------
 		if montant_G do (
-			composant.longueur			=	menuis_epaisseur
+			composant.longueur			=	menuis_largeur
 			composant.profondeur		=	profondeur
 			composant.hauteur			=	hauteur
 			
-			meshop.attach		mesh		composant.mesh
+			mgr_mesh.attacher		mesh		composant
+			
 		)
 		
 		--- montant droite ----------
 		if montant_D do (
-			composant.longueur			=	menuis_epaisseur
+			composant.longueur			=	menuis_largeur
 			composant.profondeur		=	profondeur
 			composant.hauteur			=	hauteur
 			composant.symetrie			=	true
 			
-			attacher_composant 	composant		[longueur - menuis_epaisseur,0,0]				
+			mgr_mesh.attacher		mesh		composant 	transf:[longueur - menuis_largeur,0,0]				
 		)
 		
 		--- traverse basse ----------
-		if traverse_B do (			
+		if travBasse do (			
 			composant.longueur			=	long_trav
 			composant.profondeur		=	profondeur
-			composant.hauteur			=	menuis_epaisseur
+			composant.hauteur			=	travBasse_hauteur
 			composant.symetrie			=	false
 			composant.horizontal		=	true
 			
-			attacher_composant 	composant	[posX_traverses,0,0]				
+			mgr_mesh.attacher		mesh		composant 	transf:[posX_traverses,0,0]				
 		)
 		
 		--- traverse	haute ----------
 		composant.longueur			=	long_trav
 		composant.profondeur		=	profondeur
-		composant.hauteur			=	menuis_epaisseur
+		composant.hauteur			=	menuis_largeur
 		composant.symetrie			=	true
 		composant.horizontal		=	true
 		
-		attacher_composant 	composant	[posX_traverses,0,hauteur - menuis_epaisseur]
+		mgr_mesh.attacher		mesh		composant 	transf:[posX_traverses,0,hauteur - menuis_largeur]
+		
+		----- le mapping 	--------------
+		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
+		
 		
 	)  ----- fin on buld mesh -----------------
 	
@@ -210,11 +218,24 @@ category:"CP | Menuiserie | Composant"
 					hauteur 					= length ( gridPoint - pt_hauteur )
 					pt_epaisseur 			= gridPoint
 				)
-				5: menuis_epaisseur 	= length ( gridPoint - pt_epaisseur )
+				5: (
+					menuis_largeur 				= length ( gridPoint - pt_epaisseur )
+					travBasse_hauteur 	= menuis_largeur 
+				)
 			)		
 	) --- fin tool create ---------
 	
 	
 	
 	
-)
+)	------- fin plugin ------------------------------------
+
+
+
+
+
+
+
+
+
+

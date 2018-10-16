@@ -1,6 +1,6 @@
 
 plugin simpleObject		urba_primitive_planHorizontal
-name:"Plan horizontal"
+name:"Plan horiz."
 classID:#(0x66aff812, 0x7e864a94)
 category:"CP | Primitives"
 -- invisible:true
@@ -12,18 +12,25 @@ category:"CP | Primitives"
 		profondeur		type:#worldUnits 	ui:spn_profondeur 			default:0
 		
 		matId			type:#integer 			ui:spn_matId 				default:1
+		mapCoords 	type:#boolean  default:true
 	)
 	
 	rollout roll_params "boite"
 	(
 		group "Global" (
 			spinner spn_longueur 		"Longueur" 		type:#worldunits range:[0,1e20,0]
-			spinner spn_profondeur	 	"Profondeur" 		type:#worldunits range:[0,1e20,0]
+			spinner spn_profondeur	 "Profondeur" 		type:#worldunits range:[0,1e20,0]
 		)		
 		group "Mat ID" (
 			spinner spn_matId 			"MatId" 			type:#integer	 range:[1,1000,1]
 		)
 	)
+	
+	on hasUVW do 
+		mapCoords
+		
+	on setGenUVW bool do mapCoords = bool
+	
 	
 	on buildMesh do
 	(
@@ -49,10 +56,22 @@ category:"CP | Primitives"
 		setFaceSmoothGroup mesh 2 1
 		
 		---- on clean les edges ---------
-		meshop.autoEdge mesh #{1..mesh.Edges .count}	45.
+		setEdgeVis mesh 1 3 false
+		setEdgeVis mesh 2 1 false
+		
+		/* ------ real world mapping 	--------------
+		setNumTVerts mesh pts.count
+		for i = 1 to pts.count do	
+			setTVert mesh i pts[i]
+		buildTVFaces mesh false
+		for i = 1 to faces.count do	
+			setTVFace mesh i faces[i]
+		 */
 		
 		----- le mapping 	--------------
-		meshop.applyUVWMap 	mesh  #box
+		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
+		
+		
 		
 	) --------- fin on build mesh --------------------------
 	

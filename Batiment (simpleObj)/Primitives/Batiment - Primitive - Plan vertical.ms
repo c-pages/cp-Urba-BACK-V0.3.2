@@ -3,7 +3,7 @@ plugin simpleObject		urba_primitive_planVertical
 name:"Plan vert."
 classID:#(0x49e13042, 0x7ebe4e67)
 category:"CP | Primitives"
-invisible:true
+-- invisible:true
 (
 	
 	parameters main rollout:roll_params
@@ -12,6 +12,7 @@ invisible:true
 		hauteur 			type:#worldUnits 	ui:spn_hauteur 			default:0
 		
 		matId			type:#integer 			ui:spn_matId 				default:1
+		mapCoords 	type:#boolean  default:true
 	)
 	
 	rollout roll_params "boite"
@@ -25,6 +26,12 @@ invisible:true
 		)
 	)
 	
+	on hasUVW do 
+		mapCoords
+		
+	on setGenUVW bool do mapCoords = bool
+	
+	
 	on buildMesh do
 	(
 		
@@ -36,7 +43,7 @@ invisible:true
 		local pt_2		=	[longueur,0,0]
 		local pt_3		=	[longueur,0,hauteur]
 		local pt_4		=	[0,0,hauteur]		
-		local pts	= #(pt_1, pt_2, pt_3, pt_4) 
+		local pts		= #(pt_1, pt_2, pt_3, pt_4) 
 		
 		----- on creer les faces --------------
 		local faces = #(	[1,2,3], [1,3,4] )
@@ -49,10 +56,23 @@ invisible:true
 		setFaceSmoothGroup mesh 2 1
 		
 		---- on clean les edges ---------
-		meshop.autoEdge mesh #{1..mesh.Edges .count}	45.
+		setEdgeVis mesh 1 3 false
+		setEdgeVis mesh 2 1 false
+
+		/* ----- real world mapping 	--------------
+		setNumTVerts mesh pts.count		
+		setTVert mesh 1 [ pts[1].x, pts[1].z, pts[1].y ]
+		setTVert mesh 2 [ pts[2].x, pts[2].z, pts[2].y ]
+		setTVert mesh 3 [ pts[3].x, pts[3].z, pts[3].y ]
+		setTVert mesh 4 [ pts[4].x, pts[4].z, pts[4].y ]
+		buildTVFaces mesh false		
+		for i = 1 to faces.count do		
+			setTVFace mesh i faces[i]
+		 */
 		
 		----- le mapping 	--------------
-		meshop.applyUVWMap 	mesh  #box
+		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
+		
 		
 	) --------- fin on build mesh --------------------------
 	

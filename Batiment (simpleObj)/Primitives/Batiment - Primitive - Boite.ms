@@ -3,7 +3,7 @@ plugin simpleObject		urba_primitive_boite
 name:"Boite"
 classID:#(0x3046a558, 0x2e92f235)
 category:"CP | Primitives"
-invisible:true
+-- invisible:true
 (
 	
 	parameters main rollout:roll_params
@@ -32,6 +32,11 @@ invisible:true
 			spinner spn_matId 			"MatId" 			type:#integer	 range:[1,1000,1]
 		)
 	)
+	
+	on hasUVW do map_coords
+		
+	on setGenUVW bool do map_coords = bool
+		
 	
 	on buildMesh do
 	(
@@ -62,8 +67,10 @@ invisible:true
 		
 		----- On clean le mesh 	--------------
 		meshop.autoSmooth		mesh 	#{1..mesh.numfaces} 		10
-		meshop.autoEdge 		mesh 	#{1..mesh.Edges.count}	10		
-		meshop.applyUVWMap 	mesh  	#box
+		meshop.autoEdge 		mesh 	#{1..mesh.Edges.count}	10	
+		
+		----- le mapping 	--------------
+		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
 		
 	) --------- fin on build mesh --------------------------
 	

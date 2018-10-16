@@ -18,12 +18,10 @@ category:"CP | Menuiserie | Composant"
 	
 	
 	
-	--- le manager de primitives---------------	
-	local mgr_constr	=	str_mgr_primitives ()
-	
 	--- Prédéfinitions ------------------
 	local corriger_parametres
 	
+	local mgr_mesh = str_mgr_mesh ()
 	
 	
 	
@@ -44,12 +42,15 @@ category:"CP | Menuiserie | Composant"
 		div_verti			 				type:#integer		 	ui:spn_div_verti			default:0.
 		div_epaisseur	 				type:#worldUnits 	ui:spn_div_epaisseur		default:0.
 		
-		------ options --------------
-		low_poly							type:#boolean 		ui:shk_lowPoly				default:false
+		------ cadre --------------
+		cadre_use						type:#boolean 		ui:shk_cadre				default:true
 		montant_G						type:#boolean 		ui:shk_montant_G		default:true
 		montant_D						type:#boolean 		ui:shk_montant_D		default:true
 		traverse_B						type:#boolean 		ui:shk_traverse_B		default:true
 		traverse_B_epaisseur		type:#worldUnits 	ui:spn_traverse_B_ep	default:0.
+		
+		------ options --------------
+		low_poly							type:#boolean 		ui:shk_lowPoly				default:false
 		
 		------ mat ID ----------
 		matId_menuis					type:#integer 			ui:spn_matId_menuis	default:1
@@ -63,13 +64,15 @@ category:"CP | Menuiserie | Composant"
 		on menuis_epaisseur 		set val do corriger_parametres ()
 		on profondeur			 		set val do corriger_parametres ()
 		on hauteur 					set val do corriger_parametres ()
-		on traverse_B_epaisseur 	set val do corriger_parametres ()
+		on traverse_B_epaisseur 	set val do 	corriger_parametres ()
+		
 		
 		on div_horiz			 		set val do corriger_parametres ()
 		on div_verti 					set val do corriger_parametres ()
-		on div_epaisseur			 	set val do corriger_parametres ()
-		
-		
+		on div_epaisseur			 	set val do (
+			if val > profondeur do profondeur = val
+			corriger_parametres ()
+		)
 		
 	)	-----	fin parametres --------------------
 	
@@ -79,14 +82,15 @@ category:"CP | Menuiserie | Composant"
 		group "Global" (
 			spinner spn_longueur 			"longueur" 					type:#worldunits range:[0,1e20,0]
 			spinner spn_hauteur 			"Hauteur" 					type:#worldunits range:[0,1e20,0]
-			spinner spn_profondeur 		"Profondeur" 				type:#worldunits range:[0,1e20,0]
 		)
-		group "Menuiserie" (
+		group "Cadre" (
+			checkbox	shk_cadre				"Cadre" 			
+			spinner 	spn_profondeur 		"Profondeur" 			type:#worldunits range:[0,1e20,0]
 			spinner 	spn_epaisseur	 		"Epaisseur" 				type:#worldunits range:[0,1e20,0]
 			checkbox	shk_montant_G		"Montant gauche" 			
 			checkbox	shk_montant_D		"Montant droit" 
 			checkbox	shk_traverse_B		"traverse basse" 		
-			spinner 	spn_traverse_B_ep	"Epaisseur" 				type:#worldunits range:[0,1e20,0]
+			spinner 	spn_traverse_B_ep	"Hauteur" 				type:#worldunits range:[0,1e20,0]
 		)
 		group "Division" (
 			spinner spn_div_horiz	 		"Horizontale" 				type:#integer			range:[0,1e20,0]
@@ -102,11 +106,22 @@ category:"CP | Menuiserie | Composant"
 		)
 		
 		fn actualiser = (
-			spn_traverse_B_ep.Indeterminate 	= not traverse_B
-			spn_traverse_B_ep.enabled 			= traverse_B
+			
+			spn_profondeur.Indeterminate 	= not cadre_use
+			spn_profondeur.enabled 			= cadre_use
+			spn_epaisseur.Indeterminate 		= not cadre_use
+			spn_epaisseur.enabled 				= cadre_use
+			
+			shk_montant_G.enabled 		= cadre_use
+			shk_montant_D.enabled 		= cadre_use
+			shk_traverse_B.enabled 		= cadre_use
+			
+			spn_traverse_B_ep.Indeterminate 	= not traverse_B or  not cadre_use
+			spn_traverse_B_ep.enabled 			= traverse_B and cadre_use
 		)
 		
 		on roll_general		open 				do	actualiser ()		
+		on shk_cadre			changed val 	do	actualiser ()
 		on shk_traverse_B	changed val 	do	actualiser ()
 		
 	) 	---- fin rollout	-----------------------
@@ -125,17 +140,13 @@ category:"CP | Menuiserie | Composant"
 		if montant_G	or  montant_D 	do
 			if menuis_epaisseur >longueurMax do menuis_epaisseur = longueurMax
 		
-		
 		---- epaisseur des menuiseries --------
--- 		if menuis_epaisseur >longueur/2 do menuis_epaisseur = longueur/2 
 		if menuis_epaisseur + traverse_B_epaisseur > hauteur do (
--- 			debug "par là"
 			local rapport 				=  traverse_B_epaisseur	/	( menuis_epaisseur + traverse_B_epaisseur ) 
 			menuis_epaisseur 		= 	hauteur *  ( 1- rapport)
 			traverse_B_epaisseur 	=	hauteur *	rapport
 		)
 		 
-		
 		---- les divisions ----------
 		if div_epaisseur > profondeur do  div_epaisseur = profondeur 
 		if longueur - 2*menuis_epaisseur < div_horiz * div_epaisseur do 
@@ -148,25 +159,7 @@ category:"CP | Menuiserie | Composant"
 	)
 	
 	
-	
-	----  construction du mesh	-------------------
-	fn transformer_mesh		_mesh		_transf	=(
-		if classof _transf == point3 do _transf = transMatrix _transf
-		local transf_tab =#()
-		for id_pt = 1 to   _mesh.numverts  do (
-			local pos_base 	=  meshop.getVert  _mesh 	id_pt
-			local pos_dest 	= pos_base * _transf
-			append transf_tab ( pos_dest - pos_base)
-		)
-		meshop.moveVert 	_mesh	#{1.._mesh.numverts} transf_tab
-	)
-	fn attacher_composant			_composant		_transf	=(
-		local compo_mesh	=	copy _composant.mesh
-		transformer_mesh		compo_mesh		_transf
-		meshop.attach		mesh		compo_mesh
-	)
-	
-	
+
 	
 	
 	--------------- CONSTRUCTION  ----------------------------------------------------------------------------------------------------------------------
@@ -176,14 +169,14 @@ category:"CP | Menuiserie | Composant"
 		delete mesh
 		
 		
-		--- DONNéES DE BASE ---------------------------------------------------------------------------------------
-		local posX_traverses	=	if montant_G	then menuis_epaisseur 		else 0
-		local posY_traverses	=	if traverse_B  	then traverse_B_epaisseur 	else 0
+		--- Données  ---------------------------------------------------------------------------------------
+		local posX_traverses	=	if montant_G	and cadre_use	then menuis_epaisseur 		else 0
+		local posY_traverses	=	if traverse_B  	and cadre_use	then traverse_B_epaisseur 	else 0
 		
 		local espace_vide_H	=	longueur
-		if montant_G	do espace_vide_H 	-= menuis_epaisseur
-		if montant_D	do espace_vide_H -= menuis_epaisseur
-		local espace_vide_V 	= (hauteur - 	menuis_epaisseur	- posY_traverses		)
+		if montant_G	and cadre_use	do espace_vide_H 	-= menuis_epaisseur
+		if montant_D	and cadre_use	do espace_vide_H -= menuis_epaisseur
+		local espace_vide_V 	=  if  cadre_use	then	(hauteur - 	menuis_epaisseur	- posY_traverses		)	else 	(hauteur - 	posY_traverses		)	
 		
 		local espace_div_H 		= ( espace_vide_H - div_horiz * div_epaisseur ) / ( div_horiz + 1 )
 		local depose_div_H		= [posX_traverses + espace_div_H, 	profondeur/2 -  div_epaisseur / 2,		posY_traverses	]
@@ -195,51 +188,53 @@ category:"CP | Menuiserie | Composant"
 		
 		
 		
-		--- CONSTRUCTION ---------------------------------------------------------------------------------------
+		--- Construction ---------------------------------------------------------------------------------------
 		----- les composants ----------------
-		local composant
-		if low_poly 	then	composant = createInstance  urba_primitive_boite_L		matId:matId_menuis
-						else	composant = createInstance  urba_primitive_boite			matId:matId_menuis
+		local compo_menuis	= 	if low_poly 	then	createInstance  urba_primitive_boite_U		matId:matId_menuis
+														else	createInstance  urba_primitive_boite			matId:matId_menuis
 		
 		--- montant  gauche ----------
-		if montant_G do (
-			composant.longueur			=	menuis_epaisseur
-			composant.profondeur		=	profondeur
-			composant.hauteur			=	hauteur
+		if montant_G 	and cadre_use	do (
+			compo_menuis.longueur			=	menuis_epaisseur
+			compo_menuis.profondeur		=	profondeur
+			compo_menuis.hauteur			=	hauteur
 			
-			meshop.attach		mesh		composant.mesh
+			mgr_mesh.attacher		mesh		compo_menuis
 		)
 		
 		--- montant droite ----------
-		if montant_D do (
-			composant.longueur			=	menuis_epaisseur
-			composant.profondeur		=	profondeur
-			composant.hauteur			=	hauteur
-			composant.symetrie			=	true
+		if montant_D and cadre_use	do (
+			compo_menuis.longueur			=	menuis_epaisseur
+			compo_menuis.profondeur		=	profondeur
+			compo_menuis.hauteur			=	hauteur
+			compo_menuis.symetrie			=	true
 			
-			attacher_composant 	composant		[longueur - menuis_epaisseur,0,0]				
+			mgr_mesh.attacher		mesh		compo_menuis 	transf:[longueur - menuis_epaisseur,0,0]				
 		)
 		
+		local compo_menuis	= 	if low_poly 	then	createInstance  urba_primitive_boite_L		matId:matId_menuis
+														else	createInstance  urba_primitive_boite			matId:matId_menuis
 		--- traverse basse ----------
-		if traverse_B do (			
-			composant.longueur			=	espace_vide_H
-			composant.profondeur		=	profondeur
-			composant.hauteur			=	traverse_B_epaisseur
-			composant.symetrie			=	false
-			composant.horizontal		=	true
+		if traverse_B and cadre_use	do (			
+			compo_menuis.longueur			=	espace_vide_H
+			compo_menuis.profondeur		=	profondeur
+			compo_menuis.hauteur			=	traverse_B_epaisseur
+			compo_menuis.symetrie			=	false
+			compo_menuis.horizontal		=	true
 			
-			attacher_composant 	composant	[posX_traverses,0,0]				
+			mgr_mesh.attacher		mesh		compo_menuis 	transf:[posX_traverses,0,0]				
 		)
 		
 		--- traverse	haute ----------
-		composant.longueur			=	espace_vide_H
-		composant.profondeur		=	profondeur
-		composant.hauteur			=	menuis_epaisseur
-		composant.symetrie			=	true
-		composant.horizontal		=	true
-		
-		attacher_composant 	composant	[posX_traverses,0,hauteur - menuis_epaisseur]
-		
+		if cadre_use	do (	
+			compo_menuis.longueur			=	espace_vide_H
+			compo_menuis.profondeur		=	profondeur
+			compo_menuis.hauteur			=	menuis_epaisseur
+			compo_menuis.symetrie			=	true
+			compo_menuis.horizontal		=	true
+			
+			mgr_mesh.attacher		mesh		compo_menuis 	transf:[posX_traverses,0,hauteur - menuis_epaisseur]
+		)
 		
 		
 		---- le vitrage ----------
@@ -250,7 +245,7 @@ category:"CP | Menuiserie | Composant"
 		compo_vitrage.hauteur			=	espace_vide_V
 		if not low_poly 	do compo_vitrage.profondeur		=	vitrage_epaisseur
 		
-		attacher_composant 	compo_vitrage		pos_vitrage
+		mgr_mesh.attacher		mesh		compo_vitrage 	transf:pos_vitrage
 		
 		
 		
@@ -266,7 +261,7 @@ category:"CP | Menuiserie | Composant"
 			compo_div.symetrie			=	false
 			compo_div.horizontal		=	false
 			
-			attacher_composant 	compo_div		depose_div_H
+			mgr_mesh.attacher		mesh		compo_div 	transf:depose_div_H
 			
 			depose_div_H.x += espace_div_H + div_epaisseur
 		)
@@ -280,12 +275,14 @@ category:"CP | Menuiserie | Composant"
 			compo_div.symetrie			=	false
 			compo_div.horizontal		=	true
 			
-			attacher_composant 	compo_div		depose_div_V
+			mgr_mesh.attacher		mesh		compo_div 	transf:depose_div_V
 			
 			depose_div_V.z += espace_div_V + div_epaisseur
 		)
 		
 		
+		----- le mapping 	--------------
+		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
 		
 		
 	)  ----- fin on buld mesh -----------------
@@ -332,7 +329,11 @@ category:"CP | Menuiserie | Composant"
 					hauteur 					= length ( gridPoint - pt_hauteur )
 					pt_epaisseur 			= gridPoint
 				)
-				5: menuis_epaisseur 	= length ( gridPoint - pt_epaisseur )
+				5: (
+					
+					menuis_epaisseur 	= length ( gridPoint - pt_epaisseur )
+					traverse_B_epaisseur = menuis_epaisseur
+				)
 			)		
 	) --- fin tool create ---------
 	

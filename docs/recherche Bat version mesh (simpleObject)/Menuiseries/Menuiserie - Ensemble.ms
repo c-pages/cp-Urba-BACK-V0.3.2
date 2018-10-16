@@ -24,12 +24,8 @@ category:"CP | Urba | menuiseries"
 	
 	
 	
-	
-	-----------------    VARIABLES ----------------------------------------------------------------------------------------------------------------------
-	local roll_general
-	local mgr_constr		=	str_contruction_menuiseries ()
-	
-	
+	---- manager de mesh -------------------
+	local mgr_mesh = str_mgr_mesh ()
 	
 	
 

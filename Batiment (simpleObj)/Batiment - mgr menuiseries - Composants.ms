@@ -5,10 +5,12 @@
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment - mgr primitives.ms"
 
 ----- Menuiserie base ----------------
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment - mgr mesh.ms"
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Poignée.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Cadre.ms"
-filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Chassis.ms"
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Panneau.ms"
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Chassis vitré.ms"
 
-	
 struct str_mgr_menuiseries_composants	(
 	
 		------------ DEBUG	----------------------------------------------------------------------------------

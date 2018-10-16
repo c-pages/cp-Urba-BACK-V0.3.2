@@ -43,6 +43,7 @@ category:"CP | Primitives"
 		delete mesh
 		
 		--- on place les points ---------
+		local pts 
 		local pt_1	=	[0,0,0]
 		local pt_2	=	[longueur,0,0]
 		local pt_3	=	[longueur,0,hauteur]
@@ -53,6 +54,8 @@ category:"CP | Primitives"
 			if not horizontal then (
 				pt_5	=	[longueur,profondeur,hauteur]
 				pt_6	=	[longueur,profondeur,0]
+				
+-- 				pts = #(pt_1, pt_2, pt_3, pt_4,  		pt_2, pt_3, pt_5, pt_6) 
 			) else (
 				pt_5	=	[longueur,profondeur,hauteur]
 				pt_6	=	[0,profondeur,hauteur]
@@ -66,7 +69,7 @@ category:"CP | Primitives"
 				pt_6	=	[0,profondeur,0]
 			)
 		)
-		local pts 	 = #(pt_1, pt_2, pt_3, pt_4, pt_5, pt_6) 
+			pts = #(pt_1, pt_2, pt_3, pt_4, pt_5, pt_6) 
 		
 		----- on creer les faces --------------
 		local faces		
@@ -97,11 +100,11 @@ category:"CP | Primitives"
 		setFaceSmoothGroup mesh 4 2
 		
 		---- on clean les edges ---------
-		meshop.autoEdge mesh #{1..mesh.Edges .count}	45.
-		
+		meshop.autoEdge 		mesh 	#{1..mesh.Edges.count}	10	
 		
 		----- le mapping 	--------------
-		meshop.applyUVWMap 	mesh  #box
+		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
+		
 		
 	) --------- fin on build mesh --------------------------
 	

@@ -68,7 +68,11 @@ category:"CP | Primitives"
 		----- On clean le mesh 	--------------
 		meshop.autoSmooth		mesh 	#{1..mesh.numfaces} 		10
 		meshop.autoEdge 		mesh 	#{1..mesh.Edges.count}	10		
-		meshop.applyUVWMap 	mesh  	#box
+
+		----- le mapping 	--------------
+		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
+		
+		
 		
 	) --------- fin on build mesh --------------------------
 	

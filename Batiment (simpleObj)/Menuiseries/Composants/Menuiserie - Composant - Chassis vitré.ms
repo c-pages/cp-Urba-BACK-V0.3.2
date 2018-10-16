@@ -1,10 +1,9 @@
 
 
-
-plugin simpleObject		urba_menuiserie_fixe
-name:"Fixe"
-classID:#(0x154a56e1, 0x726397f7)
-category:"CP | Menuiserie"
+plugin simpleObject		menuiserie_composant_chassisVitre
+name:"Chassis vitre"
+classID:#(0x7bb20e92, 0x37f7c1e7)
+category:"CP | Menuiserie | Composant"
 -- invisible:true
 (
 	
@@ -12,36 +11,43 @@ category:"CP | Menuiserie"
 	------------ DEBUG	----------------------------------------------------------------------------------
 	local m_debug = true
 -- 	local 	m_debug = false
-	local 	m_dbgPrefix ="urba_menuiserie_fixe"
+	local 	m_dbgPrefix ="menuiserie_composant_chassisVitre"
 	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 	------------ DEBUG	----------------------------------------------------------------------------------
 	
 	
-	---- pré déclaration -----------
-	local corriger_parametres 
 	
-	--- composant ---
-	local compo_chassisVitre
+	
+	
+	--- Prédéfinitions ------------------
+	local corriger_parametres
+	
+	---- manager de mesh -------------------
+	local mgr_mesh = str_mgr_mesh ()
+	
+	----- les composants -----------	
+	local compo_cadre, compo_vitrage
+	
 	
 	parameters params_general rollout:roll_general	
 	(
 		----- global ----------------
-		longueur 						type:#worldUnits 	ui:spn_longueur 			default:0.
-		profondeur	 					type:#worldUnits 	ui:spn_profondeur		default:0.
-		hauteur	 						type:#worldUnits 	ui:spn_hauteur 			default:0.
+		longueur 						type:#worldUnits 	ui:spn_longueur 				default:0.
+		profondeur	 					type:#worldUnits 	ui:spn_profondeur			default:0.
+		hauteur	 						type:#worldUnits 	ui:spn_hauteur 				default:0.
 		
 		----- cadre -------------
-		cadre_use						type:#boolean 		ui:shk_cadre				default:true
-		cadre_largeur	 				type:#worldUnits 	ui:spn_cadre_largeur	default:0.
-		travBasse_hauteur			type:#worldUnits 	ui:spn_travBasse_ht		default:0.
+		cadre_use						type:#boolean 		ui:shk_cadre					default:true
+		cadre_largeur	 				type:#worldUnits 	ui:spn_cadre_largeur		default:0.
+		travBasse_hauteur			type:#worldUnits 	ui:spn_travBasse_ht			default:0.
 		
 		----- vitrage -------------
-		vitrage_epaisseur				type:#worldUnits 	ui:spn_vitrage_ep		default:2.
-		div_montants_nbr		 	type:#integer		 	ui:spn_div_montants_nbr			default:0
-		div_traverses_nbr			type:#integer		 	ui:spn_div_traverses_nbr			default:0
-		div_largeur	 					type:#worldUnits 	ui:spn_div_largeur		default:4.
-		div_profondeur	 			type:#worldUnits 	ui:spn_div_profondeur		default:4.
+		vitrage_epaisseur				type:#worldUnits 	ui:spn_vitrage_ep			default:2.
+		div_montants_nbr		 	type:#integer		 	ui:spn_div_montants_nbr	default:0
+		div_traverses_nbr			type:#integer		 	ui:spn_div_traverses_nbr	default:0
 		div_calage_verti	 			type:#worldUnits	 	ui:spn_div_calage_verti		default:0.
+		div_largeur	 					type:#worldUnits 	ui:spn_div_largeur			default:4.
+		div_profondeur	 			type:#worldUnits 	ui:spn_div_profondeur			default:4.
 		
 		----- pour rester dans valeurs corrects ------------------------
 		on cadre_largeur	 			set val do corriger_parametres ()
@@ -52,7 +58,6 @@ category:"CP | Menuiserie"
 		on div_profondeur		 	set val do corriger_parametres ()
 		on div_largeur			 		set val do corriger_parametres ()		
 		on div_montants_nbr		set val do corriger_parametres ()
-		on div_calage_verti			set val do corriger_parametres ()
 		on div_traverses_nbr 		set val do corriger_parametres ()
 		on travBasse_hauteur		set val do corriger_parametres ()
 		
@@ -127,60 +132,52 @@ category:"CP | Menuiserie"
 		if cadre_largeur < 0 do cadre_largeur = 0
 		
 		if vitrage_epaisseur >	profondeur	do  vitrage_epaisseur	= profondeur
-		if vitrage_epaisseur < .01 do vitrage_epaisseur = .01
 		
-		if div_profondeur < vitrage_epaisseur	do div_profondeur = vitrage_epaisseur	
-		if div_profondeur > profondeur			do div_profondeur = profondeur	
-		
-		if div_largeur > longueur	do div_largeur = longueur	
-		if div_largeur > hauteur	do div_largeur = hauteur	
+		if div_profondeur < vitrage_epaisseur	do div_profondeur = vitrage_epaisseur			
+		if div_profondeur > profondeur	do div_profondeur = profondeur	
 		
 		local div_decal_max = ( hauteur -  div_traverses_nbr *div_largeur ) / ( div_traverses_nbr  + 1 )		
 		if div_calage_verti > div_decal_max do	div_calage_verti = div_decal_max 		
 		if div_calage_verti < - div_decal_max do	div_calage_verti = -div_decal_max 
+			
+	)
+	fn actualiser_composants	= with redraw off (
+	
+		----- les composants ----------------
+		if compo_cadre 	== undefined do compo_cadre 	= createInstance	menuiserie_composant_cadre
+		if compo_vitrage	== undefined do compo_vitrage	= createInstance	menuiserie_composant_panneau
+		
+		-----	le cadre 	-------------
+		compo_cadre.longueur					=	longueur
+		compo_cadre.hauteur					=	hauteur
+		compo_cadre.profondeur				=	profondeur
+		compo_cadre.menuis_largeur			=	cadre_largeur
+		compo_cadre.travBasse_hauteur		=	travBasse_hauteur		
+		compo_cadre.matId_menuis			=	matId_menuis
+		compo_cadre.low_poly					=	low_poly
+		
+		local longueur_passage 	=	if cadre_use 	then longueur - 2* cadre_largeur 	else 	longueur
+		local hauteur_passage		= 	if cadre_use 	then hauteur - ( cadre_largeur + travBasse_hauteur)		else 	hauteur
+		
+		-----	le vitrage 	-------------
+		compo_vitrage.longueur				=	longueur_passage
+		compo_vitrage.hauteur					=	hauteur_passage
+		
+		compo_vitrage.div_montants_nbr	=	div_montants_nbr
+		compo_vitrage.div_traverses_nbr	=	div_traverses_nbr
+		compo_vitrage.div_calage_verti		=	div_calage_verti
+		compo_vitrage.remplis_epaisseur		=	vitrage_epaisseur
+		compo_vitrage.div_largeur				=	div_largeur		
+		compo_vitrage.div_profondeur		=	div_profondeur		
+		compo_vitrage.matId_remplis			=	matId_vitrage				
+		compo_vitrage.matId_menuis			=	matId_menuis
+		compo_vitrage.low_poly				=	low_poly
+		
 	)
 	
 	
 	
-	
-	--------------- FONCTIONS  ----------------------------------------------------------------------------------------------------------------------
-	fn actualiser_composants	= with redraw off (
-		
-		if compo_chassisVitre == undefined	do
-			compo_chassisVitre		= createInstance  menuiserie_composant_chassisVitre
-		
-		local longueur_passage 	=	if cadre_use 	then longueur - 2* cadre_largeur 	else 	longueur
-		local hauteur_passage		= 	if cadre_use 	then hauteur - cadre_largeur 		else 	hauteur
-		
-		-----	le vitrage 	-------------
-		compo_chassisVitre.longueur						=	longueur
-		compo_chassisVitre.hauteur						=	hauteur
-		compo_chassisVitre.cadre_use					=	cadre_use
-		
-		compo_chassisVitre.profondeur 					= profondeur
-		compo_chassisVitre.cadre_largeur 				= cadre_largeur
-		compo_chassisVitre.travBasse_hauteur 		= travBasse_hauteur		
-		compo_chassisVitre.vitrage_epaisseur	 		= vitrage_epaisseur
-		compo_chassisVitre.div_montants_nbr 		= div_montants_nbr
-		compo_chassisVitre.div_traverses_nbr 		= div_traverses_nbr
-		compo_chassisVitre.div_largeur				 	= div_largeur
-		compo_chassisVitre.div_profondeur			 	= div_profondeur		
-		compo_chassisVitre.div_calage_verti		 	= div_calage_verti		
-		compo_chassisVitre.low_poly			 			= low_poly		
-		compo_chassisVitre.matId_menuis	 			= matId_menuis
-		compo_chassisVitre.matId_vitrage	 			= matId_vitrage
-		
-	)  --- fin actualiser_composants  ------------------
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	--------------- CONSTRUCTION  ----------------------------------------------------------------------------------------------------------------------
+	--------------- ENVENEMENTS  ----------------------------------------------------------------------------------------------------------
 	on buildMesh do	(
 		
 		---- maj des composants -----
@@ -189,13 +186,20 @@ category:"CP | Menuiserie"
 		--- vider le mesh --------
 		delete mesh
 		
-		---- le chassis -------
-		mesh	+	compo_chassisVitre.mesh
+		---- le cadre ----
+		if cadre_use do
+			mgr_mesh.attacher		mesh		compo_cadre
+		
+		local callage_G 	= 	if cadre_use 	then cadre_largeur else 0
+		local callage_B 	= 	if cadre_use 	then travBasse_hauteur else 0
+			
+		---- le vitrage ----
+		mgr_mesh.attacher		mesh		compo_vitrage		transf:[ callage_G, profondeur/2	, callage_B]
+		
+		----- le mapping 	--------------
+		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
 		
 	)  ----- fin on buld mesh -----------------
-	
-	
-	
 	
 	
 	------------ TOOLS	----------------------------------------------------------------------------------------------------------------------
@@ -209,8 +213,7 @@ category:"CP | Menuiserie"
 		on mousePoint click do
 			case click of
 			(
-				1: (	
-						pt_debut 		=  gridPoint
+				1: (	pt_debut 	=  gridPoint
 						nodeTM.translation = pt_debut
 				)
 				5: #stop
@@ -227,7 +230,6 @@ category:"CP | Menuiserie"
 					nodeTM.translation 	= pt_debut
 					
 					pt_profondeur	=	gridPoint
-					
 				)
 				3:	(
 					profondeur 				= 	length ( gridPoint - pt_profondeur )
@@ -238,25 +240,21 @@ category:"CP | Menuiserie"
 					pt_epaisseur 			= gridPoint
 				)
 				5: (
-					cadre_largeur 		= length ( gridPoint - pt_epaisseur )
+					cadre_largeur 			= length ( gridPoint - pt_epaisseur )
 					travBasse_hauteur	=	cadre_largeur
 					
-					vitrage_epaisseur 	= 2
+					---- init de quelques valeurs pour y voir quelque chose -------
+					vitrage_epaisseur		=	2
 					div_largeur				=	2
-					div_largeur			=	4
+					div_profondeur		=	4
 				)
-					
 			)		
 	) --- fin tool create ---------
 	
 	
-) ------- fin plugin ---------------------
+)	------- fin plugin ------------------------------------
 
 
 
-
-
-
-		
 
 
