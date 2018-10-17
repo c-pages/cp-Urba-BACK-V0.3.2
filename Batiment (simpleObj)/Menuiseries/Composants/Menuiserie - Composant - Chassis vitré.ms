@@ -48,7 +48,7 @@ category:"CP | Menuiserie | Composant"
 		div_calage_verti	 			type:#worldUnits	 	ui:spn_div_calage_verti		default:0.
 		div_largeur	 					type:#worldUnits 	ui:spn_div_largeur			default:4.
 		div_profondeur	 			type:#worldUnits 	ui:spn_div_profondeur		default:4.
-		
+		/* 
 		----- pour rester dans valeurs corrects ------------------------
 		on cadre_largeur	 			set val do corriger_parametres ()
 		on longueur 					set val do corriger_parametres ()
@@ -60,7 +60,7 @@ category:"CP | Menuiserie | Composant"
 		on div_montants_nbr		set val do corriger_parametres ()
 		on div_traverses_nbr 		set val do corriger_parametres ()
 		on travBasse_hauteur		set val do corriger_parametres ()
-		
+		 */
 	)
 	
 	parameters params_divers rollout:roll_divers
@@ -110,7 +110,7 @@ category:"CP | Menuiserie | Composant"
 	
 	
 	--------------- FONCTIONS  --------------------------------------------------------------------------------------------------------------
-	---- les parametres ----------------
+/* 	---- les parametres ----------------
 	fn corriger_parametres 	=(
 		
 		local longueur_passage 	= longueur  - 2* cadre_largeur
@@ -139,8 +139,8 @@ category:"CP | Menuiserie | Composant"
 		local div_decal_max = ( hauteur -  div_traverses_nbr *div_largeur ) / ( div_traverses_nbr  + 1 )		
 		if div_calage_verti > div_decal_max do	div_calage_verti = div_decal_max 		
 		if div_calage_verti < - div_decal_max do	div_calage_verti = -div_decal_max 
-			
-	)
+			 
+	) */
 	fn actualiser_composants	= with redraw off (
 	
 		----- les composants ----------------

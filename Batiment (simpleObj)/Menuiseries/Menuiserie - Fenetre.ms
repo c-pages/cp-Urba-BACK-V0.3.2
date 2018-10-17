@@ -40,9 +40,10 @@ category:"CP | Menuiserie"
 		vitrage_epaisseur				type:#worldUnits 	default:1.
 		
 		----- ouvrants ---------------------
-		ouvrant_epaisseur	 		type:#worldUnits 	default:4.	
+-- 		ouvrant_cadre_larg	 		type:#worldUnits 	default:4.	
 		ouvrant_profondeur	 		type:#worldUnits 	default:4.	
 		ouvrant_callage	 			type:#worldUnits 	default:1.5
+		ouvrant_cadre_larg		 	type:#worldUnits 	ui:spn_ouvrant_cadre_larg				default:4.	
 		div_largeur	 					type:#worldUnits 	default:2.
 		div_profondeur	 			type:#worldUnits 	default:3.
 		
@@ -80,18 +81,21 @@ category:"CP | Menuiserie"
 		checkbox	shk_cadre				"Cadre" 		
 	)
 	rollout roll_parametres  "Paramètres"	(
+		spinner 	spn_ouvrant_cadre_larg	 	"Menuis. larg." 		type:#worldunits range:[0,1e20,0]
 		checkbox	shk_double							"double" across:2
 		checkbox	shk_tierce							"Tiercée" 
 		spinner 	spn_tierce_pourcent 			"(%)" 		type:#float				range:[0,100,0] 
-		spinner 	spn_angle_1 						"Ouverture 1 (°)" 	type:#float				range:[0,180,0]
+		spinner 	spn_angle_1 						"Ouv. 1 (°)" 	type:#float				range:[0,180,0]
 		checkbox	shk_symetrie						"Inverser sens"	
-		spinner 	spn_angle_2 						"Ouverture 2 (°)" 	type:#float				range:[0,180,0]
+		spinner 	spn_angle_2 						"Ouv. 2 (°)" 	type:#float				range:[0,180,0]
 		group "Croisillons" (	
 			spinner 	spn_div_montants_nbr	 "Montants 1" 		type:#integer			range:[0,1e20,0]
 			spinner 	spn_div_montants_nbr_2	 "Montants 2" 	type:#integer		range:[0,1e20,0]
 			spinner		spn_div_traverses_nbr	 "Traverses" 		type:#integer			range:[0,1e20,0]
 			spinner 	spn_div_calage_verti 	"Align. vert." 		type:#worldunits		range:[-1e20,1e20,0]
 		)
+		
+		
 		fn actualiser =(
 			shk_symetrie.enabled = not ouvrant_double
 			if ouvrant_double do shk_symetrie.triState = 2
@@ -105,7 +109,7 @@ category:"CP | Menuiserie"
 			spn_tierce_pourcent.indeterminate		=	not ouvrant_double or not ouvrant_tierce
 			spn_tierce_pourcent.enabled 				=	ouvrant_double and  ouvrant_tierce
 			
-			spn_div_montants_nbr_2.indeterminate		=	not ouvrant_double or not ouvrant_tierce
+			spn_div_montants_nbr_2.indeterminate	=	not ouvrant_double or not ouvrant_tierce
 			spn_div_montants_nbr_2.enabled 			=	ouvrant_double and  ouvrant_tierce
 		)
 		on roll_parametres	open 					do actualiser ()
@@ -130,12 +134,10 @@ category:"CP | Menuiserie"
 	---- les composants ---------------------
 	fn composants_actualiser	= with redraw off (
 		
-		
-		
 		---- creation des composants ------------------
 		if compo_cadre 		== undefined	do	compo_cadre			= 	createInstance  menuiserie_composant_cadre
-		if compo_ouvrant_1 == undefined	do	compo_ouvrant_1	= 	createInstance  menuiserie_composant_chassisVitre				
-		if compo_ouvrant_2 == undefined	do	compo_ouvrant_2	= 	createInstance  menuiserie_composant_chassisVitre	
+		if compo_ouvrant_1 	== undefined	do	compo_ouvrant_1	= 	createInstance  menuiserie_composant_chassisVitre				
+		if compo_ouvrant_2 	== undefined	do	compo_ouvrant_2	= 	createInstance  menuiserie_composant_chassisVitre	
 		
 		local longueur_passage 	= if not cadre_use	then longueur 	else longueur 	- 2*cadre_largeur
 		local hauteur_passage 		= if not cadre_use	then hauteur 		else hauteur 	- 2*cadre_largeur
@@ -154,18 +156,19 @@ category:"CP | Menuiserie"
 		---- maj ouvrant		----
 		compo_ouvrant_1.profondeur 				= ouvrant_profondeur
 		compo_ouvrant_1.hauteur 					= hauteur_passage
-		compo_ouvrant_1.cadre_largeur 			= ouvrant_epaisseur
-		compo_ouvrant_1.travBasse_hauteur		= ouvrant_epaisseur		
-		compo_ouvrant_1.low_poly			 		= low_poly
-		compo_ouvrant_1.matId_menuis	 		= matId_menuis
-		compo_ouvrant_1.matId_vitrage	 		= matId_vitrage		
+		compo_ouvrant_1.cadre_largeur 			= ouvrant_cadre_larg
+		compo_ouvrant_1.travBasse_hauteur		= ouvrant_cadre_larg		
+		
 		compo_ouvrant_1.div_montants_nbr 		= div_montants_nbr
 		compo_ouvrant_1.div_traverses_nbr 		= div_traverses_nbr
-		compo_ouvrant_1.div_largeur				= div_largeur
+		compo_ouvrant_1.div_largeur					= div_largeur
 		compo_ouvrant_1.div_profondeur			= div_profondeur
 		compo_ouvrant_1.div_calage_verti			= div_calage_verti
 		compo_ouvrant_1.vitrage_epaisseur		= vitrage_epaisseur
 		
+		compo_ouvrant_1.low_poly			 		= low_poly
+		compo_ouvrant_1.matId_menuis	 			= matId_menuis
+		compo_ouvrant_1.matId_vitrage	 			= matId_vitrage		
 	
 		if not ouvrant_double then (
 			compo_ouvrant_1.longueur 				= longueur_passage
@@ -243,7 +246,9 @@ category:"CP | Menuiserie"
 		---- 1er ouvrant ------------
 		local transf_ouvrant_1	=	origine_ouv_1 * rotate_ouv_1 * recalle_ouv_1		
 		mgr_mesh.attacher		mesh		compo_ouvrant_1 	transf:transf_ouvrant_1
-
+		
+		try debug"compo_ouvrant_1" 	var:compo_ouvrant_1.ouvrant_cadre_larg	catch ()
+		
 		---- 2nd ouvrant	------------
 		if  ouvrant_double do (
 			

@@ -32,6 +32,8 @@ category:"CP | Menuiserie"
 		longueur 		type:#worldUnits 	ui:spn_longueur 			default:0.
 		hauteur	 		type:#worldUnits 	ui:spn_hauteur 			default:0.
 		cadre_use		type:#boolean 		ui:shk_cadre				default:true
+		
+		ouvrant_callage	 	type:#worldUnits ui:spn_ouvrant_calage	default:0
 	)
 	parameters params_general rollout:roll_parametres	(
 		
@@ -42,7 +44,6 @@ category:"CP | Menuiserie"
 		
 		----- ouvrants ---------------------
 		ouvrant_profondeur	 		type:#worldUnits 	default:4.	
-		ouvrant_callage	 			type:#worldUnits 	default:1.5
 		ouvrant_travBasse_ht	 	type:#worldUnits 	default:10.
 		div_largeur	 					type:#worldUnits 	default:2.
 		div_profondeur	 			type:#worldUnits 	default:3.
@@ -65,7 +66,8 @@ category:"CP | Menuiserie"
 		
 		
 		---- Poignées ---------------------
-		poignee_use					type:#boolean 		ui:shk_poignee							default:true
+		poignee_1_use				type:#boolean 		ui:shk_poignee_1							default:true
+		poignee_2_use				type:#boolean 		ui:shk_poignee_2							default:true
 		poignee_hauteur	 			type:#worldUnits 	default:90.
 		poignee_align_x				type:#worldUnits 	default:1.
 	
@@ -88,16 +90,17 @@ category:"CP | Menuiserie"
 		spinner 	spn_longueur 			"longueur" 				type:#worldunits 	range:[0,1e20,0]
 		spinner 	spn_hauteur 			"Hauteur" 				type:#worldunits 	range:[0,1e20,0]
 		checkbox	shk_cadre				"Cadre" 		
+		spinner 	spn_ouvrant_calage	"Calage" 				type:#worldunits 	range:[0,1e20,0]
 	)
 	
 	rollout roll_parametres  "Paramètres"	(		
 		
-		checkbox	shk_double							"Double" across:2
+		checkbox	shk_double							"Double" across:2	width:47
 		checkbox	shk_tierce							"Tiercée"
 		spinner 	spn_tierce_pourcent 			"(%)" 					type:#float				range:[0,100,0] 
-		spinner 	spn_angle_1 						"Ouverture" 			type:#float				range:[0,180,0]
+		spinner 	spn_angle_1 						"Ouv. 1 (°)" 	type:#float				range:[0,180,0]
 		checkbox	shk_symetrie						"Inverser sens"	
-		spinner 	spn_angle_2 						"Ouverture 2" 			type:#float				range:[0,180,0]
+		spinner 	spn_angle_2 						"Ouv. 2 (°)" 	type:#float				range:[0,180,0]
 		checkbox	shk_vitree							"Vitrée"				
 		spinner 	spn_ouvrant_cadre_larg	 	"Menuis. larg." 		type:#worldunits range:[0,1e20,0]
 		spinner 	spn_ouvrant_cadre_travB_ht	 "Trav B. ht." 			type:#worldunits range:[0,1e20,0]
@@ -109,12 +112,24 @@ category:"CP | Menuiserie"
 			spinner 	spn_div_calage_verti 	"Align. vert." 	type:#worldunits			range:[-1e20,1e20,0]
 		)
 		group 	"Options" (	
-			checkbox	shk_poignee						"Poignée"
+			checkbox	shk_poignee_1					"Poignée 1"
+			checkbox	shk_poignee_2					"Poignée 2"
 		)
 		
 		fn actualiser =(
 			shk_symetrie.enabled = not ouvrant_double
 			if ouvrant_double do shk_symetrie.triState = 2
+			
+			spn_ouvrant_cadre_larg.indeterminate			=	not ouvrant_double
+			spn_ouvrant_cadre_larg.enabled 				=	ouvrant_double
+			shk_tierce.enabled = ouvrant_double
+			if not ouvrant_double do shk_tierce.triState = 2
+			
+			spn_tierce_pourcent.indeterminate			=	not ouvrant_tierce or not ouvrant_double
+			spn_tierce_pourcent.enabled 					=	ouvrant_double and ouvrant_tierce
+			
+			spn_angle_2.indeterminate			=	not ouvrant_double
+			spn_angle_2.enabled 				=	ouvrant_double
 			
 			spn_ouvrant_cadre_larg.indeterminate			=	not ouvrant_vitree
 			spn_ouvrant_cadre_larg.enabled 				=	ouvrant_vitree
@@ -130,6 +145,7 @@ category:"CP | Menuiserie"
 		on roll_parametres	open 					do actualiser ()
 		on shk_double 		changed state 	do actualiser ()
 		on shk_vitree	 		changed state 	do actualiser ()
+		on shk_tierce	 		changed state 	do actualiser ()
 	)
 	
 	rollout roll_divers  "Divers"	(
@@ -248,7 +264,7 @@ category:"CP | Menuiserie"
 		
 		---- le cadre -------
 		if cadre_use do 
-			mgr_mesh.attacher		mesh		compo_cadre
+			mgr_mesh.attacher		mesh		compo_cadre	
 		
 		----Données ------------	
 		local origine_ouv_1
@@ -299,7 +315,7 @@ category:"CP | Menuiserie"
 		---- poignée 1 et interieur 1 ------------------------
 		local hauteur_min 			= 108
 		local largeur_menuis_min	= 5
-		if poignee_use and not low_poly and hauteur -  cadre_largeur > hauteur_min and ouvrant_cadre_larg > largeur_menuis_min	do (
+		if poignee_1_use and not low_poly and hauteur -  cadre_largeur > hauteur_min and ouvrant_cadre_larg > largeur_menuis_min	do (
 			
 -- 			local longueur_passage = compo_ouvrant.longueur
 			
@@ -332,9 +348,9 @@ category:"CP | Menuiserie"
 				)
 			) 
 			
-			
+		)
 			---- poignée double porte ------------------------
-			if    ouvrant_double	do (
+			if   poignee_2_use and  ouvrant_double	do (
 				
 				compo_poignee.symetrie 			= true
 				compo_poignee.symetrie_sens 	= true
@@ -351,7 +367,7 @@ category:"CP | Menuiserie"
 			 
 			
 			
-		) --- fin poignées (if not low poly )------
+		
 		
 		
 	)  ----- fin on buld mesh ---------------------------------------------------------------------

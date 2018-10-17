@@ -12,6 +12,7 @@ filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Me
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Cadre.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Panneau.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Chassis vitré.ms"
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Meneau.ms"
 
 struct str_mgr_menuiseries_composants	(
 	

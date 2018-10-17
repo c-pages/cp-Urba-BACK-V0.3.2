@@ -21,7 +21,7 @@ category:"CP | Menuiserie"
 	local sequence_tmp
 	
 	--- composant ---
-	local compo_cadre, compo_meneau
+	local compo_cadre, compo_meneau--, compo_travBas
 	
 	---- manager de mesh -------------------
 	local mgr_mesh = str_mgr_mesh ()
@@ -36,15 +36,16 @@ category:"CP | Menuiserie"
 		hauteur	 						type:#worldUnits 	ui:spn_hauteur 					default:0.
 		
 		----- les menuiseries -----------
-		cadre_largeur					type:#worldUnits 	ui:spn_cadre_largeur			default:5.	
-		montants_largeur				type:#worldUnits 	ui:spn_montants_largeur		default:5.	
-		montants_profondeur		type:#worldUnits 	ui:spn_montants_profondeur	default:10.	
+		cadre_largeur					type:#worldUnits 	ui:spn_cadre_largeur			default:2.5
+-- 		montants_largeur				type:#worldUnits 	ui:spn_montants_largeur		default:5.	
+-- 		montants_profondeur		type:#worldUnits 	ui:spn_montants_profondeur	default:10.	
 		
 	)
 	
 	parameters params_sequence rollout:roll_sequence
 	(
-		align_prof					type:#worldUnits 		ui:spn_aling_prof	default:0.	
+		align_prof					type:#worldUnits 		ui:spn_aling_prof	default:5.
+		
 		sequence					type:#maxObjectTab	tabSizeVariable:true
 		sequence_elem_long		type:#floatTab			tabSizeVariable:true
 	)
@@ -77,10 +78,10 @@ category:"CP | Menuiserie"
 		group "Cadre" (
 			spinner spn_cadre_largeur			"Largeur" 				type:#worldunits 	range:[0,1e20,0]
 		)
-		group "Meneaux" (
-			spinner spn_montants_largeur		"Largeur" 			type:#worldunits 	range:[0,1e20,0]
-			spinner spn_montants_profondeur	"Profondeur" 		type:#worldunits 	range:[0,1e20,0]
-		)
+-- 		group "Meneaux" (
+-- 			spinner spn_montants_largeur		"Largeur" 			type:#worldunits 	range:[0,1e20,0]
+-- 			spinner spn_montants_profondeur	"Profondeur" 		type:#worldunits 	range:[0,1e20,0]
+-- 		)
 		
 	)
 	
@@ -126,7 +127,7 @@ category:"CP | Menuiserie"
 		
 		spinner 	spn_elem_long		"Définir long." 		type:#worldunits range:[0,1e20,0]
 		
-		subrollout	subroll_param		""	height:500
+		subrollout	subroll_param		""	height:300
 		
 		fn actualiser =(
 			lbx_sequence.items =  for compo in sequence collect ( classof compo ).name
@@ -157,7 +158,10 @@ category:"CP | Menuiserie"
 		on btn_retirer 		pressed 			do	retirer_element 		lbx_sequence.selection 
 		on btn_monter 		pressed 			do	monter_element 		lbx_sequence.selection 
 		on btn_descendre 	pressed		 	do	descendre_element 	lbx_sequence.selection 
-		on spn_elem_long 	changed val	do	sequence_elem_long[  lbx_sequence.selection ] = val
+		on spn_elem_long 	changed val	do	(
+			sequence_elem_long[  lbx_sequence.selection ] = val
+			redrawviews ()
+		)
 		
 		
 	)
@@ -173,6 +177,8 @@ category:"CP | Menuiserie"
 	) 	---- fin rollout	-----------------------
 	
 	
+	fn est_porte	_compo	=	classof	_compo	==	urba_menuiserie_porte
+	fn est_fixe		_compo	=	classof	_compo	==	urba_menuiserie_fixe
 	
 	--------------- comopsants ----------------------------------
 	fn actualiser_composants	= with redraw off (
@@ -181,11 +187,10 @@ category:"CP | Menuiserie"
 		if compo_cadre 		== undefined	do	compo_cadre		= 	createInstance  menuiserie_composant_cadre
 		if compo_meneau		== undefined	do	compo_meneau	= 	createInstance  menuiserie_composant_meneau
 		
-		
 		----- maj du cadre ----------------------
 		compo_cadre.longueur 						= longueur
 		compo_cadre.profondeur 					= profondeur
-		compo_cadre.hauteur 						= hauteur		
+		compo_cadre.hauteur 						= hauteur	
 		compo_cadre.menuis_largeur	 			= cadre_largeur	
 		compo_cadre.travBasse_hauteur	 		= cadre_largeur	
 		compo_cadre.travBasse		 			= true	
@@ -194,29 +199,77 @@ category:"CP | Menuiserie"
 		compo_cadre.travBasse					=	false
 		
 		----- Meneaux  ----------------------
-		compo_meneau.longueur 					= montants_largeur
-		compo_meneau.profondeur 				= montants_profondeur
+		compo_meneau.longueur 					= cadre_largeur
+		compo_meneau.profondeur 				= profondeur
 		compo_meneau.hauteur 					= hauteur	-  cadre_largeur
 		compo_meneau.low_poly			 		= low_poly		
 		
-		--- maj des composants de la sequence -------------
-		local nbr_meneaux							= sequence.count - 1
 		
-		sequence_tmp 			= #()
-		local longueur_composant		=	( longueur	- 2* cadre_largeur - ( sequence.count - 1 )* compo_meneau.longueur )	/	sequence.count
-		for composant in sequence do (
-			local compo_temp 			= copy composant
-			compo_temp.longueur			=	longueur_composant
-			if classof compo_temp	== urba_menuiserie_porte then
+		
+		
+		--- maj des composants de la sequence -------------
+		local longueur_passage 	= longueur 	- 2*cadre_largeur
+		local nbr_meneaux			= sequence.count - 1
+		
+		local longueur_total_meneaux	=	( sequence.count - 1 )* compo_meneau.longueur 
+		
+		local longueur_definies_total 	= 0
+		local nbr_elem_definies 		= 0
+		for i = 1 to sequence.count do (
+			if sequence_elem_long[i] != 0 do (
+				longueur_definies_total+= sequence_elem_long[i]
+				nbr_elem_definies += 1
+			)
+		)
+		
+		local longueur_composant	= ( longueur_passage - ( longueur_total_meneaux + longueur_definies_total ) ) / ( sequence.count - nbr_elem_definies )
+		
+		
+		
+		sequence_tmp 				= #()
+		for i = 1 to sequence.count do (
+			
+			local compo_temp 				= 	copy sequence[i]
+	
+			if sequence_elem_long[i] != 0 then	compo_temp.longueur 	= 	sequence_elem_long[i]
+													else		compo_temp.longueur	=	longueur_composant
+			
+			if est_porte 	compo_temp 	then
 				compo_temp.hauteur			=	hauteur - cadre_largeur
 			else
 				compo_temp.hauteur			=	hauteur - 2*cadre_largeur
+			
 			compo_temp.profondeur		=	profondeur
-			compo_temp.cadre_use		= false
+			compo_temp.cadre_use			= false
 			compo_temp.low_poly			=	low_poly
+			
 			append sequence_tmp		compo_temp
 		)
+		
+		
+		--- Si notre sequence est vide
+		if sequence.count == 0 do (
+			local compo_temp = createInstance urba_menuiserie_fixe
+			
+			append	sequence_tmp  	compo_temp
+			
+			compo_temp.hauteur		=	hauteur - 2*cadre_largeur
+			compo_temp.profondeur		=	profondeur
+			compo_temp.cadre_use			= false
+			compo_temp.low_poly			=	low_poly
+			compo_temp.longueur			=	longueur 	- 2*cadre_largeur
+		)
+		
+		
 	)  --- fin composants_actualiser  ------------------
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	--------------- sequence ----------------------------------
@@ -283,20 +336,38 @@ category:"CP | Menuiserie"
 		---- le cadre  -------
 		mesh	+	compo_cadre.mesh
 		
+		
+		
 		---- la sequence	-----
-		local depos_composant = [ cadre_largeur, 0, 0 ]
+		local compo_travBas	= 	if low_poly	then	createInstance  urba_primitive_boite_L else createInstance 	urba_primitive_boite
+		local depos_composant = [ cadre_largeur, align_prof, 0 ]
 		for i = 1 to	sequence_tmp.count do (
 			
 			---- le composant -----
-			local composant = sequence_tmp [i]
-			local depose_temp = if classof composant	== urba_menuiserie_porte then depos_composant 
-																											else depos_composant + [0,0,cadre_largeur ]
+			local composant 		= sequence_tmp [i]
+			local calage_y		= if est_fixe		composant		then 	align_prof else  -( composant.ouvrant_profondeur / 2 )
+			local calage_z			= if est_porte		composant		then 	0 else  cadre_largeur
+			
+			local depose_temp 	= if  not est_fixe 	composant 	then  	depos_composant  	+ [0, align_prof + calage_y ,calage_z ]
+																					else		depos_composant 	+ [0,align_prof,cadre_largeur ]
+			
+			
 			mgr_mesh.attacher		mesh		composant	transf:depose_temp
+			
+			---- la traverse du bas ------------
+			if not est_porte 	composant 	do (
+				compo_travBas.hauteur 		= 	cadre_largeur
+				compo_travBas.profondeur		=	profondeur
+				compo_travBas.longueur		=	composant.longueur
+				mgr_mesh.attacher		mesh		compo_travBas	transf:( depos_composant - [0,align_prof, 0] )
+			)
+				
+			
 			depos_composant.x += composant.longueur
 			
 			--- le meneau- ----
 			if i != sequence_tmp.count do (				
-				mgr_mesh.attacher		mesh		compo_meneau	transf:(depos_composant + [0,0,cadre_largeur ])
+				mgr_mesh.attacher		mesh		compo_meneau	transf:( depos_composant - [0,align_prof, 0] )
 				depos_composant.x += compo_meneau.longueur
 			)
 		)
@@ -332,8 +403,10 @@ category:"CP | Menuiserie"
 				2: ( 
 					longueur 				= 	length 		( gridPoint - pt_debut )
 					local norm_dir 		=	normalize 	(gridPoint - pt_debut )
-					local angle_pts		=	acos			(dot  [1,0,0]  norm_dir)		
+					local angle_pts		=	acos			(dot  [1,0,0]  norm_dir)	
+					
 					if  norm_dir.y < 0 do angle_pts = 360 - angle_pts 
+					
 					nodeTM  				= rotateZMatrix angle_pts
 					nodeTM.translation 	= pt_debut
 					
