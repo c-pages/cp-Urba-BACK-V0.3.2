@@ -21,40 +21,47 @@ category:"CP | Menuiserie"
 	local corriger_parametres
 	
 	----- les composants -----------	
-	local	compo_cadre					
-	local	compo_ouvrant
+	local	compo_cadre, compo_ouvrant_1, compo_ouvrant_2
 	
 	---- manager de mesh -------------------
 	local mgr_mesh = str_mgr_mesh ()
 	
 	
-	parameters params_general rollout:roll_general
-	(
-		
-		----- global ---------------------
-		longueur 						type:#worldUnits 	ui:spn_longueur 			default:0.
-		profondeur	 					type:#worldUnits 	ui:spn_profondeur		default:0.
-		hauteur	 						type:#worldUnits 	ui:spn_hauteur 			default:0.
+	parameters params_dimensions rollout:rol_global	(
+		longueur 		type:#worldUnits 	ui:spn_longueur 			default:0.
+		hauteur	 		type:#worldUnits 	ui:spn_hauteur 			default:0.
+		cadre_use		type:#boolean 		ui:shk_cadre				default:true
+	)
+	parameters params_general rollout:roll_parametres	(
 		
 		----- les menuiseries -----------
-		cadre_epaisseur	 			type:#worldUnits 	ui:spn_cadre_ep			default:0.
-		montant_G						type:#boolean 		ui:shk_montant_G		default:true
-		montant_D						type:#boolean 		ui:shk_montant_D		default:true
-		traverse_B						type:#boolean 		ui:shk_traverse_B		default:true
+		cadre_largeur	 				type:#worldUnits 	default:3.5
+		profondeur	 					type:#worldUnits 	default:5.
+		vitrage_epaisseur				type:#worldUnits 	default:1.
 		
 		----- ouvrants ---------------------
-		ouvrant_epaisseur	 		type:#worldUnits 	ui:spn_ouvrant_ep		default:0.	
-		ouvrant_profondeur	 		type:#worldUnits 	ui:spn_ouvrant_prof		default:0.	
-		ouvrant_decallage	 		type:#worldUnits 	ui:spn_ouvrant_decal	default:0.	
-		div_horiz		 				type:#integer		 	ui:spn_div_horiz			default:0.
-		div_verti			 				type:#integer		 	ui:spn_div_verti			default:0.
-		div_epaisseur	 				type:#worldUnits 	ui:spn_div_epaisseur		default:0.
+		ouvrant_epaisseur	 		type:#worldUnits 	default:4.	
+		ouvrant_profondeur	 		type:#worldUnits 	default:4.	
+		ouvrant_callage	 			type:#worldUnits 	default:1.5
+		div_largeur	 					type:#worldUnits 	default:2.
+		div_profondeur	 			type:#worldUnits 	default:3.
 		
-		inverser							type:#boolean 		ui:shk_inverser			default:false
-		ouvert_angle_1				type:#float 			ui:spn_angle_1			default:0.
-		ouvrant_double						type:#boolean 		ui:shk_double				default:false
-		ouvert_angle_2				type:#float 			ui:spn_angle_2			default:0.
+		ouvrant_double				type:#boolean 		ui:shk_double					default:false
+		ouvrant_tierce					type:#boolean 		ui:shk_tierce					default:false
+		ouvrant_tierce_pourcent	type:#float		 		ui:spn_tierce_pourcent		default:50.
 		
+		div_montants_nbr		 	type:#integer		 	ui:spn_div_montants_nbr		default:0.
+		div_montants_nbr_2		 	type:#integer		 	ui:spn_div_montants_nbr_2	default:0.
+		div_traverses_nbr			type:#integer		 	ui:spn_div_traverses_nbr		default:0.
+		div_calage_verti	 			type:#worldUnits	 	ui:spn_div_calage_verti			default:0.
+		
+		symetrie							type:#boolean 		ui:shk_symetrie				default:false
+		ouvert_angle_1				type:#float 			ui:spn_angle_1				default:0.
+		ouvert_angle_2				type:#float 			ui:spn_angle_2				default:0.
+		
+		on ouvrant_decallage		set val 	do	corriger_parametres ()
+	)	-----	fin parametres --------------------
+	parameters params_divers rollout:roll_divers	(
 		------ options --------------
 		low_poly							type:#boolean 		ui:shk_lowPoly				default:false
 		
@@ -62,39 +69,50 @@ category:"CP | Menuiserie"
 		matId_menuis					type:#integer 			ui:spn_matId_menuis	default:1
 		matId_vitrage					type:#integer 			ui:spn_matId_vitrage	default:2
 		
-		on ouvrant_decallage		set val 	do	corriger_parametres ()
-		
 	)	-----	fin parametres --------------------
 	
 	
 	
 	
-	rollout roll_general  "Fenêtre"
-	(
-		group "Global" (
-			spinner 	spn_longueur 			"longueur" 				type:#worldunits 	range:[0,1e20,0]
-			spinner 	spn_hauteur 			"Hauteur" 				type:#worldunits 	range:[0,1e20,0]
-			spinner 	spn_profondeur 		"Profondeur" 			type:#worldunits 	range:[0,1e20,0]
-			spinner 	spn_cadre_ep	 		"Epaisseur" 				type:#worldunits 	range:[0,1e20,0]
-			checkbox	shk_montant_G		"Montant gauche" 			
-			checkbox	shk_montant_D		"Montant droit" 
-			checkbox	shk_traverse_B		"traverse basse" 	
+	rollout rol_global  "Global"	(
+		spinner 	spn_longueur 			"longueur" 				type:#worldunits 	range:[0,1e20,0]
+		spinner 	spn_hauteur 			"Hauteur" 				type:#worldunits 	range:[0,1e20,0]
+		checkbox	shk_cadre				"Cadre" 		
+	)
+	rollout roll_parametres  "Paramètres"	(
+		checkbox	shk_double							"double" across:2
+		checkbox	shk_tierce							"Tiercée" 
+		spinner 	spn_tierce_pourcent 			"(%)" 		type:#float				range:[0,100,0] 
+		spinner 	spn_angle_1 						"Ouverture 1 (°)" 	type:#float				range:[0,180,0]
+		checkbox	shk_symetrie						"Inverser sens"	
+		spinner 	spn_angle_2 						"Ouverture 2 (°)" 	type:#float				range:[0,180,0]
+		group "Croisillons" (	
+			spinner 	spn_div_montants_nbr	 "Montants 1" 		type:#integer			range:[0,1e20,0]
+			spinner 	spn_div_montants_nbr_2	 "Montants 2" 	type:#integer		range:[0,1e20,0]
+			spinner		spn_div_traverses_nbr	 "Traverses" 		type:#integer			range:[0,1e20,0]
+			spinner 	spn_div_calage_verti 	"Align. vert." 		type:#worldunits		range:[-1e20,1e20,0]
 		)
-		group "Ouvrant" (	
-			spinner spn_ouvrant_prof			"Profondeur" 			type:#worldunits 	range:[0,1e20,0]
-			spinner spn_ouvrant_ep			"Epaisseur" 				type:#worldunits 	range:[0,1e20,0]
-			spinner spn_ouvrant_decal		"Décallage prof." 		type:#worldunits 	range:[0,1e20,0]
-			checkbox	shk_inverser			"inverser"
-			spinner 	spn_angle_1	 		"Ouvertue 1" 			type:#float				range:[0,180,0]
-			checkbox	shk_double				"double"
-			spinner 	spn_angle_2	 		"Ouvertue 2" 			type:#float				range:[0,180,0]
+		fn actualiser =(
+			shk_symetrie.enabled = not ouvrant_double
+			if ouvrant_double do shk_symetrie.triState = 2
+				
+			spn_angle_2.indeterminate			=	not ouvrant_double
+			spn_angle_2.enabled 				=	ouvrant_double
+			
+			shk_tierce.enabled 					=  ouvrant_double
+			if not ouvrant_double do shk_symetrie.triState = 2
+			
+			spn_tierce_pourcent.indeterminate		=	not ouvrant_double or not ouvrant_tierce
+			spn_tierce_pourcent.enabled 				=	ouvrant_double and  ouvrant_tierce
+			
+			spn_div_montants_nbr_2.indeterminate		=	not ouvrant_double or not ouvrant_tierce
+			spn_div_montants_nbr_2.enabled 			=	ouvrant_double and  ouvrant_tierce
 		)
-		group "Division" (	
-			spinner 	spn_div_epaisseur	"Divisions ép." 			type:#worldunits 	range:[0,1e20,0]
-			spinner 	spn_div_horiz	 		"Div. Horizontale" 	type:#integer			range:[0,1e20,0]
-			spinner 	spn_div_verti	 		"Div. Verticale" 		type:#integer			range:[0,1e20,0]
-		)
-		
+		on roll_parametres	open 					do actualiser ()
+		on shk_double 		changed state 	do actualiser ()
+		on shk_tierce	 		changed state 	do actualiser ()
+	)
+	rollout roll_divers  "Divers"	(
 		group "Qualité" (
 			checkbox	shk_lowPoly			"Low poly" 		
 		)
@@ -109,51 +127,63 @@ category:"CP | Menuiserie"
 	
 	
 	--------------- FONCTIONS  ----------------------------------------------------------------------------------------------------------------------
-	---- les parametres ----------------
-	fn corriger_parametres 	=(
-		if ouvrant_decallage > profondeur - ouvrant_profondeur do ouvrant_decallage = profondeur - ouvrant_profondeur
-	)
 	---- les composants ---------------------
 	fn composants_actualiser	= with redraw off (
 		
+		
+		
 		---- creation des composants ------------------
-		if compo_cadre 	== undefined	do	compo_cadre			= 	createInstance  menuiserie_composant_cadre
-		if compo_ouvrant == undefined	do	compo_ouvrant		= 	createInstance  menuiserie_composant_chassis		
+		if compo_cadre 		== undefined	do	compo_cadre			= 	createInstance  menuiserie_composant_cadre
+		if compo_ouvrant_1 == undefined	do	compo_ouvrant_1	= 	createInstance  menuiserie_composant_chassisVitre				
+		if compo_ouvrant_2 == undefined	do	compo_ouvrant_2	= 	createInstance  menuiserie_composant_chassisVitre	
 		
-		local longueur_passage = longueur
-		if montant_G do longueur_passage -=  cadre_epaisseur
-		if montant_D do longueur_passage -=  cadre_epaisseur
-		local hauteur_passage = hauteur - cadre_epaisseur
-		if traverse_B do hauteur_passage -= cadre_epaisseur
-		
+		local longueur_passage 	= if not cadre_use	then longueur 	else longueur 	- 2*cadre_largeur
+		local hauteur_passage 		= if not cadre_use	then hauteur 		else hauteur 	- 2*cadre_largeur
 		
 		---- maj du cadre ------------------
-		compo_cadre.longueur 						= longueur
-		compo_cadre.profondeur 					= profondeur
-		compo_cadre.hauteur 						= hauteur
-		compo_cadre.menuis_epaisseur 			= cadre_epaisseur		
-		compo_cadre.montant_G	 				= montant_G
-		compo_cadre.montant_D	 				= montant_D
-		compo_cadre.traverse_B	 				= traverse_B
-		compo_cadre.low_poly			 			= low_poly		
-		compo_cadre.matId_menuis	 			= matId_menuis
+		if cadre_use do (
+			compo_cadre.longueur 						= longueur
+			compo_cadre.profondeur 					= profondeur
+			compo_cadre.hauteur 						= hauteur
+			compo_cadre.menuis_largeur	 			= cadre_largeur	
+			compo_cadre.travBasse_hauteur			= cadre_largeur		
+			compo_cadre.low_poly			 			= low_poly		
+			compo_cadre.matId_menuis	 			= matId_menuis
+		)
 		
 		---- maj ouvrant		----
-		if not ouvrant_double then 
-			compo_ouvrant.longueur 				= longueur_passage
-		else
-			compo_ouvrant.longueur 				= longueur_passage / 2
+		compo_ouvrant_1.profondeur 				= ouvrant_profondeur
+		compo_ouvrant_1.hauteur 					= hauteur_passage
+		compo_ouvrant_1.cadre_largeur 			= ouvrant_epaisseur
+		compo_ouvrant_1.travBasse_hauteur		= ouvrant_epaisseur		
+		compo_ouvrant_1.low_poly			 		= low_poly
+		compo_ouvrant_1.matId_menuis	 		= matId_menuis
+		compo_ouvrant_1.matId_vitrage	 		= matId_vitrage		
+		compo_ouvrant_1.div_montants_nbr 		= div_montants_nbr
+		compo_ouvrant_1.div_traverses_nbr 		= div_traverses_nbr
+		compo_ouvrant_1.div_largeur				= div_largeur
+		compo_ouvrant_1.div_profondeur			= div_profondeur
+		compo_ouvrant_1.div_calage_verti			= div_calage_verti
+		compo_ouvrant_1.vitrage_epaisseur		= vitrage_epaisseur
+		
 	
-		compo_ouvrant.profondeur 				= ouvrant_profondeur
-		compo_ouvrant.hauteur 					= hauteur_passage
-		compo_ouvrant.menuis_epaisseur 		= ouvrant_epaisseur
-		compo_ouvrant.traverse_B_epaisseur	= ouvrant_epaisseur		
-		compo_ouvrant.low_poly			 		= low_poly
-		compo_ouvrant.matId_menuis	 		= matId_menuis
-		compo_ouvrant.matId_vitrage	 		= matId_vitrage		
-		compo_ouvrant.div_horiz 					= div_horiz
-		compo_ouvrant.div_verti 					= div_verti
-		compo_ouvrant.div_epaisseur				= div_epaisseur
+		if not ouvrant_double then (
+			compo_ouvrant_1.longueur 				= longueur_passage
+		) else (
+			if  ouvrant_tierce then (
+				
+				compo_ouvrant_1.longueur 	= longueur_passage 	*  ouvrant_tierce_pourcent / 100 
+				
+				compo_ouvrant_2 							= copy compo_ouvrant_1
+				compo_ouvrant_2.longueur 				=  longueur_passage	* ( 100 - ouvrant_tierce_pourcent ) / 100
+				compo_ouvrant_2.div_montants_nbr 	=  div_montants_nbr_2
+			
+			)	else 	(
+				compo_ouvrant_1.longueur 	= longueur_passage / 2
+				compo_ouvrant_2 				= compo_ouvrant_1
+			)
+		)
+		
 		
 	)  --- fin composants_actualiser  ------------------
 	
@@ -176,7 +206,8 @@ category:"CP | Menuiserie"
 		delete mesh
 		
 		---- le cadre -------
-		mgr_mesh.attacher		mesh		compo_cadre
+		if cadre_use do 
+			mgr_mesh.attacher		mesh		compo_cadre
 		
 		----Données ------------	
 		local origine_ouv_1
@@ -187,35 +218,38 @@ category:"CP | Menuiserie"
 		local rotate_ouv_2
 		local recalle_ouv_2
 		
-		local longueur_ouvrant = compo_ouvrant.longueur 
-		local callage_montant_G = if montant_G then cadre_epaisseur else 0
-		local callage_montant_D = if montant_D then cadre_epaisseur else 0
-		local ouvrant_pos_z = if traverse_B then cadre_epaisseur else 0
-		if  inverser and not ouvrant_double	then (
+		local longueur_ouvrant 	= 	compo_ouvrant_1.longueur 
+		local callage_montant_G 	= 	if cadre_use then cadre_largeur	else	0
+		local callage_montant_D 	=	callage_montant_G
+		local ouvrant_pos_z 		= 	callage_montant_G
+		
+		if  symetrie and not ouvrant_double	then (
 			origine_ouv_1	=	transMatrix	[ -longueur_ouvrant, - ouvrant_profondeur ,	ouvrant_pos_z ]	
 			rotate_ouv_1	=	rotateZMatrix -ouvert_angle_1
-			recalle_ouv_1	=	transMatrix	[longueur - callage_montant_G, ouvrant_decallage + ouvrant_profondeur ,	0 ]
+			recalle_ouv_1	=	transMatrix	[longueur - callage_montant_G, ouvrant_callage + ouvrant_profondeur ,	0 ]
 		) else (
 			origine_ouv_1	=	transMatrix	[ 0, -ouvrant_profondeur,	ouvrant_pos_z ]
 			rotate_ouv_1	=	rotateZMatrix 	ouvert_angle_1 
-			recalle_ouv_1	=	transMatrix	[callage_montant_G, ouvrant_decallage + ouvrant_profondeur,	0 ]
+			recalle_ouv_1	=	transMatrix	[callage_montant_G, ouvrant_callage + ouvrant_profondeur,	0 ]
 		)
 		if  ouvrant_double do (			
-			origine_ouv_2	=	transMatrix	[ -longueur_ouvrant, -ouvrant_profondeur ,	ouvrant_pos_z ]
+			origine_ouv_2	=	transMatrix	[ -compo_ouvrant_2.longueur, -ouvrant_profondeur ,	ouvrant_pos_z ]
 			rotate_ouv_2 	=  rotateZMatrix -ouvert_angle_2
-			recalle_ouv_2	=	transMatrix	[longueur - callage_montant_D, ouvrant_decallage+ ouvrant_profondeur,	0 ]
+			recalle_ouv_2	=	transMatrix	[longueur - callage_montant_D, ouvrant_callage + ouvrant_profondeur,	0 ]
 		)
 		
 		
 		
 		---- 1er ouvrant ------------
 		local transf_ouvrant_1	=	origine_ouv_1 * rotate_ouv_1 * recalle_ouv_1		
-		mgr_mesh.attacher		mesh		compo_ouvrant 	transf:transf_ouvrant_1
+		mgr_mesh.attacher		mesh		compo_ouvrant_1 	transf:transf_ouvrant_1
 
 		---- 2nd ouvrant	------------
 		if  ouvrant_double do (
+			
 			local	transf_ouvrant_2 = origine_ouv_2 * rotate_ouv_2 * recalle_ouv_2		
-			mgr_mesh.attacher		mesh		compo_ouvrant 	transf:transf_ouvrant_2
+			mgr_mesh.attacher		mesh		compo_ouvrant_2 	transf:transf_ouvrant_2
+			
 		)
 		
 	)  ----- fin on buld mesh -----------------
@@ -239,7 +273,7 @@ category:"CP | Menuiserie"
 						pt_debut 		=  gridPoint
 						nodeTM.translation = pt_debut
 				)
-				5: #stop
+				3: #stop
 			)
 		on mouseMove click do
 			case click of
@@ -252,26 +286,13 @@ category:"CP | Menuiserie"
 					nodeTM  				= rotateZMatrix angle_pts
 					nodeTM.translation 	= pt_debut
 					
-					pt_profondeur	=	gridPoint
+					pt_hauteur				=	gridPoint
 					
 					
 				)
 				3:	(
-					profondeur 				= 	length ( gridPoint - pt_profondeur )
-					ouvrant_profondeur	=	profondeur / 2
-					
-					pt_hauteur				=	gridPoint
-				)
-				4:	(
 					hauteur 					= length ( gridPoint - pt_hauteur )
 					pt_epaisseur 			= gridPoint
-					
-				)
-				5: (
-					cadre_epaisseur 	= length ( gridPoint - pt_epaisseur )	
-					ouvrant_epaisseur = cadre_epaisseur
-					ouvrant_decallage = cadre_epaisseur /2	
-					
 				)
 					
 			)		

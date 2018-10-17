@@ -28,18 +28,17 @@ category:"CP | Menuiserie | Composant"
 	(
 		
 		----- global ----------------
-		longueur 						type:#worldUnits 	ui:spn_longueur 				default:0.
-		hauteur	 						type:#worldUnits 	ui:spn_hauteur 				default:0.
+		longueur 						type:#worldUnits 	ui:spn_longueur 			default:0.
+		hauteur	 						type:#worldUnits 	ui:spn_hauteur 			default:0.
 		
-		----- remplis -------------
-		vitrage_epaisseur				type:#worldUnits 	ui:spn_remplis_ep			default:2.
+		----- vitrage -------------
+		vitrage_epaisseur				type:#worldUnits 	ui:spn_vitrage_ep		default:2.
 		
 		----- les divisions -------------
-		div_montants_nbr		 	type:#integer		 	ui:spn_div_montants_nbr	default:0
-		div_traverses_nbr			 type:#integer		 	ui:spn_div_traverses_nbr	default:0
-		div_calage_verti	 			type:#worldUnits	 	ui:spn_div_calage_verti		default:0.
-		div_largeur	 					type:#worldUnits 	ui:spn_div_largeur			default:4.
-		div_profondeur	 				type:#worldUnits 	ui:spn_div_profondeur			default:4.
+		div_horiz		 				type:#integer		 	ui:spn_div_horiz			default:0
+		div_verti			 				type:#integer		 	ui:spn_div_verti			default:0
+		div_largeur	 					type:#worldUnits 	ui:spn_div_largeur		default:4.
+		div_profondeur	 				type:#worldUnits 	ui:spn_div_epaisseur		default:4.
 		
 		----- pour rester dans valeurs corrects ------------------------
 		on longueur 					set val do corriger_parametres ()
@@ -47,11 +46,10 @@ category:"CP | Menuiserie | Composant"
 		on hauteur 					set val do corriger_parametres ()
 		
 		on vitrage_epaisseur 		set val do corriger_parametres ()
-		on div_profondeur		 	set val do corriger_parametres ()
+		on div_profondeur		 		set val do corriger_parametres ()
 		on div_largeur			 		set val do corriger_parametres ()		
-		on div_montants_nbr		set val do corriger_parametres ()
-		on div_traverses_nbr 		set val do corriger_parametres ()
-		on div_calage_verti			set val do corriger_parametres ()
+		on div_horiz			 		set val do corriger_parametres ()
+		on div_verti 					set val do corriger_parametres ()
 		
 	)	-----	fin parametres --------------------
 	
@@ -62,23 +60,24 @@ category:"CP | Menuiserie | Composant"
 		
 		------ mat ID ----------
 		matId_menuis					type:#integer 			ui:spn_matId_menuis		default:1
-		matId_vitrage					type:#integer 			ui:spn_matId_remplis		default:2
+		matId_remplis					type:#integer 			ui:spn_matId_remplis		default:2
 )
 	
 	rollout roll_general  "Paramètres"
 	(
-		spinner 	spn_longueur 			"longueur" 				type:#worldunits 	range:[0,1e20,0]
-		spinner 	spn_hauteur 			"Hauteur" 				type:#worldunits 	range:[0,1e20,0]
-		
-		group "Remplissage" (
-			spinner spn_remplis_ep			"Epaisseur" 				type:#worldunits 	range:[0,1e20,0]
+		group "Global" (
+			spinner 	spn_longueur 			"longueur" 				type:#worldunits range:[0,1e20,0]
+			spinner 	spn_hauteur 			"Hauteur" 				type:#worldunits range:[0,1e20,0]
+		)
+		group "Vitrage" (
+			spinner spn_vitrage_ep		"Epaisseur" 					type:#worldunits 	range:[0,1e20,0]
 		)
 		group "Division" (
-			spinner spn_div_montants_nbr	 "Nbr. montants" 		type:#integer			range:[0,1e20,0]
-			spinner spn_div_traverses_nbr	"Nbr. traverses" 		type:#integer			range:[0,1e20,0]
-			spinner spn_div_largeur			"Largeur" 				type:#worldunits 	range:[0,1e20,0]
-			spinner spn_div_profondeur		"Profondeur" 			type:#worldunits 	range:[0,1e20,0]
-			spinner spn_div_calage_verti 	"Calage vertical" 		type:#worldunits		range:[-1e20,1e20,0]
+			spinner spn_div_horiz	 		"Nbr. montants" 			type:#integer			range:[0,1e20,0]
+			spinner spn_div_verti	 		"Nbr. traverses" 			type:#integer			range:[0,1e20,0]
+			spinner spn_div_calage 		"Calage vert." 				type:#worldunits		range:[0,1e20,0]
+			spinner spn_div_largeur		"Largeur" 					type:#worldunits 	range:[0,1e20,0]
+			spinner spn_div_epaisseur	"Epaisseur" 					type:#worldunits 	range:[0,1e20,0]
 		)
 	)
 	rollout roll_divers  "Divers"
@@ -96,18 +95,13 @@ category:"CP | Menuiserie | Composant"
 	
 	--------------- FONCTIONS  ----------------------------------------------------------------------------------------------------------------------
 	fn corriger_parametres 	=(
+		---- les divisions ----------
+-- 		if div_profondeur > profondeur do  div_profondeur = profondeur 
+		if longueur  < div_horiz * div_largeur do 
+			div_horiz = longueur   / div_largeur
 		
-		if div_profondeur < vitrage_epaisseur do  div_profondeur = vitrage_epaisseur 
-			
-		if longueur  < div_montants_nbr * div_largeur do 
-			div_montants_nbr = longueur   / div_largeur
-		
-		if  hauteur< div_traverses_nbr * div_largeur do 
-			div_traverses_nbr = hauteur / div_largeur
-		
-		local div_decal_max = ( hauteur -  div_traverses_nbr *div_largeur ) / ( div_traverses_nbr  + 1 )		
-		if div_calage_verti > div_decal_max do	div_calage_verti = div_decal_max 		
-		if div_calage_verti < - div_decal_max do	div_calage_verti = -div_decal_max 
+		if  hauteur< div_verti * div_largeur do 
+			div_verti = hauteur / div_largeur
 	)
 	
 	
@@ -123,31 +117,29 @@ category:"CP | Menuiserie | Composant"
 		
 		
 		----Données ------------	
-		local posY_remplis		=	- vitrage_epaisseur/2
+		local posY_vitrage		=	- vitrage_epaisseur/2
 		local posY_div			=	- ( div_profondeur/2 )		
-		
-		local espace_div_H 		= ( longueur - div_montants_nbr * div_largeur ) / ( div_montants_nbr + 1 )
+		local espace_div_H 		= ( longueur - div_horiz * div_largeur ) / ( div_horiz + 1 )
 		local depose_div_H		= [ espace_div_H, 	posY_div,		0	]
-		
-		local espace_div_V 		= ( hauteur - div_traverses_nbr * div_largeur ) / ( div_traverses_nbr + 1 )
-		local depose_div_V		= [0, 	posY_div,		 espace_div_V  + div_calage_verti	]
-		
+		local espace_div_V 		= ( hauteur - div_verti * div_largeur ) / ( div_verti + 1 )
+		local depose_div_V		= [0, 	posY_div,		 espace_div_V 	]
 		
 		
-		---- le remplis ----------
-		local compo_remplis = if low_poly 	then	 createInstance  urba_primitive_planVertical		matId:matId_vitrage
-														else	 createInstance  urba_primitive_boite				matId:matId_vitrage		
-		compo_remplis.longueur		=	longueur
-		compo_remplis.hauteur			=	hauteur
-		if not low_poly 	do compo_remplis.profondeur		=	vitrage_epaisseur		
-		mgr_mesh.attacher		mesh		compo_remplis 	transf:[0,posY_remplis,0]
+		
+		---- le vitrage ----------
+		local compo_vitrage = if low_poly 	then	 createInstance  urba_primitive_planVertical		matId:matId_remplis
+														else	 createInstance  urba_primitive_boite				matId:matId_remplis		
+		compo_vitrage.longueur		=	longueur
+		compo_vitrage.hauteur			=	hauteur
+		if not low_poly 	do compo_vitrage.profondeur		=	vitrage_epaisseur		
+		mgr_mesh.attacher		mesh		compo_vitrage 	transf:[0,posY_vitrage,0]
 		
 		
 		-------- divisions  --------------
 		local compo_div = if low_poly 	then	 createInstance  urba_primitive_boite_U		matId:matId_menuis
 													else	 createInstance  urba_primitive_boite			matId:matId_menuis
 		-------- divisions horizontales --------------
-		for i = 1 to div_montants_nbr do (
+		for i = 1 to div_horiz do (
 			
 			compo_div.longueur			=	div_largeur
 			compo_div.profondeur		=	div_profondeur
@@ -161,7 +153,7 @@ category:"CP | Menuiserie | Composant"
 		)
 		
 		-------- divisions verticales --------------
-		for i = 1 to div_traverses_nbr do (
+		for i = 1 to div_verti do (
 			
 			compo_div.longueur			=	longueur
 			compo_div.profondeur		=	div_profondeur
@@ -214,8 +206,14 @@ category:"CP | Menuiserie | Composant"
 					
 					pt_hauteur				=	gridPoint
 				)
-				3:	hauteur 					= length ( gridPoint - pt_hauteur )
-
+				3:	(
+					hauteur 					= length ( gridPoint - pt_hauteur )
+-- 					pt_profondeur	=	gridPoint
+				)
+				/* 4:	(
+					profondeur 				= 	length ( gridPoint - pt_profondeur )
+					div_profondeur			=	profondeur
+				) */
 			)		
 	) --- fin tool create ---------
 	

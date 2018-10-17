@@ -36,10 +36,10 @@ category:"CP | Menuiserie | Composant"
 		
 		----- les divisions -------------
 		div_montants_nbr		 	type:#integer		 	ui:spn_div_montants_nbr	default:0
-		div_traverses_nbr			 type:#integer		 	ui:spn_div_traverses_nbr	default:0
+		div_traverses_nbr			type:#integer		 	ui:spn_div_traverses_nbr	default:0
 		div_calage_verti	 			type:#worldUnits	 	ui:spn_div_calage_verti		default:0.
 		div_largeur	 					type:#worldUnits 	ui:spn_div_largeur			default:4.
-		div_profondeur	 				type:#worldUnits 	ui:spn_div_profondeur			default:4.
+		div_profondeur	 			type:#worldUnits 	ui:spn_div_profondeur			default:4.
 		
 		----- pour rester dans valeurs corrects ------------------------
 		on longueur 					set val do corriger_parametres ()
@@ -62,7 +62,7 @@ category:"CP | Menuiserie | Composant"
 		
 		------ mat ID ----------
 		matId_menuis					type:#integer 			ui:spn_matId_menuis		default:1
-		matId_vitrage					type:#integer 			ui:spn_matId_remplis		default:2
+		matId_remplis					type:#integer 			ui:spn_matId_remplis		default:2
 )
 	
 	rollout roll_general  "Paramètres"
@@ -135,8 +135,8 @@ category:"CP | Menuiserie | Composant"
 		
 		
 		---- le remplis ----------
-		local compo_remplis = if low_poly 	then	 createInstance  urba_primitive_planVertical		matId:matId_vitrage
-														else	 createInstance  urba_primitive_boite				matId:matId_vitrage		
+		local compo_remplis = if low_poly 	then	 createInstance  urba_primitive_planVertical		matId:matId_remplis
+														else	 createInstance  urba_primitive_boite				matId:matId_remplis		
 		compo_remplis.longueur		=	longueur
 		compo_remplis.hauteur			=	hauteur
 		if not low_poly 	do compo_remplis.profondeur		=	vitrage_epaisseur		

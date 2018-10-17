@@ -1,0 +1,110 @@
+
+plugin simpleObject		urba_primitive_planVertical
+name:"Plan vert."
+classID:#(0x49e13042, 0x7ebe4e67)
+category:"CP | Primitives"
+-- invisible:true
+(
+	
+	parameters main rollout:roll_params
+	(
+		longueur 		type:#worldUnits 	ui:spn_longueur 			default:0
+		hauteur 			type:#worldUnits 	ui:spn_hauteur 			default:0
+		
+		matId			type:#integer 			ui:spn_matId 				default:1
+		mapCoords 	type:#boolean  default:true
+	)
+	
+	rollout roll_params "boite"
+	(
+		group "Global" (
+			spinner spn_longueur 		"Longueur" 		type:#worldunits range:[0,1e20,0]
+			spinner spn_hauteur	 	"Hauteur" 		type:#worldunits range:[0,1e20,0]
+		)		
+		group "Mat ID" (
+			spinner spn_matId 			"MatId" 			type:#integer	 range:[1,1000,1]
+		)
+	)
+	
+	on hasUVW do 
+		mapCoords
+		
+	on setGenUVW bool do mapCoords = bool
+	
+	
+	on buildMesh do
+	(
+		
+		--- on vide le mesh ----------
+		delete mesh
+		
+		--- on place les points ---------
+		local pt_1		=	[0,0,0]
+		local pt_2		=	[longueur,0,0]
+		local pt_3		=	[longueur,0,hauteur]
+		local pt_4		=	[0,0,hauteur]		
+		local pts		= #(pt_1, pt_2, pt_3, pt_4) 
+		
+		----- on creer les faces --------------
+		local faces = #(	[1,2,3], [1,3,4] )
+		
+		--- on creer les vertex ---------
+		setMesh 	mesh 	verts:pts	faces:faces	materialIDs:#(matId, matId)
+		
+		--- smoothing group ---------
+		setFaceSmoothGroup mesh 1 1
+		setFaceSmoothGroup mesh 2 1
+		
+		---- on clean les edges ---------
+		setEdgeVis mesh 1 3 false
+		setEdgeVis mesh 2 1 false
+
+		/* ----- real world mapping 	--------------
+		setNumTVerts mesh pts.count		
+		setTVert mesh 1 [ pts[1].x, pts[1].z, pts[1].y ]
+		setTVert mesh 2 [ pts[2].x, pts[2].z, pts[2].y ]
+		setTVert mesh 3 [ pts[3].x, pts[3].z, pts[3].y ]
+		setTVert mesh 4 [ pts[4].x, pts[4].z, pts[4].y ]
+		buildTVFaces mesh false		
+		for i = 1 to faces.count do		
+			setTVFace mesh i faces[i]
+		 */
+		
+		----- le mapping 	--------------
+		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
+		
+		
+	) --------- fin on build mesh --------------------------
+	
+	tool create
+	(
+		local pt_debut
+		local pt_hauteur
+		
+		on mousePoint click do
+			case click of
+			(
+				1: (	pt_debut 	=  gridPoint
+						nodeTM.translation = pt_debut
+				)
+				3: #stop
+			)
+		on mouseMove click do
+			case click of
+			(
+				2: ( 
+					longueur 				= length ( gridPoint - pt_debut )
+					local norm_dir 		=	normalize (gridPoint - pt_debut )
+					local angle_pts		=	acos(dot  [1,0,0]  norm_dir)		
+					if  norm_dir.y < 0 do angle_pts = 360 - angle_pts 
+					nodeTM  				= rotateZMatrix angle_pts
+					nodeTM.translation 	= pt_debut
+					
+					pt_hauteur	=	gridPoint
+				)
+				3:	hauteur 					= length ( gridPoint - pt_hauteur )
+			)
+		
+	) ----- fin tool create -------------
+) --------- fin plugin --------------
+

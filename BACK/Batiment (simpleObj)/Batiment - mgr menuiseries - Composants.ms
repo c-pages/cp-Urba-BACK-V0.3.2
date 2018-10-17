@@ -6,8 +6,6 @@ filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment - mgr primitives.m
 
 ----- Menuiserie base ----------------
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment - mgr mesh.ms"
-
---- Composants -----------
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Poignée.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Cadre.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Menuiseries\\Composants\\Menuiserie - Composant - Panneau.ms"

@@ -28,7 +28,7 @@ category:"CP | Menuiserie | Composant"
 	local composant_boite
 	
 	parameters params_general 	rollout:roll_general		(
-		symetrie_sens		type:#boolean 		ui:shk_symetrie_sens		default:false
+		inverser_sens		type:#boolean 		ui:shk_inverser_sens		default:false
 		symetrie				type:#boolean 		ui:shk_symetrie		default:false
 		
 		------ options --------------
@@ -39,7 +39,7 @@ category:"CP | Menuiserie | Composant"
 	rollout roll_general  "Cadre"
 	(
 		
-			checkbox	shk_symetrie_sens	"symetrie_sens"
+			checkbox	shk_inverser_sens	"inverser_sens"
 			checkbox	shk_symetrie			"symetrie"
 			checkbox	shk_lowPoly			"Low poly"
 			spinner 	spn_matId 				"MatID" 			type:#integer range:[1,1000,1]
@@ -78,7 +78,7 @@ category:"CP | Menuiserie | Composant"
 		if not low_poly then 
 			mgr_mesh.attacher mesh composant_boite 	transf:[1.5, posY, 11.5]
 		else (
-			local transfo	=	if not symetrie_sens 	then	rotateZMatrix 	90	*	transMatrix	[2.5, posY, 11.5] 
+			local transfo	=	if not inverser_sens 	then	rotateZMatrix 	90	*	transMatrix	[2.5, posY, 11.5] 
 																	else	rotateZMatrix 	90	*	transMatrix	[1.5, posY, 11.5] 
 			
 			mgr_mesh.attacher mesh composant_boite 	transf:transfo
@@ -87,7 +87,7 @@ category:"CP | Menuiserie | Composant"
 		
 		---- poignée part 2	----------
 		local decalle_x = 1.5
-		if	not symetrie_sens then	decalle_x = -7.5		
+		if	not inverser_sens then	decalle_x = -7.5		
 		composant_boite.longueur			=	10
 		composant_boite.hauteur			=	1
 		if not low_poly  do	composant_boite.profondeur		=	1

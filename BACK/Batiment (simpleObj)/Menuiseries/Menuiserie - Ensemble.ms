@@ -17,11 +17,9 @@ category:"CP | Menuiserie"
 	
 	---- pré déclaration -----------
 	local corriger_parametres , 	actualiser_composants 
-	local	ajouter_element, retirer_element, monter_element, descendre_element
-	local sequence_tmp
 	
 	--- composant ---
-	local compo_cadre, compo_meneau
+	local compo_cadre, compo_montants
 	
 	---- manager de mesh -------------------
 	local mgr_mesh = str_mgr_mesh ()
@@ -32,21 +30,20 @@ category:"CP | Menuiserie"
 	(
 		----- global ---------------------
 		longueur 						type:#worldUnits 	ui:spn_longueur 					default:0.
-		profondeur	 					type:#worldUnits 	ui:spn_profondeur				default:10.
+		profondeur	 					type:#worldUnits 	ui:spn_profondeur				default:0.
 		hauteur	 						type:#worldUnits 	ui:spn_hauteur 					default:0.
 		
 		----- les menuiseries -----------
-		cadre_largeur					type:#worldUnits 	ui:spn_cadre_largeur			default:5.	
-		montants_largeur				type:#worldUnits 	ui:spn_montants_largeur		default:5.	
-		montants_profondeur		type:#worldUnits 	ui:spn_montants_profondeur	default:10.	
+		cadre_largeur					type:#worldUnits 	ui:spn_cadre_largeur			default:0.	
+		montants_largeur				type:#worldUnits 	ui:spn_montants_largeur		default:0.	
+		montants_profondeur		type:#worldUnits 	ui:spn_montants_profondeur	default:0.	
 		
-	)
-	
-	parameters params_sequence rollout:roll_sequence
-	(
-		align_prof					type:#worldUnits 		ui:spn_aling_prof	default:0.	
-		sequence					type:#maxObjectTab	tabSizeVariable:true
-		sequence_elem_long		type:#floatTab			tabSizeVariable:true
+		on longueur 					set val do actualiser_composants ()
+		on profondeur 				set val do actualiser_composants ()
+		on hauteur 					set val do actualiser_composants ()
+		on cadre_largeur				set val do actualiser_composants ()
+		on montants_largeur 		set val do actualiser_composants ()
+		on montants_profondeur	set val do actualiser_composants ()
 	)
 	
 	parameters params_divers rollout:roll_divers
@@ -58,14 +55,16 @@ category:"CP | Menuiserie"
 		matId_menuis					type:#integer 			ui:spn_matId_menuis	default:1
 		matId_vitrage					type:#integer 			ui:spn_matId_vitrage	default:2
 		
+		on low_poly		set val do actualiser_composants ()
+		on matId_menuis	set val do actualiser_composants ()
+		on matId_vitrage	set val do actualiser_composants ()
+		
 	)	-----	fin parametres --------------------
 	
-	
-	
-	
-	
-	
-	
+	parameters params_sequence rollout:roll_sequence
+	(
+		sequence	type:#maxObjectTab	tabSizeVariable:true
+	)
 	
 	rollout roll_general  "Paramètres"
 	(
@@ -74,12 +73,13 @@ category:"CP | Menuiserie"
 		spinner spn_hauteur 				"Hauteur" 				type:#worldunits range:[0,1e20,0]
 		spinner spn_profondeur 			"Profondeur" 			type:#worldunits range:[0,1e20,0]
 		
-		group "Cadre" (
-			spinner spn_cadre_largeur			"Largeur" 				type:#worldunits 	range:[0,1e20,0]
-		)
-		group "Meneaux" (
-			spinner spn_montants_largeur		"Largeur" 			type:#worldunits 	range:[0,1e20,0]
-			spinner spn_montants_profondeur	"Profondeur" 		type:#worldunits 	range:[0,1e20,0]
+		group "Menuiserie" (
+			spinner spn_cadre_largeur	"Largeur" 				type:#worldunits 	range:[0,1e20,0]
+			spinner spn_montants_largeur	"Largeur" 				type:#worldunits 	range:[0,1e20,0]
+			spinner spn_montants_profondeur	"Largeur" 				type:#worldunits 	range:[0,1e20,0]
+			
+			
+			
 		)
 		
 	)
@@ -93,7 +93,6 @@ category:"CP | Menuiserie"
 			menuiseries_classes
 		)
 		fn creer_RCM_ajouter	=(
-
 			--- on recupere les plug necessaires ---------
 			local menuiseries_plugins = get_menuiserie_plugins ()
 			
@@ -109,23 +108,18 @@ category:"CP | Menuiserie"
 			menu_txt += ")"
 			
 			---- on ouvre le menu -----
-			RCmenu_ajouter	=	execute menu_txt
-			popUpMenu	RCmenu_ajouter
+			execute menu_txt
+			popUpMenu	menu_ajouter
 			
 		) --- fin creer_RCM_ajouter ---------------
 		
 		
-		spinner 	spn_aling_prof 		"Alignement" 		type:#worldunits range:[0,1e20,0]
 		
 		button 		btn_ajouter 		"+"			across:4
 		button 		btn_retirer	 		"-"			
 		button 		btn_monter			"/\\"			
-		button 		btn_descendre	"\\/"
-		
+		button 		btn_descendre	"\\/"			
 		listBox		lbx_sequence		""	height:5
-		
-		spinner 	spn_elem_long		"Définir long." 		type:#worldunits range:[0,1e20,0]
-		
 		subrollout	subroll_param		""	height:500
 		
 		fn actualiser =(
@@ -141,9 +135,11 @@ category:"CP | Menuiserie"
 				
 				---- on ajoute le nouveau -----------------
 				local composant_actif 		=  sequence[  lbx_sequence.selection ]
-				addSubRollout 	subroll_param		composant_actif.roll_parametres
-				
-				spn_elem_long.value = sequence_elem_long[  lbx_sequence.selection ]
+				addSubRollout 	subroll_param		composant_actif.roll_general
+				/* 
+				for contro in nvl_menuiserie.roll_general.controls do 
+					contro.enabled = not shk_useGlobalSet.checked
+				 */
 			)
 		)
 		
@@ -151,13 +147,10 @@ category:"CP | Menuiserie"
 		
 		
 		
-		on roll_sequence		open 				do 	actualiser ()
-		on lbx_sequence 		selected sel 	do	actualiser ()
-		on btn_ajouter 		pressed 			do 	creer_RCM_ajouter ()
-		on btn_retirer 		pressed 			do	retirer_element 		lbx_sequence.selection 
-		on btn_monter 		pressed 			do	monter_element 		lbx_sequence.selection 
-		on btn_descendre 	pressed		 	do	descendre_element 	lbx_sequence.selection 
-		on spn_elem_long 	changed val	do	sequence_elem_long[  lbx_sequence.selection ] = val
+		on roll_sequence	open do actualiser ()
+		on btn_ajouter pressed do creer_RCM_ajouter ()
+		on lbx_sequence selected sel 			do	actualiser ()
+		
 		
 		
 	)
@@ -177,9 +170,10 @@ category:"CP | Menuiserie"
 	--------------- comopsants ----------------------------------
 	fn actualiser_composants	= with redraw off (
 		
+		
 		---- creation des composants ------------------
 		if compo_cadre 		== undefined	do	compo_cadre		= 	createInstance  menuiserie_composant_cadre
-		if compo_meneau		== undefined	do	compo_meneau	= 	createInstance  menuiserie_composant_meneau
+		if compo_montants	== undefined	do	compo_montants	= 	createInstance  urba_primitive_boite
 		
 		
 		----- maj du cadre ----------------------
@@ -191,72 +185,51 @@ category:"CP | Menuiserie"
 		compo_cadre.travBasse		 			= true	
 		compo_cadre.low_poly			 			= low_poly		
 		compo_cadre.matId_menuis	 			= matId_menuis
-		compo_cadre.travBasse					=	false
 		
-		----- Meneaux  ----------------------
-		compo_meneau.longueur 					= montants_largeur
-		compo_meneau.profondeur 				= montants_profondeur
-		compo_meneau.hauteur 					= hauteur	-  cadre_largeur
-		compo_meneau.low_poly			 		= low_poly		
+		----- montants ----------------------
+		compo_montants.longueur 				= montants_largeur
+		compo_montants.profondeur 				= montants_profondeur
+		compo_montants.hauteur 					= hauteur	- 2* cadre_largeur
 		
 		--- maj des composants de la sequence -------------
-		local nbr_meneaux							= sequence.count - 1
-		
-		sequence_tmp 			= #()
-		local longueur_composant		=	( longueur	- 2* cadre_largeur - ( sequence.count - 1 )* compo_meneau.longueur )	/	sequence.count
+		local longueur_composant	=	( longueur	- 2* cadre_largeur - ( sequence.count - 1 )* compo_montants.longueur )	/	sequence.count
 		for composant in sequence do (
-			local compo_temp 			= copy composant
-			compo_temp.longueur			=	longueur_composant
-			if classof compo_temp	== urba_menuiserie_porte then
-				compo_temp.hauteur			=	hauteur - cadre_largeur
-			else
-				compo_temp.hauteur			=	hauteur - 2*cadre_largeur
-			compo_temp.profondeur		=	profondeur
-			compo_temp.cadre_use		= false
-			compo_temp.low_poly			=	low_poly
-			append sequence_tmp		compo_temp
+			
+			composant.longueur			=	longueur_composant
+			composant.hauteur			=	hauteur - 2*cadre_largeur
+			composant.profondeur		=	profondeur
+			composant.cadre_use		= false
+			composant.low_poly			=	low_poly
 		)
 	)  --- fin composants_actualiser  ------------------
 	
 	
 	--------------- sequence ----------------------------------
-	fn ajouter_element		_element_plug	 =(		
+	fn ajouter_element	_element_plug	 =(
+		
+		debug "AJOUTER" var: _element_plug
 		local nvel_element = createinstance	_element_plug
 		append sequence	nvel_element
-		append sequence_elem_long	0.
-		actualiser_composants()		
-		if roll_sequence.open do	roll_sequence.actualiser ()
+		
+		actualiser_composants()
+		if roll_sequence.open do
+				roll_sequence.actualiser ()
 	)
 	fn retirer_element		_id	 	=(
-		deleteItem sequence 				_id
-		deleteItem sequence_elem_long 	_id
+		deleteItem sequence 			_id
 		actualiser_composants()
-		if roll_sequence.open do	roll_sequence.actualiser ()
 	)
 	fn monter_element 		_id 		=(
-		local elem_temp 		= sequence[ _id ]
-		local meneau_temp 	= sequence_elem_long[ _id ]
-		deleteItem 	sequence 				_id
-		deleteItem sequence_elem_long 	_id
-		insertItem 	elem_temp			sequence  					(	_id - 1 )
-		insertItem 	meneau_temp		sequence_elem_long  	(	_id - 1 )
+		local elem_temp = sequence[ _id ]
+		deleteItem 	sequence 			_id
+		insertItem 	elem_temp					sequence  			(	_id - 1 )
 		actualiser_composants()
-		if roll_sequence.open do	roll_sequence.actualiser ()
 	)
 	fn	descendre_element 	_id 		=(
-		local elem_temp 		= sequence[ _id ]
-		local meneau_temp 	= sequence_elem_long[ _id ]
-		deleteItem 	sequence 				_id
-		deleteItem sequence_elem_long 	_id
-		if _id == sequence.count then (
-			append sequence 				elem_temp
-			append sequence_elem_long	meneau_temp
-		) else (
-			insertItem 	elem_temp		sequence  					(	_id + 1 )
-		insertItem 	meneau_temp		sequence_elem_long  	(	_id + 1 )
-		)
+		local elem_temp = sequence[ _id ]
+		deleteItem sequence 	_id
+		insertItem 	elem_temp					sequence  			(	_id + 1 )
 		actualiser_composants()
-		if roll_sequence.open do	roll_sequence.actualiser ()
 	)
 	
 	
@@ -275,7 +248,6 @@ category:"CP | Menuiserie"
 	--------------- CONSTRUCTION  ----------------------------------------------------------------------------------------------------------------------
 	on buildMesh do	(
 		
-		actualiser_composants ()
 		
 		--- vider le mesh --------
 		delete mesh
@@ -284,24 +256,20 @@ category:"CP | Menuiserie"
 		mesh	+	compo_cadre.mesh
 		
 		---- la sequence	-----
-		local depos_composant = [ cadre_largeur, 0, 0 ]
-		for i = 1 to	sequence_tmp.count do (
+		local depos_composant = [ cadre_largeur, 0, cadre_largeur ]
+		for i = 1 to	sequence.count do (
 			
 			---- le composant -----
-			local composant = sequence_tmp [i]
-			local depose_temp = if classof composant	== urba_menuiserie_porte then depos_composant 
-																											else depos_composant + [0,0,cadre_largeur ]
-			mgr_mesh.attacher		mesh		composant	transf:depose_temp
+			local composant = sequence [i]
+			mgr_mesh.attacher		mesh		composant	transf:depos_composant
 			depos_composant.x += composant.longueur
 			
-			--- le meneau- ----
-			if i != sequence_tmp.count do (				
-				mgr_mesh.attacher		mesh		compo_meneau	transf:(depos_composant + [0,0,cadre_largeur ])
-				depos_composant.x += compo_meneau.longueur
+			--- le montant- ----
+			if i != sequence.count do (				
+				mgr_mesh.attacher		mesh		compo_montants	transf:depos_composant
+				depos_composant.x += compo_montants.longueur
 			)
 		)
-		
-		
 		
 	)  ----- fin on buld mesh -----------------
 	
@@ -324,7 +292,7 @@ category:"CP | Menuiserie"
 						pt_debut 		=  gridPoint
 						nodeTM.translation = pt_debut
 				)
-				3: #stop
+				5: #stop
 			)
 		on mouseMove click do
 			case click of
@@ -337,14 +305,25 @@ category:"CP | Menuiserie"
 					nodeTM  				= rotateZMatrix angle_pts
 					nodeTM.translation 	= pt_debut
 					
-					pt_hauteur	=	gridPoint
+					pt_profondeur	=	gridPoint
 					
 				)
 				3:	(
+					 	profondeur			= 	length ( gridPoint - pt_profondeur )
+							
+						montants_profondeur	=	profondeur
+					pt_hauteur				=	gridPoint
+				)
+				4:	(
 					hauteur 					= length ( gridPoint - pt_hauteur )
 					pt_epaisseur 			= gridPoint
 					
 				)
+				5: (
+					cadre_largeur			 	= length ( gridPoint - pt_epaisseur )	
+					montants_largeur	= cadre_largeur
+				)
+					
 			)		
 	) --- fin tool create ---------
 	

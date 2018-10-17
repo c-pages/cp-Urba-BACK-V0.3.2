@@ -166,10 +166,10 @@ category:"CP | Menuiserie | Composant"
 		compo_vitrage.div_montants_nbr	=	div_montants_nbr
 		compo_vitrage.div_traverses_nbr	=	div_traverses_nbr
 		compo_vitrage.div_calage_verti		=	div_calage_verti
-		compo_vitrage.vitrage_epaisseur		=	vitrage_epaisseur
+		compo_vitrage.remplis_epaisseur		=	vitrage_epaisseur
 		compo_vitrage.div_largeur				=	div_largeur		
 		compo_vitrage.div_profondeur		=	div_profondeur		
-		compo_vitrage.matId_vitrage			=	matId_vitrage				
+		compo_vitrage.matId_remplis			=	matId_vitrage				
 		compo_vitrage.matId_menuis			=	matId_menuis
 		compo_vitrage.low_poly				=	low_poly
 		
@@ -189,14 +189,6 @@ category:"CP | Menuiserie | Composant"
 		---- le cadre ----
 		if cadre_use do
 			mgr_mesh.attacher		mesh		compo_cadre
-		
-		--- les cotés du cadre en low_poly ---------
-		if low_poly do (
-			local plan_vertical = createInstance	urba_primitive_planVertical		longueur:profondeur	hauteur:hauteur
-			mgr_mesh.attacher		mesh		plan_vertical		transf:( rotateZMAtrix	90  * transMatrix [longueur, 0,0] )
-			mgr_mesh.attacher		mesh		plan_vertical		transf:( rotateZMAtrix	-90 * transMatrix [0, profondeur,0]  )
-			
-		)
 		
 		local callage_G 	= 	if cadre_use 	then cadre_largeur else 0
 		local callage_B 	= 	if cadre_use 	then travBasse_hauteur else 0
