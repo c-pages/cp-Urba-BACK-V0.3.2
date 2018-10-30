@@ -37,6 +37,9 @@ category:"CP | Menuiserie"
 	)
 	parameters params_general rollout:roll_parametres	(
 		
+		
+		
+		
 		----- les menuiseries -----------
 		cadre_largeur	 				type:#worldUnits 	default:3.5
 		profondeur	 					type:#worldUnits 	default:5.
@@ -47,16 +50,20 @@ category:"CP | Menuiserie"
 		ouvrant_epaisseur	 		type:#worldUnits 	default:4.	
 		ouvrant_profondeur	 		type:#worldUnits 	default:4.	
 		ouvrant_callage	 			type:#worldUnits 	default:1.5
-		div_largeur	 					type:#worldUnits 	default:2.
 		div_profondeur	 			type:#worldUnits 	default:3.
 		
 		
+		div_largeur	 					type:#worldUnits 	ui:spn_div_largeur			default:2.
 		div_montants_nbr		 	type:#integer		 	ui:spn_div_montants_nbr	default:0.
 		div_traverses_nbr			type:#integer		 	ui:spn_div_traverses_nbr	default:0.
 		div_calage_verti	 			type:#worldUnits	 	ui:spn_div_calage_verti		default:0.
 		
 	)	-----	fin parametres --------------------
 	parameters params_divers rollout:roll_divers	(
+		
+		
+		nom	 							type:#string 	default:"Fixe"
+		
 		------ options --------------
 		low_poly							type:#boolean 		ui:shk_lowPoly				default:false
 		
@@ -78,6 +85,7 @@ category:"CP | Menuiserie"
 	)
 	rollout roll_parametres  "Paramètres"	(
 		group "Croisillons" (	
+			spinner		spn_div_largeur			 "Largeur" 		type:#worldunits		range:[0,1e20,0]
 			spinner 	spn_div_montants_nbr	 "Montants" 	type:#integer			range:[0,1e20,0]
 			spinner		spn_div_traverses_nbr	 "Traverses" 	type:#integer			range:[0,1e20,0]
 			spinner 	spn_div_calage_verti 	"Align. vert." 	type:#worldunits		range:[-1e20,1e20,0]

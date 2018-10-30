@@ -17,7 +17,9 @@ category:"CP | Menuiserie"
 	
 	---- pré déclaration -----------
 	local corriger_parametres , 	actualiser_composants 
-	local	ajouter_element, retirer_element, monter_element, descendre_element
+	local	ajouter_element, retirer_element, monter_element, descendre_element, renommer_element
+	local est_instance
+	
 	local sequence_tmp
 	
 	--- composant ---
@@ -37,8 +39,10 @@ category:"CP | Menuiserie"
 		
 		----- les menuiseries -----------
 		cadre_largeur					type:#worldUnits 	ui:spn_cadre_largeur			default:2.5
--- 		montants_largeur				type:#worldUnits 	ui:spn_montants_largeur		default:5.	
--- 		montants_profondeur		type:#worldUnits 	ui:spn_montants_profondeur	default:10.	
+		
+		
+		on profondeur	set val do corriger_parametres ()
+		on longueur 	set val do corriger_parametres ()
 		
 	)
 	
@@ -48,10 +52,18 @@ category:"CP | Menuiserie"
 		
 		sequence					type:#maxObjectTab	tabSizeVariable:true
 		sequence_elem_long		type:#floatTab			tabSizeVariable:true
+		
+		on align_prof					set val do corriger_parametres ()
+		on sequence_elem_long 	set arg1 arg2 do corriger_parametres ()
+		
+		
 	)
 	
 	parameters params_divers rollout:roll_divers
 	(
+		
+		nom	 							type:#string 			default:"Ensemble"
+		
 		------ options --------------
 		low_poly							type:#boolean 		ui:shk_lowPoly				default:false
 		
@@ -78,35 +90,53 @@ category:"CP | Menuiserie"
 		group "Cadre" (
 			spinner spn_cadre_largeur			"Largeur" 				type:#worldunits 	range:[0,1e20,0]
 		)
--- 		group "Meneaux" (
--- 			spinner spn_montants_largeur		"Largeur" 			type:#worldunits 	range:[0,1e20,0]
--- 			spinner spn_montants_profondeur	"Profondeur" 		type:#worldunits 	range:[0,1e20,0]
--- 		)
-		
 	)
 	
 	rollout roll_sequence  "Séquence"
 	(
-		
+		--- divers ------------------------------------------------------------------------------------------------------
 		fn get_menuiserie_plugins =(
 			local geo_classes			=	GeometryClass.classes 
 			local menuiseries_classes 	= for geo_classe in geo_classes	where findstring ( geo_classe as string )		"urba_menuiserie_" != undefined	 and geo_classe != urba_menuiserie_ensemble	collect	geo_classe
 			menuiseries_classes
 		)
+		
+		--- menus clique droit --------------------------------------------------------------
 		fn creer_RCM_ajouter	=(
 
+			
+			
 			--- on recupere les plug necessaires ---------
 			local menuiseries_plugins = get_menuiserie_plugins ()
 			
 			--- on ecrit le menu ---------
 			local menu_txt=""
 			menu_txt += "rcmenu  menu_ajouter (\n"
-			---- les boutons ----
+			
+-- 			menu_txt += "fn est_copiable = $.est_copiable ()\n"
+			
+			
+			---- les boutons ------------------------------------------
 			for menuis_plug in menuiseries_plugins do
 				menu_txt += "menuItem	btn_" + menuis_plug.name as string + "	\"" + menuis_plug.name + "\"\n" 
-			---- les evenements ----
+			/* 
+			---- copier, instancier ----------
+			menu_txt += "separator sep1\n"			
+			menu_txt += "menuItem	btn_dupliquer	 	\"Dupliquer\" 	enabled:(est_copiable())\n" 
+			menu_txt += "menuItem	btn_instancier 	\"Instancier\" 	enabled:(est_copiable())\n" 
+			 */
+			
+			---- les evenements ---------------------------------------------
 			for menuis_plug in menuiseries_plugins do
 				menu_txt += "on		btn_" + menuis_plug.name as string + " picked do $.ajouter_element " + menuis_plug as string+ "\n" 
+		
+			
+			
+			--- copier instancier ------------
+			menu_txt += "on		btn_dupliquer picked do $.dupliquer_element ()\n" 
+			menu_txt += "on		btn_instancier picked do $.instancier_element ()\n" 
+			
+			--- fin du rc menu -----
 			menu_txt += ")"
 			
 			---- on ouvre le menu -----
@@ -114,6 +144,23 @@ category:"CP | Menuiserie"
 			popUpMenu	RCmenu_ajouter
 			
 		) --- fin creer_RCM_ajouter ---------------
+		fn creer_RCM_edition	=(
+
+			rcmenu  RCmenu_edition (
+				menuItem	btn_dupliquer	 		"Dupliquer" 			enabled:($.est_copiable 	())
+				menuItem	btn_instancier	 		"Instancier" 		enabled:($.est_copiable	())
+				menuItem	btn_rendreUnique	 	"Rendre unique" 	enabled:($.est_instance	())
+				
+				on		btn_dupliquer 		picked 	do $.dupliquer_element ()
+				on		btn_instancier 	picked 	do $.instancier_element ()
+				on		btn_rendreUnique picked 	do $.rendreUnique_element ()
+			)
+			
+			popUpMenu	RCmenu_edition
+			
+		) --- fin creer_RCM_ajouter ---------------
+		
+		
 		
 		
 		spinner 	spn_aling_prof 		"Alignement" 		type:#worldunits range:[0,1e20,0]
@@ -125,28 +172,52 @@ category:"CP | Menuiserie"
 		
 		listBox		lbx_sequence		""	height:5
 		
-		spinner 	spn_elem_long		"Définir long." 		type:#worldunits range:[0,1e20,0]
+		group "" (	
+			editText 	edTxt_nom		 	"Nom:" 	
+			spinner 	spn_elem_long		"Longeur" 		type:#worldunits range:[0,1e20,0]		tooltip:"La longueur de l'élément.\n0.0: Longueur automatique (Répartition régulière des longueurs)"
+		)
 		
 		subrollout	subroll_param		""	height:300
-		
 		fn actualiser =(
-			lbx_sequence.items =  for compo in sequence collect ( classof compo ).name
+			
+			---- l'affichage de la sequence -------------------
+			local elements_noms 	= #()
+			for i = 1 to sequence.count do (
+				local elem_nom = sequence[i].nom
+				if est_instance 	id:i 	do elem_nom += " *"
+				append elements_noms	elem_nom
+			)	
+			lbx_sequence.items 		=  for elem_nom in elements_noms collect elem_nom
+			
 			
 			--- les parametres de l'element (le subrollout)  ---------------			
-			if lbx_sequence.selection > 0 do (
+			--- on retire les vieux rollouts --------
+			if subroll_param.rollouts.count > 0 do 
+				for subRoll in subroll_param.rollouts  do
+					removeSubRollout subroll_param	subRoll
 				
-				--- on retire les vieux rollouts --------
-				if subroll_param.rollouts.count > 0 do 
-					for subRoll in subroll_param.rollouts  do
-						removeSubRollout subroll_param	subRoll
+			---- on ajoute le nouveau -----------------
+			if lbx_sequence.selection > 0 then (
 				
-				---- on ajoute le nouveau -----------------
 				local composant_actif 		=  sequence[  lbx_sequence.selection ]
 				addSubRollout 	subroll_param		composant_actif.roll_parametres
 				
-				spn_elem_long.value = sequence_elem_long[  lbx_sequence.selection ]
+				spn_elem_long.indeterminate		=	false
+				spn_elem_long.enabled 				=	true
+				
+				spn_elem_long.value = sequence_elem_long[  lbx_sequence.selection ]				
+				edTxt_nom.text	=	sequence[  lbx_sequence.selection ].nom
+				
+			) else(
+				
+				spn_elem_long.indeterminate		=	true
+				spn_elem_long.enabled 				=	false
+				
+				edTxt_nom.enabled = false
+				edTxt_nom.text	=	""
 			)
-		)
+			
+		) --- fin actualiser -----------
 		
 		
 		
@@ -154,6 +225,16 @@ category:"CP | Menuiserie"
 		
 		on roll_sequence		open 				do 	actualiser ()
 		on lbx_sequence 		selected sel 	do	actualiser ()
+		
+		on lbx_sequence	 rightClick 	_id 	do	(
+			lbx_sequence.selection = _id
+			actualiser ()
+			creer_RCM_edition ()
+			
+		)
+		
+		
+		
 		on btn_ajouter 		pressed 			do 	creer_RCM_ajouter ()
 		on btn_retirer 		pressed 			do	retirer_element 		lbx_sequence.selection 
 		on btn_monter 		pressed 			do	monter_element 		lbx_sequence.selection 
@@ -163,7 +244,7 @@ category:"CP | Menuiserie"
 			redrawviews ()
 		)
 		
-		
+		on edTxt_nom entered txt do renommer_element		lbx_sequence.selection 	txt
 	)
 	rollout roll_divers  "Divers"
 	(
@@ -177,8 +258,43 @@ category:"CP | Menuiserie"
 	) 	---- fin rollout	-----------------------
 	
 	
+	
+	------------ FONCTIONS	----------------------------------------------------------------------------------
+	---- les parametres ----------------
+	fn corriger_parametres 	=(
+		
+		--- rester dans les bonnes limites ------
+		if align_prof > profondeur do align_prof = profondeur
+		
+		
+		--- longueur de l'ensemble ----------
+		local longueur_est_contrainte = true
+		local longueur_contrainte = 0
+		for elem_long in sequence_elem_long do
+			if elem_long == 0 do longueur_est_contrainte	=	false
+		if longueur_est_contrainte and sequence.count > 0  do (
+			for elem_long in sequence_elem_long do (
+				longueur_contrainte += elem_long
+				longueur_contrainte += cadre_largeur
+			)
+			longueur_contrainte += cadre_largeur
+			longueur = longueur_contrainte
+		)
+		
+	)
+	
+	--------- divers ------------------
 	fn est_porte	_compo	=	classof	_compo	==	urba_menuiserie_porte
 	fn est_fixe		_compo	=	classof	_compo	==	urba_menuiserie_fixe
+	fn est_copiable			=	 roll_sequence.lbx_sequence.selection != 0
+	fn est_instance	id:		= (
+		if id == unsupplied do id = roll_sequence.lbx_sequence.selection
+		local result =false
+		for i = 1 to sequence.count where i != id do
+			if sequence[i] == sequence[ id] do result = true
+		result
+	)
+	
 	
 	--------------- comopsants ----------------------------------
 	fn actualiser_composants	= with redraw off (
@@ -273,30 +389,47 @@ category:"CP | Menuiserie"
 	
 	
 	--------------- sequence ----------------------------------
-	fn ajouter_element		_element_plug	 =(		
+	fn ajouter_element		_element_plug	 =(
+		
+		
 		local nvel_element = createinstance	_element_plug
-		append sequence	nvel_element
+		append sequence		nvel_element
 		append sequence_elem_long	0.
+		
+		---- actualisations -----------
+		corriger_parametres ()		
 		actualiser_composants()		
-		if roll_sequence.open do	roll_sequence.actualiser ()
+		if roll_sequence.open do	roll_sequence.actualiser ()		
+		redrawViews ()
 	)
 	fn retirer_element		_id	 	=(
+		
 		deleteItem sequence 				_id
 		deleteItem sequence_elem_long 	_id
-		actualiser_composants()
-		if roll_sequence.open do	roll_sequence.actualiser ()
+		
+		---- actualisations -----------
+		corriger_parametres ()		
+		actualiser_composants()		
+		if roll_sequence.open do	roll_sequence.actualiser ()		
+		redrawViews ()
 	)
 	fn monter_element 		_id 		=(
+		
 		local elem_temp 		= sequence[ _id ]
 		local meneau_temp 	= sequence_elem_long[ _id ]
 		deleteItem 	sequence 				_id
 		deleteItem sequence_elem_long 	_id
 		insertItem 	elem_temp			sequence  					(	_id - 1 )
 		insertItem 	meneau_temp		sequence_elem_long  	(	_id - 1 )
-		actualiser_composants()
-		if roll_sequence.open do	roll_sequence.actualiser ()
+		
+		---- actualisations -----------
+		corriger_parametres ()		
+		actualiser_composants()		
+		if roll_sequence.open do	roll_sequence.actualiser ()		
+		redrawViews ()
 	)
 	fn	descendre_element 	_id 		=(
+		
 		local elem_temp 		= sequence[ _id ]
 		local meneau_temp 	= sequence_elem_long[ _id ]
 		deleteItem 	sequence 				_id
@@ -308,13 +441,67 @@ category:"CP | Menuiserie"
 			insertItem 	elem_temp		sequence  					(	_id + 1 )
 		insertItem 	meneau_temp		sequence_elem_long  	(	_id + 1 )
 		)
-		actualiser_composants()
+		
+		
+		---- actualisations -----------
+		corriger_parametres ()		
+		actualiser_composants()		
+		if roll_sequence.open do	roll_sequence.actualiser ()		
+		redrawViews ()
+	)
+	
+	fn renommer_element	_id	_nv_nom =(
+		sequence[ _id ].nom = _nv_nom
 		if roll_sequence.open do	roll_sequence.actualiser ()
 	)
 	
 	
+	fn dupliquer_element 	id_elem_select:		=(
+		
+		if id_elem_select 	== unsupplied do
+			id_elem_select 		= 	roll_sequence.lbx_sequence.selection
+		local nvel_element 			= copy sequence[ id_elem_select ]
+		local nvel_element_long 	= copy sequence_elem_long[ id_elem_select ]
+		append sequence		nvel_element
+		append sequence_elem_long	nvel_element_long
+		
+		---- actualisations -----------
+		corriger_parametres ()		
+		actualiser_composants()		
+		if roll_sequence.open do	roll_sequence.actualiser ()		
+		redrawViews ()
+	)
+	fn instancier_element 	id_elem_select:		=(
+		
+		
+		if id_elem_select 	== unsupplied	do
+			id_elem_select 		= 	roll_sequence.lbx_sequence.selection
+		local nvel_element 			=  sequence[ id_elem_select ]
+		local nvel_element_long 	=  sequence_elem_long[ id_elem_select ]
+		
+		
+		append sequence		nvel_element
+		append sequence_elem_long	nvel_element_long
+		
+		---- actualisations -----------
+		corriger_parametres ()		
+		actualiser_composants()		
+		if roll_sequence.open do	roll_sequence.actualiser ()		
+		redrawViews ()
+	)
 	
-	
+	fn rendreUnique_element id_elem_select:		=(
+		
+		if id_elem_select 	== unsupplied do
+			id_elem_select 		= 	roll_sequence.lbx_sequence.selection
+		sequence[ id_elem_select ] = copy sequence[ id_elem_select ] 
+		
+		---- actualisations -----------
+		corriger_parametres ()		
+		actualiser_composants()		
+		if roll_sequence.open do	roll_sequence.actualiser ()		
+		redrawViews ()
+	)
 	
 	
 	
@@ -340,12 +527,12 @@ category:"CP | Menuiserie"
 		
 		---- la sequence	-----
 		local compo_travBas	= 	if low_poly	then	createInstance  urba_primitive_boite_L else createInstance 	urba_primitive_boite
-		local depos_composant = [ cadre_largeur, align_prof, 0 ]
+		local depos_composant = [ cadre_largeur, 0, 0 ]
 		for i = 1 to	sequence_tmp.count do (
 			
 			---- le composant -----
 			local composant 		= sequence_tmp [i]
-			local calage_y		= if est_fixe		composant		then 	align_prof else  -( composant.ouvrant_profondeur / 2 )
+			local calage_y		= if est_fixe		composant		then 	0 else  -( composant.ouvrant_profondeur / 2 )
 			local calage_z			= if est_porte		composant		then 	0 else  cadre_largeur
 			
 			local depose_temp 	= if  not est_fixe 	composant 	then  	depos_composant  	+ [0, align_prof + calage_y ,calage_z ]
@@ -359,7 +546,7 @@ category:"CP | Menuiserie"
 				compo_travBas.hauteur 		= 	cadre_largeur
 				compo_travBas.profondeur		=	profondeur
 				compo_travBas.longueur		=	composant.longueur
-				mgr_mesh.attacher		mesh		compo_travBas	transf:( depos_composant - [0,align_prof, 0] )
+				mgr_mesh.attacher		mesh		compo_travBas	transf:depos_composant
 			)
 				
 			
@@ -367,7 +554,7 @@ category:"CP | Menuiserie"
 			
 			--- le meneau- ----
 			if i != sequence_tmp.count do (				
-				mgr_mesh.attacher		mesh		compo_meneau	transf:( depos_composant - [0,align_prof, 0] )
+				mgr_mesh.attacher		mesh		compo_meneau	transf:depos_composant
 				depos_composant.x += compo_meneau.longueur
 			)
 		)

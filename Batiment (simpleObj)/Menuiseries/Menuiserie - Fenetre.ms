@@ -44,13 +44,13 @@ category:"CP | Menuiserie"
 		ouvrant_profondeur	 		type:#worldUnits 	default:4.	
 		ouvrant_callage	 			type:#worldUnits 	default:1.5
 		ouvrant_cadre_larg		 	type:#worldUnits 	ui:spn_ouvrant_cadre_larg				default:4.	
-		div_largeur	 					type:#worldUnits 	default:2.
 		div_profondeur	 			type:#worldUnits 	default:3.
 		
 		ouvrant_double				type:#boolean 		ui:shk_double					default:false
-		ouvrant_tierce					type:#boolean 		ui:shk_tierce					default:false
+-- 		ouvrant_tierce					type:#boolean 		ui:shk_tierce					default:false
 		ouvrant_tierce_pourcent	type:#float		 		ui:spn_tierce_pourcent		default:50.
 		
+		div_largeur	 					type:#worldUnits 	ui:spn_div_largeur			default:2.
 		div_montants_nbr		 	type:#integer		 	ui:spn_div_montants_nbr		default:0.
 		div_montants_nbr_2		 	type:#integer		 	ui:spn_div_montants_nbr_2	default:0.
 		div_traverses_nbr			type:#integer		 	ui:spn_div_traverses_nbr		default:0.
@@ -63,6 +63,9 @@ category:"CP | Menuiserie"
 		on ouvrant_decallage		set val 	do	corriger_parametres ()
 	)	-----	fin parametres --------------------
 	parameters params_divers rollout:roll_divers	(
+		
+		nom	 							type:#string 			default:"Fenêtre"
+		
 		------ options --------------
 		low_poly							type:#boolean 		ui:shk_lowPoly				default:false
 		
@@ -81,14 +84,18 @@ category:"CP | Menuiserie"
 		checkbox	shk_cadre				"Cadre" 		
 	)
 	rollout roll_parametres  "Paramètres"	(
-		spinner 	spn_ouvrant_cadre_larg	 	"Menuis. larg." 		type:#worldunits range:[0,1e20,0]
-		checkbox	shk_double							"double" across:2
-		checkbox	shk_tierce							"Tiercée" 
-		spinner 	spn_tierce_pourcent 			"(%)" 		type:#float				range:[0,100,0] 
 		spinner 	spn_angle_1 						"Ouv. 1 (°)" 	type:#float				range:[0,180,0]
 		checkbox	shk_symetrie						"Inverser sens"	
+		
+		checkbox	shk_double							"double"-- across:2
+-- 		checkbox	shk_tierce							"Tiercée" 
+		spinner 	spn_tierce_pourcent 			"Tiercée (%)" 		type:#float				range:[0,100,0] 
 		spinner 	spn_angle_2 						"Ouv. 2 (°)" 	type:#float				range:[0,180,0]
+		
+		
+		spinner 	spn_ouvrant_cadre_larg	 	"Menuis. larg." 		type:#worldunits range:[0,1e20,0]
 		group "Croisillons" (	
+			spinner		spn_div_largeur			 "Largeur" 		type:#worldunits		range:[0,1e20,0]
 			spinner 	spn_div_montants_nbr	 "Montants 1" 		type:#integer			range:[0,1e20,0]
 			spinner 	spn_div_montants_nbr_2	 "Montants 2" 	type:#integer		range:[0,1e20,0]
 			spinner		spn_div_traverses_nbr	 "Traverses" 		type:#integer			range:[0,1e20,0]
@@ -103,14 +110,14 @@ category:"CP | Menuiserie"
 			spn_angle_2.indeterminate			=	not ouvrant_double
 			spn_angle_2.enabled 				=	ouvrant_double
 			
-			shk_tierce.enabled 					=  ouvrant_double
-			if not ouvrant_double do shk_symetrie.triState = 2
+-- 			shk_tierce.enabled 					=  ouvrant_double
+-- 			if not ouvrant_double do shk_symetrie.triState = 2
 			
-			spn_tierce_pourcent.indeterminate		=	not ouvrant_double or not ouvrant_tierce
-			spn_tierce_pourcent.enabled 				=	ouvrant_double and  ouvrant_tierce
+			spn_tierce_pourcent.indeterminate		=	not ouvrant_double
+			spn_tierce_pourcent.enabled 				=	ouvrant_double 
 			
-			spn_div_montants_nbr_2.indeterminate	=	not ouvrant_double or not ouvrant_tierce
-			spn_div_montants_nbr_2.enabled 			=	ouvrant_double and  ouvrant_tierce
+			spn_div_montants_nbr_2.indeterminate	=	not ouvrant_double 
+			spn_div_montants_nbr_2.enabled 			=	ouvrant_double
 		)
 		on roll_parametres	open 					do actualiser ()
 		on shk_double 		changed state 	do actualiser ()
@@ -173,7 +180,7 @@ category:"CP | Menuiserie"
 		if not ouvrant_double then (
 			compo_ouvrant_1.longueur 				= longueur_passage
 		) else (
-			if  ouvrant_tierce then (
+-- 			if  ouvrant_tierce then (
 				
 				compo_ouvrant_1.longueur 	= longueur_passage 	*  ouvrant_tierce_pourcent / 100 
 				
@@ -181,10 +188,10 @@ category:"CP | Menuiserie"
 				compo_ouvrant_2.longueur 				=  longueur_passage	* ( 100 - ouvrant_tierce_pourcent ) / 100
 				compo_ouvrant_2.div_montants_nbr 	=  div_montants_nbr_2
 			
-			)	else 	(
+			/* )	else 	(
 				compo_ouvrant_1.longueur 	= longueur_passage / 2
 				compo_ouvrant_2 				= compo_ouvrant_1
-			)
+			) */
 		)
 		
 		
