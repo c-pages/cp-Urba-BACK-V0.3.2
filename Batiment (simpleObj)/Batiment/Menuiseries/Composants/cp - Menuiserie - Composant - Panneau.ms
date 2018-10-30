@@ -1,8 +1,8 @@
 
-plugin simpleObject		menuiserie_composant_panneau
+plugin simpleObject		cp_compo_panneau
 name:"Panneau"
 classID:#(0x7094146b, 0x7896bea1)
-category:"CP | Menuiserie | Composant"
+category:"CP | Menuiserie	| Composant"
 -- invisible:true
 (
 	
@@ -10,7 +10,7 @@ category:"CP | Menuiserie | Composant"
 	------------ DEBUG	----------------------------------------------------------------------------------
 	local m_debug = true
 -- 	local 	m_debug = false
-	local 	m_dbgPrefix ="menuiserie_composant_panneau"
+	local 	m_dbgPrefix ="cp_compo_panneau"
 	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 	------------ DEBUG	----------------------------------------------------------------------------------
 	
@@ -135,8 +135,8 @@ category:"CP | Menuiserie | Composant"
 		
 		
 		---- le remplis ----------
-		local compo_remplis = if low_poly 	then	 createInstance  urba_primitive_planVertical		matId:matId_vitrage
-														else	 createInstance  urba_primitive_boite				matId:matId_vitrage		
+		local compo_remplis = if low_poly 	then	 createInstance  cp_prim_planVertical		matId:matId_vitrage
+														else	 createInstance  cp_prim_boite				matId:matId_vitrage		
 		compo_remplis.longueur		=	longueur
 		compo_remplis.hauteur			=	hauteur
 		if not low_poly 	do compo_remplis.profondeur		=	vitrage_epaisseur		
@@ -144,8 +144,8 @@ category:"CP | Menuiserie | Composant"
 		
 		
 		-------- divisions  --------------
-		local compo_div = if low_poly 	then	 createInstance  urba_primitive_boite_U		matId:matId_menuis
-													else	 createInstance  urba_primitive_boite			matId:matId_menuis
+		local compo_div = if low_poly 	then	 createInstance  cp_prim_boiteU		matId:matId_menuis
+													else	 createInstance  cp_prim_boite			matId:matId_menuis
 		-------- divisions horizontales --------------
 		for i = 1 to div_montants_nbr do (
 			

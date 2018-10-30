@@ -1,5 +1,5 @@
 
-plugin simpleObject		urba_primitive_planHorizontal
+plugin simpleObject		cp_prim_planHorizontal
 name:"Plan horiz."
 classID:#(0x66aff812, 0x7e864a94)
 category:"CP | Primitives"

@@ -1,10 +1,10 @@
 
 
 
-plugin simpleObject		urba_menuiserie_porte
+plugin simpleObject		cp_menuis_porte
 name:"Porte"
 classID:#(0x69b93b76, 0x1be9ef01)
-category:"CP | Menuiserie"
+category:"CP | Facade	| Menuiserie"
 -- invisible:true
 (
 	
@@ -12,7 +12,7 @@ category:"CP | Menuiserie"
 	------------ DEBUG	----------------------------------------------------------------------------------
 	local m_debug = true
 -- 	local 	m_debug = false
-	local 	m_dbgPrefix ="urba_menuiserie_porteBattante"
+	local 	m_dbgPrefix ="cp_menuis_porte"
 	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 	------------ DEBUG	----------------------------------------------------------------------------------
 	
@@ -190,10 +190,10 @@ category:"CP | Menuiserie"
 		
 		
 		---- creation des composants ------------------
-		if compo_cadre 					== undefined	do	compo_cadre				= 	createInstance  menuiserie_composant_cadre
-		if compo_ouvrant_plein 		== undefined	do	compo_ouvrant_plein	= 	createInstance  urba_primitive_boite
-		if compo_ouvrant_vitree 		== undefined	do	compo_ouvrant_vitree	= 	createInstance  menuiserie_composant_chassisVitre
-		if compo_poignee					== undefined	do	compo_poignee			= 	createInstance  menuiserie_composant_poignee
+		if compo_cadre 					== undefined	do	compo_cadre				= 	createInstance  cp_compo_cadre
+		if compo_ouvrant_plein 		== undefined	do	compo_ouvrant_plein	= 	createInstance  cp_prim_boite
+		if compo_ouvrant_vitree 		== undefined	do	compo_ouvrant_vitree	= 	createInstance  cp_compo_chassisVitre
+		if compo_poignee					== undefined	do	compo_poignee			= 	createInstance  cp_compo_poignee
 		
 		local longueur_passage 	= if not cadre_use	then longueur 	else longueur 	- 2*cadre_largeur
 		local hauteur_passage 		= if not cadre_use	then hauteur 		else hauteur 	- cadre_largeur

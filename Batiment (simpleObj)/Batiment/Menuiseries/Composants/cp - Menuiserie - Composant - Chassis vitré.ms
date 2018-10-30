@@ -1,9 +1,9 @@
 
 
-plugin simpleObject		menuiserie_composant_chassisVitre
+plugin simpleObject		cp_compo_chassisVitre
 name:"Chassis vitre"
 classID:#(0x7bb20e92, 0x37f7c1e7)
-category:"CP | Menuiserie | Composant"
+category:"CP | Menuiserie	| Composant"
 -- invisible:true
 (
 	
@@ -11,7 +11,7 @@ category:"CP | Menuiserie | Composant"
 	------------ DEBUG	----------------------------------------------------------------------------------
 	local m_debug = true
 -- 	local 	m_debug = false
-	local 	m_dbgPrefix ="menuiserie_composant_chassisVitre"
+	local 	m_dbgPrefix ="cp_compo_chassisVitre"
 	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 	------------ DEBUG	----------------------------------------------------------------------------------
 	
@@ -144,8 +144,8 @@ category:"CP | Menuiserie | Composant"
 	fn actualiser_composants	= with redraw off (
 	
 		----- les composants ----------------
-		if compo_cadre 	== undefined do compo_cadre 	= createInstance	menuiserie_composant_cadre
-		if compo_vitrage	== undefined do compo_vitrage	= createInstance	menuiserie_composant_panneau
+		if compo_cadre 	== undefined do compo_cadre 	= createInstance	cp_compo_cadre
+		if compo_vitrage	== undefined do compo_vitrage	= createInstance	cp_compo_panneau
 		
 		-----	le cadre 	-------------
 		compo_cadre.longueur					=	longueur
@@ -192,7 +192,7 @@ category:"CP | Menuiserie | Composant"
 		
 		--- les cotés du cadre en low_poly ---------
 		if low_poly do (
-			local plan_vertical = createInstance	urba_primitive_planVertical		longueur:profondeur	hauteur:hauteur
+			local plan_vertical = createInstance	cp_prim_planVertical		longueur:profondeur	hauteur:hauteur
 			mgr_mesh.attacher		mesh		plan_vertical		transf:( rotateZMAtrix	90  * transMatrix [longueur, 0,0] )
 			mgr_mesh.attacher		mesh		plan_vertical		transf:( rotateZMAtrix	-90 * transMatrix [0, profondeur,0]  )
 			

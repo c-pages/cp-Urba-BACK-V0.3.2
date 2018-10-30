@@ -1,5 +1,5 @@
 
-plugin simpleObject		urba_primitive_boite_U
+plugin simpleObject		cp_prim_boiteU
 name:"Boite U"
 classID:#(0x729c803f, 0x12e92614)
 category:"CP | Primitives"

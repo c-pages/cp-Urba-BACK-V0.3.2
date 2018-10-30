@@ -1,9 +1,9 @@
 
 
-plugin simpleObject		menuiserie_composant_meneau
+plugin simpleObject		cp_compo_meneau
 name:"Meneau"
 classID:#(0x36a2a73c, 0x48b7a887)
-category:"CP | Menuiserie | Composant"
+category:"CP | Menuiserie	| Composant"
 -- invisible:true
 (
 	
@@ -11,7 +11,7 @@ category:"CP | Menuiserie | Composant"
 	------------ DEBUG	----------------------------------------------------------------------------------
 	local m_debug = true
 -- 	local 	m_debug = false
-	local 	m_dbgPrefix ="menuiserie_composant_meneau"
+	local 	m_dbgPrefix ="cp_compo_meneau"
 	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 	------------ DEBUG	----------------------------------------------------------------------------------
 	
@@ -68,8 +68,8 @@ category:"CP | Menuiserie | Composant"
 		
 		
 		--- Construction ---------------------------------------------------------------------------------------
-		local composant=	if low_poly 	then	 createInstance  urba_primitive_boite_U	matId:matId
-													else	 createInstance  urba_primitive_boite		matId:matId
+		local composant=	if low_poly 	then	 createInstance  cp_prim_boiteU	matId:matId
+													else	 createInstance  cp_prim_boite		matId:matId
 		
 		composant.longueur			=	longueur
 		composant.profondeur		=	profondeur

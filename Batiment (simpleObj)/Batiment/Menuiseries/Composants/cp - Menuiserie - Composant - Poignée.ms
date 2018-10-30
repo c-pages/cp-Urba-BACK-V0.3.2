@@ -1,8 +1,8 @@
 
-plugin simpleObject		menuiserie_composant_poignee
+plugin simpleObject		cp_compo_poignee
 name:"Poignée"
 classID:#(0x277c59b6, 0x7c0f72eb)
-category:"CP | Menuiserie | Composant"
+category:"CP | Menuiserie	| Composant"
 -- invisible:true
 (
 	
@@ -10,7 +10,7 @@ category:"CP | Menuiserie | Composant"
 	------------ DEBUG	----------------------------------------------------------------------------------
 	local m_debug = true
 -- 	local 	m_debug = false
-	local 	m_dbgPrefix ="menuiserie_composant_poignee"
+	local 	m_dbgPrefix ="cp_compo_poignee"
 	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 	------------ DEBUG	----------------------------------------------------------------------------------
 	
@@ -58,7 +58,7 @@ category:"CP | Menuiserie | Composant"
 		--- vider le mesh --------
 		delete mesh
 			
-		local compo_base = if  low_poly then  urba_primitive_planVertical	 else urba_primitive_boite
+		local compo_base = if  low_poly then  cp_prim_planVertical	 else cp_prim_boite
 		composant_boite =createinstance	compo_base 	matId:matId
 
 		---- plaque	----------

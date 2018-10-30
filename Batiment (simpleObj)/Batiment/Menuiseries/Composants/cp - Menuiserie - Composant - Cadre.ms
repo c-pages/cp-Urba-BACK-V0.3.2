@@ -1,8 +1,8 @@
 
-plugin simpleObject		menuiserie_composant_cadre
+plugin simpleObject		cp_compo_cadre
 name:"Cadre"
 classID:#(0x191d683f, 0x345d8d04)
-category:"CP | Menuiserie | Composant"
+category:"CP | Menuiserie	| Composant"
 -- invisible:true
 (
 	
@@ -10,7 +10,7 @@ category:"CP | Menuiserie | Composant"
 	------------ DEBUG	----------------------------------------------------------------------------------
 	local m_debug = true
 -- 	local 	m_debug = false
-	local 	m_dbgPrefix ="menuiserie_composant_cadre"
+	local 	m_dbgPrefix ="cp_compo_cadre"
 	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 	------------ DEBUG	----------------------------------------------------------------------------------
 	
@@ -128,8 +128,8 @@ category:"CP | Menuiserie | Composant"
 		
 		--- Construction ---------------------------------------------------------------------------------------
 		----- les composants ----------------
-		local composant=	if low_poly 	then	 createInstance  urba_primitive_boite_L	matId:matId_menuis
-													else	 createInstance  urba_primitive_boite		matId:matId_menuis
+		local composant=	if low_poly 	then	 createInstance  cp_prim_boiteL		matId:matId_menuis
+													else	 createInstance  cp_prim_boite		matId:matId_menuis
 		
 		--- montant  gauche ----------
 		if montant_G do (

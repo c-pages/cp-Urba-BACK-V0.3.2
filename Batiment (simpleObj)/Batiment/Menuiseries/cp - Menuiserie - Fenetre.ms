@@ -1,10 +1,10 @@
 
 
 
-plugin simpleObject		urba_menuiserie_fenetre
+plugin simpleObject		cp_menuis_fenetre
 name:"Fenêtre"
 classID:#(0x485379cf, 0x2fa066d9)
-category:"CP | Menuiserie"
+category:"CP | Facade	| Menuiserie"
 -- invisible:true
 (
 	
@@ -12,7 +12,7 @@ category:"CP | Menuiserie"
 	------------ DEBUG	----------------------------------------------------------------------------------
 	local m_debug = true
 -- 	local 	m_debug = false
-	local 	m_dbgPrefix ="urba_menuiserie_fenetre"
+	local 	m_dbgPrefix ="cp_menuis_fenetre"
 	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 	------------ DEBUG	----------------------------------------------------------------------------------
 	
@@ -142,9 +142,9 @@ category:"CP | Menuiserie"
 	fn composants_actualiser	= with redraw off (
 		
 		---- creation des composants ------------------
-		if compo_cadre 		== undefined	do	compo_cadre			= 	createInstance  menuiserie_composant_cadre
-		if compo_ouvrant_1 	== undefined	do	compo_ouvrant_1	= 	createInstance  menuiserie_composant_chassisVitre				
-		if compo_ouvrant_2 	== undefined	do	compo_ouvrant_2	= 	createInstance  menuiserie_composant_chassisVitre	
+		if compo_cadre 		== undefined	do	compo_cadre			= 	createInstance  cp_compo_cadre
+		if compo_ouvrant_1 	== undefined	do	compo_ouvrant_1	= 	createInstance  cp_compo_chassisVitre				
+		if compo_ouvrant_2 	== undefined	do	compo_ouvrant_2	= 	createInstance  cp_compo_chassisVitre	
 		
 		local longueur_passage 	= if not cadre_use	then longueur 	else longueur 	- 2*cadre_largeur
 		local hauteur_passage 		= if not cadre_use	then hauteur 		else hauteur 	- 2*cadre_largeur
@@ -232,20 +232,21 @@ category:"CP | Menuiserie"
 		local callage_montant_G 	= 	if cadre_use then cadre_largeur	else	0
 		local callage_montant_D 	=	callage_montant_G
 		local ouvrant_pos_z 		= 	callage_montant_G
+		local ouvrant_callage_y	= if cadre_use then ouvrant_callage	else	0
 		
 		if  symetrie and not ouvrant_double	then (
 			origine_ouv_1	=	transMatrix	[ -longueur_ouvrant, - ouvrant_profondeur ,	ouvrant_pos_z ]	
 			rotate_ouv_1	=	rotateZMatrix -ouvert_angle_1
-			recalle_ouv_1	=	transMatrix	[longueur - callage_montant_G, ouvrant_callage + ouvrant_profondeur ,	0 ]
+			recalle_ouv_1	=	transMatrix	[longueur - callage_montant_G, ouvrant_callage_y + ouvrant_profondeur ,	0 ]
 		) else (
 			origine_ouv_1	=	transMatrix	[ 0, -ouvrant_profondeur,	ouvrant_pos_z ]
 			rotate_ouv_1	=	rotateZMatrix 	ouvert_angle_1 
-			recalle_ouv_1	=	transMatrix	[callage_montant_G, ouvrant_callage + ouvrant_profondeur,	0 ]
+			recalle_ouv_1	=	transMatrix	[callage_montant_G, ouvrant_callage_y + ouvrant_profondeur,	0 ]
 		)
 		if  ouvrant_double do (			
 			origine_ouv_2	=	transMatrix	[ -compo_ouvrant_2.longueur, -ouvrant_profondeur ,	ouvrant_pos_z ]
 			rotate_ouv_2 	=  rotateZMatrix -ouvert_angle_2
-			recalle_ouv_2	=	transMatrix	[longueur - callage_montant_D, ouvrant_callage + ouvrant_profondeur,	0 ]
+			recalle_ouv_2	=	transMatrix	[longueur - callage_montant_D, ouvrant_callage_y + ouvrant_profondeur,	0 ]
 		)
 		
 		

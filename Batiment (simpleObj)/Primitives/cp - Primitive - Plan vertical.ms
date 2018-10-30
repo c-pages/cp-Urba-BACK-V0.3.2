@@ -1,5 +1,5 @@
 
-plugin simpleObject		urba_primitive_planVertical
+plugin simpleObject		cp_prim_planVertical
 name:"Plan vert."
 classID:#(0x49e13042, 0x7ebe4e67)
 category:"CP | Primitives"
