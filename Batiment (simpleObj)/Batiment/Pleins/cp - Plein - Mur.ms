@@ -55,8 +55,8 @@ category:"CP | Facade	| Pleins"
 		spinner 	spn_hauteur 			"Hauteur" 				type:#worldunits 	range:[0,1e20,0]
 		spinner 	spn_profondeur		"Profondeur" 			type:#worldunits 	range:[0,1e20,0]
 	)
-	rollout roll_parametres  "Paramètres"	(		
-	)
+-- 	rollout roll_parametres  "Paramètres"	(		
+-- 	)
 	rollout roll_divers  "Divers"	(
 		 group "Qualité" (
 			checkbox	shk_lowPoly			"Low poly" 		

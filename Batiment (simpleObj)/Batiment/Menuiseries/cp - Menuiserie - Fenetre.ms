@@ -28,7 +28,7 @@ category:"CP | Facade	| Menuiserie"
 	
 	
 	parameters params_dimensions rollout:rol_global	(
-		longueur 		type:#worldUnits 	ui:spn_longueur 			default:0.
+		longueur 		type:#worldUnits 	ui:spn_longueur 			default:120.
 		hauteur	 		type:#worldUnits 	ui:spn_hauteur 			default:0.
 		cadre_use		type:#boolean 		ui:shk_cadre				default:true
 	)

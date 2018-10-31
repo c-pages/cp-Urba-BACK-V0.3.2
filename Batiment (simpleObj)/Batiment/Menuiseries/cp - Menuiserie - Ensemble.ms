@@ -33,7 +33,7 @@ category:"CP | Facade	| Menuiserie"
 	parameters params_general rollout:roll_general
 	(
 		----- global ---------------------
-		longueur 						type:#worldUnits 	ui:spn_longueur 					default:0.
+		longueur 						type:#worldUnits 	ui:spn_longueur 					default:120.
 		profondeur	 					type:#worldUnits 	ui:spn_profondeur				default:10.
 		hauteur	 						type:#worldUnits 	ui:spn_hauteur 					default:0.
 		
@@ -215,6 +215,13 @@ category:"CP | Facade	| Menuiserie"
 				edTxt_nom.text	=	""
 			)
 			
+			---- les boutons ------
+			btn_retirer.enabled 		= lbx_sequence.selection != 0
+			btn_monter.enabled 		= lbx_sequence.selection > 1
+			btn_descendre.enabled = lbx_sequence.selection < sequence.count and lbx_sequence.selection != 0
+			
+			
+			
 		) --- fin actualiser -----------
 		
 		
@@ -377,7 +384,13 @@ category:"CP | Facade	| Menuiserie"
 		
 	)  --- fin composants_actualiser  ------------------
 	
-	
+		
+	fn actualiser = (
+		corriger_parametres ()		
+		actualiser_composants()		
+		if roll_parametres.open do	roll_parametres.actualiser ()		
+		redrawViews ()
+	)
 	
 	
 	
@@ -389,16 +402,26 @@ category:"CP | Facade	| Menuiserie"
 	--------------- sequence ----------------------------------
 	fn ajouter_element_menuis		_element_plug	 =(
 		
+		local	id_elem_select 	= 	roll_parametres.lbx_sequence.selection
+		local	id_elem_insert		= 	id_elem_select + 1
 		
-		local nvel_element = createinstance	_element_plug
-		append sequence		nvel_element
-		append sequence_elem_long	0.
+		local nvl_element 		= createinstance	_element_plug
 		
+		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	(
+			insertItem nvl_element 		sequence 		id_elem_insert
+			insertItem 0. 		sequence_elem_long 	id_elem_insert
+		) else (		
+			append sequence		nvl_element
+			append sequence_elem_long	0.
+		)		
 		---- actualisations -----------
-		corriger_parametres ()		
-		actualiser_composants()		
-		if roll_parametres.open do	roll_parametres.actualiser ()		
-		redrawViews ()
+		actualiser ()
+		
+		if roll_parametres.open do	(
+			roll_parametres.lbx_sequence.selection = id_elem_insert 
+			roll_parametres.actualiser ()	
+		)
+		
 	)
 	fn retirer_element_menuis		_id	 	=(
 		
@@ -406,10 +429,13 @@ category:"CP | Facade	| Menuiserie"
 		deleteItem sequence_elem_long 	_id
 		
 		---- actualisations -----------
-		corriger_parametres ()		
-		actualiser_composants()		
-		if roll_parametres.open do	roll_parametres.actualiser ()		
-		redrawViews ()
+		actualiser ()
+		
+-- 		if roll_parametres.open do	(
+-- 			roll_parametres.lbx_sequence.selection -= 1 
+-- 			roll_parametres.actualiser ()	
+-- 		)
+		
 	)
 	fn monter_element_menuis 		_id 		=(
 		
@@ -421,10 +447,12 @@ category:"CP | Facade	| Menuiserie"
 		insertItem 	meneau_temp		sequence_elem_long  	(	_id - 1 )
 		
 		---- actualisations -----------
-		corriger_parametres ()		
-		actualiser_composants()		
-		if roll_parametres.open do	roll_parametres.actualiser ()		
-		redrawViews ()
+		actualiser ()
+		
+		if roll_parametres.open do	(
+			roll_parametres.lbx_sequence.selection -=  1
+			roll_parametres.actualiser ()	
+		)
 	)
 	fn	descendre_element_menuis 	_id 		=(
 		
@@ -437,17 +465,18 @@ category:"CP | Facade	| Menuiserie"
 			append sequence_elem_long	meneau_temp
 		) else (
 			insertItem 	elem_temp		sequence  					(	_id + 1 )
-		insertItem 	meneau_temp		sequence_elem_long  	(	_id + 1 )
+			insertItem 	meneau_temp		sequence_elem_long  	(	_id + 1 )
 		)
 		
 		
 		---- actualisations -----------
-		corriger_parametres ()		
-		actualiser_composants()		
-		if roll_parametres.open do	roll_parametres.actualiser ()		
-		redrawViews ()
+		actualiser ()
+		
+		if roll_parametres.open do	(
+			roll_parametres.lbx_sequence.selection +=  1
+			roll_parametres.actualiser ()	
+		)
 	)
-	
 	fn renommer_element_menuis	_id	_nv_nom =(
 		sequence[ _id ].nom = _nv_nom
 		if roll_parametres.open do	roll_parametres.actualiser ()
@@ -458,34 +487,49 @@ category:"CP | Facade	| Menuiserie"
 		
 		if id_elem_select 	== unsupplied do
 			id_elem_select 		= 	roll_parametres.lbx_sequence.selection
-		local nvel_element 			= copy sequence[ id_elem_select ]
-		local nvel_element_long 	= copy sequence_elem_long[ id_elem_select ]
-		append sequence		nvel_element
-		append sequence_elem_long	nvel_element_long
+		local	id_elem_insert		= 	id_elem_select + 1
 		
+		local nvl_element 			= copy sequence[ id_elem_select ]
+		local nvl_element_long 	= copy sequence_elem_long[ id_elem_select ]
+		
+		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	(
+			insertItem nvl_element 		sequence 		id_elem_insert
+			insertItem nvl_element_long 		sequence_elem_long 	id_elem_insert
+		) else (		
+			append sequence		nvl_element
+			append sequence_elem_long	nvl_element_long
+		)		
 		---- actualisations -----------
-		corriger_parametres ()		
-		actualiser_composants()		
-		if roll_parametres.open do	roll_parametres.actualiser ()		
-		redrawViews ()
+		actualiser ()
+		
+		if roll_parametres.open do	(
+			roll_parametres.lbx_sequence.selection = id_elem_insert 
+			roll_parametres.actualiser ()	
+		)
 	)
 	fn instancier_element_menuis 	id_elem_select:		=(
-		
-		
-		if id_elem_select 	== unsupplied	do
+
+		if id_elem_select 	== unsupplied do
 			id_elem_select 		= 	roll_parametres.lbx_sequence.selection
-		local nvel_element 			=  sequence[ id_elem_select ]
-		local nvel_element_long 	=  sequence_elem_long[ id_elem_select ]
+		local	id_elem_insert		= 	id_elem_select + 1
 		
+		local nvl_element 			=  sequence[ id_elem_select ]
+		local nvl_element_long 	=  sequence_elem_long[ id_elem_select ]
 		
-		append sequence		nvel_element
-		append sequence_elem_long	nvel_element_long
-		
+		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	(
+			insertItem nvl_element 		sequence 		id_elem_insert
+			insertItem nvl_element_long 		sequence_elem_long 	id_elem_insert
+		) else (		
+			append sequence		nvl_element
+			append sequence_elem_long	nvl_element_long
+		)		
 		---- actualisations -----------
-		corriger_parametres ()		
-		actualiser_composants()		
-		if roll_parametres.open do	roll_parametres.actualiser ()		
-		redrawViews ()
+		actualiser ()
+		
+		if roll_parametres.open do	(
+			roll_parametres.lbx_sequence.selection = id_elem_insert 
+			roll_parametres.actualiser ()	
+		)
 	)
 	
 	fn rendreUnique_element_menuis	 id_elem_select:		=(
@@ -495,10 +539,7 @@ category:"CP | Facade	| Menuiserie"
 		sequence[ id_elem_select ] = copy sequence[ id_elem_select ] 
 		
 		---- actualisations -----------
-		corriger_parametres ()		
-		actualiser_composants()		
-		if roll_parametres.open do	roll_parametres.actualiser ()		
-		redrawViews ()
+		actualiser ()
 	)
 	
 	

@@ -27,7 +27,7 @@ category:"CP | Facade	| Pleins"
 	
 	
 	parameters params_global rollout:roll_global	(
-		longueur 				type:#worldUnits 	ui:spn_longueur 			default:0.
+		longueur 				type:#worldUnits 	ui:spn_longueur 			default:20.
 		hauteur	 				type:#worldUnits 	ui:spn_hauteur 			default:0.
 		profondeur	 			type:#worldUnits 	ui:spn_profondeur		default:0.
 		
