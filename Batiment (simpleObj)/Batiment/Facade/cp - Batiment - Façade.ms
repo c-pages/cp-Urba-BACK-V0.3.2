@@ -100,13 +100,19 @@ category:"CP | Bâtiment	| Composant"
 			facades_classes
 		)
 		
+		fn get_composant_facade =(
+			
+			local geo_classes			=	GeometryClass.classes 
+			local facades_classes 	= for geo_classe in geo_classes	where findstring ( geo_classe as string )		"cp_facadeCompo" != undefined	 collect	geo_classe
+			facades_classes
+		)
 		
 		--- menus cliques droit -------------------
 		fn creer_RCM_ajouter	=(
 
 			--- on recupere les plug necessaires ---------
-			local menuiseries_plugins 	= get_menuiserie_plugins ()
-			local facades_plugins 		= get_facades_plugins ()
+-- 			local menuiseries_plugins 	= get_menuiserie_plugins ()
+			local facades_plugins 		= get_composant_facade ()
 			
 			--- on ecrit le menu -----------------------------------------------------------------------------------------------
 			local menu_txt=""
@@ -115,25 +121,25 @@ category:"CP | Bâtiment	| Composant"
 			
 			---- les boutons ------------------------------------------------------------------------------------------------
 			---- elements pleins -----------------------------------
-			menu_txt +=			"subMenu \"Pleins\" (\n"
+-- 			menu_txt +=			"subMenu \"Pleins\" (\n"
 			for facade_plug in facades_plugins do
 				menu_txt += "menuItem	btn_" + facade_plug.name as string + "	\"" + facade_plug.name + "\"\n" 
-			menu_txt +=			")\n"
+-- 			menu_txt +=			")\n"
 			
 			
-			
+			/* 
 			---- menuiseries ------------
 			menu_txt +=			"subMenu \"Menuiseries\" (\n"
 			for menuis_plug in menuiseries_plugins do
 				menu_txt += "menuItem	btn_" + menuis_plug.name as string + "	\"" + menuis_plug.name + "\"\n" 
-			
+			 */
 -- 			menu_txt += "menuItem	btn_ensemble 	\"Ensemble menuisé\"\n" 
-			menu_txt +=			")\n"
+-- 			menu_txt +=			")\n"
 			
 			---- les evenements ------------------------------------------------------------------------------------------------
-			for menuis_plug in menuiseries_plugins do
+			/* for menuis_plug in menuiseries_plugins do
 				menu_txt += "on		btn_" + menuis_plug.name as string + " picked do $.ajouter_element " + menuis_plug as string+ "\n" 
-			
+			 */
 			for facade_plug in facades_plugins do
 				menu_txt += "on		btn_" + facade_plug.name as string + " picked do $.ajouter_element " + facade_plug as string+ "\n" 
 			
@@ -180,16 +186,16 @@ category:"CP | Bâtiment	| Composant"
 		button 		btn_monter			"/\\"			
 		button 		btn_descendre	"\\/"
 		
-		listBox		lbx_sequence		""	height:20
+		listBox		lbx_sequence		""	height:12
 		
 		group "" (
 			editText 	edTxt_nom		 	"Nom:" 	
 			checkBox	chk_etirable		"Etirable"
 			spinner 	spn_elem_long		"Longeur" 		type:#worldunits range:[0,1e20,0]		tooltip:"La longueur de l'élément.\n0.0: Longueur automatique (Répartition régulière des longueurs)"
-			button		btn_parametres	"Editer paramètres"	width:160
+-- 			button		btn_parametres	"Editer paramètres"	width:160
 		)
 		
--- 		subrollout	subroll_param		""	height:400		width:170 pos:[5,250]
+		subrollout	subroll_param		""	height:400	--	width:170 --pos:[5,250]
 		
 		
 		
@@ -205,19 +211,19 @@ category:"CP | Bâtiment	| Composant"
 			)	
 			lbx_sequence.items 		=  for elem_nom in elements_noms collect elem_nom
 			
-			/* 
+			
 			--- les parametres de l'element (le subrollout)  ---------------			
 			--- on retire les vieux rollouts --------
 			if subroll_param.rollouts.count > 0 do 
 				for subRoll in subroll_param.rollouts  do
 					removeSubRollout subroll_param	subRoll
-				 */
+				 
 			---- on ajoute le nouveau -----------------
 			if lbx_sequence.selection > 0 then (
-				/* 
+				
 				local composant_actif 		=  sequence[  lbx_sequence.selection ]
 				addSubRollout 	subroll_param		composant_actif.roll_parametres
-				 */
+				
 				spn_elem_long.indeterminate		=	false
 				spn_elem_long.enabled 				=	true
 				
@@ -239,12 +245,13 @@ category:"CP | Bâtiment	| Composant"
 			btn_monter.enabled 			= lbx_sequence.selection > 1
 			btn_descendre.enabled 	= lbx_sequence.selection < sequence.count and lbx_sequence.selection != 0
 			
-			
+			/* 
 			local a_desParametres = true
 			try (
 				sequence[  lbx_sequence.selection ].roll_parametres 
 			)catch a_desParametres = false			
 			btn_parametres.enabled 	= a_desParametres
+			 */
 		) --- fin actualiser -----------
 		
 		
@@ -383,7 +390,7 @@ category:"CP | Bâtiment	| Composant"
 		
 		--- Si notre sequence est vide
 		if sequence.count == 0 do (
-			local compo_temp = createInstance cp_plein_mur
+			local compo_temp = createInstance cp_facadeCompo_mur
 			
 			append	sequence_tmp  	compo_temp
 			

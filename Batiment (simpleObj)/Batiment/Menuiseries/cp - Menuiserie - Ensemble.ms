@@ -172,6 +172,7 @@ category:"CP | Facade	| Menuiserie"
 		)
 		
 		subrollout	subroll_param		""	height:300
+		dotNetControl btn_resize 	"System.Windows.Forms.Button" 		align:#left width:150 height:10
 		
 		
 		
@@ -226,9 +227,37 @@ category:"CP | Facade	| Menuiserie"
 		
 		
 		
+		----- Gestion du resize du subRollout -----------------------
+		local resize_enCours 			= false
+		local pos_initial					=	[0,0]
+		local subRoll_hauteur_init		=	0
+		local btnResize_pos_init		=	[0,0]
+		local rollParam_hauteur_init	=	[0,0]
+		fn resize_surbRoll =(
+			if resize_enCours do (
+				local mouse_pos 			= mouse.posUnscaled
+				local changement_ht 	= mouse_pos.y - pos_initial.y
+				local subRoll_nvl_ht 	= subRoll_hauteur_init 		+ 	changement_ht
+				
+				if subRoll_nvl_ht >	50 do (
+					subroll_param.height		=	subRoll_nvl_ht
+					btn_resize.pos.y			=	btnResize_pos_init.y		+	changement_ht
+					roll_parametres.height	=	rollParam_hauteur_init 	+ 	changement_ht
+				)
+			)
+		)
 		
 		
-		on roll_parametres		open 				do 	actualiser ()
+		
+		
+		on roll_parametres		open 				do 	(
+			actualiser ()
+			
+			---- le bouton resize -----------------------
+			btn_resize.FlatStyle	=		(dotNetClass "System.Windows.Forms.FlatStyle").flat	
+			btn_resize.BackColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
+			btn_resize.ForeColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
+		)
 		on lbx_sequence 		selected sel 	do	actualiser ()
 		
 		on lbx_sequence	 rightClick 	_id 	do	(
@@ -250,6 +279,30 @@ category:"CP | Facade	| Menuiserie"
 		)
 		
 		on edTxt_nom entered txt do renommer_element		lbx_sequence.selection 	txt
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		------------ le bouton resize -----------------------
+		on	btn_resize	MouseDown 	do (
+			resize_enCours 			= true
+			pos_initial					=	mouse.posUnscaled
+			subRoll_hauteur_init		= subroll_param.height
+			btnResize_pos_init		=	btn_resize.pos
+			rollParam_hauteur_init	=	roll_parametres.height
+		)
+		on	btn_resize	MouseUp 		do	resize_enCours = false		
+		on	btn_resize	MouseMove 	do 	resize_surbRoll ()
+		on	btn_resize	MouseLeave 	do	resize_enCours = false		
+		
+		
+		
+		
 	)
 	rollout roll_divers  "Divers"
 	(
@@ -314,7 +367,6 @@ category:"CP | Facade	| Menuiserie"
 		compo_cadre.hauteur 						= hauteur	
 		compo_cadre.menuis_largeur	 			= cadre_largeur	
 		compo_cadre.travBasse_hauteur	 		= cadre_largeur	
-		compo_cadre.travBasse		 			= true	
 		compo_cadre.low_poly			 			= low_poly		
 		compo_cadre.matId_menuis	 			= matId_menuis
 		compo_cadre.travBasse					=	false
@@ -329,20 +381,17 @@ category:"CP | Facade	| Menuiserie"
 		
 		
 		--- maj des composants de la sequence -------------
-		local longueur_passage 	= longueur 	- 2*cadre_largeur
-		local nbr_meneaux			= sequence.count - 1
-		
-		local longueur_total_meneaux	=	( sequence.count - 1 )* compo_meneau.longueur 
-		
-		local longueur_definies_total 	= 0
-		local nbr_elem_definies 		= 0
+		local longueur_passage 			= longueur 	- 2*cadre_largeur
+		local nbr_meneaux					= sequence.count - 1		
+		local longueur_total_meneaux	=	( sequence.count - 1 )* compo_meneau.longueur 		
+		local longueur_definies_total 		= 0
+		local nbr_elem_definies 			= 0
 		for i = 1 to sequence.count do (
 			if sequence_elem_long[i] != 0 do (
 				longueur_definies_total+= sequence_elem_long[i]
 				nbr_elem_definies += 1
 			)
-		)
-		
+		)		
 		local longueur_composant	= ( longueur_passage - ( longueur_total_meneaux + longueur_definies_total ) ) / ( sequence.count - nbr_elem_definies )
 		
 		
@@ -384,7 +433,7 @@ category:"CP | Facade	| Menuiserie"
 		
 	)  --- fin composants_actualiser  ------------------
 	
-		
+	
 	fn actualiser = (
 		corriger_parametres ()		
 		actualiser_composants()		
@@ -430,12 +479,6 @@ category:"CP | Facade	| Menuiserie"
 		
 		---- actualisations -----------
 		actualiser ()
-		
--- 		if roll_parametres.open do	(
--- 			roll_parametres.lbx_sequence.selection -= 1 
--- 			roll_parametres.actualiser ()	
--- 		)
-		
 	)
 	fn monter_element_menuis 		_id 		=(
 		

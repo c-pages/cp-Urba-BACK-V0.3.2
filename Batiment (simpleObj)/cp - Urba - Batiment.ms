@@ -25,14 +25,23 @@ filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Menuiseries\\cp -
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Menuiseries\\cp - Menuiserie - Ensemble.ms"
 
 
-
+/* 
 ------- les pleins ----------
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Pleins\\cp - Plein - Mur.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Pleins\\cp - Plein - Poteau.ms"
+ */
 
+------- Composants de facades	-----------
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\Elements\\cp - Baie element - Fixe.ms"
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\Elements\\cp - Baie element - Fenetre.ms"
+
+
+
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\cp - Facade - Composant - Mur.ms"
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\cp - Facade - Composant - Baie.ms"
 
 ------- les facades ----------
-filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\cp - Batiment - Façade.ms"
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\cp - Batiment - Façade.ms"
 
 
 /* 
