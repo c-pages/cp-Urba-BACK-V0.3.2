@@ -33,9 +33,9 @@ category:"CP | Facade	| Composant"
 	parameters params_general rollout:roll_parametres	(
 		nom	 					type:#string 			ui:edTxt_nom				default:"Mur"
 		
-		longueur 				type:#worldUnits 	ui:spn_longueur 			default:20.
-		debord	 				type:#worldUnits 	ui:spn_debord				default:5.
-		etirable					type:#boolean 		ui:shk_etirable				default:false
+		longueur 				type:#worldUnits 	ui:spn_longueur 			default:0.
+		debord	 				type:#worldUnits 	ui:spn_debord				default:0.
+		etirable					type:#boolean 		ui:shk_etirable				default:true
 	)
 	parameters params_divers rollout:roll_divers	(
 		
@@ -43,7 +43,7 @@ category:"CP | Facade	| Composant"
 		low_poly				type:#boolean 		ui:shk_lowPoly				default:false
 		
 		------ mat ID ----------
-		matId				type:#integer 			ui:spn_matId	default:1
+		matId				type:#integer 			ui:spn_matId	default:4
 		
 	)	-----	fin parametres --------------------
 	
@@ -58,11 +58,11 @@ category:"CP | Facade	| Composant"
 	rollout roll_parametres  "Paramètres"	(		
 		
 		editText 	edTxt_nom		 	"Nom:" 	
-		
-		checkbox	shk_etirable			"Etirable" 	
-		spinner 	spn_longueur 			"longueur" 				type:#worldunits 	range:[0,1e20,0]
-		spinner 	spn_debord				"Débord" 				type:#worldunits range:[0,1e20,0]
-		
+		group "Dimensions" (
+			checkbox	shk_etirable			"Etirable" 	
+			spinner 	spn_longueur 			"longueur" 				type:#worldunits 	range:[0,1e20,0]
+			spinner 	spn_debord				"Débord" 				type:#worldunits range:[0,1e20,0]
+		)
 	)
 	rollout roll_divers  "Divers"	(
 		 group "Qualité" (
@@ -98,8 +98,33 @@ category:"CP | Facade	| Composant"
 		
 		--- vider le mesh --------
 		delete mesh
-		
 		--- Construction ---------------------------------------------------------------------------------------
+		
+		
+		---- points -----
+		local pt_1	=	[0,					0,					0]
+		local pt_2	=	[longueur,			0,					0]
+		local pt_3	=	[0,					0,					hauteur]
+		local pt_4	=	[longueur,			0,					hauteur]
+		
+		local pts 	= #(pt_1, pt_2, pt_3, pt_4)
+		
+		----- faces ----------------------------------------------------		
+		local faces = #(	[1,2,4], [1,4,3])
+	
+		--- mat ID ------
+		local matIDs	= for i in faces collect matId
+		
+		--- on creer les vertex ---------
+		setMesh 	mesh 	verts:pts	faces:faces	materialIDs:matIDs
+		
+		----- On clean le mesh 	--------------
+		meshop.autoSmooth		mesh 	#{1..mesh.numfaces} 		10
+		meshop.autoEdge 		mesh 	#{1..mesh.Edges.count}	10	
+		
+		
+		
+		/* 
 		----- les composants ----------------
 		local composant=	if low_poly 	then	 createInstance  cp_prim_boiteU		matId:matId
 													else	 createInstance  cp_prim_boite		matId:matId
@@ -109,7 +134,7 @@ category:"CP | Facade	| Composant"
 		composant.hauteur			=	hauteur
 		
 		mgr_mesh.attacher		mesh		composant 	transf:[0,-debord,0]
-		
+		 */
 		
 		----- le mapping 	--------------
 		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)

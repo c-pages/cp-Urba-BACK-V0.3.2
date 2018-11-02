@@ -32,20 +32,20 @@ category:"CP | Facade	| Composant"
 	
 	
 	parameters params_global rollout:roll_global	(
-		hauteur	 				type:#worldUnits 	ui:spn_hauteur 			default:0.
+		hauteur	 				type:#worldUnits 	ui:spn_hauteur 				default:0.
 	)
 	parameters params_general rollout:roll_parametres	(
 		
-		nom	 					type:#string 			ui:edTxt_nom				default:"Baie"
+		nom	 					type:#string 			ui:edTxt_nom					default:"Baie"
 		
-		etirable					type:#boolean 		ui:shk_etirable				default:false
+		etirable					type:#boolean 		ui:shk_etirable					default:false
 		
-		longueur 				type:#worldUnits 	ui:spn_longueur 				default:0.
-		baie_hauteur			type:#worldUnits 	ui:spn_baie_hauteur			default:0.
-		profondeur	 			type:#worldUnits 	ui:spn_profondeur			default:0.
-		allege_hauteur			type:#worldUnits 	ui:spn_allege_hauteur		default:0.
+		longueur 				type:#worldUnits 	ui:spn_longueur 				default:120.
+		baie_hauteur			type:#worldUnits 	ui:spn_baie_hauteur			default:-50.
+		profondeur	 			type:#worldUnits 	ui:spn_profondeur			default:15.
+		allege_hauteur			type:#worldUnits 	ui:spn_allege_hauteur		default:100.
 		
-		menuis_largeur			type:#worldUnits 	ui:spn_menuis_largeur			default:2.5
+		menuis_largeur			type:#worldUnits 	ui:spn_menuis_largeur			default:5.
 		menuis_profondeur		type:#worldUnits 	ui:spn_menuis_profondeur		default:7.
 		
 		sequence					type:#maxObjectTab	tabSizeVariable:true
@@ -375,7 +375,7 @@ category:"CP | Facade	| Composant"
 	
 	fn ouvrir_roll_sequence = (
 		
-		createDialog roll_sequence
+		createDialog roll_sequence	width:180	
 	)
 	
 	----------- Actualisation de la sequence		-----------------------------------
@@ -426,6 +426,7 @@ category:"CP | Facade	| Composant"
 			compo_temp.profondeur		=	menuis_profondeur
 			compo_temp.low_poly			=	low_poly
 			
+			---- hasard ouverture ---------
 			if est_porte  compo_temp or est_fenetre compo_temp do (
 				local est_ouverte =   ( random 0.  100. ) < fen_proba_ouv 
 				if est_ouverte 	then (

@@ -29,34 +29,23 @@ category:"CP | Bâtiment	| Composant"
 	
 	
 	parameters params_general rollout:roll_general	(
+		
 		----- global ---------------------
 		longueur 						type:#worldUnits 	ui:spn_longueur 					default:0.
 		profondeur	 					type:#worldUnits 	ui:spn_profondeur				default:10.
 		hauteur	 						type:#worldUnits 	ui:spn_hauteur 					default:0.
 		
-		----- les menuiseries -----------
-		cadre_largeur					type:#worldUnits 	ui:spn_cadre_largeur			default:2.5
-		
-		
-		on profondeur	set val do corriger_parametres ()
-		on longueur 	set val do corriger_parametres ()
-		
 	)
 	parameters params_sequence rollout:roll_parametres	(
--- 		align_prof					type:#worldUnits 		ui:spn_aling_prof	default:5.
 		
-		repartition					type:#integer				ui:ddl_repartition		default:1
+		repartition					type:#integer				ui:ddl_repartition			default:1
+		nbr_repetitions			type:#integer				ui:spn_repetitions		default:1
 		sequence					type:#maxObjectTab	tabSizeVariable:true
-		sequence_elem_long		type:#floatTab			tabSizeVariable:true
-		
--- 		on align_prof					set val do corriger_parametres ()
-		on sequence_elem_long 	set arg1 arg2 do corriger_parametres ()
-		
 		
 	)
 	parameters params_divers rollout:roll_divers	(
 		
-		nom	 							type:#string 			default:"Ensemble"
+		nom	 							type:#string 			default:"Facade"
 		
 		------ options --------------
 		low_poly							type:#boolean 		ui:shk_lowPoly				default:false
@@ -82,9 +71,9 @@ category:"CP | Bâtiment	| Composant"
 		spinner spn_hauteur 				"Hauteur" 				type:#worldunits range:[0,1e20,0]
 		spinner spn_profondeur 			"Profondeur" 			type:#worldunits range:[0,1e20,0]
 		
-		group "Cadre" (
-			spinner spn_cadre_largeur			"Largeur" 				type:#worldunits 	range:[0,1e20,0]
-		)
+-- 		group "Cadre" (
+-- 			spinner spn_cadre_largeur			"Largeur" 				type:#worldunits 	range:[0,1e20,0]
+-- 		)
 	)
 	rollout roll_parametres  	"Séquence"		(
 		--- divers ------------------------------------------------------------------------------------------------------
@@ -107,7 +96,7 @@ category:"CP | Bâtiment	| Composant"
 			facades_classes
 		)
 		
-		--- menus cliques droit -------------------
+		--- Menus cliques droit ----------------------------------------------------------------------------------------------
 		fn creer_RCM_ajouter	=(
 
 			--- on recupere les plug necessaires ---------
@@ -156,10 +145,6 @@ category:"CP | Bâtiment	| Composant"
 			popUpMenu	RCmenu_ajouter
 			
 		) --- fin creer_RCM_ajouter ---------------
-		
-		
-		
-		
 		fn creer_RCM_edition	=(
 
 			rcmenu  RCmenu_edition (
@@ -177,30 +162,32 @@ category:"CP | Bâtiment	| Composant"
 		) --- fin creer_RCM_ajouter ---------------
 		
 		
-		dropDownList	ddl_repartition		""	 items:#("Répartir", "Centrer", "Etirer", "Aligner à gauche", "Aligner à droite")
 		
--- 		spinner 	spn_aling_prof 		"Alignement" 		type:#worldunits range:[0,1e20,0]
+		
+		--- UI ----------------------------------------------------------------------------------------------
+		group "Répartition" (
+			dropDownList	ddl_repartition		""	 items:#("Répartir", "Répéter", "Centrer", "Etirer", "Aligner à gauche", "Aligner à droite")
+			spinner spn_repetitions 		"Répétitions" 			type:#integer range:[1,1000,1]
+		)
 		
 		button 		btn_ajouter 		"+"			across:4
 		button 		btn_retirer	 		"-"			
 		button 		btn_monter			"/\\"			
 		button 		btn_descendre	"\\/"
 		
-		listBox		lbx_sequence		""	height:12
+		listBox		lbx_sequence		""	height:10
 		
-		group "" (
-			editText 	edTxt_nom		 	"Nom:" 	
-			checkBox	chk_etirable		"Etirable"
-			spinner 	spn_elem_long		"Longeur" 		type:#worldunits range:[0,1e20,0]		tooltip:"La longueur de l'élément.\n0.0: Longueur automatique (Répartition régulière des longueurs)"
--- 			button		btn_parametres	"Editer paramètres"	width:160
-		)
+		subrollout	subroll_param		""	height:300
 		
-		subrollout	subroll_param		""	height:400	--	width:170 --pos:[5,250]
+		dotNetControl btn_resize 	"System.Windows.Forms.Button" 		align:#left width:150 height:10
 		
 		
 		
 		
 		fn actualiser =(
+			
+			---- repartition -------
+			spn_repetitions.enabled = ddl_repartition.selection == 2
 			
 			---- l'affichage de la sequence -------------------
 			local elements_noms 	= #()
@@ -211,7 +198,6 @@ category:"CP | Bâtiment	| Composant"
 			)	
 			lbx_sequence.items 		=  for elem_nom in elements_noms collect elem_nom
 			
-			
 			--- les parametres de l'element (le subrollout)  ---------------			
 			--- on retire les vieux rollouts --------
 			if subroll_param.rollouts.count > 0 do 
@@ -219,25 +205,9 @@ category:"CP | Bâtiment	| Composant"
 					removeSubRollout subroll_param	subRoll
 				 
 			---- on ajoute le nouveau -----------------
-			if lbx_sequence.selection > 0 then (
-				
+			if lbx_sequence.selection > 0 then (				
 				local composant_actif 		=  sequence[  lbx_sequence.selection ]
 				addSubRollout 	subroll_param		composant_actif.roll_parametres
-				
-				spn_elem_long.indeterminate		=	false
-				spn_elem_long.enabled 				=	true
-				
-				spn_elem_long.value = sequence_elem_long[  lbx_sequence.selection ]				
-				edTxt_nom.text	=	sequence[  lbx_sequence.selection ].nom
-				
-			) else (
-				
-				spn_elem_long.indeterminate	=	true
-				spn_elem_long.enabled 			=	false
-				
-				edTxt_nom.enabled 				= false
-				edTxt_nom.text					=	""
-				
 			)
 			
 			---- les boutons ------
@@ -245,31 +215,55 @@ category:"CP | Bâtiment	| Composant"
 			btn_monter.enabled 			= lbx_sequence.selection > 1
 			btn_descendre.enabled 	= lbx_sequence.selection < sequence.count and lbx_sequence.selection != 0
 			
-			/* 
-			local a_desParametres = true
-			try (
-				sequence[  lbx_sequence.selection ].roll_parametres 
-			)catch a_desParametres = false			
-			btn_parametres.enabled 	= a_desParametres
-			 */
+			
+			
 		) --- fin actualiser -----------
 		
+		----- Gestion du resize du subRollout -----------------------
+		local resize_enCours 			= false
+		local pos_initial					=	[0,0]
+		local subRoll_hauteur_init		=	0
+		local btnResize_pos_init		=	[0,0]
+		local roll_hauteur_init			=	[0,0]
+		fn resize_surbRoll =(
+			if resize_enCours do (
+				local mouse_pos 			= mouse.posUnscaled
+				local changement_ht 	= mouse_pos.y - pos_initial.y
+				local subRoll_nvl_ht 	= subRoll_hauteur_init 		+ 	changement_ht
+				
+				if subRoll_nvl_ht >	50 do (
+					subroll_param.height		=	subRoll_nvl_ht
+					btn_resize.pos.y			=	btnResize_pos_init.y		+	changement_ht
+					roll_parametres.height	=	roll_hauteur_init 	+ 	changement_ht
+				)
+			)
+		)
 		
 		
 		
 		
-		on roll_parametres		open 				do 	actualiser ()
-		on lbx_sequence 		selected sel 	do	actualiser ()
 		
+		on roll_parametres		open 				do 	(
+			actualiser ()
+			
+			---- le bouton resize -----------------------
+			btn_resize.FlatStyle	=		(dotNetClass "System.Windows.Forms.FlatStyle").flat	
+			btn_resize.BackColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
+			btn_resize.ForeColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
+		)
+		
+		
+		---- repartition ---------
+		on ddl_repartition selected  val do actualiser ()
+		
+		----- Sequence -----------------
+		on lbx_sequence 		selected sel 	do	actualiser ()		
 		on lbx_sequence	 rightClick 	_id 	do	(
 			lbx_sequence.selection = _id
 			actualiser ()
 			creer_RCM_edition ()
 			
 		)
-		
-		
-		
 		on btn_ajouter 		pressed 			do 	creer_RCM_ajouter ()
 		on btn_retirer 		pressed 			do	retirer_element 		lbx_sequence.selection 
 		on btn_monter 		pressed 			do	monter_element 		lbx_sequence.selection 
@@ -279,12 +273,18 @@ category:"CP | Bâtiment	| Composant"
 			redrawviews ()
 		)
 		
-		on edTxt_nom entered txt do renommer_element		lbx_sequence.selection 	txt
-			
+		------------ le bouton resize -----------------------
+		on	btn_resize	MouseDown 	do (
+			resize_enCours 				= true
+			pos_initial						=	mouse.posUnscaled
+			subRoll_hauteur_init			= 	subroll_param.height
+			btnResize_pos_init			=	btn_resize.pos
+			roll_hauteur_init				=	roll_parametres.height
+		)
+		on	btn_resize	MouseUp 		do	resize_enCours = false		
+		on	btn_resize	MouseMove 	do 	resize_surbRoll ()
+		on	btn_resize	MouseLeave 	do	resize_enCours = false		
 		
-		
-		on btn_parametres pressed do ouvrir_parametres	sequence[  lbx_sequence.selection ]
-			
 			
 	)
 	rollout roll_divers  			"Divers"			(
@@ -308,7 +308,7 @@ category:"CP | Bâtiment	| Composant"
 -- 		--- rester dans les bonnes limites ------
 -- 		if align_prof > profondeur do align_prof = profondeur
 		
-		
+		/* 
 		--- longueur de l'ensemble ----------
 		local longueur_est_contrainte = true
 		local longueur_contrainte = 0
@@ -322,17 +322,14 @@ category:"CP | Bâtiment	| Composant"
 			longueur_contrainte += cadre_largeur
 			longueur = longueur_contrainte
 		)
-		
+		 */
 	)
 	
 	
 	--------- divers ------------------
 	fn est_porte		_compo	=	classof	_compo	==	cp_menuis_porte
 	fn est_fixe			_compo	=	classof	_compo	==	cp_menuis_fixe
-	fn est_unPlein		_compo	=	_compo.category	as string ==	"CP | Facade	| Pleins"
-	
-	
-	
+	fn est_unPlein		_compo	=	classof	_compo	==	cp_facadeCompo_mur	--	_compo.category	as string ==	"CP | Facade	| Pleins"
 	fn est_copiable			=	 roll_parametres.lbx_sequence.selection != 0
 	fn est_instance	id:		= (
 		if id == unsupplied do id = roll_parametres.lbx_sequence.selection
@@ -342,54 +339,16 @@ category:"CP | Bâtiment	| Composant"
 		result
 	)
 	
-	
 	--------------- comopsants ----------------------------------
 	fn actualiser_composants	= with redraw off (
-		/* 
-		
-		--- maj des composants de la sequence -------------
-		local longueur_passage 	= longueur 	- 2*cadre_largeur
-		local nbr_meneaux			= sequence.count - 1
-		
-		local longueur_total_meneaux	=	( sequence.count - 1 )* compo_meneau.longueur 
-		
-		*/
 		
 		
-		local longueur_definies_total 	= 0
-		local nbr_elem_definies 		= 0
-		for i = 1 to sequence.count do (
-			if sequence_elem_long[i] != 0 do (
-				longueur_definies_total+= sequence_elem_long[i]
-				nbr_elem_definies += 1
-			)
-		)
 		
-		local longueur_composant	= ( longueur -   longueur_definies_total  ) / ( sequence.count - nbr_elem_definies )
+		sequence_tmp 				= 	#()
 		
-		
-		sequence_tmp 				= #()
-		for i = 1 to sequence.count do (
+		--- Si notre sequence est vide ------------------------------------
+		if sequence.count == 0 then (
 			
-			local compo_temp 				= 	copy sequence[i]
-	
-			if sequence_elem_long[i] != 0 then	compo_temp.longueur 	= 	sequence_elem_long[i]
-													else		compo_temp.longueur	=	longueur_composant
-			
-			compo_temp.hauteur			=	hauteur
-			compo_temp.low_poly			=	low_poly
-			
-			append sequence_tmp		compo_temp
-			
-			if est_unPlein	compo_temp do (
-				compo_temp.matId	=	matId_mur
-				compo_temp.profondeur		=	profondeur
-			)
-		)
-		
-		
-		--- Si notre sequence est vide
-		if sequence.count == 0 do (
 			local compo_temp = createInstance cp_facadeCompo_mur
 			
 			append	sequence_tmp  	compo_temp
@@ -399,10 +358,94 @@ category:"CP | Bâtiment	| Composant"
 			compo_temp.low_poly			=	low_poly
 			compo_temp.longueur			=	longueur
 			compo_temp.matId	=	matId_mur
-		)
+			
+			
+		)  else (	----- on construit la sequence ---------------------------------------
 		
 		
-	)  --- fin composants_actualiser  ------------------
+			/* --- analyse initiale ------------------
+			local longueur_definies_total 		= 0
+			local nbr_elem_definies 			= 0
+			for i = 1 to sequence.count do 
+				if sequence[i].longueur != 0 do (
+					longueur_definies_total+= sequence[i].longueur
+					nbr_elem_definies += 1
+				) */
+-- 			local longueur_composant	= ( longueur - longueur_definies_total  ) / ( sequence.count - nbr_elem_definies )
+			
+			
+			local longueur_composant	
+			case repartition of (
+				1: 	(	-----	Répartir -------------------		
+					local longueur_definies_total 		= 0
+					local nbr_elem_definies 			= 0
+					for i = 1 to sequence.count do (
+						if sequence[i].longueur != 0 do (
+							longueur_definies_total+= sequence[i].longueur
+							nbr_elem_definies += 1
+						)			
+					)
+					longueur_composant		=  ( longueur - longueur_definies_total  )  	/ (  2*sequence.count - nbr_elem_definies  + 1   )
+				)
+				2: 	(	-----	Répéter -------------------			
+					local longueur_definies_total 		= 0
+					local nbr_elem_definies 			= 0
+					for i = 1 to sequence.count do (
+						if sequence[i].longueur != 0 do (
+							longueur_definies_total += sequence[i].longueur * nbr_repetitions
+							nbr_elem_definies += 1 * nbr_repetitions
+						)			
+					)		
+					longueur_composant		=  ( longueur - longueur_definies_total  )  	/ ( /*  */ ( nbr_repetitions *2*sequence.count - nbr_elem_definies)    + 1  )
+				)
+				
+			) ---- fin case repart --------------------------
+			
+			
+			
+			
+			--- le premier mur ----------------	
+			local compo_murRepart				=	createInstance cp_facadeCompo_mur
+			compo_murRepart.longueur		=	longueur_composant 
+			compo_murRepart.hauteur			=	hauteur 
+			compo_murRepart.profondeur		=	profondeur
+			compo_murRepart.low_poly		=	low_poly
+			compo_murRepart.matId			=	matId_mur
+			
+			append sequence_tmp		compo_murRepart
+			
+			
+			
+			--- on creer la sequence à construire ----------------------
+			local repet_temp = if repartition == 2 then nbr_repetitions else 1
+			for repet = 1 to repet_temp do (
+				for i = 1 to sequence.count do (
+					
+					--- le composant ----------------
+					local compo_temp 				= 	copy sequence[i]
+			
+					if compo_temp.longueur == 0 do
+						compo_temp.longueur 	= 		longueur_composant
+					
+					compo_temp.hauteur			=	hauteur
+					compo_temp.low_poly			=	low_poly
+					
+					append sequence_tmp		compo_temp
+					
+					
+					
+					case repartition of (
+						1: 	append sequence_tmp		compo_murRepart
+						2: 	append sequence_tmp		compo_murRepart
+					)
+					
+				) --- fin for sequence ------------------
+			)
+			
+		) ---- fin creation de la sequence ---------------------------
+		
+		
+	)  --- fin composants_actualiser  -----------------------------------------------------------------------
 	
 	fn actualiser = (
 		corriger_parametres ()		
@@ -436,13 +479,11 @@ category:"CP | Bâtiment	| Composant"
 		
 		local nvl_element 		= createinstance	_element_plug
 		
-		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	(
+		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	
 			insertItem nvl_element 					sequence 					id_elem_insert
-			insertItem nvl_element.longueur 		sequence_elem_long 	id_elem_insert
-		) else (		
+		else		
 			append sequence						nvl_element
-			append sequence_elem_long		nvl_element.longueur
-		)		
+		
 		---- actualisations -----------
 		actualiser ()
 		
@@ -455,25 +496,21 @@ category:"CP | Bâtiment	| Composant"
 	fn retirer_element		_id	 	=(
 		
 		deleteItem sequence 				_id
-		deleteItem sequence_elem_long 	_id
 		
 		---- actualisations -----------
 		actualiser ()
 		
--- 		if roll_parametres.open do	(
--- 			roll_parametres.lbx_sequence.selection -= 1 
--- 			roll_parametres.actualiser ()	
--- 		)
+		if roll_parametres.open do	(
+			roll_parametres.lbx_sequence.selection -= 1 
+			roll_parametres.actualiser ()	
+		)
 		
 	)
 	fn monter_element 		_id 		=(
 		
 		local elem_temp 		= sequence[ _id ]
-		local meneau_temp 	= sequence_elem_long[ _id ]
 		deleteItem 	sequence 				_id
-		deleteItem sequence_elem_long 	_id
 		insertItem 	elem_temp			sequence  					(	_id - 1 )
-		insertItem 	meneau_temp		sequence_elem_long  	(	_id - 1 )
 		
 		---- actualisations -----------
 		actualiser ()
@@ -486,17 +523,11 @@ category:"CP | Bâtiment	| Composant"
 	fn	descendre_element 	_id 		=(
 		
 		local elem_temp 		= sequence[ _id ]
-		local meneau_temp 	= sequence_elem_long[ _id ]
 		deleteItem 	sequence 				_id
-		deleteItem sequence_elem_long 	_id
-		if _id == sequence.count then (
+		if _id == sequence.count then 
 			append sequence 				elem_temp
-			append sequence_elem_long	meneau_temp
-		) else (
+		else 
 			insertItem 	elem_temp		sequence  					(	_id + 1 )
-			insertItem 	meneau_temp		sequence_elem_long  	(	_id + 1 )
-		)
-		
 		
 		---- actualisations -----------
 		actualiser ()
@@ -519,15 +550,12 @@ category:"CP | Bâtiment	| Composant"
 		local	id_elem_insert		= 	id_elem_select + 1
 		
 		local nvl_element 			= copy sequence[ id_elem_select ]
-		local nvl_element_long 	= copy sequence_elem_long[ id_elem_select ]
 		
-		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	(
+		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	
 			insertItem nvl_element 		sequence 		id_elem_insert
-			insertItem nvl_element_long 		sequence_elem_long 	id_elem_insert
-		) else (		
+		else
 			append sequence		nvl_element
-			append sequence_elem_long	nvl_element_long
-		)		
+		
 		---- actualisations -----------
 		actualiser ()
 		
@@ -543,15 +571,12 @@ category:"CP | Bâtiment	| Composant"
 		local	id_elem_insert		= 	id_elem_select + 1
 		
 		local nvl_element 			=  sequence[ id_elem_select ]
-		local nvl_element_long 	=  sequence_elem_long[ id_elem_select ]
 		
-		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	(
+		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	
 			insertItem nvl_element 		sequence 		id_elem_insert
-			insertItem nvl_element_long 		sequence_elem_long 	id_elem_insert
-		) else (		
+		else
 			append sequence		nvl_element
-			append sequence_elem_long	nvl_element_long
-		)		
+		
 		---- actualisations -----------
 		actualiser ()
 		
@@ -560,7 +585,6 @@ category:"CP | Bâtiment	| Composant"
 			roll_parametres.actualiser ()	
 		)
 	)
-	
 	fn rendreUnique_element	 id_elem_select:		=(
 		
 		if id_elem_select 	== unsupplied do
@@ -589,7 +613,7 @@ category:"CP | Bâtiment	| Composant"
 		---- actualisations -----------
 		actualiser ()
 	)
-	fn retirer_element_menuis		_id	 	=(
+	fn retirer_element_menuis			_id	 			=(
 		
 		local 	id_elem 		= 	roll_parametres.lbx_sequence.selection
 		sequence[ id_elem ].retirer_element_menuis		_id
@@ -598,7 +622,7 @@ category:"CP | Bâtiment	| Composant"
 		actualiser ()
 
 	)
-	fn monter_element_menuis 		_id 		=(
+	fn monter_element_menuis 		_id 				=(
 		
 		local 	id_elem 		= 	roll_parametres.lbx_sequence.selection
 		sequence[ id_elem ].monter_element_menuis		_id
@@ -607,7 +631,7 @@ category:"CP | Bâtiment	| Composant"
 		actualiser ()
 
 	)
-	fn	descendre_element_menuis 	_id 		=(
+	fn	descendre_element_menuis 	_id 				=(
 		
 		local 	id_elem 		= 	roll_parametres.lbx_sequence.selection
 		sequence[ id_elem ].descendre_element_menuis		_id
@@ -682,7 +706,7 @@ category:"CP | Bâtiment	| Composant"
 			
 			---- le composant -----
 			local composant 		= sequence_tmp [i]
-			local align_y =if est_unPlein	composant then 0 else profondeur - composant.profondeur
+			local align_y =	0	--if est_unPlein	composant then 0 else profondeur - composant.profondeur
 			
 			mgr_mesh.attacher		mesh		composant	transf:( depos_composant + [0,align_y,0] )
 			
