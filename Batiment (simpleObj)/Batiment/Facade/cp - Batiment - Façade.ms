@@ -17,7 +17,7 @@ category:"CP | Bâtiment	| Composant"
 	
 	---- pré déclaration -----------
 	local corriger_parametres , 	actualiser_composants 
-	local	ajouter_element, retirer_element, monter_element, descendre_element, renommer_element, ouvrir_parametres
+	local	ajouter_element_facade, retirer_element_facade, monter_element_facade, descendre_element_facade, renommer_element_facade, ouvrir_parametres
 	local est_instance
 	
 	local sequence_tmp
@@ -59,6 +59,26 @@ category:"CP | Bâtiment	| Composant"
 	)	-----	fin parametres --------------------
 	
 	
+	parameters params_contraintes rollout:roll_contraintes	(
+		
+		contrainte_etages_min_use		type:#boolean 		ui:chk_contrainte_etages_min			default:false
+		contrainte_etages_min				type:#integer			ui:spn_contrainte_etages_min			default:0
+		contrainte_etages_max_use		type:#boolean 		ui:chk_contrainte_etages_max			default:false
+		contrainte_etages_max				type:#integer			ui:spn_contrainte_etages_max			default:0
+		
+		contrainte_longueur_min_use		type:#boolean 		ui:chk_contrainte_longueur_min			default:false
+		contrainte_longueur_min			type:#integer			ui:spn_contrainte_longueur_min			default:0
+		contrainte_longueur_max_use		type:#boolean 		ui:chk_contrainte_longueur_max			default:false
+		contrainte_longueur_max			type:#integer			ui:spn_contrainte_longueur_max			default:0
+		
+		contrainte_mur_nord			type:#boolean 		ui:ckb_contrainte_mur_nord			default:false
+		contrainte_mur_sud			type:#boolean 		ui:ckb_contrainte_mur_sud			default:false
+		contrainte_mur_est			type:#boolean 		ui:ckb_contrainte_mur_est				default:false
+		contrainte_mur_ouest		type:#boolean 		ui:ckb_contrainte_mur_ouest			default:false
+		
+		contrainte_murs				type:#integer			ui:ddl_contrainte_murs					default:0
+		
+	)
 	
 	
 	
@@ -130,7 +150,7 @@ category:"CP | Bâtiment	| Composant"
 				menu_txt += "on		btn_" + menuis_plug.name as string + " picked do $.ajouter_element " + menuis_plug as string+ "\n" 
 			 */
 			for facade_plug in facades_plugins do
-				menu_txt += "on		btn_" + facade_plug.name as string + " picked do $.ajouter_element " + facade_plug as string+ "\n" 
+				menu_txt += "on		btn_" + facade_plug.name as string + " picked do $.ajouter_element_facade " + facade_plug as string+ "\n" 
 			
 			
 			--- fin du rc menu ------------
@@ -152,9 +172,9 @@ category:"CP | Bâtiment	| Composant"
 				menuItem	btn_instancier	 		"Instancier" 		enabled:($.est_copiable	())
 				menuItem	btn_rendreUnique	 	"Rendre unique" 	enabled:($.est_instance	())
 				
-				on		btn_dupliquer 		picked 	do $.dupliquer_element ()
-				on		btn_instancier 	picked 	do $.instancier_element ()
-				on		btn_rendreUnique picked 	do $.rendreUnique_element ()
+				on		btn_dupliquer 		picked 	do $.dupliquer_element_facade ()
+				on		btn_instancier 	picked 	do $.instancier_element_facade ()
+				on		btn_rendreUnique picked 	do $.rendreUnique_element_facade ()
 			)
 			
 			popUpMenu	RCmenu_edition
@@ -166,7 +186,7 @@ category:"CP | Bâtiment	| Composant"
 		
 		--- UI ----------------------------------------------------------------------------------------------
 		group "Répartition" (
-			dropDownList	ddl_repartition		""	 items:#("Répartir", "Répéter", "Centrer", "Etirer", "Aligner à gauche", "Aligner à droite")
+			dropDownList	ddl_repartition		""	 items:#("Répartir",  "Répéter"/*,   "Etirer" , "Centrer","Aligner à gauche", "Aligner à droite" */)
 			spinner spn_repetitions 		"Répétitions" 			type:#integer range:[1,1000,1]
 		)
 		
@@ -179,14 +199,14 @@ category:"CP | Bâtiment	| Composant"
 		
 		subrollout	subroll_param		""	height:300
 		
-		dotNetControl btn_resize 	"System.Windows.Forms.Button" 		align:#left width:150 height:10
+		dotNetControl btn_resize 	"System.Windows.Forms.Button" 		align:#left /* width:150 */ height:10
 		
 		
 		
 		
 		fn actualiser =(
 			
-			---- repartition -------
+-- 			---- repartition -------
 			spn_repetitions.enabled = ddl_repartition.selection == 2
 			
 			---- l'affichage de la sequence -------------------
@@ -265,9 +285,9 @@ category:"CP | Bâtiment	| Composant"
 			
 		)
 		on btn_ajouter 		pressed 			do 	creer_RCM_ajouter ()
-		on btn_retirer 		pressed 			do	retirer_element 		lbx_sequence.selection 
-		on btn_monter 		pressed 			do	monter_element 		lbx_sequence.selection 
-		on btn_descendre 	pressed		 	do	descendre_element 	lbx_sequence.selection 
+		on btn_retirer 		pressed 			do	retirer_element_facade 		lbx_sequence.selection 
+		on btn_monter 		pressed 			do	monter_element_facade 		lbx_sequence.selection 
+		on btn_descendre 	pressed		 	do	descendre_element_facade 	lbx_sequence.selection 
 		on spn_elem_long 	changed val	do	(
 			sequence_elem_long[  lbx_sequence.selection ] = val
 			redrawviews ()
@@ -287,6 +307,32 @@ category:"CP | Bâtiment	| Composant"
 		
 			
 	)
+	rollout roll_contraintes "Contraintes"
+	(
+		group "Etages" (
+			checkbox 	chk_contrainte_etages_min	"Minimum"   			height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left		across:2
+			spinner 	spn_contrainte_etages_min	"" 				width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#right
+			checkbox 	chk_contrainte_etages_max 	"Maximum"  			height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left	across:2
+			spinner 	spn_contrainte_etages_max 	""  			width:64 height:16 range:[0,1e+13,0] type:#integer scale:1 align:#right
+		)
+		group "Longeur" (		
+			checkbox 	chk_contrainte_longueur_min 	"Minimum" 				height:16 enabled:true highlightColor:(color 255 255 0) toolTip:"Etage minimum." align:#left	across:2
+			spinner 	spn_contrainte_longueur_min 	""  			width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#right
+			checkbox 	chk_contrainte_longueur_max 	"Maximum"  			height:16 highlightColor:(color 255 255 0) toolTip:"Etage maximum." align:#left	across:2
+			spinner 	spn_contrainte_longueur_max		"" 				width:64 height:16 range:[0,1e+13,0] type:#worldunits scale:1 align:#right
+		)
+		group "Murs" (
+			checkbutton ckb_contrainte_mur_nord 		"Nord"  	width:40 height:16 enabled:true highlightColor:(color 180 180 0) toolTip:"Etage minimum." align:#left	across:4
+			checkbutton ckb_contrainte_mur_sud 		"Sud"  	width:40 height:16 enabled:true highlightColor:(color 180 180 0) toolTip:"Etage minimum." align:#left
+			checkbutton ckb_contrainte_mur_est 		"Est" 		width:40 height:16 enabled:true highlightColor:(color 180 180 0) toolTip:"Etage minimum." align:#left
+			checkbutton ckb_contrainte_mur_ouest 		"Ouest"	width:40 height:16 enabled:true highlightColor:(color 180 180 0) toolTip:"Etage minimum." align:#left
+			
+			dropdownList ddl_contrainte_murs ""  height:21 selection:3 align:#left
+		)
+		
+	) --- fin rollout facades-------------------------
+	
+	
 	rollout roll_divers  			"Divers"			(
 		group "Qualité" (
 			checkbox	shk_lowPoly		"Low poly" 		
@@ -377,6 +423,17 @@ category:"CP | Bâtiment	| Composant"
 			local longueur_composant	
 			case repartition of (
 				1: 	(	-----	Répartir -------------------		
+					/* 
+					local longueur_definies_total 		= 0
+					local nbr_elem_definies 			= 0
+					for i = 1 to sequence.count do (
+						if sequence[i].longueur != 0 do (
+							longueur_definies_total += sequence[i].longueur * nbr_repetitions
+							nbr_elem_definies += 1 * nbr_repetitions
+						)			
+					)		
+					longueur_composant		=  ( longueur - longueur_definies_total  )  	/ ( ( nbr_repetitions *2*sequence.count - nbr_elem_definies)    + 1  )
+					*/
 					local longueur_definies_total 		= 0
 					local nbr_elem_definies 			= 0
 					for i = 1 to sequence.count do (
@@ -386,8 +443,9 @@ category:"CP | Bâtiment	| Composant"
 						)			
 					)
 					longueur_composant		=  ( longueur - longueur_definies_total  )  	/ (  2*sequence.count - nbr_elem_definies  + 1   )
+					
 				)
-				2: 	(	-----	Répéter -------------------			
+				2: 	(	-----	Repeter -------------------			
 					local longueur_definies_total 		= 0
 					local nbr_elem_definies 			= 0
 					for i = 1 to sequence.count do (
@@ -472,7 +530,7 @@ category:"CP | Bâtiment	| Composant"
 	)
 	
 	--------------- sequence ----------------------------------
-	fn ajouter_element		_element_plug	 =(
+	fn ajouter_element_facade		_element_plug	 =(
 		
 		local	id_elem_select 	= 	roll_parametres.lbx_sequence.selection
 		local	id_elem_insert		= 	id_elem_select + 1
@@ -493,7 +551,7 @@ category:"CP | Bâtiment	| Composant"
 		)
 		
 	)
-	fn retirer_element		_id	 	=(
+	fn retirer_element_facade		_id	 	=(
 		
 		deleteItem sequence 				_id
 		
@@ -506,7 +564,7 @@ category:"CP | Bâtiment	| Composant"
 		)
 		
 	)
-	fn monter_element 		_id 		=(
+	fn monter_element_facade 		_id 		=(
 		
 		local elem_temp 		= sequence[ _id ]
 		deleteItem 	sequence 				_id
@@ -520,7 +578,7 @@ category:"CP | Bâtiment	| Composant"
 			roll_parametres.actualiser ()	
 		)
 	)
-	fn	descendre_element 	_id 		=(
+	fn	descendre_element_facade 	_id 		=(
 		
 		local elem_temp 		= sequence[ _id ]
 		deleteItem 	sequence 				_id
@@ -537,13 +595,13 @@ category:"CP | Bâtiment	| Composant"
 			roll_parametres.actualiser ()	
 		)
 	)
-	fn renommer_element	_id	_nv_nom =(
+	fn renommer_element_facade	_id	_nv_nom =(
 		sequence[ _id ].nom = _nv_nom
 		if roll_parametres.open do	roll_parametres.actualiser ()
 	)
 	
 	
-	fn dupliquer_element 	id_elem_select:		=(
+	fn dupliquer_element_facade 	id_elem_select:		=(
 		
 		if id_elem_select 	== unsupplied do
 			id_elem_select 		= 	roll_parametres.lbx_sequence.selection
@@ -564,7 +622,7 @@ category:"CP | Bâtiment	| Composant"
 			roll_parametres.actualiser ()	
 		)
 	)
-	fn instancier_element 	id_elem_select:		=(
+	fn instancier_element_facade 	id_elem_select:		=(
 
 		if id_elem_select 	== unsupplied do
 			id_elem_select 		= 	roll_parametres.lbx_sequence.selection
@@ -585,7 +643,7 @@ category:"CP | Bâtiment	| Composant"
 			roll_parametres.actualiser ()	
 		)
 	)
-	fn rendreUnique_element	 id_elem_select:		=(
+	fn rendreUnique_element_facade	 id_elem_select:		=(
 		
 		if id_elem_select 	== unsupplied do
 			id_elem_select 		= 	roll_parametres.lbx_sequence.selection
