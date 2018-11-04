@@ -4,7 +4,13 @@
 
 include	 "$userScripts\\cp-Urba\\modules\\Commun\\cp - mgr - Shapes.ms" 
 	
-	
+---- fonction pour affichage viewport -----------
+global 	urba_fn_afficheur_longueurs
+
+
+
+
+
 plugin simpleObject		cp_batiment
 name:"Bâtiment"
 classID:#(0x3ae67906, 0x740a62d7)
@@ -24,11 +30,11 @@ category:"CP | Urba temp"
 	
 	
 	---- pré déclaration -----------
-	local basculer_editeurFacade, ajouter_facade, retirer_facade, monter_facade, descendre_facade, actualiser_shape
+	local basculer_editeurFacade, ajouter_facade, retirer_facade, monter_facade, descendre_facade, renommer_facade, actualiser_shape
+	local afficher_longueurs
 	
-	
-	
-	
+	----- les points de la surface------------------------
+	local pts_surface
 	
 	
 	---- managers ----------
@@ -37,30 +43,56 @@ category:"CP | Urba temp"
 	
 	
 	
-	
-	
-	parameters param_etages rollout:roll_etages
-	(
+	parameters param_etages rollout:roll_etages	(
 		
 		------- Etages			------------------
-		etages_nbre					type: #integer				default:1			ui:spn_etages_nbres	 		animatable:false		invisibleInTV:true
-		etages_hauteur_global		type: #worldUnits 		default:250.	 	ui:spn_etages_hauteur	 	animatable:false		invisibleInTV:true
+		etages_nbre					type: #integer				default:1			ui:spn_etages_nbres	 				animatable:false		invisibleInTV:true
+		etages_hauteur_global		type: #worldUnits 		default:250.	 	ui:spn_etages_hauteur	 			animatable:false		invisibleInTV:true
 		
+		dalle_epaisseur				type: #worldUnits 		default:20.	 		ui:spn_dalle_epaisseur	 			animatable:false		invisibleInTV:true
+		soubassement_hauteur		type: #worldUnits 		default:100.	 	ui:spn_soubassement_hauteur	animatable:false		invisibleInTV:true
 	)
 	
-	parameters param_surface rollout:roll_surface
-	(
+	parameters param_surface rollout:roll_surface	(
 		------- Surface		------------------
 		surface_node					type:#node 			 	ui:btn_pick_perimetre		animatable:false		invisibleInTV:true
 		
 	)
 	
 	
-	parameters param_facades rollout:roll_facades
-	(
+	parameters param_facades rollout:roll_facades	(
 		facades					type:#maxObjectTab	tabSizeVariable:true
 		
+		affichage_longueurs		type:#boolean 		ui:ckb_afficher_longueur				default:false
 	)
+	
+	parameters params_divers rollout:roll_divers	(
+		
+		------ options --------------
+		low_poly							type:#boolean 		ui:shk_lowPoly				default:false
+		
+		------ mat ID ----------
+		matId_menuis					type:#integer 			ui:spn_matId_menuis	default:1
+		matId_vitrage					type:#integer 			ui:spn_matId_vitrage	default:2
+		matId_huisserie				type:#integer 			ui:spn_matId_huisserie	default:3
+		matId_mur						type:#integer 			ui:spn_matId_mur		default:4
+		
+	)	-----	fin parametres --------------------
+	
+	parameters params_hasard rollout:roll_hasard	(
+		hasard_seed					type:#integer 			ui:spn_hasard_seed		default:123456
+		
+		fen_proba_ouv				type:#float 			ui:spn_fen_proba_ouv		default:0.
+		fen_ouvMax					type:#float 			ui:spn_fen_ouvMax			default:0.
+	)
+	
+	parameters param_toiture  rollout:roll_toiture (		
+		toiture_type					type:#integer 			ui:ddl_toiture_type		default:1
+	)
+	
+	
+	
+	
 	
 	
 	
@@ -116,16 +148,20 @@ category:"CP | Urba temp"
 			checkbox 	chk_projeter 	"Projeter"  
 		)
 		
-		on btn_pick_perimetre picked _node do 	actualiser_shape ()
+-- 		on btn_pick_perimetre picked _node do 	actualiser_shape ()
 		
 	)	---- fin rollout Surface ---------------------------
 	
 	
-	rollout roll_etages "Etages"
-	(
+	rollout roll_etages "Etages"	(
 		group "Général" (
 			spinner spn_etages_nbres 		"Nombre" 			type:#integer 				range:[0,1000,1]
 			spinner spn_etages_hauteur		"Hauteur" 			type:#worldUnits 		range:[0,1e20,0]
+			
+			spinner spn_dalle_epaisseur				"Epaisseur dalle" 			type:#worldUnits 		range:[0,1e20,0]
+			spinner spn_soubassement_hauteur	"Soubassement" 			type:#worldUnits 		range:[0,1e20,0]
+			
+	
 		)
 		group "Etages spécifiques" (	
 			
@@ -143,8 +179,7 @@ category:"CP | Urba temp"
 		)
 	)	---- fin rollout etages ---------------------------
 	
-	rollout roll_facades "Facades"
-	(
+	rollout roll_facades "Facades"	(
 		
 		button 		btn_ajouter 		"+"			across:4 --	align:#left
 		button 		btn_retirer	 		"-"			
@@ -152,8 +187,14 @@ category:"CP | Urba temp"
 		button 		btn_descendre	"\\/"	--align:#right
 		
 		listBox		lbx_facades		""	height:5
+		group "afficher" (
+		checkButton	ckb_afficher_longueur	"Longueurs"
+		)
+		editText 	edTxt_nom		 	"" 	
 		
--- 		editText 	edTxt_nom		 	"Nom:" 	
+		
+		on ckb_afficher_longueur changed state do 
+			afficher_longueurs state
 		/* 
 		group "Contraintes" (
 			
@@ -185,6 +226,7 @@ category:"CP | Urba temp"
 		
 		checkbutton		btn_editer_facade		"Editer"	width:160 height:25
 		
+		subrollout	subroll_contraintes		""	height:250	
 		
 		
 		fn actualiser =(
@@ -198,23 +240,30 @@ category:"CP | Urba temp"
 				append elements_noms	( i as string + " |  " + elem_nom )
 			)	
 			lbx_facades.items 		=  for elem_nom in elements_noms collect elem_nom
-			/* 
+				
+			
+-- 			addSubRollout 	roll_editeur_facade.subroll_contraintes		facades[ id_facade_select ].roll_contraintes
+			
 			--- les parametres de l'element (le subrollout)  ---------------			
 			--- on retire les vieux rollouts --------
-			if subroll_param.rollouts.count > 0 do 
-				for subRoll in subroll_param.rollouts  do
-					removeSubRollout subroll_param	subRoll
-				 
+			if subroll_contraintes.rollouts.count > 0 do 
+				for subRoll in subroll_contraintes.rollouts  do
+					removeSubRollout subroll_contraintes	subRoll
+				
+			local composant_actif 	
 			---- on ajoute le nouveau -----------------
 			if lbx_facades.selection > 0 then (				
-				local composant_actif 		=  facades[  lbx_facades.selection ]
-				addSubRollout 	subroll_param		composant_actif.roll_parametres
+				composant_actif 		=  facades[  lbx_facades.selection ]
+				addSubRollout 	subroll_contraintes		composant_actif.roll_contraintes
 			)
-			 */
+			
 			---- les boutons ------
 			btn_retirer.enabled 				= lbx_facades.selection != 0
 			btn_monter.enabled 				= lbx_facades.selection > 1
 			btn_descendre.enabled 		= lbx_facades.selection < facades.count and lbx_facades.selection != 0
+			
+			edTxt_nom.enabled 				= lbx_facades.selection != 0
+			edTxt_nom.text	 				= if lbx_facades.selection != 0	then	composant_actif.nom	else ""
 			
 			btn_editer_facade.enabled 	= lbx_facades.selection != 0
 			
@@ -238,19 +287,18 @@ category:"CP | Urba temp"
 		on btn_monter 		pressed 			do	monter_facade		lbx_facades.selection 
 		on btn_descendre 	pressed		 	do	descendre_facade	lbx_facades.selection 
 	
-		
+		on edTxt_nom entered txt 			do 	renommer_facade		lbx_facades.selection 	txt
 		
 		on btn_editer_facade  changed state	do 	basculer_editeurFacade 	state
 		
 	) --- fin rollout facades-------------------------
 	
 	
-	rollout roll_toiture "Toiture"
-	(
+	rollout roll_toiture "Toiture"	(
 		
 		
-		dropDownList	ddl_toiture		""	 items:#("Sans",  "Terrasse",   "1 pan",   "2 pans",   "x pans" )
-		subrollout	subroll_param		""	height:150
+		dropDownList	ddl_toiture_type		""	 items:#("Sans",  "Terrasse",   "1 pan",   "2 pans",   "x pans" )
+		subrollout			subroll_param			""	height:150
 		
 		dotNetControl btn_resize 	"System.Windows.Forms.Button" 		align:#left /* width:150 */ height:10
 		
@@ -305,6 +353,31 @@ category:"CP | Urba temp"
 	) ----- fin rollout toiture -----------------------
 	
 	
+	rollout roll_divers  "Divers"	(
+		 group "Qualité" (
+			checkbox	shk_lowPoly			"Low poly" 		
+		) 
+		group "Material ID" (
+			spinner spn_matId_menuis 		"Menuiseries" 			type:#integer range:[1,1000,1]
+			spinner spn_matId_vitrage 		"Vitrage" 				type:#integer range:[1,1000,1]
+			spinner spn_matId_huisserie 	"Huisserie" 				type:#integer range:[1,1000,1]
+			spinner spn_matId_mur 			"Mur" 					type:#integer range:[1,1000,1]
+		)
+	) 	---- fin rollout	-----------------------
+	
+	
+	rollout roll_hasard  "Hasard"	(
+		
+		spinner spn_hasard_seed 			"Seed" 					type:#integer		 range:[0,1e20,0]
+		
+		group "Fenetres" (
+			spinner spn_fen_proba_ouv 		"Proba (%)" 			type:#float			 range:[0,100,0]
+			spinner spn_fen_ouvMax 			"Max (°)" 		type:#float			 range:[0,180,0]
+		)
+	
+	)
+	
+	
 	
 	--- rollout a propos -------------------------
 	include	 "$userScripts\\cp-Urba\\modules\\Commun\\Urba - rollout - A propos.ms" 
@@ -318,26 +391,118 @@ category:"CP | Urba temp"
 	
 	
 	
-	
+	-------------- divers -------------------------
 	fn actualiser_shape =(
-		if surface_node != undefined do (
-			local this_node = (refs.dependents this)[1]
-			debug "this_node" var:this_node
+		if surface_node != undefined then (
 			
+			---- on place le batiment sur le shape ----------
+			local this_node = (refs.dependents this)[1]
 			this_node.transform	=	surface_node.transform
+			
+			----- on scanne le shape ---------
+			pts_surface = mgr_shp.scanner_points	surface_node
+			
+		) else (
+			pts_surface =#()
 		)
-	)
-	
-	
+	)--- fin actualisr shape ---------------
+
 	fn actualiser =(
+-- 		corriger_parametres ()		
+-- 		actualiser_composants()		
+		if roll_facades.open do	roll_facades.actualiser ()		
+		redrawViews ()
 	)
 	
-	
-	
+	--------- viewport --------------------------------------------------------------------------	
+	fn fn_afficheur_longueurs =(
+		
+		gw.setTransform (matrix3 1)
+		
+		if selection.count == 1 and classof $ == cp_batiment do (
+			local nd	 = $
+			
+-- 			local bat 				= nd.core.get_bat_edition ()
+-- 			
+-- 			if bat != undefined do (
+-- 			local fcd				= nd.core.get_facade_enEdition 	()
+			
+			local surface_pts 	= 	nd.pts_surface
+			
+				
+			local ptID = 0 
+			while ptID <  surface_pts.count do (
+				ptID += 1
+				
+				local ptID_suivant = ptID + 1
+				if ptID_suivant > surface_pts.count do ptID_suivant = 1
+					
+				local vec_sousBassmt		=	[0,0,1] * nd.soubassement_hauteur
+				local vec_dalle				=	[0,0,1] * nd.dalle_epaisseur
+				local vec_decallage			=	[0,0,1] * 50
+
+				local pt 						= surface_pts[ptID] 	*  nd.transform 
+				local pt_suivant 			= surface_pts[ptID_suivant] *  nd.transform  
+				local longueur_facade 	= ( (floor ( ( distance pt pt_suivant ) * 10 ) ) / 10 )
+				local txt_affichage 		= "  " + longueur_facade as string + " cm"
+				
+				local col_valid 			= yellow
+				local col_nonValid 	= [ 100, 100 , 100 ]
+				local col_divers 		= white
+				
+				---- les longueurs------
+				local color_affichage 	 = col_divers
+				local longueur_valid 	= true
+				if fcd != undefined do			(
+					
+					local lg_min_fcd = amax #(  fcd.params.longueurMin , fcd.params.get_longueur () )
+					
+					if longueur_facade < lg_min_fcd do
+						longueur_valid = false
+					
+					if fcd.params.longueurMax_use and longueur_facade >  fcd.params.longueurMax do
+						longueur_valid = false
+				)
+				if longueur_valid then (
+					color_affichage 	 = col_valid
+					gw.setColor	#line		col_valid
+				) else (
+					color_affichage 	 = col_nonValid
+					gw.setColor	#line		col_nonValid
+				)
+				
+				
+				local vec_affichage_lgs = 	vec_sousBassmt 	+ vec_dalle + vec_decallage
+				local pt_milieu_facade 	= ( (pt + pt_suivant) /2 )  - vec_affichage_lgs
+				gw.polyline #( pt - vec_affichage_lgs , pt_suivant - vec_affichage_lgs )	false
+-- 						gw.Marker 	( pt - vec_affichage_lgs  )		#xMarker   color:color_affichage
+				gw.Marker pt_milieu_facade		#smallCircle   color:color_affichage
+				gw.text 	( pt_milieu_facade	 /* - [0,0,100] */ )	txt_affichage  	color:color_affichage
+				
+			
+			)
+		
+		)
+		gw.updateScreen() 
+	)
+	fn afficher_longueurs 	state	=(
+		
+-- 		if urba_fn_afficheur_longueurs  == undefined do 	
+		
+		unregisterRedrawViewsCallback 					urba_fn_afficheur_longueurs
+		
+			urba_fn_afficheur_longueurs	= fn_afficheur_longueurs
+		
+		case state of (
+			true:		registerRedrawViewsCallback 		urba_fn_afficheur_longueurs 	
+			false:	unregisterRedrawViewsCallback 		urba_fn_afficheur_longueurs
+		)
+		redrawviews ()
+	)
 	
 	
 	--------------- facades ----------------------------------
-	fn basculer_editeurFacade 	_etat	=(
+	fn basculer_editeurFacade 	_etat			=(
 		
 		rollout roll_editeur_facade "Facade" (
 			
@@ -355,15 +520,15 @@ category:"CP | Urba temp"
 		
 		case _etat of (
 			true: (
-				createDialog		roll_editeur_facade					width:250	height:300	style:#( #style_titlebar , #style_border , #style_sysmenu, #style_resizing) 	lockWidth:true		--facades[ id_facade_select ]
-				addSubRollout 	roll_editeur_facade.subroll_param		facades[ id_facade_select ].roll_contraintes
+				createDialog		roll_editeur_facade					width:250	height:700	style:#( #style_titlebar , #style_border , #style_sysmenu, #style_resizing) 	lockWidth:true		--facades[ id_facade_select ]
+				
 				addSubRollout 	roll_editeur_facade.subroll_param		facades[ id_facade_select ].roll_parametres
 			)
 			false: destroyDialog  roll_editeur_facade
 		)
 		
 	)
-	fn ajouter_facade		 =(
+	fn ajouter_facade					 			=(
 		
 		local	id_elem_select 	= 	roll_facades.lbx_facades.selection
 		local	id_elem_insert		= 	id_elem_select + 1
@@ -384,7 +549,7 @@ category:"CP | Urba temp"
 		)
 		
 	)
-	fn retirer_facade		_id	 	=(
+	fn retirer_facade			_id	 				=(
 		
 		deleteItem facades 				_id
 		
@@ -397,7 +562,7 @@ category:"CP | Urba temp"
 		)
 		
 	)
-	fn monter_facade		_id 		=(
+	fn monter_facade		_id 					=(
 		
 		local elem_temp 		= facades[ _id ]
 		deleteItem 	facades 				_id
@@ -411,7 +576,7 @@ category:"CP | Urba temp"
 			roll_facades.actualiser ()	
 		)
 	)
-	fn	descendre_facade	_id 		=(
+	fn	descendre_facade	_id 					=(
 		
 		local elem_temp 		= facades[ _id ]
 		deleteItem 	facades 				_id
@@ -428,86 +593,74 @@ category:"CP | Urba temp"
 			roll_facades.actualiser ()	
 		)
 	)
-	
-	
-	
-	
-	
-	--------------- Passerelle Element Sequence  ----------------------------------
-	fn ajouter_element_facade		_element_plug	 =(
-		
-		local 	id_elem 		= 	roll_facades.lbx_facades.selection
-		facades[ id_elem ].ajouter_element_facade		_element_plug	
-		
+	fn renommer_facade 	_id 	_nv_nom	=(
+		facades[ _id ].nom = _nv_nom
 		---- actualisations -----------
 		actualiser ()
 	)
-	fn retirer_element_facade			_id	 			=(
-		
-		local 	id_elem 		= 	roll_facades.lbx_facades.selection
-		facades[ id_elem ].retirer_element_facade		_id
-		
-		---- actualisations -----------
-		actualiser ()
-
-	)
-	fn monter_element_facade 		_id 				=(
-		
-		local 	id_elem 		= 	roll_facades.lbx_facades.selection
-		facades[ id_elem ].monter_element_facade		_id
-		
-		---- actualisations -----------
-		actualiser ()
-
-	)
-	fn	descendre_element_facade 	_id 				=(
-		
-		local 	id_elem 		= 	roll_facades.lbx_facades.selection
-		facades[ id_elem ].descendre_element_facade		_id
-		
-		---- actualisations -----------
-		actualiser ()
-
-	)
-	
-	fn renommer_element_facade		_id	_nv_nom =(
-		
-		local 	id_elem 		= 	roll_facades.lbx_facades.selection
-		facades[ id_elem ].renommer_element_facade		_id	_nv_nom
-		
-		if roll_parametres.open do	roll_parametres.actualiser ()
-	)
 	
 	
-	fn dupliquer_element_facade 		id_elem_select:		=(
-		
-		local 	id_elem		= 	roll_facades.lbx_facades.selection
-		facades[ id_elem ].dupliquer_element_facade 	id_elem_select:id_elem_select
-		
-		---- actualisations -----------
-		actualiser ()
-
-	)
-	fn instancier_element_facade 	id_elem_select:		=(
-		
-		local 	id_elem		= 	roll_facades.lbx_facades.selection
-		facades[ id_elem ].instancier_element_facade 	id_elem_select:id_elem_select
-		
-		
-		---- actualisations -----------
-		actualiser ()
-
-	)
 	
-	fn rendreUnique_element_facade	 id_elem_select:		=(
+	
+	----- gestion des facades ----------------------------------------------------
+	fn get_facades_pourMur		_id_pt	 =(
 		
-		local 	id_elem		= 	roll_facades.lbx_facades.selection
-		facades[ id_elem ].rendreUnique_element_facade 	id_elem_select:id_elem_select
+		local result		= #()
 		
-		---- actualisations -----------
-		actualiser ()
-
-	)
+		local etages_aRemplir	= #{1..etages_nbre + 1}
+		
+		local pt 			= pts_surface[ _id_pt ]
+		local pt_suivant 	= if _id_pt != pts_surface.count then pts_surface[ _id_pt + 1 ] else pts_surface[ 1 ]
+		
+		---- Pour chaque etages------------------
+		for etage_courant = 0 to etages_nbre do (
+			local facade_trouve 			= false
+			local facade_pasDeResultat	=	facades.count == 0
+			local id_facade = 1
+			while not facade_trouve	and not facade_pasDeResultat  do (
+				
+				local facade_aTester = copy facades[ id_facade ]
+				
+				if facade_aTester.est_valide		pt		pt_suivant		etage_courant 		etages_nbre		then (
+				
+					facade_aTester.longueur			=	distance	pt	pt_suivant
+					facade_aTester.hauteur			=	etages_hauteur_global
+					facade_aTester.low_poly			=	low_poly
+					facade_aTester.fen_ouvMax		=	fen_ouvMax
+					facade_aTester.fen_proba_ouv	=	fen_proba_ouv
+					
+					facade_aTester.matId_menuis	=	matId_menuis
+					facade_aTester.matId_vitrage	=	matId_vitrage
+					facade_aTester.matId_huisserie	=	matId_huisserie
+					facade_aTester.matId_mur		=	matId_mur
+					
+					
+					append 	result		facade_aTester
+					facade_trouve = true
+					
+				)
+				
+				id_facade +=1
+				if id_facade > facades.count and not facade_trouve  do
+					facade_pasDeResultat = true
+				
+			)
+			
+			if facade_pasDeResultat do (
+				
+				local compo_planV		=	createInstance	cp_prim_planVertical
+				compo_planV.longueur	=	distance	pt	pt_suivant
+				compo_planV.hauteur	=	etages_hauteur_global
+				compo_planV.matId		=	matId_mur
+				
+				append 	result		compo_planV
+				
+			)
+		) 
+		
+		result
+		
+	) ---- fin choisir facade ------------
 	
 	
 	
@@ -516,51 +669,129 @@ category:"CP | Urba temp"
 	
 	
 	
-	on buildMesh do
-	(
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	------------  Construction du mesh --------------------------
+	on buildMesh do	(
+		
+		local chrono_debut = timestamp ()
+		
+		seed	hasard_seed
 		
 		--- on vide le mesh ----------
 		delete mesh
 		
-		
+		---- si on a une surface ----------------------
 		if surface_node != undefined do (
 			
-			local pts_surface = mgr_shp.scanner_points	surface_node
+			actualiser_shape ()		
 			
--- 			debug"pts_surface" var:pts_surface
 			
+			
+			
+			
+			
+			
+			
+			----- 1 ) les Facades ----------------------------------------------------------------------------------------------------------------------
+			---- Pour chaque segment de la surface ----------------------------
 			for i = 1 to pts_surface.count do (
+				
 				local pt 			= pts_surface[i]
-				local pt_suivant 	= if i != pts_surface.count then pts_surface[i + 1] else pts_surface[1] 
-				if facades.count >0 then (
-					local compo_facade		=	copy	facades[1]
-					compo_facade.longueur	=	distance	pt	pt_suivant
-					compo_facade.hauteur	=	etages_hauteur_global
+				local pt_suivant 	= if i != pts_surface.count then pts_surface[i + 1] else pts_surface[1]
+				
+				local angle_facade 		=	mgr_shp.get_angle_oriente 	(pt_suivant - pt )
+				local transf_facade 		= rotateZmatrix	angle_facade	*	transMatrix pt
 					
-					local angle_facade 		=	mgr_shp.get_angle_oriente 	(pt_suivant - pt )
-					local transf_facade 		= rotateZmatrix	angle_facade	*	transMatrix pt
+				
+				
+				
+				---- le soubassement --------
+				local compo_planV		=	createInstance	cp_prim_planVertical
+				compo_planV.longueur	=	distance	pt	pt_suivant
+				compo_planV.hauteur	=	soubassement_hauteur				
+				compo_planV.matId		=	matId_mur
+				mgr_mesh.attacher		mesh		compo_planV	transf:( transf_facade * transMatrix [0,0, -(soubassement_hauteur + dalle_epaisseur ) ] )
+
+				---- l'epaisseur de la dalle RdC --------
+				local compo_planV		=	createInstance	cp_prim_planVertical
+				compo_planV.longueur	=	distance	pt	pt_suivant
+				compo_planV.hauteur	=	dalle_epaisseur				
+				compo_planV.matId		=	matId_mur
+				mgr_mesh.attacher		mesh		compo_planV	transf:( transf_facade * transMatrix [0,0, - dalle_epaisseur  ] )
+
+				
+				
+				
+				
+				
+				----- les facades ---------------------
+				local depose_etage 				= 	transf_facade
+				local facades_murCourant		=	get_facades_pourMur	i	
+				for i = 1 to facades_murCourant.count do (
 					
-					mgr_mesh.attacher		mesh		compo_facade	transf:transf_facade
+					---- la facade ----
+					local fcd 				= facades_murCourant[i]
+					mgr_mesh.attacher		mesh		fcd	transf:depose_etage
 					
-				) else (
+					---- maj depose-----
+					depose_etage 		*=  transMatrix [0,0,  etages_hauteur_global ]
 					
+					
+					
+					
+					---- l'epaisseur de la dalle --------
 					local compo_planV		=	createInstance	cp_prim_planVertical
 					compo_planV.longueur	=	distance	pt	pt_suivant
-					compo_planV.hauteur	=	etages_hauteur_global
+					compo_planV.hauteur	=	dalle_epaisseur		
+					compo_planV.matId		=	matId_mur		
+					mgr_mesh.attacher		mesh		compo_planV	transf:depose_etage
 					
-					local angle_facade 		=	mgr_shp.get_angle_oriente 	(pt_suivant - pt )
-					local transf_facade 		= rotateZmatrix	angle_facade	*	transMatrix pt
+					---- maj depose-----
+					depose_etage *= transMatrix [0,0,dalle_epaisseur]
 					
-					mgr_mesh.attacher		mesh		compo_planV	transf:transf_facade
+				)				
+			)
+			
+			----- 2 ) la toiture ----------------------------------------------------------------------------------------------------------------------
+			case toiture_type of (
+				
+				1: (	-----Aucune-----------------------------
+					
+					local pts_toiture 	= deepcopy pts_surface
+					pts_toiture.z 		= (etages_nbre+1) * ( dalle_epaisseur + etages_hauteur_global  )
+					
+					local vert_debut 	=	 getNumVerts mesh + 1
+					local vert_fin 		=	getNumVerts mesh  + pts_toiture.count
+					
+					meshop.setNumVerts  mesh 	vert_fin
+					
+					for i = 1 to pts_toiture.count do (
+						local i_vert = vert_debut - 1 + i
+						setVert mesh 	i_vert 		pts_toiture[ i ]
+					)
+					local verts_toiture = #{vert_debut..vert_fin} as array
+					meshop.createPolygon  mesh verts_toiture 	smGroup:1 	matID:matId_mur
 					
 				)
-			)
+				
+			) ---- fin case toiture_type	-------
+			
 			
 			
 			
 		) --- fin if surface ---------------------
 		
-		
+		local chrono_fin = timeStamp()
+		debug  "build mesh " var:( ((chrono_fin - chrono_debut) / 1000.0) as string + "s.")
 		
 	) --------- fin on build mesh --------------------------
 	
@@ -576,8 +807,7 @@ category:"CP | Urba temp"
 	
 	
 	
-	tool create
-	(
+	tool create	(
 		local pt_debut
 		local pt_profondeur
 		local pt_hauteur

@@ -17,9 +17,17 @@ category:"CP | Facade	| Composant"
 	
 	---- pré déclaration -----------
 	local corriger_parametres , 	actualiser_composants , ouvrir_roll_sequence
-	local	ajouter_element, retirer_element, monter_element, descendre_element, renommer_element
+	local	ajouter_element_menuis, retirer_element_menuis,dupliquer_element_menuis,  instancier_element_menuis, rendreUnique_element_menuis, monter_element_menuis, descendre_element_menuis, renommer_element
 	local est_instance
 	
+	/* 
+		on btn_dupliquer 			pressed 			do	dupliquer_element_menuis 			lbx_sequence.selection 
+		on btn_instancier 		pressed 			do	instancier_element_menuis 		lbx_sequence.selection 
+		on btn_rendreUnique	pressed 			do	rendreUnique_element_menuis 	lbx_sequence.selection 
+		on btn_retirer 			pressed 			do	retirer_element_menuis 			lbx_sequence.selection 
+		on btn_monter 			pressed 			do	monter_element_menuis 			lbx_sequence.selection 
+		on btn_descendre 		pressed		 	do	descendre_element_menuis 		lbx_sequence.selection 
+			 */
 	---- sequence provisoire pour construction du mesh -------
 	local sequence_tmp
 	
@@ -171,13 +179,21 @@ category:"CP | Facade	| Composant"
 		
 		
 		------------------- UI -------------------------
-		button 		btn_ajouter 		"+"			across:4
-		button 		btn_retirer	 		"-"			
-		button 		btn_monter			"/\\"			
-		button 		btn_descendre	"\\/"
-		listBox		lbx_sequence		""	height:6
-		subrollout	subroll_param		""	height:200
+-- 		button 		btn_ajouter 		"+"			across:4
+		button 		btn_ajouter_fixe 				"Fixe"				width:50	across:3		align:#left
+		button 		btn_ajouter_fenetre 		"Fenêtre"		width:50	align:#left
+		button 		btn_ajouter_porte 			"Porte"			width:50	align:#left
 		
+		listBox		lbx_sequence		""	height:6
+		
+		button 		btn_dupliquer	 		"Dup."			width:27	height:17	across:6	align:#left
+		button 		btn_instancier	 		"Ins."			width:27			height:17			align:#left
+		button 		btn_rendreUnique	 	"Uni."			width:27			height:17			align:#left
+		button 		btn_retirer	 		"Sup."				width:27		height:17			align:#left
+		button 		btn_monter			"/\\"			width:27		height:17		align:#left
+		button 		btn_descendre	"\\/"			width:27		height:17		align:#left
+		
+		subrollout	subroll_param		""	height:200
 		
 		dotNetControl btn_resize 	"System.Windows.Forms.Button" 		align:#left width:150 height:10
 		
@@ -277,16 +293,20 @@ category:"CP | Facade	| Composant"
 			
 		)
 		
-		on btn_ajouter 		pressed 			do 	creer_RCM_ajouter ()
-		on btn_retirer 		pressed 			do	$.retirer_element_menuis 		lbx_sequence.selection 
-		on btn_monter 		pressed 			do	$.monter_element_menuis 		lbx_sequence.selection 
-		on btn_descendre 	pressed		 	do	$.descendre_element_menuis 	lbx_sequence.selection 
-		on spn_elem_long 	changed val	do	(
-			sequence_elem_long[  lbx_sequence.selection ] = val
-			redrawviews ()
-		)
+-- 		on btn_ajouter 		pressed 			do 	creer_RCM_ajouter ()
+		on btn_ajouter_fixe 			pressed 			do 	ajouter_element_menuis 	cp_baieElement_fixe
+		on btn_ajouter_fenetre 	pressed 			do 	ajouter_element_menuis 	cp_baieElement_fenetre
+		on btn_ajouter_porte 		pressed 			do 	ajouter_element_menuis 	cp_baieElement_porte
 		
-	)
+		on btn_dupliquer 			pressed 			do	dupliquer_element_menuis 			lbx_sequence.selection 
+		on btn_instancier 		pressed 			do	instancier_element_menuis 		lbx_sequence.selection 
+		on btn_rendreUnique	pressed 			do	rendreUnique_element_menuis 	lbx_sequence.selection 
+		on btn_retirer 			pressed 			do	retirer_element_menuis 			lbx_sequence.selection 
+		on btn_monter 			pressed 			do	monter_element_menuis 			lbx_sequence.selection 
+		on btn_descendre 		pressed		 	do	descendre_element_menuis 		lbx_sequence.selection 
+		
+		
+	) ---- fin rollout ---------------------
 	
 	rollout roll_divers  "Divers"	(
 		 group "Qualité" (
@@ -381,7 +401,7 @@ category:"CP | Facade	| Composant"
 	----------- Actualisation de la sequence		-----------------------------------
 	fn actualiser_composants	= with redraw off (
 		
-		seed hasard_seed
+-- 		seed hasard_seed
 		
 		
 		---- creation des composants ------------------
@@ -529,16 +549,13 @@ category:"CP | Facade	| Composant"
 	
 	
 	--------- edition sequence ---------------
-	fn dupliquer_element_menuis 	id_elem_select:		=(
+	fn dupliquer_element_menuis _id		=(
 		
-		if id_elem_select 	== unsupplied do
-			id_elem_select 		= 	roll_sequence.lbx_sequence.selection
-		local	id_elem_insert		= 	id_elem_select + 1
 		
-		local nvl_element 			= copy sequence[ id_elem_select ]
+		local nvl_element 			= copy sequence[ _id ]
 		
-		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	
-			insertItem nvl_element 		sequence 		id_elem_insert
+		if _id != 0 and _id	!= sequence.count	then	
+			insertItem nvl_element 		sequence 		(_id+1)
 		else
 			append sequence		nvl_element
 		
@@ -546,20 +563,17 @@ category:"CP | Facade	| Composant"
 		actualiser ()
 		
 		if roll_sequence.open do	(
-			roll_sequence.lbx_sequence.selection = id_elem_insert 
+			roll_sequence.lbx_sequence.selection = (_id+1) 
 			roll_sequence.actualiser ()	
 		)
 	)
-	fn instancier_element_menuis 	id_elem_select:		=(
+	fn instancier_element_menuis 	_id		=(
 
-		if id_elem_select 	== unsupplied do
-			id_elem_select 		= 	roll_sequence.lbx_sequence.selection
-		local	id_elem_insert		= 	id_elem_select + 1
 		
-		local nvl_element 			=  sequence[ id_elem_select ]
+		local nvl_element 			=  sequence[ _id ]
 		
-		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	
-			insertItem nvl_element 		sequence 		id_elem_insert
+		if _id != 0 and _id	!= sequence.count	then	
+			insertItem nvl_element 		sequence 		(_id+1)
 		else
 			append sequence		nvl_element
 		
@@ -567,15 +581,13 @@ category:"CP | Facade	| Composant"
 		actualiser ()
 		
 		if roll_sequence.open do	(
-			roll_sequence.lbx_sequence.selection = id_elem_insert 
+			roll_sequence.lbx_sequence.selection = (_id+1) 
 			roll_sequence.actualiser ()	
 		)
 	)	
-	fn rendreUnique_element_menuis	 id_elem_select:		=(
+	fn rendreUnique_element_menuis	 _id		=(
 		
-		if id_elem_select 	== unsupplied do
-			id_elem_select 		= 	roll_sequence.lbx_sequence.selection
-		sequence[ id_elem_select ] = copy sequence[ id_elem_select ] 
+		sequence[ _id ] = copy sequence[ _id ] 
 		
 		---- actualisations -----------
 		actualiser ()
