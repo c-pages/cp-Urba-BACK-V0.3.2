@@ -278,6 +278,27 @@ struct  str_squelettisation (
 			)
 			result
 		),
+		
+		fn get_intersection_droite_droite		droite1_pt_1		droite1_pt_2 		droite2_pt_1		droite2_pt_2 =(
+-- 			debug "get_intersection_droite_droite"
+			local pt_intersec	
+		
+			local vec_1 = droite1_pt_2 - droite1_pt_1
+			local vec_2 = droite2_pt_2 - droite2_pt_1
+			
+			
+-- 			debug "(vec_1.x*vec_2.y-vec_1.y*vec_2.x)" var:(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+			local coef_vec2 = -(-vec_1.x*droite1_pt_1.y+vec_1.x*droite2_pt_1.y+vec_1.y*droite1_pt_1.x-vec_1.y*droite2_pt_1.x)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+
+			local coef_vec1 = -(droite1_pt_1.x*vec_2.y-droite2_pt_1.x*vec_2.y-vec_2.x*droite1_pt_1.y+vec_2.x*droite2_pt_1.y)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+-- 			if coef_vec1 > 0 and coef_vec1 < 1 and coef_vec2 > 0 and coef_vec2 <1 do
+
+				pt_intersec	= droite2_pt_1 + coef_vec2*vec_2
+			
+-- 			debug "pt_intersec"
+			pt_intersec
+			
+		),
 		fn decaller_bisectrice 		_pt_a_decaller		_vec_avt		_vec_aprs		_distance	=(
 			
 			local	norm_bisectrice 				= get_normal_bisectionOriente_2vecteurs 	_vec_avt 		_vec_aprs
@@ -496,7 +517,7 @@ struct  str_squelettisation (
 					ss = SplineShape pos:pts[1] name:("poly_1: " + compteur_de_passes as string )  wirecolor:red
 					addNewSpline ss
 					for pt in poly_1 do
-						addKnot ss 1 #corner #line 	( pt + [0,0,decallageHT * compteur_de_passes ] )
+						addKnot ss 1 #corner #line  pt--	( pt + [0,0,decallageHT * compteur_de_passes ] )
 					close  ss 1 
 					updateShape ss
 					/******* PROVISOIRE ********/
@@ -524,7 +545,7 @@ struct  str_squelettisation (
 					ss = SplineShape pos:pts[1] name:("poly_2: " + compteur_de_passes as string )  wirecolor:red
 					addNewSpline ss
 					for pt in poly_2 do
-						addKnot ss 1 #corner #line 		( pt + [0,0,decallageHT * compteur_de_passes ] )
+						addKnot ss 1 #corner #line 	 pt--	( pt + [0,0,decallageHT * compteur_de_passes ] )
 					close  ss 1 
 					updateShape ss
 					/******* PROVISOIRE ********/
@@ -772,7 +793,10 @@ struct  str_squelettisation (
 				
 				------ Les Evenements segments --------------------
 				evts_segments 	=		get_evenements_segment		pts_retrecissement		angles_poly		normals_bisecs_poly
+				
 				if evts_segments.count > 0 then (
+					
+					debug "	--->	evts_segments" var:evts_segments
 					
 					---- on prend le premier evenement ----------
 					local evt = evts_segments[1]
@@ -783,7 +807,7 @@ struct  str_squelettisation (
 					local id_pt_aprs_evnt		= if id_pt_evnt == pts_retrecissement.count then 1 else id_pt_evnt + 1
 					local pos_pt_evnt			=	pts_retrecissement[id_pt_evnt]
 					
-					pts_retrecissement = retrecir_polygone		pts_retrecissement		( mod evt.seg_dist_min	indant_distance )
+					pts_retrecissement 		= retrecir_polygone		pts_retrecissement		( mod evt.seg_dist_min	indant_distance )
 					
 					--- on supprime LES point de l'evenement pour les rem:placer pas LE point de l'evenement ----
 					if id_pt_evnt == pts_retrecissement.count then (
@@ -807,9 +831,109 @@ struct  str_squelettisation (
 					evts_divisions 	=  	get_evenements_divisions		pts_retrecissement		decalage:indant_distance	
 					if evts_divisions.count > 0 then (
 						
+						
+						debug "	--->	evts_divisions" var:evts_divisions
+						
+						
 						---- on prend le premier evenement ----------
 						local evt = evts_divisions[1]
 						
+						
+						/* 
+						id_pt_evnt,											--> index du point évenement:       (id_pt_evnt)
+						pos_pt_evnt,	                                 	--> position du point évènement:    (pos_pt_evnt)
+						id_pt_intersec
+						 */
+						
+						
+						---- on cherche le moment ( et le point	)precis de l'intersection ----------------------------------------------------------------------------------
+						local pts_apresCollision	=	retrecir_polygone		pts_retrecissement		indant_distance
+						
+						local id_pt_segment_1	=	 evt.id_pt_intersec
+						local id_pt_segment_2	=	 if evt.id_pt_intersec	==	pts_retrecissement.count then 1 else id_pt_segment_1	+	1
+						local droite_pt1 			= 	pts_retrecissement[ id_pt_segment_1 ]
+						local droite_pt2 			= 	pts_retrecissement[ id_pt_segment_2 ]						
+						local pt_o					=	pts_retrecissement[ evt.id_pt_evnt ]
+						
+						local vitesse_point 		= pts_retrecissement[ evt.id_pt_evnt] 	-	pts_apresCollision[ evt.id_pt_evnt ]
+						
+						---- calcul vitesse de la droite	-----
+						local vec_pt_segment_retreci	=	pts_retrecissement[id_pt_segment_1] 	-	pts_apresCollision[id_pt_segment_1]
+						local norm_pt_segment_retreci	=	normalize	vec_pt_segment_retreci
+						
+						local vec_droite			=	droite_pt2 - droite_pt1
+						local norm_droite			=	normalize vec_droite
+						--- si on est pas dans le bon sens on tourne --------
+						if dot	norm_droite	norm_pt_segment_retreci	< 0 do
+							norm_droite = norm_droite * rotateZMatrix 180
+						local vitesse_droite 		=  norm_droite *	indant_distance
+						
+						-- 
+						local v_relative 				= vitesse_point - vitesse_droite
+						local pt_intersec_relatif	=	get_intersection_droite_droite		droite_pt1		droite_pt2		pt_o	( pt_o + v_relative )
+						local dist_rel					=	length		v_relative
+						local dist_interst_rel	=	distance 	pt_o	pt_intersec_relatif
+
+						local rapport_collision	=	dist_interst_rel / dist_rel
+						
+						local vec_intersection_result	=	vitesse_point * rapport_collision
+						local pt_intersection_result	=	pt_o + vec_intersection_result
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						---- donc on applique le retrecissement avec le rapport -----------
+						pts_retrecissement	=	retrecir_polygone		pts_retrecissement		( indant_distance * rapport_collision )
+						
+						
+						
+						/* 
+						
+						---- on cherche le moment precis de l'intersection -------------						
+						droite_pt1 = getKnotPoint	$Droite	1	1
+						droite_pt2 = getKnotPoint	$Droite	1	2
+						
+						pt_o	=	getKnotPoint	$	1	3
+
+						v1 = ( getKnotPoint	$v1	1	2 ) - ( getKnotPoint	$v1	1	1 ) 
+						v2 = ( getKnotPoint	$v2	1	2 ) - ( getKnotPoint	$v2	1	1 ) 
+
+						v_relative = v1 - v2
+
+						pt_intersec_relatif	=	get_intersection_droite_droite		droite_pt1		droite_pt2		pt_o	( pt_o + v_relative )
+
+						dist_rel	=	length		v_relative
+
+						dist_interst_rel	=	distance 	pt_o	pt_intersec_relatif
+
+						rapport	=	dist_interst_rel / dist_rel
+
+
+
+
+						vec_intersection_result	=	v1 * rapport
+						pt_intersection_result	=	pt_o + vec_intersection_result
+						 */
+						 
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						---- et on recupere les polygones resultants --------------------
 						local polys_division	=	get_polys_evtDivision		evt		pts_retrecissement	
 						
 						---------- on relance avec les poygone obtenus----------------------------
@@ -833,8 +957,21 @@ struct  str_squelettisation (
 				
 				-----  ( C-1 )	on stock la position actuel de chaque point du polygone (pts_pos_back) ------
 -- 				local pts_pos_back 	= deepCopy pts_retrecissement
-				pts_retrecissement = retrecir_polygone		pts_retrecissement		indant_distance
 				
+				if not on_a_fini do (
+					pts_retrecissement = retrecir_polygone		pts_retrecissement		indant_distance
+				
+				
+				
+					/******* PROVISOIRE ********/
+					ss = SplineShape pos:pts_retrecissement[1] name:("Passe: " + compteur_de_passes as string )  wirecolor:blue
+					addNewSpline ss
+					for pt in pts_retrecissement do
+						addKnot ss 1 #corner #line pt	--	( pt + [0,0,decallageHT * compteur_de_passes ] )
+					close  ss 1 
+					updateShape ss
+					/******* PROVISOIRE ********/
+				)
 				
 				
 				
@@ -865,17 +1002,6 @@ struct  str_squelettisation (
 				
 				 */
 				
-				
-				
-				
-				/******* PROVISOIRE ********/
-				ss = SplineShape pos:pts_retrecissement[1] name:("Passe: " + compteur_de_passes as string )  wirecolor:blue
-				addNewSpline ss
-				for pt in pts_retrecissement do
-					addKnot ss 1 #corner #line 	( pt + [0,0,decallageHT * compteur_de_passes ] )
-				close  ss 1 
-				updateShape ss
-				/******* PROVISOIRE ********/
 				
 				
 				
@@ -1207,6 +1333,35 @@ squel.exe	 pts
 
 
 
+
+/*
+
+
+droite_pt1 = getKnotPoint	$Droite	1	1
+droite_pt2 = getKnotPoint	$Droite	1	2
+pt_o	=	getKnotPoint	$	1	3
+
+v1 = ( getKnotPoint	$v1	1	2 ) - ( getKnotPoint	$v1	1	1 ) 
+v2 = ( getKnotPoint	$v2	1	2 ) - ( getKnotPoint	$v2	1	1 ) 
+
+v_relative = v1 - v2
+
+pt_intersec_relatif	=	get_intersection_droite_droite		droite_pt1		droite_pt2		pt_o	( pt_o + v_relative )
+
+dist_rel	=	length		v_relative
+
+dist_interst_rel	=	distance 	pt_o	pt_intersec_relatif
+
+rapport	=	dist_interst_rel / dist_rel
+
+
+
+
+vec_intersection_result	=	v1 * rapport
+pt_intersection_result	=	pt_o + vec_intersection_result
+
+
+*/
 
 
 
