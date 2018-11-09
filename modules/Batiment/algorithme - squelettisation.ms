@@ -147,6 +147,9 @@ struct str_squel_face (
 	id_pt_segment		=	0,
 	pt_seg_1		= [0,0,0],		--->	le premier point du segment original du polygone.
 	pt_seg_2		= [0,0,0],		--->	le second point du segment original du polygone.
+	pt_arret_1		= [0,0,0],
+	pt_arret_2		= [0,0,0],
+	
 	pts_squelette		= #()				--->	les points du squelette, formant la face.
 )
 
@@ -174,6 +177,7 @@ struct  str_squelettisation (
 	
 	
 		
+		decallage_z = 1.,
 		
 		
 		
@@ -1207,7 +1211,7 @@ public
 			--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			debug ""
 			debug "------------ (A)	Analyses initiales --------------------------"
-			
+			/* 
 			--******* PROVISOIRE ********
 			ss = SplineShape pos:pts[1] name:("Passe: " + compteur_de_passes as string )  wirecolor:[100,100,255]
 			addNewSpline ss
@@ -1216,21 +1220,7 @@ public
 			close  ss 1 
 			updateShape ss
 			--******* PROVISOIRE ********
-			
-			------	( A-2 BIS )  Version avec squel_faces ---------
-			if squel_faces == unsupplied do (
-				squel_faces = #()
-				for i = 1 to pts.count do (
-					local nv_squel_face	=	str_squel_face ()
-					local j 		= if  i == pts.count then 1 else i + 1
-					nv_squel_face.id_pt_segment	=	i
-					nv_squel_face.pt_seg_1			= pts[i]
-					nv_squel_face.pt_seg_2			= pts[j]
-					append squel_faces 	nv_squel_face
-				)
-			)
-
-			
+			 */
 			--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			------------------- (B)	Calculs préliminaires  ------------------------------------------------------------------------------------------------------------------------------------------------
 			--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1247,6 +1237,20 @@ public
 			debug "		---> pts" var:pts
 			
 			
+			------	( A-2 BIS )  Version avec squel_faces ---------
+			if squel_faces == unsupplied do (
+				squel_faces = #()
+				for i = 1 to pts.count do (
+					local nv_squel_face	=	str_squel_face ()
+					local j 		= if  i == pts.count then 1 else i + 1
+					nv_squel_face.id_pt_segment	=	i
+					nv_squel_face.pt_seg_1			= pts[i]
+					nv_squel_face.pt_seg_2			= pts[j]
+					append squel_faces 	nv_squel_face
+				)
+			)
+
+			
 			--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			------------------- (C)	 la BOUCLE de retrécissement -------------------------------------------------------------------------------------------------------------------------------------
 			--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1259,7 +1263,7 @@ public
 			local pts_back					= deepCopy pts
 			local pts_retrecissement		= deepCopy pts
 			pts_retrecissement 				= retrecir_polygone		pts_retrecissement			indent_distance
-			
+			pts_retrecissement.z			+=	 indent_distance  * decallage_z
 			local on_a_fini 					= false
 			
 			
@@ -1268,12 +1272,12 @@ public
 			
 			
 			---- sinon c'est parti pour la BOUCLE ---------------------------------------------------------------------------------------------------------------
-			while  not on_a_fini	and dist_parcourue < 500  and compteur_de_passes< passes_max and pts_retrecissement.count > 3 do (
+			while  not on_a_fini	and dist_parcourue < 500  and compteur_de_passes< passes_max and pts_retrecissement.count > 2 do (
 				
 				compteur_de_passes += 1 
 				debug "----- compteur_de_passes -----" var:compteur_de_passes
 				
-				(
+				/* (
 					--******* PROVISOIRE ********
 				ss = SplineShape pos:pts_retrecissement[1] name:("Passe: " + compteur_de_passes as string )  wirecolor:[100,100,100]
 				addNewSpline ss
@@ -1282,7 +1286,7 @@ public
 				close  ss 1 
 				updateShape ss
 				--******* PROVISOIRE ********
-				)
+				) */
 				
 				---- les evenements -----------------------
 				local evts_segments 		=		get_evenements_segment				pts_back					angles_poly		normals_bisecs_poly
@@ -1297,14 +1301,15 @@ public
 				debug "--------> evts_intersections"	var:evts_intersections
 				debug "--------> EVTS_ATRAITER"	var:evts_aTraiter
 				
-				
 				if evts_aTraiter.count > 0 do (
 					
 					---- on applique le retrecissement 	jusqu'a la distance de l'evenement ----------------------
 					local distance_toEvt		=	evts_aTraiter[1].distance_toEvt
 -- 					pts_retrecissement 			= retrecir_polygone		pts_back			distance_toEvt
-					pts_retrecissement 			= retrecir_polygone		pts_back			( mod  distance_toEvt  indent_distance )
+					pts_retrecissement 		= retrecir_polygone		pts_back			( mod  distance_toEvt  indent_distance )
+					pts_retrecissement.z	+=	( mod  distance_toEvt  indent_distance ) * decallage_z
 					
+					dist_parcourue += ( mod  distance_toEvt  indent_distance )
 					/* 
 					--******* PROVISOIRE ********
 					ss = SplineShape pos:pts_retrecissement[1] name:("Passe Evt: " + compteur_de_passes as string )  wirecolor:[255,255,100]
@@ -1315,6 +1320,37 @@ public
 					updateShape ss
 					--******* PROVISOIRE ********
 					 */
+					
+					
+					
+					for squel in squel_faces do (
+						local id 			=	squel.id_pt_segment
+						local id_svt	=	if id == pts_retrecissement.count then 1 else id + 1
+						squel.pt_arret_1		=	pts_retrecissement[id]
+						squel.pt_arret_2		=	pts_retrecissement[id_svt]
+-- 						squel.pt_arret_1.z	=	dist_parcourue * 1
+-- 						squel.pt_arret_2.z	=	dist_parcourue * 1
+						
+						--******* PROVISOIRE ********
+						ss = SplineShape pos:squel.pt_seg_1		 name:("Squel" )  wirecolor:[255,255,100]
+						addNewSpline ss
+						addKnot ss 1 #corner #line squel.pt_seg_1	
+						addKnot ss 1 #corner #line squel.pt_seg_2
+						addKnot ss 1 #corner #line squel.pt_arret_2	
+						addKnot ss 1 #corner #line squel.pt_arret_1
+						close  ss 1 
+						updateShape ss
+						--******* PROVISOIRE ********
+						
+						
+						
+						append squelette_result 	squel
+					)
+					
+					
+					
+					
+					
 					----------- evenements segments ------------------
 					for i = 1 to evts_segments.count do (
 						
@@ -1327,9 +1363,8 @@ public
 						
 						
 						
-						append 			squel_faces[ id_pt_evnt ].pts_squelette	pos_pt_evnt
-						append			squelette_result		squel_faces[ id_pt_evnt ]
-						deleteItem		squel_faces 			id_pt_evnt
+						
+						
 						
 						point pos:pts_retrecissement[ id_pt_evnt ]	name:"evt segment"  centermarker:off axistripod:off cross:on Box:off  constantscreensize:off drawontop:off size:2.5 wirecolor:blue
 						
@@ -1374,9 +1409,17 @@ public
 						----------- evenements intersections ------------------
 						local polys_division	=	get_polys_evts_intersections		evts_intersections	pts_retrecissement
 						
-						for pts_poly in polys_division do	this.creer_squelette 	pts_poly
-					) else this.creer_squelette 	pts_retrecissement
+						for pts_poly in polys_division do	(
+							this.creer_squelette 	pts_poly
+							
+						)
+					) else (
+						
+						
+						
+						this.creer_squelette 	pts_retrecissement
 					
+					)
 					
 					
 					on_a_fini = true
@@ -1389,8 +1432,9 @@ public
 				if not on_a_fini do (
 					
 					pts_back = deepcopy pts_retrecissement
+					dist_parcourue += indent_distance
 					pts_retrecissement = retrecir_polygone		pts_retrecissement		indent_distance
-					
+					pts_retrecissement.z			+=	 indent_distance  * decallage_z
 				)
 				
 				dist_parcourue += indent_distance
@@ -1432,8 +1476,8 @@ clearlistener ()
 squel = str_squelettisation ()
 
 -- shp = $shape001
-shp = $Rectangle001
--- shp = $Rectangle006
+-- shp = $popo
+shp = $Rectangle007
 -- shp = $Line002
 -- shp = $test_dot
 -- shp = $test
@@ -1451,6 +1495,7 @@ shp = $Rectangle001
 
 
 pts = for i = 1 to numknots shp collect getKnotPoint  shp 1 i 
+	debug_mode = false
 squel.exe	 pts
 
 
