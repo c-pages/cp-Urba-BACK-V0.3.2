@@ -144,10 +144,10 @@ struct str_squel_evnt_division (
 
 ---- les faces resultat du squelette --------
 struct str_squel_face (
-	id_pt_segment	=	0,
-	pt_seg_1			= [0,0,0],		--->	le premier point du segment original du polygone.
-	pt_seg_2			= [0,0,0],		--->	le second point du segment original du polygone.
-	pts_squelette	= #()				--->	les points du squelette, formant la face.
+	id_pt_segment		=	0,
+	pt_seg_1		= [0,0,0],		--->	le premier point du segment original du polygone.
+	pt_seg_2		= [0,0,0],		--->	le second point du segment original du polygone.
+	pts_squelette		= #()				--->	les points du squelette, formant la face.
 )
 
 
@@ -376,7 +376,19 @@ public
 		
 	---------------- Divers -----------------------------
 	private
-		fn actualiser_angles 	pts	=(
+		
+		fn cleanner_pts_doublons 	pts= (
+			local precisionDoublons		=	.0001
+			local pts_result 	=#()
+			for i = 1 to pts.count do (
+				local j = if i == pts.count then 1 else i + 1 
+					
+				if distance pts[i]  pts[j] > precisionDoublons do append pts_result pts[i]
+			)
+			pts_result
+		),
+		
+		fn calculer_angles 		pts	=	(
 			
 			---- ( B-1)		la liste des angles internes du polygone ----		
 			angles_poly 				=	#()
@@ -390,10 +402,7 @@ public
 				local norm_bisec_poly = get_normal_bisectionOriente_2vecteurs  (pts[k] - pts[i]) 	(pts[j] - pts[i])
 				append normals_bisecs_poly 	norm_bisec_poly
 			)
-			
 		),
-		
-		
 		fn supprimer_anglesNuls	_pts =(
 			local result =#()
 			for i = 1 to _pts.count do (
@@ -404,15 +413,49 @@ public
 				) else (
 					
 					--****** PROVISOIRE ********
-					point pos:_pts[i]	name:"angle nul"  centermarker:off axistripod:off cross:on Box:off  constantscreensize:off drawontop:off size:.125 wirecolor:yellow
+					point pos:_pts[i]	name:"angle nul"  centermarker:off axistripod:off cross:on Box:off  constantscreensize:off drawontop:off size:2.5 wirecolor:yellow
 					debug "Angle nul" var:_pts[i]
 					--****** PROVISOIRE ********
 				)
 			)
 			
+-- 			result = cleanner_pts_doublons 	result
+			
 			result
 		),
-		
+		fn supprimer_anglesPlats	_pts =(
+			local result =#()
+			for i = 1 to _pts.count do (
+				if angles_poly[i] != 180 then (
+					append result 	_pts[i]
+					
+					
+				) else (
+					
+					--****** PROVISOIRE ********
+					point pos:_pts[i]	name:"angle plat"  centermarker:off axistripod:off cross:on Box:off  constantscreensize:off drawontop:off size:2.5 wirecolor:yellow
+					debug "Angle plat" var:_pts[i]
+					--****** PROVISOIRE ********
+				)
+			)
+			
+-- 			result = cleanner_pts_doublons 	result
+			
+			result
+		),
+		fn actualiserEtCleanner_angles 	pts	=(
+			debug "actualiserEtCleanner_angles"
+			
+			pts = cleanner_pts_doublons 	pts
+			
+			calculer_angles 			pts
+			pts = supprimer_anglesNuls	pts
+			calculer_angles 			pts
+			pts = supprimer_anglesPlats	pts
+			
+			
+			pts
+		),
 		
 		
 	---------- Evenements ----------
@@ -423,7 +466,7 @@ public
 			
 			---- ( B-2)	La distance à parcourir pour avoir le prochain 'Evnmt de Segment':	-----
 			----	 (il peut y avoir plusieurs evenements en mm temps, à la meme distance, donc plusieurs pts à stocker )	----
-			local distance_toEvt 	= 0			---->	la distance jusqu'au prochain evenement segment
+			local distance_toEvt 	= -1			---->	la distance jusqu'au prochain evenement segment
 			local ids_pt_evt 		= #()		---->	Les points concernés dans le prochain evement segment
 			--- pour chaques points ----------
 			for i = 1 to pts.count do (
@@ -439,20 +482,29 @@ public
 				--- la longueur necéssaire pour fermer la face 'Evnmt de Segment' ----
 				local tan_omega_avt 	= 		tan (angles_poly[i]/2)
 				local tan_omega_aprs 	= 		tan (angles_poly[j]/2)
-				local seg_dist    			=   	longueur_seg * (  ( tan_omega_avt * tan_omega_aprs ) / (tan_omega_avt + tan_omega_aprs) )
+				local seg_dist   			=   	longueur_seg * (  ( tan_omega_avt * tan_omega_aprs ) / (tan_omega_avt + tan_omega_aprs) )
+-- 				
+-- 				local seg_dist_exact   	=   	longueur_seg * (  ( tan_omega_avt * tan_omega_aprs ) / (tan_omega_avt + tan_omega_aprs) )
+-- 				local seg_dist				= 		( floor ( seg_dist_exact * 10000. ) ) / 10000.
 				
 				
 				--- et donc on verifie si c'est le prochain evenement, et on stock si besoin ------
 				if seg_dist > 0 and seg_dist		<= indent_distance 	do (
-					if distance_toEvt == 0 then (
-						distance_toEvt 		= seg_dist
+					
+					debug "seg_dist" var:seg_dist
+					debug "distance_toEvt" var:distance_toEvt
+					
+					
+					if distance_toEvt == -1 then (
+						distance_toEvt 	= seg_dist
 						ids_pt_evt 			= #(i)
-					) else if seg_dist > 0 do (
+					) else if seg_dist >= 0 do (
 						if distance_toEvt > seg_dist then (
 							distance_toEvt 		= seg_dist
 							ids_pt_evt 			=#(i)
-						) else if distance_toEvt == seg_dist do 
+						) else if distance_toEvt == seg_dist do (
 							append ids_pt_evt 	i
+						)
 					)
 				) --- fin seg_dist > 0 --------
 			) -- fin du for chaques pts -----
@@ -489,7 +541,135 @@ public
 			evts_segments
 			
 		),
-		fn get_evenements_divisions		pts		pts_back	decalage:indent_distance			=(
+		
+		fn get_evenements_intersections		pts		pts_back	decalage:indent_distance			=(
+			
+			local evts_intersections =#()
+			
+			
+			if pts.count > 3 do (
+				
+				
+				----- on analyse s'il y a evenement division --------------
+				for i = 1 to pts.count do (
+					
+					-- les ids des points concernés -----------
+					local id_pt 				= i
+					local id_pt_svt		= if id_pt == pts.count then 1 else id_pt + 1
+					local id_pt_avt		= if id_pt == 1 then pts.count else id_pt - 1
+					
+					local pt 				= pts[id_pt]
+					local pt_svt 			= pts[id_pt_svt]
+					
+					local pt_back			=   pts_back[id_pt]
+					
+					for id_ptTest = 1 to pts.count where id_ptTest !=  id_pt and id_ptTest !=  id_pt_avt  and id_ptTest !=  id_pt_aprs  do (
+						
+						local id_ptTest_svt		= if id_ptTest == pts.count then 1 else id_ptTest + 1
+						local pt_segTest 		= pts[id_ptTest]
+						local pt_segTest_svt 	= pts[id_ptTest_svt]
+						
+						local intersection_segments = get_intersection_vecteurs		pt   	pt_svt		pt_segTest		pt_segTest_svt
+						
+						if intersection_segments  != undefined  do (
+							
+							local intersection_demiDroite		 = get_intersection_demiDroite_segment			pt   	pt_back		pt_segTest		pt_segTest_svt
+							
+							if intersection_demiDroite  != undefined  do (
+								
+								
+								debug "INTERSECTION"
+								debug "pts" var:pts
+								debug "pts_back" var:pts_back
+								
+								
+								
+								local nv_evt = str_squel_evnt_division 		id_pt_evnt:id_pt 		id_pt_intersec:id_ptTest 	pos_pt_evnt:intersection_demiDroite
+								append evts_intersections  nv_evt	
+								
+								
+								
+								
+								---- on calcul la distance avant d'entrer en collision ----------------------------------------------------------------------------------
+								local id_pt_segment_1	=	 nv_evt.id_pt_intersec
+								local id_pt_segment_2	=	 if nv_evt.id_pt_intersec	==	pts.count then 1 else id_pt_segment_1	+	1
+								local droite_pt1 			=	pts_back[ id_pt_segment_1 ]
+								local droite_pt2 			=	pts_back[ id_pt_segment_2 ]						
+								local pt_o					=	pts_back[ nv_evt.id_pt_evnt ]
+								
+								local vitesse_point 		= pts[ nv_evt.id_pt_evnt ]	-	pts_back[ nv_evt.id_pt_evnt]
+								
+								---- calcul vitesse de la droite	-----
+								local vec_pt_segment_retreci		=	pts[id_pt_segment_1] - pts[id_pt_segment_2] 
+								local norm_pt_segment_retreci		=	normalize	vec_pt_segment_retreci							
+								local vec_droite							=	( droite_pt2 - droite_pt1 ) * rotateZMatrix 90
+								local norm_droite							=	normalize vec_droite 
+		-- 							debug "	norm_droite 1 " var:norm_droite
+		-- 							local dot_droite							=	dot	norm_droite	norm_pt_segment_retreci	
+								
+								--- si on est pas dans le bon sens on tourne --------
+		-- 							if dot_droite< 0 do
+		-- 								norm_droite =			 norm_droite * rotateZMatrix 180
+								
+								
+								
+								local vitesse_droite 		=  norm_droite *	indent_distance
+								
+								
+								local v_relative 				= 	vitesse_point - vitesse_droite
+								local pt_intersec_relatif	=	get_intersection_droite_droite		droite_pt1		droite_pt2		pt_o	( pt_o + v_relative )
+								local dist_rel					=	length		v_relative
+								local dist_interst_rel		=	distance 	pt_o		pt_intersec_relatif
+								
+								
+								
+								
+								local rapport_collision			=	dist_interst_rel / dist_rel
+								
+								local vec_intersection_result	=	vitesse_point * rapport_collision
+								local pt_intersection_result	=	pt_o + vec_intersection_result
+								
+								
+								nv_evt.pt_o					=	 pt_o
+-- 								local distance_toEvt		=	decalage * rapport_collision
+-- 								nv_evt.distance_toEvt		=	( floor ( distance_toEvt * 10000. ) ) / 10000.
+								nv_evt.distance_toEvt		=	decalage * rapport_collision
+								
+								nv_evt.pt_intersection		=	pt_intersection_result
+								
+								
+								debug "	droite_pt1" 				var:droite_pt1							
+								debug "	droite_pt2" 				var:droite_pt2		
+								
+								debug "dest p orig" var:(pt_o + v_relative)
+								
+								debug "	vitesse_point" 				var:vitesse_point							
+								debug "	vitesse_droite" 				var:vitesse_droite		
+								debug "	norm_droite" 					var:norm_droite
+								debug "	pt_intersec_relatif" 			var:pt_intersec_relatif
+								debug "	dist_rel" 						var:dist_rel
+								debug "	dist_interst_rel" 				var:dist_interst_rel
+								debug "	rapport_collision" 				var:rapport_collision
+								debug "	vec_intersection_result" 	var:vec_intersection_result
+								
+							point pos:pt_intersection_result		name:"evt intersec"  centermarker:off axistripod:off cross:on Box:on  constantscreensize:off drawontop:off size:2.5 wirecolor:green
+						
+							)
+-- 							append intersections ( str_intersec 	id_pt:id_pt		id_pt_seg:id_ptTest		pos:intersection )
+						)
+					) -- fin for do  id_ptTest ---- 
+					
+					
+					
+				
+				) --- fin for do pts.count ----
+			)
+			evts_intersections
+		),
+		
+		
+		/* 
+		fn get_evenements_divisions_PAR_TRAJECTOIRE_DES_POINTS		pts		pts_back	decalage:indent_distance			=(
 			
 			local evts_divisions =#()
 			
@@ -535,6 +715,9 @@ public
 							debug "INTERSECTION"
 							debug "pts" var:pts
 							debug "pts_back" var:pts_back
+							
+							
+							
 							local nv_evt = str_squel_evnt_division 		id_pt_evnt:id_pt 		id_pt_intersec:id_ptTest 	pos_pt_evnt:intersection
 							append evts_divisions  nv_evt	
 							
@@ -609,6 +792,10 @@ public
 			)
 			evts_divisions
 		),
+		 */
+		
+		
+		
 		
 		fn get_evt_plusProche	_evts =(
 			
@@ -645,14 +832,13 @@ public
 		
 		
 		
-		
-		
-		
-		fn get_polys_evtDivision		evt_division		pts			=  (
+		/* 
+		fn get_polys_evts_intersections		evts_intersections		pts			=  (
 			
 -- 			debug "------------>		checker_evenements_divisions" var:pts
 			
-			local polys_result =#()
+			local polys_result 			=	#()
+			local polysIds_aTester 		=	#( #{1..pts.count} )
 			
 			if pts.count > 3 do (
 -- 				evts_divisions =	get_evenements_divisions		pts	decalage:indent_distance
@@ -662,15 +848,41 @@ public
 				
 				
 				------   2)	Les 'Evnmts  Division' -------------------------		
--- 				for i=1 to evts_divisions.count  do (
+				for i=1 to evts_intersections.count  do (
 					
+					local evt = evts_intersections[i]
+					
+					for polyIds_aTester in polysIds_aTester do (
+						
+						--- Poly 1 -----
+						local poly_1 		= #()
+						local id_seg 		= evt.id_pt_intersec
+						local id_seg_svt 	= if id_seg == pts.count then 1 else	id_seg + 1	
+						
+						
+						local id_pt_courant 		= id_seg_svt		
+						
+						local trouve 	= false					
+						while not trouve do (						
+							append poly_1 					id_pt_courant
+							if id_pt_courant == evt.id_pt_evnt  do trouve= true
+							id_pt_courant = if id_pt_courant == pts.count then  1 else id_pt_courant + 1
+						)
+						
+						
+					) ---- for poly a atester ---------
+					
+				) --- for evenements ----
+				
+				
+				
 					local evt = evt_division	--evts_divisions[i]
 					
-					/******* PROVISOIRE ********/
+					--******* PROVISOIRE ********
 					debug "########## 'Evnmts de Division' ##########"
 					debug "		passe" var:compteur_de_passes
 					debug "		evts_divisions" var:evt
-					/******* PROVISOIRE ********/
+					--******* PROVISOIRE ********
 					
 					local id_pt_intersec 		= evt.id_pt_intersec										
 					local id_pt_intersec_svt 	= id_pt_intersec + 1										
@@ -696,7 +908,7 @@ public
 					
 					
 					if poly_1.count > 2 do (
-						/******* PROVISOIRE ********/
+						--******* PROVISOIRE ********
 						debug "-------	POLY 1 --------"
 						debug "poly_1"	var:poly_1
 						ss = SplineShape pos:pts[1] name:("poly_1: " + compteur_de_passes as string )  wirecolor:red
@@ -705,7 +917,7 @@ public
 							addKnot ss 1 #corner #line  pt--	( pt + [0,0,decallageHT * compteur_de_passes ] )
 						close  ss 1 
 						updateShape ss
-						/******* PROVISOIRE ********/
+						--******* PROVISOIRE ********
 					)
 					
 					
@@ -725,7 +937,7 @@ public
 					
 					
 					if poly_1.count > 2 do (
-						/******* PROVISOIRE ********/
+						--******* PROVISOIRE ********
 						debug "-------	POLY 2 --------"
 						debug "poly_2"	var:poly_2
 						ss = SplineShape pos:pts[1] name:("poly_2: " + compteur_de_passes as string )  wirecolor:red
@@ -734,18 +946,11 @@ public
 							addKnot ss 1 #corner #line 	 pt--	( pt + [0,0,decallageHT * compteur_de_passes ] )
 						close  ss 1 
 						updateShape ss
-						/******* PROVISOIRE ********/
+						--******* PROVISOIRE ********
 					)
 					
 					polys_result = #( poly_1, poly_2 )
 					
-					/* 
-					---------- on relance avec les poygone obtenus----------------------------
-					local compteur_de_passes_back 	= compteur_de_passes
-					this.creer_squelette 	poly_1 		pans_points:faces_poly_1
-					compteur_de_passes 					= compteur_de_passes_back
-					this.creer_squelette 	poly_2 		pans_points:faces_poly_2
-					 */
 -- 				)	-----	fin evenement divisions -----------------------------------------------
 			) --- fin if pts.count > 3	------------
 			
@@ -753,6 +958,219 @@ public
 			polys_result
 		), --- fin 	get_evenements_divisions
 		
+		 */
+		
+		fn get_ids_polys_evtDivision		evt		ids_pts		pts	=  (
+			
+			local polys_result =#()
+			
+			debug "			------>	ids_pts" var:ids_pts
+			debug "				------>	evt.id_pt_evnt " var:evt.id_pt_evnt 
+			debug "				------>	evt.id_pt_intersec " var:evt.id_pt_intersec 
+			
+				
+				
+				------------- Creation des polygones resultants -------------------------------------
+				if ids_pts.count > 3 and findItem	ids_pts		evt.id_pt_evnt != 0 and  findItem	ids_pts		evt.id_pt_intersec	 != 0 	then (
+					
+					
+					
+					local pt_intersec 			= evt.id_pt_intersec
+					local id_pt_intersec			=	findItem	ids_pts		evt.id_pt_intersec
+					
+					local pt_intersec_svt 		= if id_pt_intersec == ids_pts.count then 1 else  id_pt_intersec + 1					
+					local id_pt_intersec_svt	=	ids_pts[ pt_intersec_svt ]
+					
+					
+					debug "				------>	pt_intersec_svt" var:pt_intersec_svt
+					debug "					------>	id_pt_intersec" var:id_pt_intersec
+					debug "					------>	id_pt_intersec_svt" var:id_pt_intersec_svt
+					
+					
+					
+					
+					--- copy des tableaux ------
+					local pts_copy1 			= deepcopy pts
+					local pts_copy2 			= deepcopy pts
+				
+					
+					--- Poly 1 -----
+					local poly_1 				= #()					
+					local id_pt 					= 	id_pt_intersec_svt
+					local id_pts_courant	=	findItem	ids_pts	id_pt
+					local trouve 				= false
+					while not trouve do (
+						local id_pt	=	ids_pts[	id_pts_courant	]
+						append poly_1 		id_pt
+						if id_pt == evt.id_pt_evnt  do trouve= true	
+						
+						id_pts_courant += 1
+						if id_pts_courant > ids_pts.count do id_pts_courant = 1						
+					)
+					debug "						------>	poly_1" var:poly_1
+					append polys_result 		poly_1
+					
+					
+					--- Poly 2 -----
+					local poly_2 	= #()
+					local id_pt 		= evt.id_pt_evnt
+					local id_pts_courant	=	findItem	ids_pts	id_pt
+					local trouve 	= false
+					while not trouve do (						
+						local id_pt	=	ids_pts[	id_pts_courant	]
+						append poly_2 		id_pt
+						if id_pt == pt_intersec do trouve= true
+						
+						id_pts_courant += 1
+						if id_pts_courant > ids_pts.count do id_pts_courant = 1	
+					)
+					debug "						------>	poly_2" var:poly_2
+					append polys_result 		poly_2
+				
+				
+			) --- fin if pts.count > 3	------------
+			else polys_result = #(deepcopy ids_pts)
+			
+			polys_result
+			
+			
+		), --- fin 	get_evenements_divisions
+		
+		fn get_polys_evts_intersections		evts_intersections		pts			=  (
+			
+			local polys_result 		=	#()
+			
+			local ids_pts 					=	#{1..pts.count} as array
+			local ids_polys_aTester 	=	#( ids_pts )
+			local ids_pts_courant 		=	#{1..pts.count} as array
+			
+			debug "			------>	evts_intersections" var:evts_intersections
+			
+			for evt in evts_intersections do (
+				
+				debug "			------>	ids_polys_aTester" var:ids_polys_aTester
+				
+				local ids_polys_temp =#()
+				for ids_poly_aTester in ids_polys_aTester do (
+					ids_polys_temp  	+= get_ids_polys_evtDivision		evt		ids_poly_aTester		pts
+					debug "				------>	ids_polys_temp" var:ids_polys_temp
+					
+				)
+				
+				ids_polys_aTester = ids_polys_temp
+				
+			)
+			
+			debug "			------>	ids_polys_aTester" var:ids_polys_aTester
+			
+			for ids_poly_aTester in ids_polys_aTester do (
+				pts_poly = for idpt in ids_poly_aTester collect pts[idpt]
+				append polys_result 	pts_poly
+			)
+			
+			debug "			------>	POLYS_RESULT" var:polys_result
+			
+			polys_result
+		),
+		/* 
+		fn get_polys_evtDivision		evt_division		pts			=  (
+			
+-- 			debug "------------>		checker_evenements_divisions" var:pts
+			
+			local polys_result =#()
+			
+			if pts.count > 3 do (
+-- 				evts_divisions =	get_evenements_divisions		pts	decalage:indent_distance
+			
+				
+-- 				debug "------------>		evts_divisions" var:evts_divisions
+				
+				
+				------   2)	Les 'Evnmts  Division' -------------------------		
+-- 				for i=1 to evts_divisions.count  do (
+					
+					local evt = evt_division	--evts_divisions[i]
+					
+					--******* PROVISOIRE ********
+					debug "########## 'Evnmts de Division' ##########"
+					debug "		passe" var:compteur_de_passes
+					debug "		evts_divisions" var:evt
+					--******* PROVISOIRE ********
+					
+					local id_pt_intersec 		= evt.id_pt_intersec										
+					local id_pt_intersec_svt 	= id_pt_intersec + 1										
+					if id_pt_intersec_svt > pts.count do id_pt_intersec_svt = 1	
+					
+					--- copy des tableaux ------
+					local pts_copy1 			= deepcopy pts
+					local pts_copy2 			= deepcopy pts
+					
+					
+					
+					------------- Creation des polygones resultants -------------------------------------
+					--- Poly 1 -----
+					local poly_1 = #()					
+					local id_pt = id_pt_intersec_svt
+					local trouve = false					
+					while not trouve do (						
+						append poly_1 					pts_copy1[id_pt]						
+						if id_pt == evt.id_pt_evnt  do trouve= true						
+						id_pt += 1
+						if id_pt > pts.count do id_pt = 1						
+					)
+					
+					
+					if poly_1.count > 2 do (
+						--******* PROVISOIRE ********
+						debug "-------	POLY 1 --------"
+						debug "poly_1"	var:poly_1
+						ss = SplineShape pos:pts[1] name:("poly_1: " + compteur_de_passes as string )  wirecolor:red
+						addNewSpline ss
+						for pt in poly_1 do
+							addKnot ss 1 #corner #line  pt--	( pt + [0,0,decallageHT * compteur_de_passes ] )
+						close  ss 1 
+						updateShape ss
+					--******* PROVISOIRE ********
+					)
+					
+					
+					
+					
+					--- Poly 2 -----
+					local poly_2 = #()
+					local id_pt = evt.id_pt_evnt
+					local trouve = false
+					while not trouve do (						
+						append poly_2 					pts_copy2[id_pt]
+						if id_pt == id_pt_intersec do trouve= true						
+						id_pt += 1
+						if id_pt > pts.count do id_pt = 1
+					)
+					
+					
+					
+					if poly_1.count > 2 do (
+						--******* PROVISOIRE ********
+						debug "-------	POLY 2 --------"
+						debug "poly_2"	var:poly_2
+						ss = SplineShape pos:pts[1] name:("poly_2: " + compteur_de_passes as string )  wirecolor:red
+						addNewSpline ss
+						for pt in poly_2 do
+							addKnot ss 1 #corner #line 	 pt--	( pt + [0,0,decallageHT * compteur_de_passes ] )
+						close  ss 1 
+						updateShape ss
+						--******* PROVISOIRE ********
+					)
+					
+					polys_result = #( poly_1, poly_2 )
+					
+-- 				)	-----	fin evenement divisions -----------------------------------------------
+			) --- fin if pts.count > 3	------------
+			
+			
+			polys_result
+		), --- fin 	get_evenements_divisions
+		 */
 		
 		
 		
@@ -773,20 +1191,15 @@ public
 		
 	---------------- Coeur de l'algorithme  -----------------------------
 	private
+			passes_max = 100,
 		---- on execute si notre polygone à plus de 2 segments		 ----
-		fn creer_squelette 	pts 	pans_points:		squel_faces:		= 	if pts.count> 2 and compteur_de_passes < 200 do (
+		fn creer_squelette 	pts 	pans_points:		squel_faces:		= 	if pts.count> 2 and compteur_de_passes < passes_max do (
 			
 			
 			debug ""
 			debug ""
 			debug "------------------------ CREER_SQUELETTE -----------------------------------"
 			debug "----- pts -----" var:pts
-			
-			
-			/******* PROVISOIRE ********/
--- 			for pt in pts do
--- 				point size:20 centermarker:off axistripod:off cross:on Box:off pos:pt
-			/******* PROVISOIRE ********/
 			
 			
 			--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -803,21 +1216,7 @@ public
 			close  ss 1 
 			updateShape ss
 			--******* PROVISOIRE ********
-					
-					
--- 			------	(A-1)	On choisi une valeur pour la distance à parcourir pour chaque indentation (indent_distance)
--- 			local indent_distance = precision		
 			
-		/* 	------	( A-2 ) On initialise les listes de points par segment du polygone qui vont créer la face de la géometrie du pans de toit. ----
-			if pans_points == unsupplied do (
-				pans_points = #()
-				for i = 1 to pts.count do (
-					local j 		= if  i == pts.count then 1 else i + 1
-					local pt_1	= pts[i]
-					local pt_2	= pts[j]
-					append pans_points 	#( pt_2, pt_1 )
-				)
-			) */
 			------	( A-2 BIS )  Version avec squel_faces ---------
 			if squel_faces == unsupplied do (
 				squel_faces = #()
@@ -831,133 +1230,21 @@ public
 				)
 			)
 
--- 			debug "		squel_faces" var:squel_faces
-			
-			
-			/******* PROVISOIRE ********/
-		/* 	for pan_pts in pans_points do (
-				ss = SplineShape pos:pan_pts[1] wirecolor:green name:("Face exe: " + compteur_de_passes as string )
-				addNewSpline ss
-				for pt in pan_pts do
-					addKnot ss 1 #corner #line pt
-				close  ss 1 
-				updateShape ss
-			) */
-			/******* PROVISOIRE ********/
-						
-			
-
 			
 			--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			------------------- (B)	Calculs préliminaires  ------------------------------------------------------------------------------------------------------------------------------------------------
 			--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-			debug ""
-			debug "------------ (B)	Calculs préliminaires --------------------------"
-			/* 
-			---- ( B-1)		la liste des angles internes du polygone ----		
-			local angles_poly 				=	#()
-			---- et la liste des normals des bisectrices du polygone ----	
-			local normals_bisecs_poly 	=	#()
-			for i = 1 to pts.count do (
-				local j 		= if  i == pts.count then 1 else i + 1
-				local k 		= if  i == 1 then pts.count else i - 1
-				local angle_pt = get_angle_vecteurs  (pts[k] - pts[i]) 	(pts[j] - pts[i])
-				append angles_poly					angle_pt
-				local norm_bisec_poly = get_normal_bisectionOriente_2vecteurs  (pts[k] - pts[i]) 	(pts[j] - pts[i])
-				append normals_bisecs_poly 	norm_bisec_poly
-			)
-			
-			 */
-			 
-			 
-			 
+			/* actualiser_angles		pts		
+			pts	= supprimer_anglesNuls			pts
 			actualiser_angles		pts		
-			pts	= supprimer_anglesNuls	pts
-			
-			
-			
-			
-			
-			/* 
-			
-			
-			---- ( B-2)	La distance à parcourir pour avoir le prochain 'Evnmt de Segment':	-----
-			----	 (il peut y avoir plusieurs evenements en mm temps, à la meme distance, donc plusieurs pts à stocker )	----
-			local seg_dist_min 	= 0			---->	la distance jusqu'au prochain evenement segment
-			local ids_pt_evt 		= #()		---->	Les points concernés dans le prochain evement segment
-			--- pour chaques points ----------
-			for i = 1 to pts.count do (
-				
-				-- les points concernés -----------
-				local j 		= if  i == pts.count then 1 else i + 1
-				local pt_1	= pts[i]
-				local pt_2	= pts[j]
-				
-				--- la longueur du segment au point 'i'. ---
-				local longueur_seg 		= 		distance pt_1 pt_2
-				
-				--- la longueur necéssaire pour fermer la face 'Evnmt de Segment' ----
-				local tan_omega_avt 	= 		tan (angles_poly[i]/2)
-				local tan_omega_aprs 	= 		tan (angles_poly[j]/2)
-				local seg_dist    			=   	longueur_seg * (  ( tan_omega_avt * tan_omega_aprs ) / (tan_omega_avt + tan_omega_aprs) )
-				
-				
-				--- et donc on verifie si c'est le prochain evenement, et on stock si besoin ------
-				if seg_dist > 0 do (
-					if seg_dist_min == 0 then (
-						seg_dist_min 		= seg_dist
-						ids_pt_evt 			= #(i)
-					) else if seg_dist > 0 do (
-						if seg_dist_min > seg_dist then (
-							seg_dist_min 		= seg_dist
-							ids_pt_evt 			=#(i)
-						) else if seg_dist_min == seg_dist do 
-							append ids_pt_evt 	i
-					)
-				) --- fin seg_dist > 0 --------
-			) -- fin du for chaques pts -----
-			
-			---- ( B-3)	et donc on créé les évenements segments	-----------
-			local evts_segments =#()
-			for i = 1 to ids_pt_evt.count do (
-				
-				-- les ids des points concernés -----------
-				local id_evt 			= ids_pt_evt[i]
-				local id_evt_avt		= if id_evt == 1 then pts.count else id_evt - 1
-				local id_evt_aprs		= if id_evt == pts.count then 1 else id_evt + 1
-				
-				-- la position du point fusionné -----------
-				local vec_seg_avt		=	pts[id_evt_avt] 		- pts[id_evt] 
-				local vec_seg_aprs		=	pts[id_evt_aprs] 	- pts[id_evt]
-				local normal_diag		=	normals_bisecs_poly[id_evt]
-				local dist_depuis_pt 	= 	seg_dist_min / sin ( angles_poly[id_evt] / 2 )
-				local pos_evt 				= 	pts[id_evt] + normal_diag * dist_depuis_pt
-				local dist_passe		 	= 	 sin ( angles_poly[id_evt] / 2 )
-				
-				local passe_prevu		=	compteur_de_passes + integer ( dist_depuis_pt / indent_distance ) - 1
-				
-				--- la creation de l'evenement -----------
-				local nv_evt 	= str_squel_evnt_segment 	id_pt_evnt:		id_evt				\
-																			pos_pt_evnt:		pos_evt 			\
-																			seg_dist_min:		seg_dist_min		\
-																			dist_depuis_pt:	dist_depuis_pt	\
-																			passe_prevu:		passe_prevu
-				append evts_segments 	nv_evt
-			)
-			
-			
+			debug "	---> angles_poly" var:angles_poly
+			pts	= supprimer_anglesPlats		pts
+			actualiser_angles		pts		
+			debug "	---> angles_poly" var:angles_poly
 			*/
-			/* 
-			local evts_segments =		get_evenements_segment		pts		angles_poly		normals_bisecs_poly			
-			local evts_divisions =  	get_evenements_divisions		pts		decalage:indent_distance	
-				
-			
-			debug "	--->	evts_segments" var:evts_segments
-			debug "	--->	evts_divisions" var:evts_divisions
-			
-			
-			 */
-			
+			pts	=	actualiserEtCleanner_angles	pts
+-- 			calculer_angles 	pts
+			debug "		---> pts" var:pts
 			
 			
 			--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -972,20 +1259,22 @@ public
 			local pts_back					= deepCopy pts
 			local pts_retrecissement		= deepCopy pts
 			pts_retrecissement 				= retrecir_polygone		pts_retrecissement			indent_distance
-			local on_a_un_evenement 	= false
+			
 			local on_a_fini 					= false
 			
--- 			---- si on a pas d'evenement segment on n'a pas besoin de faire la boucle ( c'est un peu zarb ça, peut etre pas necessaire, à voir ) ------------
--- 			if evts_segments.count == 0 do 
--- 				on_a_fini = true
+			
+			
+			
+			
 			
 			---- sinon c'est parti pour la BOUCLE ---------------------------------------------------------------------------------------------------------------
-			while not on_a_un_evenement  and not on_a_fini	and dist_parcourue < 500  and compteur_de_passes< 200 do (
+			while  not on_a_fini	and dist_parcourue < 500  and compteur_de_passes< passes_max and pts_retrecissement.count > 3 do (
 				
 				compteur_de_passes += 1 
 				debug "----- compteur_de_passes -----" var:compteur_de_passes
 				
-				--******* PROVISOIRE ********
+				(
+					--******* PROVISOIRE ********
 				ss = SplineShape pos:pts_retrecissement[1] name:("Passe: " + compteur_de_passes as string )  wirecolor:[100,100,100]
 				addNewSpline ss
 				for pt in pts_retrecissement do
@@ -993,34 +1282,30 @@ public
 				close  ss 1 
 				updateShape ss
 				--******* PROVISOIRE ********
+				)
 				
 				---- les evenements -----------------------
-				local evts_segments 	=		get_evenements_segment		pts_back		angles_poly		normals_bisecs_poly
-				local evts_divisions 		=  	get_evenements_divisions		pts_retrecissement		pts_back	--decalage:indent_distance	
+				local evts_segments 		=		get_evenements_segment				pts_back					angles_poly		normals_bisecs_poly
+				local evts_intersections 	=  	get_evenements_intersections		pts_retrecissement		pts_back	--decalage:indent_distance	
+				local evts_aTraiter			=		get_evt_plusProche		( evts_segments + evts_intersections )
 				
--- 			debug "pts_retrecissement" var:pts_retrecissement
+				
+				
+				
+				
 				debug "--------> evts_segments"	var:evts_segments				
-				debug "--------> evts_divisions"	var:evts_divisions
-				local evts_aTraiter		=		get_evt_plusProche		( evts_segments + evts_divisions )
-				
+				debug "--------> evts_intersections"	var:evts_intersections
 				debug "--------> EVTS_ATRAITER"	var:evts_aTraiter
-				
-				
-				
-				------ Les Evenements segments --------------------
--- 				evts_segments 	=		get_evenements_segment		pts_retrecissement		angles_poly		normals_bisecs_poly
-				
-				
 				
 				
 				if evts_aTraiter.count > 0 do (
 					
 					---- on applique le retrecissement 	jusqu'a la distance de l'evenement ----------------------
-					local distance_toEvt		=	evts_aTraiter[1].distance_toEvt			
+					local distance_toEvt		=	evts_aTraiter[1].distance_toEvt
 -- 					pts_retrecissement 			= retrecir_polygone		pts_back			distance_toEvt
 					pts_retrecissement 			= retrecir_polygone		pts_back			( mod  distance_toEvt  indent_distance )
 					
-					
+					/* 
 					--******* PROVISOIRE ********
 					ss = SplineShape pos:pts_retrecissement[1] name:("Passe Evt: " + compteur_de_passes as string )  wirecolor:[255,255,100]
 					addNewSpline ss
@@ -1029,72 +1314,70 @@ public
 					close  ss 1 
 					updateShape ss
 					--******* PROVISOIRE ********
-					
-					
-					local polygones_aRenvoyerDansLaMoulinette	=#()
-					
-					----- pour chaque evenement ------------------------
-					for i = 1 to evts_aTraiter.count do (
+					 */
+					----------- evenements segments ------------------
+					for i = 1 to evts_segments.count do (
 						
-						local evt = evts_aTraiter[i]
-						case classof evt of (
-							
-							str_squel_evnt_segment: (
-										
-										-- les ids des points concernés -----------
-										local id_pt_evnt 				= evt.id_pt_evnt
-										local id_pt_avt_evnt		= if id_pt_evnt == 1 then pts_retrecissement.count else id_pt_evnt - 1
-										local id_pt_aprs_evnt		= if id_pt_evnt == pts_retrecissement.count then 1 else id_pt_evnt + 1
-										local pos_pt_evnt			=	pts_retrecissement[id_pt_evnt]
-										
-										--- on supprime LES points de l'evenement pour les rem:placer pas LE point de l'evenement ----
-										if id_pt_evnt == pts_retrecissement.count then (
-											deleteItem		pts_retrecissement 		id_pt_evnt
-											deleteItem		pts_retrecissement 		1
-											append			pts_retrecissement		evt.pos_pt_evnt
-										) else (
-											deleteItem		pts_retrecissement		id_pt_evnt
-											deleteItem		pts_retrecissement 		id_pt_evnt
-											insertItem		evt.pos_pt_evnt			pts_retrecissement	id_pt_evnt	
-										)
-										
-										
-										---- maj des ids des points des evenements  ---------
-										for j = i to evts_aTraiter.count do (
-											local evt_aCorriger 			= evts_aTraiter[j]
-											evt_aCorriger.id_pt_evnt -= 1
-											if evt_aCorriger.id_pt_evnt == 0 do evt_aCorriger.id_pt_evnt == pts_retrecissement.count
-										)
-										append 	polygones_aRenvoyerDansLaMoulinette		pts_retrecissement
-							)
-							str_squel_evnt_division: (
-								
-								---- et on recupere les polygones resultants --------------------
-								local polys_division	=	get_polys_evtDivision		evt		pts_retrecissement
-								append 	polygones_aRenvoyerDansLaMoulinette  polys_division[1]
-								append 	polygones_aRenvoyerDansLaMoulinette  polys_division[2]
-								
-								
-								
-								/* 
-								---------- on relance avec les poygone obtenus----------------------------
-								local compteur_de_passes_back 	= compteur_de_passes
-								if polys_division[1].count > 2 do
-									this.creer_squelette 	polys_division[1] 		--pans_points:faces_poly_1
-								compteur_de_passes 					= compteur_de_passes_back
-								if polys_division[2].count > 2 do
-									this.creer_squelette 	polys_division[2] 		--pans_points:faces_poly_2
-								 */
-							)
-							
-						)	---- fin case of -------------
+						local evt = evts_segments[i]
+						-- les ids des points concernés -----------
+						local id_pt_evnt 				= evt.id_pt_evnt
+						local id_pt_avt_evnt		= if id_pt_evnt == 1 then pts_retrecissement.count else id_pt_evnt - 1
+						local id_pt_aprs_evnt		= if id_pt_evnt == pts_retrecissement.count then 1 else id_pt_evnt + 1
+						local pos_pt_evnt			=	pts_retrecissement[id_pt_evnt]
 						
-					) 	--- fin for chaque evets ---------
+						
+						
+						append 			squel_faces[ id_pt_evnt ].pts_squelette	pos_pt_evnt
+						append			squelette_result		squel_faces[ id_pt_evnt ]
+						deleteItem		squel_faces 			id_pt_evnt
+						
+						point pos:pts_retrecissement[ id_pt_evnt ]	name:"evt segment"  centermarker:off axistripod:off cross:on Box:off  constantscreensize:off drawontop:off size:2.5 wirecolor:blue
+						
+						--- on supprime LES points de l'evenement pour les rem:placer pas LE point de l'evenement ----
+						if id_pt_evnt == pts_retrecissement.count then (
+							deleteItem		pts_retrecissement 		id_pt_evnt
+							deleteItem		pts_retrecissement 		1
+							append			pts_retrecissement		evt.pos_pt_evnt
+							
+							
+						) else (
+							deleteItem		pts_retrecissement		id_pt_evnt
+							deleteItem		pts_retrecissement 		id_pt_evnt
+							insertItem		evt.pos_pt_evnt			pts_retrecissement	id_pt_evnt	
+						)
+						
+						
+						
+						
+-- 						calculer_angles pts_retrecissement
+						
+						
+						---- maj des ids des points des evenements  ---------
+						for j = i to evts_segments.count do (
+							local evt_aCorriger 			= evts_segments[j]
+							evt_aCorriger.id_pt_evnt -= 1
+							if evt_aCorriger.id_pt_evnt == 0 do evt_aCorriger.id_pt_evnt == pts_retrecissement.count
+						)
+						for j = i to evts_intersections.count do (
+							local evt_aCorriger 			= evts_intersections[j]
+							evt_aCorriger.id_pt_evnt -= 1
+							if evt_aCorriger.id_pt_evnt == 0 do evt_aCorriger.id_pt_evnt == pts_retrecissement.count
+							evt_aCorriger.id_pt_intersec -= 1
+							if evt_aCorriger.id_pt_intersec == 0 do evt_aCorriger.id_pt_intersec == pts_retrecissement.count
+						)
+					)
 					
-					for pts_poly in polygones_aRenvoyerDansLaMoulinette do
-						this.creer_squelette 	pts_poly
--- 					
--- 					this.creer_squelette 	pts_retrecissement
+					
+					
+					
+					if evts_intersections.count > 0 then (
+						----------- evenements intersections ------------------
+						local polys_division	=	get_polys_evts_intersections		evts_intersections	pts_retrecissement
+						
+						for pts_poly in polys_division do	this.creer_squelette 	pts_poly
+					) else this.creer_squelette 	pts_retrecissement
+					
+					
 					
 					on_a_fini = true
 					
@@ -1103,453 +1386,11 @@ public
 				
 				
 				
-				
-				
-				
-				
-				
-				
-				/* 
-				if evts_segments.count > 0 then (
-					
-					
-					---- on prend le premier evenement ----------
--- 					local evt = ( get_evt_plusProche 	evts_segments )[1]
-					
--- 					debug "	--->	evts_segments" var:evt
-					
-					local distance_toEvt	=	evts_segments[1].distance_toEvt
-					
-					pts_retrecissement 			= retrecir_polygone		pts_retrecissement		( mod 	distance_toEvt		indent_distance )
-					
-					
--- 					for evt in evts_segments do (
-					for i = 1 to evts_segments.count do (
-						
-						local evt = evts_segments[i]
-						
-						-- les ids des points concernés -----------
-						local id_pt_evnt 				= evt.id_pt_evnt
-						local id_pt_avt_evnt			= if id_pt_evnt == 1 then pts_retrecissement.count else id_pt_evnt - 1
-						local id_pt_aprs_evnt			= if id_pt_evnt == pts_retrecissement.count then 1 else id_pt_evnt + 1
-						local pos_pt_evnt				=	pts_retrecissement[id_pt_evnt]
-						
-						--- on supprime LES point de l'evenement pour les rem:placer pas LE point de l'evenement ----
-						if id_pt_evnt == pts_retrecissement.count then (
-							deleteItem		pts_retrecissement 		id_pt_evnt
-							deleteItem		pts_retrecissement 		1
-							append				pts_retrecissement		evt.pos_pt_evnt
-						) else (
-							deleteItem		pts_retrecissement		id_pt_evnt
-							deleteItem		pts_retrecissement 		id_pt_evnt
-							insertItem			evt.pos_pt_evnt			pts_retrecissement	id_pt_evnt	
-						)
-						
-						---- maj des ids des points des evenements  ---------
-						for j = i to evts_segments.count do (
-							local evt_aCorriger 			= evts_segments[j]
-							evt_aCorriger.id_pt_evnt -= 1
-							if evt_aCorriger.id_pt_evnt == 0 do evt_aCorriger.id_pt_evnt == pts_retrecissement.count
-						)
-						for j = i to evts_divisions.count do (
-							local evt_aCorriger 			= evts_divisions[j]
-							evt_aCorriger.id_pt_evnt -= 1
-							if evt_aCorriger.id_pt_evnt == 0 do evt_aCorriger.id_pt_evnt == pts_retrecissement.count
-						)
-						
-						
-						
-					)
-					
-					
-					
-					----****** PROVISOIRE ********
-					ss = SplineShape pos:pts_retrecissement[1] name:("Passe: " + compteur_de_passes as string )  wirecolor:yellow
-					addNewSpline ss
-					for pt in pts_retrecissement do
-						addKnot ss 1 #corner #line pt	--	( pt + [0,0,decallageHT * compteur_de_passes ] )
-					close  ss 1 
-					updateShape ss
-					----******* PROVISOIRE ********
-					
-					this.creer_squelette 	pts_retrecissement
-					
-					on_a_fini = true
-					
-				) else (
-					
-					------ Les Evenements division --------------------		
-					evts_divisions 	=  	get_evenements_divisions		pts_retrecissement		decalage:indent_distance	
-					if evts_divisions.count > 0 then (
-						
-						
-						
-						
-						---- on prend le premier evenement ----------
-						local evt = ( get_evt_plusProche		evts_divisions  )[1]
-						
-						debug "	--->	evts_divisions" var:evt
-						
-						
-						
-						
-						
-						
-						
-						---- donc on applique le retrecissement avec le rapport -----------
-						pts_retrecissement	=	retrecir_polygone		pts_retrecissement		evt.distance_toEvt
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						---- et on recupere les polygones resultants --------------------
-						local polys_division	=	get_polys_evtDivision		evt		pts_retrecissement	
-						
-						---------- on relance avec les poygone obtenus----------------------------
-						local compteur_de_passes_back 	= compteur_de_passes
-						if polys_division[1].count > 2 do
-							this.creer_squelette 	polys_division[1] 		--pans_points:faces_poly_1
-						compteur_de_passes 					= compteur_de_passes_back
-						if polys_division[2].count > 2 do
-							this.creer_squelette 	polys_division[2] 		--pans_points:faces_poly_2
-						
-						
-						
-						
-						on_a_fini = true
-						
-					)
-				)
-				 */
--- 				debug "	--->	evts_segments" var:evts_segments
--- 				debug "	--->	evts_divisions" var:evts_divisions
-				
-				
-				
-				
-				
-				
-				-----  ( C-1 )	on stock la position actuel de chaque point du polygone (pts_pos_back) ------
--- 				local pts_pos_back 	= deepCopy pts_retrecissement
-				
 				if not on_a_fini do (
 					
-					
-				
 					pts_back = deepcopy pts_retrecissement
 					pts_retrecissement = retrecir_polygone		pts_retrecissement		indent_distance
-				
-				)
-				
-				
-				
-				
-				/* 
-				---- ( C-2 )	on applique le retrecissement à chaque points ( pour obtenir la lise : pts_retrecissement)  ---------
-				for i = 1 to pts_retrecissement.count do (
 					
-					-- les ids des points concernés -----------
-					local id_pt 			= i
-					local id_pt_avt	= if id_pt == 1 then pts.count else id_pt - 1
-					local id_pt_aprs	= if id_pt == pts.count then 1 else id_pt + 1
-					
-					local pt 			= pts_retrecissement[id_pt]
-					local pt_avt	= pts_retrecissement[id_pt_avt]
-					local pt_aprs 	= pts_retrecissement[id_pt_aprs]
-					
-					local vec_avt		= pts[id_pt_avt] 	- pts[id_pt] 
-					local vec_aprs 	= pts[id_pt_aprs] 	- pts[id_pt] 
-					
-					----	on trouve la position de destination de chaque point du polygone après rétrécissement (pts_pos_dest).
-					local pt_dest 		= decaller_bisectrice 		pt		vec_avt		vec_aprs		indent_distance
--- 					pt_dest.z += decallageHT
-					
-					pts_retrecissement[i] 	= pt_dest
-					
-				)
-				
-				 */
-				
-				
-				
-				
-				
-			
-				
-				
-				
-				------   2)	Les 'EVENEMENTS DE DIVISION' -------------------------		
-				---		( C-3 )	On cherche les evenements de division --------------------
-				---   on cherche les intersections pour chaque points, entre la demi-droite formée par sa trajectoire( pt_Back -> pt_retréci ) et chacun des segments du polygone ----
--- 				local on_a_evts_divisions =  checker_evenements_divisions		pts_retrecissement		pts_pos_back
-				
-				/* 
-				local evts_divisions =#()
-				for i = 1 to pts_retrecissement.count do (
-					
-					-- les ids des points concernés -----------
-					local id_pt 			= i
-					local id_pt_avt	= if id_pt == 1 then pts_retrecissement.count else id_pt - 1
-					local id_pt_aprs	= if id_pt == pts_retrecissement.count then 1 else id_pt + 1
-					
-					local pt 				= pts_retrecissement[id_pt]
-					local pt_avt		= pts_retrecissement[id_pt_avt]
-					local pt_aprs 		= pts_retrecissement[id_pt_aprs]
-					
-					local pt_evt			=	 pts_retrecissement[id_pt]
-					local pt_evt_back	=   pts_pos_back[id_pt]
-					
-					
-					for id_ptTest = 1 to pts_retrecissement.count where id_ptTest !=  id_pt and id_ptTest !=  id_pt_avt  and id_ptTest !=  id_pt_aprs  do (
-						
-						local id_ptTest_apres	= if id_ptTest == pts_retrecissement.count then 1 else id_ptTest + 1
-						local pt_segTest_1 		= pts_retrecissement[id_ptTest]
-						local pt_segTest_2 		= pts_retrecissement[id_ptTest_apres]
-						
-						local intersection = get_intersection_demiDroite_segment		pt_evt   pt_evt_back		pt_segTest_1	pt_segTest_2
-						
-						if intersection  != undefined  do (
-							local nv_evt = str_squel_evnt_division 		id_pt_evnt:id_pt 		id_pt_intersec:id_ptTest 	pos_pt_evnt:intersection
-							append evts_divisions  nv_evt	
-							
-							
-							point pos:intersection wirecolor:yellow  name:("id_pt:" + id_pt as string + " id_intrsc: " + id_ptTest as string )
-							
-							
-						)
-					)
-				
-				)
-				 */
-				
--- 				debug "	on_a_evts_divisions" var:on_a_evts_divisions
-				
-				
-				
-				
-				(
--- 										if not on_a_evts_divisions do (
--- 											---- ( C-4 )	on controle les evenements ------------------------------------------------------------------------
--- 											------   1)	Les 'EVENEMENTS DE SEGMENT' -------------------------		
--- 											local ids_evts_a_retirer 		=#()
--- 											local ids_pts_a_retirer 		=#()
--- 											local squelette_result_temp =#()
--- 											for i=1 to evts_segments.count  where pts_retrecissement.count > 2    do (
--- 												
--- 												local evt = evts_segments[i]
--- 												
--- 												-- on test si on a atteind la position de l'evenement ---------
--- 												if dist_parcourue >= evt.seg_dist_min - indent_distance or evt.seg_dist_min <= 0 do (
--- 													
--- 													--- on declenche l'evenement ----------
--- 													on_a_un_evenement = true
--- 													
--- 													/******* PROVISOIRE ********/
--- 													debug "########## 'Evnmts de Segment' ##########"
--- 													debug "		passe" var:compteur_de_passes
--- 													/* for pan_pts in pans_points do (
--- 														ss = SplineShape pos:pan_pts[1] wirecolor:red name:("Face passe: " + compteur_de_passes as string )
--- 														addNewSpline ss
--- 														for pt in pan_pts do
--- 															addKnot ss 1 #corner #line pt
--- 														close  ss 1 
--- 														updateShape ss
--- 													) */
--- 													/******* PROVISOIRE ********/
--- 													
--- 													
--- 													-- les ids des points concernés -----------
--- 													local id_pt_evnt 				= evt.id_pt_evnt
--- 													local id_pt_avt_evnt		= if id_pt_evnt == 1 then pts_retrecissement.count else id_pt_evnt - 1
--- 													local id_pt_aprs_evnt		= if id_pt_evnt == pts_retrecissement.count then 1 else id_pt_evnt + 1
--- 													local pos_pt_evnt			=	pts_retrecissement[id_pt_evnt]
--- 													
--- 													
--- 													
--- 													
--- 													
--- 													
--- 													debug "pts_retrecissement	Avant" var:pts_retrecissement
--- 													
--- 													pts_pos_back 	= deepCopy pts_retrecissement
--- 													---- 	on applique le retrecissement  jusqu'a l'evenement  ---------
--- 													for i = 1 to pts_retrecissement.count do (
--- 														
--- 														-- les ids des points concernés -----------
--- 														local id_pt 			= i
--- 														local id_pt_avt	= if id_pt == 1 then pts.count else id_pt - 1
--- 														local id_pt_aprs	= if id_pt == pts.count then 1 else id_pt + 1
--- 														
--- 														local pt 			= pts_retrecissement[id_pt]
--- 														local pt_avt	= pts_retrecissement[id_pt_avt]
--- 														local pt_aprs 	= pts_retrecissement[id_pt_aprs]
--- 														
--- 														local vec_avt		= pts[id_pt_avt] 	- pts[id_pt] 
--- 														local vec_aprs 	= pts[id_pt_aprs] - pts[id_pt] 
--- 														
--- 														----	on trouve la position de destination de chaque point du polygone après rétrécissement (pts_pos_dest).
--- 														local pt_dest 		= decaller_bisectrice 		pt		vec_avt		vec_aprs		( mod evt.seg_dist_min	indent_distance )
--- 									-- 					pt_dest.z += decallageHT
--- 														
--- 														pts_retrecissement[i] 	= pt_dest
--- 														
--- 													)
--- 													--- on supprime LES point de l'evenement pour les rem:placer pas LE point de l'evenement ----
--- 													if id_pt_evnt == pts_retrecissement.count then (
--- 														deleteItem		pts_retrecissement 		id_pt_evnt
--- 														deleteItem		pts_retrecissement 		1
--- 														append			pts_retrecissement		evt.pos_pt_evnt		
--- 													) else (
--- 														deleteItem		pts_retrecissement		id_pt_evnt
--- 														deleteItem		pts_retrecissement 		id_pt_evnt
--- 														insertItem		evt.pos_pt_evnt		pts_retrecissement	id_pt_evnt	
--- 													)
--- 													
--- 													debug "pts_retrecissement	Apres" var:pts_retrecissement
--- 													
--- 													
--- 													/******* PROVISOIRE ********/
--- 													ss = SplineShape pos:pts_retrecissement[1] name:("Passe: " + compteur_de_passes as string )  wirecolor:yellow
--- 													addNewSpline ss
--- 													for pt in pts_retrecissement do
--- 														addKnot ss 1 #corner #line 	( pt + [0,0,decallageHT * compteur_de_passes ] )
--- 													close  ss 1 
--- 													updateShape ss
--- 													/******* PROVISOIRE ********/
--- 													
--- 													
--- 													
--- 													
--- 													
--- 													
--- 													
--- 													
--- 													
--- 													
--- 													
--- 													
--- 													----- RESULTAT ?!?!? -----------
--- 													----   On met à jour les faces des segmets concernés ---------
--- 							-- 						append 		pans_points[id_pt_evnt]									pos_pt_evnt
--- 							-- 						insertItem 	pos_pt_evnt		pans_points[id_pt_avt_evnt]		 1									
--- 							-- 						append  		pans_points[id_pt_aprs_evnt]							pos_pt_evnt
--- 													
--- 													--- (BIS)	Version avec squel_faces  ------
--- 													append  		squel_faces[id_pt_evnt].pts_squelette				pos_pt_evnt
--- 													insertItem  	pos_pt_evnt			squel_faces[id_pt_aprs_evnt].pts_squelette		1
--- 													
--- 													
--- 													append			ids_evts_a_retirer		i 
--- 													insertItem  	id_pt_evnt			ids_pts_a_retirer		1
--- 													
--- 													
--- 													----   On créé la face formée par nos points (pans_points[id_pt_evnt] ou squel_faces[id_pt_evnt]  )	---------------------------
--- 													--- (BIS)	 on valide le segment du squelette -----------------
--- 													append			squelette_result_temp		squel_faces[id_pt_evnt]
--- 													/* 
--- 													--- (BIS)	 on supprime le segment qui a ete validé --------
--- 													deleteItem	squel_faces				id_pt_evnt
--- 													 */
--- 													 
--- 													 
--- 													 
--- 													/******* PROVISOIRE ********/
--- 													/* ss = SplineShape pos:pans_points[evt.id_pt_evnt][1]  
--- 													addNewSpline ss
--- 													for pt in pans_points[evt.id_pt_evnt] do
--- 														addKnot ss 1 #corner #line pt
--- 													close  ss 1 
--- 													updateShape ss
--- 													addmodifier ss  ( edit_poly() ) */
--- 													/******* PROVISOIRE ********/
--- 													
--- 													
--- 													
--- 													
--- 																			
-
--- 													----   On retire le point source de l'évènement (id_pt_evnt) de la liste des points du polygone (pts_poly) et de la liste des faces à créer (pans_points).
--- 							-- 						deleteItem pts_retrecissement  		id_pt_evnt
--- 							-- 						deleteItem pans_points 				id_pt_evnt
--- 													
--- 													
--- 													
--- 													
--- 													----   On met à jour les index des points des evenement restant à traiter (on retire 1 aux points étant après (id_pt_evnt)).
--- 													for j = i+1 to evts_segments.count do (
--- 														local evt_a_modifer = evts_segments[j]
--- 														evt_a_modifer.id_pt_evnt = if evt_a_modifer.id_pt_evnt  == 1 then pts_retrecissement.count else evt_a_modifer.id_pt_evnt  - 1
--- 													)
--- 													/*
--- 													for j = 1 to evts_divisions.count do (
--- 														local evt_a_modifer = evts_divisions[j]
--- 														evt_a_modifer.id_pt_evnt 		= if evt_a_modifer.id_pt_evnt  == 1 		then pts_retrecissement.count else evt_a_modifer.id_pt_evnt  - 1
--- 														evt_a_modifer.id_pt_intersec 	= if evt_a_modifer.id_pt_intersec  == 1 	then pts_retrecissement.count else evt_a_modifer.id_pt_intersec  - 1
--- 													)
--- 													
--- 													 */
--- 													
--- 													
--- 						-- 							if pts_retrecissement.count <= 2  then 
--- 														on_a_fini = true
--- 													
--- 												) --- fin declenchement de l'evenement ---------
--- 												
--- 											)  ----- fin evenements  'segments' -------------------		
--- 											
--- 											
--- 											-------on retire les evets segments déclenchés -----
--- 											for i_aRetirer = ids_evts_a_retirer.count  to 1 by -1  do
--- 												deleteItem evts_segments 	 ids_evts_a_retirer[i_aRetirer]
--- 											ids_evts_a_retirer =#()
--- 											
--- 											
--- 											
--- 											---- on reste les divisions -------------
--- 						-- 					on_a_fini =  checker_evenements_divisions		pts_retrecissement		pts_pos_back
--- 										
--- 											
--- 										)
-				)
-				
-				
-				
-				
-				
-				
-				/* 
-				
-				if evts_segments.count == 0 and not on_a_fini do (
-					on_a_fini = true
-					if pts_retrecissement.count > 2 do (
-						debug " ************ on a pas fini, on relance (je sais pas bien pourquoi on est là) .... **********************************************"
--- 						creer_squelette 	pts_retrecissement 	pans_points:pans_points
-					)
-				)
-				 */
-				
-			
-				if on_a_fini do (
-					/******* PROVISOIRE ********/
-					/* for pan_pts in pans_points do (
-						ss = SplineShape pos:pan_pts[1]
-						addNewSpline ss
-						for pt in pan_pts do
-							addKnot ss 1 #corner #line pt
-						close  ss 1 
-						updateShape ss
-						addmodifier ss  ( edit_poly() )
-					) */
-					
-					/******* PROVISOIRE ********/
 				)
 				
 				dist_parcourue += indent_distance
@@ -1590,8 +1431,10 @@ clearlistener ()
 
 squel = str_squelettisation ()
 
-shp = $Rectangle006
--- shp = $Shape001
+-- shp = $shape001
+shp = $Rectangle001
+-- shp = $Rectangle006
+-- shp = $Line002
 -- shp = $test_dot
 -- shp = $test
 -- for obj in objects where obj != shp do delete obj
