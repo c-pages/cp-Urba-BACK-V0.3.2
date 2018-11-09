@@ -11,7 +11,7 @@ fn creer_debug_pts	_liste_pos =(
 	
 	
 	fn creer_pt 	posit =(
-		p =   point pos:posit		name:"pt_debug" centermarker:on axistripod:off cross:on Box:off size:100 constantscreensize:off drawontop:off wirecolor:yellow	
+		p =   point pos:posit		name:"pt_debug" centermarker:on axistripod:off cross:on Box:off  constantscreensize:off drawontop:off 
 		selectmore p
 	)
 	case classof _liste_pos of (
@@ -70,7 +70,7 @@ fn debug_point 	_pos	=  if DEBUG_MODE do  (
 	
 	
 
-	try delete $pt_debug* catch ()
+-- 	try delete $pt_debug* catch ()
 	clearselection ()
 	
 	creer_debug_pts		_pos
