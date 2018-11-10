@@ -2,7 +2,7 @@
 
 
 
-include	 "$userScripts\\cp-Urba\\modules\\Commun\\cp - mgr - Shapes.ms" 
+
 	
 ---- fonction pour affichage viewport -----------
 global 	urba_fn_afficheur_longueurs
@@ -39,7 +39,7 @@ category:"CP | Urba temp"
 	
 	---- managers ----------
 	local mgr_shp 	= str_mgr_shape ()
-	local mgr_mesh 	= str_mgr_mesh ()
+	local mgr_mesh 	= include	 "$userScripts\\cp-Urba\\modules\\Commun\\cp - mgr - Shapes.ms" 
 	
 	
 	

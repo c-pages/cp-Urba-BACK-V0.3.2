@@ -1,5 +1,6 @@
 
-
+(
+	
 struct str_mgr_shape (
 
 
@@ -264,22 +265,67 @@ struct str_mgr_shape (
 			
 		),
 
-		fn	get_angleVecteurs 	v1 v2	 =(
--- 			debug "get_angleVecteurs"
--- 			debug "dot (normalize v1) (normalize v2)" var:(dot (normalize v1) (normalize v2))
-			local result_angle
--- 			if abs (dot (normalize v1) (normalize v2)) == 0 then 
--- 				result_angle = 0
--- 			else
-				result_angle = acos(dot (normalize v1) (normalize v2))
--- 			format "angle entre vec :%\n" result_angle
-			result_angle
-		),		
-		fn	get_angleVecteurs_oriente 	vec1_pt1	vec1_pt2	vec2_pt1	vec2_pt2 =(
+		
+		
+	
+		fn get_angle_vecteur 	vec	=(
+			
+			local result = 0
+			local angle_tan = atan ( vec.y / vec.x )
+			
+			if vec.x >=0 then (
+				if vec.y >= 0 then 	result = angle_tan
+				else 	result = 360 + angle_tan
+			) else (		
+				if vec.y >= 0 then 	result = 180 + angle_tan
+				else result = 180 + angle_tan
+			)
+			
+			result
+		),
+		fn get_angle_vecteurs 		vec1 	vec2	=(
+			local result = ( get_angle_vecteur  vec1 )  - ( get_angle_vecteur  vec2 )
+			if result < 0 do result = 360 + result
+			result
+		),
+		fn get_normal_bisectionOriente_2vecteurs 		_vec1 	_vec2		=(
+			
+			local	norm_dir 
+			
+			local norm_vec_1 = (normalize _vec1)
+			local norm_vec_2 = (normalize _vec2)			
+			
+			
+			if  norm_vec_1 ==  [-1,0,0] and norm_vec_2 == [1,0,0] then 
+				norm_dir = [0,1,0]
+			else if norm_vec_1 ==  [1,0,0] and norm_vec_2 == [-1,0,0] then 
+				norm_dir = [0,-1,0]
+			else if norm_vec_1 ==  [0,1,0] and norm_vec_2 == [0,-1,0] then 
+				norm_dir = [1,0,0]
+			else if norm_vec_1 ==   [0,-1,0] and norm_vec_2 == [0,1,0] then 
+				norm_dir = [-1,0,0]
+			else (
+				
+				local crossProd 	= cross _vec1 	_vec2
+				local sensDot 		= dot crossProd  [0,0,1]
+				local sens 			= if sensDot > 0 then -1 else 1
+				
+				norm_dir 		= normalize ( ( norm_vec_1 + norm_vec_2 ) * sens )
+				
+			---- s'ils sont alignés, on fait les 4 cas 
+			)  
+			
+			
+			
+			norm_dir
+			
+		),
+		
+		fn	get_angle_vecteur_oriente 	vec1_pt1	vec1_pt2	vec2_pt1	vec2_pt2 =(
 			local v1 = vec1_pt2 - vec1_pt1
 			local v2 = vec2_pt2 - vec2_pt1
 			
-			local result_angle = get_angleVecteurs 	v1 v2	 
+			local result_angle = get_angle_vecteur 	v1 v2	 
 			
 			if est_aGauche		vec1_pt1	vec1_pt2		( vec1_pt2 +  v2 ) do 
 				result_angle	=	 - result_angle
@@ -290,7 +336,7 @@ struct str_mgr_shape (
 			local v1 = [1,0,0]
 			local v2 = vec1
 			
-			local result_angle = get_angleVecteurs 	v1 v2	 
+			local result_angle = get_angle_vecteur 	v1 v2	 
 			
 			if est_aGauche		v1	[0,0,0]		vec1 do 
 				result_angle	=	 - result_angle
@@ -309,7 +355,7 @@ struct str_mgr_shape (
 			local vec_1 		= (_seg_pt2  -  _seg_pt1)
 			local vec_2 		=  ( _pt  -  _seg_pt1)
 			
-			local angle_test 	= get_angleVecteurs    vec_1 vec_2
+			local angle_test 	= get_angle_vecteur    vec_1 vec_2
 -- 			debug "			--->	angle_test" var:angle_test
 			local longueur_hypo = length vec_2
 -- 			debug "			--->		longueur_hypo" var:longueur_hypo
@@ -328,26 +374,87 @@ struct str_mgr_shape (
 			aire
 		),
 		
-		fn get_intersection_vecteurs		vec1_pt_1   vec1_pt_2		vec2_pt_1	vec2_pt_2 =(
+		
+		
+		
+		
+		fn get_intersection_droites		vec1_pt_1   vec1_pt_2		vec2_pt_1	vec2_pt_2 =(
 			
-			local pt_intersec	
--- 			if BBs_seCroisent #( vec1_pt_1 ,  vec1_pt_2 ) 	#( 	vec2_pt_1	vec2_pt_2  ) do (
+			local pt_intersec
+			
+			local vec_1 = vec1_pt_2 - vec1_pt_1
+			local vec_2 = vec2_pt_2 - vec2_pt_1
+			
+-- 			pt_P = vec1_pt_1 + coef_vec1*vec_1
+-- 			pt_P = vec2_pt_1 + m*vec_2
+			
+			if vec_1.x*vec_2.y-vec_1.y*vec_2.x == 0 then (
+-- 				debug "##### PARALLELES #####"
+			) else (
 				
-				local vec_1 = vec1_pt_2 - vec1_pt_1
-				local vec_2 = vec2_pt_2 - vec2_pt_1
+				local coef_vec2 = -(-vec_1.x*vec1_pt_1.y+vec_1.x*vec2_pt_1.y+vec_1.y*vec1_pt_1.x-vec_1.y*vec2_pt_1.x)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+				local coef_vec1 = -(vec1_pt_1.x*vec_2.y-vec2_pt_1.x*vec_2.y-vec_2.x*vec1_pt_1.y+vec_2.x*vec2_pt_1.y)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+-- 				debug "coef_vec1" var:coef_vec1
+-- 				debug "coef_vec2" var:coef_vec2
 				
-				if vec_1.x*vec_2.y-vec_1.y*vec_2.x != 0 then (				
-					local coef_vec2 = -(-vec_1.x*vec1_pt_1.y+vec_1.x*vec2_pt_1.y+vec_1.y*vec1_pt_1.x-vec_1.y*vec2_pt_1.x)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
-					local coef_vec1 = -(vec1_pt_1.x*vec_2.y-vec2_pt_1.x*vec_2.y-vec_2.x*vec1_pt_1.y+vec_2.x*vec2_pt_1.y)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
-					if coef_vec1 > 0 and coef_vec1 < 1 and coef_vec2 > 0 and coef_vec2 <1 do
-						pt_intersec	= vec2_pt_1 + coef_vec2*vec_2
-				)
--- 			)
+-- 				if coef_vec1 > 0 and coef_vec1 < 1 and coef_vec2 > 0 and coef_vec2 <1 do
+					pt_intersec	= vec2_pt_1 + coef_vec2*vec_2
+-- 					pt_intersec	= vec1_pt_1 + coef_vec1*vec_1
+				
+			)
+			
 			pt_intersec
 			
-		),		
-		
-		
+		),
+		fn get_intersection_vecteurs		vec1_pt_1   vec1_pt_2		vec2_pt_1	vec2_pt_2 =(
+			
+			local pt_intersec
+			
+			local vec_1 = vec1_pt_2 - vec1_pt_1
+			local vec_2 = vec2_pt_2 - vec2_pt_1
+			
+			
+			if vec_1.x*vec_2.y-vec_1.y*vec_2.x == 0 then (
+-- 				debug "##### PARALLELES #####"
+			) else (
+				
+				local coef_vec2 = -(-vec_1.x*vec1_pt_1.y+vec_1.x*vec2_pt_1.y+vec_1.y*vec1_pt_1.x-vec_1.y*vec2_pt_1.x)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+				local coef_vec1 = -(vec1_pt_1.x*vec_2.y-vec2_pt_1.x*vec_2.y-vec_2.x*vec1_pt_1.y+vec_2.x*vec2_pt_1.y)/(vec_1.x*vec_2.y-vec_1.y*vec_2.x)
+
+				
+				if coef_vec1 > 0 and coef_vec1 < 1 and coef_vec2 > 0 and coef_vec2 <1 do
+					pt_intersec	= vec2_pt_1 + coef_vec2*vec_2
+				
+			)
+			
+			pt_intersec
+			
+		),
+		fn get_intersection_demiDroite_segment		pt_demiDrt_orig	pt_demiDrt_direction  	seg_pt_1  seg_pt_2 =(
+			
+			local result
+			
+			local pt_intersection 		=  get_intersection_droites		pt_demiDrt_orig   pt_demiDrt_direction		seg_pt_1	seg_pt_2 
+			if pt_intersection != undefined do (
+				
+				local vec_intersection 		= pt_intersection 			- pt_demiDrt_orig
+				local	norm_intersection	= normalize vec_intersection
+				local vec_demiDroite 		= pt_demiDrt_direction		- pt_demiDrt_orig
+				local	norm_demiDroite		= normalize vec_demiDroite
+				
+				local dot_intersection 		= dot norm_intersection 	norm_demiDroite	
+-- 				
+				-- on test le segment ------
+				local dist_seg_1 		= 	length	( seg_pt_1 -	pt_intersection )
+				local dist_seg_2 		= 	length	( seg_pt_2 -	pt_intersection )
+				local dist_seg_test 	=  length	( seg_pt_1 -	seg_pt_2 )
+				
+				--- si on est sur la demi droite ---------------
+				if abs ( dist_seg_test  - ( dist_seg_1 + dist_seg_2  ) ) < .01 and dot_intersection > 0 do
+					result		=  pt_intersection				
+			)
+			result
+		),
 		fn get_intersection_droite_droite		droite1_pt_1		droite1_pt_2 		droite2_pt_1		droite2_pt_2 =(
 -- 			debug "get_intersection_droite_droite"
 			local pt_intersec	
@@ -368,6 +475,8 @@ struct str_mgr_shape (
 			pt_intersec
 			
 		),
+		
+		
 		
 		
 		fn point_lePlusHautSurY 			_pts		=(
@@ -407,7 +516,7 @@ struct str_mgr_shape (
 				local vec_1 		= (_pt_seg2  -  _pt_seg1)
 				local vec_2 		=  ( pt  -  _pt_seg1)
 				
-				local angle_test 	= get_angleVecteurs    vec_1 vec_2
+				local angle_test 	= get_angle_vecteur    vec_1 vec_2
 				
 				local dist_test 	= abs ( ( dot  vec_1  vec_2 ) * tan  angle_test ) */
 				
@@ -589,6 +698,49 @@ struct str_mgr_shape (
 		
 		
 		
+		fn decaller_bisectrice 		_pt_a_decaller		_vec_avt		_vec_aprs		_distance	=(
+			
+			local	norm_bisectrice 				= get_normal_bisectionOriente_2vecteurs 	_vec_avt 		_vec_aprs
+			local distance_aux_segments 	= _distance
+			local angle_pt 							= get_angle_vecteurs 	_vec_avt	 _vec_aprs
+			local distance_sur_bisectrice 	= distance_aux_segments / ( sin ( angle_pt /2) )		
+			
+			local result	 			= _pt_a_decaller 	+ norm_bisectrice		* distance_sur_bisectrice 
+			
+			result
+			
+		),
+		fn retrecir_polygone 		_pts		_decalage	= (
+			
+			local poly_result = #()
+			
+			---- ( C-2 )	on applique le retrecissement à chaque points ( pour obtenir la lise : pts_retrecissement)  ---------
+			for i = 1 to _pts.count do (
+				
+				-- les ids des points concernés -----------
+				local id_pt 			= i
+				local id_pt_avt		= if id_pt == 1 then _pts.count else id_pt - 1
+				local id_pt_aprs	= if id_pt == _pts.count then 1 else id_pt + 1
+				
+				local pt 			= _pts[id_pt]
+				local pt_avt		= _pts[id_pt_avt]
+				local pt_aprs 	= _pts[id_pt_aprs]
+				
+				local vec_avt		= _pts[id_pt_avt] 	- _pts[id_pt] 
+				local vec_aprs 		= _pts[id_pt_aprs] 	- _pts[id_pt] 
+				
+				
+				----	on trouve la position de destination de chaque point du polygone après rétrécissement (pts_pos_dest).
+				local pt_dest 		= decaller_bisectrice 		pt		vec_avt		vec_aprs		_decalage
+-- 					pt_dest.z += decallageHT
+				
+				poly_result[i] 	= pt_dest
+				
+			)
+			poly_result
+		),
+		
+		
 		
 		--- sens du shape ----------------------
 		fn est_sensPositif 				_pts 		=(
@@ -704,7 +856,7 @@ struct str_mgr_shape (
 		
 		
 		
-		
+		---------------------- collisions ------------------------
 		fn BBs_seCroisent		_shp_1  	_shp_2	 =(
 			local result = false
 			
@@ -740,7 +892,6 @@ struct str_mgr_shape (
 			)
 			result
 		),
-		
 		------- renvois la position d'un shape par rapport à un autre: si un shapes est ' l'interieur d'un autre (trou boolean), se croisent ou à l'exterieur ---------
 		fn get_positionRelative_shapes 		_pts_shpA		_pts_shpB 		renvoyer_intersections:true		=(
 			
@@ -851,8 +1002,6 @@ struct str_mgr_shape (
 			
 			result
 		),
-		
-		
 		fn shape_estDans_shape		_shp_1  shp_test 	=(
 			if _shp_1.count == 0 then 			
 				true
@@ -2083,3 +2232,5 @@ struct str_mgr_shape (
 	
 )
 
+str_mgr_shape ()
+)
