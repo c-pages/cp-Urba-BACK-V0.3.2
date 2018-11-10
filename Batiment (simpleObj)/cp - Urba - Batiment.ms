@@ -2,7 +2,6 @@
 
 
 
-
 	
 ---- fonction pour affichage viewport -----------
 global 	urba_fn_afficheur_longueurs
@@ -33,13 +32,15 @@ category:"CP | Urba temp"
 	local basculer_editeurFacade, ajouter_facade, retirer_facade, monter_facade, descendre_facade, renommer_facade, actualiser_shape
 	local afficher_longueurs
 	
+	local definir_toiture
+	
 	----- les points de la surface------------------------
 	local pts_surface
 	
 	
 	---- managers ----------
 	local mgr_shp 	= str_mgr_shape ()
-	local mgr_mesh 	= include	 "$userScripts\\cp-Urba\\modules\\Commun\\cp - mgr - Shapes.ms" 
+	local mgr_mesh 	= str_mgr_mesh ()
 	
 	
 	
@@ -87,7 +88,10 @@ category:"CP | Urba temp"
 	)
 	
 	parameters param_toiture  rollout:roll_toiture (		
-		toiture_type					type:#integer 			ui:ddl_toiture_type		default:1
+		toiture_type				type:#integer 			ui:ddl_toiture_type		default:1
+		toiture						type:#maxObject	
+		
+		on toiture_type set val do definir_toiture		toiture_type
 	)
 	
 	
@@ -297,12 +301,27 @@ category:"CP | Urba temp"
 	rollout roll_toiture "Toiture"	(
 		
 		
-		dropDownList	ddl_toiture_type		""	 items:#("Sans",  "Terrasse",   "1 pan",   "2 pans",   "x pans" )
+		dropDownList	ddl_toiture_type		""	 items:#("Sans",  "Terrasse",   "1 pan",   "2 pans",   "n pans" )
 		subrollout			subroll_param			""	height:150
 		
-		dotNetControl btn_resize 	"System.Windows.Forms.Button" 		align:#left /* width:150 */ height:10
+		dotNetControl 	btn_resize 	"System.Windows.Forms.Button" 		align:#left /* width:150 */ height:10
 		
-		fn actualiser = ()
+		fn actualiser = (
+			
+			--- les parametres de l'element (le subrollout)  ---------------			
+			--- on retire les vieux rollouts --------
+			if subroll_param.rollouts.count > 0 do 
+				for subRoll in subroll_param.rollouts  do
+					removeSubRollout subroll_param	subRoll
+				
+			local composant_actif 	
+			---- on ajoute le nouveau -----------------
+			if ddl_toiture_type.selection > 1 then (
+				addSubRollout 	subroll_param		toiture.roll_general
+			)
+			
+			
+		)
 		
 		----- Gestion du resize du subRollout -----------------------
 		local resize_enCours 			= false
@@ -349,7 +368,7 @@ category:"CP | Urba temp"
 		on	btn_resize	MouseMove 	do 	resize_surbRoll ()
 		on	btn_resize	MouseLeave 	do	resize_enCours = false		
 		
-		
+		on 	ddl_toiture_type		selected val		do actualiser()
 	) ----- fin rollout toiture -----------------------
 	
 	
@@ -392,6 +411,12 @@ category:"CP | Urba temp"
 	
 	
 	-------------- divers -------------------------
+	fn initialiser =(
+		mgr_shp 	= str_mgr_shape ()
+		mgr_mesh 	= str_mgr_mesh ()
+	)
+	
+	
 	fn actualiser_shape =(
 		if surface_node != undefined then (
 			
@@ -600,7 +625,14 @@ category:"CP | Urba temp"
 	)
 	
 	
-	
+	fn definir_toiture		_id_type 	=(
+-- 		debug "definir_toiture" var:_id_type
+		case _id_type of (
+			1:		toiture		=	undefined
+			5:		toiture 		= createInstance		batiment_composant_toiture_nPans
+		)
+-- 		debug "toiture" var:toiture
+	)
 	
 	----- gestion des facades ----------------------------------------------------
 	fn get_facades_pourMur		_id_pt	 =(
@@ -682,6 +714,9 @@ category:"CP | Urba temp"
 	------------  Construction du mesh --------------------------
 	on buildMesh do	(
 		
+-- 		debug "buildMesh"
+		
+		
 		local chrono_debut = timestamp ()
 		
 		seed	hasard_seed
@@ -710,7 +745,7 @@ category:"CP | Urba temp"
 				
 				local angle_facade 		=	mgr_shp.get_angle_oriente 	(pt_suivant - pt )
 				local transf_facade 		= rotateZmatrix	angle_facade	*	transMatrix pt
-					
+				
 				
 				
 				
@@ -782,6 +817,16 @@ category:"CP | Urba temp"
 					meshop.createPolygon  mesh verts_toiture 	smGroup:1 	matID:matId_mur
 					
 				)
+					
+				5:(	---------- n pans ----------------------
+					local pts_toiture 	= deepcopy pts_surface
+					pts_toiture.z 		= (etages_nbre+1) * ( dalle_epaisseur + etages_hauteur_global  )
+					local compo_toiture = copy toiture
+					compo_toiture.set_points		pts_toiture
+					mgr_mesh.attacher		mesh		compo_toiture	
+					
+				)
+				
 				
 			) ---- fin case toiture_type	-------
 			
@@ -791,7 +836,7 @@ category:"CP | Urba temp"
 		) --- fin if surface ---------------------
 		
 		local chrono_fin = timeStamp()
-		debug  "build mesh " var:( ((chrono_fin - chrono_debut) / 1000.0) as string + "s.")
+-- 		debug  "build mesh " var:( ((chrono_fin - chrono_debut) / 1000.0) as string + "s.")
 		
 	) --------- fin on build mesh --------------------------
 	
@@ -824,12 +869,9 @@ category:"CP | Urba temp"
 	) ----- fin tool create -------------
 	
 	
-	
-	on update do (
-		
-		mgr_shp 	= str_mgr_shape ()
-		mgr_mesh 	= str_mgr_mesh ()
-	)
+	on update 	do initialiser ()
+	on create  	do initialiser ()
+	on load  	do initialiser ()
 	
 ) --------- fin plugin -------------------------------------------------------------------------------------------
 
