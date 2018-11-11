@@ -1,10 +1,5 @@
 
 
-
-
-
-
-
 plugin simpleObject		batiment_composant_toiture_nPans
 name:"Toit n pans"
 classID:#(0x484f89fb, 0x546888a1)
@@ -31,6 +26,7 @@ category:"CP | Bâtiment	| Composant"
 	
 	---- managers		 -------------------
 	local mgr_mesh 			=	str_mgr_mesh ()
+	local mgr_shape 			=	str_mgr_shape ()
 	local mgr_squelette		=	str_squelettisation ()
 	
 	
@@ -40,10 +36,11 @@ category:"CP | Bâtiment	| Composant"
 		----- global ---------------------
 		points_surface					type:#point3Tab  	tabSizeVariable:true
 		pente		 					type:#float			 	ui:spn_pente				default:20.
+		decallage						type:#worldUnits		ui:spn_decallage			default:10.
 		
-		debord_use						type:#boolean 		ui:shk_debord				default:false
-		debord_longueur				type:#worldUnits		ui:spn_debord_lg			default:50.
-		debord_hauteur				type:#worldUnits		ui:spn_debord_ht			default:50.
+		debord_use						type:#boolean 		ui:shk_debord				default:true
+		debord_longueur				type:#worldUnits		ui:spn_debord_lg			default:30.
+		debord_hauteur				type:#worldUnits		ui:spn_debord_ht			default:20.
 		
 	)
 	
@@ -75,11 +72,24 @@ category:"CP | Bâtiment	| Composant"
 	rollout roll_general 			"Paramètres"	(
 		
 		spinner spn_pente	 				"Pente (°)" 				type:#float range:[0,80,0]
+		spinner spn_decallage 				"Decallage" 			type:#worldunits range:[0,1e20,0]
+		
 		group "Corniche" (
 			checkbox	shk_debord			"Corniche"
 			spinner spn_debord_lg 			"Longueur" 			type:#worldunits range:[0,1e20,0]
 			spinner spn_debord_ht 			"Hauteur" 			type:#worldunits range:[0,1e20,0]
 		)
+		
+		fn actualiser =(
+			
+			spn_debord_lg.indeterminate		=	not debord_use
+			spn_debord_lg.enabled 				=	debord_use
+			spn_debord_ht.indeterminate		=	not debord_use
+			spn_debord_ht.enabled 				=	debord_use
+		)
+		
+		
+		on shk_debord changed state do actualiser ()
 	)
 	
 	rollout roll_divers  			"Divers"			(
@@ -175,16 +185,78 @@ category:"CP | Bâtiment	| Composant"
 		if points_surface.count > 0 do (
 			
 			
-			-----	la corniche	---------------
 			
-			-----	les pans 		---------------
-			local faces_squel = mgr_squelette.exe 		points_surface 	pente:pente
+-- 			meshop.createPolygon <Mesh mesh> <vertIndex array> smGroup:<int=0> matID:
 			
--- 			debug "faces_squel" var:faces_squel
 			local pts 		= #()
 			local faces		= #()
 			local matIds	= #()
 			local id_pt		=	1
+			
+			local pts_toiture
+			
+			-----	la corniche	------------------------------------------
+			local pts_corniche 	= for pt in  points_surface collect pt			
+			local pts_sousFace 	= mgr_shape.retrecir_polygone	pts_corniche	-debord_longueur
+			local pts_epaisseur 	= deepcopy pts_sousFace
+			pts_epaisseur.z +=	debord_hauteur
+			local pts_toiture 	
+			
+			if debord_use then pts_toiture	= mgr_shape.retrecir_polygone	pts_epaisseur	decallage
+			else pts_toiture	= mgr_shape.retrecir_polygone	pts_corniche	decallage
+			
+			for i = 1 to points_surface.count do (
+				
+				local j= if i == points_surface.count then 1 else i + 1
+				
+				if debord_use then (
+					---- la sous face ------------
+					pts 		+= #( pts_corniche[i], pts_corniche[j], pts_sousFace[j], pts_sousFace[i]	)
+					faces		+=	#( [ id_pt, id_pt +1 , id_pt +2 ] ,  [ id_pt, id_pt +2 , id_pt +3 ] )
+					matIds	+=	#( matId_corniche, matId_corniche )
+					
+					id_pt 	+=	4
+					
+					
+					---- l'epaisseur --------------
+					pts 		+= 	#( pts_sousFace[i], pts_sousFace[j], pts_epaisseur[j], pts_epaisseur[i]	)
+					faces		+=	#( [ id_pt, id_pt +1 , id_pt +2 ] ,  [ id_pt, id_pt +2 , id_pt +3 ] )
+					matIds	+=	#( matId_corniche, matId_corniche )
+					
+					id_pt 	+=	4
+						
+					---- decallage toiture --------------
+					pts 		+= 	#( pts_epaisseur[i], pts_epaisseur[j], pts_toiture[j], pts_toiture[i]	)
+					faces		+=	#( [ id_pt, id_pt +1 , id_pt +2 ] ,  [ id_pt, id_pt +2 , id_pt +3 ] )
+					matIds	+=	#( matId_corniche, matId_corniche )
+					
+					id_pt 	+=	4
+					
+					
+				) else (
+					---- decallage toiture --------------
+					pts 		+= 	#( pts_corniche[i], pts_corniche[j], pts_toiture[j], pts_toiture[i]	)
+					faces		+=	#( [ id_pt, id_pt +1 , id_pt +2 ] ,  [ id_pt, id_pt +2 , id_pt +3 ] )
+					matIds	+=	#( matId_corniche, matId_corniche )
+					
+					id_pt 	+=	4
+				
+				)
+			)
+			
+				
+			
+			
+			
+			-----	les pans 		---------------
+			local faces_squel = mgr_squelette.exe 		pts_toiture 	pente:pente
+			
+-- 			debug "faces_squel" var:faces_squel
+-- 			local pts 		= #()
+-- 			local faces		= #()
+-- 			local matIds	= #()
+-- 			local id_pt		=	1
+			
 			for face_squel in faces_squel do (
 				
 				pts 		+=	face_squel.pts
@@ -194,54 +266,24 @@ category:"CP | Bâtiment	| Composant"
 				id_pt 	+=	4
 			)
 			
+			
+			
 			setMesh 	mesh 	verts:pts	faces:faces	materialIDs:matIds
-			
-			
-			
 			
 			for i = 1 to	faces.count do
 				setFaceSmoothGroup mesh i 0
-			/* 
-			--- smoothing group ---------
-			setFaceSmoothGroup mesh 1 1
-			setFaceSmoothGroup mesh 2 1
 			
-			---- on clean les edges ---------
-			setEdgeVis mesh 1 3 false
-			setEdgeVis mesh 2 1 false
- */
+			
+			meshop.autoEdge mesh (#{1..mesh.Edges.count} as array )  2.
+			
 			
 			----- le mapping 	--------------
 			meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
 			
 			
 			
-	/* 	--- on place les points ---------
-		local pt_1		=	[0,0,0]
-		local pt_2		=	[longueur,0,0]
-		local pt_3		=	[longueur,0,hauteur]
-		local pt_4		=	[0,0,hauteur]		
-		local pts		= #(pt_1, pt_2, pt_3, pt_4) 
-		
-		----- on creer les faces --------------
-		local faces = #(	[1,2,3], [1,3,4] )
-		
-		--- on creer les vertex ---------
-		setMesh 	mesh 	verts:pts	faces:faces	materialIDs:#(matId, matId)
-		
-		--- smoothing group ---------
-		setFaceSmoothGroup mesh 1 1
-		setFaceSmoothGroup mesh 2 1
-		
-		---- on clean les edges ---------
-		setEdgeVis mesh 1 3 false
-		setEdgeVis mesh 2 1 false
-
-		
-		----- le mapping 	--------------
-		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
-		
-			 */
+			
+			
 			
 			
 		)
