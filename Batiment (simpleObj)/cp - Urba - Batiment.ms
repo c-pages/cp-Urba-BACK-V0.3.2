@@ -421,7 +421,10 @@ category:"CP | Urba temp"
 		if surface_node != undefined then (
 			
 			---- on place le batiment sur le shape ----------
-			local this_node = (refs.dependents this)[1]
+			local this_node 		= (refs.dependents this)[1]
+-- 			this_node.rotation	=	surface_node.rotation
+-- 			this_node.pos			=	surface_node.pos
+			
 			this_node.transform	=	surface_node.transform
 			
 			----- on scanne le shape ---------
@@ -755,7 +758,7 @@ category:"CP | Urba temp"
 				compo_planV.hauteur	=	soubassement_hauteur				
 				compo_planV.matId		=	matId_mur
 				mgr_mesh.attacher		mesh		compo_planV	transf:( transf_facade * transMatrix [0,0, -(soubassement_hauteur + dalle_epaisseur ) ] )
-
+/* 
 				---- l'epaisseur de la dalle RdC --------
 				local compo_planV		=	createInstance	cp_prim_planVertical
 				compo_planV.longueur	=	distance	pt	pt_suivant
@@ -763,23 +766,15 @@ category:"CP | Urba temp"
 				compo_planV.matId		=	matId_mur
 				mgr_mesh.attacher		mesh		compo_planV	transf:( transf_facade * transMatrix [0,0, - dalle_epaisseur  ] )
 
-				
+				 */
 				
 				
 				
 				
 				----- les facades ---------------------
-				local depose_etage 				= 	transf_facade
+				local depose_etage 				= 	transf_facade* transMatrix [0,0, -dalle_epaisseur  ]
 				local facades_murCourant		=	get_facades_pourMur	i	
 				for i = 1 to facades_murCourant.count do (
-					
-					---- la facade ----
-					local fcd 				= facades_murCourant[i]
-					mgr_mesh.attacher		mesh		fcd	transf:depose_etage
-					
-					---- maj depose-----
-					depose_etage 		*=  transMatrix [0,0,  etages_hauteur_global ]
-					
 					
 					
 					
@@ -793,16 +788,32 @@ category:"CP | Urba temp"
 					---- maj depose-----
 					depose_etage *= transMatrix [0,0,dalle_epaisseur]
 					
+					
+					
+					
+					---- la facade ----
+					local fcd 				= facades_murCourant[i]
+					mgr_mesh.attacher		mesh		fcd	transf:depose_etage
+					
+					---- maj depose-----
+					depose_etage 		*=  transMatrix [0,0,  etages_hauteur_global ]
+					
+					
+					
+					
 				)				
 			)
 			
 			----- 2 ) la toiture ----------------------------------------------------------------------------------------------------------------------
+			local pts_toiture 	= deepcopy pts_surface
+			pts_toiture.z 		+=  ( etages_nbre	+ 1 ) *	etages_hauteur_global	+ (etages_nbre  ) * dalle_epaisseur	
+			
+			
+			
 			case toiture_type of (
 				
 				1: (	-----Aucune-----------------------------
 					
-					local pts_toiture 	= deepcopy pts_surface
-					pts_toiture.z 		= (etages_nbre+1) * ( dalle_epaisseur + etages_hauteur_global  )
 					
 					local vert_debut 	=	 getNumVerts mesh + 1
 					local vert_fin 		=	getNumVerts mesh  + pts_toiture.count
@@ -819,8 +830,7 @@ category:"CP | Urba temp"
 				)
 					
 				5:(	---------- n pans ----------------------
-					local pts_toiture 	= deepcopy pts_surface
-					pts_toiture.z 		= (etages_nbre+1) * ( dalle_epaisseur + etages_hauteur_global  )
+				
 					local compo_toiture = copy toiture
 					compo_toiture.set_points		pts_toiture
 					mgr_mesh.attacher		mesh		compo_toiture	

@@ -1230,16 +1230,18 @@ public
 				compteur_de_passes += 1 
 				debug "----- compteur_de_passes -----" var:compteur_de_passes
 				
-				/*  (
-					--******* PROVISOIRE ********
-				ss = SplineShape pos:pts_retrecissement[1] name:("Passe: " + compteur_de_passes as string )  wirecolor:[100,100,100]
-				addNewSpline ss
-				for pt in pts_retrecissement do
-					addKnot ss 1 #corner #line pt	--	( pt + [0,0,decallageHT * compteur_de_passes ] )
-				close  ss 1 
-				updateShape ss
-				--******* PROVISOIRE ********
-				)  */
+				  (
+					if debug_mode do (
+						--******* PROVISOIRE ********
+						ss = SplineShape pos:pts_retrecissement[1] name:("Passe: " + compteur_de_passes as string )  wirecolor:[100,100,100]
+						addNewSpline ss
+						for pt in pts_retrecissement do
+							addKnot ss 1 #corner #line pt	--	( pt + [0,0,decallageHT * compteur_de_passes ] )
+						close  ss 1 
+						updateShape ss
+						--******* PROVISOIRE ********
+					)
+				)  
 				
 				---- les evenements -----------------------
 				local evts_segments 		=		get_evenements_segment				pts_back					angles_poly		normals_bisecs_poly
@@ -1256,6 +1258,9 @@ public
 				
 				if evts_aTraiter.count > 0 do (
 					
+					debug""
+					debug "pts_retrecissement avant Event"	var:pts_retrecissement
+					
 					---- on applique le retrecissement 	jusqu'a la distance de l'evenement ----------------------
 					local distance_toEvt		=	evts_aTraiter[1].distance_toEvt
 -- 					pts_retrecissement 			= retrecir_polygone		pts_back			distance_toEvt
@@ -1265,15 +1270,19 @@ public
 					dist_parcourue += ( mod  distance_toEvt  indent_distance )
 					
 					
+					debug "pts_retrecissement apres Event"	var:pts_retrecissement
+					debug""
 					
 					
 					--******* PROVISOIRE ********
-					ss = SplineShape pos:pts_retrecissement[1] name:("Passe Evt: " + compteur_de_passes as string )  wirecolor:[255,255,100]
-					addNewSpline ss
-					for pt in pts_retrecissement do
-						addKnot ss 1 #corner #line pt	--	( pt + [0,0,decallageHT * compteur_de_passes ] )
-					close  ss 1 
-					updateShape ss
+					if debug_mode do (
+						ss = SplineShape pos:pts_retrecissement[1] name:("Passe Evt: " + compteur_de_passes as string )  wirecolor:[255,255,100]
+						addNewSpline ss
+						for pt in pts_retrecissement do
+							addKnot ss 1 #corner #line pt	--	( pt + [0,0,decallageHT * compteur_de_passes ] )
+						close  ss 1 
+						updateShape ss
+					)
 					--******* PROVISOIRE ********
 					
 					/* 
@@ -1313,14 +1322,32 @@ public
 					
 					
 					----- FACE RESULTAT ----------------------------
-					for squel in squel_faces do (
-						local id 			=	squel.id_pt_segment
+					for squel_face in squel_faces do (
+						local id 			=	squel_face.id_pt_segment
 						local id_svt	=	if id == pts_retrecissement.count then 1 else id + 1
 						
-						append squel.pts 	pts_retrecissement[id_svt]
-						append squel.pts 	pts_retrecissement[id]
+						append squel_face.pts 	pts_retrecissement[id_svt]
+						append squel_face.pts 	pts_retrecissement[id]
 						
-						append squelette_result 	squel
+						
+						
+						if debug_mode do (
+							--******* PROVISOIRE ********
+							ss = SplineShape pos:squel_face.pts[1]		 name:("Squel" )  wirecolor:[255,255,100]
+							addNewSpline ss
+							addKnot ss 1 #corner #line squel_face.pts[1]		
+							addKnot ss 1 #corner #line squel_face.pts[2]	
+							addKnot ss 1 #corner #line squel_face.pts[3]		
+							addKnot ss 1 #corner #line squel_face.pts[4]	
+							close  ss 1 
+							updateShape ss
+							--******* PROVISOIRE ********
+						)
+						
+						
+						
+						
+						append squelette_result 	squel_face
 					)					
 					----- FACE RESULTAT ----------------------------
 					
@@ -1471,7 +1498,7 @@ public
 			
 			local bb_pts 				= get_BB_shape 	pts
 			local longueurs_BBpts 	= #( bb_pts[2].x - bb_pts[1].x ,  bb_pts[2].y - bb_pts[1].y )
-			precision 					= ( amax longueurs_BBpts  ) / 500			
+			precision 					= ( amax longueurs_BBpts  ) / 1000			
 			indent_distance 			= precision
 			debug "longueurs_BBpts" var:longueurs_BBpts	
 			debug "--->	precision" var:precision
@@ -1488,5 +1515,23 @@ public
 )   --  fin structure -------------------------------
 
 
+
+
+
+/* 
+
+
+debug_mode = true
+clearlistener ()
+
+squel = str_squelettisation ()
+
+shp = $Rectangle010
+pts = for i = 1 to numknots shp collect getKnotPoint  shp 1 i 
+
+squel.exe	 pts	pente:45
+
+
+ */
 
 
