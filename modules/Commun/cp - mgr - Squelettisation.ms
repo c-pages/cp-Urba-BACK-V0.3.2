@@ -35,7 +35,9 @@ struct  str_squelettisation (
 	---------------- Membres  -----------------------------
 	private
 		precision 					= 1,		--	<<------ en cm ?!?
-	
+		
+		passes_max 				= 300000,
+		
 		compteur_de_passes 	= 0,
 		
 		squelette_result 			=#(),	---	<--------- le resultat ( liste de 'str_squel_face' )
@@ -421,13 +423,17 @@ struct  str_squelettisation (
 		
 	---------------- Coeur de l'algorithme  -----------------------------
 	private
-		passes_max = 300,
 		
 		fn creer_squelette 	pts 	pans_points:		squel_faces:		pente:	= 	if pts.count> 2 and compteur_de_passes < passes_max do (
 			
 			if pente != unsupplied then (
+				debug "Pente ------------------"
 				decallage_z	=	indent_distance * tan pente
--- 				debug "decallage_z" var:decallage_z
+				debug "	indent_distance" var:indent_distance
+				debug "	pente" var:pente
+				debug "	tan pente" var:(tan pente)
+				debug "	--->	decallage_z" var:decallage_z
+				
 			)
 			
 			
@@ -459,7 +465,7 @@ struct  str_squelettisation (
 			local pts_back					= deepCopy pts
 			local pts_retrecissement		= deepCopy pts
 			pts_retrecissement 				= shp.retrecir_polygone		pts_retrecissement			indent_distance
-			pts_retrecissement.z			+=	 indent_distance  * decallage_z
+			pts_retrecissement.z			+=	 decallage_z
 			local on_a_fini 					= false
 			
 			
@@ -468,10 +474,10 @@ struct  str_squelettisation (
 			
 			
 			---- sinon c'est parti pour la BOUCLE ---------------------------------------------------------------------------------------------------------------
-			while  not on_a_fini	and dist_parcourue < 500  and compteur_de_passes< passes_max and pts_retrecissement.count > 2 do (
+			while  not on_a_fini	and dist_parcourue < 50000  and compteur_de_passes< passes_max and pts_retrecissement.count > 2 do (
 				
 				compteur_de_passes += 1 
-				
+-- 				debug "compteur_de_passes" var:compteur_de_passes
 				---- les evenements -----------------------
 				local evts_segments 		=		get_evenements_segment				pts_back					angles_poly		normals_bisecs_poly
 				local evts_intersections 	=  	get_evenements_intersections		pts_retrecissement		pts_back	--decalage:indent_distance	
@@ -482,9 +488,16 @@ struct  str_squelettisation (
 					---- on applique le retrecissement 	jusqu'a la distance de l'evenement ----------------------
 					local distance_toEvt		=	evts_aTraiter[1].distance_toEvt
 					pts_retrecissement 		= shp.retrecir_polygone		pts_back			( mod  distance_toEvt  indent_distance )
-					pts_retrecissement.z	+=	( mod  distance_toEvt  indent_distance ) * decallage_z
+					pts_retrecissement.z	+=	( mod  distance_toEvt  indent_distance ) / indent_distance * decallage_z
 					
 					dist_parcourue += ( mod  distance_toEvt  indent_distance )
+					
+					
+					
+					
+					
+					
+					
 					
 					----- FACE RESULTAT ----------------------------
 					for squel in squel_faces do (
@@ -492,11 +505,23 @@ struct  str_squelettisation (
 						local id_svt	=	if id == pts_retrecissement.count then 1 else id + 1
 						
 						append squel.pts 	pts_retrecissement[id_svt]
--- 						if pts_retrecissement[id] != pts_retrecissement[id_svt] do
-							append squel.pts 	pts_retrecissement[id]
+						append squel.pts 	pts_retrecissement[id]
 						
 						append squelette_result 	squel
-					)
+					)					
+					----- FACE RESULTAT ----------------------------
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
 					
 					----------- evenements segments ------------------
 					for i = 1 to evts_segments.count do (
@@ -566,7 +591,20 @@ struct  str_squelettisation (
 					pts_back = deepcopy pts_retrecissement
 					dist_parcourue += indent_distance
 					pts_retrecissement = shp.retrecir_polygone		pts_retrecissement		indent_distance
-					pts_retrecissement.z			+=	 indent_distance  * decallage_z
+					pts_retrecissement.z			+=	  decallage_z
+					
+					
+					/* 
+					------- DEBUG -------------------
+					ss = SplineShape pos:pts_retrecissement[1]   wirecolor:yellow
+					addNewSpline ss
+					for pt in pts_retrecissement do
+						addKnot ss 1 #corner #line pt
+					close  ss 1 
+					updateShape ss
+					------- DEBUG -------------------
+					 */
+					
 				)
 				
 				dist_parcourue += indent_distance
@@ -585,10 +623,29 @@ struct  str_squelettisation (
 	public
 		fn exe 		pts 	pente:	= (
 			
+			local bb_pts 				= shp.get_BB_shape 	pts
+			local longueurs_BBpts 	= #( bb_pts[2].x - bb_pts[1].x ,  bb_pts[2].y - bb_pts[1].y )
+			precision 					= ( amax longueurs_BBpts  ) / 100			
+			indent_distance 			= precision
+			debug "longueurs_BBpts" var:longueurs_BBpts	
+			debug "--->	precision" var:precision
+			
+			
+			
+			
 			squelette_result 			=#()
 			compteur_de_passes 	= 0
 			
+			
+			
 			creer_squelette 	pts 	pente:pente
+			
+			
+			
+			debug "### RESULT ###"
+			debug "	compteur_de_passes"	var:compteur_de_passes
+			debug "	squelette_result"	var:squelette_result
+			
 			
 			squelette_result
 		)

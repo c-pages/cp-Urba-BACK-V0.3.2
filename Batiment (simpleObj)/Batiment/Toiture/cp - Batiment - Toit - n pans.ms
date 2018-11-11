@@ -193,7 +193,12 @@ category:"CP | Bâtiment	| Composant"
 				
 				id_pt 	+=	4
 			)
+			
 			setMesh 	mesh 	verts:pts	faces:faces	materialIDs:matIds
+			
+			
+			
+			
 			for i = 1 to	faces.count do
 				setFaceSmoothGroup mesh i 0
 			/* 

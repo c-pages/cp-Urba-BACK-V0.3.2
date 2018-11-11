@@ -283,9 +283,15 @@ struct str_mgr_shape (
 			result
 		),
 		fn get_angle_vecteurs 		vec1 	vec2	=(
+			
 			local result_angle
 			result_angle = acos(dot (normalize vec1) (normalize vec2))
 			result_angle
+				 
+				
+-- 			local result = ( get_angle_vecteur  vec1 )  - ( get_angle_vecteur  vec2 )
+-- 			if result < 0 do result = 360 + result
+-- 			result
 		),
 		fn get_angle_vecteurs_2 		vec1 	vec2	=(
 			local result = ( get_angle_vecteur  vec1 )  - ( get_angle_vecteur  vec2 )
@@ -329,7 +335,7 @@ struct str_mgr_shape (
 			local v1 = vec1_pt2 - vec1_pt1
 			local v2 = vec2_pt2 - vec2_pt1
 			
-			local result_angle = get_angle_vecteurs 	v1 v2	 
+			local result_angle = get_angle_vecteurs_2 	v1 v2	 
 			
 			if est_aGauche		vec1_pt1	vec1_pt2		( vec1_pt2 +  v2 ) do 
 				result_angle	=	 - result_angle
@@ -706,7 +712,7 @@ struct str_mgr_shape (
 			
 			local	norm_bisectrice 				= get_normal_bisectionOriente_2vecteurs 	_vec_avt 		_vec_aprs
 			local distance_aux_segments 	= _distance
-			local angle_pt 							= get_angle_vecteurs 	_vec_avt	 _vec_aprs
+			local angle_pt 							= get_angle_vecteurs_2 	_vec_avt	 _vec_aprs
 			local distance_sur_bisectrice 	= distance_aux_segments / ( sin ( angle_pt /2) )		
 			
 			local result	 			= _pt_a_decaller 	+ norm_bisectrice		* distance_sur_bisectrice 
