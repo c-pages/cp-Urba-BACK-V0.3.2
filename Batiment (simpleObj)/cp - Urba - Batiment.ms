@@ -58,6 +58,19 @@ category:"CP | Urba temp"
 		------- Surface		------------------
 		surface_node					type:#node 			 	ui:btn_pick_perimetre		animatable:false		invisibleInTV:true
 		
+		------- Optimisations		------------------
+		optim_aplanir					type:#boolean			default:true		ui:chk_aplanir		animatable:false		invisibleInTV:true
+		optim_souder					type:#boolean			default:true		ui:chk_souder		animatable:false		invisibleInTV:true
+		optim_orthonormer			type:#boolean			default:false		ui:chk_ortho			animatable:false		invisibleInTV:true
+		optim_aligner					type:#boolean			default:false		ui:chk_aligner		animatable:false		invisibleInTV:true
+		optim_projeter					type:#boolean			default:false		ui:chk_projeter		animatable:false		invisibleInTV:true
+		
+		------- Seuils		------------------
+		optim_aplanir_seuil			type:#float				default:20.			ui:spn_aplanir		animatable:false		invisibleInTV:true
+		optim_souder_seuil			type:#float				default:30.			ui:spn_souder		animatable:false		invisibleInTV:true
+		optim_ortho_seuil				type:#float				default:100.		ui:spn_ortho		animatable:false		invisibleInTV:true
+		optim_aligner_seuil			type:#float				default:50.			ui:spn_aligner		animatable:false		invisibleInTV:true
+		
 	)
 	
 	
@@ -136,6 +149,7 @@ category:"CP | Urba temp"
 		pickbutton btn_pick_perimetre "Pick shape"  width:160 height:20 filter:shape_filt	autoDisplay:true-- align:#left
 		
 		group "Optimiser" (
+			
 			checkbox 	chk_souder 	"Souder" 		across:2
 			spinner 	spn_souder 	"" range:[0,10000,0] type:#worldUnits	width:60	align:#right
 			
@@ -429,6 +443,16 @@ category:"CP | Urba temp"
 			
 			----- on scanne le shape ---------
 			pts_surface = mgr_shp.scanner_points	surface_node
+			
+			
+			--- on gere les OPTIMISATIONS  ----
+			if optim_souder			do	mgr_shp.souder				&pts_surface		optim_souder_seuil
+			if optim_orthonormer	do	mgr_shp.orthonormer		&pts_surface		optim_ortho_seuil
+			if optim_aplanir			do	mgr_shp.aplanir				&pts_surface		optim_aplanir_seuil
+			if optim_aligner			do	mgr_shp.aligner				&pts_surface		optim_aligner_seuil
+			if optim_projeter			do	mgr_shp.projeter				&pts_surface
+			
+			
 			
 		) else (
 			pts_surface =#()

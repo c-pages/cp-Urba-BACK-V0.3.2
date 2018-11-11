@@ -667,7 +667,7 @@ struct  str_squelettisation (
 				compteur_de_passes += 1 
 				debug "----- compteur_de_passes -----" var:compteur_de_passes
 				
-				  (
+				 /*  (
 					if debug_mode do (
 						--******* PROVISOIRE ********
 						ss = SplineShape pos:pts_retrecissement[1] name:("Passe: " + compteur_de_passes as string )  wirecolor:[100,100,100]
@@ -679,7 +679,7 @@ struct  str_squelettisation (
 						--******* PROVISOIRE ********
 					)
 				)  
-				
+				 */
 				---- les evenements -----------------------
 				local evts_segments 		=		get_evenements_segment				pts_back					angles_poly		normals_bisecs_poly
 				local evts_intersections 	=  	get_evenements_intersections		pts_retrecissement		pts_back	--decalage:indent_distance	
@@ -709,7 +709,7 @@ struct  str_squelettisation (
 					
 					debug "pts_retrecissement apres Event"	var:pts_retrecissement
 					debug""
-					
+					/* 
 					
 					--******* PROVISOIRE ********
 					if debug_mode do (
@@ -721,7 +721,7 @@ struct  str_squelettisation (
 						updateShape ss
 					)
 					--******* PROVISOIRE ********
-					
+					 */
 					/* 
 					
 					
@@ -767,7 +767,7 @@ struct  str_squelettisation (
 						append squel_face.pts 	pts_retrecissement[id]
 						
 						
-						
+						/* 
 						if debug_mode do (
 							--******* PROVISOIRE ********
 							ss = SplineShape pos:squel_face.pts[1]		 name:("Squel" )  wirecolor:[255,255,100]
@@ -779,7 +779,7 @@ struct  str_squelettisation (
 							close  ss 1 
 							updateShape ss
 							--******* PROVISOIRE ********
-						)
+						) */
 						
 						
 						
@@ -890,9 +890,9 @@ struct  str_squelettisation (
 				if not on_a_fini do (
 					
 					pts_back = deepcopy pts_retrecissement
-					dist_parcourue += indent_distance
-					pts_retrecissement = shp.retrecir_polygone		pts_retrecissement		indent_distance
-					pts_retrecissement.z			+=	 decallage_z
+					dist_parcourue 			+= indent_distance
+					pts_retrecissement 		= shp.retrecir_polygone		pts_retrecissement		indent_distance
+					pts_retrecissement.z	+=	 decallage_z
 				)
 				
 				dist_parcourue += indent_distance
