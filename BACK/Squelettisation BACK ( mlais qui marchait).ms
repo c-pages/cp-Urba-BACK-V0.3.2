@@ -1358,7 +1358,7 @@ public
 					updateShape ss
 					--******* PROVISOIRE ********
 					
-					
+					/* 
 					
 					
 					for squel in squel_faces do (
@@ -1391,6 +1391,20 @@ public
 					)
 					
 					
+					 */
+					
+					
+					----- FACE RESULTAT ----------------------------
+					for squel in squel_faces do (
+						local id 			=	squel.id_pt_segment
+						local id_svt	=	if id == pts_retrecissement.count then 1 else id + 1
+						
+						append squel.pts 	pts_retrecissement[id_svt]
+						append squel.pts 	pts_retrecissement[id]
+						
+						append squelette_result 	squel
+					)					
+					----- FACE RESULTAT ----------------------------
 					
 					
 					/* 
@@ -1534,6 +1548,8 @@ public
 		fn exe 		pts 	pans_points:		= (
 			debug "----- EXECUTER -----------------------------"
 			
+			compteur_de_passes = 0
+			squelette_result = #()
 			
 			local bb_pts 				= get_BB_shape 	pts
 			local longueurs_BBpts 	= #( bb_pts[2].x - bb_pts[1].x ,  bb_pts[2].y - bb_pts[1].y )
@@ -1545,8 +1561,10 @@ public
 			
 			
 			
-			compteur_de_passes = 0
 			creer_squelette 	pts 	pans_points:pans_points
+			
+			
+			squelette_result
 		)
 
 )   --  fin structure -------------------------------
