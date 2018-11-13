@@ -1,7 +1,7 @@
 
-plugin simpleObject		cp_facadeCompo_baie
-name:"Baie"
-classID:#(0x6acdec6f, 0x495efeca)
+plugin simpleObject		cp_facadeCompo_ensemble
+name:"Ensemble menuisé"
+classID:#(0x5e14b205, 0x12910401)
 category:"CP | Facade	| Composant"
 -- invisible:true
 (
@@ -10,7 +10,7 @@ category:"CP | Facade	| Composant"
 	------------ DEBUG	----------------------------------------------------------------------------------
 	local m_debug = true
 -- 	local 	m_debug = false
-	local 	m_dbgPrefix ="cp_facadeCompo_baie"
+	local 	m_dbgPrefix ="cp_facadeCompo_ensemble"
 	fn debug 	_txt  var:	 param:    =	if m_debug do ::debuger 	_txt  	var:var	 param:param	prefix:m_dbgPrefix
 	------------ DEBUG	----------------------------------------------------------------------------------
 	
@@ -44,7 +44,7 @@ category:"CP | Facade	| Composant"
 	)
 	parameters params_general rollout:roll_parametres	(
 		
-		nom	 					type:#string 			ui:edTxt_nom					default:"Baie"
+		nom	 					type:#string 			ui:edTxt_nom					default:"Ensemble menuisé"
 		
 		etirable					type:#boolean 		ui:shk_etirable					default:false
 		
@@ -55,6 +55,7 @@ category:"CP | Facade	| Composant"
 		
 		menuis_largeur			type:#worldUnits 	ui:spn_menuis_largeur			default:5.
 		menuis_profondeur		type:#worldUnits 	ui:spn_menuis_profondeur		default:7.
+		
 		
 		sequence					type:#maxObjectTab	tabSizeVariable:true
 -- 		sequence_elem_long		type:#floatTab			tabSizeVariable:true
@@ -285,14 +286,13 @@ category:"CP | Facade	| Composant"
 		-------- la sequence -----------
 		
 		on lbx_sequence 		selected sel 	do	actualiser ()
-		
+		/* 
 		on lbx_sequence	 rightClick 	_id 	do	(
 			lbx_sequence.selection = _id
 			actualiser ()
 			creer_RCM_edition ()
-			
 		)
-		
+		 */
 -- 		on btn_ajouter 		pressed 			do 	creer_RCM_ajouter ()
 		on btn_ajouter_fixe 			pressed 			do 	ajouter_element_menuis 	cp_baieElement_fixe
 		on btn_ajouter_fenetre 	pressed 			do 	ajouter_element_menuis 	cp_baieElement_fenetre

@@ -34,7 +34,8 @@ filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composant
 
 
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\cp - Facade - Composant - Mur.ms"
-filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\cp - Facade - Composant - Baie.ms"
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\cp - Facade - Composant - Ensemble.ms"
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\cp - Facade - Composant - Balcon.ms"
 
 ------- les composant du batiment ----------
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\cp - Batiment - Façade.ms"

@@ -205,8 +205,11 @@ category:"CP | Urba temp"
 		button 		btn_descendre	"\\/"	--align:#right
 		
 		listBox		lbx_facades		""	height:5
-		group "afficher" (
-		checkButton	ckb_afficher_longueur	"Longueurs"
+		group "Viewport" (
+			checkButton	ckb_afficher_longueur	"Long"	width:35	across:4 	align:#right
+			checkButton	ckb_autre_1	""	width:35	align:#right
+			checkButton	ckb_autre_2	""	width:35	align:#right
+			checkButton	ckb_autre_3	""	width:35	align:#right
 		)
 		editText 	edTxt_nom		 	"" 	
 		
@@ -242,9 +245,9 @@ category:"CP | Urba temp"
 			
 		) */
 		
-		checkbutton		btn_editer_facade		"Editer"	width:160 height:25
+		subrollout	subroll_contraintes		""	height:236
 		
-		subrollout	subroll_contraintes		""	height:250	
+		checkbutton		btn_editer_facade		"Editer"	width:140 height:25
 		
 		
 		fn actualiser =(
@@ -299,7 +302,9 @@ category:"CP | Urba temp"
 			actualiser ()
 -- 			creer_RCM_edition ()
 			
-		)
+		)	
+		on lbx_facades	 doubleClicked  	_id 	do		basculer_editeurFacade 	true
+			
 		on btn_ajouter 		pressed 			do 	ajouter_facade ()
 		on btn_retirer 		pressed 			do	retirer_facade			lbx_facades.selection 
 		on btn_monter 		pressed 			do	monter_facade		lbx_facades.selection 
@@ -466,6 +471,8 @@ category:"CP | Urba temp"
 		redrawViews ()
 	)
 	
+	
+	
 	--------- viewport --------------------------------------------------------------------------	
 	fn fn_afficheur_longueurs =(
 		
@@ -546,11 +553,17 @@ category:"CP | Urba temp"
 			urba_fn_afficheur_longueurs	= fn_afficheur_longueurs
 		
 		case state of (
-			true:		registerRedrawViewsCallback 		urba_fn_afficheur_longueurs 	
-			false:	unregisterRedrawViewsCallback 		urba_fn_afficheur_longueurs
+			true:		registerRedrawViewsCallback 			urba_fn_afficheur_longueurs 	
+			false:		unregisterRedrawViewsCallback 		urba_fn_afficheur_longueurs
 		)
-		redrawviews ()
+		
+-- 		redrawviews ()
+		forceCompleteRedraw ()
+		
 	)
+	
+	
+	
 	
 	
 	--------------- facades ----------------------------------
