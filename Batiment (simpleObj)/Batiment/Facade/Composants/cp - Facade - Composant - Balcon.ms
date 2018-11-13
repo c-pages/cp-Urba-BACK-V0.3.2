@@ -30,6 +30,8 @@ category:"CP | Facade	| Composant"
 		
 		nom	 					type:#string 			ui:edTxt_nom					default:"Balcon"
 		
+		etirable					type:#boolean 	/* 	ui:shk_etirable			 */		default:false
+		
 		longueur 				type:#worldUnits 	ui:spn_longueur 				default:0.
 		hauteur	 				type:#worldUnits 	/* ui:spn_hauteur  */			default:0.
 		dalle_epaisseur 		type:#worldUnits 	ui:spn_dalle_epaisseur		default:20.

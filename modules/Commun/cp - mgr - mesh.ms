@@ -11,20 +11,26 @@ struct str_mgr_mesh (
 	
 	
 	
-	fn transformer		_mesh	_transf	=(
-		if classof _transf == point3 do _transf = transMatrix _transf
-		local transf_tab =#()
-		for id_pt = 1 to   _mesh.numverts  do (
-			local pos_base 	=  meshop.getVert  _mesh 	id_pt
-			local pos_dest 	= pos_base * _transf
-			append transf_tab ( pos_dest - pos_base)
+	fn transformer		_mesh	_transf	= (
+		
+		if _mesh.verts.count > 0 do (
+			debug "_mesh.verts.count" var:_mesh.verts.count
+			if classof _transf == point3 do _transf = transMatrix _transf
+			local transf_tab =#()
+			for id_pt = 1 to   _mesh.numverts  do (
+				local pos_base 	=  meshop.getVert  _mesh 	id_pt
+				local pos_dest 	= pos_base * _transf
+				append transf_tab ( pos_dest - pos_base)
+			)
+			meshop.moveVert 	_mesh	#{1.._mesh.numverts} transf_tab
 		)
-		meshop.moveVert 	_mesh	#{1.._mesh.numverts} transf_tab
 	),
 	fn attacher		_mesh		_composant		transf:	=(
 		debug "attacher"
+		debug "_composant" var:_composant
 		if classof _composant != trimesh do  _composant = _composant.mesh
 		local compo_mesh	=	copy _composant
+		
 		if transf != unsupplied do	transformer				compo_mesh		transf
 			
 		if _mesh.verts.count == 0 then

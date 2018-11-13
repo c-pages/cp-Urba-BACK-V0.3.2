@@ -44,7 +44,7 @@ category:"CP | Facade	| Composant"
 	)
 	parameters params_general rollout:roll_parametres	(
 		
-		nom	 					type:#string 			ui:edTxt_nom					default:"Ensemble menuisé"
+		nom	 					type:#string 			ui:edTxt_nom					default:"Ens. menuisé"
 		
 		etirable					type:#boolean 		ui:shk_etirable					default:false
 		

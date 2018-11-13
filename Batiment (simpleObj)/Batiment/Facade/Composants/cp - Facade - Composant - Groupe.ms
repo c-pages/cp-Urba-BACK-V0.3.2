@@ -1,7 +1,7 @@
 
 plugin 		simpleObject		cp_facadeCompo_groupe
 name:		"Groupe"
-classID:		#(0x5b4e91a1, 0x66f01359)
+classID:		#(0x91ef199, 0x43204119)
 category:	"CP | Facade	| Composant"
 -- invisible:true
 (
@@ -25,19 +25,38 @@ category:	"CP | Facade	| Composant"
 	
 	
 	
-	--------------- PARAMETERES  ----------------------------------------------------------------------------------------------------------------------
-	parameters params_general rollout:roll_general	(
+--------------- PARAMETERES  ----------------------------------------------------------------------------------------------------------------------
+	parameters params_parameters rollout:roll_parametres	(
 		
-		elements					type:#maxObjectTab	tabSizeVariable:true
+		nom	 					type:#string 			ui:edTxt_nom					default:"Groupe"
+		
+		etirable					type:#boolean 		/* ui:shk_etirable		 */			default:false
+		
+		longueur 				type:#worldUnits /* 	ui:spn_longueur  */				default:0.
+		hauteur	 				type:#worldUnits 	/* ui:spn_hauteur  */			default:0.
+		
+		
+		elements				type:#maxObjectTab		tabSizeVariable:true
+		
 		
 	)
+	parameters params_divers ---rollout:roll_divers
+	(
+		
+		------ options --------------
+		low_poly							type:#boolean 	/* 	ui:shk_lowPoly		 */		default:false
+		
+	)	-----	fin parametres --------------------
+	
+	
 	
 	
 	
 	
 	--------------- ROLLOUTS  ----------------------------------------------------------------------------------------------------------------------
-	rollout roll_general 			"Paramètres"	(
-		
+
+	rollout roll_parametres 				"Paramètres"	(
+		editText 	edTxt_nom		 		"Nom:" 	
 	)
 	
 	
@@ -85,7 +104,7 @@ category:	"CP | Facade	| Composant"
 		--- vider le mesh --------
 		delete mesh
 		--- Construction ---------------------------------------------------------------------------------------
-		
+		setMesh mesh numverts:0
 		
 	)
 	

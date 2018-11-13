@@ -133,8 +133,11 @@ category:"CP | Bâtiment	| Composant"
 			button 		btn_ajouter_corniche 	"Corniche"			width:50	height:17			align:#left		enabled:false
 			button 		btn_ajouter_porche 	"Porche"			width:50		height:17		align:#left		enabled:false
 			
+			button 		btn_ajouter_groupe 	"Groupe"			width:50		height:17		align:#left		across:3	
+			button 		btn_ajouter_vide1 	""			width:50	height:17			align:#left		enabled:false
+			button 		btn_ajouter_vide2 	""			width:50		height:17		align:#left		enabled:false
 			
-			dotNetControl tv_sequence	 "TreeView" /* width:145 */ height:145 --align:#left
+			dotNetControl tv_sequence	 "TreeView" /* width:145 */ height:200 --align:#left
 			
 			
 			
@@ -171,7 +174,8 @@ category:"CP | Bâtiment	| Composant"
 			tv_sequence.allowdrop 				= true
 			tv_sequence.HideSelection 		= false
 			tv_sequence.ShowRootLines	 	= true
--- 			tv_sequence.CheckBoxes   		= true
+			tv_sequence.ShowLines   			= true
+			tv_sequence.HotTracking   		= true
 			tv_sequence.BackColor 			= (dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
 			tv_sequence.ForeColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
 			tv_sequence.DrawMode 			= (dotnetclass "TreeViewDrawMode.OwnerDrawText")
@@ -179,7 +183,7 @@ category:"CP | Bâtiment	| Composant"
 -- 			tv_sequence.Dock 					= (dotnetclass "DockStyle").Fill
 			tv_sequence.indent				= 12
 			debug "tv_sequence.indent"	var:tv_sequence.indent
--- 			show tv_sequence
+			show tv_sequence
 		)
 		
 		
@@ -189,14 +193,70 @@ category:"CP | Bâtiment	| Composant"
 		local id_element_destination	=	0
 		
 		local elementParent_enDrag
-		
+		local element_enDrag
+		local node_enDrag
 		
 		
 		fn get_element_parent		_noeud =(
-			local element_parent	
-			if _noeud.parent != undefined do
+			
+			local element_parent
+			
+			if _noeud.level == 1 then
 				element_parent = sequence[_noeud.parent.index + 1 ]
+			
+			else if _noeud.level == 2 do 
+				element_parent = sequence[_noeud.parent.parent.index + 1 ].elements[ _noeud.parent.index  + 1 ]
+			
 			element_parent
+		)
+		
+		
+		fn get_element		_noeud =(
+			
+			local element
+			
+			if _noeud.level == 0 then
+				element = sequence[_noeud.index + 1 ]
+			
+			if _noeud.level == 1 then
+				element = sequence[_noeud.parent.index + 1 ].elements[_noeud.index + 1 ]
+			
+			else if _noeud.level == 2 do 
+				element = sequence[_noeud.parent.parent.index + 1 ].elements[ _noeud.parent.index  + 1 ].elements[_noeud.index + 1 ]
+			
+			element
+		)
+		
+		
+		fn valider_drop	_node_dest =(
+			
+		
+			local on_valide = true
+			local	elementParent_dest 			=  	get_element_parent		 	_node_dest
+			
+			
+			
+			
+			if classof element_enDrag	==	cp_facadeCompo_balcon and 	classof elementParent_dest	==	cp_facadeCompo_balcon do
+				on_valide = false
+			if classof element_enDrag	==	cp_facadeCompo_groupe and 	classof elementParent_dest	==	cp_facadeCompo_groupe do
+				on_valide = false
+		
+		
+		
+		
+			if _node_dest.level == 2 do
+				if classof element_enDrag == cp_facadeCompo_balcon or classof element_enDrag == cp_facadeCompo_groupe do
+					on_valide = false
+			
+			if _node_dest.level == 1 do
+				if hasproperty  element_enDrag "elements" do
+					for elem in element_enDrag.elements do
+						if hasproperty  elem "elements" do 
+							on_valide = false
+						
+			on_valide
+			
 		)
 		
 		
@@ -207,14 +267,29 @@ category:"CP | Bâtiment	| Composant"
 			local posDrag		= tv_sequence.PointToClient 	tv_sequence.MousePosition
 			local itemSurvol	= tv_sequence.GetNodeAt (dotNetObject "System.Drawing.Point" posDrag.x 	posDrag.y)
 			
--- 			debug "posDrag"	var:posDrag.y
 			
--- 			targetPoint = treeView1.PointToClient(new Point(e.X, e.Y));
-
-			tv_sequence.SelectedNode = tv_sequence.GetNodeAt(posDrag);
-		
-		
 			if itemSurvol != undefined then	(
+				
+				/* 
+				local on_survole = true
+				if itemSurvol.level == 2 do
+					if classof element_enDrag == cp_facadeCompo_balcon or classof element_enDrag == cp_facadeCompo_groupe do
+						on_survole = false
+				
+				if itemSurvol.level == 1 do
+					if hasproperty  element_enDrag "elements" do
+						for elem in element_enDrag.elements do
+							if hasproperty  elem "elements" do 
+								on_survole = false
+				 */
+						
+						
+				if valider_drop		itemSurvol	 then
+					tv_sequence.SelectedNode = itemSurvol	---		tv_sequence.GetNodeAt(posDrag);
+				else
+					tv_sequence.SelectedNode = node_enDrag
+			
+			
 -- 				debug "id_element_destination"	var:id_element_destination
 -- 				debug "id_element_destination"	var:id_element_destination
 -- 				if id_element_destination != ( itemSurvol.Index 	+ 1 ) do (
@@ -268,9 +343,10 @@ category:"CP | Bâtiment	| Composant"
 				if _arg.item.tag	!=		"vide" do (
 				
 					
-					
+					node_enDrag				=		_arg.item
 					id_element_enDrag		=		_arg.item.Index	+	1
 					elementParent_enDrag	= 		get_element_parent		_arg.item
+					element_enDrag 			=  	get_element		 	_arg.item
 					
 					tv_sequence.doDragDrop 		_arg.item 		m_dragDropEffect.Move
 				)
@@ -298,18 +374,44 @@ category:"CP | Bâtiment	| Composant"
 -- 				) else (
 					
 -- 					local id_elementParent_dest 	= noeudDest.parent.index + 1
-					local elementParent_dest 		= get_element_parent	noeudDest
+				
+				local elementParent_dest 		= get_element_parent	noeudDest
+				local element_dest 				= get_element		 	noeudDest
+				/* 
+				local on_insere = true
+				if noeudDest.level == 2 do
+					if classof element_enDrag == cp_facadeCompo_balcon or classof element_enDrag == cp_facadeCompo_groupe do
+						on_insere = false
 					
+				if noeudDest.level == 1 do
+					if hasproperty  element_enDrag "elements" do
+						for elem in element_enDrag.elements do
+							if hasproperty  elem "elements" do 
+								on_insere = false
+				
+				 */
+				local on_insere = valider_drop	noeudDest
+				
+				
+				if on_insere do 
 					inserer_element		elementParent_enDrag		id_element_enDrag		elementParent_dest		( noeudDest.index + 1 )
 -- 				)
 				
 				
 			) else 
-				deplacer_element_facade 		id_element_enDrag		( sequence.count )
-			 
-			elementParent_enDrag = undefined
-			id_element_enDrag	=	0
-			id_element_destination = 0
+				inserer_element		elementParent_enDrag		id_element_enDrag		undefined			( sequence.count +1)
+-- 				deplacer_element_facade 		id_element_enDrag		( sequence.count )
+			
+			
+			
+			
+			elementParent_enDrag 		= undefined
+			element_enDrag 				= undefined
+			id_element_enDrag			=	0
+			id_element_destination 		= 0
+			
+			node_enDrag = undefined
+			
 -- 			show noeudDest
 			
 			/* 
@@ -397,7 +499,7 @@ category:"CP | Bâtiment	| Composant"
 					)
 				)
 			)
-				
+			
 			nv_node.expand ()
 			nv_node
 		)
@@ -462,6 +564,7 @@ category:"CP | Bâtiment	| Composant"
 		on btn_ajouter_mur	 			pressed 			do 	ajouter_element_facade 	cp_facadeCompo_mur
 		on btn_ajouter_ensemble		pressed 			do 	ajouter_element_facade 	cp_facadeCompo_ensemble
 		on btn_ajouter_balcon			pressed 			do 	ajouter_element_facade 	cp_facadeCompo_balcon
+		on btn_ajouter_groupe			pressed 			do 	ajouter_element_facade 	cp_facadeCompo_groupe
 		
 		
 		
@@ -922,7 +1025,7 @@ category:"CP | Bâtiment	| Composant"
 					local longueur_definies_total 		= 0
 					local nbr_elem_definies 			= 0
 					for i = 1 to sequence.count do (
-						if sequence[i].longueur != 0 do (
+						if /* sequence[i].longueur != 0 and  */not sequence[i].etirable		do (
 							longueur_definies_total+= sequence[i].longueur
 							nbr_elem_definies += 1
 						)			
@@ -934,7 +1037,7 @@ category:"CP | Bâtiment	| Composant"
 					local longueur_definies_total 		= 0
 					local nbr_elem_definies 			= 0
 					for i = 1 to sequence.count do (
-						if sequence[i].longueur != 0 do (
+						if /* sequence[i].longueur != 0  and  */not sequence[i].etirable		do (
 							longueur_definies_total += sequence[i].longueur * nbr_repetitions
 							nbr_elem_definies += 1 * nbr_repetitions
 						)			
@@ -967,8 +1070,8 @@ category:"CP | Bâtiment	| Composant"
 					
 					--- le composant ----------------
 					local compo_temp 				= 	copy sequence[i]
-			
-					if compo_temp.longueur == 0 do
+					
+					if compo_temp.longueur == 0  and compo_temp.etirable		do
 						compo_temp.longueur 	= 		longueur_composant
 					
 					compo_temp.hauteur			=	hauteur
@@ -1128,31 +1231,46 @@ category:"CP | Bâtiment	| Composant"
 		----- on retire l'element à deplacer de son origine -------------
 		if _elementParent_enDrag != undefined then (
 			elem_aDeplacer	=	 	_elementParent_enDrag.elements 		[_id_aDeplacer]
-			deleteItem 	_elementParent_enDrag.elements 			_id_aDeplacer
 		) else (
 			elem_aDeplacer	=	 	sequence		[_id_aDeplacer]
-			deleteItem 	sequence 			_id_aDeplacer
 		)
 		
 		
-		----- on le pose à sa destination -------------
-		if _elementParent_dest != undefined then (
+		local on_continue = true 
+		if classof elem_aDeplacer	==	cp_facadeCompo_balcon and 	classof _elementParent_dest	==	cp_facadeCompo_balcon do
+			on_continue = false
+		if classof elem_aDeplacer	==	cp_facadeCompo_groupe and 	classof _elementParent_dest	==	cp_facadeCompo_groupe do
+			on_continue = false
+		
+		if on_continue do (
+		
 				
-				if _id_destination > _elementParent_dest.elements.count then 
-					append _elementParent_dest.elements		 elem_aDeplacer
-				else
-					insertItem 	elem_aDeplacer			_elementParent_dest.elements  		_id_destination  
-			
-		) else (
-							
-				if _id_destination > sequence.count then 
-					append sequence	 elem_aDeplacer
-				else
-					insertItem 	elem_aDeplacer			sequence  			_id_destination  
+				----- on retire l'element à deplacer de son origine -------------
+				if _elementParent_enDrag != undefined then (
+					deleteItem 	_elementParent_enDrag.elements 			_id_aDeplacer
+				) else (
+					deleteItem 	sequence 			_id_aDeplacer
+				)
+				
+				
+				----- on le pose à sa destination -------------
+				if _elementParent_dest != undefined then (
+						
+						if _id_destination > _elementParent_dest.elements.count then 
+							append _elementParent_dest.elements		 elem_aDeplacer
+						else
+							insertItem 	elem_aDeplacer			_elementParent_dest.elements  		_id_destination  
+					
+				) else (
+									
+						if _id_destination > sequence.count then 
+							append sequence	 elem_aDeplacer
+						else
+							insertItem 	elem_aDeplacer			sequence  			_id_destination  
+				)
+				
+				
 		)
-		
-		
-		
 		
 		/* 
 		if _id_destination > _elementParent_dest.elements.count then 
@@ -1281,7 +1399,7 @@ category:"CP | Bâtiment	| Composant"
 			---- le composant -----
 			local composant 		= sequence_tmp [i]
 			local align_y =	0	-- if est_unPlein	composant then 0 else profondeur - composant.profondeur
-			
+-- 			debug "----> composant" var:composant
 			mgr_mesh.attacher		mesh		composant	transf:( depos_composant + [0,align_y,0] )
 			
 			depos_composant.x += composant.longueur
