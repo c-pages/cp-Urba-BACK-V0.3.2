@@ -18,7 +18,7 @@ category:"CP | Bâtiment	| Composant"
 	---- pré déclaration -----------
 	local corriger_parametres , 		actualiser_composants 
 	local	ajouter_element_facade, 	retirer_element_facade, 	dupliquer_element_facade, instancier_element_facade, rendreUnique_element_facade, monter_element_facade, descendre_element_facade, renommer_element_facade, ouvrir_parametres
-	local deplacer_element_facade 	,	inserer_element
+	local 	inserer_element
 
 	
 	local est_instance
@@ -119,6 +119,7 @@ category:"CP | Bâtiment	| Composant"
 			button 		btn_descendre	"\\/"
 			 */
 -- 			label			lbl_plein	"Plein:"	align:#left
+-- 			dotNetControl tvBtn_mur		 "treeview"		 width:50		height:17	across:3		align:#left
 			button 		btn_ajouter_mur 			"Mur"			width:50		height:17		across:3		align:#left
 			button 		btn_ajouter_poteau 		"Poteau"			width:50		height:17		align:#left	enabled:false
 			button 		btn_ajouter_chainage 		"Chainage"		width:50	height:17			align:#left		enabled:false
@@ -137,14 +138,13 @@ category:"CP | Bâtiment	| Composant"
 			button 		btn_ajouter_vide1 	""			width:50	height:17			align:#left		enabled:false
 			button 		btn_ajouter_vide2 	""			width:50		height:17		align:#left		enabled:false
 			
-			dotNetControl tv_sequence	 "TreeView" /* width:145 */ height:200 --align:#left
-			
-			
+			dotNetControl tv_sequence	 "treeview" /* width:145 */ height:260 --align:#left
 			
 			button 		btn_dupliquer	 		"Dup."			width:27	height:17	across:4	align:#center
 			button 		btn_instancier	 		"Ins."			width:27			height:17			align:#center
 			button 		btn_rendreUnique	 	"Uni."			width:27			height:17			align:#center
 			button 		btn_retirer	 		"Sup."				width:27		height:17			align:#center
+			
 -- 			button 		btn_monter			"/\\"			width:27		height:17		align:#left
 -- 			button 		btn_descendre	"\\/"			width:27		height:17		align:#left
 		
@@ -157,6 +157,9 @@ category:"CP | Bâtiment	| Composant"
 		
 		---- cliques ----		
 		local m_btnsDotNet = dotNetClass "System.Windows.Forms.MouseButtons"
+		
+		local tv_imageList 	= dotNetObject "System.Windows.Forms.ImageList"
+		
 		
 		
 		fn creerItem 		_nvl_item 	_item_parent = (
@@ -173,20 +176,58 @@ category:"CP | Bâtiment	| Composant"
 			tv_sequence.LabelEdit 				= true 
 			tv_sequence.allowdrop 				= true
 			tv_sequence.HideSelection 		= false
-			tv_sequence.ShowRootLines	 	= true
+-- 			tv_sequence.ShowRootLines	 	= true
 			tv_sequence.ShowLines   			= true
-			tv_sequence.HotTracking   		= true
+-- 			tv_sequence.HotTracking   		= true
 			tv_sequence.BackColor 			= (dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
 			tv_sequence.ForeColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
+			tv_sequence.LineColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
 			tv_sequence.DrawMode 			= (dotnetclass "TreeViewDrawMode.OwnerDrawText")
 			
 -- 			tv_sequence.Dock 					= (dotnetclass "DockStyle").Fill
-			tv_sequence.indent				= 12
+			tv_sequence.indent				= 24
 			debug "tv_sequence.indent"	var:tv_sequence.indent
+			
+			tv_imageList.imageSize 	= 	dotNetObject "System.Drawing.Size" 32 32
+			
+-- 			showmethods 	tv_imageList.Images
+			tv_imageList.Images.Clear ()
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - vide.png"))
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - mur.png"))
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - fenetre.png"))
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - balcon.png"))
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - groupe.png"))
+-- 			local img = (dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv mur.jpg")
+			
+			tv_sequence.ImageList =	tv_imageList
+-- 			tv_imageList.Images.Add(img)
+			
 			show tv_sequence
+			
+			/* 
+			tv_btns = #(tvBtn_mur)
+			for tv_btn in tv_btns do (
+				tv_btn.borderstyle 			= (dotnetclass "System.Windows.Forms.BorderStyle").None
+				tv_btn.LabelEdit 				= true 
+				tv_btn.allowdrop 				= true
+				tv_btn.HideSelection 		= false
+	-- 			tv_btn.ShowRootLines	 	= true
+				tv_btn.ShowLines   			= false
+	 			tv_btn.indent   				= 0
+				tv_btn.BackColor 			= (dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
+				tv_btn.ForeColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
+				tv_btn.LineColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
+				tv_btn.DrawMode 			= (dotnetclass "TreeViewDrawMode.OwnerDrawText")
+			)
+			tvBtn_mur.nodes.add 		"Mur"
+			
+			 */
+-- 			tv_imageList.Images.Add(img)
+-- 			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv fenetre.jpg"))
+			
+			
+			
 		)
-		
-		
 		
 		
 		local id_element_enDrag	=	0
@@ -211,7 +252,7 @@ category:"CP | Bâtiment	| Composant"
 		)
 		
 		
-		fn get_element		_noeud =(
+		fn get_element		_noeud 	=(
 			
 			local element
 			
@@ -270,19 +311,6 @@ category:"CP | Bâtiment	| Composant"
 			
 			if itemSurvol != undefined then	(
 				
-				/* 
-				local on_survole = true
-				if itemSurvol.level == 2 do
-					if classof element_enDrag == cp_facadeCompo_balcon or classof element_enDrag == cp_facadeCompo_groupe do
-						on_survole = false
-				
-				if itemSurvol.level == 1 do
-					if hasproperty  element_enDrag "elements" do
-						for elem in element_enDrag.elements do
-							if hasproperty  elem "elements" do 
-								on_survole = false
-				 */
-						
 						
 				if valider_drop		itemSurvol	 then
 					tv_sequence.SelectedNode = itemSurvol	---		tv_sequence.GetNodeAt(posDrag);
@@ -290,42 +318,9 @@ category:"CP | Bâtiment	| Composant"
 					tv_sequence.SelectedNode = node_enDrag
 			
 			
--- 				debug "id_element_destination"	var:id_element_destination
--- 				debug "id_element_destination"	var:id_element_destination
--- 				if id_element_destination != ( itemSurvol.Index 	+ 1 ) do (
--- 					id_element_destination = ( itemSurvol.Index 	+ 1 )
--- 					
--- 					deplacer_element_facade 		id_element_enDrag		id_element_destination
--- 					id_element_enDrag	=	id_element_destination
--- 				)
 			)
 			
 			
-			/*  else 
-				deplacer_element_facade 		id_element_enDrag		( sequence.count )
-			 */
-			
-			
-			if itemSurvol != undefined then (
-				
--- 				debug "sequence[itemSurvol.Index]"	var:sequence[itemSurvol.Index + 1 ]
--- 				local element_survol	=	sequence[itemSurvol.Index + 1 ]
--- 				if hasProperty	element_survol	"elements" do (
-					
--- 					debug "On peut le mettre dedans !"
-					
--- 				)
--- 				if sequence[itemSurvol.Index]
-				/* 
-				local noeudsQuiBougent 	= m_edit.drag_getNoeuds ()
-				local noeudSurvol 			= getNoeud	itemSurvol
-				
-				if noeudSurvol.nomUnique == "RECHERCHE" then 
-					_arg.Effect	=	m_dragDropEffect.none
-				else if (findItem noeudsQuiBougent  noeudSurvol ) != 0
-					do _arg.Effect=m_dragDropEffect.none
-				 */
-			)
 			
 		)
 		
@@ -356,53 +351,22 @@ category:"CP | Bâtiment	| Composant"
 		
 		fn drag_recevoir 	_arg =(
 			
-			debug "--------drag_recevoir-------------"
 			local posDrop		= tv_sequence.PointToClient 	tv_sequence.MousePosition
-			debug "posDrop"	var:posDrop
-			
 			local noeudDest 	= tv_sequence.GetNodeAt (dotNetObject "System.Drawing.Point" posDrop.x 	posDrop.y )
--- 			local element_dest	=	get_element_destination	noeudDest
-			
--- 			debug "---->	element_dest" var:element_dest.nom
 			
 			if noeudDest != undefined then	(
 				
-				debug "noeudDest"	var:noeudDest.Index
-				
--- 				if noeudDest.parent == undefined then (
--- 					deplacer_element_facade 		id_element_enDrag		( noeudDest.Index 	+ 1 )
--- 				) else (
-					
--- 					local id_elementParent_dest 	= noeudDest.parent.index + 1
 				
 				local elementParent_dest 		= get_element_parent	noeudDest
 				local element_dest 				= get_element		 	noeudDest
-				/* 
-				local on_insere = true
-				if noeudDest.level == 2 do
-					if classof element_enDrag == cp_facadeCompo_balcon or classof element_enDrag == cp_facadeCompo_groupe do
-						on_insere = false
-					
-				if noeudDest.level == 1 do
-					if hasproperty  element_enDrag "elements" do
-						for elem in element_enDrag.elements do
-							if hasproperty  elem "elements" do 
-								on_insere = false
-				
-				 */
-				local on_insere = valider_drop	noeudDest
 				
 				
-				if on_insere do 
+				if valider_drop	noeudDest do 
 					inserer_element		elementParent_enDrag		id_element_enDrag		elementParent_dest		( noeudDest.index + 1 )
--- 				)
 				
 				
 			) else 
-				inserer_element		elementParent_enDrag		id_element_enDrag		undefined			( sequence.count +1)
--- 				deplacer_element_facade 		id_element_enDrag		( sequence.count )
-			
-			
+				inserer_element		elementParent_enDrag		id_element_enDrag		undefined			( sequence.count +1)			
 			
 			
 			elementParent_enDrag 		= undefined
@@ -412,46 +376,9 @@ category:"CP | Bâtiment	| Composant"
 			
 			node_enDrag = undefined
 			
--- 			show noeudDest
-			
-			/* 
-			local noeudDest 	= getNoeudA_at 	posDrop.x 	posDrop.y
-			
-			m_edit.drag_finaliser 	noeudDest
-			 */
-			
 		)
 		
 		
-		
-	/* 
-		----accesseurs ----
-		fn	getNoeud 			_item = (
-			local	result = undefined
--- 			if _item != undefined 
--- 				do result = m_edit.getNoeud	 	_item.name
-			result
-		)
-		fn	getItem 			_noeudA = (
-			local	result = undefined
--- 			for noeudTV in m_noeudsTV_total do 
--- 				if noeudTV.name == _noeudA.nomUnique do 
--- 					result = noeudTV
-			result
-		)
-		fn getNoeudA_at 	_x  _y 	=(
-			local noeudAt
-			local	itemAt = tv_sequence.GetNodeAt (dotNetObject "System.Drawing.Point" _x  _y )
--- 			debug "itemAt" var:itemAt
-			if itemAt !=undefined do 
-				debug "itemAt" var:itemAt.name
-			
-			if itemAt != undefined then
-				noeudAt = getNoeud  itemAt
-			
-			noeudAt
-		)
-		 */
 		
 		struct tv_elem_vide (
 			nom ="..."
@@ -487,6 +414,21 @@ category:"CP | Bâtiment	| Composant"
 		fn ajouter_TV_item	_item_aAjouter	_itemParent	=(
 			
 			local nv_node 	=	_itemParent.Nodes.add 		_item_aAjouter.nom
+			
+			if est_instance 	_item_aAjouter	( nv_node.index + 1 )	(get_element_parent nv_node)	do nv_node.text += " *"
+				
+			case classof _item_aAjouter of (
+				cp_facadeCompo_mur:			nv_node.imageIndex = nv_node.selectedImageIndex	=	1
+				cp_facadeCompo_ensemble:	nv_node.imageIndex = nv_node.selectedImageIndex	=	2
+				cp_facadeCompo_balcon:		nv_node.imageIndex = nv_node.selectedImageIndex	=	3
+				cp_facadeCompo_groupe:		nv_node.imageIndex = nv_node.selectedImageIndex	=	4
+				
+				
+				
+				
+				default:	nv_node.imageIndex = nv_node.selectedImageIndex	=	0
+			)
+			
 			
 			if hasProperty	_item_aAjouter	"elements" do (
 				if _item_aAjouter.elements.count == 0 then (
@@ -555,7 +497,10 @@ category:"CP | Bâtiment	| Composant"
 			actualiser ()
 			
 		)
+		on roll_parametres_TV		close 				do 	(
 		
+			tv_imageList.Images.Clear ()
+		)
 		
 		---- repartition ---------
 		on ddl_repartition selected  val do actualiser ()
@@ -583,10 +528,10 @@ category:"CP | Bâtiment	| Composant"
 		
 		
 		--------- Edition ---------
-		on btn_dupliquer 			pressed 			do	dupliquer_element_facade 			lbx_sequence.selection 
-		on btn_instancier 		pressed 			do	instancier_element_facade 		lbx_sequence.selection 
-		on btn_rendreUnique	pressed 			do	rendreUnique_element_facade 	lbx_sequence.selection 
-		on btn_retirer 			pressed 			do	retirer_element_facade 			lbx_sequence.selection 
+		on btn_dupliquer 			pressed 			do	dupliquer_element_facade 			( get_element_parent	tv_sequence.SelectedNode	)				( tv_sequence.SelectedNode.index + 1 )
+		on btn_instancier 		pressed 			do	instancier_element_facade 		( get_element_parent	tv_sequence.SelectedNode	)				( tv_sequence.SelectedNode.index + 1 )
+		on btn_rendreUnique	pressed 			do	rendreUnique_element_facade 	( get_element_parent	tv_sequence.SelectedNode	)				( tv_sequence.SelectedNode.index + 1 )
+		on btn_retirer 			pressed 			do	retirer_element_facade 			( get_element_parent	tv_sequence.SelectedNode	)				( tv_sequence.SelectedNode.index + 1 )
 		
 	
 	
@@ -724,7 +669,7 @@ category:"CP | Bâtiment	| Composant"
 			local elements_noms 	= #()
 			for i = 1 to sequence.count do (
 				local elem_nom = sequence[i].nom
-				if est_instance 	id:i 	do elem_nom += " *"
+-- 				if est_instance 	id:i 	do elem_nom += " *"
 				append elements_noms	elem_nom
 			)	
 			lbx_sequence.items 		=  for elem_nom in elements_noms collect elem_nom
@@ -923,16 +868,55 @@ category:"CP | Bâtiment	| Composant"
 	fn est_fixe			_compo	=	classof	_compo	==	cp_menuis_fixe
 	fn est_unPlein		_compo	=	classof	_compo	==	cp_facadeCompo_mur	--	_compo.category	as string ==	"CP | Facade	| Pleins"
 	fn est_copiable			=	 roll_parametres.lbx_sequence.selection != 0
-	fn est_instance	id:		= (
-		if id == unsupplied do id = roll_parametres.lbx_sequence.selection
+	
+	
+	---- instances -------------------
+	fn est_instance_recurrence		_element	_elements		_id_original		 	_parent_original	=(
 		local result =false
-		for i = 1 to sequence.count where i != id do
-			if sequence[i] == sequence[ id] do result = true
+		
+		for i = 1 to _elements.elements.count do (
+			if 	 _elements	!= _parent_original or _elements	== _parent_original and i != _id_original	do (
+				if _elements.elements[i] == _element then
+					result = true
+				else
+					if hasProperty _elements.elements[i] "elements" do
+						if 	est_instance_recurrence		_element		_elements.elements[i] 		_id_original		_parent_original	do
+							result = true
+			)
+		)
+		
+		result
+	)
+	fn est_instance		_element		_id_original		 	_parent_original	=(
+		local result =false
+		
+		for i = 1 to sequence.count do (
+			if 	 _parent_original != undefined or _parent_original	==  undefined and i != _id_original	do (
+				if sequence[i] == _element then
+					result = true
+				else
+					if hasProperty sequence[i] "elements" do
+						if 	est_instance_recurrence		_element		sequence[i] 		_id_original		_parent_original	do
+							result = true
+			)
+		)
+		
+		
 		result
 	)
 	
 	
-	fn est_valide	_pt_1 		_pt_2  			_etage		_etages_nbre	=(
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	fn est_facadeValide	_pt_1 		_pt_2  			_etage		_etages_nbre	=(
 		
 		local pt_1 = _pt_1
 		local pt_2 = _pt_2
@@ -1167,9 +1151,19 @@ category:"CP | Bâtiment	| Composant"
 		)
 		
 	)
-	fn retirer_element_facade			_id	 	=(
+	fn retirer_element_facade				_element_parent		_id		 	=(
 		
-		deleteItem sequence 				_id
+-- 		deleteItem sequence 				_id
+		
+		
+		----- on retire l'element à deplacer de son origine -------------
+		if _element_parent != undefined then 
+			deleteItem 	_element_parent.elements 			_id
+		else 
+			deleteItem 	sequence 			_id
+		
+		
+		
 		
 		---- actualisations -----------
 		actualiser ()
@@ -1180,7 +1174,7 @@ category:"CP | Bâtiment	| Composant"
 		)
 		
 	)
-	fn monter_element_facade 		_id 		=(
+	/* fn monter_element_facade 		_id 		=(
 		
 		local elem_temp 		= sequence[ _id ]
 		deleteItem 	sequence 				_id
@@ -1210,104 +1204,43 @@ category:"CP | Bâtiment	| Composant"
 			roll_parametres.lbx_sequence.selection +=  1
 			roll_parametres.actualiser ()	
 		)
-	)
+	) */
+	
 	fn renommer_element_facade		_id	_nv_nom =(
 		sequence[ _id ].nom = _nv_nom
 		if roll_parametres.open do	roll_parametres.actualiser ()
 	)
 	
--- 					inserer_element		elementParent_enDrag		id_element_enDrag		elementParent_dest		( noeudDest.index + 1 )
-	
 	fn inserer_element	_elementParent_enDrag		_id_aDeplacer		_elementParent_dest			_id_destination		=(
-		
-		debug "##### inserer_element_dans_noeud #####"
-		
-		
--- 		local elem_destParent		--= sequence[ _id_elemParent_dest ]		
--- 		local elem_aDeplacer 		--= sequence[ _id_aDeplacer ]
 		
 		local elem_aDeplacer
 		
 		----- on retire l'element à deplacer de son origine -------------
 		if _elementParent_enDrag != undefined then (
 			elem_aDeplacer	=	 	_elementParent_enDrag.elements 		[_id_aDeplacer]
+			deleteItem 	_elementParent_enDrag.elements 			_id_aDeplacer
 		) else (
 			elem_aDeplacer	=	 	sequence		[_id_aDeplacer]
+			deleteItem 	sequence 			_id_aDeplacer
 		)
 		
 		
-		local on_continue = true 
-		if classof elem_aDeplacer	==	cp_facadeCompo_balcon and 	classof _elementParent_dest	==	cp_facadeCompo_balcon do
-			on_continue = false
-		if classof elem_aDeplacer	==	cp_facadeCompo_groupe and 	classof _elementParent_dest	==	cp_facadeCompo_groupe do
-			on_continue = false
 		
-		if on_continue do (
-		
-				
-				----- on retire l'element à deplacer de son origine -------------
-				if _elementParent_enDrag != undefined then (
-					deleteItem 	_elementParent_enDrag.elements 			_id_aDeplacer
-				) else (
-					deleteItem 	sequence 			_id_aDeplacer
-				)
-				
-				
-				----- on le pose à sa destination -------------
-				if _elementParent_dest != undefined then (
-						
-						if _id_destination > _elementParent_dest.elements.count then 
-							append _elementParent_dest.elements		 elem_aDeplacer
-						else
-							insertItem 	elem_aDeplacer			_elementParent_dest.elements  		_id_destination  
-					
-				) else (
-									
-						if _id_destination > sequence.count then 
-							append sequence	 elem_aDeplacer
-						else
-							insertItem 	elem_aDeplacer			sequence  			_id_destination  
-				)
-				
-				
-		)
-		
-		/* 
-		if _id_destination > _elementParent_dest.elements.count then 
-			append elem_destParent.elements	 elem_aDeplacer
-		else
-			insertItem 	elem_aDeplacer			elem_destParent.elements  					(	_id_destination  )
-		 */
-		
-		---- actualisations -----------
-		actualiser ()
-		
-		if roll_parametres.open do	(
-			roll_parametres.lbx_sequence.selection -=  1
-			roll_parametres.actualiser ()	
-		)
-	
-	)
-	
-	
-	fn deplacer_element_facade 		_id_aDeplacer		_id_destination 		=(
-		
-		local elem_dest				= sequence[ _id_destination ]
-		local elem_aDeplacer 		= sequence[ _id_aDeplacer ]
-		deleteItem 	sequence 			_id_aDeplacer
-		
-		/* if hasProperty	elem_dest	"elements" then (
+		----- on le pose à sa destination -------------
+		if _elementParent_dest != undefined then (
 			
-				append elem_dest.elements	 elem_aDeplacer
+			if _id_destination > _elementParent_dest.elements.count then 
+				append _elementParent_dest.elements		 elem_aDeplacer
+			else
+				insertItem 	elem_aDeplacer			_elementParent_dest.elements  		_id_destination  
 			
-		) else ( */
+		) else (
 			
 			if _id_destination > sequence.count then 
-				append sequence elem_aDeplacer
+				append sequence	 elem_aDeplacer
 			else
-				insertItem 	elem_aDeplacer			sequence  					(	_id_destination  )
--- 		)
-		
+				insertItem 	elem_aDeplacer			sequence  			_id_destination  
+		)
 		
 		
 		---- actualisations -----------
@@ -1317,49 +1250,70 @@ category:"CP | Bâtiment	| Composant"
 			roll_parametres.lbx_sequence.selection -=  1
 			roll_parametres.actualiser ()	
 		)
+	
 	)
 	
 	
 	
-	fn dupliquer_element_facade 			_id		=(
+	fn dupliquer_element_facade 		_element_parent		_id		=(
 		
-		
-		local nvl_element 			= copy sequence[ _id ]
-		
-		if _id != 0 and _id	!= sequence.count	then	
-			insertItem nvl_element 		sequence 		(_id+1)
-		else
-			append sequence		nvl_element
-		
-		---- actualisations -----------
-		actualiser ()
-		
-		if roll_parametres.open do	(
-			roll_parametres.lbx_sequence.selection = (_id+1) 
-			roll_parametres.actualiser ()	
+		if _id > 0 do (
+			
+			local liste_cible
+			if _element_parent != undefined then 
+				liste_cible = _element_parent.elements
+			else
+				liste_cible = sequence
+			
+			local elem_duplique 		= copy	liste_cible[ _id ]
+			
+			if _id > liste_cible.count then 
+				append _liste_cible	 elem_duplique
+			else
+				insertItem 	elem_duplique			liste_cible  					(	_id  )
+			
+			
+			---- actualisations -----------
+			actualiser ()
+			
+			if roll_parametres.open do	(
+				roll_parametres.lbx_sequence.selection = (_id+1) 
+				roll_parametres.actualiser ()	
+			)
 		)
 	)
-	fn instancier_element_facade 		_id		=(
-
-		
-		local nvl_element 			=  sequence[ _id ]
-		
-		if _id != 0 and _id	!= sequence.count	then	
-			insertItem nvl_element 		sequence 		(_id+1)
-		else
-			append sequence		nvl_element
-		
-		---- actualisations -----------
-		actualiser ()
-		
-		if roll_parametres.open do	(
-			roll_parametres.lbx_sequence.selection = (_id+1) 
-			roll_parametres.actualiser ()	
+	fn instancier_element_facade 	_element_parent	_id		=(
+		if _id > 0 do (
+			
+			local liste_cible
+			if _element_parent != undefined then 
+				liste_cible = _element_parent.elements
+			else
+				liste_cible = sequence
+			
+			local elem_duplique 		= 	liste_cible[ _id ]
+			
+			if _id > liste_cible.count then 
+				append _liste_cible	 elem_duplique
+			else
+				insertItem 	elem_duplique			liste_cible  					(	_id  )
+			
+			
+			---- actualisations -----------
+			actualiser ()
+			
+			if roll_parametres.open do	(
+				roll_parametres.lbx_sequence.selection = (_id+1) 
+				roll_parametres.actualiser ()	
+			)
 		)
 	)
-	fn rendreUnique_element_facade	_id		=(
+	fn rendreUnique_element_facade		_element_parent	_id			=(
 		
-		sequence[ _id ] = copy sequence[ _id ] 
+			if _element_parent != undefined then 
+				_element_parent.elements[ _id ]  = copy		_element_parent.elements[ _id ] 
+			else
+				sequence[ _id ] = copy sequence[ _id ] 
 		
 		---- actualisations -----------
 		actualiser ()

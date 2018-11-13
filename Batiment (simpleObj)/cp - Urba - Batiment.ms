@@ -585,9 +585,9 @@ category:"CP | Urba temp"
 		
 		case _etat of (
 			true: (
-				createDialog		roll_editeur_facade					width:250	height:700	style:#( #style_titlebar , #style_border , #style_sysmenu, #style_resizing) 	lockWidth:true		--facades[ id_facade_select ]
+				createDialog		roll_editeur_facade					width:300	height:700	style:#( #style_titlebar , #style_border , #style_sysmenu, #style_resizing) 	lockWidth:true		--facades[ id_facade_select ]
 				
-				addSubRollout 	roll_editeur_facade.subroll_param		facades[ id_facade_select ].roll_parametres
+				addSubRollout 	roll_editeur_facade.subroll_param		facades[ id_facade_select ].roll_parametres_TV
 			)
 			false: destroyDialog  roll_editeur_facade
 		)
@@ -693,7 +693,7 @@ category:"CP | Urba temp"
 				
 				local facade_aTester = copy facades[ id_facade ]
 				
-				if facade_aTester.est_valide		pt		pt_suivant		etage_courant 		etages_nbre		then (
+				if facade_aTester.est_facadeValide		pt		pt_suivant		etage_courant 		etages_nbre		then (
 				
 					facade_aTester.longueur			=	distance	pt	pt_suivant
 					facade_aTester.hauteur			=	etages_hauteur_global
