@@ -77,7 +77,7 @@ category:"CP | Urba temp"
 	parameters param_facades rollout:roll_facades	(
 		facades					type:#maxObjectTab	tabSizeVariable:true
 		
-		affichage_longueurs		type:#boolean 		ui:ckb_afficher_longueur				default:false
+		affichage_longueurs		type:#boolean 		/* ui:ckb_afficher_longueur	 */			default:true
 	)
 	
 	parameters params_divers rollout:roll_divers	(
@@ -205,12 +205,15 @@ category:"CP | Urba temp"
 		button 		btn_descendre	"\\/"	--align:#right
 		
 		listBox		lbx_facades		""	height:5
+		/* 
 		group "Viewport" (
 			checkButton	ckb_afficher_longueur	"Long"	width:35	across:4 	align:#right
 			checkButton	ckb_autre_1	""	width:35	align:#right
 			checkButton	ckb_autre_2	""	width:35	align:#right
 			checkButton	ckb_autre_3	""	width:35	align:#right
 		)
+		 */
+		
 		editText 	edTxt_nom		 	"" 	
 		
 		
@@ -569,25 +572,40 @@ category:"CP | Urba temp"
 	--------------- facades ----------------------------------
 	fn basculer_editeurFacade 	_etat			=(
 		
-		rollout roll_editeur_facade "Facade" (
+		
+		----- rollout editeur ---------------------
+		rollout roll_editeur_facade "Facade"	width:480 height:570		--	width:500
+		(
 			
-			subrollout	subroll_param		""	/* width:350 */	height:300	
+			subRollout 'subroll_param' "" pos:[13,7] width:224 height:300 align:#left	
+			
+			subRollout 'subroll_element' "" pos:[246,7] width:224 height:300 align:#left
 			
 			fn resize_rollout	=(
 				subroll_param.height	=	roll_editeur_facade.height - 5
+				subroll_element.height	=	roll_editeur_facade.height - 5
 			)
-			on roll_editeur_facade	open do resize_rollout  ()
-			on roll_editeur_facade	resized val do resize_rollout  ()
+			
+			on roll_editeur_facade open do
+				resize_rollout  ()
+			on roll_editeur_facade resized val do
+				resize_rollout  ()
 		)
+		
+		
+		
+		
+		
 		
 		
 		local	id_facade_select 	= 	roll_facades.lbx_facades.selection
 		
 		case _etat of (
 			true: (
-				createDialog		roll_editeur_facade					width:300	height:700	style:#( #style_titlebar , #style_border , #style_sysmenu, #style_resizing) 	lockWidth:true		--facades[ id_facade_select ]
+				createDialog		roll_editeur_facade					/* width:300	 height:670*/	style:#( #style_titlebar , #style_border , #style_sysmenu, #style_resizing) 	lockWidth:true		--facades[ id_facade_select ]
 				
 				addSubRollout 	roll_editeur_facade.subroll_param		facades[ id_facade_select ].roll_parametres_TV
+				addSubRollout 	roll_editeur_facade.subroll_element		facades[ id_facade_select ].roll_parametres_element
 			)
 			false: destroyDialog  roll_editeur_facade
 		)

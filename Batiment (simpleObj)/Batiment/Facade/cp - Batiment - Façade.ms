@@ -16,6 +16,7 @@ category:"CP | Bâtiment	| Composant"
 	
 	
 	---- pré déclaration -----------
+	local roll_parametres_element
 	local corriger_parametres , 		actualiser_composants 
 	local	ajouter_element_facade, 	retirer_element_facade, 	dupliquer_element_facade, instancier_element_facade, rendreUnique_element_facade, monter_element_facade, descendre_element_facade, renommer_element_facade, ouvrir_parametres
 	local 	inserer_element
@@ -138,7 +139,7 @@ category:"CP | Bâtiment	| Composant"
 			button 		btn_ajouter_vide1 	""			width:50	height:17			align:#left		enabled:false
 			button 		btn_ajouter_vide2 	""			width:50		height:17		align:#left		enabled:false
 			
-			dotNetControl tv_sequence	 "treeview" /* width:145 */ height:260 --align:#left
+			dotNetControl tv_sequence	 "treeview" /* width:145 */ height:360 --align:#left
 			
 			button 		btn_dupliquer	 		"Dup."			width:27	height:17	across:4	align:#center
 			button 		btn_instancier	 		"Ins."			width:27			height:17			align:#center
@@ -186,7 +187,7 @@ category:"CP | Bâtiment	| Composant"
 			
 -- 			tv_sequence.Dock 					= (dotnetclass "DockStyle").Fill
 			tv_sequence.indent				= 24
-			debug "tv_sequence.indent"	var:tv_sequence.indent
+-- 			debug "tv_sequence.indent"	var:tv_sequence.indent
 			
 			tv_imageList.imageSize 	= 	dotNetObject "System.Drawing.Size" 32 32
 			
@@ -201,8 +202,8 @@ category:"CP | Bâtiment	| Composant"
 			
 			tv_sequence.ImageList =	tv_imageList
 -- 			tv_imageList.Images.Add(img)
-			
-			show tv_sequence
+-- 			debug "tv_sequence.SelectedNode " var:tv_sequence.SelectedNode
+-- 			show tv_sequence
 			
 			/* 
 			tv_btns = #(tvBtn_mur)
@@ -311,14 +312,15 @@ category:"CP | Bâtiment	| Composant"
 			
 			if itemSurvol != undefined then	(
 				
-						
+				
 				if valider_drop		itemSurvol	 then
 					tv_sequence.SelectedNode = itemSurvol	---		tv_sequence.GetNodeAt(posDrag);
 				else
 					tv_sequence.SelectedNode = node_enDrag
 			
 			
-			)
+			) else 
+				tv_sequence.SelectedNode = undefined
 			
 			
 			
@@ -328,12 +330,7 @@ category:"CP | Bâtiment	| Composant"
 		
 		fn drag_demarrer 	_arg =(
 			
-			debug "--------drag_demarrer-------------"
-			debug "_arg" var:_arg
-			
 			if _arg.item != undefined do (
-				
-				debug "_arg.item.Index" var:_arg.item.Index
 				
 				if _arg.item.tag	!=		"vide" do (
 				
@@ -514,7 +511,17 @@ category:"CP | Bâtiment	| Composant"
 		
 		
 		--------- le treeView ---------
--- 		on tv_sequence 	mouseDown 				_arg 	do  	clq_down  				_arg
+		on tv_sequence 	mouseDown 				_arg 	do  	(
+-- 			clq_down  				_arg
+			local noeud_selec 	= tv_sequence.GetNodeAt (dotNetObject "System.Drawing.Point" _arg.x _arg.y )
+			local elem_selec 		= get_element	noeud_selec
+			
+			local subroll_dest	 = roll_parametres_element.subroll_param
+			if subroll_dest.rollouts.count > 0 do 
+				for subRoll in subroll_dest.rollouts  do
+					removeSubRollout subroll_dest	subRoll
+			addSubRollout 	subroll_dest		elem_selec.roll_parametres
+		)
 -- 		on tv_sequence 	mouseUp 	_sender 		_arg 	do 	clq_up 					_arg
 		on tv_sequence 	DragOver 	_sender		_arg	do	drag_checkSurvol  	_arg
 		on tv_sequence 	DragDrop 					_arg 	do	drag_recevoir 			_arg
@@ -537,6 +544,29 @@ category:"CP | Bâtiment	| Composant"
 	
 		
 	)
+	
+	
+	
+	rollout roll_parametres_element  	"Element"		(
+	
+		subrollout	subroll_param		""	height:516
+		
+		
+	)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	rollout roll_parametres  	"Façade"		(
 		--- divers ------------------------------------------------------------------------------------------------------
 		fn get_menuiserie_plugins =(

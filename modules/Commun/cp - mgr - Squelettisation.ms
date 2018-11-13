@@ -40,7 +40,7 @@ struct str_squel_face (
 struct  str_squelettisation (
 	
 		------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
-		fn debug 	_txt  var:	 param:    =	try if true  do ::debuger 	_txt	prefix:"str_squel."	  	var:var	 param:param	catch (),
+		fn debug 	_txt  var:	 param:    =	try if false  do ::debuger 	_txt	prefix:"str_squel."	  	var:var	 param:param	catch (),
 		------------ DEBUG	-------------------------------------------------------------------------------------------------------------------------
 		
 		
@@ -915,7 +915,7 @@ struct  str_squelettisation (
 			
 			local bb_pts 				= shp.get_BB_shape 	pts
 			local longueurs_BBpts 	= #( bb_pts[2].x - bb_pts[1].x ,  bb_pts[2].y - bb_pts[1].y )
-			precision 					= ( amax longueurs_BBpts  ) / 1000			
+			precision 					= ( amax longueurs_BBpts  ) / 100			
 			indent_distance 			= precision
 			debug "longueurs_BBpts" var:longueurs_BBpts	
 			debug "--->	precision" var:precision
