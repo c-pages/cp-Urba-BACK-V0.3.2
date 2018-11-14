@@ -604,7 +604,7 @@ category:"CP | Urba temp"
 			true: (
 				createDialog		roll_editeur_facade					/* width:300	 height:670*/	style:#( #style_titlebar , #style_border , #style_sysmenu, #style_resizing) 	lockWidth:true		--facades[ id_facade_select ]
 				
-				addSubRollout 	roll_editeur_facade.subroll_param		facades[ id_facade_select ].roll_parametres_TV
+				addSubRollout 	roll_editeur_facade.subroll_param		facades[ id_facade_select ].roll_parametres
 				addSubRollout 	roll_editeur_facade.subroll_element		facades[ id_facade_select ].roll_parametres_element
 			)
 			false: destroyDialog  roll_editeur_facade

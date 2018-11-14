@@ -28,7 +28,7 @@ category:"CP | Facade	| Composant"
 		on btn_retirer 			pressed 			do	retirer_element_menuis 			lbx_sequence.selection 
 		on btn_monter 			pressed 			do	monter_element_menuis 			lbx_sequence.selection 
 		on btn_descendre 		pressed		 	do	descendre_element_menuis 		lbx_sequence.selection 
-			 */
+	*/
 	---- sequence provisoire pour construction du mesh -------
 	local sequence_tmp
 	
@@ -112,6 +112,12 @@ category:"CP | Facade	| Composant"
 		)
 		
 		
+		fn actualiser =(
+			spn_longueur.indeterminate		=	etirable
+			spn_longueur.enabled 				=	not	etirable 
+		)
+		on roll_parametres	open 					do actualiser ()
+		on shk_etirable		changed state  	do actualiser ()
 		
 		
 		on btn_editer_sequence pressed do ouvrir_roll_sequence ()
@@ -122,12 +128,12 @@ category:"CP | Facade	| Composant"
 	
 	
 	
-	rollout roll_sequence_TV  "Séquence TV"	(	
+	rollout roll_sequence  "Ensemble menuisé"	(	
 		
 		
 		------------ TRee view -----------------------------
-		local m_dragDropEffect		=dotNetClass "System.Windows.Forms.DragDropEffects"		
-		local tv_imageList 			= dotNetObject "System.Windows.Forms.ImageList"
+		local m_dragDropEffect		=	dotNetClass "System.Windows.Forms.DragDropEffects"		
+		local tv_imageList 			=	dotNetObject "System.Windows.Forms.ImageList"
 		
 		
 		------------------- UI -------------------------
@@ -149,7 +155,7 @@ category:"CP | Facade	| Composant"
 		
 		subrollout	subroll_param		""	height:200
 		
-		dotNetControl btn_resize 	"System.Windows.Forms.Button" 		align:#left width:150 height:10
+		dotNetControl btn_resize 	"System.Windows.Forms.Button" 		align:#left /* width:150 */ height:10
 		
 		
 		
@@ -296,22 +302,23 @@ category:"CP | Facade	| Composant"
 			
 			
 		) --- fin actualiser -----------
-		fn initialiser = (
+		fn initialiser_tv = (
 			
 			---- TRee view ----
 			tv_sequence.borderstyle 			= (dotnetclass "System.Windows.Forms.BorderStyle").None
 			tv_sequence.LabelEdit 				= true 
 			tv_sequence.allowdrop 				= true
 			tv_sequence.HideSelection 		= false
--- 			tv_sequence.ShowRootLines	 	= true
-			tv_sequence.ShowLines   			= true
+			tv_sequence.ShowRootLines	 	= false
+			tv_sequence.ShowLines   			= false
 -- 			tv_sequence.HotTracking   		= true
 			tv_sequence.BackColor 			= (dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
 			tv_sequence.ForeColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
 			tv_sequence.LineColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
 			tv_sequence.DrawMode 			= (dotnetclass "TreeViewDrawMode.OwnerDrawText")
 			
-			tv_sequence.indent				= 24
+			tv_sequence.indent				= 0
+			tv_sequence.Left				= 0
 			
 			tv_imageList.imageSize 	= 	dotNetObject "System.Drawing.Size" 32 32
 			
@@ -322,7 +329,7 @@ category:"CP | Facade	| Composant"
 
 			tv_sequence.ImageList =	tv_imageList
 
-
+		show tv_sequence
 			
 		)
 		
@@ -344,7 +351,7 @@ category:"CP | Facade	| Composant"
 				if subRoll_nvl_ht >	50 do (
 					subroll_param.height		=	subRoll_nvl_ht
 					btn_resize.pos.y			=	btnResize_pos_init.y		+	changement_ht
-					roll_sequence_tv.height		=	rollSequence_hauteur_init 	+ 	changement_ht
+					roll_sequence.height		=	rollSequence_hauteur_init 	+ 	changement_ht
 				)
 			)
 		)
@@ -353,8 +360,8 @@ category:"CP | Facade	| Composant"
 		
 		
 		
-		on roll_sequence_TV	open do (
-			initialiser ()
+		on roll_sequence	open do (
+			initialiser_tv ()
 			actualiser ()
 			
 			
@@ -371,7 +378,7 @@ category:"CP | Facade	| Composant"
 			pos_initial						=	mouse.posUnscaled
 			subRoll_hauteur_init			= subroll_param.height
 			btnResize_pos_init			=	btn_resize.pos
-			rollSequence_hauteur_init	=	roll_sequence_tv.height
+			rollSequence_hauteur_init	=	roll_sequence.height
 		)
 		on	btn_resize	MouseUp 		do	resize_enCours = false		
 		on	btn_resize	MouseMove 	do 	resize_surbRoll ()
@@ -429,201 +436,7 @@ category:"CP | Facade	| Composant"
 		
 	) ---- fin rollout ---------------------
 	
-	
-	
-	rollout roll_sequence  "Séquence"	(	
-	
-		--- divers ------------------------------------------------------------------------------------------------------
-		fn get_menuiserie_plugins =(
-			local geo_classes			=	GeometryClass.classes 
-			local menuiseries_classes 	= for geo_classe in geo_classes	where findstring ( geo_classe as string )		"cp_baieElement" != undefined		collect	geo_classe
-			menuiseries_classes
-		)
-		
-		--- menus clique droit --------------------------------------------------------------
-		fn creer_RCM_ajouter	=(
 
-			
-			
-			--- on recupere les plug necessaires ---------
-			local menuiseries_plugins = get_menuiserie_plugins ()
-			
-			--- on ecrit le menu ---------
-			local menu_txt=""
-			menu_txt += "rcmenu  menu_ajouter (\n"
-			
-			---- les boutons ------------------------------------------
-			for menuis_plug in menuiseries_plugins do
-				menu_txt += "menuItem	btn_" + menuis_plug.name as string + "	\"" + menuis_plug.name + "\"\n" 
-			
-			---- les evenements ---------------------------------------------
-			for menuis_plug in menuiseries_plugins do
-				menu_txt += "on		btn_" + menuis_plug.name as string + " picked do $.ajouter_element_menuis " + menuis_plug as string+ "\n" 
-			
-			--- fin du rc menu -----
-			menu_txt += ")"
-			
-			---- on ouvre le menu -----
-			RCmenu_ajouter	=	execute menu_txt
-			popUpMenu	RCmenu_ajouter
-			
-		) --- fin creer_RCM_ajouter ---------------
-		fn creer_RCM_edition	=(
-
-			rcmenu  RCmenu_edition (
-				
-				local this_test
-				
-				menuItem	btn_dupliquer	 		"Dupliquer" 			enabled:($.est_copiable 	())
-				menuItem	btn_instancier	 		"Instancier" 		enabled:($.est_copiable	())
-				menuItem	btn_rendreUnique	 	"Rendre unique" 	enabled:($.est_instance	())
-				
-				on		btn_dupliquer 		picked 	do $.dupliquer_element_menuis ()
-				on		btn_instancier 	picked 	do $.instancier_element_menuis ()
-				on		btn_rendreUnique picked 	do $.rendreUnique_element_menuis ()
-				
-			)
-			RCmenu_edition.this_test = $
-			popUpMenu	RCmenu_edition
-			
-			format "par LA\n"
-		) --- fin creer_RCM_ajouter ---------------
-		
-		
-		
-		
-		------------------- UI -------------------------
--- 		button 		btn_ajouter 		"+"			across:4
-		button 		btn_ajouter_fixe 				"Fixe"				width:50		height:17	across:3		align:#left
-		button 		btn_ajouter_fenetre 		"Fenêtre"		width:50		height:17	align:#left
-		button 		btn_ajouter_porte 			"Porte"			width:50		height:17	align:#left
-		
-		listBox		lbx_sequence		""	height:6
-		
-		button 		btn_dupliquer	 		"Dup."			width:27	height:17	across:6	align:#left
-		button 		btn_instancier	 		"Ins."			width:27			height:17			align:#left
-		button 		btn_rendreUnique	 	"Uni."			width:27			height:17			align:#left
-		button 		btn_retirer	 		"Sup."				width:27		height:17			align:#left
-		button 		btn_monter			"/\\"			width:27		height:17		align:#left
-		button 		btn_descendre	"\\/"			width:27		height:17		align:#left
-		
-		subrollout	subroll_param		""	height:200
-		
-		dotNetControl btn_resize 	"System.Windows.Forms.Button" 		align:#left width:150 height:10
-		
-		
-		fn actualiser =(
-			
-			---- l'affichage de la sequence -------------------
-			local elements_noms 	= #()
-			for i = 1 to sequence.count do (
-				local elem_nom = sequence[i].nom
-				if est_instance 	id:i 	do elem_nom += " *"
-				append elements_noms	elem_nom
-			)	
-			lbx_sequence.items 		=  for elem_nom in elements_noms collect elem_nom
-			
-			
-			--- les parametres de l'element (le subrollout)  ---------------			
-			--- on retire les vieux rollouts --------
-			if subroll_param.rollouts.count > 0 do 
-				for subRoll in subroll_param.rollouts  do
-					removeSubRollout subroll_param	subRoll
-				
-			---- on ajoute le nouveau -----------------
-			if lbx_sequence.selection > 0 then 
-				addSubRollout 	subroll_param		sequence[  lbx_sequence.selection ].roll_parametres
-				
-			---- les boutons ------
-			btn_retirer.enabled 		= lbx_sequence.selection != 0
-			btn_monter.enabled 		= lbx_sequence.selection > 1
-			btn_descendre.enabled = lbx_sequence.selection < sequence.count and lbx_sequence.selection != 0
-			
-			
-			
-		) --- fin actualiser -----------
-		
-		
-		
-		
-		----- Gestion du resize du subRollout -----------------------
-		local resize_enCours 			= false
-		local pos_initial					=	[0,0]
-		local subRoll_hauteur_init		=	0
-		local btnResize_pos_init		=	[0,0]
-		local rollSequence_hauteur_init	=	[0,0]
-		fn resize_surbRoll =(
-			if resize_enCours do (
-				local mouse_pos 			= mouse.posUnscaled
-				local changement_ht 	= mouse_pos.y - pos_initial.y
-				local subRoll_nvl_ht 	= subRoll_hauteur_init 		+ 	changement_ht
-				
-				if subRoll_nvl_ht >	50 do (
-					subroll_param.height		=	subRoll_nvl_ht
-					btn_resize.pos.y			=	btnResize_pos_init.y		+	changement_ht
-					roll_sequence.height		=	rollSequence_hauteur_init 	+ 	changement_ht
-				)
-			)
-		)
-		
-		
-		
-		
-		
-		on roll_sequence	open do (
-			
-			actualiser ()
-			
-			
-			---- le bouton resize -----------------------
-			btn_resize.FlatStyle	=		(dotNetClass "System.Windows.Forms.FlatStyle").flat	
-			btn_resize.BackColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
-			btn_resize.ForeColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
-		)
-		
-		
-		------------ le bouton resize -----------------------
-		on	btn_resize	MouseDown 	do (
-			resize_enCours 				= true
-			pos_initial						=	mouse.posUnscaled
-			subRoll_hauteur_init			= subroll_param.height
-			btnResize_pos_init			=	btn_resize.pos
-			rollSequence_hauteur_init	=	roll_sequence.height
-		)
-		on	btn_resize	MouseUp 		do	resize_enCours = false		
-		on	btn_resize	MouseMove 	do 	resize_surbRoll ()
-		on	btn_resize	MouseLeave 	do	resize_enCours = false		
-		
-		
-		
-		-------- la sequence -----------
-		
-		on lbx_sequence 		selected sel 	do	actualiser ()
-		/* 
-		on lbx_sequence	 rightClick 	_id 	do	(
-			lbx_sequence.selection = _id
-			actualiser ()
-			creer_RCM_edition ()
-		)
-		 */
--- 		on btn_ajouter 		pressed 			do 	creer_RCM_ajouter ()
-		on btn_ajouter_fixe 			pressed 			do 	ajouter_element_menuis 	cp_baieElement_fixe
-		on btn_ajouter_fenetre 	pressed 			do 	ajouter_element_menuis 	cp_baieElement_fenetre
-		on btn_ajouter_porte 		pressed 			do 	ajouter_element_menuis 	cp_baieElement_porte
-		
-		on btn_dupliquer 			pressed 			do	dupliquer_element_menuis 			lbx_sequence.selection 
-		on btn_instancier 		pressed 			do	instancier_element_menuis 		lbx_sequence.selection 
-		on btn_rendreUnique	pressed 			do	rendreUnique_element_menuis 	lbx_sequence.selection 
-		on btn_retirer 			pressed 			do	retirer_element_menuis 			lbx_sequence.selection 
-		on btn_monter 			pressed 			do	monter_element_menuis 			lbx_sequence.selection 
-		on btn_descendre 		pressed		 	do	descendre_element_menuis 		lbx_sequence.selection 
-		
-		
-	) ---- fin rollout ---------------------
-	
-	
-	
-	
 	
 	
 	
@@ -676,10 +489,10 @@ category:"CP | Facade	| Composant"
 		) */
 	)
 	
-	fn actualiser = (
+	fn actualiser_UI = (
 		corriger_parametres ()		
 		actualiser_composants()		
-		if roll_sequence_TV.open do	roll_sequence_TV.actualiser ()		
+		if roll_sequence.open do	roll_sequence.actualiser ()		
 		redrawViews ()
 	)
 	
@@ -827,12 +640,7 @@ category:"CP | Facade	| Composant"
 		
 		
 		---- actualisations -----------
-		actualiser ()
-		
-		if roll_parametres.open do	(
-			roll_parametres.lbx_sequence.selection -=  1
-			roll_parametres.actualiser ()	
-		)
+		actualiser_UI ()
 	
 	)
 	
@@ -840,20 +648,22 @@ category:"CP | Facade	| Composant"
 	
 	fn ajouter_element_menuis		_element_plug	 =(
 		
-		local	id_elem_select 	= 	roll_sequence.lbx_sequence.selection
-		local	id_elem_insert		= 	id_elem_select + 1
+-- 		local	id_elem_select 	= 	roll_sequence.lbx_sequence.selection
+-- 		local	id_elem_insert		= 	id_elem_select + 1
 		
 		local nvl_element 		= createinstance	_element_plug
 		
-		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	
-			insertItem nvl_element 		sequence 		id_elem_insert
-		 else 		
+-- 		if id_elem_select != 0 and id_elem_select	!= sequence.count	then	
+-- 			insertItem nvl_element 		sequence 		id_elem_insert
+-- 		 else 		
 			append sequence		nvl_element
+		
+		
 		---- actualisations -----------
-		actualiser ()
+		actualiser_UI ()
 		
 		if roll_sequence.open do	(
-			roll_sequence.lbx_sequence.selection = id_elem_insert 
+-- 			roll_sequence.lbx_sequence.selection = id_elem_insert 
 			roll_sequence.actualiser ()	
 		)
 		
@@ -872,10 +682,10 @@ category:"CP | Facade	| Composant"
 		insertItem 	elem_temp			sequence  					(	_id - 1 )
 		
 		---- actualisations -----------
-		actualiser ()
+		actualiser_UI ()
 		
 		if roll_sequence.open do	(
-			roll_sequence.lbx_sequence.selection -=  1
+-- 			roll_sequence.lbx_sequence.selection -=  1
 			roll_sequence.actualiser ()	
 		)
 	)
@@ -889,10 +699,10 @@ category:"CP | Facade	| Composant"
 			insertItem 	elem_temp		sequence  					(	_id + 1 )		
 		
 		---- actualisations -----------
-		actualiser ()
+		actualiser_UI ()
 		
 		if roll_sequence.open do	(
-			roll_sequence.lbx_sequence.selection +=  1
+-- 			roll_sequence.lbx_sequence.selection +=  1
 			roll_sequence.actualiser ()	
 		)
 	)
@@ -915,10 +725,10 @@ category:"CP | Facade	| Composant"
 			append sequence		nvl_element
 		
 		---- actualisations -----------
-		actualiser ()
+		actualiser_UI ()
 		
 		if roll_sequence.open do	(
-			roll_sequence.lbx_sequence.selection = (_id+1) 
+-- 			roll_sequence.lbx_sequence.selection = (_id+1) 
 			roll_sequence.actualiser ()	
 		)
 	)
@@ -933,10 +743,10 @@ category:"CP | Facade	| Composant"
 			append sequence		nvl_element
 		
 		---- actualisations -----------
-		actualiser ()
+		actualiser_UI ()
 		
 		if roll_sequence.open do	(
-			roll_sequence.lbx_sequence.selection = (_id+1) 
+-- 			roll_sequence.lbx_sequence.selection = (_id+1) 
 			roll_sequence.actualiser ()	
 		)
 	)	
@@ -945,7 +755,7 @@ category:"CP | Facade	| Composant"
 		sequence[ _id ] = copy sequence[ _id ] 
 		
 		---- actualisations -----------
-		actualiser ()
+		actualiser_UI ()
 	)
 	
 	

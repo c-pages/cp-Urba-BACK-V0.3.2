@@ -63,6 +63,13 @@ category:"CP | Facade	| Composant"
 			spinner 	spn_longueur 			"longueur" 				type:#worldunits 	range:[0,1e20,0]
 			spinner 	spn_debord				"Débord" 				type:#worldunits range:[0,1e20,0]
 		)
+		
+		fn actualiser =(
+			spn_longueur.indeterminate		=	etirable
+			spn_longueur.enabled 				=	not	etirable 
+		)
+		on roll_parametres	open 					do actualiser ()
+		on shk_etirable		changed state  	do actualiser ()
 	)
 	rollout roll_divers  "Divers"	(
 		 group "Qualité" (
