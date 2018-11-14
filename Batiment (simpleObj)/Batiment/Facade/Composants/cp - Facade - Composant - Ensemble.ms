@@ -18,6 +18,7 @@ category:"CP | Facade	| Composant"
 	---- pré déclaration -----------
 	local corriger_parametres , 	actualiser_composants , ouvrir_roll_sequence
 	local	ajouter_element_menuis, retirer_element_menuis,dupliquer_element_menuis,  instancier_element_menuis, rendreUnique_element_menuis, monter_element_menuis, descendre_element_menuis, renommer_element
+	local deplacer_element
 	local est_instance
 	
 	/* 
@@ -58,7 +59,6 @@ category:"CP | Facade	| Composant"
 		
 		
 		sequence					type:#maxObjectTab	tabSizeVariable:true
--- 		sequence_elem_long		type:#floatTab			tabSizeVariable:true
 		
 	)
 	parameters params_divers rollout:roll_divers
@@ -118,6 +118,319 @@ category:"CP | Facade	| Composant"
 		
 		
 	)
+	
+	
+	
+	
+	rollout roll_sequence_TV  "Séquence TV"	(	
+		
+		
+		------------ TRee view -----------------------------
+		local m_dragDropEffect		=dotNetClass "System.Windows.Forms.DragDropEffects"		
+		local tv_imageList 			= dotNetObject "System.Windows.Forms.ImageList"
+		
+		
+		------------------- UI -------------------------
+		button 		btn_ajouter_fixe 				"Fixe"				width:50		height:17	across:3		align:#left
+		button 		btn_ajouter_fenetre 		"Fenêtre"		width:50		height:17	align:#left
+		button 		btn_ajouter_porte 			"Porte"			width:50		height:17	align:#left
+		
+		
+		
+		dotNetControl tv_sequence	 "treeview" /* width:145 */ height:200 --align:#left
+		
+		
+		button 		btn_dupliquer	 		"Dup."			width:27	height:17	across:6	align:#left
+		button 		btn_instancier	 		"Ins."			width:27			height:17			align:#left
+		button 		btn_rendreUnique	 	"Uni."			width:27			height:17			align:#left
+		button 		btn_retirer	 		"Sup."				width:27		height:17			align:#left
+		button 		btn_monter			"/\\"			width:27		height:17		align:#left
+		button 		btn_descendre	"\\/"			width:27		height:17		align:#left
+		
+		subrollout	subroll_param		""	height:200
+		
+		dotNetControl btn_resize 	"System.Windows.Forms.Button" 		align:#left width:150 height:10
+		
+		
+		
+		---------- Treeview -----------------------------------------------------------------------------
+		local id_element_enDrag	=	0
+		local id_element_destination	=	0		
+		local elementParent_enDrag
+		local element_enDrag
+		local node_enDrag
+		
+		fn vider_tv = (
+			tv_sequence.Nodes.Clear()
+		)
+		fn get_element		_noeud 	=(
+			
+			local element
+			
+			element = sequence[_noeud.index + 1 ]
+			
+			element
+		)
+		------- drag and drop -------------------------
+		fn drag_checkSurvol	 _arg = (
+			
+			_arg.Effect=_arg.AllowedEffect			
+			
+			local posDrag		= tv_sequence.PointToClient 	tv_sequence.MousePosition
+			local itemSurvol	= tv_sequence.GetNodeAt (dotNetObject "System.Drawing.Point" posDrag.x 	posDrag.y)
+			
+			
+			if itemSurvol != undefined then	
+				tv_sequence.SelectedNode = itemSurvol
+			else 
+				tv_sequence.SelectedNode = undefined
+			
+			
+			
+		)
+		fn drag_demarrer 	_arg =(
+			
+			if _arg.item != undefined do (
+				
+				if _arg.item.tag	!=		"vide" do (
+				
+					
+					node_enDrag				=		_arg.item
+					id_element_enDrag		=		_arg.item.Index	+	1
+-- 					elementParent_enDrag	= 		get_element_parent		_arg.item
+					element_enDrag 			=  	get_element		 	_arg.item
+					
+					tv_sequence.doDragDrop 		_arg.item 		m_dragDropEffect.Move
+				)
+				
+			)
+		)
+		fn drag_recevoir 	_arg =(
+			
+			local posDrop		= tv_sequence.PointToClient 	tv_sequence.MousePosition
+			local noeudDest 	= tv_sequence.GetNodeAt (dotNetObject "System.Drawing.Point" posDrop.x 	posDrop.y )
+			
+			if noeudDest != undefined then	(
+				
+				
+-- 				local elementParent_dest 		= get_element_parent	noeudDest
+				local element_dest 				= get_element		 	noeudDest
+				
+				
+-- 				if valider_drop	noeudDest do 
+					deplacer_element				id_element_enDrag			( noeudDest.index + 1 )
+				
+				
+			) else 
+				deplacer_element				id_element_enDrag				( sequence.count +1)			
+			
+			
+			elementParent_enDrag 		= undefined
+			element_enDrag 				= undefined
+			id_element_enDrag			=	0
+			id_element_destination 		= 0
+			
+			node_enDrag = undefined
+			
+		)
+		fn ajouter_TV_item	_item_aAjouter	_itemParent	=(
+			
+			---- pour element vide ---------
+			struct tv_elem_vide (
+				nom ="..."
+			)
+		
+			local nv_node 	=	_itemParent.Nodes.add 		_item_aAjouter.nom
+			
+-- 			if est_instance 	_item_aAjouter	( nv_node.index + 1 )	(get_element_parent nv_node)	do nv_node.text += " *"
+			
+			case classof _item_aAjouter of (
+				cp_baieElement_fixe:			nv_node.imageIndex = nv_node.selectedImageIndex	=	0
+				cp_baieElement_fenetre:		nv_node.imageIndex = nv_node.selectedImageIndex	=	1
+				cp_baieElement_porte:			nv_node.imageIndex = nv_node.selectedImageIndex	=	2
+				
+				default:	nv_node.imageIndex = nv_node.selectedImageIndex	=	0
+			)
+			
+			
+			if hasProperty	_item_aAjouter	"elements" do (
+				if _item_aAjouter.elements.count == 0 then (
+						local elem_vide = ajouter_TV_item	(tv_elem_vide () )	nv_node
+						elem_vide.tag	="vide"
+				) else (
+					for elem in _item_aAjouter.elements	do (
+						local elem_enfant = ajouter_TV_item	elem	nv_node
+						
+					)
+				)
+			)
+			
+			nv_node.expand ()
+			nv_node
+		)
+				
+		
+		----- UI	divers ----------------------------------------------------------------------------------------------------
+		fn actualiser =(
+			
+
+			--- les parametres de l'element (le subrollout)  ---------------			
+			--- on retire les vieux rollouts --------
+			if subroll_param.rollouts.count > 0 do 
+				for subRoll in subroll_param.rollouts  do
+					removeSubRollout subroll_param	subRoll
+				
+			---- on ajoute le nouveau -----------------
+-- 			if lbx_sequence.selection > 0 then 
+-- 				addSubRollout 	subroll_param		sequence[  lbx_sequence.selection ].roll_parametres
+				
+			---- les boutons ------
+-- 			btn_retirer.enabled 		= lbx_sequence.selection != 0
+-- 			btn_monter.enabled 		= lbx_sequence.selection > 1
+-- 			btn_descendre.enabled = lbx_sequence.selection < sequence.count and lbx_sequence.selection != 0
+			
+			---- tree view ----------
+			vider_tv ()
+			for i = 1 to sequence.count do 				
+				ajouter_TV_item	sequence[i]		tv_sequence
+			
+			
+		) --- fin actualiser -----------
+		fn initialiser = (
+			
+			---- TRee view ----
+			tv_sequence.borderstyle 			= (dotnetclass "System.Windows.Forms.BorderStyle").None
+			tv_sequence.LabelEdit 				= true 
+			tv_sequence.allowdrop 				= true
+			tv_sequence.HideSelection 		= false
+-- 			tv_sequence.ShowRootLines	 	= true
+			tv_sequence.ShowLines   			= true
+-- 			tv_sequence.HotTracking   		= true
+			tv_sequence.BackColor 			= (dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
+			tv_sequence.ForeColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
+			tv_sequence.LineColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
+			tv_sequence.DrawMode 			= (dotnetclass "TreeViewDrawMode.OwnerDrawText")
+			
+			tv_sequence.indent				= 24
+			
+			tv_imageList.imageSize 	= 	dotNetObject "System.Drawing.Size" 32 32
+			
+			tv_imageList.Images.Clear ()
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - fixe.png"))
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - fenetre.png"))
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - porte.png"))
+
+			tv_sequence.ImageList =	tv_imageList
+
+
+			
+		)
+		
+		
+		
+		
+		----- Gestion du resize du subRollout -----------------------
+		local resize_enCours 			= false
+		local pos_initial					=	[0,0]
+		local subRoll_hauteur_init		=	0
+		local btnResize_pos_init		=	[0,0]
+		local rollSequence_hauteur_init	=	[0,0]
+		fn resize_surbRoll =(
+			if resize_enCours do (
+				local mouse_pos 			= mouse.posUnscaled
+				local changement_ht 	= mouse_pos.y - pos_initial.y
+				local subRoll_nvl_ht 	= subRoll_hauteur_init 		+ 	changement_ht
+				
+				if subRoll_nvl_ht >	50 do (
+					subroll_param.height		=	subRoll_nvl_ht
+					btn_resize.pos.y			=	btnResize_pos_init.y		+	changement_ht
+					roll_sequence_tv.height		=	rollSequence_hauteur_init 	+ 	changement_ht
+				)
+			)
+		)
+		
+		
+		
+		
+		
+		on roll_sequence_TV	open do (
+			initialiser ()
+			actualiser ()
+			
+			
+			---- le bouton resize -----------------------
+			btn_resize.FlatStyle	=		(dotNetClass "System.Windows.Forms.FlatStyle").flat	
+			btn_resize.BackColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
+			btn_resize.ForeColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
+		)
+		
+		
+		------------ le bouton resize -----------------------
+		on	btn_resize	MouseDown 	do (
+			resize_enCours 				= true
+			pos_initial						=	mouse.posUnscaled
+			subRoll_hauteur_init			= subroll_param.height
+			btnResize_pos_init			=	btn_resize.pos
+			rollSequence_hauteur_init	=	roll_sequence_tv.height
+		)
+		on	btn_resize	MouseUp 		do	resize_enCours = false		
+		on	btn_resize	MouseMove 	do 	resize_surbRoll ()
+		on	btn_resize	MouseLeave 	do	resize_enCours = false		
+		
+		
+		
+		-------- la sequence -----------
+		
+		on lbx_sequence 		selected sel 	do	actualiser ()
+		/* 
+		on lbx_sequence	 rightClick 	_id 	do	(
+			lbx_sequence.selection = _id
+			actualiser ()
+			creer_RCM_edition ()
+		)
+		 */
+-- 		on btn_ajouter 		pressed 			do 	creer_RCM_ajouter ()
+		on btn_ajouter_fixe 			pressed 			do 	ajouter_element_menuis 	cp_baieElement_fixe
+		on btn_ajouter_fenetre 	pressed 			do 	ajouter_element_menuis 	cp_baieElement_fenetre
+		on btn_ajouter_porte 		pressed 			do 	ajouter_element_menuis 	cp_baieElement_porte
+		
+		on btn_dupliquer 			pressed 			do	dupliquer_element_menuis 			lbx_sequence.selection 
+		on btn_instancier 		pressed 			do	instancier_element_menuis 		lbx_sequence.selection 
+		on btn_rendreUnique	pressed 			do	rendreUnique_element_menuis 	lbx_sequence.selection 
+		on btn_retirer 			pressed 			do	retirer_element_menuis 			lbx_sequence.selection 
+		on btn_monter 			pressed 			do	monter_element_menuis 			lbx_sequence.selection 
+		on btn_descendre 		pressed		 	do	descendre_element_menuis 		lbx_sequence.selection 
+		
+		
+		--------- le treeView ---------
+		on tv_sequence 	mouseDown 				_arg 	do  	(
+-- 			clq_down  				_arg
+			local noeud_selec 	= tv_sequence.GetNodeAt (dotNetObject "System.Drawing.Point" _arg.x _arg.y )
+			local elem_selec 		= get_element	noeud_selec
+			
+			local subroll_dest	 = subroll_param	--	roll_parametres_element.subroll_param
+			if subroll_dest.rollouts.count > 0 do 
+				for subRoll in subroll_dest.rollouts  do
+					removeSubRollout subroll_dest	subRoll
+				
+			if elem_selec != undefined do 
+				addSubRollout 	subroll_dest		elem_selec.roll_parametres
+		)
+-- 		on tv_sequence 	mouseUp 	_sender 		_arg 	do 	clq_up 					_arg
+		on tv_sequence 	DragOver 	_sender		_arg	do	drag_checkSurvol  	_arg
+		on tv_sequence 	DragDrop 					_arg 	do	drag_recevoir 			_arg
+			
+		on tv_sequence 	ItemDrag 	_sender		_arg 	do	drag_demarrer 		_arg
+
+		
+-- 		on tv_sequence 	AfterLabelEdit				_arg 	do  	renommer				_arg
+-- 		on tv_sequence 	keyup  						_arg 	do  	key_up					_arg
+		
+		
+	) ---- fin rollout ---------------------
+	
+	
+	
 	rollout roll_sequence  "Séquence"	(	
 	
 		--- divers ------------------------------------------------------------------------------------------------------
@@ -181,9 +494,9 @@ category:"CP | Facade	| Composant"
 		
 		------------------- UI -------------------------
 -- 		button 		btn_ajouter 		"+"			across:4
-		button 		btn_ajouter_fixe 				"Fixe"				width:50	across:3		align:#left
-		button 		btn_ajouter_fenetre 		"Fenêtre"		width:50	align:#left
-		button 		btn_ajouter_porte 			"Porte"			width:50	align:#left
+		button 		btn_ajouter_fixe 				"Fixe"				width:50		height:17	across:3		align:#left
+		button 		btn_ajouter_fenetre 		"Fenêtre"		width:50		height:17	align:#left
+		button 		btn_ajouter_porte 			"Porte"			width:50		height:17	align:#left
 		
 		listBox		lbx_sequence		""	height:6
 		
@@ -308,6 +621,14 @@ category:"CP | Facade	| Composant"
 		
 	) ---- fin rollout ---------------------
 	
+	
+	
+	
+	
+	
+	
+	
+	
 	rollout roll_divers  "Divers"	(
 		 group "Qualité" (
 			checkbox	shk_lowPoly			"Low poly" 		
@@ -358,7 +679,7 @@ category:"CP | Facade	| Composant"
 	fn actualiser = (
 		corriger_parametres ()		
 		actualiser_composants()		
-		if roll_sequence.open do	roll_sequence.actualiser ()		
+		if roll_sequence_TV.open do	roll_sequence_TV.actualiser ()		
 		redrawViews ()
 	)
 	
@@ -483,6 +804,40 @@ category:"CP | Facade	| Composant"
 	
 	
 	--------------- sequence ----------------------------------
+	
+	
+	fn deplacer_element				_id_aDeplacer				_id_destination		=(
+		
+		local elem_aDeplacer
+		
+		----- on retire l'element à deplacer de son origine -------------
+		elem_aDeplacer	=	 	sequence		[_id_aDeplacer]
+		deleteItem 	sequence 			_id_aDeplacer
+		
+		
+		
+		
+		----- on le pose à sa destination -------------
+			
+			if _id_destination > sequence.count then 
+				append sequence	 elem_aDeplacer
+			else
+				insertItem 	elem_aDeplacer			sequence  			_id_destination  
+		
+		
+		
+		---- actualisations -----------
+		actualiser ()
+		
+		if roll_parametres.open do	(
+			roll_parametres.lbx_sequence.selection -=  1
+			roll_parametres.actualiser ()	
+		)
+	
+	)
+	
+	
+	
 	fn ajouter_element_menuis		_element_plug	 =(
 		
 		local	id_elem_select 	= 	roll_sequence.lbx_sequence.selection

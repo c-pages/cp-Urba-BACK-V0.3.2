@@ -98,37 +98,33 @@ category:"CP | Bâtiment	| Composant"
 		spinner spn_hauteur 				"Hauteur" 				type:#worldunits range:[0,1e20,0]
 		spinner spn_profondeur 			"Profondeur" 			type:#worldunits range:[0,1e20,0]
 		
--- 		group "Cadre" (
--- 			spinner spn_cadre_largeur			"Largeur" 				type:#worldunits 	range:[0,1e20,0]
--- 		)
 	)
+	
+	
 	rollout roll_parametres_TV  	"Façade TV"		(
 	
+		------------ TRee view -----------------------------
+		local m_dragDropEffect		=dotNetClass "System.Windows.Forms.DragDropEffects"		
+		local tv_imageList 			= dotNetObject "System.Windows.Forms.ImageList"
 		
 		
-	--- UI ----------------------------------------------------------------------------------------------
--- 		label 				lbl_mode	"Mode:"	across:3			align:#left
+		
+		
+		--- UI ----------------------------------------------------------------------------------------------
 		dropDownList	ddl_repartition		""	 items:#("Répartir",  "Répéter"/*,   "Etirer" , "Centrer","Aligner à gauche", "Aligner à droite" */)	width:95	align:#left	across:2
 		
 		spinner spn_repetitions 		"" 			type:#integer range:[1,1000,1]	align:#right
 	
 		group "Séquence" (
-			/* 
-			button 		btn_ajouter 		"+"			across:4
-			button 		btn_retirer	 		"-"			
-			button 		btn_monter			"/\\"			
-			button 		btn_descendre	"\\/"
-			 */
--- 			label			lbl_plein	"Plein:"	align:#left
--- 			dotNetControl tvBtn_mur		 "treeview"		 width:50		height:17	across:3		align:#left
+			
 			button 		btn_ajouter_mur 			"Mur"			width:50		height:17		across:3		align:#left
 			button 		btn_ajouter_poteau 		"Poteau"			width:50		height:17		align:#left	enabled:false
 			button 		btn_ajouter_chainage 		"Chainage"		width:50	height:17			align:#left		enabled:false
 			
 -- 			label			lbl_baies	"Baies:"	align:#left
-			button 		btn_ajouter_ensemble 		"Ensemble"				width:50	height:17			align:#left	across:3		
-			button 		btn_ajouter_fenetre 		"Fenetre"		width:50		height:17	align:#left	enabled:false
+			button 		btn_ajouter_fenetre 		"Fenêtre"		width:50		height:17	align:#left	enabled:false	across:3		
 			button 		btn_ajouter_porte 	"Porte"			width:50		height:17		align:#left		enabled:false
+			button 		btn_ajouter_ensemble 		"Ens. men."				width:50	height:17			align:#left
 			
 -- 			label			lbl_divers	"Divers:"	align:#left
 			button 		btn_ajouter_balcon 	"Balcon"			width:50		height:17		align:#left		across:3	
@@ -146,99 +142,23 @@ category:"CP | Bâtiment	| Composant"
 			button 		btn_rendreUnique	 	"Uni."			width:27			height:17			align:#center
 			button 		btn_retirer	 		"Sup."				width:27		height:17			align:#center
 			
--- 			button 		btn_monter			"/\\"			width:27		height:17		align:#left
--- 			button 		btn_descendre	"\\/"			width:27		height:17		align:#left
 		
 		)
 		
 		
-		------------ TRee view -----------------------------
-		---- drag -----
-		local m_dragDropEffect=dotNetClass "System.Windows.Forms.DragDropEffects"
-		
-		---- cliques ----		
-		local m_btnsDotNet = dotNetClass "System.Windows.Forms.MouseButtons"
-		
-		local tv_imageList 	= dotNetObject "System.Windows.Forms.ImageList"
+
 		
 		
-		
-		fn creerItem 		_nvl_item 	_item_parent = (
-			
-		)
-		
-		fn vider_tv = (
-			tv_sequence.Nodes.Clear()
-		)
-		fn initialiser = (
-			
-			---- TRee view ----
-			tv_sequence.borderstyle 			= (dotnetclass "System.Windows.Forms.BorderStyle").None
-			tv_sequence.LabelEdit 				= true 
-			tv_sequence.allowdrop 				= true
-			tv_sequence.HideSelection 		= false
--- 			tv_sequence.ShowRootLines	 	= true
-			tv_sequence.ShowLines   			= true
--- 			tv_sequence.HotTracking   		= true
-			tv_sequence.BackColor 			= (dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
-			tv_sequence.ForeColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
-			tv_sequence.LineColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
-			tv_sequence.DrawMode 			= (dotnetclass "TreeViewDrawMode.OwnerDrawText")
-			
--- 			tv_sequence.Dock 					= (dotnetclass "DockStyle").Fill
-			tv_sequence.indent				= 24
--- 			debug "tv_sequence.indent"	var:tv_sequence.indent
-			
-			tv_imageList.imageSize 	= 	dotNetObject "System.Drawing.Size" 32 32
-			
--- 			showmethods 	tv_imageList.Images
-			tv_imageList.Images.Clear ()
-			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - vide.png"))
-			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - mur.png"))
-			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - fenetre.png"))
-			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - balcon.png"))
-			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - groupe.png"))
--- 			local img = (dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv mur.jpg")
-			
-			tv_sequence.ImageList =	tv_imageList
--- 			tv_imageList.Images.Add(img)
--- 			debug "tv_sequence.SelectedNode " var:tv_sequence.SelectedNode
--- 			show tv_sequence
-			
-			/* 
-			tv_btns = #(tvBtn_mur)
-			for tv_btn in tv_btns do (
-				tv_btn.borderstyle 			= (dotnetclass "System.Windows.Forms.BorderStyle").None
-				tv_btn.LabelEdit 				= true 
-				tv_btn.allowdrop 				= true
-				tv_btn.HideSelection 		= false
-	-- 			tv_btn.ShowRootLines	 	= true
-				tv_btn.ShowLines   			= false
-	 			tv_btn.indent   				= 0
-				tv_btn.BackColor 			= (dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
-				tv_btn.ForeColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
-				tv_btn.LineColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
-				tv_btn.DrawMode 			= (dotnetclass "TreeViewDrawMode.OwnerDrawText")
-			)
-			tvBtn_mur.nodes.add 		"Mur"
-			
-			 */
--- 			tv_imageList.Images.Add(img)
--- 			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv fenetre.jpg"))
-			
-			
-			
-		)
-		
-		
+		---------- Treeview -----------------------------------------------------------------------------
 		local id_element_enDrag	=	0
-		local id_element_destination	=	0
-		
+		local id_element_destination	=	0		
 		local elementParent_enDrag
 		local element_enDrag
 		local node_enDrag
 		
-		
+		fn vider_tv = (
+			tv_sequence.Nodes.Clear()
+		)
 		fn get_element_parent		_noeud =(
 			
 			local element_parent
@@ -251,8 +171,6 @@ category:"CP | Bâtiment	| Composant"
 			
 			element_parent
 		)
-		
-		
 		fn get_element		_noeud 	=(
 			
 			local element
@@ -268,8 +186,7 @@ category:"CP | Bâtiment	| Composant"
 			
 			element
 		)
-		
-		
+		------- drag and drop -------------------------
 		fn valider_drop	_node_dest =(
 			
 		
@@ -299,9 +216,7 @@ category:"CP | Bâtiment	| Composant"
 						
 			on_valide
 			
-		)
-		
-		
+		)		
 		fn drag_checkSurvol	 _arg = (
 			
 			_arg.Effect=_arg.AllowedEffect			
@@ -325,9 +240,6 @@ category:"CP | Bâtiment	| Composant"
 			
 			
 		)
-		
-		
-		
 		fn drag_demarrer 	_arg =(
 			
 			if _arg.item != undefined do (
@@ -345,7 +257,6 @@ category:"CP | Bâtiment	| Composant"
 				
 			)
 		)
-		
 		fn drag_recevoir 	_arg =(
 			
 			local posDrop		= tv_sequence.PointToClient 	tv_sequence.MousePosition
@@ -374,42 +285,13 @@ category:"CP | Bâtiment	| Composant"
 			node_enDrag = undefined
 			
 		)
-		
-		
-		
-		struct tv_elem_vide (
-			nom ="..."
-		)
-		
-		struct	tv_element	(
-			nom				=	"",
-			parent			=	undefined,
-			enfants 			=	#(),
-			
-			maxObject_ref	= undefined,
-			
-			fn ajouter_enfant		_enfant	id_dest:0	=(
-				_enfant.parent = this
-				if id_dest == 0 then 
-					append enfants	_enfant
-				else
-					insertItem	_enfant	enfants	id_dest
-			),
-			fn retirer_enfant	_enfant =(
-				
-			),
-			fn supprimer	=(
-				parent
-			)
-			
-		)
-		
-		
-		
-		
-		
 		fn ajouter_TV_item	_item_aAjouter	_itemParent	=(
 			
+			---- pour element vide ---------
+			struct tv_elem_vide (
+				nom ="..."
+			)
+		
 			local nv_node 	=	_itemParent.Nodes.add 		_item_aAjouter.nom
 			
 			if est_instance 	_item_aAjouter	( nv_node.index + 1 )	(get_element_parent nv_node)	do nv_node.text += " *"
@@ -419,9 +301,6 @@ category:"CP | Bâtiment	| Composant"
 				cp_facadeCompo_ensemble:	nv_node.imageIndex = nv_node.selectedImageIndex	=	2
 				cp_facadeCompo_balcon:		nv_node.imageIndex = nv_node.selectedImageIndex	=	3
 				cp_facadeCompo_groupe:		nv_node.imageIndex = nv_node.selectedImageIndex	=	4
-				
-				
-				
 				
 				default:	nv_node.imageIndex = nv_node.selectedImageIndex	=	0
 			)
@@ -442,28 +321,58 @@ category:"CP | Bâtiment	| Composant"
 			nv_node.expand ()
 			nv_node
 		)
+				
 		
+		
+		
+
+		----- UI	divers ----------------------------------------------------------------------------------------------------
 		fn actualiser =(
 			
--- 			---- repartition -------
+			---- repartition -------
 			spn_repetitions.enabled = ddl_repartition.selection == 2
 			
 			---- tree view ----------
 			vider_tv ()
-			for i = 1 to sequence.count do (
-				
+			for i = 1 to sequence.count do 				
 				ajouter_TV_item	sequence[i]		tv_sequence
-				
--- 				case classof sequence[i] of (
-					
--- 					default:	theRoot = tv_sequence.Nodes.add 		sequence[i].nom
-					
--- 				)
-			)
-			
--- 			tv_sequence.expend ()
 			
 		) --- fin actualiser -----------
+		fn initialiser = (
+			
+			---- TRee view ----
+			tv_sequence.borderstyle 			= (dotnetclass "System.Windows.Forms.BorderStyle").None
+			tv_sequence.LabelEdit 				= true 
+			tv_sequence.allowdrop 				= true
+			tv_sequence.HideSelection 		= false
+-- 			tv_sequence.ShowRootLines	 	= true
+			tv_sequence.ShowLines   			= true
+-- 			tv_sequence.HotTracking   		= true
+			tv_sequence.BackColor 			= (dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
+			tv_sequence.ForeColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
+			tv_sequence.LineColor 				= (dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
+			tv_sequence.DrawMode 			= (dotnetclass "TreeViewDrawMode.OwnerDrawText")
+			
+			tv_sequence.indent				= 24
+			
+			tv_imageList.imageSize 	= 	dotNetObject "System.Drawing.Size" 32 32
+			
+			tv_imageList.Images.Clear ()
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - vide.png"))
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - mur.png"))
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - ensemble menuis.png"))
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - balcon.png"))
+			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - groupe.png"))
+		
+			tv_sequence.ImageList =	tv_imageList
+
+			
+			
+		)
+		
+		
+		
+		
 		
 		----- Gestion du resize du subRollout -----------------------
 		local resize_enCours 			= false
@@ -488,15 +397,10 @@ category:"CP | Bâtiment	| Composant"
 		
 		
 		
-		
+		----- EVENEMENTS ------------------------------------------------------------------------------ -----------------------
 		on roll_parametres_TV		open 				do 	(
 			initialiser  ()
 			actualiser ()
-			
-		)
-		on roll_parametres_TV		close 				do 	(
-		
-			tv_imageList.Images.Clear ()
 		)
 		
 		---- repartition ---------
@@ -520,7 +424,9 @@ category:"CP | Bâtiment	| Composant"
 			if subroll_dest.rollouts.count > 0 do 
 				for subRoll in subroll_dest.rollouts  do
 					removeSubRollout subroll_dest	subRoll
-			addSubRollout 	subroll_dest		elem_selec.roll_parametres
+				
+			if elem_selec != undefined do 
+				addSubRollout 	subroll_dest		elem_selec.roll_parametres
 		)
 -- 		on tv_sequence 	mouseUp 	_sender 		_arg 	do 	clq_up 					_arg
 		on tv_sequence 	DragOver 	_sender		_arg	do	drag_checkSurvol  	_arg
@@ -528,10 +434,10 @@ category:"CP | Bâtiment	| Composant"
 			
 		on tv_sequence 	ItemDrag 	_sender		_arg 	do	drag_demarrer 		_arg
 
-			
+		
 -- 		on tv_sequence 	AfterLabelEdit				_arg 	do  	renommer				_arg
 -- 		on tv_sequence 	keyup  						_arg 	do  	key_up					_arg
-			
+		
 		
 		
 		--------- Edition ---------
