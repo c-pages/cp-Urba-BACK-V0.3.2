@@ -146,12 +146,17 @@ category:"CP | Facade	| Composant"
 		dotNetControl tv_sequence	 "treeview" /* width:145 */ height:200 --align:#left
 		
 		
-		button 		btn_dupliquer	 		"Dup."			width:27	height:17	across:6	align:#left
+		button 		btn_dupliquer	 		"Dup."			width:27	height:17				align:#left	across:4
 		button 		btn_instancier	 		"Ins."			width:27			height:17			align:#left
 		button 		btn_rendreUnique	 	"Uni."			width:27			height:17			align:#left
 		button 		btn_retirer	 		"Sup."				width:27		height:17			align:#left
-		button 		btn_monter			"/\\"			width:27		height:17		align:#left
-		button 		btn_descendre	"\\/"			width:27		height:17		align:#left
+		
+		
+-- 		dotNetControl btn_poubelle	 	"System.Windows.Forms.Button" 		align:#left  width:20 height:20
+		
+		
+-- 		button 		btn_monter			"/\\"			width:27		height:17		align:#left
+-- 		button 		btn_descendre	"\\/"			width:27		height:17		align:#left
 		
 		subrollout	subroll_param		""	height:200
 		
@@ -172,8 +177,8 @@ category:"CP | Facade	| Composant"
 		fn get_element		_noeud 	=(
 			
 			local element
-			
-			element = sequence[_noeud.index + 1 ]
+			if _noeud != undefined do 
+				element = sequence[_noeud.index + 1 ]
 			
 			element
 		)
@@ -248,7 +253,7 @@ category:"CP | Facade	| Composant"
 		
 			local nv_node 	=	_itemParent.Nodes.add 		_item_aAjouter.nom
 			
--- 			if est_instance 	_item_aAjouter	( nv_node.index + 1 )	(get_element_parent nv_node)	do nv_node.text += " *"
+			if est_instance 	( nv_node.index + 1 )	do nv_node.text += " *"
 			
 			case classof _item_aAjouter of (
 				cp_baieElement_fixe:			nv_node.imageIndex = nv_node.selectedImageIndex	=	0
@@ -274,7 +279,7 @@ category:"CP | Facade	| Composant"
 			nv_node.expand ()
 			nv_node
 		)
-				
+		
 		
 		----- UI	divers ----------------------------------------------------------------------------------------------------
 		fn actualiser =(
@@ -320,16 +325,15 @@ category:"CP | Facade	| Composant"
 			tv_sequence.indent				= 0
 			tv_sequence.Left				= 0
 			
-			tv_imageList.imageSize 	= 	dotNetObject "System.Drawing.Size" 32 32
 			
+			
+			tv_imageList.imageSize 	= 	dotNetObject "System.Drawing.Size" 32 32			
 			tv_imageList.Images.Clear ()
 			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - fixe.png"))
 			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - fenetre.png"))
 			tv_imageList.Images.Add((dotnetclass "System.Drawing.Image" ).FromFile("C:\\Users\\kris\\AppData\\Local\\Autodesk\\3dsMax\\2018 - 64bit\\ENU\\scripts\\cp-Urba\\img\\tv - porte.png"))
-
 			tv_sequence.ImageList =	tv_imageList
 
-		show tv_sequence
 			
 		)
 		
@@ -361,14 +365,25 @@ category:"CP | Facade	| Composant"
 		
 		
 		on roll_sequence	open do (
-			initialiser_tv ()
-			actualiser ()
-			
 			
 			---- le bouton resize -----------------------
 			btn_resize.FlatStyle	=		(dotNetClass "System.Windows.Forms.FlatStyle").flat	
 			btn_resize.BackColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
 			btn_resize.ForeColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
+			
+			/* 
+			btn_poubelle.FlatStyle	=		(dotNetClass "System.Windows.Forms.FlatStyle").flat	
+			btn_poubelle.BackColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	110	110	110
+			btn_poubelle.ForeColor	=		(dotNetClass "System.Drawing.Color").fromARGB 	255	255	255
+			btn_poubelle.Text 		= "poub"
+			btn_poubelle.AllowDrop = true
+			
+			show btn_poubelle
+			 */
+			
+			initialiser_tv ()
+			actualiser ()
+			
 		)
 		
 		
@@ -401,12 +416,12 @@ category:"CP | Facade	| Composant"
 		on btn_ajouter_fenetre 	pressed 			do 	ajouter_element_menuis 	cp_baieElement_fenetre
 		on btn_ajouter_porte 		pressed 			do 	ajouter_element_menuis 	cp_baieElement_porte
 		
-		on btn_dupliquer 			pressed 			do	dupliquer_element_menuis 			lbx_sequence.selection 
-		on btn_instancier 		pressed 			do	instancier_element_menuis 		lbx_sequence.selection 
-		on btn_rendreUnique	pressed 			do	rendreUnique_element_menuis 	lbx_sequence.selection 
-		on btn_retirer 			pressed 			do	retirer_element_menuis 			lbx_sequence.selection 
-		on btn_monter 			pressed 			do	monter_element_menuis 			lbx_sequence.selection 
-		on btn_descendre 		pressed		 	do	descendre_element_menuis 		lbx_sequence.selection 
+		on btn_dupliquer 			pressed 			do	dupliquer_element_menuis 			( tv_sequence.SelectedNode.index + 1 )
+		on btn_instancier 		pressed 			do	instancier_element_menuis 		( tv_sequence.SelectedNode.index + 1 )
+		on btn_rendreUnique	pressed 			do	rendreUnique_element_menuis 	( tv_sequence.SelectedNode.index + 1 )
+		on btn_retirer 			pressed 			do	retirer_element_menuis 			( tv_sequence.SelectedNode.index + 1 )
+-- 		on btn_monter 			pressed 			do	monter_element_menuis 			lbx_sequence.selection 
+-- 		on btn_descendre 		pressed		 	do	descendre_element_menuis 		lbx_sequence.selection 
 		
 		
 		--------- le treeView ---------
@@ -420,8 +435,10 @@ category:"CP | Facade	| Composant"
 				for subRoll in subroll_dest.rollouts  do
 					removeSubRollout subroll_dest	subRoll
 				
-			if elem_selec != undefined do 
+			if elem_selec != undefined then 
 				addSubRollout 	subroll_dest		elem_selec.roll_parametres
+			else
+				tv_sequence.SelectedNode = undefined
 		)
 -- 		on tv_sequence 	mouseUp 	_sender 		_arg 	do 	clq_up 					_arg
 		on tv_sequence 	DragOver 	_sender		_arg	do	drag_checkSurvol  	_arg
@@ -429,10 +446,15 @@ category:"CP | Facade	| Composant"
 			
 		on tv_sequence 	ItemDrag 	_sender		_arg 	do	drag_demarrer 		_arg
 
-		
--- 		on tv_sequence 	AfterLabelEdit				_arg 	do  	renommer				_arg
--- 		on tv_sequence 	keyup  						_arg 	do  	key_up					_arg
-		
+		/* 
+		on btn_poubelle 	DragDrop 					_arg 	do	debug 			"DragDrop !!! " --var:_arg			
+		on btn_poubelle 	ItemDrag 	_sender		_arg 	do	debug 			"ItemDrag !!! "-- var:_arg
+		on btn_poubelle 	DragOver 	_sender		_arg	do	debug 			"DragOver !!! " --var:_arg
+		on btn_poubelle 	DragEnter 	_sender		_arg	do	debug 			"DragEnter !!! " --var:_arg
+			
+		on btn_poubelle 	mouseDown 				_arg 	do  	debug 			"mouseDown !!! "
+		on btn_poubelle 	mouseUp 				_arg 	do  	debug 			"mouseUp !!! "
+		 */
 		
 	) ---- fin rollout ---------------------
 	
@@ -503,11 +525,11 @@ category:"CP | Facade	| Composant"
 	fn est_fenetre		_compo	=	classof	_compo	==	cp_baieElement_fenetre
 	fn est_fixe			_compo	=	classof	_compo	==	cp_baieElement_fixe
 	fn est_copiable			=	 roll_sequence.lbx_sequence.selection != 0
-	fn est_instance	id:		= (
-		if id == unsupplied do id = roll_sequence.lbx_sequence.selection
+	fn est_instance	_id		= (
+-- 		if id == unsupplied do id = roll_sequence.lbx_sequence.selection
 		local result =false
-		for i = 1 to sequence.count where i != id do
-			if sequence[i] == sequence[ id] do result = true
+		for i = 1 to sequence.count where i != _id do
+			if sequence[i] == sequence[ _id] do result = true
 		result
 	)
 	fn get_longueur_composant =(
@@ -673,7 +695,7 @@ category:"CP | Facade	| Composant"
 		deleteItem sequence 				_id
 		
 		---- actualisations -----------
-		actualiser ()
+		actualiser_UI ()
 	)
 	fn monter_element_menuis 		_id 		=(
 		

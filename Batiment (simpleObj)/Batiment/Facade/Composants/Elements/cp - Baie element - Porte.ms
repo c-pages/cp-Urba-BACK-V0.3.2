@@ -28,13 +28,15 @@ category:"CP | Baie	| Element"
 	
 	
 	parameters params_dimensions rollout:rol_global	(
-		longueur 		type:#worldUnits 	ui:spn_longueur 			default:90.
+-- 		longueur 		type:#worldUnits 	ui:spn_longueur 			default:90.
 		hauteur	 		type:#worldUnits 	ui:spn_hauteur 			default:0.
 -- 		cadre_use		type:#boolean 		ui:shk_cadre				default:true
 		
 -- 		ouvrant_callage	 	type:#worldUnits ui:spn_ouvrant_calage	default:0
 	)
 	parameters params_general rollout:roll_parametres	(
+		
+		longueur 		type:#worldUnits 	ui:spn_longueur 			default:90.
 		
 		----- les menuiseries -----------
 -- 		cadre_largeur	 				type:#worldUnits 	default:3.5
@@ -90,7 +92,6 @@ category:"CP | Baie	| Element"
 	
 	
 	rollout rol_global  "Global"	(
-		spinner 	spn_longueur 			"longueur" 				type:#worldunits 	range:[0,1e20,0]
 		spinner 	spn_hauteur 			"Hauteur" 				type:#worldunits 	range:[0,1e20,0]
 -- 		checkbox	shk_cadre				"Cadre" 		
 -- 		spinner 	spn_ouvrant_calage	"Calage" 				type:#worldunits 	range:[0,1e20,0]
@@ -98,6 +99,7 @@ category:"CP | Baie	| Element"
 	
 	rollout roll_parametres  "Paramètres"	(		
 		
+		spinner 	spn_longueur 			"longueur" 				type:#worldunits 	range:[0,1e20,0]
 -- 		spinner 	spn_angle_1 						"Ouv. 1 (°)" 	type:#float				range:[0,180,0]	tooltip:"Angle ouverture porte 1"
 		checkbox	shk_symetrie						"Inverser sens"		tooltip:"Inverser le sens d'ouverture de la porte"
 		checkbox	shk_double							"Double"		width:47	-- across:2	
@@ -332,7 +334,7 @@ category:"CP | Baie	| Element"
 		-------- poignées -------------
 		---- poignée 1 et interieur 1 ------------------------
 		local hauteur_min 			= 108
-		local largeur_menuis_min	= 5
+		local largeur_menuis_min	= 2.5
 		if poignee_1_use /* and not low_poly  */and hauteur  > hauteur_min and ouvrant_cadre_larg > largeur_menuis_min	do (
 			
 -- 			local longueur_passage = compo_ouvrant.longueur

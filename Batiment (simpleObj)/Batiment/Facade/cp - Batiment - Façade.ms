@@ -15,16 +15,16 @@ category:"CP | Bâtiment	| Composant"
 	------------ DEBUG	----------------------------------------------------------------------------------
 	
 	
-	---- pré déclaration -----------
 	local roll_parametres_element
+	
+	---- fonctions	-----------
 	local corriger_parametres , 		actualiser_composants 
 	local	ajouter_element_facade, 	retirer_element_facade, 	dupliquer_element_facade, instancier_element_facade, rendreUnique_element_facade, monter_element_facade, descendre_element_facade, renommer_element_facade, ouvrir_parametres
-	local 	inserer_element
-
-	
+	local inserer_element
 	local est_instance
 	
-	local sequence_tmp
+	---- la sequence à construire issue de la sequence	------------------------
+	local sequence_aConstruire
 	
 	---- manager de mesh -------------------
 	local mgr_mesh = str_mgr_mesh ()
@@ -95,16 +95,14 @@ category:"CP | Bâtiment	| Composant"
 	
 	
 	
-	rollout roll_general 			"Paramètres"	(
+	rollout roll_general 						"Paramètres"	(
 		
 		spinner spn_longueur 				"longueur" 				type:#worldunits range:[0,1e20,0]
 		spinner spn_hauteur 				"Hauteur" 				type:#worldunits range:[0,1e20,0]
 		spinner spn_profondeur 			"Profondeur" 			type:#worldunits range:[0,1e20,0]
 		
 	)
-	
-	
-	rollout roll_parametres  	"Façade"		(
+	rollout roll_parametres  				"Façade"		(
 	
 		------------ TRee view -----------------------------
 		local m_dragDropEffect		=dotNetClass "System.Windows.Forms.DragDropEffects"		
@@ -128,8 +126,8 @@ category:"CP | Bâtiment	| Composant"
 			button 		btn_ajouter_chainage 		"Chainage"		width:50	height:17			align:#left		enabled:false
 			
 -- 			label			lbl_baies	"Baies:"	align:#left
-			button 		btn_ajouter_fenetre 		"Fenêtre"		width:50		height:17	align:#left	enabled:false	across:3		
-			button 		btn_ajouter_porte 	"Porte"			width:50		height:17		align:#left		enabled:false
+			button 		btn_ajouter_fenetre 		"Fenêtre"		width:50		height:17	align:#left	/* enabled:false */	across:3		
+			button 		btn_ajouter_porte 	"Porte"			width:50		height:17		align:#left		/* enabled:false */
 			button 		btn_ajouter_ensemble 		"Ens. men."				width:50	height:17			align:#left
 			
 -- 			label			lbl_divers	"Divers:"	align:#left
@@ -374,6 +372,48 @@ category:"CP | Bâtiment	| Composant"
 		) --- fin actualiser -----------
 
 		
+		---- clavier ----		
+		fn key_up				_arg =(
+			
+			keyCode = _arg.KeyCode
+			
+			local touches = dotnetclass  "System.Windows.Forms.Keys"
+			
+-- 			local dossierCourant  = m_edit.getDossier ()			
+			
+			
+			debug "key_up arg" var:_arg
+			/* 
+			case keyCode of (
+				
+				-- Tab : focus ----
+				( touches.Tab ): 	if _arg.shift		then m_prt.focusPrecedant ()
+															else  m_prt.focusSuivant ()
+				
+		 		-- renommer --
+				( touches.F2 ): 		if dossierCourant.estElemUtilisateur () do editerNom	dossierCourant
+				
+				-- supprimer --
+				( touches.Delete ): 	if dossierCourant.estElemUtilisateur ()	do m_edit.supprimer	dossierCourant
+			
+-- 				-- ouvrir  --	
+-- 				( touches.Enter ): 	m_edit.ouvrir		dossierCourant
+				
+				-- fleches --
+				( touches.Left): 		m_edit.ouvrir		dossierCourant
+				( touches.Right ): 	m_edit.ouvrir		dossierCourant
+				( touches.Up): 		m_edit.ouvrir		dossierCourant
+				( touches.Down ): 	m_edit.ouvrir		dossierCourant
+				
+				-- undo /redo --
+				( touches.Z ): 		if _arg.Control do	m_cmd.defaire ()
+				( touches.Y ): 		if _arg.Control do	m_cmd.refaire ()
+				
+				( touches.Escape ): 		m_apercus.annuler ()
+				
+			)
+			 */
+		)
 		
 		
 		----- Gestion du resize du subRollout -----------------------
@@ -427,17 +467,33 @@ category:"CP | Bâtiment	| Composant"
 				for subRoll in subroll_dest.rollouts  do
 					removeSubRollout subroll_dest	subRoll
 				
-			if elem_selec != undefined do 
+			if elem_selec != undefined then 
 				addSubRollout 	subroll_dest		elem_selec.roll_parametres
+			else
+				tv_sequence.SelectedNode = undefined
+				
 		)
--- 		on tv_sequence 	mouseUp 	_sender 		_arg 	do 	clq_up 					_arg
 		on tv_sequence 	DragOver 	_sender		_arg	do	drag_checkSurvol  	_arg
 		on tv_sequence 	DragDrop 					_arg 	do	drag_recevoir 			_arg
-			
 		on tv_sequence 	ItemDrag 	_sender		_arg 	do	drag_demarrer 		_arg
 
+		on tv_sequence 	AfterLabelEdit				_arg 	do  	(
+			
+			if _arg.label != undefined do (
+				local noeud = _arg.Node
+				
+				local element
+				if noeud.level == 0 then	element = sequence[noeud.index + 1 ]
+				else if noeud.level == 1 then	element = sequence[noeud.parent.index + 1 ].elements[ noeud.index  + 1 ]
+				else if noeud.level == 2 do 	element = sequence[noeud.parent.parent.index + 1 ].elements[ noeud.parent.index  + 1 ].elements[ noeud.index  + 1 ]
+				
+				element.nom = _arg.label
+				
+				actualiser ()
+			)
+		)
 		
--- 		on tv_sequence 	AfterLabelEdit				_arg 	do  	renommer				_arg
+		
 -- 		on tv_sequence 	keyup  						_arg 	do  	key_up					_arg
 		
 		
@@ -452,23 +508,12 @@ category:"CP | Bâtiment	| Composant"
 	
 		
 	)
-	
-	
-	
 	rollout roll_parametres_element  	"Element"		(
 	
 		subrollout	subroll_param		""	height:516
 		
 		
 	)
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	rollout roll_contraintes 	"Contraintes"	(
 		group "Etages" (
@@ -515,7 +560,7 @@ category:"CP | Bâtiment	| Composant"
 			
 			
 		
-	) --- fin rollout facades-------------------------
+	) --- fin roll_contraintes-------------------------
 	rollout roll_divers  			"Divers"			(
 		group "Qualité" (
 			checkbox	shk_lowPoly		"Low poly" 		
@@ -566,12 +611,15 @@ category:"CP | Bâtiment	| Composant"
 	
 	
 	--------- divers ------------------
--- 	fn est_ensemble			_compo	=	classof	_compo	==	cp_facadeCompo_ensemble
-	fn est_ouvrable			_compo	=	classof	_compo	==	cp_facadeCompo_ensemble --or classof	_compo	==	cp_facadeCompo_ensemble
-	fn est_porte		_compo	=	classof	_compo	==	cp_menuis_porte
-	fn est_fixe			_compo	=	classof	_compo	==	cp_menuis_fixe
-	fn est_unPlein		_compo	=	classof	_compo	==	cp_facadeCompo_mur	--	_compo.category	as string ==	"CP | Facade	| Pleins"
-	fn est_copiable			=	 roll_parametres.lbx_sequence.selection != 0
+	fn est_unGroupe		_compo	=	classof	_compo	==	cp_facadeCompo_groupe
+	fn est_ouvrable		_compo	=	classof	_compo	==	cp_facadeCompo_ensemble --or classof	_compo	==	cp_facadeCompo_ensemble
+	
+	fn est_porte			_compo	=	classof	_compo	==	cp_menuis_porte
+	fn est_fixe				_compo	=	classof	_compo	==	cp_menuis_fixe
+	fn est_unPlein			_compo	=	classof	_compo	==	cp_facadeCompo_mur	--	_compo.category	as string ==	"CP | Facade	| Pleins"
+	fn est_copiable					=	 roll_parametres.lbx_sequence.selection != 0
+	
+	
 	
 	fn ouvrir_parametres		_element =(
 		createdialog 	_element.roll_parametres	width:250
@@ -653,390 +701,8 @@ category:"CP | Bâtiment	| Composant"
 
 	
 	
-	
-	--------------- comopsants ----------------------------------
-	fn actualiser_composants	= with redraw off (
--- 		
--- 		seed	hasard_seed
-		
-		sequence_tmp 				= 	#()
-		
-		--- Si notre sequence est vide ------------------------------------
-		if sequence.count == 0 then (
-			
-			local compo_temp = createInstance cp_facadeCompo_mur
-			
-			append	sequence_tmp  	compo_temp
-			
-			compo_temp.hauteur			=	hauteur 
-			compo_temp.profondeur		=	profondeur
-			compo_temp.low_poly			=	low_poly
-			compo_temp.longueur			=	longueur
-			compo_temp.matId	=	matId_mur
-			
-			
-		)  else (	----- on construit la sequence ---------------------------------------
-		
-		
-			
-			---- la sequence de base à repetiter si besoin --------------------------
-			local sequence_aRepeter =#()
-			local longueur_repartition	
-			
-			
-			
-			--- en fonction du mode de répartition ----------------------
-			case repartition of (
-				/* 
-				1: 	(	-----	REPARTIR --------------------------------------------------------------------------------------------------------------------------------
-					
-					---- la longueur des composants  etirable -------------
-					local longueur_definies_total 			=	0
-					local nbr_elem_definies 				=	0
-					local longueurMax_atteinte 			=	false
-					local id_dernierComposant				=	sequence.count
-					
-					---- on ajoute les longueurs des composant a longueur définie -----------------
-					for i = 1 to sequence.count do (
-						if not sequence[i].etirable		do (
-							longueur_definies_total+= sequence[i].longueur
-							nbr_elem_definies += 1
-							
-							if longueur_definies_total > longueur and not longueurMax_atteinte do (
-								longueurMax_atteinte 	= true
-								id_dernierComposant 	= i - 1
-							)
-							
-						)			
-					)
-					
-					---- si on est plus long que la longueur de la facade on réajuste --------------------------
-					if longueurMax_atteinte do (
-						longueur_definies_total 	=	0
-						nbr_elem_definies 			=	0
-						for i = 1 to id_dernierComposant 	do (
-							if not sequence[i].etirable			do (
-								longueur_definies_total+= sequence[i].longueur
-								nbr_elem_definies += 1
-							)
-						)
-					)
-					
-					---- on a donc notre longueur a repartir -------------------
-					longueur_repartition		=  ( longueur - longueur_definies_total  )  	/ (  2*id_dernierComposant - nbr_elem_definies  + 1   )
-					
-					
-					
-					
-					
-					--- le mur séparant les composant 	------------------	
-					local compo_murRepart				=	createInstance cp_facadeCompo_mur
-					compo_murRepart.longueur		=	longueur_repartition 
-					compo_murRepart.hauteur			=	hauteur 
-					compo_murRepart.profondeur		=	profondeur
-					compo_murRepart.low_poly		=	low_poly
-					compo_murRepart.matId			=	matId_mur		
-					
-					
-					
-					
-					---- le premier mur ---------------
-					append sequence_tmp		compo_murRepart
-					
-					
-					--- on creer la sequence à construire ----------------------					
-					for i = 1 to id_dernierComposant do (
-						
-						
-						--- le composant ----------------
-						local compo_temp 				= 	copy sequence[i]						
-						if compo_temp.etirable		do	compo_temp.longueur 	= 		longueur_repartition						
-						compo_temp.hauteur			=	hauteur
-						compo_temp.low_poly			=	low_poly						
-						if est_ouvrable	 compo_temp do (	--- hasard ------
-							compo_temp.fen_ouvMax		=	fen_ouvMax
-							compo_temp.fen_proba_ouv	=	fen_proba_ouv
-						)
-						append sequence_tmp		compo_temp
-						
-						
-						
-						---- le mur separant les composants  -------------------------------------
-						append sequence_tmp		compo_murRepart
-						
-						
-					) --- fin for sequence ------------------
-				) -----		fin 	REPARTIR	 ------------------------------------------------------------ 
-				
-				 */
-				
-				
-				1: 	(	-----	REPARTIR	 --------------------------------------------------------------------------------------------------------------------------------
-					
-					/* 
-					---- la longueur des composants  etirable -------------
-					local longueur_definies_total 		= 0
-					local nbr_elem_definies 			= 0
-					for i = 1 to sequence.count do (
-						if not sequence[i].etirable		do (
-							longueur_definies_total += sequence[i].longueur * repart_nombre
-							nbr_elem_definies += 1 * repart_nombre
-						)			
-					)		
-					longueur_repartition		=  ( longueur - longueur_definies_total  )  	/ ( ( repart_nombre *2*sequence.count - nbr_elem_definies)    + 1  )
-					
-					 */
-					
-					---- la longueur des composants  etirable -------------
-					local longueur_definies_total 			=	0
-					local nbr_elem_definies 				=	0
-					local longueurMax_atteinte 			=	false
-					local id_dernierComposant				=	sequence.count
-					
-					---- on ajoute les longueurs des composant a longueur définie -----------------
-					for i = 1 to sequence.count do (
-						if not sequence[i].etirable		do (
-							longueur_definies_total+= sequence[i].longueur  * repart_nombre
-							nbr_elem_definies += 1  * repart_nombre
-							
-							if longueur_definies_total > longueur and not longueurMax_atteinte do (
-								longueurMax_atteinte 	= true
-								id_dernierComposant 	= i - 1
-							)
-							
-						)			
-					)
-					
-					---- si on est plus long que la longueur de la facade on réajuste --------------------------
-					if longueurMax_atteinte do (
-						longueur_definies_total 	=	0
-						nbr_elem_definies 			=	0
-						for i = 1 to id_dernierComposant 	do (
-							if not sequence[i].etirable			do (
-								longueur_definies_total+= sequence[i].longueur
-								nbr_elem_definies += 1
-							)
-						)
-					)
-					
-					---- on a donc notre longueur a repartir -------------------
-					longueur_repartition		=  ( longueur - longueur_definies_total  )  	/ (  ( repart_nombre *2*id_dernierComposant - nbr_elem_definies ) + 1   )
-					
-					
-					
-					---- l espacement de la sequence ----------------------
-					local espacement_sequence = copy repart_espacement
-					if espacement_sequence *   ( repart_nombre * id_dernierComposant - 1 )  > 2* longueur_repartition do
-						espacement_sequence = 2* longueur_repartition  / ( repart_nombre * id_dernierComposant - 1 ) 
-					if espacement_sequence < - longueur_repartition	do
-						espacement_sequence =  - longueur_repartition
-					
-					
-					---- le decallage de la sequence ----------------------
-					local decallage_espacement	=	espacement_sequence * (  ( repart_nombre * id_dernierComposant - 1 ) )  / 2
-					
-					local decallage_sequence = copy repart_decallage 
--- 					if 	abs decallage_sequence > decallage_espacement do
-					if decallage_sequence > longueur_repartition - decallage_espacement do
-						decallage_sequence = longueur_repartition - decallage_espacement 
-					if decallage_sequence < ( - longueur_repartition + decallage_espacement ) do
-						decallage_sequence = ( - longueur_repartition + decallage_espacement ) 
--- 					if decallage_sequence <0 then decallage_sequence = - decallage_espacement
--- 						else decallage_sequence =  decallage_espacement
-					
-					
-					
-					
-					--- le mur séparant les composant 	------------------	
-					local compo_murRepart				=	createInstance cp_facadeCompo_mur
-					compo_murRepart.longueur		=	longueur_repartition + espacement_sequence
-					compo_murRepart.hauteur			=	hauteur 
-					compo_murRepart.profondeur		=	profondeur
-					compo_murRepart.low_poly		=	low_poly
-					compo_murRepart.matId			=	matId_mur		
-					
-					
-					
-					
-					---- le premier mur ---------------
-					local compo_murDebut 		= copy compo_murRepart					
-					compo_murDebut.longueur		=	longueur_repartition - decallage_espacement + decallage_sequence
-					append sequence_tmp		compo_murDebut
-					
-					
-					
-					--- on creer la sequence à construire ----------------------
-					local repet_temp = repart_nombre 
-					
-					for i = 1 to sequence.count do (
-						
-						--- le composant ----------------
-						local compo_temp 				= 	copy sequence[i]
-						if compo_temp.etirable		do	compo_temp.longueur 	= 		longueur_repartition						
-						compo_temp.hauteur			=	hauteur
-						compo_temp.low_poly			=	low_poly
-						if est_ouvrable	 compo_temp do (		--- hasard ------
-							compo_temp.fen_ouvMax		=	fen_ouvMax
-							compo_temp.fen_proba_ouv	=	fen_proba_ouv
-						)
-						append sequence_aRepeter		compo_temp
-						
-						
-						---- le mur separant les composants  -------------------------------------
-						if i != sequence.count  do
-							append sequence_aRepeter		compo_murRepart
-						
-						
-					) --- fin for sequence ------------------
-					
-					
-					
-					
-					--- la repetition de la sequence de base -----------
-					for repet = 1 to repet_temp do 	(
-						sequence_tmp += for compo in  sequence_aRepeter collect copy compo
-						if repet != repet_temp  do	append sequence_tmp		compo_murRepart
-					)
-					
-					
-					
-					---- le mur sdernier mur  -------------------------------------
-					local compo_murDeFin = copy compo_murRepart					
-					compo_murDeFin.longueur		=	longueur_repartition - decallage_espacement - decallage_sequence
-					append sequence_tmp		compo_murDeFin
-					
-					
-				) -----		fin 	REPARTIR	 ------------------------------------------------------------ 
-				
-				
-				
-				
-				2: 	(	-----	CENTRER		 --------------------------------------------------------------------------------------------------------------------------------
-					
-					
-					
-					
-					---- la longueur des composants  etirable -------------
-					local longueur_definies_total 			=	0
-					local nbr_elem_definies 				=	0
-					local nbr_elem_indefinies 				=	0
-					local longueurMax_atteinte 			=	false
-					local id_dernierComposant				=	sequence.count
-					
-					---- on ajoute les longueurs des composant a longueur définie -----------------
-					for i = 1 to sequence.count do (
-						if not sequence[i].etirable		then (
-							longueur_definies_total+= sequence[i].longueur
-							nbr_elem_definies += 1
-							
-							if longueur_definies_total > longueur and not longueurMax_atteinte do (
-								longueurMax_atteinte 	= true
-								id_dernierComposant 	= i - 1
-							)
-							
-						)		else nbr_elem_indefinies += 1
-					)
-					
-					---- si on est plus long que la longueur de la facade on réajuste --------------------------
-					if longueurMax_atteinte do (
-						longueur_definies_total 	=	0
-						nbr_elem_definies 			=	0
-						for i = 1 to id_dernierComposant 	do (
-							if not sequence[i].etirable			then (
-								longueur_definies_total+= sequence[i].longueur
-								nbr_elem_definies += 1
-							) 
-						)
-					)
-					
-					---- on a donc notre longueur a repartir -------------------
-					longueur_repartition		=  ( longueur - longueur_definies_total  )  	/ ( nbr_elem_indefinies + 2  )
-					
-					
-					---- le decallage de la sequence ----------------------
-					local decallage_sequence = copy repart_decallage
-					if 	abs decallage_sequence > longueur_repartition do
-						if decallage_sequence <0 then decallage_sequence = - longueur_repartition
-							else decallage_sequence =  longueur_repartition
-					
-					
-					--- le mur séparant les composant 	------------------	
-					local compo_murRepart				=	createInstance cp_facadeCompo_mur
-					compo_murRepart.longueur		=	longueur_repartition + decallage_sequence
-					compo_murRepart.hauteur			=	hauteur 
-					compo_murRepart.profondeur		=	profondeur
-					compo_murRepart.low_poly		=	low_poly
-					compo_murRepart.matId			=	matId_mur		
-					
-					
-					
-					
-					---- le premier mur ---------------
-					append sequence_tmp		compo_murRepart
-					
-					
-					--- on creer la sequence à construire ----------------------					
-					for i = 1 to id_dernierComposant do (
-						
-						
-						--- le composant ----------------
-						local compo_temp 				= 	copy sequence[i]						
-						if compo_temp.etirable		do	compo_temp.longueur 	= 		longueur_repartition						
-						compo_temp.hauteur			=	hauteur
-						compo_temp.low_poly			=	low_poly						
-						if est_ouvrable	 compo_temp do (	--- hasard ------
-							compo_temp.fen_ouvMax		=	fen_ouvMax
-							compo_temp.fen_proba_ouv	=	fen_proba_ouv
-						)
-						append sequence_tmp		compo_temp
-						
-						
-						
-					) --- fin for sequence ------------------
-					
-					
-					
-					
-					---- le mur sdernier mur  -------------------------------------
-					local compo_murDeFin = copy compo_murRepart					
-					compo_murDeFin.longueur		=	longueur_repartition - decallage_sequence
-					append sequence_tmp		compo_murDeFin
-					
-				) -----		fin 	CENTRER	 ------------------------------------------------------------ 
-				
-				
-				
-				
-			) ---- fin case repart -----------------------------------------------------------------------------------------
-			
-			
-			
-			
-			
-			
-			---- le hasard -----------------
-			--  on rend unique le compo qui a besoin d'estre ouvert, mais ca rend l'operation plus long a construire -------------
-			for i = 1 to sequence_tmp.count do (
--- 				local compo_temp = 
-				if est_ouvrable	 sequence_tmp[i] do (
-					local est_ouverte =   ( random 0.  100. ) < fen_proba_ouv 
-					if est_ouverte 	do
-						sequence_tmp[i] = copy sequence_tmp[i]
-				)
-			)
-			 
-			
-		) ---- fin creation de la sequence ---------------------------
-		
-		
-	)  --- fin composants_actualiser  -----------------------------------------------------------------------
-	
-	
-	
-	
-	
 	--------------- sequence ----------------------------------
-	fn ajouter_element_facade		_element_plug	 =(
+	fn ajouter_element_facade			_element_plug	 =(
 		
 -- 		local	id_elem_select 	= 	roll_parametres.lbx_sequence.selection
 -- 		local	id_elem_insert		= 	id_elem_select + 1
@@ -1080,11 +746,11 @@ category:"CP | Bâtiment	| Composant"
 		)
 		
 	)
-	fn renommer_element_facade		_id	_nv_nom =(
+	fn renommer_element_facade			_id	_nv_nom =(
 		sequence[ _id ].nom = _nv_nom
 		if roll_parametres.open do	roll_parametres.actualiser ()
 	)
-	fn inserer_element	_elementParent_enDrag		_id_aDeplacer		_elementParent_dest			_id_destination		=(
+	fn inserer_element						_elementParent_enDrag		_id_aDeplacer		_elementParent_dest			_id_destination		=(
 		
 		local elem_aDeplacer
 		
@@ -1125,7 +791,7 @@ category:"CP | Bâtiment	| Composant"
 		)
 	
 	)
-	fn dupliquer_element_facade 		_element_parent		_id		=(
+	fn dupliquer_element_facade 			_element_parent		_id		=(
 		
 		if _id > 0 do (
 			
@@ -1152,7 +818,7 @@ category:"CP | Bâtiment	| Composant"
 			)
 		)
 	)
-	fn instancier_element_facade 	_element_parent	_id		=(
+	fn instancier_element_facade 		_element_parent	_id		=(
 		if _id > 0 do (
 			
 			local liste_cible
@@ -1178,7 +844,7 @@ category:"CP | Bâtiment	| Composant"
 			)
 		)
 	)
-	fn rendreUnique_element_facade		_element_parent	_id			=(
+	fn rendreUnique_element_facade	_element_parent	_id			=(
 		
 			if _element_parent != undefined then 
 				_element_parent.elements[ _id ]  = copy		_element_parent.elements[ _id ] 
@@ -1188,6 +854,283 @@ category:"CP | Bâtiment	| Composant"
 		---- actualisations -----------
 		actualiser_UI ()
 	)
+	
+	
+	
+	
+	
+	--------------- comopsants ----------------------------------
+	fn actualiser_composants	= with redraw off (
+		
+		
+		sequence_aConstruire 				= 	#()
+		
+		--- Si notre sequence est vide ------------------------------------
+		if sequence.count == 0 then (
+			
+			local compo_temp = createInstance cp_facadeCompo_mur
+			
+			compo_temp.hauteur			=	hauteur 
+			compo_temp.profondeur		=	profondeur
+			compo_temp.low_poly			=	low_poly
+			compo_temp.longueur			=	longueur
+			compo_temp.matId				=	matId_mur
+			
+			append	sequence_aConstruire  	compo_temp
+			
+		)  else (	----- on construit la sequence ---------------------------------------
+			
+			
+			
+			---- la sequence de base à repetiter si besoin --------------------------
+			local sequence_aRepeter =#()
+			
+			---- cleanage de la sequence (on retire les elements qui n'apparetront pas ) -----------------------------------------------------------
+			local sequence_clean	=#()
+			for i = 1 to sequence.count do 
+				if not  est_unGroupe	sequence[i] or   est_unGroupe	sequence[i] and sequence[i].elements.count > 0 do 
+					append	sequence_clean	sequence[i]
+			
+			/* 
+			local sequence_clean	=#()
+			for i = 1 to sequence.count do 
+				if not  est_unGroupe	sequence[i]  then (
+					append	sequence_clean	sequence[i]
+				) else if est_unGroupe	sequence[i]  and sequence[i].elements.count > 0	do (
+					for elem in sequence[i].elements do (
+						debug "on ajoute un element du groupe"
+						append	sequence_clean	elem
+					)
+				)
+			 */
+			
+			
+			
+			
+			
+			
+			
+			---- la longueur des composants  etirable --------------------------------------------------------------------------------------------------
+			local longueur_repartition				=	0
+			local longueur_definies_total 			=	0
+			local nbr_elem_definies 				=	0
+			local nbr_elem_indefinies 				=	0
+			local longueurMax_atteinte 			=	false
+			local id_dernierComposant				=	sequence_clean.count
+			
+			---- on ajoute les longueurs des composant a longueur définie -----------------
+			for i = 1 to sequence_clean.count do (
+				if not sequence_clean[i].etirable	then (
+					longueur_definies_total+= sequence_clean[i].longueur  * repart_nombre
+					nbr_elem_definies += 1  * repart_nombre
+					
+					if longueur_definies_total > longueur and not longueurMax_atteinte do (
+						longueurMax_atteinte 	= true
+						id_dernierComposant 	= i - 1
+					)
+					
+				)	else nbr_elem_indefinies += 1
+			)
+			
+			---- si on est plus long que la longueur de la facade on réajuste --------------------------
+			if longueurMax_atteinte do (
+				longueur_definies_total 	=	0
+				nbr_elem_definies 			=	0
+				nbr_elem_indefinies 			=	0
+				for i = 1 to id_dernierComposant 	do (
+					if not sequence_clean[i].etirable			then (
+						longueur_definies_total+= sequence_clean[i].longueur
+						nbr_elem_definies += 1
+					)	else nbr_elem_indefinies += 1
+				)
+			)
+			
+			
+			
+			
+			
+			
+			--- en fonction du mode de répartition ----------------------
+			case repartition of (
+				
+				1: 	(	-----	REPARTIR	 --------------------------------------------------------------------------------------------------------------------------------
+					
+				
+					
+					---- on a donc notre longueur a repartir -------------------
+					longueur_repartition		=  ( longueur - longueur_definies_total  )  	/ (  ( repart_nombre *2*id_dernierComposant - nbr_elem_definies ) + 1   )
+					
+					
+					
+					
+					
+					
+					
+					---- l espacement de la sequence ----------------------
+					local espacement_sequence = copy repart_espacement
+					if espacement_sequence *   ( repart_nombre * id_dernierComposant - 1 )  > 2* longueur_repartition do
+						espacement_sequence = 2* longueur_repartition  / ( repart_nombre * id_dernierComposant - 1 ) 
+					if espacement_sequence < - longueur_repartition	do
+						espacement_sequence =  - longueur_repartition
+					
+					
+					---- le decallage de la sequence ----------------------
+					local decallage_espacement	=	espacement_sequence * (  ( repart_nombre * id_dernierComposant - 1 ) )  / 2					
+					local decallage_sequence = copy repart_decallage 
+					if decallage_sequence > longueur_repartition - decallage_espacement do
+						decallage_sequence = longueur_repartition - decallage_espacement 
+					if decallage_sequence < ( - longueur_repartition + decallage_espacement ) do
+						decallage_sequence = ( - longueur_repartition + decallage_espacement ) 
+					
+					
+					
+					
+					--- le mur séparant les composant 	------------------	
+					local compo_murRepart				=	createInstance cp_facadeCompo_mur
+					compo_murRepart.longueur		=	longueur_repartition + espacement_sequence
+					compo_murRepart.hauteur			=	hauteur 
+					compo_murRepart.profondeur		=	profondeur
+					compo_murRepart.low_poly		=	low_poly
+					compo_murRepart.matId			=	matId_mur		
+					
+					
+					
+					
+					---- le premier mur ---------------
+					local compo_murDebut 		= copy compo_murRepart					
+					compo_murDebut.longueur		=	longueur_repartition - decallage_espacement + decallage_sequence
+					append sequence_aConstruire		compo_murDebut
+					
+					
+					
+					--- on creer la sequence à construire ----------------------
+					local repet_temp = repart_nombre 
+					
+					for i = 1 to sequence_clean.count do (
+						--- le composant ----------------
+						local compo_temp 				= 	copy sequence_clean[i]
+						if compo_temp.etirable		do	compo_temp.longueur 	= 		longueur_repartition						
+						compo_temp.hauteur			=	hauteur
+						compo_temp.low_poly			=	low_poly
+						if est_ouvrable	 compo_temp do (		--- hasard ------
+							compo_temp.fen_ouvMax		=	fen_ouvMax
+							compo_temp.fen_proba_ouv	=	fen_proba_ouv
+						)
+						append sequence_aRepeter		compo_temp
+						
+						
+						---- le mur separant les composants  -------------------------------------
+						if i != sequence_clean.count  do
+							append sequence_aRepeter		compo_murRepart
+						
+					) --- fin for sequence ------------------
+					
+					
+					
+					
+					--- la repetition de la sequence de base -----------
+					for repet = 1 to repet_temp do 	(
+						sequence_aConstruire += for compo in  sequence_aRepeter collect copy compo
+						if repet != repet_temp  do	append sequence_aConstruire		compo_murRepart
+					)
+					
+					
+					
+					---- le mur sdernier mur  -------------------------------------
+					local compo_murDeFin 			= copy compo_murRepart					
+					compo_murDeFin.longueur		=	longueur_repartition - decallage_espacement - decallage_sequence
+					append sequence_aConstruire		compo_murDeFin
+					
+					
+				) -----		fin 	REPARTIR	 -------------------------------------------------------------------------------------------------------------------------------- 
+				
+				
+				
+				
+				2: 	(	-----	CENTRER		 --------------------------------------------------------------------------------------------------------------------------------
+					
+					
+					
+					---- on a donc notre longueur a repartir -------------------
+					longueur_repartition		=  ( longueur - longueur_definies_total  )  	/ ( nbr_elem_indefinies + 2  )
+					
+					
+					---- le decallage de la sequence ----------------------
+					local decallage_sequence = copy repart_decallage
+					if 	abs decallage_sequence > longueur_repartition do
+						if decallage_sequence <0 then decallage_sequence = - longueur_repartition
+							else decallage_sequence =  longueur_repartition
+					
+					
+					--- le mur séparant les composant 	------------------	
+					local compo_murRepart				=	createInstance cp_facadeCompo_mur
+					compo_murRepart.longueur		=	longueur_repartition + decallage_sequence
+					compo_murRepart.hauteur			=	hauteur 
+					compo_murRepart.profondeur		=	profondeur
+					compo_murRepart.low_poly		=	low_poly
+					compo_murRepart.matId			=	matId_mur	
+					
+					---- le premier mur ---------------
+					append sequence_aConstruire		compo_murRepart
+					
+					
+					
+					
+					
+					--- on creer la sequence à construire ----------------------					
+					for i = 1 to id_dernierComposant do (
+						
+						--- le composant ----------------
+						local compo_temp 				= 	copy sequence_clean[i]						
+						if compo_temp.etirable		do	compo_temp.longueur 	= 		longueur_repartition						
+						compo_temp.hauteur			=	hauteur
+						compo_temp.low_poly			=	low_poly						
+						if est_ouvrable	 compo_temp do (	--- hasard ------
+							compo_temp.fen_ouvMax		=	fen_ouvMax
+							compo_temp.fen_proba_ouv	=	fen_proba_ouv
+						)
+						append sequence_aConstruire		compo_temp
+						
+					) --- fin for sequence ------------------
+					
+					
+					
+					
+					---- le dernier mur  -------------------------------------
+					local compo_murDeFin 				= copy compo_murRepart					
+					compo_murDeFin.longueur			=	longueur_repartition - decallage_sequence
+					append sequence_aConstruire		compo_murDeFin
+					
+					
+					
+				) -----		fin 	CENTRER	 ------------------------------------------------------------ 
+				
+				
+				
+				
+			) ---- fin case repartition -----------------------------------------------------------------------------------------
+			
+			
+			
+			
+			
+			
+			---- le hasard -----------------------------------------------------------------------------------------
+			--  on rend unique le compo qui a besoin d'etre ouvert, c'est plus rapide que de faire tout les composants uniques -------------
+			for i = 1 to sequence_aConstruire.count do (
+				if est_ouvrable	 sequence_aConstruire[i] do (
+					local est_ouverte =   ( random 0.  100. ) < fen_proba_ouv 
+					if est_ouverte 	do
+						sequence_aConstruire[i] = copy sequence_aConstruire[i]
+				)
+			)-----------------------------------------------------------------------------------------
+			
+			
+		) ---- fin creation de la sequence ---------------------------
+		
+		
+	)  --- fin composants_actualiser  -----------------------------------------------------------------------
+	
 	
 	
 	
@@ -1218,10 +1161,10 @@ category:"CP | Bâtiment	| Composant"
 		
 		---- la sequence	-----		
 		local depos_composant = [ 0, 0, 0 ]
-		for i = 1 to	sequence_tmp.count do (
+		for i = 1 to	sequence_aConstruire.count do (
 			
 			---- le composant -----
-			local composant 		= sequence_tmp [i]
+			local composant 		= sequence_aConstruire [i]
 			local align_y =	0	-- if est_unPlein	composant then 0 else profondeur - composant.profondeur
 -- 			debug "----> composant" var:composant
 			mgr_mesh.attacher		mesh		composant	transf:( depos_composant + [0,align_y,0] )

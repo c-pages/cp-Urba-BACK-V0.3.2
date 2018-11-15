@@ -23,17 +23,18 @@ category:	"CP | Facade	| Composant"
 	---- manager de mesh -------------------
 	local mgr_mesh = str_mgr_mesh ()
 	
-	
+	---- la sequence à construire issue de la sequence	------------------------
+	local sequence_aConstruire
 	
 --------------- PARAMETERES  ----------------------------------------------------------------------------------------------------------------------
 	parameters params_parameters rollout:roll_parametres	(
 		
-		nom	 					type:#string 			ui:edTxt_nom					default:"Groupe"
+		nom	 					type:#string 			ui:edTxt_nom							default:"Groupe"
 		
-		etirable					type:#boolean 		/* ui:shk_etirable		 */			default:false
+		etirable					type:#boolean 		/*  ui:shk_etirable	 */	 				default:false
 		
-		longueur 				type:#worldUnits /* 	ui:spn_longueur  */				default:0.
-		hauteur	 				type:#worldUnits 	/* ui:spn_hauteur  */			default:0.
+		longueur 				type:#worldUnits		 /*  	ui:spn_longueur  	 */				default:0.
+		hauteur	 				type:#worldUnits 	/* ui:spn_hauteur  		*/				default:0.
 		
 		
 		elements				type:#maxObjectTab		tabSizeVariable:true
@@ -57,6 +58,15 @@ category:	"CP | Facade	| Composant"
 
 	rollout roll_parametres 				"Paramètres"	(
 		editText 	edTxt_nom		 		"Nom:" 	
+		spinner 	spn_repetition 		"Répétition" 			type:#integer 	range:[0,1e20,0]
+-- 			checkbox	shk_etirable			"Etirable" 	
+-- 			spinner 	spn_longueur 			"Longueur" 			type:#worldunits 	range:[0,1e20,0]
+-- 		fn actualiser =(
+-- 			spn_longueur.indeterminate		=	etirable
+-- 			spn_longueur.enabled 				=	not	etirable 
+-- 		)
+-- 		on roll_parametres	open 					do actualiser ()
+-- 		on shk_etirable		changed state  	do actualiser ()
 	)
 	
 	
@@ -70,21 +80,6 @@ category:	"CP | Facade	| Composant"
 	
 	
 	
-	
-	
-	---------- Elements ----------------------------------------
-	fn ajouter_element		_element =(
-		
-	)
-	fn retirer_element		_element =(
-		
-	)
-	fn monter_element		_element =(
-		
-	)
-	fn descendre_element	_element =(
-		
-	)
 	
 	
 	
@@ -103,6 +98,7 @@ category:	"CP | Facade	| Composant"
 		
 		--- vider le mesh --------
 		delete mesh
+		
 		--- Construction ---------------------------------------------------------------------------------------
 		setMesh mesh numverts:0
 		
