@@ -68,7 +68,7 @@ category:"CP | Menuiserie	| Composant"
 		
 		
 		--- Construction ---------------------------------------------------------------------------------------
-		local composant=	if low_poly 	then	 createInstance  cp_prim_boiteU	matId:matId
+		local composant=	if low_poly 	then	 createInstance  cp_prim_boiteU		matId:matId
 													else	 createInstance  cp_prim_boite		matId:matId
 		
 		composant.longueur			=	longueur

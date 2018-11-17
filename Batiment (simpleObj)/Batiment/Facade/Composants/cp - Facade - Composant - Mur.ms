@@ -31,7 +31,7 @@ category:"CP | Facade	| Composant"
 		profondeur	 			type:#worldUnits 	ui:spn_profondeur		default:0.
 	)
 	parameters params_general rollout:roll_parametres	(
-		nom	 					type:#string 			ui:edTxt_nom				default:"Mur"
+		nom	 					type:#string 		/* 	ui:edTxt_nom	 */			default:"Mur"
 		
 		longueur 				type:#worldUnits 	ui:spn_longueur 			default:20.
 		debord	 				type:#worldUnits 	ui:spn_debord				default:0.
@@ -59,8 +59,8 @@ category:"CP | Facade	| Composant"
 		spinner 	spn_profondeur		"Profondeur" 			type:#worldunits 	range:[0,1e20,0]
 	)
 	rollout roll_parametres  "Paramètres"	(		
-		
-		editText 	edTxt_nom		 	"Nom:" 	
+-- 		
+-- 		editText 	edTxt_nom		 	"Nom:" 	
 		group "Dimensions" (
 -- 			checkbox	shk_etirable			"Etirable" 	
 			spinner 	spn_longueur 			"longueur" 				type:#worldunits 	range:[0,1e20,0]
@@ -96,7 +96,7 @@ category:"CP | Facade	| Composant"
 	
 	
 	fn get_longueur	=	longueur
-	
+	fn set_hasard	_fen_ouvMax	_fen_proba_ouv =()
 	
 	
 	

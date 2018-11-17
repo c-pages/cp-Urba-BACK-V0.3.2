@@ -12,7 +12,7 @@ category:"CP | Primitives"
 		profondeur		type:#worldUnits 	ui:spn_profondeur 			default:0
 		
 		matId			type:#integer 			ui:spn_matId 				default:1
-		mapCoords 	type:#boolean  default:true
+		mapCoords 		type:#boolean  default:true
 	)
 	
 	rollout roll_params "boite"

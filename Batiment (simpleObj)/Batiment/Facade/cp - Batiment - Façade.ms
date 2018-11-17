@@ -147,6 +147,7 @@ category:"CP | Bâtiment	| Composant"
 			button 		btn_rendreUnique	 	"Uni."				width:27	height:17			align:#center
 			button 		btn_retirer	 			"Sup."			width:27	height:17			align:#center
 			
+			editText 	edTxt_nom		 	"Nom:" 	
 		
 		)
 		
@@ -261,19 +262,21 @@ category:"CP | Bâtiment	| Composant"
 		fn a_unEnfant_balcon		_noeud 	=(
 			
 			local result = false
-			
-			local element =	get_element		_noeud
-			if est_unbalcon 	element then 
-				result = true			
-			else	if hasProperty		element		"elements" do (
-				for i = 0 to _noeud.nodes.count - 1  do (
-					local nd = _noeud.nodes.item[ i  ]
-					if nd.tag		!=		"vide" do
-						if a_unEnfant_balcon	nd		do
-							result = true
+			if _noeud != undefined do (
+				local element =	get_element		_noeud
+				if element != undefined do (
+					if est_unbalcon 	element then 
+						result = true			
+					else	if hasProperty		element		"elements" do (
+						for i = 0 to _noeud.nodes.count - 1  do (
+							local nd = _noeud.nodes.item[ i  ]
+							if nd.tag		!=		"vide" do
+								if a_unEnfant_balcon	nd		do
+									result = true
+						)
+					)
 				)
 			)
-			
 			result
 			
 		)
@@ -435,7 +438,7 @@ category:"CP | Bâtiment	| Composant"
 		
 
 		----- UI	divers ----------------------------------------------------------------------------------------------------
-		fn actualiser =(
+		fn actualiser_TV 	=(
 			
 			---- repartition -------
 -- 			spn_repetitions.enabled = ddl_repartition.selection == 2
@@ -445,14 +448,40 @@ category:"CP | Bâtiment	| Composant"
 			
 			
 			vider_tv ()
-			
-			
-			
-			
 			for i = 1 to sequence.count do 				
 				ajouter_TV_item	sequence[i]		tv_sequence
 			
 			
+			
+		) --- fin actualiser -----------
+		fn actualiser 	nd:	=(
+			
+			
+			local nd_selec			=	if nd == unsupplied then tv_sequence.SelectedNode  else nd
+			local elem_selec		= get_element nd_selec
+			
+			
+			local subroll_dest	 = roll_parametres_element.subroll_param
+			if subroll_dest.rollouts.count > 0 do 
+				for subRoll in subroll_dest.rollouts  do
+					removeSubRollout subroll_dest	subRoll
+			
+			
+			
+			if elem_selec	!= undefined then (
+-- 			debug "elem_selec.nom"	var:elem_selec.nom
+					edTxt_nom.text	=	elem_selec.nom
+					edTxt_nom.enabled = true
+				
+					addSubRollout 	subroll_dest		elem_selec.roll_parametres
+			) else (
+-- 			debug "elem_selec.nom"	var:elem_selec
+					edTxt_nom.text	=	""
+					edTxt_nom.enabled = false
+					tv_sequence.SelectedNode = undefined
+			)
+			
+				
 			----- divers -------------------
 			local repart_options_enabled 		= ddl_repartition.selection != 1
 			spn_repetitions.indeterminate			=	repart_options_enabled
@@ -538,6 +567,7 @@ category:"CP | Bâtiment	| Composant"
 		----- EVENEMENTS ------------------------------------------------------------------------------ -----------------------
 		on roll_parametres		open 				do 	(
 			initialiser_tv  ()
+			actualiser_tv ()
 			actualiser ()
 		)
 		
@@ -554,8 +584,9 @@ category:"CP | Bâtiment	| Composant"
 		
 		--------- le treeView ---------
 		on tv_sequence 	mouseDown 				_arg 	do  	(
+			actualiser nd:( tv_sequence.GetNodeAt (dotNetObject "System.Drawing.Point" _arg.x _arg.y ) ) 
 -- 			clq_down  				_arg
-			local noeud_selec 	= tv_sequence.GetNodeAt (dotNetObject "System.Drawing.Point" _arg.x _arg.y )
+			/* local noeud_selec 	= tv_sequence.GetNodeAt (dotNetObject "System.Drawing.Point" _arg.x _arg.y )
 			local elem_selec 		= get_element	noeud_selec
 			
 			local subroll_dest	 = roll_parametres_element.subroll_param
@@ -565,17 +596,21 @@ category:"CP | Bâtiment	| Composant"
 				
 			if elem_selec != undefined then (
 				addSubRollout 	subroll_dest		elem_selec.roll_parametres
-				a_unEnfant_balcon  	noeud_selec
-				a_unParent_balcon  	noeud_selec
-			)
-			else
+				
+				edTxt_nom.text	=	elem_selec.nom
+				edTxt_nom.enabled = true		
+			)	else (
 				tv_sequence.SelectedNode = undefined
-			
+				
+				edTxt_nom.text	=	""
+				edTxt_nom.enabled = false
+			)
+			 */
 		)
 		on tv_sequence 	DragOver 	_sender		_arg	do	drag_checkSurvol  	_arg
 		on tv_sequence 	DragDrop 					_arg 	do	drag_recevoir 			_arg
 		on tv_sequence 	ItemDrag 	_sender		_arg 	do	drag_demarrer 		_arg
-/* 
+		/* 
 		on tv_sequence 	AfterLabelEdit				_arg 	do  	(
 			
 			if _arg.label != undefined do (
@@ -591,7 +626,7 @@ category:"CP | Bâtiment	| Composant"
 				actualiser ()
 			)
 		)
-		 */
+		*/
 		
 -- 		on tv_sequence 	keyup  						_arg 	do  	key_up					_arg
 		
@@ -730,7 +765,10 @@ category:"CP | Bâtiment	| Composant"
 		corriger_parametres ()		
 		actualiser_composants()		
 -- 		if roll_parametres.open do	roll_parametres.actualiser ()
-		if roll_parametres.open do	roll_parametres.actualiser ()		
+		if roll_parametres.open do	(
+			roll_parametres.actualiser ()		
+			roll_parametres.actualiser_TV ()		
+		)
 		redrawViews ()
 		
 	)
@@ -1058,15 +1096,8 @@ category:"CP | Bâtiment	| Composant"
 				1: 	(	-----	REPARTIR	 --------------------------------------------------------------------------------------------------------------------------------
 					
 					
-					
-					
 					---- on a donc notre longueur a repartir -------------------
 					longueur_repartition		=  ( longueur - longueur_definies_total  )  	/ (  ( nombre_deRepetitions /* *2 */	*	id_dernierComposant /* - nbr_elem_definies */ ) + 1   )
-					
-					
-					
-					
-					
 					
 					
 					---- l espacement de la sequence ----------------------
@@ -1113,30 +1144,16 @@ category:"CP | Bâtiment	| Composant"
 						compo_temp.longueur 			= 	compo_temp.get_longueur()
 						compo_temp.hauteur			=	hauteur
 						compo_temp.low_poly			=	low_poly
-						if est_ouvrable	 compo_temp do (		--- hasard ------
-							compo_temp.fen_ouvMax		=	fen_ouvMax
-							compo_temp.fen_proba_ouv	=	fen_proba_ouv
-						)
+						
+						compo_temp.set_hasard		fen_ouvMax	fen_proba_ouv
 						
 						append sequence_aRepeter		compo_temp
 						
 						---- le mur separant les composants  -------------------------------------
 						if i != sequence.count  do
 							append sequence_aRepeter		compo_murRepart
-						/* 
-						---la repetition si c'est un groupe --------------
-						if est_unGroupe		compo_temp do 
-							for j=2 to compo_temp.repetition	do  (
-								append sequence_aRepeter		compo_temp
-								if i != sequence.count and  j	!=	compo_temp.repetition	do
-									append sequence_aRepeter		compo_murRepart
-							)
-							 */
-							
+						
 					) --- fin for sequence ------------------
-					
-					
-					
 					
 					--- la repetition de la sequence de base -----------
 					for repet = 1 to nombre_deRepetitions do 	(
@@ -1145,8 +1162,7 @@ category:"CP | Bâtiment	| Composant"
 					)
 					
 					
-					
-					---- le mur sdernier mur  -------------------------------------
+					---- le dernier mur  -------------------------------------
 					local compo_murDeFin 			= copy compo_murRepart					
 					compo_murDeFin.longueur		=	longueur_repartition - decallage_espacement - decallage_sequence
 					append sequence_aConstruire		compo_murDeFin
@@ -1192,11 +1208,13 @@ category:"CP | Bâtiment	| Composant"
 						local compo_temp 				= 	copy sequence[i]			
 						compo_temp.longueur			=	hauteur	
 						compo_temp.hauteur			=	hauteur
-						compo_temp.low_poly			=	low_poly						
-						if est_ouvrable	 compo_temp do (	--- hasard ------
-							compo_temp.fen_ouvMax		=	fen_ouvMax
-							compo_temp.fen_proba_ouv	=	fen_proba_ouv
-						)
+						compo_temp.low_poly			=	low_poly			
+
+						compo_temp.set_hasard		fen_ouvMax	fen_proba_ouv						
+-- 						if est_ouvrable	 compo_temp do (	--- hasard ------
+-- 							compo_temp.fen_ouvMax		=	fen_ouvMax
+-- 							compo_temp.fen_proba_ouv	=	fen_proba_ouv
+-- 						)
 						append sequence_aConstruire		compo_temp
 						
 						
@@ -1266,10 +1284,12 @@ category:"CP | Bâtiment	| Composant"
 						compo_temp.longueur 			= 	compo_temp.get_longueur()
 						compo_temp.hauteur			=	hauteur
 						compo_temp.low_poly			=	low_poly						
-						if est_ouvrable	 compo_temp do (	--- hasard ------
-							compo_temp.fen_ouvMax		=	fen_ouvMax
-							compo_temp.fen_proba_ouv	=	fen_proba_ouv
-						)
+						
+						compo_temp.set_hasard		fen_ouvMax	fen_proba_ouv
+-- 						if est_ouvrable	 compo_temp do (	--- hasard ------
+-- 							compo_temp.fen_ouvMax		=	fen_ouvMax
+-- 							compo_temp.fen_proba_ouv	=	fen_proba_ouv
+-- 						)
 						append sequence_aConstruire		compo_temp
 						
 						
@@ -1338,10 +1358,13 @@ category:"CP | Bâtiment	| Composant"
 						local compo_temp 				= 	copy sequence[i]				
 						compo_temp.hauteur			=	hauteur
 						compo_temp.low_poly			=	low_poly						
-						if est_ouvrable	 compo_temp do (	--- hasard ------
-							compo_temp.fen_ouvMax		=	fen_ouvMax
-							compo_temp.fen_proba_ouv	=	fen_proba_ouv
-						)
+						
+						compo_temp.set_hasard		fen_ouvMax	fen_proba_ouv
+						
+-- 						if est_ouvrable	 compo_temp do (	--- hasard ------
+-- 							compo_temp.fen_ouvMax		=	fen_ouvMax
+-- 							compo_temp.fen_proba_ouv	=	fen_proba_ouv
+-- 						)
 						append sequence_aConstruire		compo_temp
 						
 						
@@ -1418,7 +1441,7 @@ category:"CP | Bâtiment	| Composant"
 	on buildMesh do	(
 		
 -- 		local chrono_debut = timestamp ()
-		
+-- 		debug "### BUILDMESH ###"
 		actualiser_composants ()
 		
 		--- vider le mesh --------
@@ -1428,13 +1451,9 @@ category:"CP | Bâtiment	| Composant"
 		
 		---- la sequence	-----		
 		local depos_composant = [ 0, 0, 0 ]
-		for i = 1 to	sequence_aConstruire.count do (
+		for composant in 	sequence_aConstruire do (
 			
-			---- le composant -----
-			local composant 		= sequence_aConstruire [i]
-			local align_y =	0	-- if est_unPlein	composant then 0 else profondeur - composant.profondeur
--- 			debug "----> composant" var:composant
-			mgr_mesh.attacher		mesh		composant	transf:( depos_composant + [0,align_y,0] )
+			mgr_mesh.attacher		mesh		composant	transf:( depos_composant + [0,0,0] )
 			
 			depos_composant.x += composant.get_longueur()
 			

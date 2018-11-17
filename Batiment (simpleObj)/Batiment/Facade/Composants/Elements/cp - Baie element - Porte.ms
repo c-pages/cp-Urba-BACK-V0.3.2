@@ -89,6 +89,23 @@ category:"CP | Baie	| Element"
 	)	-----	fin parametres --------------------
 	
 	
+	parameters params_hasard --rollout:roll_hasard
+	(
+		hasard_seed					type:#integer 		/* 	ui:spn_hasard_seed	 */	default:123456
+		
+		fen_proba_ouv				type:#float 		/* 	ui:spn_fen_proba_ouv	 */	default:0.
+		fen_ouvMax					type:#float 		/* 	ui:spn_fen_ouvMax	 */		default:0.
+	)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	rollout rol_global  "Global"	(
@@ -186,6 +203,11 @@ category:"CP | Baie	| Element"
 	
 	--------------- FONCTIONS  ----------------------------------------------------------------------------------------------------------------------
 
+	fn set_hasard	_fen_ouvMax	_fen_proba_ouv =(
+		fen_ouvMax 		= _fen_ouvMax
+		fen_proba_ouv 	= _fen_proba_ouv
+	)
+	
 	---- les composants ---------------------
 	fn actualiser_composants	= with redraw off (
 		
@@ -259,6 +281,18 @@ category:"CP | Baie	| Element"
 				compo_ouvrant_1.longueur 	= longueur_passage / 2
 				compo_ouvrant_2 				= compo_ouvrant_1
 			) */
+		)
+		
+		
+		
+		
+		--- hasard	---------------
+		local est_ouverte =   ( random 0.  100. ) < fen_proba_ouv 
+		if est_ouverte 	then (
+			
+			ouvert_angle_1 = random 0.		fen_ouvMax
+			ouvert_angle_2 = random 0.		fen_ouvMax		
+
 		)
 		
 		

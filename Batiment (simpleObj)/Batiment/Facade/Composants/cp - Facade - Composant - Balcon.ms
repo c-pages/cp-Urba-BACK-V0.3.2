@@ -30,15 +30,15 @@ category:"CP | Facade	| Composant"
 	--------------- PARAMETERES  ----------------------------------------------------------------------------------------------------------------------
 	parameters params_parameters rollout:roll_parametres	(
 		
-		nom	 					type:#string 			ui:edTxt_nom					default:"Balcon"
+		nom	 					type:#string 		/* 	ui:edTxt_nom	 */				default:"Balcon"
 		
 -- 		etirable					type:#boolean 	/* 	ui:shk_etirable			 */		default:false
 		
 		longueur 				type:#worldUnits 	/* ui:spn_longueur 	 */			default:0.
 		hauteur	 				type:#worldUnits 	/* ui:spn_hauteur  */			default:0.
 		dalle_epaisseur 		type:#worldUnits 	ui:spn_dalle_epaisseur		default:20.
-		dalle_debord	 		type:#worldUnits 	ui:spn_dalle_debord 			default:0.
-		profondeur	 			type:#worldUnits 	ui:spn_profondeur 			default:0.
+		dalle_porteAFaux	 	type:#worldUnits 	ui:spn_dalle_porteAFaux 	default:60.
+		profondeur	 			type:#worldUnits 	ui:spn_profondeur 			default:60.
 		
 		
 		elements				type:#maxObjectTab		tabSizeVariable:true
@@ -79,6 +79,20 @@ category:"CP | Facade	| Composant"
 		fen_ouvMax					type:#float 			ui:spn_fen_ouvMax			default:0.
 	)
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	rollout roll_hasard  "Hasard"	(
 		
 		spinner spn_hasard_seed 			"Seed" 					type:#integer		 range:[0,1e20,0]
@@ -96,11 +110,11 @@ category:"CP | Facade	| Composant"
 	
 	--------------- ROLLOUTS  ----------------------------------------------------------------------------------------------------------------------
 	rollout roll_parametres 				"Paramètres"	(
-		editText 	edTxt_nom		 		"Nom:" 	
+-- 		editText 	edTxt_nom		 		"Nom:" 	
 -- 		spinner 	spn_longueur 		"Longueur" 				type:#worldunits 	range:[0,1e20,0]
 		group  "balcon" (
 			spinner 	spn_dalle_epaisseur 		"Ep. dalle" 				type:#worldunits 	range:[0,1e20,0]
-			spinner 	spn_dalle_debord 		"Débord" 			type:#worldunits 	range:[0,1e20,0]
+			spinner 	spn_dalle_porteAFaux 		"Porte-à-faux" 			type:#worldunits 	range:[0,1e20,0]
 		)
 		group "loggia" (
 			
@@ -134,6 +148,14 @@ category:"CP | Facade	| Composant"
 			result_longueur += elem.get_longueur ()
 		result_longueur
 	) 
+	fn set_hasard	_fen_ouvMax	_fen_proba_ouv =(
+		
+		
+		fen_ouvMax 		= _fen_ouvMax
+		fen_proba_ouv 	= _fen_proba_ouv
+		for elem in elements do
+			elem.set_hasard	_fen_ouvMax	_fen_proba_ouv
+	)
 	/* 
 	-----elements -------------
 	fn ajouter_element		_elem	id:		=(
@@ -162,10 +184,7 @@ category:"CP | Facade	| Composant"
 			local compo_temp 				= 	copy elem				
 			compo_temp.hauteur			=	hauteur
 			compo_temp.low_poly			=	low_poly
-			if est_ouvrable	 compo_temp do (		--- hasard ------
-				compo_temp.fen_ouvMax		=	fen_ouvMax
-				compo_temp.fen_proba_ouv	=	fen_proba_ouv
-			)
+			compo_temp.set_hasard	fen_ouvMax	fen_proba_ouv 
 			append sequence_aConstruire		compo_temp
 			
 		) --- fin for sequence ------------------
@@ -192,11 +211,11 @@ category:"CP | Facade	| Composant"
 		
 		
 		--- Construction ---------------------------------------------------------------------------------------		
-		local compo_dalle		= 	createInstance 	cp_prim_boite
+		local compo_dalle		= 	createInstance 	cp_prim_boite	matId:matId_mur
 		compo_dalle.hauteur 		= 	dalle_epaisseur
-		compo_dalle.profondeur		=	dalle_debord
+		compo_dalle.profondeur		=	dalle_porteAFaux
 		compo_dalle.longueur		=	get_longueur()
-		mgr_mesh.attacher		mesh		compo_dalle			transf:[0,-dalle_debord ,-dalle_epaisseur]
+		mgr_mesh.attacher		mesh		compo_dalle			transf:[0,-dalle_porteAFaux ,-dalle_epaisseur]
 		
 		---- la sequence	-----		
 		local depos_composant = [ 0, 0, 0 ]
@@ -204,12 +223,41 @@ category:"CP | Facade	| Composant"
 			
 			---- le composant -----
 			local composant 		= sequence_aConstruire [i]
-			local align_y =	0	
-			mgr_mesh.attacher		mesh		composant	transf:( depos_composant + [0,align_y,0] )
-			
+-- 			local align_y 			=	profondeur
+			mgr_mesh.attacher		mesh		composant	transf:( depos_composant + [0,profondeur,0] )
+						
 			depos_composant.x += composant.get_longueur()
 			
 		)
+		
+		
+		
+		--- les element pour la loggia , si besoin	---------
+		if profondeur > 0 do (
+			--- sol ------
+			local compo_mur			= 	createInstance 	cp_prim_planHorizontal	matId:matId_mur
+			compo_mur.longueur 	=	get_longueur()
+			compo_mur.profondeur 	=	profondeur			
+			mgr_mesh.attacher		mesh		compo_mur		--transf:( rotateZMatrix	90 )
+			
+			--- plafond ----
+			mgr_mesh.attacher		mesh		compo_mur		transf:( ( rotateYMatrix	180  )	*	transMatrix	[longueur, 0, hauteur ] )
+			
+			
+			--- mur G  ------
+			local compo_mur			= 	createInstance 	cp_prim_planVertical		matId:matId_mur
+			compo_mur.longueur 	=	profondeur
+			compo_mur.hauteur	 	=	hauteur			
+			mgr_mesh.attacher		mesh		compo_mur		transf:( rotateZMatrix	90 )
+			
+			
+			--- mur D ----
+			mgr_mesh.attacher		mesh		compo_mur		transf:( ( rotateZMatrix	-90  )	*	transMatrix	[longueur, profondeur, 0 ] )
+			
+			
+		)
+		
+		
 	)
 	
 	

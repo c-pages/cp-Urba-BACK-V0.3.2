@@ -29,7 +29,7 @@ category:	"CP | Facade	| Composant"
 	--------------- PARAMETERES  ----------------------------------------------------------------------------------------------------------------------
 	parameters params_parameters rollout:roll_parametres	(
 		
-		nom	 					type:#string 			ui:edTxt_nom							default:"Groupe"
+		nom	 					type:#string 		/* 	ui:edTxt_nom	 */						default:"Groupe"
 		
 -- 		etirable					type:#boolean 		/*  ui:shk_etirable	 */	 				default:false
 		
@@ -101,7 +101,7 @@ category:	"CP | Facade	| Composant"
 	
 	--------------- ROLLOUTS  ----------------------------------------------------------------------------------------------------------------------
 	rollout roll_parametres 				"Paramètres"	(
-		editText 	edTxt_nom		 		"Nom:" 	
+-- 		editText 	edTxt_nom		 		"Nom:" 	
 		spinner 	spn_repetition 		"Répétition" 			type:#integer 	range:[1,1e20,0]
 -- 			checkbox	shk_etirable			"Etirable" 	
 -- 			spinner 	spn_longueur 			"Longueur" 			type:#worldunits 	range:[0,1e20,0]
@@ -158,6 +158,12 @@ category:	"CP | Facade	| Composant"
 		result_longueur
 	)
 	
+	fn set_hasard	_fen_ouvMax	_fen_proba_ouv =(
+		fen_ouvMax 		= _fen_ouvMax
+		fen_proba_ouv 	= _fen_proba_ouv
+		for elem in elements do
+			elem.set_hasard	_fen_ouvMax	_fen_proba_ouv
+	)
 	
 	
 	
@@ -191,10 +197,11 @@ category:	"CP | Facade	| Composant"
 			local compo_temp 				= 	copy elem				
 			compo_temp.hauteur			=	hauteur
 			compo_temp.low_poly			=	low_poly
-			if est_ouvrable	 compo_temp do (		--- hasard ------
-				compo_temp.fen_ouvMax		=	fen_ouvMax
-				compo_temp.fen_proba_ouv	=	fen_proba_ouv
-			)
+			compo_temp.set_hasard		fen_ouvMax	fen_proba_ouv
+-- 			if est_ouvrable	 compo_temp do (		--- hasard ------
+-- 				compo_temp.fen_ouvMax		=	fen_ouvMax
+-- 				compo_temp.fen_proba_ouv	=	fen_proba_ouv
+-- 			)
 			append sequence_aConstruire		compo_temp
 			
 		) --- fin for sequence ------------------
@@ -231,7 +238,7 @@ category:	"CP | Facade	| Composant"
 				for i = 1 to	sequence_aConstruire.count do (
 					
 					---- le composant -----
-					local composant 		= sequence_aConstruire [i]
+					local composant 		= copy sequence_aConstruire [i]
 					local align_y =	0	
 					mgr_mesh.attacher		mesh		composant	transf:( depos_composant + [0,align_y,0] )
 					

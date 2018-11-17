@@ -45,7 +45,7 @@ category:"CP | Facade	| Composant"
 	)
 	parameters params_general rollout:roll_parametres	(
 		
-		nom	 					type:#string 			ui:edTxt_nom					default:"Ens. menuisé"
+		nom	 					type:#string 		/* 	ui:edTxt_nom		 */			default:"Ens. menuisé"
 		
 -- 		etirable					type:#boolean 		ui:shk_etirable					default:false
 		
@@ -93,7 +93,7 @@ category:"CP | Facade	| Composant"
 		
 		--- UI ------------------------------------------------------------------------------------------------------
 		
-		editText 	edTxt_nom		 	"Nom:" 	
+-- 		editText 	edTxt_nom		 	"Nom:" 	
 		
 		
 		group "Dimensions" (
@@ -538,6 +538,17 @@ category:"CP | Facade	| Composant"
 	
 	
 	fn get_longueur	=	longueur
+		
+	fn set_hasard	_fen_ouvMax	_fen_proba_ouv =(
+		fen_ouvMax 		= _fen_ouvMax
+		fen_proba_ouv 	= _fen_proba_ouv
+		for elem in sequence do 
+			elem.set_hasard	_fen_ouvMax	_fen_proba_ouv 
+	)
+	
+	
+	
+	
 	
 	fn get_longueur_composant =(
 		local longueur_passage 			= longueur 	- 2*menuis_largeur
@@ -564,91 +575,7 @@ category:"CP | Facade	| Composant"
 		
 		createDialog roll_sequence	width:180	
 	)
-	
-	----------- Actualisation de la sequence		-----------------------------------
-	fn actualiser_composants	= with redraw off (
-		
--- 		seed hasard_seed
-		
-		
-		---- creation des composants ------------------
-		if compo_cadre 		== undefined	do	compo_cadre		= 	createInstance  cp_compo_cadre
-		if compo_meneau		== undefined	do	compo_meneau	= 	createInstance  cp_compo_meneau
-		
-		local hauteur_baie_tmp 		=  baie_hauteur
-		if baie_hauteur <= 0 do hauteur_baie_tmp = hauteur -	( -baie_hauteur + allege_hauteur )
-		
-		
-		
-		
-		----- maj du cadre ----------------------
-		compo_cadre.longueur 						= longueur
-		compo_cadre.hauteur 						= hauteur_baie_tmp	
-		compo_cadre.profondeur 					= menuis_profondeur
-		compo_cadre.menuis_largeur	 			= menuis_largeur	
-		compo_cadre.low_poly			 			= low_poly		
-		compo_cadre.matId_menuis	 			= matId_menuis
-		compo_cadre.travBasse					=	false
-		
-		----- Meneaux  ----------------------
-		compo_meneau.longueur 					= menuis_largeur
-		compo_meneau.profondeur 				= menuis_profondeur
-		compo_meneau.hauteur 					= hauteur_baie_tmp	-  menuis_largeur
-		compo_meneau.low_poly			 		= low_poly		
-		
-		
-		
-		--- maj des composants de la sequence -------------
-		local longueur_composant	= get_longueur_composant ()
-		sequence_tmp 				= #()
-		for i = 1 to sequence.count do (
-			
-			local compo_temp 				= 	copy sequence[i]
-	
-			if compo_temp.longueur == 0 then		compo_temp.longueur 	= 		longueur_composant
-			
-			if est_porte 	compo_temp 	then		compo_temp.hauteur	=		hauteur_baie_tmp - menuis_largeur
-													else		compo_temp.hauteur	=		hauteur_baie_tmp - 2*menuis_largeur
-			
-			compo_temp.profondeur		=	menuis_profondeur
-			compo_temp.low_poly			=	low_poly
--- 			compo_temp.fen_ouvMax		=	fen_ouvMax
--- 			compo_temp.fen_proba_ouv	=	fen_proba_ouv
-			
-			---- hasard ouverture ---------
-			if est_ouvrable	 compo_temp do (
-				local est_ouverte =   ( random 0.  100. ) < fen_proba_ouv 
-				if est_ouverte 	then (
-					compo_temp.low_poly			=	false
-					compo_temp.ouvert_angle_1 = random 0.		fen_ouvMax
-					compo_temp.ouvert_angle_2 = random 0.		fen_ouvMax					
-				)
-			
-			)			
-			
-			append sequence_tmp		compo_temp
-		)
-		
-		
-		
-		--- Si notre sequence est vide
-		if sequence.count == 0 do (
-			local compo_temp = createInstance cp_baieElement_fixe
-			
-			append	sequence_tmp  	compo_temp
-			
-			compo_temp.hauteur			=	hauteur_baie_tmp 	- 2*menuis_largeur
-			compo_temp.profondeur		=	menuis_profondeur
-			compo_temp.low_poly			=	low_poly
-			compo_temp.longueur			=	longueur 		- 2*menuis_largeur
-		)
-		
-	)  --- fin actualiser_composants  ------------------
-	
-	
-	
-	
-	
+
 	
 	
 	--------------- sequence ----------------------------------
@@ -798,14 +725,86 @@ category:"CP | Facade	| Composant"
 	
 	
 	
+		
+	----------- Actualisation de la sequence		-----------------------------------
+	fn actualiser_composants	= with redraw off (
+		
+-- 		seed hasard_seed
+		
+		---- creation des composants ------------------
+		if compo_cadre 		== undefined	do	compo_cadre		= 	createInstance  cp_compo_cadre
+		if compo_meneau		== undefined	do	compo_meneau	= 	createInstance  cp_compo_meneau
+		
+		local hauteur_baie_tmp 		=  baie_hauteur
+		if baie_hauteur <= 0 do hauteur_baie_tmp = hauteur -	( -baie_hauteur + allege_hauteur )
+		
+		
+		
+		
+		----- maj du cadre ----------------------
+		compo_cadre.longueur 						= longueur
+		compo_cadre.hauteur 						= hauteur_baie_tmp	
+		compo_cadre.profondeur 					= menuis_profondeur
+		compo_cadre.menuis_largeur	 			= menuis_largeur	
+		compo_cadre.low_poly			 			= low_poly		
+		compo_cadre.matId_menuis	 			= matId_menuis
+		compo_cadre.travBasse					=	false
+		
+		----- Meneaux  ----------------------
+		compo_meneau.longueur 					= menuis_largeur
+		compo_meneau.profondeur 				= menuis_profondeur
+		compo_meneau.hauteur 					= hauteur_baie_tmp	-  menuis_largeur
+		compo_meneau.low_poly			 		= low_poly		
+		
+		
+		
+		--- maj des composants de la sequence -------------
+		local longueur_composant	= get_longueur_composant ()
+		sequence_tmp 				= #()
+		for i = 1 to sequence.count do (
+			
+			local compo_temp 				= 	copy sequence[i]
+	
+			if compo_temp.longueur == 0 then		compo_temp.longueur 	= 		longueur_composant
+			
+			if est_porte 	compo_temp 	then		compo_temp.hauteur	=		hauteur_baie_tmp - menuis_largeur
+													else		compo_temp.hauteur	=		hauteur_baie_tmp - 2*menuis_largeur
+			
+			compo_temp.profondeur		=	menuis_profondeur
+			compo_temp.low_poly			=	low_poly
+			compo_temp.set_hasard		fen_ouvMax	fen_proba_ouv
+			
+			
+			append sequence_tmp		compo_temp
+		)
+		
+		
+		
+		--- Si notre sequence est vide
+		if sequence.count == 0 do (
+			local compo_temp = createInstance cp_baieElement_fixe
+			
+			append	sequence_tmp  	compo_temp
+			
+			compo_temp.hauteur			=	hauteur_baie_tmp 	- 2*menuis_largeur
+			compo_temp.profondeur		=	menuis_profondeur
+			compo_temp.low_poly			=	low_poly
+			compo_temp.longueur			=	longueur 		- 2*menuis_largeur
+		)
+		
+	)  --- fin actualiser_composants  ------------------
+	
+	
+	
+	
 	
 	
 	--------------- CONSTRUCTION  ----------------------------------------------------------------------------------------------------------------------
 	on buildMesh do	(
 		
+-- 		debug "BUILDMESH"
 		---- maj des composants -----
 		actualiser_composants ()
-		
 		--- vider le mesh --------
 		delete mesh
 		
