@@ -195,7 +195,7 @@ category:"CP | Facade	| Composant"
 		local compo_dalle		= 	createInstance 	cp_prim_boite
 		compo_dalle.hauteur 		= 	dalle_epaisseur
 		compo_dalle.profondeur		=	dalle_debord
-		compo_dalle.longueur		=	longueur
+		compo_dalle.longueur		=	get_longueur()
 		mgr_mesh.attacher		mesh		compo_dalle			transf:[0,-dalle_debord ,-dalle_epaisseur]
 		
 		---- la sequence	-----		
@@ -207,7 +207,7 @@ category:"CP | Facade	| Composant"
 			local align_y =	0	
 			mgr_mesh.attacher		mesh		composant	transf:( depos_composant + [0,align_y,0] )
 			
-			depos_composant.x += composant.longueur
+			depos_composant.x += composant.get_longueur()
 			
 		)
 	)
