@@ -26,26 +26,72 @@ category:	"CP | Facade	| Composant"
 	---- la sequence à construire issue de la sequence	------------------------
 	local sequence_aConstruire
 	
---------------- PARAMETERES  ----------------------------------------------------------------------------------------------------------------------
+	--------------- PARAMETERES  ----------------------------------------------------------------------------------------------------------------------
 	parameters params_parameters rollout:roll_parametres	(
 		
 		nom	 					type:#string 			ui:edTxt_nom							default:"Groupe"
 		
-		etirable					type:#boolean 		/*  ui:shk_etirable	 */	 				default:false
+-- 		etirable					type:#boolean 		/*  ui:shk_etirable	 */	 				default:false
 		
 		longueur 				type:#worldUnits		 /*  	ui:spn_longueur  	 */				default:0.
 		hauteur	 				type:#worldUnits 	/* ui:spn_hauteur  		*/				default:0.
 		
 		
+		repetition				type:#integer 			ui:spn_repetition		default:1
+		
 		elements				type:#maxObjectTab		tabSizeVariable:true
 		
+		parent					type:#maxObject	
 		
+		
+		
+-- 		on elements 	tabChanged  	_operation		 _index	_count		do (
+-- 			longueur = 0
+-- 			for elem in elements do
+-- 				longueur += elem.longueur
+-- 		)
+
+
+	/* 
+		on longueur 	get 	_arg do (
+			debug "###GET	LONGUEUR" var:nom
+			local result_longueur = 0
+			debug "GET	--	elements" var:elements
+			for elem in elements do (
+				debug "GET	--	elem" var:elem
+				local elem_lg	=	elem.longueur
+				debug "GET	--	elem_lg" var:elem_lg
+				result_longueur += elem_lg
+			)
+			debug "GET	--	repetition" var:repetition
+			result_longueur *= repetition
+			debug "GET	--	LONGUEUR" var:result_longueur
+			result_longueur
+		)
+ */
 	)
-	parameters params_divers ---rollout:roll_divers
+	
+	
+	
+	parameters params_hasard rollout:roll_hasard
+	(
+		hasard_seed					type:#integer 			ui:spn_hasard_seed		default:123456
+		
+		fen_proba_ouv				type:#float 			ui:spn_fen_proba_ouv		default:0.
+		fen_ouvMax					type:#float 			ui:spn_fen_ouvMax			default:0.
+	)
+	
+	parameters params_divers rollout:roll_divers
 	(
 		
 		------ options --------------
-		low_poly							type:#boolean 	/* 	ui:shk_lowPoly		 */		default:false
+		low_poly							type:#boolean 		ui:shk_lowPoly				default:false
+		
+		------ mat ID ----------
+		matId_menuis					type:#integer 			ui:spn_matId_menuis	default:1
+		matId_vitrage					type:#integer 			ui:spn_matId_vitrage	default:2
+		matId_huisserie				type:#integer 			ui:spn_matId_huisserie	default:3
+		matId_mur						type:#integer 			ui:spn_matId_mur		default:4
 		
 	)	-----	fin parametres --------------------
 	
@@ -53,12 +99,10 @@ category:	"CP | Facade	| Composant"
 	
 	
 	
-	
 	--------------- ROLLOUTS  ----------------------------------------------------------------------------------------------------------------------
-
 	rollout roll_parametres 				"Paramètres"	(
 		editText 	edTxt_nom		 		"Nom:" 	
-		spinner 	spn_repetition 		"Répétition" 			type:#integer 	range:[0,1e20,0]
+		spinner 	spn_repetition 		"Répétition" 			type:#integer 	range:[1,1e20,0]
 -- 			checkbox	shk_etirable			"Etirable" 	
 -- 			spinner 	spn_longueur 			"Longueur" 			type:#worldunits 	range:[0,1e20,0]
 -- 		fn actualiser =(
@@ -71,14 +115,91 @@ category:	"CP | Facade	| Composant"
 	
 	
 	
+	rollout roll_divers  "Divers"	(
+		 group "Qualité" (
+			checkbox	shk_lowPoly			"Low poly" 		
+		) 
+		group "Material ID" (
+			spinner spn_matId_menuis 		"Menuiseries" 			type:#integer range:[1,1000,1]
+			spinner spn_matId_vitrage 		"Vitrage" 				type:#integer range:[1,1000,1]
+			spinner spn_matId_huisserie 	"Huisserie" 				type:#integer range:[1,1000,1]
+			spinner spn_matId_mur 			"Mur" 					type:#integer range:[1,1000,1]
+		)
+	) 	---- fin rollout	-----------------------
+	
+	rollout roll_hasard  "Hasard"	(
+		
+		spinner spn_hasard_seed 			"Seed" 					type:#integer		 range:[0,1e20,0]
+		
+		group "Fenetres" (
+			spinner spn_fen_proba_ouv 		"Proba (%)" 			type:#float			 range:[0,100,0]
+			spinner spn_fen_ouvMax 			"Max (°)" 		type:#float			 range:[0,180,0]
+		)
+	
+	)
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	--------------- FONCTIONS  ----------------------------------------------------------------------------------------------------------------------
+	fn est_ouvrable		_compo	=	classof	_compo	==	cp_facadeCompo_ensemble
+	
+
+	fn get_longueur	=	(
+		local result_longueur = 0
+		for elem in elements do
+			result_longueur += elem.get_longueur ()
+		result_longueur *= repetition
+		result_longueur
+	)
+	
+	
+	
+	
+	/* 
+	-----elements -------------
+	fn ajouter_element		_elem	id:		=(
+		if id == unsupplied then
+			append elements	_elem
+		else
+			insertItem		_elem		elements		id
+		_elem.parent = this
+	)
+	fn retirer_element		_id		=(
+		local elem_avirer	=	elements[_id]
+		deleteItem	 elements	_id
+		elem_avirer.parent = undefined
+		
+		elem_avirer
+	)
+	 */
+	
+	
+	
 	fn actualiser_composants	= with redraw off (
 		
+		sequence_aConstruire 				= 	#()
+		
+		for elem in elements do (
+			
+			--- le composant ----------------
+			local compo_temp 				= 	copy elem				
+			compo_temp.hauteur			=	hauteur
+			compo_temp.low_poly			=	low_poly
+			if est_ouvrable	 compo_temp do (		--- hasard ------
+				compo_temp.fen_ouvMax		=	fen_ouvMax
+				compo_temp.fen_proba_ouv	=	fen_proba_ouv
+			)
+			append sequence_aConstruire		compo_temp
+			
+		) --- fin for sequence ------------------
+		
 	)  --- fin actualiser_composants  ------------------
-	
-	
 	
 	
 	
@@ -100,7 +221,25 @@ category:	"CP | Facade	| Composant"
 		delete mesh
 		
 		--- Construction ---------------------------------------------------------------------------------------
-		setMesh mesh numverts:0
+		if elements.count == 0	then
+			setMesh mesh numverts:0
+		else (
+			
+			---- la sequence	-----		
+			local depos_composant = [ 0, 0, 0 ]
+			for j = 1 to repetition do (
+				for i = 1 to	sequence_aConstruire.count do (
+					
+					---- le composant -----
+					local composant 		= sequence_aConstruire [i]
+					local align_y =	0	
+					mgr_mesh.attacher		mesh		composant	transf:( depos_composant + [0,align_y,0] )
+					
+					depos_composant.x += composant.get_longueur()
+					
+				)
+			)
+		)
 		
 	)
 	

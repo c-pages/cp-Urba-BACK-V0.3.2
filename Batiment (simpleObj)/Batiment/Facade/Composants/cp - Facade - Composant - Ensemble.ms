@@ -47,7 +47,7 @@ category:"CP | Facade	| Composant"
 		
 		nom	 					type:#string 			ui:edTxt_nom					default:"Ens. menuisé"
 		
-		etirable					type:#boolean 		ui:shk_etirable					default:false
+-- 		etirable					type:#boolean 		ui:shk_etirable					default:false
 		
 		longueur 				type:#worldUnits 	ui:spn_longueur 				default:120.
 		baie_hauteur			type:#worldUnits 	ui:spn_baie_hauteur			default:-50.
@@ -60,6 +60,7 @@ category:"CP | Facade	| Composant"
 		
 		sequence					type:#maxObjectTab	tabSizeVariable:true
 		
+		parent					type:#maxObject	
 	)
 	parameters params_divers rollout:roll_divers
 	(
@@ -96,7 +97,7 @@ category:"CP | Facade	| Composant"
 		
 		
 		group "Dimensions" (
-			checkbox	shk_etirable			"Etirable" 	
+-- 			checkbox	shk_etirable			"Etirable" 	
 			spinner 	spn_longueur 			"Longueur" 			type:#worldunits 	range:[0,1e20,0]
 			spinner 	spn_baie_hauteur 	"Hauteur" 			type:#worldunits 	range:[-1e20,1e20,0]
 			spinner 	spn_profondeur		"Profondeur" 		type:#worldunits 	range:[0,1e20,0]
@@ -112,12 +113,12 @@ category:"CP | Facade	| Composant"
 		)
 		
 		
-		fn actualiser =(
-			spn_longueur.indeterminate		=	etirable
-			spn_longueur.enabled 				=	not	etirable 
-		)
-		on roll_parametres	open 					do actualiser ()
-		on shk_etirable		changed state  	do actualiser ()
+-- 		fn actualiser =(
+-- 			spn_longueur.indeterminate		=	etirable
+-- 			spn_longueur.enabled 				=	not	etirable 
+-- 		)
+-- 		on roll_parametres	open 					do actualiser ()
+-- 		on shk_etirable		changed state  	do actualiser ()
 		
 		
 		on btn_editer_sequence pressed do ouvrir_roll_sequence ()
@@ -523,6 +524,8 @@ category:"CP | Facade	| Composant"
 	--------- divers ------------------
 	fn est_porte		_compo	=	classof	_compo	==	cp_baieElement_porte
 	fn est_fenetre		_compo	=	classof	_compo	==	cp_baieElement_fenetre
+	fn est_ouvrable	_compo	=	est_fenetre		_compo	or est_porte		_compo	
+	
 	fn est_fixe			_compo	=	classof	_compo	==	cp_baieElement_fixe
 	fn est_copiable			=	 roll_sequence.lbx_sequence.selection != 0
 	fn est_instance	_id		= (
@@ -532,6 +535,10 @@ category:"CP | Facade	| Composant"
 			if sequence[i] == sequence[ _id] do result = true
 		result
 	)
+	
+	
+	fn get_longueur	=	longueur
+	
 	fn get_longueur_composant =(
 		local longueur_passage 			= longueur 	- 2*menuis_largeur
 		local nbr_meneaux					= sequence.count - 1		
@@ -548,6 +555,10 @@ category:"CP | Facade	| Composant"
 		
 		longueur_composant
 	)
+	
+	
+	
+	
 	
 	fn ouvrir_roll_sequence = (
 		
@@ -601,9 +612,11 @@ category:"CP | Facade	| Composant"
 			
 			compo_temp.profondeur		=	menuis_profondeur
 			compo_temp.low_poly			=	low_poly
+-- 			compo_temp.fen_ouvMax		=	fen_ouvMax
+-- 			compo_temp.fen_proba_ouv	=	fen_proba_ouv
 			
 			---- hasard ouverture ---------
-			if est_porte  compo_temp or est_fenetre compo_temp do (
+			if est_ouvrable	 compo_temp do (
 				local est_ouverte =   ( random 0.  100. ) < fen_proba_ouv 
 				if est_ouverte 	then (
 					compo_temp.low_poly			=	false

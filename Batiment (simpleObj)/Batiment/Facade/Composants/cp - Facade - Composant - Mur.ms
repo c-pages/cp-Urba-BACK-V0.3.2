@@ -33,9 +33,12 @@ category:"CP | Facade	| Composant"
 	parameters params_general rollout:roll_parametres	(
 		nom	 					type:#string 			ui:edTxt_nom				default:"Mur"
 		
-		longueur 				type:#worldUnits 	ui:spn_longueur 			default:0.
+		longueur 				type:#worldUnits 	ui:spn_longueur 			default:20.
 		debord	 				type:#worldUnits 	ui:spn_debord				default:0.
-		etirable					type:#boolean 		ui:shk_etirable				default:true
+-- 		etirable					type:#boolean 		ui:shk_etirable				default:true
+		
+		
+		parent					type:#maxObject	
 	)
 	parameters params_divers rollout:roll_divers	(
 		
@@ -59,17 +62,17 @@ category:"CP | Facade	| Composant"
 		
 		editText 	edTxt_nom		 	"Nom:" 	
 		group "Dimensions" (
-			checkbox	shk_etirable			"Etirable" 	
+-- 			checkbox	shk_etirable			"Etirable" 	
 			spinner 	spn_longueur 			"longueur" 				type:#worldunits 	range:[0,1e20,0]
 			spinner 	spn_debord				"Débord" 				type:#worldunits range:[0,1e20,0]
 		)
 		
-		fn actualiser =(
-			spn_longueur.indeterminate		=	etirable
-			spn_longueur.enabled 				=	not	etirable 
-		)
-		on roll_parametres	open 					do actualiser ()
-		on shk_etirable		changed state  	do actualiser ()
+-- 		fn actualiser =(
+-- 			spn_longueur.indeterminate		=	etirable
+-- 			spn_longueur.enabled 				=	not	etirable 
+-- 		)
+-- 		on roll_parametres	open 					do actualiser ()
+-- 		on shk_etirable		changed state  	do actualiser ()
 	)
 	rollout roll_divers  "Divers"	(
 		 group "Qualité" (
@@ -92,7 +95,7 @@ category:"CP | Facade	| Composant"
 	
 	
 	
-	
+	fn get_longueur	=	longueur
 	
 	
 	
