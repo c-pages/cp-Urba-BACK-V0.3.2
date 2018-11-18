@@ -33,7 +33,7 @@ category:"CP | Facade	| Composant"
 	local sequence_tmp
 	
 	---- composants ---------
-	local compo_cadre, compo_meneau
+	local compo_cadre, compo_meneau, compo_baie
 	
 	---- manager de mesh -------------------
 	local mgr_mesh = str_mgr_mesh ()
@@ -734,10 +734,21 @@ category:"CP | Facade	| Composant"
 		---- creation des composants ------------------
 		if compo_cadre 		== undefined	do	compo_cadre		= 	createInstance  cp_compo_cadre
 		if compo_meneau		== undefined	do	compo_meneau	= 	createInstance  cp_compo_meneau
+		if compo_baie			== undefined	do	compo_baie		= 	createInstance  cp_baieElement_baie
 		
 		local hauteur_baie_tmp 		=  baie_hauteur
 		if baie_hauteur <= 0 do hauteur_baie_tmp = hauteur -	( -baie_hauteur + allege_hauteur )
 		
+		
+		---- la baie ------------------------------------------------
+		compo_baie.hauteur				=	hauteur 
+		compo_baie.profondeur			=	profondeur
+		compo_baie.longueur			=	longueur
+		compo_baie.baie_hauteur		=	baie_hauteur
+		compo_baie.allege_hauteur	=	allege_hauteur
+		
+		compo_baie.low_poly			=	low_poly
+		compo_baie.matId_mur			=	matId_mur
 		
 		
 		
@@ -802,68 +813,20 @@ category:"CP | Facade	| Composant"
 	--------------- CONSTRUCTION  ----------------------------------------------------------------------------------------------------------------------
 	on buildMesh do	(
 		
--- 		debug "BUILDMESH"
+		
 		---- maj des composants -----
 		actualiser_composants ()
+		
+		
 		--- vider le mesh --------
 		delete mesh
 		
 		--- Construction ---------------------------------------------------------------------------------------
-		---- la BAIE	------------------
-		local hauteur_baie_tmp 		= allege_hauteur + baie_hauteur
-		if baie_hauteur <= 0 do hauteur_baie_tmp = hauteur +	baie_hauteur
+		---- la baie	------------------
+		mgr_mesh.attacher		mesh		compo_baie 	
 		
-		
-		---- Allege -----
-		local pt_1	=	[0,					0,					0]
-		local pt_2	=	[longueur,			0,					0]
-		local pt_3	=	[0,					0,					allege_hauteur]
-		local pt_4	=	[longueur,			0,					allege_hauteur]
-		
-		----- tableau bas ------
-		local pt_5	=	[longueur,			profondeur,		allege_hauteur]
-		local pt_6	=	[0,					profondeur,		allege_hauteur]
-		
-		----- tableau gauche ------
-		local pt_7	=	[0,					profondeur,		hauteur_baie_tmp]
-		local pt_8	=	[0,					0,					hauteur_baie_tmp]
-		
-		----- tableau droit ------
-		local pt_9	=	[longueur,			0,					hauteur_baie_tmp]
-		local pt_10	=	[longueur,			profondeur,		hauteur_baie_tmp]
-		
-		----- Imposte ------
-		local pt_11	=	[longueur,			0,					hauteur]
-		local pt_12	=	[0,					0,					hauteur]
-		
-		local pts 	= #(pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7, pt_8, pt_9, pt_10, pt_11, pt_12) 
-		
-		----- on creer les faces ----------------------------------------------------
-		
-		local faces = #(	[1,2,4], [1,4,3],		[3,4,5], [3,5,6],		[3,6,7], [3,7,8]  ,		[5,4,9], [5,9,10],				[7,10,8], [8,10,9],		[8,9,11], [8,11,12] )
-	
-		--- mat ID ------
-		local matIDs	= for i in faces collect matId_mur
-		
-		--- on creer les vertex ---------
-		setMesh 	mesh 	verts:pts	faces:faces	materialIDs:matIDs
-		
-		----- On clean le mesh 	--------------
-		meshop.autoSmooth		mesh 	#{1..mesh.numfaces} 		10
-		meshop.autoEdge 		mesh 	#{1..mesh.Edges.count}	10	
-		
-		
-		
-		
-		
-		
-		
-		
-		----- les composants -------------------------------------------------------------
 		---- le cadre  -------
 		mgr_mesh.attacher		mesh		compo_cadre 	transf:[0, profondeur  , allege_hauteur ]
-		
-		
 		
 		---- la sequence	-----
 		local compo_travBas		= 	if low_poly	then	createInstance  cp_prim_boiteL  horizontal:true	else createInstance 	cp_prim_boite
@@ -902,11 +865,6 @@ category:"CP | Facade	| Composant"
 		
 		
 		
-		
-		
-		
-		----- le mapping 	--------------
-		meshop.applyUVWMap 	mesh  #box		tm:(scaleMatrix [2,2,2]	)
 		
 		
 	)  ----- fin on buld mesh -----------------

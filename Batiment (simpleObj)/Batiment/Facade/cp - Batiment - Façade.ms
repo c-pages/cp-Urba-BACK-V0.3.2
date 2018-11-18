@@ -25,6 +25,7 @@ category:"CP | Bâtiment	| Composant"
 	
 	---- la sequence à construire issue de la sequence	------------------------
 	local sequence_aConstruire
+	local compo_baie
 	
 	---- manager de mesh -------------------
 	local mgr_mesh = str_mgr_mesh ()
@@ -745,15 +746,8 @@ category:"CP | Bâtiment	| Composant"
 	
 	
 	--------- tests ------------------
-	fn est_unGroupe		_compo	=	classof	_compo	==	cp_facadeCompo_groupe
 	fn est_ouvrable		_compo	=	classof	_compo	==	cp_facadeCompo_ensemble --or classof	_compo	==	cp_facadeCompo_ensemble
-	
 	fn est_unBalcon		_compo	=	classof	_compo	==	cp_facadeCompo_balcon
-	
-	fn est_porte			_compo	=	classof	_compo	==	cp_menuis_porte
-	fn est_fixe				_compo	=	classof	_compo	==	cp_menuis_fixe
-	fn est_unPlein			_compo	=	classof	_compo	==	cp_facadeCompo_mur	--	_compo.category	as string ==	"CP | Facade	| Pleins"
-	fn est_copiable					=	 roll_parametres.lbx_sequence.selection != 0
 	
 	
 	
@@ -1009,6 +1003,8 @@ category:"CP | Bâtiment	| Composant"
 		
 		sequence_aConstruire 				= 	#()
 		
+		
+		
 		--- Si notre sequence est vide ------------------------------------
 		if sequence.count == 0 then (
 			
@@ -1029,12 +1025,7 @@ category:"CP | Bâtiment	| Composant"
 			---- la sequence de base à repeter si besoin --------------------------
 			local sequence_aRepeter =#()
 			
-			---- cleanage de la sequence (on retire les elements qui n'apparetront pas ) -----------------------------------------------------------
--- 			local sequence	=#()
--- 			for i = 1 to sequence.count do 
--- 				if not  est_unGroupe	sequence[i] or   est_unGroupe	sequence[i] and sequence[i].elements.count > 0 do 
--- 					append	sequence	sequence[i]
-			
+
 			
 			
 			---- si repetitions == 0 alors on en met le maximum -------------------
@@ -1059,35 +1050,12 @@ category:"CP | Bâtiment	| Composant"
 			
 			
 			---- on ajoute les longueurs des composant a longueur définie -----------------
--- 			debug""
--- 			debug "############	longueur_definies_total		##############"	
 			for i = 1 to sequence.count do (
--- 				if est_unGroupe sequence[i] then (
--- 					longueur_definies_total+= sequence[i].get_longueur()  *	sequence[i].repetition	* nombre_deRepetitions 
--- 				) else (
-				local seq_lg	=	sequence[i].get_longueur()
+				local seq_lg					=	sequence[i].get_longueur()
 				longueur_definies_total+=  seq_lg * nombre_deRepetitions
--- 				debug "sequence[i] "	var:sequence[i].nom 
--- 				debug "sequence[i].get_longueur() "	var:seq_lg
--- 				)
-			)
--- 			debug "---->	longueur_definies_total"	var:longueur_definies_total
--- 			debug""
-			/* 
-			---- si on est plus long que la longueur de la facade on réajuste --------------------------
-			if longueurMax_atteinte do (
-				longueur_definies_total 	=	0
--- 				nbr_elem_definies 			=	0
--- 				nbr_elem_indefinies 			=	0
-				for i = 1 to id_dernierComposant 	do (
-					if not sequence[i].etirable			then (
-						longueur_definies_total+= sequence[i].get_longueur()
-						nbr_elem_definies += 1
-					)	else nbr_elem_indefinies += 1
-				)
 			)
 			
-			 */
+			
 			
 			
 			--- en fonction du mode de répartition ----------------------
@@ -1210,24 +1178,10 @@ category:"CP | Bâtiment	| Composant"
 						compo_temp.hauteur			=	hauteur
 						compo_temp.low_poly			=	low_poly			
 
-						compo_temp.set_hasard		fen_ouvMax	fen_proba_ouv						
--- 						if est_ouvrable	 compo_temp do (	--- hasard ------
--- 							compo_temp.fen_ouvMax		=	fen_ouvMax
--- 							compo_temp.fen_proba_ouv	=	fen_proba_ouv
--- 						)
+						compo_temp.set_hasard		fen_ouvMax	fen_proba_ouv	
 						append sequence_aConstruire		compo_temp
 						
 						
-						
-						/* 
-						---la repetition si c'est un groupe --------------
-						if est_unGroupe		compo_temp do 
-							for j=2 to compo_temp.repetition	do  (
-								append sequence_aConstruire		compo_temp
--- 								if i != sequence.count and  j	!=	compo_temp.repetition	do
--- 									append sequence_aRepeter		compo_murRepart
-							)
-						 */
 						
 						
 					) --- fin for sequence ------------------
@@ -1286,22 +1240,10 @@ category:"CP | Bâtiment	| Composant"
 						compo_temp.low_poly			=	low_poly						
 						
 						compo_temp.set_hasard		fen_ouvMax	fen_proba_ouv
--- 						if est_ouvrable	 compo_temp do (	--- hasard ------
--- 							compo_temp.fen_ouvMax		=	fen_ouvMax
--- 							compo_temp.fen_proba_ouv	=	fen_proba_ouv
--- 						)
 						append sequence_aConstruire		compo_temp
 						
 						
 						
-						
-						---la repetition si c'est un groupe --------------
-						if est_unGroupe		compo_temp do 
-							for j=2 to compo_temp.repetition	do  (
-								append sequence_aConstruire		compo_temp
--- 								if i != sequence.count and  j	!=	compo_temp.repetition	do
--- 									append sequence_aRepeter		compo_murRepart
-							)
 						
 						
 						
@@ -1361,22 +1303,9 @@ category:"CP | Bâtiment	| Composant"
 						
 						compo_temp.set_hasard		fen_ouvMax	fen_proba_ouv
 						
--- 						if est_ouvrable	 compo_temp do (	--- hasard ------
--- 							compo_temp.fen_ouvMax		=	fen_ouvMax
--- 							compo_temp.fen_proba_ouv	=	fen_proba_ouv
--- 						)
 						append sequence_aConstruire		compo_temp
 						
 						
-						
-						
-						---la repetition si c'est un groupe --------------
-						if est_unGroupe		compo_temp do 
-							for j=2 to compo_temp.repetition	do  (
-								append sequence_aConstruire		compo_temp
--- 								if i != sequence.count and  j	!=	compo_temp.repetition	do
--- 									append sequence_aRepeter		compo_murRepart
-							)
 						
 						
 						
@@ -1447,6 +1376,8 @@ category:"CP | Bâtiment	| Composant"
 		--- vider le mesh --------
 		delete mesh
 		
+-- 		--- la baie ------------
+-- 		mgr_mesh.attacher		mesh		compo_baie	
 		
 		
 		---- la sequence	-----		

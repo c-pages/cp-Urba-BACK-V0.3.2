@@ -31,6 +31,7 @@ filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Menuiseries\\cp -
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\Elements\\cp - Baie element - Fixe.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\Elements\\cp - Baie element - Fenetre.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\Elements\\cp - Baie element - Porte.ms"
+filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\Elements\\cp - Baie element - Baie.ms"
 
 
 

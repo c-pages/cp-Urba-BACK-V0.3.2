@@ -36,14 +36,14 @@ category:"CP | Facade	| Composant"
 		
 		longueur 				type:#worldUnits 	/* ui:spn_longueur 	 */			default:0.
 		hauteur	 				type:#worldUnits 	/* ui:spn_hauteur  */			default:0.
-		dalle_epaisseur 		type:#worldUnits 	ui:spn_dalle_epaisseur		default:20.
+		dalle_epaisseur 		type:#worldUnits /* 	ui:spn_dalle_epaisseur	 */		default:20.
 		dalle_porteAFaux	 	type:#worldUnits 	ui:spn_dalle_porteAFaux 	default:60.
 		profondeur	 			type:#worldUnits 	ui:spn_profondeur 			default:60.
 		
 		
 		elements				type:#maxObjectTab		tabSizeVariable:true
 		
-		parent					type:#maxObject	
+		gardeCorps				type:#integer		 	ui:ddl_gardeCorps 			default:1
 		
 -- 		
 -- 		on elements 	tabChanged  	_operation		 _index	_count		do (
@@ -112,15 +112,18 @@ category:"CP | Facade	| Composant"
 	rollout roll_parametres 				"Paramètres"	(
 -- 		editText 	edTxt_nom		 		"Nom:" 	
 -- 		spinner 	spn_longueur 		"Longueur" 				type:#worldunits 	range:[0,1e20,0]
-		group  "balcon" (
-			spinner 	spn_dalle_epaisseur 		"Ep. dalle" 				type:#worldunits 	range:[0,1e20,0]
+		group  "Dimensions" (
+-- 			spinner 	spn_dalle_epaisseur 		"Ep. dalle" 				type:#worldunits 	range:[0,1e20,0]
 			spinner 	spn_dalle_porteAFaux 		"Porte-à-faux" 			type:#worldunits 	range:[0,1e20,0]
-		)
-		group "loggia" (
+-- 		)
+-- 		group "loggia" (
 			
 			spinner 	spn_profondeur 		"Profondeur" 			type:#worldunits 	range:[0,1e20,0]
 		)
-		
+		group "Garde corps" (
+			dropDownList	ddl_gardeCorps	""	items:#("Aucun", "Simple", "Bareaudage")
+			
+		)
 	)
 	
 	rollout roll_divers  "Divers"	(
@@ -241,7 +244,7 @@ category:"CP | Facade	| Composant"
 			mgr_mesh.attacher		mesh		compo_mur		--transf:( rotateZMatrix	90 )
 			
 			--- plafond ----
-			mgr_mesh.attacher		mesh		compo_mur		transf:( ( rotateYMatrix	180  )	*	transMatrix	[longueur, 0, hauteur ] )
+			mgr_mesh.attacher		mesh		compo_mur		transf:( ( rotateYMatrix	180  )	*	transMatrix	[get_longueur(), 0, hauteur ] )
 			
 			
 			--- mur G  ------
@@ -252,7 +255,7 @@ category:"CP | Facade	| Composant"
 			
 			
 			--- mur D ----
-			mgr_mesh.attacher		mesh		compo_mur		transf:( ( rotateZMatrix	-90  )	*	transMatrix	[longueur, profondeur, 0 ] )
+			mgr_mesh.attacher		mesh		compo_mur		transf:( ( rotateZMatrix	-90  )	*	transMatrix	[get_longueur(), profondeur, 0 ] )
 			
 			
 		)
