@@ -1,47 +1,42 @@
-ctre = [0,0,0]
-r = 100
-intervale = 10
-/* for	x=  (ctre.x - R*(cos 45) ) to  (ctre.x + R*(cos 45) )  by intervale do (
-	y  =	sqrt (R^2 - (x-ctre.x)^2)	+ctre.y
-				point	pos:[x, y,0] 	size:2
-)
-for	y=  0 to  (ctre.y + R*(cos 45) ) by intervale  do (
-	x  =	sqrt (R^2 - (y-ctre.y)^2)	+ctre.x
-				point	pos:[x, y,0] 	 	size:2
-	x  =	- sqrt (R^2 - (y-ctre.y)^2)	+ctre.x
-				point	pos:[x, y,0] 	 	size:2
-) */
 
-
+------- CA MARCHE	-------	DEBUT-------------------------------------------------
 
 longeur				=	75.
-hauteur_decal		=	50.
+hauteur_decal		=	25.
+
+
+
 
 pt_1	=	[-25,10,0]
 pt_3	=	[100,10,0]
+
+
+
+
 pt_2	=	( pt_1 + pt_3) / 2 + [0,hauteur_decal,0 ]
-
--- pt_3	=	( pt_1 + pt_2) / 2 + [0,hauteur_decal,0 ]
--- pt_2	=	[100,10,0]
-
-
 
 --- le centre ----------------
 Xc	=	 ( pt_1.x + pt_3.x) / 2 
-/* 
-
-	(	( pt_3.x^2 - pt_2.x^2 + pt_3.y^2 - pt_2.y^2 )  /  ( 2 * ( pt_3.y - pt_2.y ) ) 	-	
-		( pt_2.x^2 - pt_1.x^2 + pt_2.y^2 - pt_1.y^2 )  /  ( 2 * ( pt_2.y - pt_1.y ) ) 	)	/
-	(	( ( pt_2.x - pt_1.x ) / ( pt_2.y - pt_1.y )	)		-	( ( pt_3.x - pt_2.x ) / ( pt_3.y - pt_2.y )	)	)
-	 */
 Yc	=
 	-(	( pt_2.x - pt_1.x ) / ( pt_2.y - pt_1.y ) )	* Xc		+	
-	(	( pt_2.x^2 - pt_1.x^2  + pt_2.y^2  -  pt_1.y^2 )	/	2*( pt_2.y - pt_1.y ) )
+	(	( pt_2.x^2 - pt_1.x^2  + pt_2.y^2  -  pt_1.y^2 )	/	(2*( pt_2.y - pt_1.y ) ) )
 		 
 		 
-		 
-		 
-		 
+CENTRE =  [Xc, Yc,0 ]
+
+
+po	pt_1
+po	pt_2
+po	pt_3
+
+po centre
+------- CA MARCHE	-------	FIN-------------------------------------
+
+
+
+
+
+
 rayon 				= 100.
 vec_rayon 	= [0,rayon,0]
 
