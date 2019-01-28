@@ -33,8 +33,6 @@ filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composant
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\Elements\\cp - Baie element - Porte.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\Elements\\cp - Baie element - Baie.ms"
 
-
-
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\cp - Facade - Composant - Mur.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\cp - Facade - Composant - Ensemble.ms"
 filein "$userScripts\\cp-Urba\\Batiment (simpleObj)\\Batiment\\Facade\\Composants\\cp - Facade - Composant - Balcon.ms"

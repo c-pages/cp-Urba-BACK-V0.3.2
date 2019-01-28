@@ -117,7 +117,7 @@ category:"CP | Baie	| Element"
 	fn	est_ouvrant = false
 	
 	
-	
+	fn set_hasard	_fen_ouvMax	_fen_proba_ouv =()
 	
 	
 	
